@@ -1,0 +1,3 @@
+[submodule "libs/matrix-structs"]
+	path = libs/matrix-structs
+	url = https://github.com/mujx/matrix-structs
