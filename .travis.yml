@@ -15,10 +15,14 @@ matrix:
     - os: osx
       osx_image: xcode8
       compiler: clang
+      env:
+        - OPENSLL_ROOT_DIR=/usr/local/opt/openssl
+        - TESTS=OFF
     - os: linux
       compiler: gcc
       env:
         - CXX_VERSION=g++-6
+        - TESTS=ON
       addons:
         apt:
           sources:
@@ -29,6 +33,7 @@ matrix:
       compiler: gcc
       env:
         - CXX_VERSION=g++-7
+        - TESTS=ON
       addons:
         apt:
           sources:
@@ -40,6 +45,7 @@ matrix:
       env:
         - CXX_VERSION=clang++-5.0
         - LINT=ON
+        - TESTS=ON
       addons:
         apt:
           sources:
@@ -49,10 +55,11 @@ matrix:
             - "clang++-5.0"
             - "clang-5.0"
             - "g++-7"
-            - "clang-format"
 
 install:
+  - if [ $TRAVIS_OS_NAME == osx ]; then brew update && brew upgrade boost; fi
   - if [ $TRAVIS_OS_NAME == linux ]; then ./.ci/gtest.sh; fi
+  - if [ $TRAVIS_OS_NAME == linux ]; then ./.ci/boost.sh; fi
   - if [ $TRAVIS_OS_NAME == linux ]; then sudo add-apt-repository -y ppa:george-edison55/cmake-3.x; fi
   - if [ $TRAVIS_OS_NAME == linux ]; then sudo apt-get update -qq; fi
   - if [ $TRAVIS_OS_NAME == linux ]; then sudo apt-get install -qq -y cmake; fi
@@ -64,13 +71,12 @@ script:
   - cmake --version
 
   # Build library, examples & tests
-  - cmake -H. -Bbuild
+  - cmake -H. -Bbuild -DOPENSSL_ROOT_DIR=$OPENSLL_ROOT_DIR -DBUILD_LIB_TESTS=$TESTS
   - cmake --build build
 
   # Unit & Integration tests
-  - make synapse
-  - make test
-  - make stop-synapse
+  - if [ $TESTS == ON ]; then make synapse; fi
+  - if [ $TESTS == ON ]; then make test; fi
 
   # Linting
   - if [ $LINT == ON ]; then make lint; fi
