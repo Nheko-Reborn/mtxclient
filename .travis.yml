@@ -1,0 +1,76 @@
+---
+
+language: cpp
+sudo: required
+dist: trusty
+
+services:
+  - docker
+
+notifications:
+  email: false
+
+matrix:
+  include:
+    - os: osx
+      osx_image: xcode8
+      compiler: clang
+    - os: linux
+      compiler: gcc
+      env:
+        - CXX_VERSION=g++-6
+      addons:
+        apt:
+          sources:
+            - "ubuntu-toolchain-r-test"
+          packages:
+            - "g++-6"
+    - os: linux
+      compiler: gcc
+      env:
+        - CXX_VERSION=g++-7
+      addons:
+        apt:
+          sources:
+            - "ubuntu-toolchain-r-test"
+          packages:
+            - "g++-7"
+    - os: linux
+      compiler: clang
+      env:
+        - CXX_VERSION=clang++-5.0
+        - LINT=ON
+      addons:
+        apt:
+          sources:
+            - "ubuntu-toolchain-r-test"
+            - "llvm-toolchain-trusty-5.0"
+          packages:
+            - "clang++-5.0"
+            - "clang-5.0"
+            - "g++-7"
+            - "clang-format"
+
+install:
+  - if [ $TRAVIS_OS_NAME == linux ]; then ./.ci/gtest.sh; fi
+  - if [ $TRAVIS_OS_NAME == linux ]; then sudo add-apt-repository -y ppa:george-edison55/cmake-3.x; fi
+  - if [ $TRAVIS_OS_NAME == linux ]; then sudo apt-get update -qq; fi
+  - if [ $TRAVIS_OS_NAME == linux ]; then sudo apt-get install -qq -y cmake; fi
+
+script:
+  - if [[ "${CXX_VERSION}" != "" ]]; then export CXX=${CXX_VERSION}; fi
+
+  - $CXX --version
+  - cmake --version
+
+  # Build library, examples & tests
+  - cmake -H. -Bbuild
+  - cmake --build build
+
+  # Unit & Integration tests
+  - make synapse
+  - make test
+  - make stop-synapse
+
+  # Linting
+  - if [ $LINT == ON ]; then make lint; fi

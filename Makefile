@@ -1,3 +1,5 @@
+FILES=`find src tests examples -type f -type f \( -iname "*.cpp" -o -iname "*.hpp" \)`
+
 debug:
 	@cmake -GNinja -H. -Bbuild -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=1 -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl
 	@cmake --build build
@@ -29,6 +31,9 @@ synapse:
 stop-synapse:
 	@rm -rf ./data/*
 	@docker rm -f synapse 2>&1>/dev/null
+
+lint:
+	@clang-format -i ${FILES} && git diff --exit-code
 
 clean:
 	rm -rf build
