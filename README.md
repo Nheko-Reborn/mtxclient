@@ -1,5 +1,6 @@
 mtxclient
 ---
+[![Build Status](https://travis-ci.org/mujx/mtxclient.svg?branch=master)](https://travis-ci.org/mujx/mtxclient)
 
 Client API library for the Matrix protocol, built on top of Boost.Asio.
 
@@ -13,9 +14,18 @@ Client API library for the Matrix protocol, built on top of Boost.Asio.
 - CMake 3.1 or greater
 - Google Test (for testing)
 
-You will need to pass as argument (`-DOPENSSL_ROOT_DIR`) the installation root of openssl. 
-
 Below is an example which will build the library along with the tests & examples.
+
+#### Linux 
+
+```bash
+cmake -H. -Bbuild -DCMAKE_BUILD_TYPE=Debug
+cmake --build build
+```
+
+#### macOS
+
+You will need to pass as argument (`-DOPENSSL_ROOT_DIR`) the installation root of openssl. 
 
 ```bash
 cmake -H. -Bbuild -DCMAKE_BUILD_TYPE=Debug -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl
