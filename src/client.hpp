@@ -249,10 +249,7 @@ mtx::client::Client::create_session(const Callback &callback)
                   mtx::client::errors::ClientError client_error;
                   client_error.error_code = ec;
 
-                  std::experimental::optional<mtx::client::errors::ClientError> error;
-                  error = client_error;
-
-                  callback(response_data, error);
+                  callback(response_data, client_error);
           });
 
         // Set SNI Hostname (many hosts need this to handshake successfully)
