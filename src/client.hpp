@@ -36,6 +36,10 @@ public:
         int active_sessions() const { return active_sessions_.size(); }
         //! Add an access token.
         void set_access_token(const std::string &token) { access_token_ = token; }
+        //! Update the next batch token.
+        void set_next_batch_token(const std::string &token) { next_batch_token_ = token; }
+        //! Retrieve the current next batch token.
+        std::string next_batch_token() const { return next_batch_token_; }
 
         using RequestErr = std::experimental::optional<mtx::client::errors::ClientError>;
 
@@ -130,6 +134,8 @@ private:
         std::string server_;
         //! The access token that would be used for authentication.
         std::string access_token_;
+        //! The token that will be used as the 'since' parameter on the next sync request.
+        std::string next_batch_token_;
 };
 }
 }

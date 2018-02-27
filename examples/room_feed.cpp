@@ -19,6 +19,17 @@ using namespace mtx::events;
 using ErrType       = experimental::optional<mtx::client::errors::ClientError>;
 using TimelineEvent = mtx::events::collections::TimelineEvents;
 
+void
+print_errors(ErrType err)
+{
+        if (err->status_code != boost::beast::http::status::unknown)
+                cout << err->status_code << "\n";
+        if (!err->matrix_error.error.empty())
+                cout << err->matrix_error.error << "\n";
+        if (err->error_code)
+                cout << err->error_code.message() << "\n";
+}
+
 // Check if the given event has a textual representation.
 bool
 is_room_message(const TimelineEvent &event)
@@ -75,9 +86,15 @@ sync_handler(shared_ptr<Client> client, const mtx::responses::Sync &res, ErrType
 {
         if (err) {
                 cout << "sync error:\n";
-                cout << err->status_code << "\n";
-                cout << err->matrix_error.error << "\n";
-                cout << err->error_code << "\n";
+                print_errors(err);
+
+                client->sync(
+                  "",
+                  client->next_batch_token(),
+                  false,
+                  30000,
+                  std::bind(&sync_handler, client, std::placeholders::_1, std::placeholders::_2));
+
                 return;
         }
 
@@ -86,9 +103,11 @@ sync_handler(shared_ptr<Client> client, const mtx::responses::Sync &res, ErrType
                         print_message(msg);
         }
 
+        client->set_next_batch_token(res.next_batch);
+
         client->sync(
           "",
-          res.next_batch,
+          client->next_batch_token(),
           false,
           30000,
           std::bind(&sync_handler, client, std::placeholders::_1, std::placeholders::_2));
@@ -100,14 +119,9 @@ initial_sync_handler(shared_ptr<Client> client, const mtx::responses::Sync &res,
 {
         if (err) {
                 cout << "error during initial sync:\n";
-                if (err->status_code != boost::beast::http::status::unknown)
-                        cout << err->status_code << "\n";
-                if (!err->matrix_error.error.empty())
-                        cout << err->matrix_error.error << "\n";
-                if (err->error_code)
-                        cout << err->error_code.message() << "\n";
+                print_errors(err);
 
-                if (err->status_code == boost::beast::http::status::gateway_timeout) {
+                if (err->status_code != boost::beast::http::status::ok) {
                         cout << "retrying initial sync ...\n";
                         client->sync("",
                                      "",
@@ -122,9 +136,11 @@ initial_sync_handler(shared_ptr<Client> client, const mtx::responses::Sync &res,
                 return;
         }
 
+        client->set_next_batch_token(res.next_batch);
+
         client->sync(
           "",
-          res.next_batch,
+          client->next_batch_token(),
           false,
           30000,
           std::bind(&sync_handler, client, std::placeholders::_1, std::placeholders::_2));
