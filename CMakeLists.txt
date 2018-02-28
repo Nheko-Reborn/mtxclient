@@ -40,25 +40,46 @@ if(NOT APPLE AND NOT MSVC)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
 endif()
 
+#
+# OpenSSL
+#
+find_package(OpenSSL REQUIRED)
+include_directories(${OPENSSL_INCLUDE_DIR})
+
+#
+# Boost 1.66
+#
+# If we can't find an already installed version we will
+# download it and build it from source.
+#
 set(Boost_USE_STATIC_LIBS OFF)
 set(Boost_USE_MULTITHREADED ON)
-find_package(Boost 1.66 REQUIRED)
+find_package(Boost 1.66)
 find_package(Boost 1.66 COMPONENTS system random thread)
 
-find_package(OpenSSL REQUIRED)
+if(NOT Boost_FOUND)
+    message(STATUS "Fetching and building Boost 1.66")
+    include(${CMAKE_SOURCE_DIR}/cmake/Boost.cmake)
+endif()
 
 include_directories(${Boost_INCLUDE_DIRS})
-include_directories(${OPENSSL_INCLUDE_DIR})
-include_directories(src)
 
+#
+# matrix-structs
+#
 add_subdirectory(libs/matrix-structs)
 include_directories(${matrix_structs_SOURCE_DIR}/include)
 include_directories(${matrix_structs_SOURCE_DIR}/deps)
 
+include_directories(src)
 set(SRC src/client.cpp src/utils.cpp)
 
 add_library(matrix_client ${SRC})
 target_link_libraries(matrix_client matrix_structs ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES})
+
+if(NOT Boost_FOUND)
+    add_dependencies(matrix_client Boost)
+endif()
 
 if (BUILD_LIB_EXAMPLES)
     add_executable(room_feed examples/room_feed.cpp)
@@ -68,7 +89,13 @@ endif()
 if (BUILD_LIB_TESTS)
     enable_testing()
 
-    find_package(GTest REQUIRED)
+    find_package(GTest)
+
+    if (NOT GTest_FOUND)
+        message(STATUS "Fetching and building GTest 1.8")
+        include(${CMAKE_SOURCE_DIR}/cmake/GoogleTest.cmake)
+    endif()
+
     include_directories(${GTEST_INCLUDE_DIRS})
 
     add_executable(client_api tests/client_api.cpp)
@@ -85,6 +112,11 @@ if (BUILD_LIB_TESTS)
 
     add_executable(connection tests/connection.cpp)
     target_link_libraries(connection matrix_client ${GTEST_BOTH_LIBRARIES})
+
+    if (NOT GTest_FOUND)
+        add_dependencies(client_api GTest)
+        add_dependencies(connection GTest)
+    endif()
 
     add_test(BasicConnectivity connection)
     add_test(ClientAPI client_api)

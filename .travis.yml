@@ -57,9 +57,6 @@ matrix:
             - "g++-7"
 
 install:
-  - if [ $TRAVIS_OS_NAME == osx ]; then brew update && brew upgrade boost; fi
-  - if [ $TRAVIS_OS_NAME == linux ]; then ./.ci/gtest.sh; fi
-  - if [ $TRAVIS_OS_NAME == linux ]; then ./.ci/boost.sh; fi
   - if [ $TRAVIS_OS_NAME == linux ]; then sudo add-apt-repository -y ppa:george-edison55/cmake-3.x; fi
   - if [ $TRAVIS_OS_NAME == linux ]; then sudo apt-get update -qq; fi
   - if [ $TRAVIS_OS_NAME == linux ]; then sudo apt-get install -qq -y cmake; fi

@@ -36,3 +36,6 @@ compile_commands.json
 
 # Synapse data
 data/
+
+# Deps
+.third-party
