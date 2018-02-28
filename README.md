@@ -14,6 +14,8 @@ Client API library for the Matrix protocol, built on top of Boost.Asio.
 - CMake 3.1 or greater
 - Google Test (for testing)
 
+Boost and GTest will be built automatically by CMake if they're not found on  your system.
+
 Below is an example which will build the library along with the tests & examples.
 
 #### Linux 
