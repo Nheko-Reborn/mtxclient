@@ -55,7 +55,8 @@ public:
         void join_room(const mtx::identifiers::Room &room_id,
                        std::function<void(const nlohmann::json &res, RequestErr err)>);
         //! Leave a room by its room_id.
-        /* void leave_room(); */
+        void leave_room(const mtx::identifiers::Room &room_id,
+                        std::function<void(const nlohmann::json &res, RequestErr err)>);
         //! Invite a user to a room.
         /* void invite_user(); */
         //! Perform sync.
