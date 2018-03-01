@@ -10,8 +10,8 @@ set(BUNDLED_BOOST_ROOT ${THIRD_PARTY_ROOT}/boost_1_66_0)
 ExternalProject_Add(
   Boost
 
-  URL https://sourceforge.net/projects/boost/files/boost/1.66.0/boost_1_66_0.tar.bz2/download
-  URL_HASH SHA1=b6b284acde2ad7ed49b44e856955d7b1ea4e9459
+  URL https://dl.bintray.com/boostorg/release/1.66.0/source/boost_1_66_0.tar.bz2
+  URL_HASH SHA256=5721818253e6a0989583192f96782c4a98eb6204965316df9f5ad75819225ca9
   DOWNLOAD_DIR ${THIRD_PARTY_ROOT}/downloads
   DOWNLOAD_NO_PROGRESS 0
 
