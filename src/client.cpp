@@ -224,7 +224,17 @@ Client::login(
         req.user     = user;
         req.password = password;
 
-        post<mtx::requests::Login, mtx::responses::Login>("/login", req, callback, false);
+        post<mtx::requests::Login, mtx::responses::Login>(
+          "/login",
+          req,
+          [this, callback](const mtx::responses::Login &resp,
+                           std::experimental::optional<mtx::client::errors::ClientError> err) {
+                  if (!err && resp.access_token.size()) {
+                          access_token_ = resp.access_token;
+                  }
+                  callback(resp, err);
+          },
+          false);
 }
 
 void

@@ -6,10 +6,10 @@
 std::string
 mtx::client::utils::random_token(uint8_t len)
 {
-        std ::string chars("abcdefghijklmnopqrstuvwxyz"
-                           "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-                           "1234567890"
-                           "!@#$%^&*()");
+        std::string chars("abcdefghijklmnopqrstuvwxyz"
+                          "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                          "1234567890"
+                          "!@#$%^&*()");
         boost::random::random_device rng;
         boost::random::uniform_int_distribution<> index_dist(0, chars.size() - 1);
 
