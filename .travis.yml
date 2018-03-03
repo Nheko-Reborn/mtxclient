@@ -30,17 +30,6 @@ matrix:
           packages:
             - "g++-6"
     - os: linux
-      compiler: gcc
-      env:
-        - CXX_VERSION=g++-7
-        - TESTS=ON
-      addons:
-        apt:
-          sources:
-            - "ubuntu-toolchain-r-test"
-          packages:
-            - "g++-7"
-    - os: linux
       compiler: clang
       env:
         - CXX_VERSION=clang++-5.0
