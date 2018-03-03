@@ -255,6 +255,15 @@ Client::join_room(const mtx::identifiers::Room &room_id,
 }
 
 void
+Client::join_room(const std::string &room,
+                  std::function<void(const nlohmann::json &, RequestErr)> callback)
+{
+        auto api_path = "/join/" + room;
+
+        post<std::string, nlohmann::json>(api_path, "", callback);
+}
+
+void
 Client::leave_room(const mtx::identifiers::Room &room_id,
                    std::function<void(const nlohmann::json &, RequestErr)> callback)
 {

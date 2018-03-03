@@ -4,12 +4,15 @@
 #include <boost/random/uniform_int_distribution.hpp>
 
 std::string
-mtx::client::utils::random_token(uint8_t len)
+mtx::client::utils::random_token(uint8_t len, bool with_symbols)
 {
-        std::string chars("abcdefghijklmnopqrstuvwxyz"
-                          "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-                          "1234567890"
-                          "!@#$%^&*()");
+        std::string symbols = "!@#$%^&*()";
+        std::string alphanumberic("abcdefghijklmnopqrstuvwxyz"
+                                  "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                                  "1234567890");
+
+        const auto chars = with_symbols ? alphanumberic + symbols : alphanumberic;
+
         boost::random::random_device rng;
         boost::random::uniform_int_distribution<> index_dist(0, chars.size() - 1);
 

@@ -54,6 +54,9 @@ public:
         //! Join a room by its room_id.
         void join_room(const mtx::identifiers::Room &room_id,
                        std::function<void(const nlohmann::json &res, RequestErr err)>);
+        //! Join a room by an alias or a room_id.
+        void join_room(const std::string &room,
+                       std::function<void(const nlohmann::json &res, RequestErr err)>);
         //! Leave a room by its room_id.
         void leave_room(const mtx::identifiers::Room &room_id,
                         std::function<void(const nlohmann::json &res, RequestErr err)>);

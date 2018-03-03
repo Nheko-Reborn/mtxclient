@@ -169,11 +169,16 @@ TEST(ClientAPI, JoinRoom)
         // Waiting for the previous requests to complete.
         std::this_thread::sleep_for(std::chrono::seconds(3));
 
+        // Creating a random room alias.
+        // TODO: add a type for room aliases.
+        const auto alias = utils::random_token(20, false);
+
         mtx::requests::CreateRoom req;
-        req.name   = "Name";
-        req.topic  = "Topic";
-        req.invite = {"@bob:localhost"};
-        alice->create_room(req, [bob](const mtx::responses::CreateRoom &res, ErrType err) {
+        req.name            = "Name";
+        req.topic           = "Topic";
+        req.invite          = {"@bob:localhost"};
+        req.room_alias_name = alias;
+        alice->create_room(req, [bob, alias](const mtx::responses::CreateRoom &res, ErrType err) {
                 ASSERT_FALSE(err);
                 auto room_id = res.room_id;
 
@@ -188,6 +193,9 @@ TEST(ClientAPI, JoinRoom)
                                                  "M_UNRECOGNIZED");
                                });
 
+                // Join the room using an alias.
+                bob->join_room("#" + alias + ":localhost",
+                               [](const nlohmann::json &, ErrType err) { ASSERT_FALSE(err); });
         });
 
         alice->close();
