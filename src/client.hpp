@@ -47,6 +47,8 @@ public:
         void login(const std::string &username,
                    const std::string &password,
                    std::function<void(const mtx::responses::Login &response, RequestErr err)>);
+        //! Perform logout.
+        void logout(std::function<void(const mtx::responses::Logout &response, RequestErr err)>);
         //! Create a room with the given options.
         void create_room(
           const mtx::requests::CreateRoom &room_options,

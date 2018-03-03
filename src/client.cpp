@@ -238,6 +238,27 @@ Client::login(
 }
 
 void
+Client::logout(
+  std::function<void(const mtx::responses::Logout &response,
+                     std::experimental::optional<mtx::client::errors::ClientError>)> callback)
+{
+        mtx::requests::Logout req;
+
+        post<mtx::requests::Logout, mtx::responses::Logout>(
+          "/logout",
+          req,
+          [this, callback](const mtx::responses::Logout &res,
+                           std::experimental::optional<mtx::client::errors::ClientError> err) {
+                  if (!err) {
+                          // Clear the now invalid access token when logout is successful
+                          access_token_.clear();
+                  }
+                  // Pass up response and error to supplied callback
+                  callback(res, err);
+          });
+}
+
+void
 Client::create_room(const mtx::requests::CreateRoom &room_options,
                     std::function<void(const mtx::responses::CreateRoom &, RequestErr)> callback)
 {
