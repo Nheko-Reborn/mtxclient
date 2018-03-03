@@ -68,6 +68,7 @@ include_directories(${MATRIX_STRUCTS_INCLUDE_DIRS})
 set(SRC src/client.cpp src/utils.cpp)
 
 add_library(matrix_client ${SRC})
+add_dependencies(matrix_client MatrixStructs)
 target_link_libraries(matrix_client matrix_structs ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES})
 
 if(NOT Boost_FOUND)
