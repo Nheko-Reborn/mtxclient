@@ -7,12 +7,6 @@ option(BUILD_LIB_EXAMPLES "Build examples" ON)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-if (NOT EXISTS "${CMAKE_SOURCE_DIR}/libs/matrix-structs/.git")
-    message(WARNING "The git submodules are not available.")
-    message(STATUS "Running git submodule update --init --recursive ...")
-    execute_process(COMMAND git submodule update --init --recursive)
-endif()
-
 if(CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} \
         -std=c++1z \
@@ -67,11 +61,10 @@ include_directories(${Boost_INCLUDE_DIRS})
 #
 # matrix-structs
 #
-add_subdirectory(libs/matrix-structs)
-include_directories(${matrix_structs_SOURCE_DIR}/include)
-include_directories(${matrix_structs_SOURCE_DIR}/deps)
+include(${CMAKE_SOURCE_DIR}/cmake/MatrixStructs.cmake)
 
 include_directories(src)
+include_directories(${MATRIX_STRUCTS_INCLUDE_DIRS})
 set(SRC src/client.cpp src/utils.cpp)
 
 add_library(matrix_client ${SRC})
