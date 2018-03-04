@@ -49,6 +49,8 @@ public:
                    std::function<void(const mtx::responses::Login &response, RequestErr err)>);
         //! Perform logout.
         void logout(std::function<void(const mtx::responses::Logout &response, RequestErr err)>);
+        //! Change displayname.
+        void set_displayname(const std::string &displayname, std::function<void(RequestErr err)>);
         //! Create a room with the given options.
         void create_room(
           const mtx::requests::CreateRoom &room_options,
@@ -101,6 +103,20 @@ private:
                              std::experimental::optional<mtx::client::errors::ClientError>)>,
           bool requires_auth = true);
 
+        // put function for the PUT HTTP requests that send responses
+        template<class Request, class Response>
+        void put(const std::string &endpoint,
+                 const Request &req,
+                 std::function<void(const Response &,
+                                    std::experimental::optional<mtx::client::errors::ClientError>)>,
+                 bool requires_auth = true);
+
+        template<class Request>
+        void put(const std::string &endpoint,
+                 const Request &req,
+                 std::function<void(std::experimental::optional<mtx::client::errors::ClientError>)>,
+                 bool requires_auth = true);
+
         template<class Response>
         void get(const std::string &endpoint,
                  std::function<void(const Response &,
@@ -140,6 +156,8 @@ private:
         std::string server_;
         //! The access token that would be used for authentication.
         std::string access_token_;
+        //! The user ID associated with the client.
+        mtx::identifiers::User user_id_;
         //! The token that will be used as the 'since' parameter on the next sync request.
         std::string next_batch_token_;
 };
@@ -175,6 +193,60 @@ mtx::client::Client::post(
         session->request.prepare_payload();
 
         do_request(session);
+}
+
+// put function for the PUT HTTP requests that send responses
+template<class Request, class Response>
+void
+mtx::client::Client::put(
+  const std::string &endpoint,
+  const Request &req,
+  std::function<void(const Response &,
+                     std::experimental::optional<mtx::client::errors::ClientError>)> callback,
+  bool requires_auth)
+{
+        // Serialize request.
+        nlohmann::json j = req;
+
+        using CallbackType = std::function<void(
+          const Response &, std::experimental::optional<mtx::client::errors::ClientError>)>;
+
+        std::shared_ptr<Session> session = create_session<Response, CallbackType>(callback);
+
+        session->request.method(boost::beast::http::verb::put);
+        session->request.target("/_matrix/client/r0" + endpoint);
+        session->request.set(boost::beast::http::field::user_agent, "mtxclient v0.1.0");
+        session->request.set(boost::beast::http::field::content_type, "application/json");
+        session->request.set(boost::beast::http::field::host, session->host);
+        if (requires_auth && !access_token_.empty())
+                session->request.set(boost::beast::http::field::authorization,
+                                     "Bearer " + access_token_);
+        session->request.body() = j.dump();
+        session->request.prepare_payload();
+
+        do_request(session);
+}
+
+// provides PUT functionality for the endpoints which dont respond with a body
+template<class Request>
+void
+mtx::client::Client::put(
+  const std::string &endpoint,
+  const Request &req,
+  std::function<void(std::experimental::optional<mtx::client::errors::ClientError>)> callback,
+  bool requires_auth)
+{
+        // Serialize request.
+        nlohmann::json j = req;
+
+        mtx::client::Client::put<Request, mtx::responses::Empty>(
+          endpoint,
+          req,
+          [callback](const mtx::responses::Empty,
+                     std::experimental::optional<mtx::client::errors::ClientError> err) {
+                  callback(err);
+          },
+          requires_auth);
 }
 
 template<class Response>

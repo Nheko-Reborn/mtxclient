@@ -82,6 +82,41 @@ TEST(ClientAPI, LoginWrongUsername)
         mtx_client->close();
 }
 
+TEST(ClientAPI, ChangeDisplayName)
+{
+        std::shared_ptr<Client> mtx_client = std::make_shared<Client>("localhost");
+
+        mtx_client->login(
+          "alice", "secret", [mtx_client](const mtx::responses::Login &res, ErrType err) {
+                  ASSERT_FALSE(err);
+                  validate_login("@alice:localhost", res);
+
+                  // Change the display name to Arthur Dent and verify its success through the lack
+                  // of an error
+                  mtx_client->set_displayname("Arthur Dent",
+                                              [](ErrType err) { ASSERT_FALSE(err); });
+          });
+
+        mtx_client->close();
+}
+
+TEST(ClientAPI, EmptyDisplayName)
+{
+        std::shared_ptr<Client> mtx_client = std::make_shared<Client>("localhost");
+
+        mtx_client->login(
+          "alice", "secret", [mtx_client](const mtx::responses::Login &res, ErrType err) {
+                  ASSERT_FALSE(err);
+                  validate_login("@alice:localhost", res);
+
+                  // Change the display name to an empty string and verify its success through the
+                  // lack of an error
+                  mtx_client->set_displayname("", [](ErrType err) { ASSERT_FALSE(err); });
+          });
+
+        mtx_client->close();
+}
+
 TEST(ClientAPI, CreateRoom)
 {
         std::shared_ptr<Client> mtx_client = std::make_shared<Client>("localhost");
