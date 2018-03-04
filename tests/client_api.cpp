@@ -414,3 +414,20 @@ TEST(ClientAPI, Sync)
 
         mtx_client->close();
 }
+
+TEST(ClientAPI, Versions)
+{
+        std::shared_ptr<Client> mtx_client = std::make_shared<Client>("localhost");
+
+        mtx_client->versions([](const mtx::responses::Versions &res, ErrType err) {
+                ASSERT_FALSE(err);
+
+                EXPECT_EQ(res.versions.size(), 4);
+                EXPECT_EQ(res.versions.at(0), "r0.0.1");
+                EXPECT_EQ(res.versions.at(1), "r0.1.0");
+                EXPECT_EQ(res.versions.at(2), "r0.2.0");
+                EXPECT_EQ(res.versions.at(3), "r0.3.0");
+        });
+
+        mtx_client->close();
+}

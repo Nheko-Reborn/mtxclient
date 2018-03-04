@@ -77,7 +77,7 @@ public:
         //! Send a message into a room.
         /* void send_room_message(); */
         //! Get the supported versions from the server.
-        /* void versions(); */
+        void versions(std::function<void(const mtx::responses::Versions &res, RequestErr err)>);
 
         /* void download_room_avatar(); */
         /* void download_user_avatar(); */
@@ -182,7 +182,7 @@ mtx::client::Client::post(
         std::shared_ptr<Session> session = create_session<Response, CallbackType>(callback);
 
         session->request.method(boost::beast::http::verb::post);
-        session->request.target("/_matrix/client/r0" + endpoint);
+        session->request.target("/_matrix" + endpoint);
         session->request.set(boost::beast::http::field::user_agent, "mtxclient v0.1.0");
         session->request.set(boost::beast::http::field::content_type, "application/json");
         session->request.set(boost::beast::http::field::host, session->host);
@@ -214,7 +214,7 @@ mtx::client::Client::put(
         std::shared_ptr<Session> session = create_session<Response, CallbackType>(callback);
 
         session->request.method(boost::beast::http::verb::put);
-        session->request.target("/_matrix/client/r0" + endpoint);
+        session->request.target("/_matrix" + endpoint);
         session->request.set(boost::beast::http::field::user_agent, "mtxclient v0.1.0");
         session->request.set(boost::beast::http::field::content_type, "application/json");
         session->request.set(boost::beast::http::field::host, session->host);
@@ -263,7 +263,7 @@ mtx::client::Client::get(
         std::shared_ptr<Session> session = create_session<Response, CallbackType>(callback);
 
         session->request.method(boost::beast::http::verb::get);
-        session->request.target("/_matrix/client/r0" + endpoint);
+        session->request.target("/_matrix" + endpoint);
         session->request.set(boost::beast::http::field::user_agent, "mtxclient v0.1.0");
         session->request.set(boost::beast::http::field::host, session->host);
         if (requires_auth && !access_token_.empty())

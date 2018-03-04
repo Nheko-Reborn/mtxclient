@@ -225,7 +225,7 @@ Client::login(
         req.password = password;
 
         post<mtx::requests::Login, mtx::responses::Login>(
-          "/login",
+          "/client/r0/login",
           req,
           [this, callback](const mtx::responses::Login &resp,
                            std::experimental::optional<mtx::client::errors::ClientError> err) {
@@ -246,7 +246,7 @@ Client::logout(
         mtx::requests::Logout req;
 
         post<mtx::requests::Logout, mtx::responses::Logout>(
-          "/logout",
+          "/client/r0/logout",
           req,
           [this, callback](const mtx::responses::Logout &res,
                            std::experimental::optional<mtx::client::errors::ClientError> err) {
@@ -268,7 +268,7 @@ Client::set_displayname(
         req.displayname = displayname;
 
         put<mtx::requests::DisplayName>(
-          "/profile/" + user_id_.toString() + "/displayname", req, callback);
+          "/client/r0/profile/" + user_id_.toString() + "/displayname", req, callback);
 }
 
 void
@@ -276,14 +276,14 @@ Client::create_room(const mtx::requests::CreateRoom &room_options,
                     std::function<void(const mtx::responses::CreateRoom &, RequestErr)> callback)
 {
         post<mtx::requests::CreateRoom, mtx::responses::CreateRoom>(
-          "/createRoom", room_options, callback);
+          "/client/r0/createRoom", room_options, callback);
 }
 
 void
 Client::join_room(const mtx::identifiers::Room &room_id,
                   std::function<void(const nlohmann::json &, RequestErr)> callback)
 {
-        auto api_path = "/rooms/" + room_id.toString() + "/join";
+        auto api_path = "/client/r0/rooms/" + room_id.toString() + "/join";
 
         post<std::string, nlohmann::json>(api_path, "", callback);
 }
@@ -292,7 +292,7 @@ void
 Client::join_room(const std::string &room,
                   std::function<void(const nlohmann::json &, RequestErr)> callback)
 {
-        auto api_path = "/join/" + room;
+        auto api_path = "/client/r0/join/" + room;
 
         post<std::string, nlohmann::json>(api_path, "", callback);
 }
@@ -301,7 +301,7 @@ void
 Client::leave_room(const mtx::identifiers::Room &room_id,
                    std::function<void(const nlohmann::json &, RequestErr)> callback)
 {
-        auto api_path = "/rooms/" + room_id.toString() + "/leave";
+        auto api_path = "/client/r0/rooms/" + room_id.toString() + "/leave";
 
         post<std::string, nlohmann::json>(api_path, "", callback);
 }
@@ -326,5 +326,11 @@ Client::sync(const std::string &filter,
 
         params.emplace("timeout", std::to_string(timeout));
 
-        get<mtx::responses::Sync>("/sync?" + utils::query_params(params), callback);
+        get<mtx::responses::Sync>("/client/r0/sync?" + utils::query_params(params), callback);
+}
+
+void
+Client::versions(std::function<void(const mtx::responses::Versions &res, RequestErr err)> callback)
+{
+        get<mtx::responses::Versions>("/client/versions", callback);
 }
