@@ -334,3 +334,15 @@ Client::versions(std::function<void(const mtx::responses::Versions &res, Request
 {
         get<mtx::responses::Versions>("/client/versions", callback);
 }
+
+void
+Client::upload(const std::string &data,
+               const std::string &content_type,
+               const std::string &filename,
+               std::function<void(const mtx::responses::ContentURI &res, RequestErr err)> cb)
+{
+        std::map<std::string, std::string> params = {{"filename", filename}};
+
+        const auto api_path = "/media/r0/upload?" + utils::query_params(params);
+        post<std::string, mtx::responses::ContentURI>(api_path, data, cb, true, content_type);
+}

@@ -85,6 +85,8 @@ if (BUILD_LIB_TESTS)
 
     find_package(GTest)
 
+    file(COPY fixtures DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+
     if (NOT GTest_FOUND)
         message(STATUS "Fetching and building GTest 1.8")
         include(${CMAKE_SOURCE_DIR}/cmake/GoogleTest.cmake)
@@ -95,8 +97,8 @@ if (BUILD_LIB_TESTS)
     add_executable(client_api tests/client_api.cpp)
     target_link_libraries(client_api matrix_client ${GTEST_BOTH_LIBRARIES})
 
-    #add_executable(media_api tests/media_api.cpp)
-    #target_link_libraries(media_api matrix_client ${GTEST_BOTH_LIBRARIES})
+    add_executable(media_api tests/media_api.cpp)
+    target_link_libraries(media_api matrix_client ${GTEST_BOTH_LIBRARIES})
 
     #add_executable(sync tests/sync.cpp)
     #target_link_libraries(sync matrix_client ${GTEST_BOTH_LIBRARIES})
@@ -110,8 +112,10 @@ if (BUILD_LIB_TESTS)
     if (NOT GTest_FOUND)
         add_dependencies(client_api GTest)
         add_dependencies(connection GTest)
+        add_dependencies(media_api GTest)
     endif()
 
     add_test(BasicConnectivity connection)
     add_test(ClientAPI client_api)
+    add_test(MediaAPI media_api)
 endif()

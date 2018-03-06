@@ -37,7 +37,7 @@ public:
         //! Add an access token.
         void set_access_token(const std::string &token) { access_token_ = token; }
         //! Retrieve the access token.
-        std::string access_token() { return access_token_; }
+        std::string access_token() const { return access_token_; }
         //! Update the next batch token.
         void set_next_batch_token(const std::string &token) { next_batch_token_ = token; }
         //! Retrieve the current next batch token.
@@ -81,6 +81,11 @@ public:
         //! Get the supported versions from the server.
         void versions(std::function<void(const mtx::responses::Versions &res, RequestErr err)>);
 
+        //! Upload data to the content repository.
+        void upload(const std::string &data,
+                    const std::string &content_type,
+                    const std::string &filename,
+                    std::function<void(const mtx::responses::ContentURI &res, RequestErr err)> cb);
         /* void download_room_avatar(); */
         /* void download_user_avatar(); */
         /* void download_media(); */
@@ -103,7 +108,8 @@ private:
           const Request &req,
           std::function<void(const Response &,
                              std::experimental::optional<mtx::client::errors::ClientError>)>,
-          bool requires_auth = true);
+          bool requires_auth              = true,
+          const std::string &content_type = "application/json");
 
         // put function for the PUT HTTP requests that send responses
         template<class Request, class Response>
@@ -207,7 +213,8 @@ mtx::client::Client::post(
   const Request &req,
   std::function<void(const Response &,
                      std::experimental::optional<mtx::client::errors::ClientError>)> callback,
-  bool requires_auth)
+  bool requires_auth,
+  const std::string &content_type)
 {
         using CallbackType = std::function<void(
           const Response &, std::experimental::optional<mtx::client::errors::ClientError>)>;
@@ -217,7 +224,7 @@ mtx::client::Client::post(
         session->request.method(boost::beast::http::verb::post);
         session->request.target("/_matrix" + endpoint);
         session->request.set(boost::beast::http::field::user_agent, "mtxclient v0.1.0");
-        session->request.set(boost::beast::http::field::content_type, "application/json");
+        session->request.set(boost::beast::http::field::content_type, content_type);
         session->request.set(boost::beast::http::field::host, session->host);
         if (requires_auth && !access_token_.empty())
                 session->request.set(boost::beast::http::field::authorization,
