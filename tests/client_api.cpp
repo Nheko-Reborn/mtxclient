@@ -1,4 +1,5 @@
 #include <chrono>
+#include <iostream>
 #include <thread>
 
 #include <gtest/gtest.h>
@@ -394,22 +395,21 @@ TEST(ClientAPI, Sync)
                   ASSERT_FALSE(err);
           });
 
-        // Waiting for the previous request to complete.
-        std::this_thread::sleep_for(std::chrono::seconds(2));
+        while (mtx_client->access_token().empty())
+                std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
         mtx::requests::CreateRoom req;
         req.name  = "Name";
         req.topic = "Topic";
-        mtx_client->create_room(
-          req, [](const mtx::responses::CreateRoom &, ErrType err) { ASSERT_FALSE(err); });
-
-        // Waiting for the previous request to complete.
-        std::this_thread::sleep_for(std::chrono::seconds(2));
-
-        mtx_client->sync("", "", false, 0, [](const mtx::responses::Sync &res, ErrType err) {
+        mtx_client->create_room(req, [mtx_client](const mtx::responses::CreateRoom &, ErrType err) {
                 ASSERT_FALSE(err);
-                ASSERT_TRUE(res.rooms.join.size() > 0);
-                ASSERT_TRUE(res.next_batch.size() > 0);
+
+                mtx_client->sync(
+                  "", "", false, 0, [](const mtx::responses::Sync &res, ErrType err) {
+                          ASSERT_FALSE(err);
+                          ASSERT_TRUE(res.rooms.join.size() > 0);
+                          ASSERT_TRUE(res.next_batch.size() > 0);
+                  });
         });
 
         mtx_client->close();

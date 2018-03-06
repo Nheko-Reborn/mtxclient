@@ -36,6 +36,8 @@ public:
         int active_sessions() const { return active_sessions_.size(); }
         //! Add an access token.
         void set_access_token(const std::string &token) { access_token_ = token; }
+        //! Retrieve the access token.
+        std::string access_token() { return access_token_; }
         //! Update the next batch token.
         void set_next_batch_token(const std::string &token) { next_batch_token_ = token; }
         //! Retrieve the current next batch token.
@@ -164,6 +166,40 @@ private:
 }
 }
 
+template<class T>
+inline T
+deserialize(const std::string &data)
+{
+        T res;
+
+        nlohmann::json j = json::parse(data);
+        res              = j;
+
+        return res;
+}
+
+template<>
+inline std::string
+deserialize<std::string>(const std::string &data)
+{
+        return data;
+}
+
+template<class T>
+inline std::string
+serialize(const T &obj)
+{
+        nlohmann::json j = obj;
+        return j.dump();
+}
+
+template<>
+inline std::string
+serialize<std::string>(const std::string &obj)
+{
+        return obj;
+}
+
 template<class Request, class Response>
 void
 mtx::client::Client::post(
@@ -173,9 +209,6 @@ mtx::client::Client::post(
                      std::experimental::optional<mtx::client::errors::ClientError>)> callback,
   bool requires_auth)
 {
-        // Serialize request.
-        nlohmann::json j = req;
-
         using CallbackType = std::function<void(
           const Response &, std::experimental::optional<mtx::client::errors::ClientError>)>;
 
@@ -189,7 +222,7 @@ mtx::client::Client::post(
         if (requires_auth && !access_token_.empty())
                 session->request.set(boost::beast::http::field::authorization,
                                      "Bearer " + access_token_);
-        session->request.body() = j.dump();
+        session->request.body() = serialize<Request>(req);
         session->request.prepare_payload();
 
         do_request(session);
@@ -205,9 +238,6 @@ mtx::client::Client::put(
                      std::experimental::optional<mtx::client::errors::ClientError>)> callback,
   bool requires_auth)
 {
-        // Serialize request.
-        nlohmann::json j = req;
-
         using CallbackType = std::function<void(
           const Response &, std::experimental::optional<mtx::client::errors::ClientError>)>;
 
@@ -221,7 +251,7 @@ mtx::client::Client::put(
         if (requires_auth && !access_token_.empty())
                 session->request.set(boost::beast::http::field::authorization,
                                      "Bearer " + access_token_);
-        session->request.body() = j.dump();
+        session->request.body() = serialize<Request>(req);
         session->request.prepare_payload();
 
         do_request(session);
@@ -236,9 +266,6 @@ mtx::client::Client::put(
   std::function<void(std::experimental::optional<mtx::client::errors::ClientError>)> callback,
   bool requires_auth)
 {
-        // Serialize request.
-        nlohmann::json j = req;
-
         mtx::client::Client::put<Request, mtx::responses::Empty>(
           endpoint,
           req,
@@ -313,15 +340,16 @@ mtx::client::Client::create_session(const Callback &callback)
                                   } catch (nlohmann::json::exception &e) {
                                           std::cout << e.what() << ": Couldn't parse response\n"
                                                     << response.body().data() << std::endl;
+                                          // TODO: handle error
                                   }
                           }
 
                           try {
-                                  nlohmann::json json_data = json::parse(response.body().data());
-                                  response_data            = json_data;
+                                  response_data = deserialize<Response>(response.body().data());
                           } catch (nlohmann::json::exception &e) {
                                   std::cout << e.what() << ": Couldn't parse response\n"
                                             << response.body().data() << std::endl;
+                                  // TODO: handle error
                           }
 
                           callback(response_data, {});
