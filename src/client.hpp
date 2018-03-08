@@ -133,8 +133,11 @@ private:
                                     std::experimental::optional<mtx::client::errors::ClientError>)>,
                  bool requires_auth = true);
 
-        template<class Response, class Callback>
-        std::shared_ptr<Session> create_session(const Callback &callback);
+        template<class Response>
+        std::shared_ptr<Session> create_session(
+          std::function<void(const Response &res,
+                             std::experimental::optional<mtx::client::errors::ClientError>)>
+            callback);
 
         void remove_session(std::shared_ptr<Session> s);
         void on_request_complete(std::shared_ptr<Session> s);
@@ -218,10 +221,7 @@ mtx::client::Client::post(
   bool requires_auth,
   const std::string &content_type)
 {
-        using CallbackType = std::function<void(
-          const Response &, std::experimental::optional<mtx::client::errors::ClientError>)>;
-
-        std::shared_ptr<Session> session = create_session<Response, CallbackType>(callback);
+        std::shared_ptr<Session> session = create_session<Response>(callback);
 
         session->request.method(boost::beast::http::verb::post);
         session->request.target("/_matrix" + endpoint);
@@ -247,10 +247,7 @@ mtx::client::Client::put(
                      std::experimental::optional<mtx::client::errors::ClientError>)> callback,
   bool requires_auth)
 {
-        using CallbackType = std::function<void(
-          const Response &, std::experimental::optional<mtx::client::errors::ClientError>)>;
-
-        std::shared_ptr<Session> session = create_session<Response, CallbackType>(callback);
+        std::shared_ptr<Session> session = create_session<Response>(callback);
 
         session->request.method(boost::beast::http::verb::put);
         session->request.target("/_matrix" + endpoint);
@@ -293,10 +290,7 @@ mtx::client::Client::get(
                      std::experimental::optional<mtx::client::errors::ClientError>)> callback,
   bool requires_auth)
 {
-        using CallbackType = std::function<void(
-          const Response &, std::experimental::optional<mtx::client::errors::ClientError>)>;
-
-        std::shared_ptr<Session> session = create_session<Response, CallbackType>(callback);
+        std::shared_ptr<Session> session = create_session<Response>(callback);
 
         session->request.method(boost::beast::http::verb::get);
         session->request.target("/_matrix" + endpoint);
@@ -310,9 +304,11 @@ mtx::client::Client::get(
         do_request(session);
 }
 
-template<class Response, class Callback>
+template<class Response>
 std::shared_ptr<mtx::client::Session>
-mtx::client::Client::create_session(const Callback &callback)
+mtx::client::Client::create_session(
+  std::function<void(const Response &,
+                     std::experimental::optional<mtx::client::errors::ClientError>)> callback)
 {
         boost::asio::ssl::context ssl_ctx{boost::asio::ssl::context::sslv23_client};
 
