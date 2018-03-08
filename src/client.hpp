@@ -67,7 +67,10 @@ public:
         void leave_room(const mtx::identifiers::Room &room_id,
                         std::function<void(const nlohmann::json &res, RequestErr err)>);
         //! Invite a user to a room.
-        /* void invite_user(); */
+        void invite_user(
+          const mtx::identifiers::Room &room_id,
+          const std::string &user_id,
+          std::function<void(const mtx::responses::RoomInvite &res, RequestErr err)>);
         //! Perform sync.
         void sync(const std::string &filter,
                   const std::string &since,

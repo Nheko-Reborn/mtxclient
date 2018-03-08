@@ -385,6 +385,92 @@ TEST(ClientAPI, LeaveRoom)
         bob->close();
 }
 
+TEST(ClientAPI, InviteRoom)
+{
+        auto alice = std::make_shared<Client>("localhost");
+        auto bob   = std::make_shared<Client>("localhost");
+
+        alice->login("alice", "secret", [alice](const mtx::responses::Login &res, ErrType err) {
+                boost::ignore_unused(res);
+                ASSERT_FALSE(err);
+        });
+
+        bob->login("bob", "secret", [bob](const mtx::responses::Login &res, ErrType err) {
+                boost::ignore_unused(res);
+                ASSERT_FALSE(err);
+        });
+
+        // Waiting for the previous requests to complete.
+        std::this_thread::sleep_for(std::chrono::seconds(3));
+
+        mtx::requests::CreateRoom req;
+        req.name   = "Name";
+        req.topic  = "Topic";
+        req.invite = {};
+        alice->create_room(req, [alice, bob](const mtx::responses::CreateRoom &res, ErrType err) {
+                ASSERT_FALSE(err);
+                auto room_id = res.room_id;
+
+                alice->invite_user(
+                  room_id,
+                  "@bob:localhost",
+                  [room_id, bob](const mtx::responses::Empty &, ErrType err) {
+                          ASSERT_FALSE(err);
+                          if (err) {
+                                  std::cout << "Received error when inviting user" << std::endl;
+                          }
+
+                          bob->join_room(room_id, [](const nlohmann::json &, ErrType err) {
+                                  ASSERT_FALSE(err);
+                          });
+                  });
+        });
+
+        alice->close();
+        bob->close();
+}
+
+TEST(ClientAPI, InvalidInvite)
+{
+        auto alice = std::make_shared<Client>("localhost");
+        auto bob   = std::make_shared<Client>("localhost");
+
+        alice->login("alice", "secret", [alice](const mtx::responses::Login &res, ErrType err) {
+                boost::ignore_unused(res);
+                ASSERT_FALSE(err);
+        });
+
+        bob->login("bob", "secret", [bob](const mtx::responses::Login &res, ErrType err) {
+                boost::ignore_unused(res);
+                ASSERT_FALSE(err);
+        });
+
+        // Waiting for the previous requests to complete.
+        std::this_thread::sleep_for(std::chrono::seconds(3));
+
+        mtx::requests::CreateRoom req;
+        req.name   = "Name";
+        req.topic  = "Topic";
+        req.invite = {};
+        alice->create_room(req, [alice, bob](const mtx::responses::CreateRoom &res, ErrType err) {
+                ASSERT_FALSE(err);
+                auto room_id = res.room_id;
+
+                bob->invite_user(room_id,
+                                 "@carl:localhost",
+                                 [room_id, bob](const mtx::responses::Empty &, ErrType err) {
+                                         ASSERT_TRUE(err);
+                                         EXPECT_EQ(
+                                           mtx::errors::to_string(err->matrix_error.errcode),
+                                           "M_FORBIDDEN");
+
+                                 });
+        });
+
+        alice->close();
+        bob->close();
+}
+
 TEST(ClientAPI, Sync)
 {
         std::shared_ptr<Client> mtx_client = std::make_shared<Client>("localhost");

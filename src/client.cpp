@@ -307,6 +307,19 @@ Client::leave_room(const mtx::identifiers::Room &room_id,
 }
 
 void
+Client::invite_user(const mtx::identifiers::Room &room_id,
+                    const std::string &user_id,
+                    std::function<void(const mtx::responses::RoomInvite &, RequestErr)> callback)
+{
+        mtx::requests::RoomInvite req;
+        req.user_id = user_id;
+
+        auto api_path = "/client/r0/rooms/" + room_id.toString() + "/invite";
+
+        post<mtx::requests::RoomInvite, mtx::responses::RoomInvite>(api_path, req, callback);
+}
+
+void
 Client::sync(const std::string &filter,
              const std::string &since,
              bool full_state,
