@@ -60,9 +60,15 @@ TEST(MediaAPI, UploadTextFile)
 
                                       alice->download("localhost",
                                                       get_media_id(res),
-                                                      [text](const string &data, ErrType err) {
+                                                      [text](const string &data,
+                                                             const string &content_type,
+                                                             const string &original_filename,
+                                                             ErrType err) {
                                                               ASSERT_FALSE(err);
                                                               EXPECT_EQ(data, text);
+                                                              EXPECT_EQ(content_type, "text/plain");
+                                                              EXPECT_EQ(original_filename,
+                                                                        "doc.txt");
                                                       });
                               });
         });
@@ -87,9 +93,14 @@ TEST(MediaAPI, UploadAudio)
 
                                     bob->download("localhost",
                                                   get_media_id(res),
-                                                  [audio](const string &data, ErrType err) {
+                                                  [audio](const string &data,
+                                                          const string &content_type,
+                                                          const string &original_filename,
+                                                          ErrType err) {
                                                           ASSERT_FALSE(err);
                                                           EXPECT_EQ(data, audio);
+                                                          EXPECT_EQ(content_type, "audio/mp3");
+                                                          EXPECT_EQ(original_filename, "sound.mp3");
                                                   });
                             });
         });
@@ -114,9 +125,15 @@ TEST(MediaAPI, UploadImage)
 
                                      carl->download("localhost",
                                                     get_media_id(res),
-                                                    [img](const string &data, ErrType err) {
+                                                    [img](const string &data,
+                                                          const string &content_type,
+                                                          const string &original_filename,
+                                                          ErrType err) {
                                                             ASSERT_FALSE(err);
                                                             EXPECT_EQ(data, img);
+                                                            EXPECT_EQ(content_type, "image/jpeg");
+                                                            EXPECT_EQ(original_filename,
+                                                                      "test.jpeg");
                                                     });
                              });
         });

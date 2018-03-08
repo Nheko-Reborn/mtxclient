@@ -43,7 +43,8 @@ public:
         //! Retrieve the current next batch token.
         std::string next_batch_token() const { return next_batch_token_; }
 
-        using RequestErr = std::experimental::optional<mtx::client::errors::ClientError>;
+        using HeaderFields = std::experimental::optional<boost::beast::http::fields>;
+        using RequestErr   = std::experimental::optional<mtx::client::errors::ClientError>;
 
         //! Perfom login.
         void login(const std::string &username,
@@ -92,7 +93,10 @@ public:
         //! Retrieve data from the content repository.
         void download(const std::string &server,
                       const std::string &media_id,
-                      std::function<void(const std::string &data, RequestErr err)> cb);
+                      std::function<void(const std::string &data,
+                                         const std::string &content_type,
+                                         const std::string &original_filename,
+                                         RequestErr err)> cb);
         /* void download_room_avatar(); */
         /* void download_user_avatar(); */
         /* void download_media(); */
@@ -105,39 +109,33 @@ public:
 
 private:
         template<class Request, class Response>
-        void post(
-          const std::string &endpoint,
-          const Request &req,
-          std::function<void(const Response &,
-                             std::experimental::optional<mtx::client::errors::ClientError>)>,
-          bool requires_auth              = true,
-          const std::string &content_type = "application/json");
+        void post(const std::string &endpoint,
+                  const Request &req,
+                  std::function<void(const Response &, RequestErr)>,
+                  bool requires_auth              = true,
+                  const std::string &content_type = "application/json");
 
         // put function for the PUT HTTP requests that send responses
         template<class Request, class Response>
         void put(const std::string &endpoint,
                  const Request &req,
-                 std::function<void(const Response &,
-                                    std::experimental::optional<mtx::client::errors::ClientError>)>,
+                 std::function<void(const Response &, RequestErr)>,
                  bool requires_auth = true);
 
         template<class Request>
         void put(const std::string &endpoint,
                  const Request &req,
-                 std::function<void(std::experimental::optional<mtx::client::errors::ClientError>)>,
+                 std::function<void(RequestErr err)>,
                  bool requires_auth = true);
 
         template<class Response>
         void get(const std::string &endpoint,
-                 std::function<void(const Response &,
-                                    std::experimental::optional<mtx::client::errors::ClientError>)>,
+                 std::function<void(const Response &res, HeaderFields fields, RequestErr err)>,
                  bool requires_auth = true);
 
         template<class Response>
         std::shared_ptr<Session> create_session(
-          std::function<void(const Response &res,
-                             std::experimental::optional<mtx::client::errors::ClientError>)>
-            callback);
+          std::function<void(const Response &res, HeaderFields fields, RequestErr err)> callback);
 
         void remove_session(std::shared_ptr<Session> s);
         void on_request_complete(std::shared_ptr<Session> s);
@@ -213,15 +211,14 @@ serialize<std::string>(const std::string &obj)
 
 template<class Request, class Response>
 void
-mtx::client::Client::post(
-  const std::string &endpoint,
-  const Request &req,
-  std::function<void(const Response &,
-                     std::experimental::optional<mtx::client::errors::ClientError>)> callback,
-  bool requires_auth,
-  const std::string &content_type)
+mtx::client::Client::post(const std::string &endpoint,
+                          const Request &req,
+                          std::function<void(const Response &, RequestErr)> callback,
+                          bool requires_auth,
+                          const std::string &content_type)
 {
-        std::shared_ptr<Session> session = create_session<Response>(callback);
+        std::shared_ptr<Session> session = create_session<Response>(
+          [callback](const Response &res, HeaderFields, RequestErr err) { callback(res, err); });
 
         session->request.method(boost::beast::http::verb::post);
         session->request.target("/_matrix" + endpoint);
@@ -240,14 +237,13 @@ mtx::client::Client::post(
 // put function for the PUT HTTP requests that send responses
 template<class Request, class Response>
 void
-mtx::client::Client::put(
-  const std::string &endpoint,
-  const Request &req,
-  std::function<void(const Response &,
-                     std::experimental::optional<mtx::client::errors::ClientError>)> callback,
-  bool requires_auth)
+mtx::client::Client::put(const std::string &endpoint,
+                         const Request &req,
+                         std::function<void(const Response &, RequestErr)> callback,
+                         bool requires_auth)
 {
-        std::shared_ptr<Session> session = create_session<Response>(callback);
+        std::shared_ptr<Session> session = create_session<Response>(
+          [callback](const Response &res, HeaderFields, RequestErr err) { callback(res, err); });
 
         session->request.method(boost::beast::http::verb::put);
         session->request.target("/_matrix" + endpoint);
@@ -266,29 +262,23 @@ mtx::client::Client::put(
 // provides PUT functionality for the endpoints which dont respond with a body
 template<class Request>
 void
-mtx::client::Client::put(
-  const std::string &endpoint,
-  const Request &req,
-  std::function<void(std::experimental::optional<mtx::client::errors::ClientError>)> callback,
-  bool requires_auth)
+mtx::client::Client::put(const std::string &endpoint,
+                         const Request &req,
+                         std::function<void(RequestErr)> callback,
+                         bool requires_auth)
 {
         mtx::client::Client::put<Request, mtx::responses::Empty>(
           endpoint,
           req,
-          [callback](const mtx::responses::Empty,
-                     std::experimental::optional<mtx::client::errors::ClientError> err) {
-                  callback(err);
-          },
+          [callback](const mtx::responses::Empty, RequestErr err) { callback(err); },
           requires_auth);
 }
 
 template<class Response>
 void
-mtx::client::Client::get(
-  const std::string &endpoint,
-  std::function<void(const Response &,
-                     std::experimental::optional<mtx::client::errors::ClientError>)> callback,
-  bool requires_auth)
+mtx::client::Client::get(const std::string &endpoint,
+                         std::function<void(const Response &, HeaderFields, RequestErr)> callback,
+                         bool requires_auth)
 {
         std::shared_ptr<Session> session = create_session<Response>(callback);
 
@@ -307,8 +297,7 @@ mtx::client::Client::get(
 template<class Response>
 std::shared_ptr<mtx::client::Session>
 mtx::client::Client::create_session(
-  std::function<void(const Response &,
-                     std::experimental::optional<mtx::client::errors::ClientError>)> callback)
+  std::function<void(const Response &, HeaderFields, RequestErr)> callback)
 {
         boost::asio::ssl::context ssl_ctx{boost::asio::ssl::context::sslv23_client};
 
@@ -328,7 +317,7 @@ mtx::client::Client::create_session(
 
                           if (err_code) {
                                   client_error.error_code = err_code;
-                                  return callback(response_data, client_error);
+                                  return callback(response_data, response.base(), client_error);
                           }
 
                           // TODO: handle http error.
@@ -341,7 +330,8 @@ mtx::client::Client::create_session(
                                           mtx::errors::Error matrix_error = json_error;
 
                                           client_error.matrix_error = matrix_error;
-                                          return callback(response_data, client_error);
+                                          return callback(
+                                            response_data, response.base(), client_error);
                                   } catch (nlohmann::json::exception &e) {
                                           std::cout << e.what() << ": Couldn't parse response\n"
                                                     << response.body() << std::endl;
@@ -357,7 +347,7 @@ mtx::client::Client::create_session(
                                   // TODO: handle error
                           }
 
-                          callback(response_data, {});
+                          callback(response_data, response.base(), {});
                   });
           },
           [callback](RequestID, const boost::system::error_code ec) {
@@ -366,7 +356,7 @@ mtx::client::Client::create_session(
                   mtx::client::errors::ClientError client_error;
                   client_error.error_code = ec;
 
-                  callback(response_data, client_error);
+                  callback(response_data, {}, client_error);
           });
 
         // Set SNI Hostname (many hosts need this to handshake successfully)

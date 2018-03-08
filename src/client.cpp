@@ -1,3 +1,4 @@
+#include <boost/algorithm/string.hpp>
 #include <boost/bind.hpp>
 
 #include "client.hpp"
@@ -260,9 +261,7 @@ Client::logout(
 }
 
 void
-Client::set_displayname(
-  const std::string &displayname,
-  std::function<void(std::experimental::optional<mtx::client::errors::ClientError>)> callback)
+Client::set_displayname(const std::string &displayname, std::function<void(RequestErr)> callback)
 {
         mtx::requests::DisplayName req;
         req.displayname = displayname;
@@ -339,13 +338,19 @@ Client::sync(const std::string &filter,
 
         params.emplace("timeout", std::to_string(timeout));
 
-        get<mtx::responses::Sync>("/client/r0/sync?" + utils::query_params(params), callback);
+        get<mtx::responses::Sync>("/client/r0/sync?" + utils::query_params(params),
+                                  [callback](const mtx::responses::Sync &res,
+                                             HeaderFields,
+                                             RequestErr err) { callback(res, err); });
 }
 
 void
-Client::versions(std::function<void(const mtx::responses::Versions &res, RequestErr err)> callback)
+Client::versions(std::function<void(const mtx::responses::Versions &, RequestErr)> callback)
 {
-        get<mtx::responses::Versions>("/client/versions", callback);
+        get<mtx::responses::Versions>("/client/versions",
+                                      [callback](const mtx::responses::Versions &res,
+                                                 HeaderFields,
+                                                 RequestErr err) { callback(res, err); });
 }
 
 void
@@ -363,8 +368,29 @@ Client::upload(const std::string &data,
 void
 Client::download(const std::string &server,
                  const std::string &media_id,
-                 std::function<void(const std::string &res, RequestErr err)> cb)
+                 std::function<void(const std::string &res,
+                                    const std::string &content_type,
+                                    const std::string &original_filename,
+                                    RequestErr err)> callback)
 {
         const auto api_path = "/media/r0/download/" + server + "/" + media_id;
-        get<std::string>(api_path, cb);
+        get<std::string>(
+          api_path, [callback](const std::string &res, HeaderFields fields, RequestErr err) {
+                  std::string content_type, original_filename;
+
+                  if (fields) {
+                          if (fields->find("Content-Type") != fields->end())
+                                  content_type = fields->at("Content-Type").to_string();
+                          if (fields->find("Content-Disposition") != fields->end()) {
+                                  auto value = fields->at("Content-Disposition").to_string();
+
+                                  std::vector<std::string> results;
+                                  boost::split(results, value, [](char c) { return c == '='; });
+
+                                  original_filename = results.back();
+                          }
+                  }
+
+                  callback(res, content_type, original_filename, err);
+          });
 }
