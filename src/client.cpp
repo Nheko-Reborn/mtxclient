@@ -359,3 +359,12 @@ Client::upload(const std::string &data,
         const auto api_path = "/media/r0/upload?" + utils::query_params(params);
         post<std::string, mtx::responses::ContentURI>(api_path, data, cb, true, content_type);
 }
+
+void
+Client::download(const std::string &server,
+                 const std::string &media_id,
+                 std::function<void(const std::string &res, RequestErr err)> cb)
+{
+        const auto api_path = "/media/r0/download/" + server + "/" + media_id;
+        get<std::string>(api_path, cb);
+}

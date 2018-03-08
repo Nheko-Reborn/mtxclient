@@ -16,10 +16,16 @@ using namespace mtx::identifiers;
 
 using namespace std;
 
-// std::vector<std::string> results;
-// boost::split(results, res.content_uri, [](char c) { return c == '/'; });
-
 using ErrType = std::experimental::optional<errors::ClientError>;
+
+string
+get_media_id(const mtx::responses::ContentURI &res)
+{
+        vector<string> results;
+        boost::split(results, res.content_uri, [](char c) { return c == '/'; });
+
+        return results.back();
+}
 
 string
 read_file(const string &file_path)
@@ -35,7 +41,6 @@ validate_upload(const mtx::responses::ContentURI &res, ErrType err)
 {
         ASSERT_FALSE(err);
         ASSERT_TRUE(res.content_uri.size() > 10);
-        cout << res.content_uri << endl;
 }
 
 TEST(MediaAPI, UploadTextFile)
@@ -45,7 +50,21 @@ TEST(MediaAPI, UploadTextFile)
         alice->login("alice", "secret", [alice](const mtx::responses::Login &, ErrType err) {
                 ASSERT_FALSE(err);
 
-                alice->upload("This is a text content", "text/plain", "doc.txt", validate_upload);
+                const auto text = "This is some random text";
+
+                alice->upload(text,
+                              "text/plain",
+                              "doc.txt",
+                              [alice, text](const mtx::responses::ContentURI &res, ErrType err) {
+                                      validate_upload(res, err);
+
+                                      alice->download("localhost",
+                                                      get_media_id(res),
+                                                      [text](const string &data, ErrType err) {
+                                                              ASSERT_FALSE(err);
+                                                              EXPECT_EQ(data, text);
+                                                      });
+                              });
         });
 
         alice->close();
@@ -58,8 +77,21 @@ TEST(MediaAPI, UploadAudio)
         bob->login("bob", "secret", [bob](const mtx::responses::Login &, ErrType err) {
                 ASSERT_FALSE(err);
 
-                bob->upload(
-                  read_file("./fixtures/sound.mp3"), "audio/mp3", "sound.mp3", validate_upload);
+                const auto audio = read_file("./fixtures/sound.mp3");
+
+                bob->upload(audio,
+                            "audio/mp3",
+                            "sound.mp3",
+                            [bob, audio](const mtx::responses::ContentURI &res, ErrType err) {
+                                    validate_upload(res, err);
+
+                                    bob->download("localhost",
+                                                  get_media_id(res),
+                                                  [audio](const string &data, ErrType err) {
+                                                          ASSERT_FALSE(err);
+                                                          EXPECT_EQ(data, audio);
+                                                  });
+                            });
         });
 
         bob->close();
@@ -72,8 +104,21 @@ TEST(MediaAPI, UploadImage)
         carl->login("carl", "secret", [carl](const mtx::responses::Login &, ErrType err) {
                 ASSERT_FALSE(err);
 
-                carl->upload(
-                  read_file("./fixtures/test.jpeg"), "image/jpeg", "test.jpeg", validate_upload);
+                const auto img = read_file("./fixtures/test.jpeg");
+
+                carl->upload(img,
+                             "image/jpeg",
+                             "test.jpeg",
+                             [carl, img](const mtx::responses::ContentURI &res, ErrType err) {
+                                     validate_upload(res, err);
+
+                                     carl->download("localhost",
+                                                    get_media_id(res),
+                                                    [img](const string &data, ErrType err) {
+                                                            ASSERT_FALSE(err);
+                                                            EXPECT_EQ(data, img);
+                                                    });
+                             });
         });
 
         carl->close();

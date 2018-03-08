@@ -89,14 +89,13 @@ public:
                     const std::string &content_type,
                     const std::string &filename,
                     std::function<void(const mtx::responses::ContentURI &res, RequestErr err)> cb);
+        //! Retrieve data from the content repository.
+        void download(const std::string &server,
+                      const std::string &media_id,
+                      std::function<void(const std::string &data, RequestErr err)> cb);
         /* void download_room_avatar(); */
         /* void download_user_avatar(); */
         /* void download_media(); */
-
-        /* void upload_image(); */
-        /* void upload_file(); */
-        /* void upload_audio(); */
-        /* void upload_video(); */
 
         /* void upload_filter(); */
 
@@ -349,16 +348,16 @@ mtx::client::Client::create_session(const Callback &callback)
                                           return callback(response_data, client_error);
                                   } catch (nlohmann::json::exception &e) {
                                           std::cout << e.what() << ": Couldn't parse response\n"
-                                                    << response.body().data() << std::endl;
+                                                    << response.body() << std::endl;
                                           // TODO: handle error
                                   }
                           }
 
                           try {
-                                  response_data = deserialize<Response>(response.body().data());
+                                  response_data = deserialize<Response>(response.body());
                           } catch (nlohmann::json::exception &e) {
                                   std::cout << e.what() << ": Couldn't parse response\n"
-                                            << response.body().data() << std::endl;
+                                            << response.body() << std::endl;
                                   // TODO: handle error
                           }
 
