@@ -389,3 +389,30 @@ Client::download(const std::string &server,
                   callback(res, content_type, original_filename, err);
           });
 }
+
+void
+Client::start_typing(const mtx::identifiers::Room &room_id,
+                     uint64_t timeout,
+                     std::function<void(RequestErr)> callback)
+{
+        const auto api_path =
+          "/client/r0/rooms/" + room_id.toString() + "/typing/" + user_id_.toString();
+
+        mtx::requests::TypingNotification req;
+        req.typing  = true;
+        req.timeout = timeout;
+
+        put<mtx::requests::TypingNotification>(api_path, req, callback);
+}
+
+void
+Client::stop_typing(const mtx::identifiers::Room &room_id, std::function<void(RequestErr)> callback)
+{
+        const auto api_path =
+          "/client/r0/rooms/" + room_id.toString() + "/typing/" + user_id_.toString();
+
+        mtx::requests::TypingNotification req;
+        req.typing = false;
+
+        put<mtx::requests::TypingNotification>(api_path, req, callback);
+}

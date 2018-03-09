@@ -97,6 +97,13 @@ public:
                                          const std::string &content_type,
                                          const std::string &original_filename,
                                          RequestErr err)> cb);
+        //! Send typing notifications to the room.
+        void start_typing(const mtx::identifiers::Room &room_id,
+                          uint64_t timeout,
+                          std::function<void(RequestErr err)> cb);
+        //! Remove typing notifications from the room.
+        void stop_typing(const mtx::identifiers::Room &room_id,
+                         std::function<void(RequestErr err)> cb);
         /* void download_room_avatar(); */
         /* void download_user_avatar(); */
         /* void download_media(); */

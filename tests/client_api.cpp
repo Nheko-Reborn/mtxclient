@@ -1,3 +1,4 @@
+#include <atomic>
 #include <chrono>
 #include <iostream>
 #include <thread>
@@ -516,4 +517,63 @@ TEST(ClientAPI, Versions)
         });
 
         mtx_client->close();
+}
+
+TEST(ClientAPI, Typing)
+{
+        auto alice = std::make_shared<Client>("localhost");
+
+        alice->login(
+          "alice", "secret", [](const mtx::responses::Login &, ErrType err) { ASSERT_FALSE(err); });
+
+        while (alice->access_token().empty())
+                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
+        mtx::requests::CreateRoom req;
+        alice->create_room(req, [alice](const mtx::responses::CreateRoom &res, ErrType err) {
+                ASSERT_FALSE(err);
+
+                alice->start_typing(res.room_id, 10000, [alice, res](ErrType err) {
+                        ASSERT_FALSE(err);
+
+                        const auto room_id       = res.room_id.toString();
+                        atomic_bool can_continue = false;
+
+                        alice->sync(
+                          "",
+                          "",
+                          false,
+                          0,
+                          [room_id, &can_continue](const mtx::responses::Sync &res, ErrType err) {
+                                  ASSERT_FALSE(err);
+
+                                  can_continue = true;
+
+                                  auto room = res.rooms.join.at(room_id);
+
+                                  EXPECT_EQ(room.ephemeral.typing.size(), 1);
+                                  EXPECT_EQ(room.ephemeral.typing.front(), "@alice:localhost");
+                          });
+
+                        while (!can_continue)
+                                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
+                        alice->stop_typing(res.room_id, [alice, room_id](ErrType err) {
+                                ASSERT_FALSE(err);
+
+                                alice->sync(
+                                  "",
+                                  "",
+                                  false,
+                                  0,
+                                  [room_id](const mtx::responses::Sync &res, ErrType err) {
+                                          ASSERT_FALSE(err);
+                                          auto room = res.rooms.join.at(room_id);
+                                          EXPECT_EQ(room.ephemeral.typing.size(), 0);
+                                  });
+                        });
+                });
+        });
+
+        alice->close();
 }
