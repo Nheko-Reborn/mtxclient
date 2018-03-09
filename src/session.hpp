@@ -1,10 +1,10 @@
 #pragma once
 
+#include <atomic>
 #include <boost/asio.hpp>
 #include <boost/asio/ssl.hpp>
 #include <boost/beast.hpp>
 #include <memory>
-#include <mutex>
 
 namespace mtx {
 namespace client {
@@ -62,9 +62,7 @@ struct Session
         //! Function to be called when the request fails.
         FailureCallback on_failure;
         //! Whether or not the request has been cancelled.
-        bool is_cancelled;
-        //! Retricting access to the cancelled bool.
-        std::mutex cancel_guard;
+        std::atomic_bool is_cancelled;
 };
 }
 }

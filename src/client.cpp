@@ -68,7 +68,6 @@ Client::on_connect(std::shared_ptr<Session> s, boost::system::error_code ec)
         }
 
         // Check if the request is already cancelled and we shouldn't move forward.
-        std::unique_lock<std::mutex> cancel_lock(s->cancel_guard);
         if (s->is_cancelled)
                 return on_request_complete(s);
 
@@ -87,7 +86,6 @@ Client::on_handshake(std::shared_ptr<Session> s, boost::system::error_code ec)
         }
 
         // Check if the request is already cancelled and we shouldn't move forward.
-        std::unique_lock<std::mutex> cancel_lock(s->cancel_guard);
         if (s->is_cancelled)
                 return on_request_complete(s);
 
@@ -112,7 +110,6 @@ Client::on_write(std::shared_ptr<Session> s,
                 return s->on_failure(s->id, ec);
         }
 
-        std::unique_lock<std::mutex> cancel_lock(s->cancel_guard);
         if (s->is_cancelled)
                 return on_request_complete(s);
 
@@ -156,10 +153,8 @@ Client::cancel_request(RequestID request_id)
         std::unique_lock<std::mutex> lock(active_sessions_guard_);
 
         auto it = active_sessions_.find(request_id);
-        if (it != active_sessions_.end()) {
-                std::unique_lock<std::mutex> cancel_lock(it->second->cancel_guard);
+        if (it != active_sessions_.end())
                 it->second->is_cancelled = true;
-        }
 }
 
 void
