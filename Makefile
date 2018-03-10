@@ -17,6 +17,10 @@ test:
 synapse:
 	@docker run -v `pwd`/data:/data --rm \
 		-e SERVER_NAME=localhost -e REPORT_STATS=no ${SYNAPSE_IMAGE} generate
+	@perl -pi -w -e \
+		's/rc_messages_per_second.*/rc_messages_per_second: 100/g;' data/homeserver.yaml
+	@perl -pi -w -e \
+		's/rc_message_burst_count.*/rc_message_burst_count: 1000/g;' data/homeserver.yaml
 	@docker run -d \
 		--name synapse \
 		-p 443:8448 -p 80:8008 -p 3478:3478 \
