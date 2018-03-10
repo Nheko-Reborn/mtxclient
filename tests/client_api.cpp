@@ -151,8 +151,8 @@ TEST(ClientAPI, CreateRoom)
                   check_error(err);
           });
 
-        // Waiting for the previous request to complete.
-        std::this_thread::sleep_for(std::chrono::seconds(3));
+        while (mtx_client->access_token().empty())
+                std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
         mtx::requests::CreateRoom req;
         req.name  = "Name";
@@ -274,8 +274,9 @@ TEST(ClientAPI, CreateRoomInvites)
                 check_error(err);
         });
 
-        // Waiting for the previous requests to complete.
-        std::this_thread::sleep_for(std::chrono::seconds(3));
+        while (alice->access_token().empty() || bob->access_token().empty() ||
+               carl->access_token().empty())
+                std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
         mtx::requests::CreateRoom req;
         req.name   = "Name";
@@ -309,8 +310,8 @@ TEST(ClientAPI, JoinRoom)
         bob->login(
           "bob", "secret", [bob](const mtx::responses::Login &, ErrType err) { check_error(err); });
 
-        // Waiting for the previous requests to complete.
-        std::this_thread::sleep_for(std::chrono::seconds(3));
+        while (alice->access_token().empty() || bob->access_token().empty())
+                std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
         // Creating a random room alias.
         // TODO: add a type for room aliases.
@@ -357,8 +358,8 @@ TEST(ClientAPI, LeaveRoom)
         bob->login(
           "bob", "secret", [bob](const mtx::responses::Login &, ErrType err) { check_error(err); });
 
-        // Waiting for the previous requests to complete.
-        std::this_thread::sleep_for(std::chrono::seconds(3));
+        while (alice->access_token().empty() || bob->access_token().empty())
+                std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
         mtx::requests::CreateRoom req;
         req.name   = "Name";
@@ -400,8 +401,8 @@ TEST(ClientAPI, InviteRoom)
         bob->login(
           "bob", "secret", [bob](const mtx::responses::Login &, ErrType err) { check_error(err); });
 
-        // Waiting for the previous requests to complete.
-        std::this_thread::sleep_for(std::chrono::seconds(3));
+        while (alice->access_token().empty() || bob->access_token().empty())
+                std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
         mtx::requests::CreateRoom req;
         req.name   = "Name";
@@ -439,8 +440,8 @@ TEST(ClientAPI, InvalidInvite)
         bob->login(
           "bob", "secret", [bob](const mtx::responses::Login &, ErrType err) { check_error(err); });
 
-        // Waiting for the previous requests to complete.
-        std::this_thread::sleep_for(std::chrono::seconds(3));
+        while (alice->access_token().empty() || bob->access_token().empty())
+                std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
         mtx::requests::CreateRoom req;
         req.name   = "Name";
@@ -582,7 +583,7 @@ TEST(ClientAPI, SendMessages)
         bob->login(
           "bob", "secret", [bob](const mtx::responses::Login &, ErrType err) { check_error(err); });
 
-        while (alice->access_token().empty() && bob->access_token().empty())
+        while (alice->access_token().empty() || bob->access_token().empty())
                 std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
         mtx::requests::CreateRoom req;
