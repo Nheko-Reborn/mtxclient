@@ -110,6 +110,84 @@ TEST(ClientAPI, LoginWrongUsername)
         mtx_client->close();
 }
 
+TEST(ClientAPI, EmptyUserAvatar)
+{
+        auto alice = std::make_shared<Client>("localhost");
+
+        alice->login("alice", "secret", [alice](const mtx::responses::Login &res, ErrType err) {
+                ASSERT_FALSE(err);
+
+                auto const alice_id = res.user_id;
+                validate_login(alice_id.toString(), res);
+
+                alice->set_avatar_url("", [alice, alice_id](ErrType err) {
+                        ASSERT_FALSE(err);
+
+                        auto done = false;
+
+                        alice->get_profile(
+                          alice_id, [&done](const mtx::responses::Profile &res, ErrType err) {
+                                  ASSERT_FALSE(err);
+                                  ASSERT_TRUE(res.avatar_url.size() == 0);
+                                  done = true;
+                          });
+
+                        while (!done)
+                                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
+                        alice->get_avatar_url(
+                          alice_id, [](const mtx::responses::AvatarUrl &res, ErrType err) {
+                                  ASSERT_FALSE(err);
+                                  ASSERT_TRUE(res.avatar_url.size() == 0);
+                          });
+                });
+
+        });
+
+        alice->close();
+}
+
+TEST(ClientAPI, RealUserAvatar)
+{
+        auto alice = std::make_shared<Client>("localhost");
+
+        alice->login("alice", "secret", [alice](const mtx::responses::Login &res, ErrType err) {
+                ASSERT_FALSE(err);
+
+                auto const alice_id   = res.user_id;
+                auto const avatar_url = "mxc://matrix.org/wefh34uihSDRGhw34";
+
+                validate_login(alice_id.toString(), res);
+
+                alice->set_avatar_url(avatar_url, [alice, alice_id, avatar_url](ErrType err) {
+                        ASSERT_FALSE(err);
+
+                        auto done = false;
+
+                        alice->get_profile(
+                          alice_id,
+                          [avatar_url, &done](const mtx::responses::Profile &res, ErrType err) {
+                                  ASSERT_FALSE(err);
+                                  ASSERT_TRUE(res.avatar_url == avatar_url);
+                                  done = true;
+                          });
+
+                        while (!done)
+                                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
+                        alice->get_avatar_url(
+                          alice_id,
+                          [avatar_url](const mtx::responses::AvatarUrl &res, ErrType err) {
+                                  ASSERT_FALSE(err);
+                                  ASSERT_TRUE(res.avatar_url == avatar_url);
+                          });
+                });
+
+        });
+
+        alice->close();
+}
+
 TEST(ClientAPI, ChangeDisplayName)
 {
         std::shared_ptr<Client> mtx_client = std::make_shared<Client>("localhost");
