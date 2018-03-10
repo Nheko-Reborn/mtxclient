@@ -127,6 +127,19 @@ public:
           const std::string &txn_id,
           Payload payload,
           std::function<void(const mtx::responses::EventId &, RequestErr)> callback);
+        //! Send a state event by providing the state key.
+        template<class Payload, mtx::events::EventType Event>
+        void send_state_event(
+          const mtx::identifiers::Room &room_id,
+          const std::string &state_key,
+          Payload payload,
+          std::function<void(const mtx::responses::EventId &, RequestErr)> callback);
+        //! Send a state event with an empty state key.
+        template<class Payload, mtx::events::EventType Event>
+        void send_state_event(
+          const mtx::identifiers::Room &room_id,
+          Payload payload,
+          std::function<void(const mtx::responses::EventId &, RequestErr)> callback);
         /* void download_room_avatar(); */
         /* void download_media(); */
 
@@ -421,5 +434,29 @@ mtx::client::Client::send_room_message(
         const auto api_path = "/client/r0/rooms/" + room_id.toString() + "/send/" +
                               mtx::events::to_string(Event) + "/" + txn_id;
 
-        put<nlohmann::json>(api_path, payload, callback);
+        put<Payload, mtx::responses::EventId>(api_path, payload, callback);
+}
+
+template<class Payload, mtx::events::EventType Event>
+void
+mtx::client::Client::send_state_event(
+  const mtx::identifiers::Room &room_id,
+  const std::string &state_key,
+  Payload payload,
+  std::function<void(const mtx::responses::EventId &, RequestErr)> callback)
+{
+        const auto api_path = "/client/r0/rooms/" + room_id.toString() + "/state/" +
+                              mtx::events::to_string(Event) + "/" + state_key;
+
+        put<Payload, mtx::responses::EventId>(api_path, payload, callback);
+}
+
+template<class Payload, mtx::events::EventType Event>
+void
+mtx::client::Client::send_state_event(
+  const mtx::identifiers::Room &room_id,
+  Payload payload,
+  std::function<void(const mtx::responses::EventId &, RequestErr)> callback)
+{
+        send_state_event<Payload, Event>(room_id, "", payload, callback);
 }

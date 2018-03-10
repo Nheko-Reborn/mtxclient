@@ -12,6 +12,7 @@
 
 using namespace mtx::client;
 using namespace mtx::identifiers;
+using namespace mtx::events::collections;
 
 using namespace std;
 
@@ -40,8 +41,9 @@ validate_login(const std::string &user, const mtx::responses::Login &res)
         ASSERT_TRUE(res.device_id.size() > 5);
 }
 
+template<class Collection>
 vector<string>
-get_event_ids(const std::vector<mtx::events::collections::TimelineEvents> &events)
+get_event_ids(const std::vector<Collection> &events)
 {
         vector<string> ids;
 
@@ -713,7 +715,7 @@ TEST(ClientAPI, SendMessages)
                             [room_id, event_ids](const mtx::responses::Sync &res, ErrType err) {
                                     check_error(err);
 
-                                    auto ids = get_event_ids(
+                                    auto ids = get_event_ids<TimelineEvents>(
                                       res.rooms.join.at(room_id.toString()).timeline.events);
 
                                     // The sent event ids should be visible in the timeline.
@@ -723,6 +725,85 @@ TEST(ClientAPI, SendMessages)
                                                                   event_id) != std::end(ids));
                             });
                   });
+        });
+
+        alice->close();
+        bob->close();
+}
+
+TEST(ClientAPI, SendStateEvents)
+{
+        auto alice = std::make_shared<Client>("localhost");
+        auto bob   = std::make_shared<Client>("localhost");
+
+        alice->login("alice", "secret", [alice](const mtx::responses::Login &, ErrType err) {
+                check_error(err);
+        });
+
+        bob->login(
+          "bob", "secret", [bob](const mtx::responses::Login &, ErrType err) { check_error(err); });
+
+        while (alice->access_token().empty() || bob->access_token().empty())
+                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
+        mtx::requests::CreateRoom req;
+        req.invite = {"@bob:localhost"};
+        alice->create_room(req, [alice, bob](const mtx::responses::CreateRoom &res, ErrType err) {
+                check_error(err);
+                auto room_id = res.room_id;
+
+                // Flag to indicate when those messages would be ready to be read by
+                // alice.
+                vector<string> event_ids;
+
+                mtx::events::state::Name event;
+                event.name = "Bob's room";
+
+                bob->send_state_event<mtx::events::state::Name, mtx::events::EventType::RoomName>(
+                  room_id, event, [](const mtx::responses::EventId &, ErrType err) {
+                          ASSERT_TRUE(err);
+                          ASSERT_EQ("M_FORBIDDEN",
+                                    mtx::errors::to_string(err->matrix_error.errcode));
+                  });
+
+                mtx::events::state::Name name_event;
+                name_event.name = "Alice's room";
+                alice->send_state_event<mtx::events::state::Name, mtx::events::EventType::RoomName>(
+                  room_id,
+                  name_event,
+                  [&event_ids](const mtx::responses::EventId &res, ErrType err) {
+                          check_error(err);
+                          event_ids.push_back(res.event_id.toString());
+                  });
+
+                mtx::events::state::Avatar avatar;
+                avatar.url = "mxc://localhost/random";
+                alice->send_state_event<mtx::events::state::Avatar,
+                                        mtx::events::EventType::RoomAvatar>(
+                  room_id, avatar, [&event_ids](const mtx::responses::EventId &res, ErrType err) {
+                          check_error(err);
+                          event_ids.push_back(res.event_id.toString());
+                  });
+
+                while (event_ids.size() != 2)
+                        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+
+                alice->sync("",
+                            "",
+                            false,
+                            0,
+                            [room_id, event_ids](const mtx::responses::Sync &res, ErrType err) {
+                                    check_error(err);
+
+                                    auto ids = get_event_ids<TimelineEvents>(
+                                      res.rooms.join.at(room_id.toString()).timeline.events);
+
+                                    // The sent event ids should be visible in the timeline.
+                                    for (const auto &event_id : event_ids)
+                                            ASSERT_TRUE(std::find(ids.begin(),
+                                                                  ids.end(),
+                                                                  event_id) != std::end(ids));
+                            });
         });
 
         alice->close();
