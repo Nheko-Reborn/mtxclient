@@ -42,6 +42,8 @@ public:
         void set_next_batch_token(const std::string &token) { next_batch_token_ = token; }
         //! Retrieve the current next batch token.
         std::string next_batch_token() const { return next_batch_token_; }
+        //! Generate a new transaction id.
+        std::string generate_txn_id() { return utils::random_token(32, false); }
 
         using HeaderFields = std::experimental::optional<boost::beast::http::fields>;
         using RequestErr   = std::experimental::optional<mtx::client::errors::ClientError>;
@@ -81,7 +83,6 @@ public:
         //! Paginate through room messages.
         /* void get_messages(); */
         //! Send a message into a room.
-        /* void send_room_message(); */
         //! Get the supported versions from the server.
         void versions(std::function<void(const mtx::responses::Versions &res, RequestErr err)>);
 
@@ -104,6 +105,19 @@ public:
         //! Remove typing notifications from the room.
         void stop_typing(const mtx::identifiers::Room &room_id,
                          std::function<void(RequestErr err)> cb);
+        //! Send a room message with auto-generated transaction id.
+        template<class Payload, mtx::events::EventType Event>
+        void send_room_message(
+          const mtx::identifiers::Room &room_id,
+          Payload payload,
+          std::function<void(const mtx::responses::EventId &, RequestErr)> callback);
+        //! Send a room message by providing transaction id.
+        template<class Payload, mtx::events::EventType Event>
+        void send_room_message(
+          const mtx::identifiers::Room &room_id,
+          const std::string &txn_id,
+          Payload payload,
+          std::function<void(const mtx::responses::EventId &, RequestErr)> callback);
         /* void download_room_avatar(); */
         /* void download_user_avatar(); */
         /* void download_media(); */
@@ -376,4 +390,28 @@ mtx::client::Client::create_session(
         }
 
         return session;
+}
+
+template<class Payload, mtx::events::EventType Event>
+void
+mtx::client::Client::send_room_message(
+  const mtx::identifiers::Room &room_id,
+  Payload payload,
+  std::function<void(const mtx::responses::EventId &, RequestErr)> callback)
+{
+        send_room_message<Payload, Event>(room_id, generate_txn_id(), payload, callback);
+}
+
+template<class Payload, mtx::events::EventType Event>
+void
+mtx::client::Client::send_room_message(
+  const mtx::identifiers::Room &room_id,
+  const std::string &txn_id,
+  Payload payload,
+  std::function<void(const mtx::responses::EventId &, RequestErr)> callback)
+{
+        const auto api_path = "/client/r0/rooms/" + room_id.toString() + "/send/" +
+                              mtx::events::to_string(Event) + "/" + txn_id;
+
+        put<nlohmann::json>(api_path, payload, callback);
 }

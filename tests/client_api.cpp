@@ -8,6 +8,7 @@
 #include "client.hpp"
 #include "mtx/requests.hpp"
 #include "mtx/responses.hpp"
+#include "variant.hpp"
 
 using namespace mtx::client;
 using namespace mtx::identifiers;
@@ -23,6 +24,17 @@ validate_login(const std::string &user, const mtx::responses::Login &res)
         EXPECT_EQ(res.home_server, "localhost");
         ASSERT_TRUE(res.access_token.size() > 100);
         ASSERT_TRUE(res.device_id.size() > 5);
+}
+
+vector<string>
+get_event_ids(const std::vector<mtx::events::collections::TimelineEvents> &events)
+{
+        vector<string> ids;
+
+        for (const auto &e : events)
+                ids.push_back(mpark::visit([](auto msg) { return msg.event_id; }, e));
+
+        return ids;
 }
 
 TEST(ClientAPI, LoginSuccess)
@@ -576,4 +588,87 @@ TEST(ClientAPI, Typing)
         });
 
         alice->close();
+}
+
+TEST(ClientAPI, SendMessages)
+{
+        auto alice = std::make_shared<Client>("localhost");
+        auto bob   = std::make_shared<Client>("localhost");
+
+        alice->login("alice", "secret", [alice](const mtx::responses::Login &res, ErrType err) {
+                boost::ignore_unused(res);
+                ASSERT_FALSE(err);
+        });
+
+        bob->login("bob", "secret", [bob](const mtx::responses::Login &res, ErrType err) {
+                boost::ignore_unused(res);
+                ASSERT_FALSE(err);
+        });
+
+        while (alice->access_token().empty() && bob->access_token().empty())
+                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
+        mtx::requests::CreateRoom req;
+        req.invite = {"@bob:localhost"};
+        alice->create_room(req, [alice, bob](const mtx::responses::CreateRoom &res, ErrType err) {
+                ASSERT_FALSE(err);
+                auto room_id = res.room_id;
+
+                bob->join_room(
+                  res.room_id, [alice, bob, room_id](const nlohmann::json &, ErrType err) {
+                          ASSERT_FALSE(err);
+
+                          // Flag to indicate when those messages would be ready to be read by
+                          // alice.
+                          vector<string> event_ids;
+
+                          mtx::events::msg::Text text;
+                          text.body = "hello alice!";
+
+                          bob->send_room_message<mtx::events::msg::Text,
+                                                 mtx::events::EventType::RoomMessage>(
+                            room_id,
+                            text,
+                            [&event_ids](const mtx::responses::EventId &res, ErrType err) {
+                                    event_ids.push_back(res.event_id.toString());
+                                    ASSERT_FALSE(err);
+                            });
+
+                          mtx::events::msg::Emote emote;
+                          emote.body = "*bob tests";
+
+                          bob->send_room_message<mtx::events::msg::Emote,
+                                                 mtx::events::EventType::RoomMessage>(
+                            room_id,
+                            emote,
+                            [&event_ids](const mtx::responses::EventId &res, ErrType err) {
+                                    event_ids.push_back(res.event_id.toString());
+                                    ASSERT_FALSE(err);
+                            });
+
+                          while (event_ids.size() != 2)
+                                  std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
+                          alice->sync(
+                            "",
+                            "",
+                            false,
+                            0,
+                            [room_id, event_ids](const mtx::responses::Sync &res, ErrType err) {
+                                    ASSERT_FALSE(err);
+
+                                    auto ids = get_event_ids(
+                                      res.rooms.join.at(room_id.toString()).timeline.events);
+
+                                    // The sent event ids should be visible in the timeline.
+                                    for (const auto &event_id : event_ids)
+                                            ASSERT_TRUE(std::find(ids.begin(),
+                                                                  ids.end(),
+                                                                  event_id) != std::end(ids));
+                            });
+                  });
+        });
+
+        alice->close();
+        bob->close();
 }
