@@ -536,8 +536,8 @@ TEST(ClientAPI, Typing)
                 alice->start_typing(res.room_id, 10000, [alice, res](ErrType err) {
                         ASSERT_FALSE(err);
 
-                        const auto room_id       = res.room_id.toString();
-                        atomic_bool can_continue = false;
+                        const auto room_id = res.room_id.toString();
+                        atomic_bool can_continue(false);
 
                         alice->sync(
                           "",
