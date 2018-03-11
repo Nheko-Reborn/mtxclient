@@ -205,6 +205,15 @@ Client::on_request_complete(std::shared_ptr<Session> s)
         s->on_success(s->id, s->parser.get(), ec);
 }
 
+void
+Client::setup_auth(std::shared_ptr<Session> session, bool auth)
+{
+        const auto token = access_token();
+
+        if (auth && !token.empty())
+                session->request.set(boost::beast::http::field::authorization, "Bearer " + token);
+}
+
 //
 // Client API endpoints
 //

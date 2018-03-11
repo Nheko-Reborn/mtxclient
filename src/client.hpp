@@ -179,6 +179,9 @@ private:
         std::shared_ptr<Session> create_session(
           std::function<void(const Response &res, HeaderFields fields, RequestErr err)> callback);
 
+        //! Setup http header with the access token if needed.
+        void setup_auth(std::shared_ptr<Session> session, bool auth);
+
         void remove_session(std::shared_ptr<Session> s);
         void on_request_complete(std::shared_ptr<Session> s);
         void on_resolve(std::shared_ptr<Session> s,
@@ -262,14 +265,13 @@ mtx::client::Client::post(const std::string &endpoint,
         std::shared_ptr<Session> session = create_session<Response>(
           [callback](const Response &res, HeaderFields, RequestErr err) { callback(res, err); });
 
+        setup_auth(session, requires_auth);
+
         session->request.method(boost::beast::http::verb::post);
         session->request.target("/_matrix" + endpoint);
         session->request.set(boost::beast::http::field::user_agent, "mtxclient v0.1.0");
         session->request.set(boost::beast::http::field::content_type, content_type);
         session->request.set(boost::beast::http::field::host, session->host);
-        if (requires_auth && !access_token_.empty())
-                session->request.set(boost::beast::http::field::authorization,
-                                     "Bearer " + access_token_);
         session->request.body() = serialize<Request>(req);
         session->request.prepare_payload();
 
@@ -287,14 +289,13 @@ mtx::client::Client::put(const std::string &endpoint,
         std::shared_ptr<Session> session = create_session<Response>(
           [callback](const Response &res, HeaderFields, RequestErr err) { callback(res, err); });
 
+        setup_auth(session, requires_auth);
+
         session->request.method(boost::beast::http::verb::put);
         session->request.target("/_matrix" + endpoint);
         session->request.set(boost::beast::http::field::user_agent, "mtxclient v0.1.0");
         session->request.set(boost::beast::http::field::content_type, "application/json");
         session->request.set(boost::beast::http::field::host, session->host);
-        if (requires_auth && !access_token_.empty())
-                session->request.set(boost::beast::http::field::authorization,
-                                     "Bearer " + access_token_);
         session->request.body() = serialize<Request>(req);
         session->request.prepare_payload();
 
@@ -324,13 +325,12 @@ mtx::client::Client::get(const std::string &endpoint,
 {
         std::shared_ptr<Session> session = create_session<Response>(callback);
 
+        setup_auth(session, requires_auth);
+
         session->request.method(boost::beast::http::verb::get);
         session->request.target("/_matrix" + endpoint);
         session->request.set(boost::beast::http::field::user_agent, "mtxclient v0.1.0");
         session->request.set(boost::beast::http::field::host, session->host);
-        if (requires_auth && !access_token_.empty())
-                session->request.set(boost::beast::http::field::authorization,
-                                     "Bearer " + access_token_);
         session->request.prepare_payload();
 
         do_request(session);
