@@ -809,3 +809,52 @@ TEST(ClientAPI, SendStateEvents)
         alice->close();
         bob->close();
 }
+
+TEST(ClientAPI, Pagination)
+{
+        auto alice = std::make_shared<Client>("localhost");
+
+        alice->login("alice", "secret", [alice](const mtx::responses::Login &, ErrType err) {
+                check_error(err);
+        });
+
+        while (alice->access_token().empty())
+                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
+        mtx::requests::CreateRoom req;
+        alice->create_room(req, [alice](const mtx::responses::CreateRoom &res, ErrType err) {
+                check_error(err);
+                auto room_id = res.room_id;
+
+                alice->messages(res.room_id,
+                                "", // from
+                                "", // to
+                                PaginationDirection::Backwards,
+                                30, // limit. Just enough messages so can fetch the whole history on
+                                    // this newly created room.
+                                "", // filter
+                                [room_id, alice](const mtx::responses::Messages &res, ErrType err) {
+                                        check_error(err);
+
+                                        ASSERT_TRUE(res.chunk.size() > 5);
+                                        ASSERT_NE(res.start, res.end);
+
+                                        alice->messages(
+                                          room_id,
+                                          res.end,
+                                          "",
+                                          PaginationDirection::Backwards,
+                                          30,
+                                          "",
+                                          [](const mtx::responses::Messages &res, ErrType err) {
+                                                  check_error(err);
+
+                                                  // We reached the start of the timeline.
+                                                  EXPECT_EQ(res.start, res.end);
+                                                  EXPECT_EQ(res.chunk.size(), 0);
+                                          });
+                                });
+        });
+
+        alice->close();
+}

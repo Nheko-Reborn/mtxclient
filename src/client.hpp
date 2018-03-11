@@ -20,6 +20,21 @@
 namespace mtx {
 namespace client {
 
+enum class PaginationDirection
+{
+        Backwards,
+        Forwards,
+};
+
+inline std::string
+to_string(PaginationDirection dir)
+{
+        if (dir == PaginationDirection::Backwards)
+                return "b";
+
+        return "f";
+}
+
 //! The main object that the user will interact.
 class Client : public std::enable_shared_from_this<Client>
 {
@@ -89,9 +104,16 @@ public:
                   bool full_state,
                   uint16_t timeout,
                   std::function<void(const mtx::responses::Sync &res, RequestErr err)>);
+
         //! Paginate through room messages.
-        /* void get_messages(); */
-        //! Send a message into a room.
+        void messages(const mtx::identifiers::Room &room_id,
+                      const std::string &from,
+                      const std::string &to,
+                      PaginationDirection dir,
+                      uint16_t limit,
+                      const std::string &filter,
+                      std::function<void(const mtx::responses::Messages &res, RequestErr err)>);
+
         //! Get the supported versions from the server.
         void versions(std::function<void(const mtx::responses::Versions &res, RequestErr err)>);
 
@@ -140,13 +162,8 @@ public:
           const mtx::identifiers::Room &room_id,
           Payload payload,
           std::function<void(const mtx::responses::EventId &, RequestErr)> callback);
-        /* void download_room_avatar(); */
-        /* void download_media(); */
 
         /* void upload_filter(); */
-
-        /* void send_typing_notification(); */
-        /* void remove_typing_notification(); */
         /* void read_event(); */
 
 private:

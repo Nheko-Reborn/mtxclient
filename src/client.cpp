@@ -455,3 +455,33 @@ Client::stop_typing(const mtx::identifiers::Room &room_id, std::function<void(Re
 
         put<mtx::requests::TypingNotification>(api_path, req, callback);
 }
+
+void
+Client::messages(const mtx::identifiers::Room &room_id,
+                 const std::string &from,
+                 const std::string &to,
+                 PaginationDirection dir,
+                 uint16_t limit,
+                 const std::string &filter,
+                 std::function<void(const mtx::responses::Messages &res, RequestErr err)> callback)
+{
+        std::map<std::string, std::string> params;
+
+        params.emplace("from", from);
+        params.emplace("dir", to_string(dir));
+
+        if (!to.empty())
+                params.emplace("to", to);
+        if (limit > 0)
+                params.emplace("limit", std::to_string(limit));
+        if (!filter.empty())
+                params.emplace("filter", filter);
+
+        const auto api_path =
+          "/client/r0/rooms/" + room_id.toString() + "/messages?" + utils::query_params(params);
+
+        get<mtx::responses::Messages>(
+          api_path, [callback](const mtx::responses::Messages &res, HeaderFields, RequestErr err) {
+                  callback(res, err);
+          });
+}
