@@ -878,3 +878,61 @@ TEST(ClientAPI, UploadFilter)
 
         alice->close();
 }
+
+TEST(ClientAPI, ReadMarkers)
+{
+        auto alice = std::make_shared<Client>("localhost");
+
+        alice->login("alice", "secret", [alice](const mtx::responses::Login &, ErrType err) {
+                check_error(err);
+        });
+
+        while (alice->access_token().empty())
+                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
+        mtx::requests::CreateRoom req;
+        alice->create_room(req, [alice](const mtx::responses::CreateRoom &res, ErrType err) {
+                check_error(err);
+
+                string event_id;
+
+                mtx::events::msg::Text text;
+                text.body = "hello alice!";
+
+                const auto room_id = res.room_id;
+
+                alice
+                  ->send_room_message<mtx::events::msg::Text, mtx::events::EventType::RoomMessage>(
+                    room_id,
+                    text,
+                    [alice, &event_id, room_id](const mtx::responses::EventId &res, ErrType err) {
+                            check_error(err);
+
+                            alice->read_event(room_id, res.event_id, [&event_id, res](ErrType err) {
+                                    check_error(err);
+                                    event_id = res.event_id.toString();
+                            });
+                    });
+
+                while (event_id.size() == 0)
+                        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
+                alice->sync("",
+                            "",
+                            false,
+                            0,
+                            [room_id, event_id](const mtx::responses::Sync &res, ErrType err) {
+                                    check_error(err);
+
+                                    auto receipts =
+                                      res.rooms.join.at(room_id.toString()).ephemeral.receipts;
+                                    EXPECT_EQ(receipts.size(), 1);
+
+                                    auto users = receipts[event_id];
+                                    EXPECT_EQ(users.size(), 1);
+                                    ASSERT_TRUE(users["@alice:localhost"] > 0);
+                            });
+        });
+
+        alice->close();
+}

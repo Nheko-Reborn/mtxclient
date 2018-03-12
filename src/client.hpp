@@ -117,6 +117,11 @@ public:
         //! Get the supported versions from the server.
         void versions(std::function<void(const mtx::responses::Versions &res, RequestErr err)>);
 
+        //! Mark an event as read.
+        void read_event(const mtx::identifiers::Room &room_id,
+                        const mtx::identifiers::Event &event_id,
+                        std::function<void(RequestErr err)>);
+
         //! Upload a filter
         void upload_filter(const nlohmann::json &j,
                            std::function<void(const mtx::responses::FilterId, RequestErr err)>);
@@ -166,9 +171,6 @@ public:
           const mtx::identifiers::Room &room_id,
           Payload payload,
           std::function<void(const mtx::responses::EventId &, RequestErr)> callback);
-
-        /* void upload_filter(); */
-        /* void read_event(); */
 
 private:
         template<class Request, class Response>

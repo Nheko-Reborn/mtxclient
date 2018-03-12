@@ -494,3 +494,19 @@ Client::upload_filter(const nlohmann::json &j,
 
         post<nlohmann::json, mtx::responses::FilterId>(api_path, j, callback);
 }
+
+void
+Client::read_event(const mtx::identifiers::Room &room_id,
+                   const mtx::identifiers::Event &event_id,
+                   std::function<void(RequestErr err)> callback)
+{
+        const auto api_path = "/client/r0/rooms/" + room_id.toString() + "/read_markers";
+
+        nlohmann::json body = {{"m.fully_read", event_id.toString()},
+                               {"m.read", event_id.toString()}};
+
+        post<nlohmann::json, mtx::responses::Empty>(
+          api_path, body, [callback](const mtx::responses::Empty, RequestErr err) {
+                  callback(err);
+          });
+}
