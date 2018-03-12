@@ -485,3 +485,12 @@ Client::messages(const mtx::identifiers::Room &room_id,
                   callback(res, err);
           });
 }
+
+void
+Client::upload_filter(const nlohmann::json &j,
+                      std::function<void(const mtx::responses::FilterId, RequestErr err)> callback)
+{
+        const auto api_path = "/client/r0/user/" + user_id_.toString() + "/filter";
+
+        post<nlohmann::json, mtx::responses::FilterId>(api_path, j, callback);
+}

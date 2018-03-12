@@ -143,7 +143,6 @@ TEST(ClientAPI, EmptyUserAvatar)
                                   ASSERT_TRUE(res.avatar_url.size() == 0);
                           });
                 });
-
         });
 
         alice->close();
@@ -184,7 +183,6 @@ TEST(ClientAPI, RealUserAvatar)
                                   ASSERT_TRUE(res.avatar_url == avatar_url);
                           });
                 });
-
         });
 
         alice->close();
@@ -285,7 +283,6 @@ TEST(ClientAPI, LogoutSuccess)
                 ASSERT_TRUE(err);
                 EXPECT_EQ(mtx::errors::to_string(err->matrix_error.errcode), "M_MISSING_TOKEN");
                 EXPECT_EQ(err->status_code, boost::beast::http::status::forbidden);
-
         });
 
         mtx_client->close();
@@ -538,7 +535,6 @@ TEST(ClientAPI, InvalidInvite)
                                          EXPECT_EQ(
                                            mtx::errors::to_string(err->matrix_error.errcode),
                                            "M_FORBIDDEN");
-
                                  });
         });
 
@@ -854,6 +850,30 @@ TEST(ClientAPI, Pagination)
                                                   EXPECT_EQ(res.chunk.size(), 0);
                                           });
                                 });
+        });
+
+        alice->close();
+}
+
+TEST(ClientAPI, UploadFilter)
+{
+        auto alice = std::make_shared<Client>("localhost");
+
+        alice->login("alice", "secret", [alice](const mtx::responses::Login &, ErrType err) {
+                check_error(err);
+        });
+
+        while (alice->access_token().empty())
+                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
+        nlohmann::json j = {
+          {"room", {{"include_leave", true}, {"account_data", {{"not_types", {"*"}}}}}},
+          {"account_data", {{"not_types", {"*"}}}},
+          {"presence", {{"not_types", {"*"}}}}};
+
+        alice->upload_filter(j, [](const mtx::responses::FilterId &res, ErrType err) {
+                check_error(err);
+                ASSERT_TRUE(res.filter_id.size() > 0);
         });
 
         alice->close();

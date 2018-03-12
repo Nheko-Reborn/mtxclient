@@ -117,6 +117,10 @@ public:
         //! Get the supported versions from the server.
         void versions(std::function<void(const mtx::responses::Versions &res, RequestErr err)>);
 
+        //! Upload a filter
+        void upload_filter(const nlohmann::json &j,
+                           std::function<void(const mtx::responses::FilterId, RequestErr err)>);
+
         //! Upload data to the content repository.
         void upload(const std::string &data,
                     const std::string &content_type,
@@ -369,7 +373,6 @@ mtx::client::Client::create_session(
            this](RequestID,
                  const boost::beast::http::response<boost::beast::http::string_body> &response,
                  const boost::system::error_code &err_code) {
-
                   ios_.post([callback, response, err_code]() {
                           Response response_data;
                           mtx::client::errors::ClientError client_error;
