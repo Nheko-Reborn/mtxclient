@@ -8,6 +8,7 @@
 #include <boost/asio.hpp>
 #include <boost/asio/ssl.hpp>
 #include <boost/beast.hpp>
+#include <boost/iostreams/stream.hpp>
 #include <boost/thread/thread.hpp>
 #include <json.hpp>
 
@@ -297,6 +298,7 @@ mtx::client::Client::post(const std::string &endpoint,
         session->request.target("/_matrix" + endpoint);
         session->request.set(boost::beast::http::field::user_agent, "mtxclient v0.1.0");
         session->request.set(boost::beast::http::field::content_type, content_type);
+        session->request.set(boost::beast::http::field::accept_encoding, "gzip,deflate");
         session->request.set(boost::beast::http::field::host, session->host);
         session->request.body() = serialize<Request>(req);
         session->request.prepare_payload();
@@ -324,6 +326,7 @@ mtx::client::Client::put(const std::string &endpoint,
         session->request.target("/_matrix" + endpoint);
         session->request.set(boost::beast::http::field::user_agent, "mtxclient v0.1.0");
         session->request.set(boost::beast::http::field::content_type, "application/json");
+        session->request.set(boost::beast::http::field::accept_encoding, "gzip,deflate");
         session->request.set(boost::beast::http::field::host, session->host);
         session->request.body() = serialize<Request>(req);
         session->request.prepare_payload();
@@ -362,6 +365,7 @@ mtx::client::Client::get(const std::string &endpoint,
         session->request.method(boost::beast::http::verb::get);
         session->request.target("/_matrix" + endpoint);
         session->request.set(boost::beast::http::field::user_agent, "mtxclient v0.1.0");
+        session->request.set(boost::beast::http::field::accept_encoding, "gzip,deflate");
         session->request.set(boost::beast::http::field::host, session->host);
         session->request.prepare_payload();
 
@@ -393,11 +397,18 @@ mtx::client::Client::create_session(
                                   return callback(response_data, response.base(), client_error);
                           }
 
+                          // Decompress the response.
+                          const auto encoding = response.base()["Content-Encoding"].to_string();
+                          const auto body     = utils::decompress(
+                            boost::iostreams::array_source{response.body().data(),
+                                                           response.body().size()},
+                            encoding);
+
                           if (response.result() != boost::beast::http::status::ok) {
                                   client_error.status_code = response.result();
 
                                   try {
-                                          nlohmann::json json_error = json::parse(response.body());
+                                          nlohmann::json json_error       = json::parse(body);
                                           mtx::errors::Error matrix_error = json_error;
 
                                           client_error.matrix_error = matrix_error;
@@ -405,7 +416,7 @@ mtx::client::Client::create_session(
                                             response_data, response.base(), client_error);
                                   } catch (const nlohmann::json::exception &e) {
                                           client_error.parse_error =
-                                            std::string(e.what()) + ": " + response.body();
+                                            std::string(e.what()) + ": " + body;
 
                                           return callback(
                                             response_data, response.base(), client_error);
@@ -413,10 +424,9 @@ mtx::client::Client::create_session(
                           }
 
                           try {
-                                  response_data = deserialize<Response>(response.body());
+                                  response_data = deserialize<Response>(body);
                           } catch (const nlohmann::json::exception &e) {
-                                  client_error.parse_error =
-                                    std::string(e.what()) + ": " + response.body();
+                                  client_error.parse_error = std::string(e.what()) + ": " + body;
                                   return callback(response_data, response.base(), client_error);
                           }
 

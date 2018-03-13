@@ -57,7 +57,13 @@ if(NOT Boost_FOUND)
     include(Boost)
 endif()
 
-include_directories(${Boost_INCLUDE_DIRS})
+#
+# zlib
+#
+find_package(ZLIB REQUIRED)
+if(ZLIB_FOUND)
+    include_directories(${ZLIB_INCLUDE_DIRS})
+endif(ZLIB_FOUND)
 
 #
 # matrix-structs
@@ -75,7 +81,8 @@ set(SRC src/client.cpp src/utils.cpp)
 
 add_library(matrix_client ${SRC})
 add_dependencies(matrix_client MatrixStructs Olm)
-target_link_libraries(matrix_client matrix_structs olm ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES})
+target_link_libraries(matrix_client matrix_structs olm
+    ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} ${ZLIB_LIBRARIES})
 
 if(NOT Boost_FOUND)
     add_dependencies(matrix_client Boost)

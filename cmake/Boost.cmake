@@ -18,14 +18,14 @@ ExternalProject_Add(
   BUILD_IN_SOURCE 1
   SOURCE_DIR ${BUNDLED_BOOST_ROOT}
   CONFIGURE_COMMAND ${BUNDLED_BOOST_ROOT}/bootstrap.sh
-    --with-libraries=random,thread,system
+    --with-libraries=random,thread,system,iostreams
     --prefix=${BUNDLED_BOOST_ROOT}
   BUILD_COMMAND ${BUNDLED_BOOST_ROOT}/b2 -d0 variant=release link=static threading=multi
   INSTALL_COMMAND ${BUNDLED_BOOST_ROOT}/b2 -d0 install
 )
 
 set(Boost_INCLUDE_DIRS ${BUNDLED_BOOST_ROOT})
-set(Boost_LIBRARIES boost_random boost_system boost_thread)
+set(Boost_LIBRARIES boost_random boost_system boost_thread boost_iostreams)
 
 include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
 link_directories(${Boost_INCLUDE_DIRS}/stage/lib)
