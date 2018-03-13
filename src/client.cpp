@@ -10,9 +10,10 @@
 using namespace mtx::client;
 using namespace boost::beast;
 
-Client::Client(const std::string &server)
+Client::Client(const std::string &server, uint16_t port)
   : resolver_{ios_}
   , server_{server}
+  , port_{port}
 {
         work_.reset(new boost::asio::io_service::work(ios_));
 
@@ -139,7 +140,7 @@ void
 Client::do_request(std::shared_ptr<Session> s)
 {
         resolver_.async_resolve(server_,
-                                "443",
+                                std::to_string(port_),
                                 std::bind(&Client::on_resolve,
                                           shared_from_this(),
                                           s,

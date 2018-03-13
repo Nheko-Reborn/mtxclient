@@ -20,7 +20,7 @@ synapse:
 	@./.ci/adjust-config.sh
 	@docker run -d \
 		--name synapse \
-		-p 443:8448 -p 80:8008 -p 3478:3478 \
+		-p 443:8448 -p 8448:8448 \
 		-v `pwd`/data:/data ${SYNAPSE_IMAGE} start
 	@echo Waiting for synapse to start...
 	@sleep 5

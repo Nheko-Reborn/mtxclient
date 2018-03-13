@@ -40,7 +40,7 @@ to_string(PaginationDirection dir)
 class Client : public std::enable_shared_from_this<Client>
 {
 public:
-        Client(const std::string &server = "");
+        Client(const std::string &server = "", uint16_t port = 443);
 
         //! Wait for the client to close.
         void close();
@@ -240,6 +240,8 @@ private:
         mtx::identifiers::User user_id_;
         //! The token that will be used as the 'since' parameter on the next sync request.
         std::string next_batch_token_;
+        //! The homeserver port to connect.
+        uint16_t port_ = 443;
 };
 }
 }
