@@ -27,6 +27,9 @@ check_error(ErrType err)
                      << "\n";
                 cout << "error_code      : " << err->error_code << "\n";
                 cout << "status_code     : " << err->status_code << "\n";
+
+                if (!err->parse_error.empty())
+                        cout << "parse_error     : " << err->parse_error << "\n";
         }
 
         ASSERT_FALSE(err);

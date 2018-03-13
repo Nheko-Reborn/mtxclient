@@ -288,6 +288,9 @@ mtx::client::Client::post(const std::string &endpoint,
         std::shared_ptr<Session> session = create_session<Response>(
           [callback](const Response &res, HeaderFields, RequestErr err) { callback(res, err); });
 
+        if (!session)
+                return;
+
         setup_auth(session, requires_auth);
 
         session->request.method(boost::beast::http::verb::post);
@@ -311,6 +314,9 @@ mtx::client::Client::put(const std::string &endpoint,
 {
         std::shared_ptr<Session> session = create_session<Response>(
           [callback](const Response &res, HeaderFields, RequestErr err) { callback(res, err); });
+
+        if (!session)
+                return;
 
         setup_auth(session, requires_auth);
 
@@ -348,6 +354,9 @@ mtx::client::Client::get(const std::string &endpoint,
 {
         std::shared_ptr<Session> session = create_session<Response>(callback);
 
+        if (!session)
+                return;
+
         setup_auth(session, requires_auth);
 
         session->request.method(boost::beast::http::verb::get);
@@ -384,9 +393,7 @@ mtx::client::Client::create_session(
                                   return callback(response_data, response.base(), client_error);
                           }
 
-                          // TODO: handle http error.
                           if (response.result() != boost::beast::http::status::ok) {
-                                  // TODO: handle unknown error.
                                   client_error.status_code = response.result();
 
                                   try {
@@ -396,19 +403,21 @@ mtx::client::Client::create_session(
                                           client_error.matrix_error = matrix_error;
                                           return callback(
                                             response_data, response.base(), client_error);
-                                  } catch (nlohmann::json::exception &e) {
-                                          std::cout << e.what() << ": Couldn't parse response\n"
-                                                    << response.body() << std::endl;
-                                          // TODO: handle error
+                                  } catch (const nlohmann::json::exception &e) {
+                                          client_error.parse_error =
+                                            std::string(e.what()) + ": " + response.body();
+
+                                          return callback(
+                                            response_data, response.base(), client_error);
                                   }
                           }
 
                           try {
                                   response_data = deserialize<Response>(response.body());
-                          } catch (nlohmann::json::exception &e) {
-                                  std::cout << e.what() << ": Couldn't parse response\n"
-                                            << response.body() << std::endl;
-                                  // TODO: handle error
+                          } catch (const nlohmann::json::exception &e) {
+                                  client_error.parse_error =
+                                    std::string(e.what()) + ": " + response.body();
+                                  return callback(response_data, response.base(), client_error);
                           }
 
                           callback(response_data, response.base(), {});
@@ -424,12 +433,20 @@ mtx::client::Client::create_session(
           });
 
         // Set SNI Hostname (many hosts need this to handshake successfully)
-        // TODO: handle the error
         if (!SSL_set_tlsext_host_name(session->socket.native_handle(), server_.c_str())) {
                 boost::system::error_code ec{static_cast<int>(::ERR_get_error()),
                                              boost::asio::error::get_ssl_category()};
                 std::cerr << ec.message() << "\n";
-                return session;
+
+                Response response_data;
+
+                mtx::client::errors::ClientError client_error;
+                client_error.error_code = ec;
+
+                callback(response_data, {}, client_error);
+
+                // Initialization failed.
+                return nullptr;
         }
 
         return session;

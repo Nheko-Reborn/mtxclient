@@ -16,6 +16,8 @@ struct ClientError
         boost::system::error_code error_code;
         //! Status code of the associated http response.
         boost::beast::http::status status_code;
+        //! Parsing response error.
+        std::string parse_error;
 };
 }
 }
