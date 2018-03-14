@@ -4,6 +4,7 @@ project(matrix_client CXX)
 
 option(BUILD_LIB_TESTS "Build tests" ON)
 option(BUILD_LIB_EXAMPLES "Build examples" ON)
+option(BUILD_OLM "Fetch & build libolm" OFF)
 
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
@@ -69,20 +70,29 @@ endif(ZLIB_FOUND)
 # matrix-structs
 #
 include(MatrixStructs)
+include_directories(${MATRIX_STRUCTS_INCLUDE_DIRS})
+
+set(MTXCLIENT_DEPS MatrixStructs)
+set(MTXCLIENT_LIBS matrix_structs
+    ${Boost_LIBRARIES}
+    ${OPENSSL_LIBRARIES}
+    ${ZLIB_LIBRARIES})
 
 #
 # libolm
 #
-include(Olm)
+if (BUILD_OLM)
+    include(Olm)
+    set(MTXCLIENT_DEPS ${MTXCLIENT_DEPS} Olm)
+    set(MTXCLIENT_LIBS ${MTXCLIENT_LIBS} olm)
+endif()
 
 include_directories(src)
-include_directories(${MATRIX_STRUCTS_INCLUDE_DIRS})
 set(SRC src/client.cpp src/utils.cpp)
 
 add_library(matrix_client ${SRC})
-add_dependencies(matrix_client MatrixStructs Olm)
-target_link_libraries(matrix_client matrix_structs olm
-    ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} ${ZLIB_LIBRARIES})
+add_dependencies(matrix_client ${MTXCLIENT_DEPS})
+target_link_libraries(matrix_client ${MTXCLIENT_LIBS})
 
 if(NOT Boost_FOUND)
     add_dependencies(matrix_client Boost)
@@ -102,7 +112,7 @@ if (BUILD_LIB_TESTS)
 
     if (NOT GTest_FOUND)
         message(STATUS "Fetching and building GTest 1.8")
-        include(${CMAKE_SOURCE_DIR}/cmake/GoogleTest.cmake)
+        include(GoogleTest)
     endif()
 
     include_directories(${GTEST_INCLUDE_DIRS})
@@ -113,11 +123,11 @@ if (BUILD_LIB_TESTS)
     add_executable(media_api tests/media_api.cpp)
     target_link_libraries(media_api matrix_client ${GTEST_BOTH_LIBRARIES})
 
-    #add_executable(sync tests/sync.cpp)
-    #target_link_libraries(sync matrix_client ${GTEST_BOTH_LIBRARIES})
-
     #add_executable(cache tests/cache.cpp)
     #target_link_libraries(cache matrix_client ${GTEST_BOTH_LIBRARIES})
+
+    #add_executable(e2ee tests/e2ee.cpp)
+    #target_link_libraries(e2ee matrix_client ${GTEST_BOTH_LIBRARIES})
 
     add_executable(connection tests/connection.cpp)
     target_link_libraries(connection matrix_client ${GTEST_BOTH_LIBRARIES})
