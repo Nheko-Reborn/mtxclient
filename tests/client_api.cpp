@@ -3,6 +3,8 @@
 #include <iostream>
 #include <thread>
 
+#include <boost/algorithm/string.hpp>
+
 #include <gtest/gtest.h>
 
 #include "client.hpp"
@@ -65,7 +67,10 @@ TEST(ClientAPI, Register)
                 EXPECT_EQ(mtx::errors::to_string(err->matrix_error.errcode), "M_USER_IN_USE");
         });
 
-        auto username = utils::random_token();
+        auto username = utils::random_token(10, false);
+
+        // Synapse converts the username to lowercase.
+        boost::algorithm::to_lower(username);
 
         user->flow_register(
           username,
@@ -82,10 +87,11 @@ TEST(ClientAPI, Register)
                                       "secret",
                                       res.session,
                                       "m.login.dummy",
-                                      [](const mtx::responses::Register &res, ErrType err) {
+                                      [username](const mtx::responses::Register &res, ErrType err) {
+                                              const auto user_id = "@" + username + ":localhost";
+
                                               check_error(err);
-                                              EXPECT_EQ(res.user_id.toString(),
-                                                        "@" + username + ":localhost");
+                                              EXPECT_EQ(res.user_id.toString(), user_id);
                                       });
           });
 
