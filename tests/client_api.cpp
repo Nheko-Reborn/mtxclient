@@ -56,6 +56,42 @@ get_event_ids(const std::vector<Collection> &events)
         return ids;
 }
 
+TEST(ClientAPI, Register)
+{
+        auto user = std::make_shared<Client>("localhost");
+
+        user->registration("alice", "secret", [](const mtx::responses::Register &, ErrType err) {
+                ASSERT_TRUE(err);
+                EXPECT_EQ(mtx::errors::to_string(err->matrix_error.errcode), "M_USER_IN_USE");
+        });
+
+        auto username = utils::random_token();
+
+        user->flow_register(
+          username,
+          "secret",
+          [user, username](const mtx::responses::RegistrationFlows &res, ErrType) {
+                  if (res.flows.size() == 0)
+                          return;
+
+                  EXPECT_EQ(res.flows.size(), 2);
+                  EXPECT_EQ(res.flows[0].stages[0], "m.login.dummy");
+                  EXPECT_EQ(res.flows[1].stages[0], "m.login.email.identity");
+
+                  user->flow_response(username,
+                                      "secret",
+                                      res.session,
+                                      "m.login.dummy",
+                                      [](const mtx::responses::Register &res, ErrType err) {
+                                              check_error(err);
+                                              EXPECT_EQ(res.user_id.toString(),
+                                                        "@" + username + ":localhost");
+                                      });
+          });
+
+        user->close();
+}
+
 TEST(ClientAPI, LoginSuccess)
 {
         std::shared_ptr<Client> mtx_client = std::make_shared<Client>("localhost");

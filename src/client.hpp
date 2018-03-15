@@ -68,6 +68,25 @@ public:
         void login(const std::string &username,
                    const std::string &password,
                    std::function<void(const mtx::responses::Login &response, RequestErr err)>);
+
+        //! Register by not expecting a registration flow.
+        void registration(const std::string &user,
+                          const std::string &pass,
+                          std::function<void(const mtx::responses::Register &, RequestErr)>);
+
+        //! Register through a registration flow.
+        void flow_register(
+          const std::string &user,
+          const std::string &pass,
+          std::function<void(const mtx::responses::RegistrationFlows &, RequestErr)>);
+
+        //! Complete the flow registration.
+        void flow_response(const std::string &user,
+                           const std::string &pass,
+                           const std::string &session,
+                           const std::string &flow_type,
+                           std::function<void(const mtx::responses::Register &, RequestErr)>);
+
         //! Perform logout.
         void logout(std::function<void(const mtx::responses::Logout &response, RequestErr err)>);
         //! Change avatar.
@@ -409,6 +428,14 @@ mtx::client::Client::create_session(
                           if (response.result() != boost::beast::http::status::ok) {
                                   client_error.status_code = response.result();
 
+                                  // Try to parse the response in case we have an endpoint that
+                                  // doesn't return an error struct for non 200 requests.
+                                  try {
+                                          response_data = deserialize<Response>(body);
+                                  } catch (const nlohmann::json::exception &e) {
+                                  }
+
+                                  // The homeserver should return an error struct.
                                   try {
                                           nlohmann::json json_error       = json::parse(body);
                                           mtx::errors::Error matrix_error = json_error;
@@ -425,6 +452,8 @@ mtx::client::Client::create_session(
                                   }
                           }
 
+                          // If we reach that point we most likely have a valid output from the
+                          // homeserver.
                           try {
                                   response_data = deserialize<Response>(body);
                           } catch (const nlohmann::json::exception &e) {

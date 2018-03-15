@@ -511,3 +511,39 @@ Client::read_event(const mtx::identifiers::Room &room_id,
                   callback(err);
           });
 }
+
+void
+Client::registration(const std::string &user,
+                     const std::string &pass,
+                     std::function<void(const mtx::responses::Register &, RequestErr)> callback)
+{
+        nlohmann::json req = {{"username", user}, {"password", pass}};
+
+        post<nlohmann::json, mtx::responses::Register>("/client/r0/register", req, callback, false);
+}
+
+void
+Client::flow_register(
+  const std::string &user,
+  const std::string &pass,
+  std::function<void(const mtx::responses::RegistrationFlows &, RequestErr)> callback)
+{
+        nlohmann::json req = {{"username", user}, {"password", pass}};
+
+        post<nlohmann::json, mtx::responses::RegistrationFlows>(
+          "/client/r0/register", req, callback, false);
+}
+
+void
+Client::flow_response(const std::string &user,
+                      const std::string &pass,
+                      const std::string &session,
+                      const std::string &flow_type,
+                      std::function<void(const mtx::responses::Register &, RequestErr)> callback)
+{
+        nlohmann::json req = {{"username", user},
+                              {"password", pass},
+                              {"auth", {{"type", flow_type}, {"session", session}}}};
+
+        post<nlohmann::json, mtx::responses::Register>("/client/r0/register", req, callback, false);
+}
