@@ -57,7 +57,7 @@ script:
   - cmake --version
 
   # Build library, examples & tests
-  - cmake -H. -Bbuild -DOPENSSL_ROOT_DIR=$OPENSLL_ROOT_DIR -DBUILD_LIB_TESTS=$TESTS
+  - cmake -H. -Bbuild -DOPENSSL_ROOT_DIR=$OPENSLL_ROOT_DIR -DBUILD_LIB_TESTS=$TESTS -DBUILD_OLM=1
   - cmake --build build
 
   # Unit & Integration tests
