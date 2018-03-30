@@ -58,6 +58,10 @@ public:
         void set_next_batch_token(const std::string &token) { next_batch_token_ = token; }
         //! Retrieve the current next batch token.
         std::string next_batch_token() const { return next_batch_token_; }
+        //! Retrieve the user_id.
+        mtx::identifiers::User user_id() const { return user_id_; }
+        //! Retrieve the device_id.
+        std::string device_id() const { return device_id_; }
         //! Generate a new transaction id.
         std::string generate_txn_id() { return utils::random_token(32, false); }
 
@@ -192,6 +196,16 @@ public:
           Payload payload,
           std::function<void(const mtx::responses::EventId &, RequestErr)> callback);
 
+        //
+        // Encryption related endpoints.
+        //
+
+        //! Upload identity & one time keys.
+        // TODO: Replace json with a proper type. API methods shouldn't throw.
+        void upload_identity_keys(
+          const nlohmann::json &identity_keys,
+          std::function<void(const mtx::responses::UploadKeys &res, RequestErr err)> cb);
+
 private:
         template<class Request, class Response>
         void post(const std::string &endpoint,
@@ -257,6 +271,8 @@ private:
         std::string access_token_;
         //! The user ID associated with the client.
         mtx::identifiers::User user_id_;
+        //! The device that this session is associated with.
+        std::string device_id_;
         //! The token that will be used as the 'since' parameter on the next sync request.
         std::string next_batch_token_;
         //! The homeserver port to connect.

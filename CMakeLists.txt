@@ -92,14 +92,17 @@ set(MTXCLIENT_LIBS matrix_structs
 #
 # libolm
 #
-if (BUILD_OLM)
+if(BUILD_OLM)
     include(Olm)
     set(MTXCLIENT_DEPS ${MTXCLIENT_DEPS} Olm)
     set(MTXCLIENT_LIBS ${MTXCLIENT_LIBS} olm)
 endif()
 
 include_directories(src)
-set(SRC src/client.cpp src/utils.cpp)
+set(SRC 
+    src/client.cpp
+    src/utils.cpp
+    src/crypto.cpp)
 
 add_library(matrix_client ${SRC})
 add_dependencies(matrix_client ${MTXCLIENT_DEPS})
@@ -137,8 +140,8 @@ if (BUILD_LIB_TESTS)
     #add_executable(cache tests/cache.cpp)
     #target_link_libraries(cache matrix_client ${GTEST_BOTH_LIBRARIES})
 
-    #add_executable(e2ee tests/e2ee.cpp)
-    #target_link_libraries(e2ee matrix_client ${GTEST_BOTH_LIBRARIES})
+    add_executable(e2ee tests/e2ee.cpp)
+    target_link_libraries(e2ee matrix_client ${GTEST_BOTH_LIBRARIES})
 
     add_executable(connection tests/connection.cpp)
     target_link_libraries(connection matrix_client ${GTEST_BOTH_LIBRARIES})
@@ -147,9 +150,11 @@ if (BUILD_LIB_TESTS)
         add_dependencies(client_api GTest)
         add_dependencies(connection GTest)
         add_dependencies(media_api GTest)
+        add_dependencies(e2ee GTest)
     endif()
 
     add_test(BasicConnectivity connection)
     add_test(ClientAPI client_api)
     add_test(MediaAPI media_api)
+    add_test(Encryption e2ee)
 endif()

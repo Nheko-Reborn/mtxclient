@@ -3,7 +3,11 @@ FILES=`find src tests examples -type f -type f \( -iname "*.cpp" -o -iname "*.hp
 SYNAPSE_IMAGE="avhost/docker-matrix:v0.26.0"
 
 debug:
-	@cmake -GNinja -H. -Bbuild -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=1 -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl
+	@cmake -GNinja -H. -Bbuild \
+		-DCMAKE_BUILD_TYPE=Debug \
+		-DCMAKE_EXPORT_COMPILE_COMMANDS=1 \
+		-DOPENSSL_ROOT_DIR=/usr/local/opt/openssl \
+		-DBUILD_OLM=1
 	@cmake --build build
 	@cp build/compile_commands.json .
 

@@ -237,6 +237,7 @@ Client::login(
                            std::experimental::optional<mtx::client::errors::ClientError> err) {
                   if (!err && resp.access_token.size()) {
                           user_id_      = resp.user_id;
+                          device_id_    = resp.device_id;
                           access_token_ = resp.access_token;
                   }
                   callback(resp, err);
@@ -546,4 +547,23 @@ Client::flow_response(const std::string &user,
                               {"auth", {{"type", flow_type}, {"session", session}}}};
 
         post<nlohmann::json, mtx::responses::Register>("/client/r0/register", req, callback, false);
+}
+
+//
+// Encryption related endpoints
+//
+
+void
+Client::upload_identity_keys(
+  const nlohmann::json &identity_keys,
+  std::function<void(const mtx::responses::UploadKeys &res, RequestErr err)> callback)
+{
+        mtx::requests::UploadKeys req;
+        req.device_keys.user_id   = user_id().to_string();
+        req.device_keys.device_id = device_id();
+        req.device_keys.keys.emplace("curve25519:" + device_id(), identity_keys["curve25519"]);
+        req.device_keys.keys.emplace("ed25519:" + device_id(), identity_keys["ed25519"]);
+
+        post<mtx::requests::UploadKeys, mtx::responses::UploadKeys>(
+          "/client/r0/keys/upload", req, callback);
 }
