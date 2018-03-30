@@ -40,7 +40,7 @@ check_error(ErrType err)
 void
 validate_login(const std::string &user, const mtx::responses::Login &res)
 {
-        EXPECT_EQ(res.user_id.toString(), user);
+        EXPECT_EQ(res.user_id.to_string(), user);
         EXPECT_EQ(res.home_server, "localhost");
         ASSERT_TRUE(res.access_token.size() > 100);
         ASSERT_TRUE(res.device_id.size() > 5);
@@ -91,7 +91,7 @@ TEST(ClientAPI, Register)
                                               const auto user_id = "@" + username + ":localhost";
 
                                               check_error(err);
-                                              EXPECT_EQ(res.user_id.toString(), user_id);
+                                              EXPECT_EQ(res.user_id.to_string(), user_id);
                                       });
           });
 
@@ -130,7 +130,7 @@ TEST(ClientAPI, LoginWrongPassword)
                   EXPECT_EQ(mtx::errors::to_string(err->matrix_error.errcode), "M_FORBIDDEN");
                   EXPECT_EQ(err->status_code, boost::beast::http::status::forbidden);
 
-                  EXPECT_EQ(res.user_id.toString(), "");
+                  EXPECT_EQ(res.user_id.to_string(), "");
                   EXPECT_EQ(res.device_id, "");
                   EXPECT_EQ(res.home_server, "");
                   EXPECT_EQ(res.access_token, "");
@@ -148,7 +148,7 @@ TEST(ClientAPI, LoginWrongUsername)
                 EXPECT_EQ(mtx::errors::to_string(err->matrix_error.errcode), "M_FORBIDDEN");
                 EXPECT_EQ(err->status_code, boost::beast::http::status::forbidden);
 
-                EXPECT_EQ(res.user_id.toString(), "");
+                EXPECT_EQ(res.user_id.to_string(), "");
                 EXPECT_EQ(res.device_id, "");
                 EXPECT_EQ(res.home_server, "");
                 EXPECT_EQ(res.access_token, "");
@@ -165,7 +165,7 @@ TEST(ClientAPI, EmptyUserAvatar)
                 ASSERT_FALSE(err);
 
                 auto const alice_id = res.user_id;
-                validate_login(alice_id.toString(), res);
+                validate_login(alice_id.to_string(), res);
 
                 alice->set_avatar_url("", [alice, alice_id](ErrType err) {
                         ASSERT_FALSE(err);
@@ -203,7 +203,7 @@ TEST(ClientAPI, RealUserAvatar)
                 auto const alice_id   = res.user_id;
                 auto const avatar_url = "mxc://matrix.org/wefh34uihSDRGhw34";
 
-                validate_login(alice_id.toString(), res);
+                validate_login(alice_id.to_string(), res);
 
                 alice->set_avatar_url(avatar_url, [alice, alice_id, avatar_url](ErrType err) {
                         ASSERT_FALSE(err);
@@ -650,7 +650,7 @@ TEST(ClientAPI, Typing)
                 alice->start_typing(res.room_id, 10000, [alice, res](ErrType err) {
                         check_error(err);
 
-                        const auto room_id = res.room_id.toString();
+                        const auto room_id = res.room_id.to_string();
                         atomic_bool can_continue(false);
 
                         alice->sync(
@@ -729,7 +729,7 @@ TEST(ClientAPI, SendMessages)
                             room_id,
                             text,
                             [&event_ids](const mtx::responses::EventId &res, ErrType err) {
-                                    event_ids.push_back(res.event_id.toString());
+                                    event_ids.push_back(res.event_id.to_string());
                                     check_error(err);
                             });
 
@@ -741,7 +741,7 @@ TEST(ClientAPI, SendMessages)
                             room_id,
                             emote,
                             [&event_ids](const mtx::responses::EventId &res, ErrType err) {
-                                    event_ids.push_back(res.event_id.toString());
+                                    event_ids.push_back(res.event_id.to_string());
                                     check_error(err);
                             });
 
@@ -757,7 +757,7 @@ TEST(ClientAPI, SendMessages)
                                     check_error(err);
 
                                     auto ids = get_event_ids<TimelineEvents>(
-                                      res.rooms.join.at(room_id.toString()).timeline.events);
+                                      res.rooms.join.at(room_id.to_string()).timeline.events);
 
                                     // The sent event ids should be visible in the timeline.
                                     for (const auto &event_id : event_ids)
@@ -814,7 +814,7 @@ TEST(ClientAPI, SendStateEvents)
                   name_event,
                   [&event_ids](const mtx::responses::EventId &res, ErrType err) {
                           check_error(err);
-                          event_ids.push_back(res.event_id.toString());
+                          event_ids.push_back(res.event_id.to_string());
                   });
 
                 mtx::events::state::Avatar avatar;
@@ -823,7 +823,7 @@ TEST(ClientAPI, SendStateEvents)
                                         mtx::events::EventType::RoomAvatar>(
                   room_id, avatar, [&event_ids](const mtx::responses::EventId &res, ErrType err) {
                           check_error(err);
-                          event_ids.push_back(res.event_id.toString());
+                          event_ids.push_back(res.event_id.to_string());
                   });
 
                 while (event_ids.size() != 2)
@@ -837,7 +837,7 @@ TEST(ClientAPI, SendStateEvents)
                                     check_error(err);
 
                                     auto ids = get_event_ids<TimelineEvents>(
-                                      res.rooms.join.at(room_id.toString()).timeline.events);
+                                      res.rooms.join.at(room_id.to_string()).timeline.events);
 
                                     // The sent event ids should be visible in the timeline.
                                     for (const auto &event_id : event_ids)
@@ -955,7 +955,7 @@ TEST(ClientAPI, ReadMarkers)
 
                             alice->read_event(room_id, res.event_id, [&event_id, res](ErrType err) {
                                     check_error(err);
-                                    event_id = res.event_id.toString();
+                                    event_id = res.event_id.to_string();
                             });
                     });
 
@@ -970,7 +970,7 @@ TEST(ClientAPI, ReadMarkers)
                                     check_error(err);
 
                                     auto receipts =
-                                      res.rooms.join.at(room_id.toString()).ephemeral.receipts;
+                                      res.rooms.join.at(room_id.to_string()).ephemeral.receipts;
                                     EXPECT_EQ(receipts.size(), 1);
 
                                     auto users = receipts[event_id];

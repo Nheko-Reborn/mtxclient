@@ -272,7 +272,7 @@ Client::set_avatar_url(const std::string &avatar_url, std::function<void(Request
         req.avatar_url = avatar_url;
 
         put<mtx::requests::AvatarUrl>(
-          "/client/r0/profile/" + user_id_.toString() + "/avatar_url", req, callback);
+          "/client/r0/profile/" + user_id_.to_string() + "/avatar_url", req, callback);
 }
 
 void
@@ -282,14 +282,14 @@ Client::set_displayname(const std::string &displayname, std::function<void(Reque
         req.displayname = displayname;
 
         put<mtx::requests::DisplayName>(
-          "/client/r0/profile/" + user_id_.toString() + "/displayname", req, callback);
+          "/client/r0/profile/" + user_id_.to_string() + "/displayname", req, callback);
 }
 
 void
 Client::get_profile(const mtx::identifiers::User &user_id,
                     std::function<void(const mtx::responses::Profile &, RequestErr)> callback)
 {
-        get<mtx::responses::Profile>("/client/r0/profile/" + user_id.toString(),
+        get<mtx::responses::Profile>("/client/r0/profile/" + user_id.to_string(),
                                      [callback](const mtx::responses::Profile &res,
                                                 HeaderFields,
                                                 RequestErr err) { callback(res, err); });
@@ -299,7 +299,7 @@ void
 Client::get_avatar_url(const mtx::identifiers::User &user_id,
                        std::function<void(const mtx::responses::AvatarUrl &, RequestErr)> callback)
 {
-        get<mtx::responses::AvatarUrl>("/client/r0/profile/" + user_id.toString() + "/avatar_url",
+        get<mtx::responses::AvatarUrl>("/client/r0/profile/" + user_id.to_string() + "/avatar_url",
                                        [callback](const mtx::responses::AvatarUrl &res,
                                                   HeaderFields,
                                                   RequestErr err) { callback(res, err); });
@@ -317,7 +317,7 @@ void
 Client::join_room(const mtx::identifiers::Room &room_id,
                   std::function<void(const nlohmann::json &, RequestErr)> callback)
 {
-        auto api_path = "/client/r0/rooms/" + room_id.toString() + "/join";
+        auto api_path = "/client/r0/rooms/" + room_id.to_string() + "/join";
 
         post<std::string, nlohmann::json>(api_path, "", callback);
 }
@@ -335,7 +335,7 @@ void
 Client::leave_room(const mtx::identifiers::Room &room_id,
                    std::function<void(const nlohmann::json &, RequestErr)> callback)
 {
-        auto api_path = "/client/r0/rooms/" + room_id.toString() + "/leave";
+        auto api_path = "/client/r0/rooms/" + room_id.to_string() + "/leave";
 
         post<std::string, nlohmann::json>(api_path, "", callback);
 }
@@ -348,7 +348,7 @@ Client::invite_user(const mtx::identifiers::Room &room_id,
         mtx::requests::RoomInvite req;
         req.user_id = user_id;
 
-        auto api_path = "/client/r0/rooms/" + room_id.toString() + "/invite";
+        auto api_path = "/client/r0/rooms/" + room_id.to_string() + "/invite";
 
         post<mtx::requests::RoomInvite, mtx::responses::RoomInvite>(api_path, req, callback);
 }
@@ -436,7 +436,7 @@ Client::start_typing(const mtx::identifiers::Room &room_id,
                      std::function<void(RequestErr)> callback)
 {
         const auto api_path =
-          "/client/r0/rooms/" + room_id.toString() + "/typing/" + user_id_.toString();
+          "/client/r0/rooms/" + room_id.to_string() + "/typing/" + user_id_.to_string();
 
         mtx::requests::TypingNotification req;
         req.typing  = true;
@@ -449,7 +449,7 @@ void
 Client::stop_typing(const mtx::identifiers::Room &room_id, std::function<void(RequestErr)> callback)
 {
         const auto api_path =
-          "/client/r0/rooms/" + room_id.toString() + "/typing/" + user_id_.toString();
+          "/client/r0/rooms/" + room_id.to_string() + "/typing/" + user_id_.to_string();
 
         mtx::requests::TypingNotification req;
         req.typing = false;
@@ -479,7 +479,7 @@ Client::messages(const mtx::identifiers::Room &room_id,
                 params.emplace("filter", filter);
 
         const auto api_path =
-          "/client/r0/rooms/" + room_id.toString() + "/messages?" + utils::query_params(params);
+          "/client/r0/rooms/" + room_id.to_string() + "/messages?" + utils::query_params(params);
 
         get<mtx::responses::Messages>(
           api_path, [callback](const mtx::responses::Messages &res, HeaderFields, RequestErr err) {
@@ -491,7 +491,7 @@ void
 Client::upload_filter(const nlohmann::json &j,
                       std::function<void(const mtx::responses::FilterId, RequestErr err)> callback)
 {
-        const auto api_path = "/client/r0/user/" + user_id_.toString() + "/filter";
+        const auto api_path = "/client/r0/user/" + user_id_.to_string() + "/filter";
 
         post<nlohmann::json, mtx::responses::FilterId>(api_path, j, callback);
 }
@@ -501,10 +501,10 @@ Client::read_event(const mtx::identifiers::Room &room_id,
                    const mtx::identifiers::Event &event_id,
                    std::function<void(RequestErr err)> callback)
 {
-        const auto api_path = "/client/r0/rooms/" + room_id.toString() + "/read_markers";
+        const auto api_path = "/client/r0/rooms/" + room_id.to_string() + "/read_markers";
 
-        nlohmann::json body = {{"m.fully_read", event_id.toString()},
-                               {"m.read", event_id.toString()}};
+        nlohmann::json body = {{"m.fully_read", event_id.to_string()},
+                               {"m.read", event_id.to_string()}};
 
         post<nlohmann::json, mtx::responses::Empty>(
           api_path, body, [callback](const mtx::responses::Empty, RequestErr err) {

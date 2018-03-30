@@ -11,7 +11,7 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 if(CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} \
-        -std=c++1z \
+        -std=c++14 \
         -Wall \
         -Wextra \
         -Werror \
@@ -35,6 +35,8 @@ endif()
 if(NOT APPLE AND NOT MSVC)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
 endif()
+
+set(MTXCLIENT_DEPS "")
 
 #
 # OpenSSL
@@ -69,10 +71,19 @@ endif(ZLIB_FOUND)
 #
 # matrix-structs
 #
-include(MatrixStructs)
-include_directories(${MATRIX_STRUCTS_INCLUDE_DIRS})
+find_library(MATRIX_STRUCTS_LIBRARY 
+    NAMES matrix_structs 
+    PATHS ${MATRIX_STRUCTS_ROOT}
+          ${MATRIX_STRUCTS_ROOT}/lib
+          ${MATRIX_STRUCTS_ROOT}/lib/static)
 
-set(MTXCLIENT_DEPS MatrixStructs)
+if(NOT MATRIX_STRUCTS_LIBRARY)
+    include(MatrixStructs)
+    set(MTXCLIENT_DEPS ${MTXCLIENT_DEPS} MatrixStructs)
+endif()
+
+include_directories(SYSTEM ${MATRIX_STRUCTS_INCLUDE_DIR})
+
 set(MTXCLIENT_LIBS matrix_structs
     ${Boost_LIBRARIES}
     ${OPENSSL_LIBRARIES}

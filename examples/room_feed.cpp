@@ -168,7 +168,7 @@ main()
                         return;
                 }
 
-                cout << "Logged in as: " << res.user_id.toString() << "\n";
+                cout << "Logged in as: " << res.user_id.to_string() << "\n";
                 client->set_access_token(res.access_token);
 
                 client->sync(

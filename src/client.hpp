@@ -511,7 +511,7 @@ mtx::client::Client::send_room_message(
   Payload payload,
   std::function<void(const mtx::responses::EventId &, RequestErr)> callback)
 {
-        const auto api_path = "/client/r0/rooms/" + room_id.toString() + "/send/" +
+        const auto api_path = "/client/r0/rooms/" + room_id.to_string() + "/send/" +
                               mtx::events::to_string(Event) + "/" + txn_id;
 
         put<Payload, mtx::responses::EventId>(api_path, payload, callback);
@@ -525,7 +525,7 @@ mtx::client::Client::send_state_event(
   Payload payload,
   std::function<void(const mtx::responses::EventId &, RequestErr)> callback)
 {
-        const auto api_path = "/client/r0/rooms/" + room_id.toString() + "/state/" +
+        const auto api_path = "/client/r0/rooms/" + room_id.to_string() + "/state/" +
                               mtx::events::to_string(Event) + "/" + state_key;
 
         put<Payload, mtx::responses::EventId>(api_path, payload, callback);
