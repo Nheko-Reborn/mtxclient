@@ -2,10 +2,10 @@
 
 using json = nlohmann::json;
 
-std::shared_ptr<olm::Account::Account>
+std::shared_ptr<olm::Account>
 mtx::client::crypto::olm_new_account()
 {
-        auto olm_account    = std::make_shared<olm::Account::Account>();
+        auto olm_account    = std::make_shared<olm::Account>();
         const auto buf_size = olm_account->new_account_random_length();
         auto account_buf    = std::make_unique<uint8_t[]>(buf_size);
 
@@ -18,7 +18,7 @@ mtx::client::crypto::olm_new_account()
 }
 
 json
-mtx::client::crypto::identity_keys(std::shared_ptr<olm::Account::Account> account)
+mtx::client::crypto::identity_keys(std::shared_ptr<olm::Account> account)
 {
         const auto buf_size = account->get_identity_json_length();
         auto json_buf       = std::make_unique<uint8_t[]>(buf_size);
@@ -34,7 +34,7 @@ mtx::client::crypto::identity_keys(std::shared_ptr<olm::Account::Account> accoun
 }
 
 json
-mtx::client::crypto::one_time_keys(std::shared_ptr<olm::Account::Account> account)
+mtx::client::crypto::one_time_keys(std::shared_ptr<olm::Account> account)
 {
         const auto buf_size = account->get_one_time_keys_json_length();
         auto json_buf       = std::make_unique<uint8_t[]>(buf_size);

@@ -30,16 +30,16 @@ private:
 };
 
 //! Create a new olm Account.
-std::shared_ptr<olm::Account::Account>
+std::shared_ptr<olm::Account>
 olm_new_account();
 
 //! Retrieve the json representation of the identity keys for the given account.
 nlohmann::json
-identity_keys(std::shared_ptr<olm::Account::Account> user);
+identity_keys(std::shared_ptr<olm::Account> user);
 
 //! Retrieve the json representation of the one time keys for the given account.
 nlohmann::json
-one_time_keys(std::shared_ptr<olm::Account::Account> user);
+one_time_keys(std::shared_ptr<olm::Account> user);
 
 } // namespace crypto
 } // namespace client

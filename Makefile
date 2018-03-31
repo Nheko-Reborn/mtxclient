@@ -9,7 +9,6 @@ debug:
 		-DOPENSSL_ROOT_DIR=/usr/local/opt/openssl \
 		-DBUILD_OLM=1
 	@cmake --build build
-	@cp build/compile_commands.json .
 
 release:
 	@cmake -GNinja -H. -Bbuild -DCMAKE_BUILD_TYPE=Release
