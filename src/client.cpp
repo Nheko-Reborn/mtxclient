@@ -567,3 +567,20 @@ Client::upload_identity_keys(
         post<mtx::requests::UploadKeys, mtx::responses::UploadKeys>(
           "/client/r0/keys/upload", req, callback);
 }
+
+void
+Client::upload_one_time_keys(
+  const nlohmann::json &identity_keys,
+  std::function<void(const mtx::responses::UploadKeys &res, RequestErr err)> callback)
+{
+        mtx::requests::UploadKeys req;
+        req.device_keys.user_id   = user_id().to_string();
+        req.device_keys.device_id = device_id();
+
+        auto obj = identity_keys.at("curve25519");
+        for (auto it = obj.begin(); it != obj.end(); ++it)
+                req.one_time_keys.emplace("curve25519:" + it.key(), it.value());
+
+        post<mtx::requests::UploadKeys, mtx::responses::UploadKeys>(
+          "/client/r0/keys/upload", req, callback);
+}

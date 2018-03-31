@@ -37,9 +37,16 @@ olm_new_account();
 nlohmann::json
 identity_keys(std::shared_ptr<olm::Account> user);
 
+//! Generate a number of one time keys.
+std::size_t
+generate_one_time_keys(std::shared_ptr<olm::Account> account, std::size_t number_of_keys);
+
 //! Retrieve the json representation of the one time keys for the given account.
 nlohmann::json
 one_time_keys(std::shared_ptr<olm::Account> user);
+
+std::unique_ptr<uint8_t[]>
+create_buffer(std::size_t nbytes);
 
 } // namespace crypto
 } // namespace client

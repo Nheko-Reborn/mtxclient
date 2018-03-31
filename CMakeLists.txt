@@ -45,6 +45,13 @@ find_package(OpenSSL REQUIRED)
 include_directories(${OPENSSL_INCLUDE_DIR})
 
 #
+# libsodium
+#
+include(Findsodium)
+set(MTXCLIENT_LIBS ${MTXCLIENT_LIBS} ${sodium_LIBRARY_RELEASE})
+include_directories(SYSTEM sodium_INCLUDE_DIR)
+
+#
 # Boost 1.66
 #
 # If we can't find an already installed version we will
@@ -84,7 +91,8 @@ endif()
 
 include_directories(SYSTEM ${MATRIX_STRUCTS_INCLUDE_DIR})
 
-set(MTXCLIENT_LIBS matrix_structs
+set(MTXCLIENT_LIBS ${MTXCLIENT_LIBS}
+    matrix_structs
     ${Boost_LIBRARIES}
     ${OPENSSL_LIBRARIES}
     ${ZLIB_LIBRARIES})

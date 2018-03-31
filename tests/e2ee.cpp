@@ -68,3 +68,29 @@ TEST(Encryption, UploadIdentityKeys)
 
         alice->close();
 }
+
+TEST(Encryption, UploadOneTimeKeys)
+{
+        auto alice       = std::make_shared<Client>("localhost");
+        auto olm_account = mtx::client::crypto::olm_new_account();
+
+        alice->login(
+          "alice", "secret", [](const mtx::responses::Login &, ErrType err) { check_error(err); });
+
+        while (alice->access_token().empty())
+                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
+        auto number_of_keys = mtx::client::crypto::generate_one_time_keys(olm_account, 5);
+        EXPECT_EQ(number_of_keys, 5);
+
+        auto one_time_keys = mtx::client::crypto::one_time_keys(olm_account);
+
+        alice->upload_one_time_keys(one_time_keys,
+                                    [](const mtx::responses::UploadKeys &res, ErrType err) {
+                                            check_error(err);
+                                            EXPECT_EQ(res.one_time_key_counts.size(), 1);
+                                            EXPECT_EQ(res.one_time_key_counts.at("curve25519"), 5);
+                                    });
+
+        alice->close();
+}

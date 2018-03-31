@@ -200,10 +200,16 @@ public:
         // Encryption related endpoints.
         //
 
-        //! Upload identity & one time keys.
+        //! Upload identity keys.
         // TODO: Replace json with a proper type. API methods shouldn't throw.
         void upload_identity_keys(
           const nlohmann::json &identity_keys,
+          std::function<void(const mtx::responses::UploadKeys &res, RequestErr err)> cb);
+
+        //! Upload one time keys.
+        // TODO: Replace json with a proper type. API methods shouldn't throw.
+        void upload_one_time_keys(
+          const nlohmann::json &one_time_keys,
           std::function<void(const mtx::responses::UploadKeys &res, RequestErr err)> cb);
 
 private:
