@@ -2,10 +2,12 @@
 #include <sodium.h>
 
 #include "crypto.hpp"
-#include "olm/base64.hh"
+#include <olm/base64.hh>
 
 using json = nlohmann::json;
 using namespace mtx::client::crypto;
+
+constexpr std::size_t SIGNATURE_SIZE = 64;
 
 std::unique_ptr<uint8_t[]>
 mtx::client::crypto::create_buffer(std::size_t nbytes)
@@ -81,21 +83,23 @@ mtx::client::crypto::sign_one_time_key(std::shared_ptr<olm::Account> account,
         json j{{"key", key}};
         auto str_json = j.dump();
 
-        constexpr std::size_t SIGNATURE_SIZE = 64;
+        auto signature_buf = sign_message(account, j.dump());
 
-        // Message
-        std::vector<std::uint8_t> tmp(str_json.begin(), str_json.end());
-        std::uint8_t *buf  = &tmp[0];
-        std::size_t nbytes = str_json.size();
+        return encode_base64(signature_buf.get(), SIGNATURE_SIZE);
+}
 
-        // Signature
+std::unique_ptr<uint8_t[]>
+mtx::client::crypto::sign_message(std::shared_ptr<olm::Account> account, const std::string &msg)
+{
+        // Message buffer
+        auto buf           = str_to_buffer(msg);
+        std::size_t nbytes = msg.size();
+
+        // Signature buffer
         auto signature_buf = create_buffer(SIGNATURE_SIZE);
-        account->sign(buf, nbytes, signature_buf.get(), SIGNATURE_SIZE);
+        account->sign(buf.get(), nbytes, signature_buf.get(), SIGNATURE_SIZE);
 
-        auto encoded_buf = create_buffer(SIGNATURE_SIZE);
-        olm::encode_base64(signature_buf.get(), SIGNATURE_SIZE, encoded_buf.get());
-
-        return std::string(encoded_buf.get(), encoded_buf.get() + SIGNATURE_SIZE);
+        return signature_buf;
 }
 
 json
@@ -106,4 +110,53 @@ mtx::client::crypto::signed_one_time_key_json(const mtx::identifiers::User &user
 {
         return json{{"key", key},
                     {"signatures", {{user_id.to_string(), {{"ed25519:" + device_id, signature}}}}}};
+}
+
+std::unique_ptr<uint8_t[]>
+mtx::client::crypto::str_to_buffer(const std::string &data)
+{
+        auto str_pointer  = reinterpret_cast<const uint8_t *>(&data[0]);
+        const auto nbytes = data.size();
+
+        auto buf = create_buffer(nbytes);
+        memcpy(buf.get(), str_pointer, nbytes);
+
+        return buf;
+}
+
+std::unique_ptr<uint8_t[]>
+mtx::client::crypto::decode_base64(const std::string &data)
+{
+        const auto nbytes       = data.size();
+        const int output_nbytes = olm::decode_base64_length(nbytes);
+
+        if (output_nbytes == -1)
+                throw std::runtime_error("invalid base64 input length");
+
+        auto output_buf = create_buffer(output_nbytes);
+        auto input_buf  = str_to_buffer(data);
+
+        olm::decode_base64(input_buf.get(), nbytes, output_buf.get());
+
+        return output_buf;
+}
+
+std::string
+mtx::client::crypto::encode_base64(const uint8_t *data, std::size_t len)
+{
+        const int output_nbytes = olm::encode_base64_length(len);
+
+        if (output_nbytes == -1)
+                throw std::runtime_error("invalid base64 input length");
+
+        auto output_buf = create_buffer(output_nbytes);
+        olm::encode_base64(data, output_nbytes, output_buf.get());
+
+        return std::string(output_buf.get(), output_buf.get() + output_nbytes);
+}
+
+std::unique_ptr<uint8_t[]>
+mtx::client::crypto::json_to_buffer(const nlohmann::json &obj)
+{
+        return str_to_buffer(obj.dump());
 }

@@ -50,9 +50,13 @@ one_time_keys(std::shared_ptr<olm::Account> user);
 std::unique_ptr<uint8_t[]>
 create_buffer(std::size_t nbytes);
 
-//! Sign the given one time keys.
+//! Sign the given one time keys and encode it to base64.
 std::string
 sign_one_time_key(std::shared_ptr<olm::Account> account, const std::string &key);
+
+//! Sign the given message.
+std::unique_ptr<uint8_t[]>
+sign_message(std::shared_ptr<olm::Account> account, const std::string &msg);
 
 //! Generate the json structure for the signed one time key.
 nlohmann::json
@@ -60,6 +64,22 @@ signed_one_time_key_json(const mtx::identifiers::User &user_id,
                          const std::string &device_id,
                          const std::string &key,
                          const std::string &signature);
+
+std::string
+encode_base64(const uint8_t *data, std::size_t len);
+
+//! Decode the given base64 string
+std::unique_ptr<uint8_t[]>
+decode_base64(const std::string &data);
+
+//! Convert the given string to an uint8_t buffer.
+std::unique_ptr<uint8_t[]>
+str_to_buffer(const std::string &data);
+
+//! Convert the given json struct to an uint8_t buffer.
+std::unique_ptr<uint8_t[]>
+json_to_buffer(const nlohmann::json &obj);
+
 } // namespace crypto
 } // namespace client
 } // namespace mtx

@@ -155,6 +155,9 @@ if (BUILD_LIB_TESTS)
     add_executable(e2ee tests/e2ee.cpp)
     target_link_libraries(e2ee matrix_client ${GTEST_BOTH_LIBRARIES})
 
+    add_executable(utils tests/utils.cpp)
+    target_link_libraries(utils matrix_client ${GTEST_BOTH_LIBRARIES})
+
     add_executable(connection tests/connection.cpp)
     target_link_libraries(connection matrix_client ${GTEST_BOTH_LIBRARIES})
 
@@ -163,10 +166,12 @@ if (BUILD_LIB_TESTS)
         add_dependencies(connection GTest)
         add_dependencies(media_api GTest)
         add_dependencies(e2ee GTest)
+        add_dependencies(utils GTest)
     endif()
 
     add_test(BasicConnectivity connection)
     add_test(ClientAPI client_api)
     add_test(MediaAPI media_api)
     add_test(Encryption e2ee)
+    add_test(Utilities utils)
 endif()
