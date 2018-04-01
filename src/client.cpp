@@ -173,9 +173,14 @@ Client::remove_session(std::shared_ptr<Session> s)
                         ec.assign(0, ec.category());
                 }
 
+                // Ignoring short_read error.
+                if ((ec.category() == boost::asio::error::get_ssl_category()) &&
+                    (ERR_GET_REASON(ec.value()) == SSL_R_SHORT_READ))
+                        return;
+
                 if (ec)
                         // TODO: propagate the error.
-                        std::cout << "shutdown: " << ec << std::endl;
+                        std::cout << "shutdown: " << ec.message() << std::endl;
         });
 
         // Remove the session from the map of active sessions.
