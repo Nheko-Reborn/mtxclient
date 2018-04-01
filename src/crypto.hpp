@@ -4,6 +4,7 @@
 #include <memory>
 
 #include <json.hpp>
+#include <mtx/identifiers.hpp>
 #include <olm/account.hh>
 #include <olm/error.h>
 
@@ -49,6 +50,16 @@ one_time_keys(std::shared_ptr<olm::Account> user);
 std::unique_ptr<uint8_t[]>
 create_buffer(std::size_t nbytes);
 
+//! Sign the given one time keys.
+std::string
+sign_one_time_key(std::shared_ptr<olm::Account> account, const std::string &key);
+
+//! Generate the json structure for the signed one time key.
+nlohmann::json
+signed_one_time_key_json(const mtx::identifiers::User &user_id,
+                         const std::string &device_id,
+                         const std::string &key,
+                         const std::string &signature);
 } // namespace crypto
 } // namespace client
 } // namespace mtx

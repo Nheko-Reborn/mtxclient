@@ -1,6 +1,8 @@
+#include <iostream>
 #include <sodium.h>
 
 #include "crypto.hpp"
+#include "olm/base64.hh"
 
 using json = nlohmann::json;
 using namespace mtx::client::crypto;
@@ -70,4 +72,38 @@ mtx::client::crypto::one_time_keys(std::shared_ptr<olm::Account> account)
         std::string data(buf.get(), buf.get() + nbytes);
 
         return json::parse(data);
+}
+
+std::string
+mtx::client::crypto::sign_one_time_key(std::shared_ptr<olm::Account> account,
+                                       const std::string &key)
+{
+        json j{{"key", key}};
+        auto str_json = j.dump();
+
+        constexpr std::size_t SIGNATURE_SIZE = 64;
+
+        // Message
+        std::vector<std::uint8_t> tmp(str_json.begin(), str_json.end());
+        std::uint8_t *buf  = &tmp[0];
+        std::size_t nbytes = str_json.size();
+
+        // Signature
+        auto signature_buf = create_buffer(SIGNATURE_SIZE);
+        account->sign(buf, nbytes, signature_buf.get(), SIGNATURE_SIZE);
+
+        auto encoded_buf = create_buffer(SIGNATURE_SIZE);
+        olm::encode_base64(signature_buf.get(), SIGNATURE_SIZE, encoded_buf.get());
+
+        return std::string(encoded_buf.get(), encoded_buf.get() + SIGNATURE_SIZE);
+}
+
+json
+mtx::client::crypto::signed_one_time_key_json(const mtx::identifiers::User &user_id,
+                                              const std::string &device_id,
+                                              const std::string &key,
+                                              const std::string &signature)
+{
+        return json{{"key", key},
+                    {"signatures", {{user_id.to_string(), {{"ed25519:" + device_id, signature}}}}}};
 }

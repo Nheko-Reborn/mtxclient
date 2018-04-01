@@ -561,6 +561,24 @@ Client::flow_response(const std::string &user,
 //
 
 void
+Client::upload_keys(
+  const nlohmann::json &identity_keys,
+  const std::map<std::string, nlohmann::json> &one_time_keys,
+  std::function<void(const mtx::responses::UploadKeys &res, RequestErr err)> callback)
+{
+        mtx::requests::UploadKeys req;
+        req.one_time_keys = one_time_keys;
+
+        req.device_keys.user_id   = user_id().to_string();
+        req.device_keys.device_id = device_id();
+        req.device_keys.keys.emplace("curve25519:" + device_id(), identity_keys["curve25519"]);
+        req.device_keys.keys.emplace("ed25519:" + device_id(), identity_keys["ed25519"]);
+
+        post<mtx::requests::UploadKeys, mtx::responses::UploadKeys>(
+          "/client/r0/keys/upload", req, callback);
+}
+
+void
 Client::upload_identity_keys(
   const nlohmann::json &identity_keys,
   std::function<void(const mtx::responses::UploadKeys &res, RequestErr err)> callback)
@@ -577,16 +595,13 @@ Client::upload_identity_keys(
 
 void
 Client::upload_one_time_keys(
-  const nlohmann::json &identity_keys,
+  const std::map<std::string, nlohmann::json> &one_time_keys,
   std::function<void(const mtx::responses::UploadKeys &res, RequestErr err)> callback)
 {
         mtx::requests::UploadKeys req;
         req.device_keys.user_id   = user_id().to_string();
         req.device_keys.device_id = device_id();
-
-        auto obj = identity_keys.at("curve25519");
-        for (auto it = obj.begin(); it != obj.end(); ++it)
-                req.one_time_keys.emplace("curve25519:" + it.key(), it.value());
+        req.one_time_keys         = one_time_keys;
 
         post<mtx::requests::UploadKeys, mtx::responses::UploadKeys>(
           "/client/r0/keys/upload", req, callback);
