@@ -45,6 +45,7 @@ generate_one_time_keys(std::shared_ptr<olm::Account> account, std::size_t number
 nlohmann::json
 one_time_keys(std::shared_ptr<olm::Account> user);
 
+//! Create a uint8_t buffer which is initialized with random bytes.
 std::unique_ptr<uint8_t[]>
 create_buffer(std::size_t nbytes);
 

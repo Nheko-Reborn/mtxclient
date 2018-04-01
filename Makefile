@@ -17,6 +17,15 @@ release:
 test:
 	@cd build && GTEST_COLOR=1 ctest --verbose
 
+asan:
+	@cmake -GNinja -H. -Bbuild \
+		-DCMAKE_BUILD_TYPE=Debug \
+		-DCMAKE_EXPORT_COMPILE_COMMANDS=1 \
+		-DOPENSSL_ROOT_DIR=/usr/local/opt/openssl \
+		-DBUILD_OLM=1 \
+		-DASAN=1
+	@cmake --build build
+
 synapse:
 	@docker run -v `pwd`/data:/data --rm \
 		-e SERVER_NAME=localhost -e REPORT_STATS=no ${SYNAPSE_IMAGE} generate

@@ -2,16 +2,19 @@ cmake_minimum_required(VERSION 3.1)
 
 project(matrix_client CXX)
 
+option(ASAN "Compile with address sanitizers" OFF)
 option(BUILD_LIB_TESTS "Build tests" ON)
 option(BUILD_LIB_EXAMPLES "Build examples" ON)
 option(BUILD_OLM "Fetch & build libolm" OFF)
 
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 if(CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} \
-        -std=c++14 \
+        -std=c++1z \
         -Wall \
         -Wextra \
         -Werror \
@@ -32,24 +35,33 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU")
     endif()
 endif()
 
+if(ASAN)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address,undefined")
+endif()
+
 if(NOT APPLE AND NOT MSVC)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
 endif()
 
+# Dependencies on ExternalProjects
 set(MTXCLIENT_DEPS "")
+
+# Libraries linked to matrix_client
+set(MTXCLIENT_LIBS "")
 
 #
 # OpenSSL
 #
 find_package(OpenSSL REQUIRED)
 include_directories(${OPENSSL_INCLUDE_DIR})
+set(MTXCLIENT_LIBS ${MTXCLIENT_LIBS} ${OPENSSL_LIBRARIES})
 
 #
 # libsodium
 #
 include(Findsodium)
+include_directories(${sodium_INCLUDE_DIR})
 set(MTXCLIENT_LIBS ${MTXCLIENT_LIBS} ${sodium_LIBRARY_RELEASE})
-include_directories(SYSTEM sodium_INCLUDE_DIR)
 
 #
 # Boost 1.66
@@ -60,12 +72,14 @@ include_directories(SYSTEM sodium_INCLUDE_DIR)
 set(Boost_USE_STATIC_LIBS OFF)
 set(Boost_USE_MULTITHREADED ON)
 find_package(Boost 1.66)
-find_package(Boost 1.66 COMPONENTS system random thread)
+find_package(Boost 1.66 COMPONENTS system random thread iostreams)
 
 if(NOT Boost_FOUND)
-    message(STATUS "Fetching and building Boost 1.66")
     include(Boost)
+    set(MTXCLIENT_DEPS ${MTXCLIENT_DEPS} Boost)
 endif()
+include_directories(${Boost_INCLUDE_DIRS})
+set(MTXCLIENT_LIBS ${MTXCLIENT_LIBS} ${Boost_LIBRARIES})
 
 #
 # zlib
@@ -73,6 +87,7 @@ endif()
 find_package(ZLIB REQUIRED)
 if(ZLIB_FOUND)
     include_directories(${ZLIB_INCLUDE_DIRS})
+    set(MTXCLIENT_LIBS ${MTXCLIENT_LIBS} ${ZLIB_LIBRARIES})
 endif(ZLIB_FOUND)
 
 #
@@ -88,23 +103,16 @@ if(NOT MATRIX_STRUCTS_LIBRARY)
     include(MatrixStructs)
     set(MTXCLIENT_DEPS ${MTXCLIENT_DEPS} MatrixStructs)
 endif()
+include_directories(${MATRIX_STRUCTS_INCLUDE_DIR})
+set(MTXCLIENT_LIBS ${MTXCLIENT_LIBS} matrix_structs)
 
-include_directories(SYSTEM ${MATRIX_STRUCTS_INCLUDE_DIR})
-
-set(MTXCLIENT_LIBS ${MTXCLIENT_LIBS}
-    matrix_structs
-    ${Boost_LIBRARIES}
-    ${OPENSSL_LIBRARIES}
-    ${ZLIB_LIBRARIES})
 
 #
 # libolm
 #
-if(BUILD_OLM)
-    include(Olm)
-    set(MTXCLIENT_DEPS ${MTXCLIENT_DEPS} Olm)
-    set(MTXCLIENT_LIBS ${MTXCLIENT_LIBS} olm)
-endif()
+include(Olm)
+set(MTXCLIENT_DEPS ${MTXCLIENT_DEPS} Olm)
+set(MTXCLIENT_LIBS ${MTXCLIENT_LIBS} olm)
 
 include_directories(src)
 set(SRC 
@@ -115,10 +123,7 @@ set(SRC
 add_library(matrix_client ${SRC})
 add_dependencies(matrix_client ${MTXCLIENT_DEPS})
 target_link_libraries(matrix_client ${MTXCLIENT_LIBS})
-
-if(NOT Boost_FOUND)
-    add_dependencies(matrix_client Boost)
-endif()
+target_include_directories(matrix_client SYSTEM PRIVATE $ENV{INCLUDE})
 
 if (BUILD_LIB_EXAMPLES)
     add_executable(room_feed examples/room_feed.cpp)
@@ -133,7 +138,6 @@ if (BUILD_LIB_TESTS)
     file(COPY fixtures DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
     if (NOT GTest_FOUND)
-        message(STATUS "Fetching and building GTest 1.8")
         include(GoogleTest)
     endif()
 

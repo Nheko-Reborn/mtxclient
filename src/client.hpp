@@ -427,11 +427,11 @@ mtx::client::Client::create_session(
           ssl_ctx,
           server_,
           utils::random_token(),
-          [callback,
-           this](RequestID,
-                 const boost::beast::http::response<boost::beast::http::string_body> &response,
-                 const boost::system::error_code &err_code) {
-                  ios_.post([callback, response, err_code]() {
+          [callback, _this = shared_from_this()](
+            RequestID,
+            const boost::beast::http::response<boost::beast::http::string_body> &response,
+            const boost::system::error_code &err_code) {
+                  _this->ios_.post([callback, response, err_code]() {
                           Response response_data;
                           mtx::client::errors::ClientError client_error;
 
