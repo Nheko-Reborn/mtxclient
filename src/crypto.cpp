@@ -187,7 +187,7 @@ mtx::client::crypto::encode_base64(const uint8_t *data, std::size_t len)
                 throw std::runtime_error("invalid base64 input length");
 
         auto output_buf = create_buffer(output_nbytes);
-        olm::encode_base64(data, output_nbytes, output_buf.get());
+        olm::encode_base64(data, len, output_buf.get());
 
         return std::string(output_buf.get(), output_buf.get() + output_nbytes);
 }
