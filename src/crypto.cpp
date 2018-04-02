@@ -125,6 +125,35 @@ mtx::client::crypto::sign_one_time_keys(std::shared_ptr<olm::Account> account,
         return signed_one_time_keys;
 }
 
+mtx::requests::UploadKeys
+mtx::client::crypto::create_upload_keys_request(
+  std::shared_ptr<olm::Account> account,
+  const mtx::client::crypto::IdentityKeys &identity_keys,
+  const mtx::client::crypto::OneTimeKeys &one_time_keys,
+  const mtx::identifiers::User &user_id,
+  const std::string &device_id)
+{
+        mtx::requests::UploadKeys req;
+        req.device_keys.user_id   = user_id.to_string();
+        req.device_keys.device_id = device_id;
+
+        req.device_keys.keys["curve25519:" + device_id] = identity_keys.curve25519;
+        req.device_keys.keys["ed25519:" + device_id]    = identity_keys.ed25519;
+
+        // Generate and add the signature to the request.
+        auto sig = sign_identity_keys(account, identity_keys, user_id, device_id);
+        req.device_keys.signatures[user_id.to_string()]["ed25519:" + device_id] = sig;
+
+        if (one_time_keys.curve25519.empty())
+                return req;
+
+        // Sign & append the one time keys.
+        req.one_time_keys =
+          mtx::client::crypto::sign_one_time_keys(account, one_time_keys, user_id, device_id);
+
+        return req;
+}
+
 std::unique_ptr<BinaryBuf>
 mtx::client::crypto::sign_message(std::shared_ptr<olm::Account> account, const std::string &msg)
 {

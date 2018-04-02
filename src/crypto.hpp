@@ -5,6 +5,7 @@
 
 #include <json.hpp>
 #include <mtx/identifiers.hpp>
+#include <mtx/requests.hpp>
 #include <olm/account.hh>
 #include <olm/error.h>
 
@@ -124,6 +125,14 @@ sign_one_time_keys(std::shared_ptr<olm::Account> account,
                    const mtx::client::crypto::OneTimeKeys &keys,
                    const mtx::identifiers::User &user_id,
                    const std::string &device_id);
+
+//! Prepare request for the /keys/upload endpoint by signing identity & one time keys.
+mtx::requests::UploadKeys
+create_upload_keys_request(std::shared_ptr<olm::Account> account,
+                           const mtx::client::crypto::IdentityKeys &identity_keys,
+                           const mtx::client::crypto::OneTimeKeys &one_time_keys,
+                           const mtx::identifiers::User &user_id,
+                           const std::string &device_id);
 
 std::string
 encode_base64(const uint8_t *data, std::size_t len);

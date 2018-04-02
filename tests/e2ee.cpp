@@ -24,52 +24,6 @@ using namespace std;
 
 using ErrType = std::experimental::optional<errors::ClientError>;
 
-std::map<std::string, json>
-sign_one_time_keys(std::shared_ptr<olm::Account> account,
-                   const mtx::client::crypto::OneTimeKeys &keys,
-                   const mtx::identifiers::User &user_id,
-                   const std::string &device_id)
-{
-        // Sign & append the one time keys.
-        std::map<std::string, json> signed_one_time_keys;
-        for (const auto &elem : keys.curve25519) {
-                auto sig = mtx::client::crypto::sign_one_time_key(account, elem.second);
-
-                signed_one_time_keys["signed_curve25519:" + elem.first] =
-                  mtx::client::crypto::signed_one_time_key_json(
-                    user_id, device_id, elem.second, sig);
-        }
-
-        return signed_one_time_keys;
-}
-
-mtx::requests::UploadKeys
-create_upload_keys_request(std::shared_ptr<olm::Account> account,
-                           const mtx::client::crypto::IdentityKeys &identity_keys,
-                           const mtx::client::crypto::OneTimeKeys &one_time_keys,
-                           const mtx::identifiers::User &user_id,
-                           const string &device_id)
-{
-        mtx::requests::UploadKeys req;
-        req.device_keys.user_id   = user_id.to_string();
-        req.device_keys.device_id = device_id;
-
-        req.device_keys.keys["curve25519:" + device_id] = identity_keys.curve25519;
-        req.device_keys.keys["ed25519:" + device_id]    = identity_keys.ed25519;
-
-        // Generate and add the signature to the request.
-        auto sig = sign_identity_keys(account, identity_keys, user_id, device_id);
-        req.device_keys.signatures[user_id.to_string()]["ed25519:" + device_id] = sig;
-
-        if (one_time_keys.curve25519.empty())
-                return req;
-
-        // Sign & append the one time keys.
-        req.one_time_keys = ::sign_one_time_keys(account, one_time_keys, user_id, device_id);
-
-        return req;
-}
-
 void
 check_error(ErrType err)
 {
@@ -104,7 +58,7 @@ TEST(Encryption, UploadIdentityKeys)
         ASSERT_TRUE(identity_keys.curve25519.size() > 10);
 
         mtx::client::crypto::OneTimeKeys unused;
-        auto request = ::create_upload_keys_request(
+        auto request = mtx::client::crypto::create_upload_keys_request(
           olm_account, identity_keys, unused, alice->user_id(), alice->device_id());
 
         // Make the request with the signed identity keys.
@@ -169,8 +123,8 @@ TEST(Encryption, UploadSignedOneTimeKeys)
         auto one_time_keys = mtx::client::crypto::one_time_keys(olm_account);
 
         mtx::requests::UploadKeys req;
-        req.one_time_keys =
-          ::sign_one_time_keys(olm_account, one_time_keys, alice->user_id(), alice->device_id());
+        req.one_time_keys = mtx::client::crypto::sign_one_time_keys(
+          olm_account, one_time_keys, alice->user_id(), alice->device_id());
 
         alice->upload_keys(req, [nkeys](const mtx::responses::UploadKeys &res, ErrType err) {
                 check_error(err);
@@ -197,7 +151,7 @@ TEST(Encryption, UploadKeys)
         mtx::client::crypto::generate_one_time_keys(olm_account, 1);
         auto one_time_keys = mtx::client::crypto::one_time_keys(olm_account);
 
-        auto req = ::create_upload_keys_request(
+        auto req = mtx::client::crypto::create_upload_keys_request(
           olm_account, identity_keys, one_time_keys, alice->user_id(), alice->device_id());
 
         alice->upload_keys(req, [](const mtx::responses::UploadKeys &res, ErrType err) {
