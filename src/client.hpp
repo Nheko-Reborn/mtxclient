@@ -12,6 +12,7 @@
 #include <boost/thread/thread.hpp>
 #include <json.hpp>
 
+#include "crypto.hpp"
 #include "errors.hpp"
 #include "mtx/requests.hpp"
 #include "mtx/responses.hpp"
@@ -201,22 +202,8 @@ public:
         //
 
         //! Upload identity keys & one time keys.
-        // TODO: Replace json with a proper type. API methods shouldn't throw.
         void upload_keys(
-          const nlohmann::json &identity_keys,
-          const std::map<std::string, nlohmann::json> &one_time_keys,
-          std::function<void(const mtx::responses::UploadKeys &res, RequestErr err)> cb);
-
-        //! Upload identity keys.
-        // TODO: Replace json with a proper type. API methods shouldn't throw.
-        void upload_identity_keys(
-          const nlohmann::json &identity_keys,
-          std::function<void(const mtx::responses::UploadKeys &res, RequestErr err)> cb);
-
-        //! Upload one time keys.
-        // TODO: Replace json with a proper type. API methods shouldn't throw.
-        void upload_one_time_keys(
-          const std::map<std::string, nlohmann::json> &one_time_keys,
+          const mtx::requests::UploadKeys &req,
           std::function<void(const mtx::responses::UploadKeys &res, RequestErr err)> cb);
 
 private:

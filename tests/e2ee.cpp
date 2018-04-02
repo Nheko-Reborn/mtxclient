@@ -24,6 +24,52 @@ using namespace std;
 
 using ErrType = std::experimental::optional<errors::ClientError>;
 
+std::map<std::string, json>
+sign_one_time_keys(std::shared_ptr<olm::Account> account,
+                   const mtx::client::crypto::OneTimeKeys &keys,
+                   const mtx::identifiers::User &user_id,
+                   const std::string &device_id)
+{
+        // Sign & append the one time keys.
+        std::map<std::string, json> signed_one_time_keys;
+        for (const auto &elem : keys.curve25519) {
+                auto sig = mtx::client::crypto::sign_one_time_key(account, elem.second);
+
+                signed_one_time_keys["signed_curve25519:" + elem.first] =
+                  mtx::client::crypto::signed_one_time_key_json(
+                    user_id, device_id, elem.second, sig);
+        }
+
+        return signed_one_time_keys;
+}
+
+mtx::requests::UploadKeys
+create_upload_keys_request(std::shared_ptr<olm::Account> account,
+                           const mtx::client::crypto::IdentityKeys &identity_keys,
+                           const mtx::client::crypto::OneTimeKeys &one_time_keys,
+                           const mtx::identifiers::User &user_id,
+                           const string &device_id)
+{
+        mtx::requests::UploadKeys req;
+        req.device_keys.user_id   = user_id.to_string();
+        req.device_keys.device_id = device_id;
+
+        req.device_keys.keys["curve25519:" + device_id] = identity_keys.curve25519;
+        req.device_keys.keys["ed25519:" + device_id]    = identity_keys.ed25519;
+
+        // Generate and add the signature to the request.
+        auto sig = sign_identity_keys(account, identity_keys, user_id, device_id);
+        req.device_keys.signatures[user_id.to_string()]["ed25519:" + device_id] = sig;
+
+        if (one_time_keys.curve25519.empty())
+                return req;
+
+        // Sign & append the one time keys.
+        req.one_time_keys = ::sign_one_time_keys(account, one_time_keys, user_id, device_id);
+
+        return req;
+}
+
 void
 check_error(ErrType err)
 {
@@ -52,19 +98,20 @@ TEST(Encryption, UploadIdentityKeys)
         while (alice->access_token().empty())
                 std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
-        json identity_keys = mtx::client::crypto::identity_keys(olm_account);
+        auto identity_keys = mtx::client::crypto::identity_keys(olm_account);
 
-        ASSERT_TRUE(identity_keys.find("curve25519") != identity_keys.end());
-        ASSERT_TRUE(identity_keys.at("curve25519").get<std::string>().size() > 10);
+        ASSERT_TRUE(identity_keys.curve25519.size() > 10);
+        ASSERT_TRUE(identity_keys.curve25519.size() > 10);
 
-        ASSERT_TRUE(identity_keys.find("ed25519") != identity_keys.end());
-        ASSERT_TRUE(identity_keys.at("ed25519").get<std::string>().size() > 10);
+        mtx::client::crypto::OneTimeKeys unused;
+        auto request = ::create_upload_keys_request(
+          olm_account, identity_keys, unused, alice->user_id(), alice->device_id());
 
-        alice->upload_identity_keys(identity_keys,
-                                    [](const mtx::responses::UploadKeys &res, ErrType err) {
-                                            check_error(err);
-                                            EXPECT_EQ(res.one_time_key_counts.size(), 0);
-                                    });
+        // Make the request with the signed identity keys.
+        alice->upload_keys(request, [](const mtx::responses::UploadKeys &res, ErrType err) {
+                check_error(err);
+                EXPECT_EQ(res.one_time_key_counts.size(), 0);
+        });
 
         alice->close();
 }
@@ -85,14 +132,18 @@ TEST(Encryption, UploadOneTimeKeys)
 
         auto one_time_keys = mtx::client::crypto::one_time_keys(olm_account);
 
+        mtx::requests::UploadKeys req;
+
         // Create the proper structure for uploading.
-        std::map<std::string, json> keys;
+        std::map<std::string, json> unsigned_keys;
 
         auto obj = one_time_keys.at("curve25519");
         for (auto it = obj.begin(); it != obj.end(); ++it)
-                keys["curve25519:" + it.key()] = it.value();
+                unsigned_keys["curve25519:" + it.key()] = it.value();
 
-        alice->upload_one_time_keys(keys, [](const mtx::responses::UploadKeys &res, ErrType err) {
+        req.one_time_keys = unsigned_keys;
+
+        alice->upload_keys(req, [](const mtx::responses::UploadKeys &res, ErrType err) {
                 check_error(err);
                 EXPECT_EQ(res.one_time_key_counts.size(), 1);
                 EXPECT_EQ(res.one_time_key_counts.at("curve25519"), 5);
@@ -117,24 +168,15 @@ TEST(Encryption, UploadSignedOneTimeKeys)
 
         auto one_time_keys = mtx::client::crypto::one_time_keys(olm_account);
 
-        // Create the proper structure for uploading.
-        std::map<std::string, json> signed_keys;
+        mtx::requests::UploadKeys req;
+        req.one_time_keys =
+          ::sign_one_time_keys(olm_account, one_time_keys, alice->user_id(), alice->device_id());
 
-        auto obj = one_time_keys.at("curve25519");
-        for (auto it = obj.begin(); it != obj.end(); ++it) {
-                auto sig = mtx::client::crypto::sign_one_time_key(olm_account, it.value());
-
-                signed_keys["signed_curve25519:" + it.key()] =
-                  mtx::client::crypto::signed_one_time_key_json(
-                    alice->user_id(), alice->device_id(), it.value(), sig);
-        }
-
-        alice->upload_one_time_keys(
-          signed_keys, [nkeys](const mtx::responses::UploadKeys &res, ErrType err) {
-                  check_error(err);
-                  EXPECT_EQ(res.one_time_key_counts.size(), 1);
-                  EXPECT_EQ(res.one_time_key_counts.at("signed_curve25519"), nkeys);
-          });
+        alice->upload_keys(req, [nkeys](const mtx::responses::UploadKeys &res, ErrType err) {
+                check_error(err);
+                EXPECT_EQ(res.one_time_key_counts.size(), 1);
+                EXPECT_EQ(res.one_time_key_counts.at("signed_curve25519"), nkeys);
+        });
 
         alice->close();
 }
@@ -155,24 +197,14 @@ TEST(Encryption, UploadKeys)
         mtx::client::crypto::generate_one_time_keys(olm_account, 1);
         auto one_time_keys = mtx::client::crypto::one_time_keys(olm_account);
 
-        // Create the proper structure for uploading.
-        std::map<std::string, json> signed_keys;
+        auto req = ::create_upload_keys_request(
+          olm_account, identity_keys, one_time_keys, alice->user_id(), alice->device_id());
 
-        auto obj = one_time_keys.at("curve25519");
-        for (auto it = obj.begin(); it != obj.end(); ++it) {
-                auto sig = mtx::client::crypto::sign_one_time_key(olm_account, it.value());
-
-                signed_keys["signed_curve25519:" + it.key()] =
-                  mtx::client::crypto::signed_one_time_key_json(
-                    alice->user_id(), alice->device_id(), it.value(), sig);
-        }
-
-        alice->upload_keys(
-          identity_keys, signed_keys, [](const mtx::responses::UploadKeys &res, ErrType err) {
-                  check_error(err);
-                  EXPECT_EQ(res.one_time_key_counts.size(), 1);
-                  EXPECT_EQ(res.one_time_key_counts.at("signed_curve25519"), 1);
-          });
+        alice->upload_keys(req, [](const mtx::responses::UploadKeys &res, ErrType err) {
+                check_error(err);
+                EXPECT_EQ(res.one_time_key_counts.size(), 1);
+                EXPECT_EQ(res.one_time_key_counts.at("signed_curve25519"), 1);
+        });
 
         alice->close();
 }

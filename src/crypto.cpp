@@ -34,7 +34,7 @@ mtx::client::crypto::olm_new_account()
         return olm_account;
 }
 
-json
+IdentityKeys
 mtx::client::crypto::identity_keys(std::shared_ptr<olm::Account> account)
 {
         const auto nbytes = account->get_identity_json_length();
@@ -46,8 +46,27 @@ mtx::client::crypto::identity_keys(std::shared_ptr<olm::Account> account)
                 throw olm_exception("identity_keys", account->last_error);
 
         std::string data(buf.get(), buf.get() + nbytes);
+        IdentityKeys keys = json::parse(data);
 
-        return json::parse(data);
+        return keys;
+}
+
+std::string
+mtx::client::crypto::sign_identity_keys(std::shared_ptr<olm::Account> account,
+                                        const IdentityKeys &keys,
+                                        const mtx::identifiers::User &user_id,
+                                        const std::string &device_id)
+{
+        json body{{"algorithms", {"m.olm.v1.curve25519-aes-sha2", "m.megolm.v1.aes-sha2"}},
+                  {"user_id", user_id.to_string()},
+                  {"device_id", device_id},
+                  {"keys",
+                   {
+                     {"curve25519:" + device_id, keys.curve25519},
+                     {"ed25519:" + device_id, keys.ed25519},
+                   }}};
+
+        return encode_base64(sign_message(account, body.dump()).get(), SIGNATURE_SIZE);
 }
 
 std::size_t
@@ -86,6 +105,24 @@ mtx::client::crypto::sign_one_time_key(std::shared_ptr<olm::Account> account,
         auto signature_buf = sign_message(account, j.dump());
 
         return encode_base64(signature_buf.get(), SIGNATURE_SIZE);
+}
+
+std::map<std::string, json>
+mtx::client::crypto::sign_one_time_keys(std::shared_ptr<olm::Account> account,
+                                        const mtx::client::crypto::OneTimeKeys &keys,
+                                        const mtx::identifiers::User &user_id,
+                                        const std::string &device_id)
+{
+        // Sign & append the one time keys.
+        std::map<std::string, json> signed_one_time_keys;
+        for (const auto &elem : keys.curve25519) {
+                auto sig = sign_one_time_key(account, elem.second);
+
+                signed_one_time_keys["signed_curve25519:" + elem.first] =
+                  signed_one_time_key_json(user_id, device_id, elem.second, sig);
+        }
+
+        return signed_one_time_keys;
 }
 
 std::unique_ptr<uint8_t[]>
