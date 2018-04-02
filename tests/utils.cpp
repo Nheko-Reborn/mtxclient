@@ -15,13 +15,7 @@ TEST(Utilities, JsonToBuffer)
         auto msg = json({{"key", "text"}});
         auto buf = json_to_buffer(msg);
 
-        auto strjson = msg.dump();
-        auto len     = msg.dump().size();
-
-        for (uint8_t i = 0; i < len; i++) {
-                if (strjson[i] != buf[i])
-                        FAIL();
-        }
+        EXPECT_EQ(std::string(buf->begin(), buf->end()), msg.dump());
 }
 
 TEST(Utilities, VerifySignedOneTimeKey)
@@ -39,9 +33,9 @@ TEST(Utilities, VerifySignedOneTimeKey)
         olm::Utility utillity;
 
         auto res = utillity.ed25519_verify(alice->identity_keys.ed25519_key.public_key,
-                                           str_to_buffer(msg).get(),
+                                           str_to_buffer(msg)->data(),
                                            msg.size(),
-                                           sig_buf.get(),
+                                           sig_buf->data(),
                                            SIGNATURE_SIZE);
 
         EXPECT_EQ(utillity.last_error, 0);
@@ -67,9 +61,9 @@ TEST(Utilities, VerifySignedIdentityKeys)
         olm::Utility utillity;
 
         auto res = utillity.ed25519_verify(alice->identity_keys.ed25519_key.public_key,
-                                           str_to_buffer(msg).get(),
+                                           str_to_buffer(msg)->data(),
                                            msg.size(),
-                                           sig_buf.get(),
+                                           sig_buf->data(),
                                            SIGNATURE_SIZE);
 
         EXPECT_EQ(utillity.last_error, 0);

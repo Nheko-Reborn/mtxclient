@@ -8,12 +8,15 @@
 #include <olm/account.hh>
 #include <olm/error.h>
 
-static constexpr const char *ED25519    = "ed25519";
-static constexpr const char *CURVE25519 = "curve25519";
-
 namespace mtx {
 namespace client {
 namespace crypto {
+
+static constexpr const char *ED25519    = "ed25519";
+static constexpr const char *CURVE25519 = "curve25519";
+
+//! Data representation used to interact with libolm.
+using BinaryBuf = std::vector<uint8_t>;
 
 struct IdentityKeys
 {
@@ -90,7 +93,7 @@ nlohmann::json
 one_time_keys(std::shared_ptr<olm::Account> user);
 
 //! Create a uint8_t buffer which is initialized with random bytes.
-std::unique_ptr<uint8_t[]>
+std::unique_ptr<BinaryBuf>
 create_buffer(std::size_t nbytes);
 
 //! Sign the given one time keys and encode it to base64.
@@ -105,7 +108,7 @@ sign_identity_keys(std::shared_ptr<olm::Account> account,
                    const std::string &device_id);
 
 //! Sign the given message.
-std::unique_ptr<uint8_t[]>
+std::unique_ptr<BinaryBuf>
 sign_message(std::shared_ptr<olm::Account> account, const std::string &msg);
 
 //! Generate the json structure for the signed one time key.
@@ -126,15 +129,15 @@ std::string
 encode_base64(const uint8_t *data, std::size_t len);
 
 //! Decode the given base64 string
-std::unique_ptr<uint8_t[]>
+std::unique_ptr<BinaryBuf>
 decode_base64(const std::string &data);
 
 //! Convert the given string to an uint8_t buffer.
-std::unique_ptr<uint8_t[]>
+std::unique_ptr<BinaryBuf>
 str_to_buffer(const std::string &data);
 
 //! Convert the given json struct to an uint8_t buffer.
-std::unique_ptr<uint8_t[]>
+std::unique_ptr<BinaryBuf>
 json_to_buffer(const nlohmann::json &obj);
 
 } // namespace crypto

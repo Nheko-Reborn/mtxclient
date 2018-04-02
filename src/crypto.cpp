@@ -9,11 +9,11 @@ using namespace mtx::client::crypto;
 
 constexpr std::size_t SIGNATURE_SIZE = 64;
 
-std::unique_ptr<uint8_t[]>
+std::unique_ptr<BinaryBuf>
 mtx::client::crypto::create_buffer(std::size_t nbytes)
 {
-        auto buf = std::make_unique<uint8_t[]>(nbytes);
-        randombytes_buf(buf.get(), nbytes);
+        auto buf = std::make_unique<BinaryBuf>(nbytes);
+        randombytes_buf(buf->data(), buf->size());
 
         return buf;
 }
@@ -26,7 +26,7 @@ mtx::client::crypto::olm_new_account()
         const auto nbytes = olm_account->new_account_random_length();
         auto buf          = create_buffer(nbytes);
 
-        int result = olm_account->new_account(buf.get(), nbytes);
+        int result = olm_account->new_account(buf->data(), buf->size());
 
         if (result == -1)
                 throw olm_exception("olm_new_account", olm_account->last_error);
@@ -40,12 +40,12 @@ mtx::client::crypto::identity_keys(std::shared_ptr<olm::Account> account)
         const auto nbytes = account->get_identity_json_length();
         auto buf          = create_buffer(nbytes);
 
-        int result = account->get_identity_json(buf.get(), nbytes);
+        int result = account->get_identity_json(buf->data(), buf->size());
 
         if (result == -1)
                 throw olm_exception("identity_keys", account->last_error);
 
-        std::string data(buf.get(), buf.get() + nbytes);
+        std::string data(buf->begin(), buf->end());
         IdentityKeys keys = json::parse(data);
 
         return keys;
@@ -66,7 +66,7 @@ mtx::client::crypto::sign_identity_keys(std::shared_ptr<olm::Account> account,
                      {"ed25519:" + device_id, keys.ed25519},
                    }}};
 
-        return encode_base64(sign_message(account, body.dump()).get(), SIGNATURE_SIZE);
+        return encode_base64(sign_message(account, body.dump())->data(), SIGNATURE_SIZE);
 }
 
 std::size_t
@@ -76,7 +76,7 @@ mtx::client::crypto::generate_one_time_keys(std::shared_ptr<olm::Account> accoun
         const auto nbytes = account->generate_one_time_keys_random_length(number_of_keys);
 
         auto buf = create_buffer(nbytes);
-        return account->generate_one_time_keys(number_of_keys, buf.get(), nbytes);
+        return account->generate_one_time_keys(number_of_keys, buf->data(), buf->size());
 }
 
 json
@@ -85,12 +85,12 @@ mtx::client::crypto::one_time_keys(std::shared_ptr<olm::Account> account)
         const auto nbytes = account->get_one_time_keys_json_length();
         auto buf          = create_buffer(nbytes);
 
-        int result = account->get_one_time_keys_json(buf.get(), nbytes);
+        int result = account->get_one_time_keys_json(buf->data(), buf->size());
 
         if (result == -1)
                 throw olm_exception("one_time_keys", account->last_error);
 
-        std::string data(buf.get(), buf.get() + nbytes);
+        std::string data(buf->begin(), buf->end());
 
         return json::parse(data);
 }
@@ -104,7 +104,7 @@ mtx::client::crypto::sign_one_time_key(std::shared_ptr<olm::Account> account,
 
         auto signature_buf = sign_message(account, j.dump());
 
-        return encode_base64(signature_buf.get(), SIGNATURE_SIZE);
+        return encode_base64(signature_buf->data(), signature_buf->size());
 }
 
 std::map<std::string, json>
@@ -125,16 +125,15 @@ mtx::client::crypto::sign_one_time_keys(std::shared_ptr<olm::Account> account,
         return signed_one_time_keys;
 }
 
-std::unique_ptr<uint8_t[]>
+std::unique_ptr<BinaryBuf>
 mtx::client::crypto::sign_message(std::shared_ptr<olm::Account> account, const std::string &msg)
 {
         // Message buffer
-        auto buf           = str_to_buffer(msg);
-        std::size_t nbytes = msg.size();
+        auto buf = str_to_buffer(msg);
 
         // Signature buffer
         auto signature_buf = create_buffer(SIGNATURE_SIZE);
-        account->sign(buf.get(), nbytes, signature_buf.get(), SIGNATURE_SIZE);
+        account->sign(buf->data(), buf->size(), signature_buf->data(), signature_buf->size());
 
         return signature_buf;
 }
@@ -149,19 +148,19 @@ mtx::client::crypto::signed_one_time_key_json(const mtx::identifiers::User &user
                     {"signatures", {{user_id.to_string(), {{"ed25519:" + device_id, signature}}}}}};
 }
 
-std::unique_ptr<uint8_t[]>
+std::unique_ptr<BinaryBuf>
 mtx::client::crypto::str_to_buffer(const std::string &data)
 {
         auto str_pointer  = reinterpret_cast<const uint8_t *>(&data[0]);
         const auto nbytes = data.size();
 
         auto buf = create_buffer(nbytes);
-        memcpy(buf.get(), str_pointer, nbytes);
+        memcpy(buf->data(), str_pointer, buf->size());
 
         return buf;
 }
 
-std::unique_ptr<uint8_t[]>
+std::unique_ptr<BinaryBuf>
 mtx::client::crypto::decode_base64(const std::string &data)
 {
         const auto nbytes       = data.size();
@@ -173,7 +172,7 @@ mtx::client::crypto::decode_base64(const std::string &data)
         auto output_buf = create_buffer(output_nbytes);
         auto input_buf  = str_to_buffer(data);
 
-        olm::decode_base64(input_buf.get(), nbytes, output_buf.get());
+        olm::decode_base64(input_buf->data(), nbytes, output_buf->data());
 
         return output_buf;
 }
@@ -187,12 +186,12 @@ mtx::client::crypto::encode_base64(const uint8_t *data, std::size_t len)
                 throw std::runtime_error("invalid base64 input length");
 
         auto output_buf = create_buffer(output_nbytes);
-        olm::encode_base64(data, len, output_buf.get());
+        olm::encode_base64(data, len, output_buf->data());
 
-        return std::string(output_buf.get(), output_buf.get() + output_nbytes);
+        return std::string(output_buf->begin(), output_buf->end());
 }
 
-std::unique_ptr<uint8_t[]>
+std::unique_ptr<BinaryBuf>
 mtx::client::crypto::json_to_buffer(const nlohmann::json &obj)
 {
         return str_to_buffer(obj.dump());
