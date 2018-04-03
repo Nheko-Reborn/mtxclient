@@ -24,6 +24,20 @@ using namespace std;
 
 using ErrType = std::experimental::optional<errors::ClientError>;
 
+mtx::requests::UploadKeys
+generate_keys(std::shared_ptr<olm::Account> account,
+              const mtx::identifiers::User &user_id,
+              const std::string &device_id)
+{
+        auto idks = mtx::client::crypto::identity_keys(account);
+
+        mtx::client::crypto::generate_one_time_keys(account, 1);
+        auto otks = mtx::client::crypto::one_time_keys(account);
+
+        return mtx::client::crypto::create_upload_keys_request(
+          account, idks, otks, user_id, device_id);
+}
+
 void
 check_error(ErrType err)
 {
@@ -146,13 +160,7 @@ TEST(Encryption, UploadKeys)
         while (alice->access_token().empty())
                 std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
-        json identity_keys = mtx::client::crypto::identity_keys(olm_account);
-
-        mtx::client::crypto::generate_one_time_keys(olm_account, 1);
-        auto one_time_keys = mtx::client::crypto::one_time_keys(olm_account);
-
-        auto req = mtx::client::crypto::create_upload_keys_request(
-          olm_account, identity_keys, one_time_keys, alice->user_id(), alice->device_id());
+        auto req = ::generate_keys(olm_account, alice->user_id(), alice->device_id());
 
         alice->upload_keys(req, [](const mtx::responses::UploadKeys &res, ErrType err) {
                 check_error(err);
@@ -181,20 +189,8 @@ TEST(Encryption, QueryKeys)
                 std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
         // Create and upload keys for both users.
-        auto alice_idks = mtx::client::crypto::identity_keys(alice_olm);
-        auto bob_idks   = mtx::client::crypto::identity_keys(bob_olm);
-
-        mtx::client::crypto::generate_one_time_keys(alice_olm, 1);
-        mtx::client::crypto::generate_one_time_keys(bob_olm, 1);
-
-        auto alice_otks = mtx::client::crypto::one_time_keys(alice_olm);
-        auto bob_otks   = mtx::client::crypto::one_time_keys(bob_olm);
-
-        auto alice_req = mtx::client::crypto::create_upload_keys_request(
-          alice_olm, alice_idks, alice_otks, alice->user_id(), alice->device_id());
-
-        auto bob_req = mtx::client::crypto::create_upload_keys_request(
-          bob_olm, bob_idks, bob_otks, bob->user_id(), bob->device_id());
+        auto alice_req = ::generate_keys(alice_olm, alice->user_id(), alice->device_id());
+        auto bob_req   = ::generate_keys(bob_olm, bob->user_id(), bob->device_id());
 
         // Validates that both upload requests are finished.
         atomic_int uploads(0);
@@ -268,4 +264,60 @@ TEST(Encryption, QueryKeys)
 
         alice->close();
         bob->close();
+}
+
+TEST(Encryption, KeyChanges)
+{
+        auto carl     = std::make_shared<Client>("localhost");
+        auto carl_olm = mtx::client::crypto::olm_new_account();
+
+        carl->login(
+          "carl", "secret", [](const mtx::responses::Login &, ErrType err) { check_error(err); });
+
+        while (carl->access_token().empty())
+                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
+        mtx::requests::CreateRoom req;
+        carl->create_room(req, [carl, carl_olm](const mtx::responses::CreateRoom &, ErrType err) {
+                check_error(err);
+
+                // Carl syncs to get the first next_batch token.
+                carl->sync(
+                  "", "", false, 0, [carl, carl_olm](const mtx::responses::Sync &res, ErrType err) {
+                          check_error(err);
+                          const auto next_batch_token = res.next_batch;
+
+                          auto key_req =
+                            ::generate_keys(carl_olm, carl->user_id(), carl->device_id());
+
+                          atomic_bool keys_uploaded(false);
+
+                          // Changes his keys.
+                          carl->upload_keys(
+                            key_req,
+                            [&keys_uploaded](const mtx::responses::UploadKeys &, ErrType err) {
+                                    check_error(err);
+                                    keys_uploaded = true;
+                            });
+
+                          while (!keys_uploaded)
+                                  std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
+                          // The key changes should contain his username
+                          // because of the key uploading.
+                          carl->key_changes(
+                            next_batch_token,
+                            "",
+                            [carl](const mtx::responses::KeyChanges &res, ErrType err) {
+                                    check_error(err);
+
+                                    EXPECT_EQ(res.changed.size(), 1);
+                                    EXPECT_EQ(res.left.size(), 0);
+
+                                    EXPECT_EQ(res.changed.at(0), carl->user_id().to_string());
+                            });
+                  });
+        });
+
+        carl->close();
 }

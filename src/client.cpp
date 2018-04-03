@@ -577,3 +577,23 @@ Client::query_keys(
         post<mtx::requests::QueryKeys, mtx::responses::QueryKeys>(
           "/client/r0/keys/query", req, callback);
 }
+
+void
+Client::key_changes(
+  const std::string &from,
+  const std::string &to,
+  std::function<void(const mtx::responses::KeyChanges &res, RequestErr err)> callback)
+{
+        std::map<std::string, std::string> params;
+
+        if (!from.empty())
+                params.emplace("from", from);
+
+        if (!to.empty())
+                params.emplace("to", to);
+
+        get<mtx::responses::KeyChanges>("/client/r0/keys/changes?" + utils::query_params(params),
+                                        [callback](const mtx::responses::KeyChanges &res,
+                                                   HeaderFields,
+                                                   RequestErr err) { callback(res, err); });
+}

@@ -211,6 +211,13 @@ public:
           const mtx::requests::QueryKeys &req,
           std::function<void(const mtx::responses::QueryKeys &res, RequestErr err)> cb);
 
+        //! Gets a list of users who have updated their device identity keys
+        //! since a previous sync token.
+        void key_changes(
+          const std::string &from,
+          const std::string &to,
+          std::function<void(const mtx::responses::KeyChanges &res, RequestErr err)> cb);
+
 private:
         template<class Request, class Response>
         void post(const std::string &endpoint,

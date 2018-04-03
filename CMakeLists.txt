@@ -5,7 +5,6 @@ project(matrix_client CXX)
 option(ASAN "Compile with address sanitizers" OFF)
 option(BUILD_LIB_TESTS "Build tests" ON)
 option(BUILD_LIB_EXAMPLES "Build examples" ON)
-option(BUILD_OLM "Fetch & build libolm" OFF)
 
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
