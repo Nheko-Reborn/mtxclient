@@ -568,3 +568,12 @@ Client::upload_keys(
         post<mtx::requests::UploadKeys, mtx::responses::UploadKeys>(
           "/client/r0/keys/upload", req, callback);
 }
+
+void
+Client::query_keys(
+  const mtx::requests::QueryKeys &req,
+  std::function<void(const mtx::responses::QueryKeys &res, RequestErr err)> callback)
+{
+        post<mtx::requests::QueryKeys, mtx::responses::QueryKeys>(
+          "/client/r0/keys/query", req, callback);
+}

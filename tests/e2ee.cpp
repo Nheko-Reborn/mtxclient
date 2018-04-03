@@ -162,3 +162,110 @@ TEST(Encryption, UploadKeys)
 
         alice->close();
 }
+
+TEST(Encryption, QueryKeys)
+{
+        auto alice     = std::make_shared<Client>("localhost");
+        auto alice_olm = mtx::client::crypto::olm_new_account();
+
+        auto bob     = std::make_shared<Client>("localhost");
+        auto bob_olm = mtx::client::crypto::olm_new_account();
+
+        alice->login(
+          "alice", "secret", [](const mtx::responses::Login &, ErrType err) { check_error(err); });
+
+        bob->login(
+          "bob", "secret", [](const mtx::responses::Login &, ErrType err) { check_error(err); });
+
+        while (alice->access_token().empty() || bob->access_token().empty())
+                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
+        // Create and upload keys for both users.
+        auto alice_idks = mtx::client::crypto::identity_keys(alice_olm);
+        auto bob_idks   = mtx::client::crypto::identity_keys(bob_olm);
+
+        mtx::client::crypto::generate_one_time_keys(alice_olm, 1);
+        mtx::client::crypto::generate_one_time_keys(bob_olm, 1);
+
+        auto alice_otks = mtx::client::crypto::one_time_keys(alice_olm);
+        auto bob_otks   = mtx::client::crypto::one_time_keys(bob_olm);
+
+        auto alice_req = mtx::client::crypto::create_upload_keys_request(
+          alice_olm, alice_idks, alice_otks, alice->user_id(), alice->device_id());
+
+        auto bob_req = mtx::client::crypto::create_upload_keys_request(
+          bob_olm, bob_idks, bob_otks, bob->user_id(), bob->device_id());
+
+        // Validates that both upload requests are finished.
+        atomic_int uploads(0);
+
+        alice->upload_keys(alice_req,
+                           [&uploads](const mtx::responses::UploadKeys &res, ErrType err) {
+                                   check_error(err);
+                                   EXPECT_EQ(res.one_time_key_counts.size(), 1);
+                                   EXPECT_EQ(res.one_time_key_counts.at("signed_curve25519"), 1);
+
+                                   uploads += 1;
+                           });
+
+        bob->upload_keys(bob_req, [&uploads](const mtx::responses::UploadKeys &res, ErrType err) {
+                check_error(err);
+                EXPECT_EQ(res.one_time_key_counts.size(), 1);
+                EXPECT_EQ(res.one_time_key_counts.at("signed_curve25519"), 1);
+
+                uploads += 1;
+        });
+
+        while (uploads != 2)
+                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
+        atomic_int responses(0);
+
+        // Each user is requests each other's keys.
+        mtx::requests::QueryKeys alice_rk;
+        alice_rk.device_keys[bob->user_id().to_string()] = {};
+        alice->query_keys(
+          alice_rk, [&responses, bob, bob_req](const mtx::responses::QueryKeys &res, ErrType err) {
+                  check_error(err);
+
+                  ASSERT_TRUE(res.failures.size() == 0);
+
+                  auto bob_devices = res.device_keys.at(bob->user_id().to_string());
+                  ASSERT_TRUE(bob_devices.size() > 0);
+
+                  auto dev_keys = bob_devices.at(bob->device_id());
+                  EXPECT_EQ(dev_keys.user_id, bob->user_id().to_string());
+                  EXPECT_EQ(dev_keys.device_id, bob->device_id());
+                  EXPECT_EQ(dev_keys.keys, bob_req.device_keys.keys);
+                  EXPECT_EQ(dev_keys.signatures, bob_req.device_keys.signatures);
+
+                  responses += 1;
+          });
+
+        mtx::requests::QueryKeys bob_rk;
+        bob_rk.device_keys[alice->user_id().to_string()] = {};
+        bob->query_keys(
+          bob_rk,
+          [&responses, alice, alice_req](const mtx::responses::QueryKeys &res, ErrType err) {
+                  check_error(err);
+
+                  ASSERT_TRUE(res.failures.size() == 0);
+
+                  auto bob_devices = res.device_keys.at(alice->user_id().to_string());
+                  ASSERT_TRUE(bob_devices.size() > 0);
+
+                  auto dev_keys = bob_devices.at(alice->device_id());
+                  EXPECT_EQ(dev_keys.user_id, alice->user_id().to_string());
+                  EXPECT_EQ(dev_keys.device_id, alice->device_id());
+                  EXPECT_EQ(dev_keys.keys, alice_req.device_keys.keys);
+                  EXPECT_EQ(dev_keys.signatures, alice_req.device_keys.signatures);
+
+                  responses += 1;
+          });
+
+        while (responses != 2)
+                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
+        alice->close();
+        bob->close();
+}

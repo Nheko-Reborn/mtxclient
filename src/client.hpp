@@ -206,6 +206,11 @@ public:
           const mtx::requests::UploadKeys &req,
           std::function<void(const mtx::responses::UploadKeys &res, RequestErr err)> cb);
 
+        //! Returns the current devices and identity keys for the given users.
+        void query_keys(
+          const mtx::requests::QueryKeys &req,
+          std::function<void(const mtx::responses::QueryKeys &res, RequestErr err)> cb);
+
 private:
         template<class Request, class Response>
         void post(const std::string &endpoint,
