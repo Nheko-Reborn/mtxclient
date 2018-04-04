@@ -297,12 +297,7 @@ template<class T>
 inline T
 deserialize(const std::string &data)
 {
-        T res;
-
-        nlohmann::json j = json::parse(data);
-        res              = j;
-
-        return res;
+        return json::parse(data);
 }
 
 template<>
@@ -316,8 +311,7 @@ template<class T>
 inline std::string
 serialize(const T &obj)
 {
-        nlohmann::json j = obj;
-        return j.dump();
+        return json(obj).dump();
 }
 
 template<>
@@ -441,17 +435,18 @@ mtx::client::Client::create_session(
                           Response response_data;
                           mtx::client::errors::ClientError client_error;
 
+                          const auto header = response.base();
+
                           if (err_code) {
                                   client_error.error_code = err_code;
-                                  return callback(response_data, response.base(), client_error);
+                                  return callback(response_data, header, client_error);
                           }
 
                           // Decompress the response.
-                          const auto encoding = response.base()["Content-Encoding"].to_string();
-                          const auto body     = utils::decompress(
+                          const auto body = utils::decompress(
                             boost::iostreams::array_source{response.body().data(),
                                                            response.body().size()},
-                            encoding);
+                            header["Content-Encoding"].to_string());
 
                           if (response.result() != boost::beast::http::status::ok) {
                                   client_error.status_code = response.result();
@@ -469,27 +464,23 @@ mtx::client::Client::create_session(
                                           mtx::errors::Error matrix_error = json_error;
 
                                           client_error.matrix_error = matrix_error;
-                                          return callback(
-                                            response_data, response.base(), client_error);
+                                          return callback(response_data, header, client_error);
                                   } catch (const nlohmann::json::exception &e) {
                                           client_error.parse_error =
                                             std::string(e.what()) + ": " + body;
 
-                                          return callback(
-                                            response_data, response.base(), client_error);
+                                          return callback(response_data, header, client_error);
                                   }
                           }
 
                           // If we reach that point we most likely have a valid output from the
                           // homeserver.
                           try {
-                                  response_data = deserialize<Response>(body);
+                                  callback(deserialize<Response>(body), header, {});
                           } catch (const nlohmann::json::exception &e) {
                                   client_error.parse_error = std::string(e.what()) + ": " + body;
-                                  return callback(response_data, response.base(), client_error);
+                                  callback(response_data, header, client_error);
                           }
-
-                          callback(response_data, response.base(), {});
                   });
           },
           [callback](RequestID, const boost::system::error_code ec) {

@@ -57,6 +57,8 @@ std::string
 mtx::client::utils::decompress(const boost::iostreams::array_source &src, const std::string &type)
 {
         boost::iostreams::filtering_istream is;
+        is.set_auto_close(true);
+
         std::stringstream decompressed;
 
         if (type == "deflate")
