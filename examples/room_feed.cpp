@@ -16,11 +16,10 @@ using namespace std;
 using namespace mtx::client;
 using namespace mtx::events;
 
-using ErrType       = experimental::optional<mtx::client::errors::ClientError>;
 using TimelineEvent = mtx::events::collections::TimelineEvents;
 
 void
-print_errors(ErrType err)
+print_errors(RequestErr err)
 {
         if (err->status_code != boost::beast::http::status::unknown)
                 cout << err->status_code << "\n";
@@ -82,7 +81,7 @@ print_message(const TimelineEvent &event)
 
 // Callback to executed after a /sync request completes.
 void
-sync_handler(shared_ptr<Client> client, const mtx::responses::Sync &res, ErrType err)
+sync_handler(shared_ptr<Client> client, const mtx::responses::Sync &res, RequestErr err)
 {
         if (err) {
                 cout << "sync error:\n";
@@ -115,7 +114,7 @@ sync_handler(shared_ptr<Client> client, const mtx::responses::Sync &res, ErrType
 
 // Callback to executed after the first (initial) /sync request completes.
 void
-initial_sync_handler(shared_ptr<Client> client, const nlohmann::json &res, ErrType err)
+initial_sync_handler(shared_ptr<Client> client, const nlohmann::json &res, RequestErr err)
 {
         if (err) {
                 cout << "error during initial sync:\n";
@@ -161,24 +160,25 @@ main()
 
         auto client = std::make_shared<Client>(server);
 
-        client->login(username, password, [client](const mtx::responses::Login &res, ErrType err) {
-                if (err) {
-                        cout << "There was an error during login: " << err->matrix_error.error
-                             << "\n";
-                        return;
-                }
+        client->login(
+          username, password, [client](const mtx::responses::Login &res, RequestErr err) {
+                  if (err) {
+                          cout << "There was an error during login: " << err->matrix_error.error
+                               << "\n";
+                          return;
+                  }
 
-                cout << "Logged in as: " << res.user_id.to_string() << "\n";
-                client->set_access_token(res.access_token);
+                  cout << "Logged in as: " << res.user_id.to_string() << "\n";
+                  client->set_access_token(res.access_token);
 
-                client->sync(
-                  "",
-                  "",
-                  false,
-                  0,
-                  std::bind(
-                    &initial_sync_handler, client, std::placeholders::_1, std::placeholders::_2));
-        });
+                  client->sync(
+                    "",
+                    "",
+                    false,
+                    0,
+                    std::bind(
+                      &initial_sync_handler, client, std::placeholders::_1, std::placeholders::_2));
+          });
 
         client->close();
 

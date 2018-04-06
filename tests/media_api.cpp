@@ -16,8 +16,6 @@ using namespace mtx::identifiers;
 
 using namespace std;
 
-using ErrType = std::experimental::optional<errors::ClientError>;
-
 string
 get_media_id(const mtx::responses::ContentURI &res)
 {
@@ -37,7 +35,7 @@ read_file(const string &file_path)
 }
 
 void
-validate_upload(const mtx::responses::ContentURI &res, ErrType err)
+validate_upload(const mtx::responses::ContentURI &res, RequestErr err)
 {
         ASSERT_FALSE(err);
         ASSERT_TRUE(res.content_uri.size() > 10);
@@ -47,7 +45,7 @@ TEST(MediaAPI, UploadTextFile)
 {
         std::shared_ptr<Client> alice = std::make_shared<Client>("localhost");
 
-        alice->login("alice", "secret", [alice](const mtx::responses::Login &, ErrType err) {
+        alice->login("alice", "secret", [alice](const mtx::responses::Login &, RequestErr err) {
                 ASSERT_FALSE(err);
 
                 const auto text = "This is some random text";
@@ -55,7 +53,7 @@ TEST(MediaAPI, UploadTextFile)
                 alice->upload(text,
                               "text/plain",
                               "doc.txt",
-                              [alice, text](const mtx::responses::ContentURI &res, ErrType err) {
+                              [alice, text](const mtx::responses::ContentURI &res, RequestErr err) {
                                       validate_upload(res, err);
 
                                       alice->download("localhost",
@@ -63,7 +61,7 @@ TEST(MediaAPI, UploadTextFile)
                                                       [text](const string &data,
                                                              const string &content_type,
                                                              const string &original_filename,
-                                                             ErrType err) {
+                                                             RequestErr err) {
                                                               ASSERT_FALSE(err);
                                                               EXPECT_EQ(data, text);
                                                               EXPECT_EQ(content_type, "text/plain");
@@ -80,7 +78,7 @@ TEST(MediaAPI, UploadAudio)
 {
         std::shared_ptr<Client> bob = std::make_shared<Client>("localhost");
 
-        bob->login("bob", "secret", [bob](const mtx::responses::Login &, ErrType err) {
+        bob->login("bob", "secret", [bob](const mtx::responses::Login &, RequestErr err) {
                 ASSERT_FALSE(err);
 
                 const auto audio = read_file("./fixtures/sound.mp3");
@@ -88,7 +86,7 @@ TEST(MediaAPI, UploadAudio)
                 bob->upload(audio,
                             "audio/mp3",
                             "sound.mp3",
-                            [bob, audio](const mtx::responses::ContentURI &res, ErrType err) {
+                            [bob, audio](const mtx::responses::ContentURI &res, RequestErr err) {
                                     validate_upload(res, err);
 
                                     bob->download("localhost",
@@ -96,7 +94,7 @@ TEST(MediaAPI, UploadAudio)
                                                   [audio](const string &data,
                                                           const string &content_type,
                                                           const string &original_filename,
-                                                          ErrType err) {
+                                                          RequestErr err) {
                                                           ASSERT_FALSE(err);
                                                           EXPECT_EQ(data, audio);
                                                           EXPECT_EQ(content_type, "audio/mp3");
@@ -112,7 +110,7 @@ TEST(MediaAPI, UploadImage)
 {
         std::shared_ptr<Client> carl = std::make_shared<Client>("localhost");
 
-        carl->login("carl", "secret", [carl](const mtx::responses::Login &, ErrType err) {
+        carl->login("carl", "secret", [carl](const mtx::responses::Login &, RequestErr err) {
                 ASSERT_FALSE(err);
 
                 const auto img = read_file("./fixtures/test.jpeg");
@@ -120,7 +118,7 @@ TEST(MediaAPI, UploadImage)
                 carl->upload(img,
                              "image/jpeg",
                              "test.jpeg",
-                             [carl, img](const mtx::responses::ContentURI &res, ErrType err) {
+                             [carl, img](const mtx::responses::ContentURI &res, RequestErr err) {
                                      validate_upload(res, err);
 
                                      carl->download("localhost",
@@ -128,7 +126,7 @@ TEST(MediaAPI, UploadImage)
                                                     [img](const string &data,
                                                           const string &content_type,
                                                           const string &original_filename,
-                                                          ErrType err) {
+                                                          RequestErr err) {
                                                             ASSERT_FALSE(err);
                                                             EXPECT_EQ(data, img);
                                                             EXPECT_EQ(content_type, "image/jpeg");

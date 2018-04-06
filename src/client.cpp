@@ -176,11 +176,9 @@ Client::setup_auth(std::shared_ptr<Session> session, bool auth)
 //
 
 void
-Client::login(
-  const std::string &user,
-  const std::string &password,
-  std::function<void(const mtx::responses::Login &response,
-                     std::experimental::optional<mtx::client::errors::ClientError>)> callback)
+Client::login(const std::string &user,
+              const std::string &password,
+              std::function<void(const mtx::responses::Login &response, RequestErr err)> callback)
 {
         mtx::requests::Login req;
         req.user     = user;
@@ -189,9 +187,8 @@ Client::login(
         post<mtx::requests::Login, mtx::responses::Login>(
           "/client/r0/login",
           req,
-          [_this = shared_from_this(),
-           callback](const mtx::responses::Login &resp,
-                     std::experimental::optional<mtx::client::errors::ClientError> err) {
+          [_this = shared_from_this(), callback](const mtx::responses::Login &resp,
+                                                 RequestErr err) {
                   if (!err && resp.access_token.size()) {
                           _this->user_id_      = resp.user_id;
                           _this->device_id_    = resp.device_id;
@@ -203,18 +200,15 @@ Client::login(
 }
 
 void
-Client::logout(
-  std::function<void(const mtx::responses::Logout &response,
-                     std::experimental::optional<mtx::client::errors::ClientError>)> callback)
+Client::logout(std::function<void(const mtx::responses::Logout &response, RequestErr)> callback)
 {
         mtx::requests::Logout req;
 
         post<mtx::requests::Logout, mtx::responses::Logout>(
           "/client/r0/logout",
           req,
-          [_this = shared_from_this(),
-           callback](const mtx::responses::Logout &res,
-                     std::experimental::optional<mtx::client::errors::ClientError> err) {
+          [_this = shared_from_this(), callback](const mtx::responses::Logout &res,
+                                                 RequestErr err) {
                   if (!err) {
                           // Clear the now invalid access token when logout is successful
                           _this->access_token_.clear();

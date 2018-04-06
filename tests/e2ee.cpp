@@ -22,8 +22,6 @@ using namespace mtx::events::collections;
 
 using namespace std;
 
-using ErrType = std::experimental::optional<errors::ClientError>;
-
 mtx::requests::UploadKeys
 generate_keys(std::shared_ptr<olm::Account> account,
               const mtx::identifiers::User &user_id,
@@ -39,7 +37,7 @@ generate_keys(std::shared_ptr<olm::Account> account,
 }
 
 void
-check_error(ErrType err)
+check_error(RequestErr err)
 {
         if (err) {
                 cout << "matrix (error)  : " << err->matrix_error.error << "\n";
@@ -60,8 +58,9 @@ TEST(Encryption, UploadIdentityKeys)
         auto alice       = std::make_shared<Client>("localhost");
         auto olm_account = mtx::client::crypto::olm_new_account();
 
-        alice->login(
-          "alice", "secret", [](const mtx::responses::Login &, ErrType err) { check_error(err); });
+        alice->login("alice", "secret", [](const mtx::responses::Login &, RequestErr err) {
+                check_error(err);
+        });
 
         while (alice->access_token().empty())
                 std::this_thread::sleep_for(std::chrono::milliseconds(100));
@@ -76,7 +75,7 @@ TEST(Encryption, UploadIdentityKeys)
           olm_account, identity_keys, unused, alice->user_id(), alice->device_id());
 
         // Make the request with the signed identity keys.
-        alice->upload_keys(request, [](const mtx::responses::UploadKeys &res, ErrType err) {
+        alice->upload_keys(request, [](const mtx::responses::UploadKeys &res, RequestErr err) {
                 check_error(err);
                 EXPECT_EQ(res.one_time_key_counts.size(), 0);
         });
@@ -89,8 +88,9 @@ TEST(Encryption, UploadOneTimeKeys)
         auto alice       = std::make_shared<Client>("localhost");
         auto olm_account = mtx::client::crypto::olm_new_account();
 
-        alice->login(
-          "alice", "secret", [](const mtx::responses::Login &, ErrType err) { check_error(err); });
+        alice->login("alice", "secret", [](const mtx::responses::Login &, RequestErr err) {
+                check_error(err);
+        });
 
         while (alice->access_token().empty())
                 std::this_thread::sleep_for(std::chrono::milliseconds(100));
@@ -111,7 +111,7 @@ TEST(Encryption, UploadOneTimeKeys)
 
         req.one_time_keys = unsigned_keys;
 
-        alice->upload_keys(req, [](const mtx::responses::UploadKeys &res, ErrType err) {
+        alice->upload_keys(req, [](const mtx::responses::UploadKeys &res, RequestErr err) {
                 check_error(err);
                 EXPECT_EQ(res.one_time_key_counts.size(), 1);
                 EXPECT_EQ(res.one_time_key_counts.at("curve25519"), 5);
@@ -125,8 +125,9 @@ TEST(Encryption, UploadSignedOneTimeKeys)
         auto alice       = std::make_shared<Client>("localhost");
         auto olm_account = mtx::client::crypto::olm_new_account();
 
-        alice->login(
-          "alice", "secret", [](const mtx::responses::Login &, ErrType err) { check_error(err); });
+        alice->login("alice", "secret", [](const mtx::responses::Login &, RequestErr err) {
+                check_error(err);
+        });
 
         while (alice->access_token().empty())
                 std::this_thread::sleep_for(std::chrono::milliseconds(100));
@@ -140,7 +141,7 @@ TEST(Encryption, UploadSignedOneTimeKeys)
         req.one_time_keys = mtx::client::crypto::sign_one_time_keys(
           olm_account, one_time_keys, alice->user_id(), alice->device_id());
 
-        alice->upload_keys(req, [nkeys](const mtx::responses::UploadKeys &res, ErrType err) {
+        alice->upload_keys(req, [nkeys](const mtx::responses::UploadKeys &res, RequestErr err) {
                 check_error(err);
                 EXPECT_EQ(res.one_time_key_counts.size(), 1);
                 EXPECT_EQ(res.one_time_key_counts.at("signed_curve25519"), nkeys);
@@ -154,15 +155,16 @@ TEST(Encryption, UploadKeys)
         auto alice       = std::make_shared<Client>("localhost");
         auto olm_account = mtx::client::crypto::olm_new_account();
 
-        alice->login(
-          "alice", "secret", [](const mtx::responses::Login &, ErrType err) { check_error(err); });
+        alice->login("alice", "secret", [](const mtx::responses::Login &, RequestErr err) {
+                check_error(err);
+        });
 
         while (alice->access_token().empty())
                 std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
         auto req = ::generate_keys(olm_account, alice->user_id(), alice->device_id());
 
-        alice->upload_keys(req, [](const mtx::responses::UploadKeys &res, ErrType err) {
+        alice->upload_keys(req, [](const mtx::responses::UploadKeys &res, RequestErr err) {
                 check_error(err);
                 EXPECT_EQ(res.one_time_key_counts.size(), 1);
                 EXPECT_EQ(res.one_time_key_counts.at("signed_curve25519"), 1);
@@ -179,11 +181,12 @@ TEST(Encryption, QueryKeys)
         auto bob     = std::make_shared<Client>("localhost");
         auto bob_olm = mtx::client::crypto::olm_new_account();
 
-        alice->login(
-          "alice", "secret", [](const mtx::responses::Login &, ErrType err) { check_error(err); });
+        alice->login("alice", "secret", [](const mtx::responses::Login &, RequestErr err) {
+                check_error(err);
+        });
 
         bob->login(
-          "bob", "secret", [](const mtx::responses::Login &, ErrType err) { check_error(err); });
+          "bob", "secret", [](const mtx::responses::Login &, RequestErr err) { check_error(err); });
 
         while (alice->access_token().empty() || bob->access_token().empty())
                 std::this_thread::sleep_for(std::chrono::milliseconds(100));
@@ -196,7 +199,7 @@ TEST(Encryption, QueryKeys)
         atomic_int uploads(0);
 
         alice->upload_keys(alice_req,
-                           [&uploads](const mtx::responses::UploadKeys &res, ErrType err) {
+                           [&uploads](const mtx::responses::UploadKeys &res, RequestErr err) {
                                    check_error(err);
                                    EXPECT_EQ(res.one_time_key_counts.size(), 1);
                                    EXPECT_EQ(res.one_time_key_counts.at("signed_curve25519"), 1);
@@ -204,13 +207,14 @@ TEST(Encryption, QueryKeys)
                                    uploads += 1;
                            });
 
-        bob->upload_keys(bob_req, [&uploads](const mtx::responses::UploadKeys &res, ErrType err) {
-                check_error(err);
-                EXPECT_EQ(res.one_time_key_counts.size(), 1);
-                EXPECT_EQ(res.one_time_key_counts.at("signed_curve25519"), 1);
+        bob->upload_keys(bob_req,
+                         [&uploads](const mtx::responses::UploadKeys &res, RequestErr err) {
+                                 check_error(err);
+                                 EXPECT_EQ(res.one_time_key_counts.size(), 1);
+                                 EXPECT_EQ(res.one_time_key_counts.at("signed_curve25519"), 1);
 
-                uploads += 1;
-        });
+                                 uploads += 1;
+                         });
 
         while (uploads != 2)
                 std::this_thread::sleep_for(std::chrono::milliseconds(100));
@@ -221,7 +225,8 @@ TEST(Encryption, QueryKeys)
         mtx::requests::QueryKeys alice_rk;
         alice_rk.device_keys[bob->user_id().to_string()] = {};
         alice->query_keys(
-          alice_rk, [&responses, bob, bob_req](const mtx::responses::QueryKeys &res, ErrType err) {
+          alice_rk,
+          [&responses, bob, bob_req](const mtx::responses::QueryKeys &res, RequestErr err) {
                   check_error(err);
 
                   ASSERT_TRUE(res.failures.size() == 0);
@@ -242,7 +247,7 @@ TEST(Encryption, QueryKeys)
         bob_rk.device_keys[alice->user_id().to_string()] = {};
         bob->query_keys(
           bob_rk,
-          [&responses, alice, alice_req](const mtx::responses::QueryKeys &res, ErrType err) {
+          [&responses, alice, alice_req](const mtx::responses::QueryKeys &res, RequestErr err) {
                   check_error(err);
 
                   ASSERT_TRUE(res.failures.size() == 0);
@@ -271,53 +276,59 @@ TEST(Encryption, KeyChanges)
         auto carl     = std::make_shared<Client>("localhost");
         auto carl_olm = mtx::client::crypto::olm_new_account();
 
-        carl->login(
-          "carl", "secret", [](const mtx::responses::Login &, ErrType err) { check_error(err); });
+        carl->login("carl", "secret", [](const mtx::responses::Login &, RequestErr err) {
+                check_error(err);
+        });
 
         while (carl->access_token().empty())
                 std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
         mtx::requests::CreateRoom req;
-        carl->create_room(req, [carl, carl_olm](const mtx::responses::CreateRoom &, ErrType err) {
-                check_error(err);
+        carl->create_room(
+          req, [carl, carl_olm](const mtx::responses::CreateRoom &, RequestErr err) {
+                  check_error(err);
 
-                // Carl syncs to get the first next_batch token.
-                carl->sync(
-                  "", "", false, 0, [carl, carl_olm](const mtx::responses::Sync &res, ErrType err) {
-                          check_error(err);
-                          const auto next_batch_token = res.next_batch;
+                  // Carl syncs to get the first next_batch token.
+                  carl->sync(
+                    "",
+                    "",
+                    false,
+                    0,
+                    [carl, carl_olm](const mtx::responses::Sync &res, RequestErr err) {
+                            check_error(err);
+                            const auto next_batch_token = res.next_batch;
 
-                          auto key_req =
-                            ::generate_keys(carl_olm, carl->user_id(), carl->device_id());
+                            auto key_req =
+                              ::generate_keys(carl_olm, carl->user_id(), carl->device_id());
 
-                          atomic_bool keys_uploaded(false);
+                            atomic_bool keys_uploaded(false);
 
-                          // Changes his keys.
-                          carl->upload_keys(
-                            key_req,
-                            [&keys_uploaded](const mtx::responses::UploadKeys &, ErrType err) {
-                                    check_error(err);
-                                    keys_uploaded = true;
-                            });
+                            // Changes his keys.
+                            carl->upload_keys(
+                              key_req,
+                              [&keys_uploaded](const mtx::responses::UploadKeys &, RequestErr err) {
+                                      check_error(err);
+                                      keys_uploaded = true;
+                              });
 
-                          while (!keys_uploaded)
-                                  std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                            while (!keys_uploaded)
+                                    std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
-                          // The key changes should contain his username
-                          // because of the key uploading.
-                          carl->key_changes(
-                            next_batch_token,
-                            "",
-                            [carl](const mtx::responses::KeyChanges &res, ErrType err) {
-                                    check_error(err);
+                            // The key changes should contain his username
+                            // because of the key uploading.
+                            carl->key_changes(
+                              next_batch_token,
+                              "",
+                              [carl](const mtx::responses::KeyChanges &res, RequestErr err) {
+                                      check_error(err);
 
-                                    EXPECT_EQ(res.changed.size(), 1);
-                                    EXPECT_EQ(res.left.size(), 0);
+                                      EXPECT_EQ(res.changed.size(), 1);
+                                      EXPECT_EQ(res.left.size(), 0);
 
-                                    EXPECT_EQ(res.changed.at(0), carl->user_id().to_string());
-                            });
-                  });
-        });
+                                      EXPECT_EQ(res.changed.at(0), carl->user_id().to_string());
+                              });
+                    });
+          });
 
         carl->close();
 }

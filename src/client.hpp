@@ -1,6 +1,5 @@
 #pragma once
 
-#include <experimental/optional>
 #include <memory>
 #include <mutex>
 #include <thread>
@@ -9,6 +8,7 @@
 #include <boost/asio/ssl.hpp>
 #include <boost/beast.hpp>
 #include <boost/iostreams/stream.hpp>
+#include <boost/optional.hpp>
 #include <boost/thread/thread.hpp>
 #include <json.hpp>
 
@@ -38,6 +38,8 @@ to_string(PaginationDirection dir)
         return "f";
 }
 
+using RequestErr = const boost::optional<mtx::client::errors::ClientError> &;
+
 //! The main object that the user will interact.
 class Client : public std::enable_shared_from_this<Client>
 {
@@ -63,8 +65,7 @@ public:
         //! Generate a new transaction id.
         std::string generate_txn_id() { return utils::random_token(32, false); }
 
-        using HeaderFields = std::experimental::optional<boost::beast::http::fields>;
-        using RequestErr   = std::experimental::optional<mtx::client::errors::ClientError>;
+        using HeaderFields = const boost::optional<boost::beast::http::fields> &;
 
         //! Perfom login.
         void login(const std::string &username,
