@@ -18,6 +18,7 @@ ExternalProject_Add(
   BUILD_IN_SOURCE 1
   SOURCE_DIR ${BUNDLED_BOOST_ROOT}
   CONFIGURE_COMMAND ${BUNDLED_BOOST_ROOT}/bootstrap.sh
+    --layout=system
     --with-libraries=random,thread,system,iostreams
     --prefix=${BUNDLED_BOOST_ROOT}
   BUILD_COMMAND ${BUNDLED_BOOST_ROOT}/b2 -d0 variant=release link=static threading=multi
