@@ -23,17 +23,18 @@ matrix:
       env:
         - CXX_VERSION=g++-6
         - TESTS=ON
+        - COVERAGE=ON
       addons:
         apt:
           sources:
             - "ubuntu-toolchain-r-test"
           packages:
             - "g++-6"
+            - "lcov"
     - os: linux
       compiler: clang
       env:
         - CXX_VERSION=clang++-6.0
-        - LINT=ON
         - TESTS=ON
       addons:
         apt:
@@ -60,7 +61,7 @@ script:
   - cmake --version
 
   # Build library, examples & tests
-  - cmake -H. -Bbuild -DOPENSSL_ROOT_DIR=$OPENSLL_ROOT_DIR -DBUILD_LIB_TESTS=$TESTS
+  - cmake -H. -Bbuild -DOPENSSL_ROOT_DIR=$OPENSLL_ROOT_DIR -DBUILD_LIB_TESTS=$TESTS -DCOVERAGE=$COVERAGE
   - cmake --build build
 
   # Unit & Integration tests
@@ -69,3 +70,12 @@ script:
 
   # Linting
   - if [ $LINT == ON ]; then make lint; fi
+
+after_success:
+  - if [ $COVERAGE == ON ]; then make -C build matrix_client_coverage; fi
+
+  # Generate coverage report.
+  - if [ $COVERAGE == ON ]; then ./.ci/coverage.sh; fi
+
+  # Upload report to CodeCov.
+  - if [ $COVERAGE == ONE ]; then bash <(curl -s https://codecov.io/bash) -t $COV_TOKEN || echo "Codecov did not collect coverage reports"; fi

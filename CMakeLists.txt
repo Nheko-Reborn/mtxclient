@@ -5,6 +5,7 @@ project(matrix_client CXX C)
 option(ASAN "Compile with address sanitizers" OFF)
 option(BUILD_LIB_TESTS "Build tests" ON)
 option(BUILD_LIB_EXAMPLES "Build examples" ON)
+option(COVERAGE "Calculate test coverage" OFF)
 
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
@@ -40,6 +41,13 @@ endif()
 
 if(NOT APPLE AND NOT MSVC)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
+endif()
+
+if(COVERAGE)
+    include(CodeCoverage)
+    add_custom_target(ctest COMMAND ${CMAKE_CTEST_COMMAND})
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O0 -fprofile-arcs -ftest-coverage")
+    setup_target_for_coverage(${PROJECT_NAME}_coverage ctest coverage)
 endif()
 
 # Dependencies on ExternalProjects
