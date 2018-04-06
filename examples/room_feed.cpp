@@ -115,7 +115,7 @@ sync_handler(shared_ptr<Client> client, const mtx::responses::Sync &res, ErrType
 
 // Callback to executed after the first (initial) /sync request completes.
 void
-initial_sync_handler(shared_ptr<Client> client, const mtx::responses::Sync &res, ErrType err)
+initial_sync_handler(shared_ptr<Client> client, const nlohmann::json &res, ErrType err)
 {
         if (err) {
                 cout << "error during initial sync:\n";
@@ -136,7 +136,7 @@ initial_sync_handler(shared_ptr<Client> client, const mtx::responses::Sync &res,
                 return;
         }
 
-        client->set_next_batch_token(res.next_batch);
+        client->set_next_batch_token(res.at("next_batch"));
 
         client->sync(
           "",

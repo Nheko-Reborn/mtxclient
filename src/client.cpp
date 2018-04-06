@@ -366,7 +366,7 @@ Client::sync(const std::string &filter,
              const std::string &since,
              bool full_state,
              uint16_t timeout,
-             std::function<void(const mtx::responses::Sync &, RequestErr)> callback)
+             std::function<void(const nlohmann::json &, RequestErr)> callback)
 {
         std::map<std::string, std::string> params;
 
@@ -381,10 +381,10 @@ Client::sync(const std::string &filter,
 
         params.emplace("timeout", std::to_string(timeout));
 
-        get<mtx::responses::Sync>("/client/r0/sync?" + utils::query_params(params),
-                                  [callback](const mtx::responses::Sync &res,
-                                             HeaderFields,
-                                             RequestErr err) { callback(res, err); });
+        get<nlohmann::json>("/client/r0/sync?" + utils::query_params(params),
+                            [callback](const nlohmann::json &res, HeaderFields, RequestErr err) {
+                                    callback(res, err);
+                            });
 }
 
 void

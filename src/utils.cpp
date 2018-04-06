@@ -11,7 +11,7 @@
 #include <boost/random/uniform_int_distribution.hpp>
 
 std::string
-mtx::client::utils::random_token(uint8_t len, bool with_symbols)
+mtx::client::utils::random_token(uint8_t len, bool with_symbols) noexcept
 {
         std::string symbols = "!@#$%^&*()";
         std::string alphanumberic("abcdefghijklmnopqrstuvwxyz"
@@ -33,7 +33,7 @@ mtx::client::utils::random_token(uint8_t len, bool with_symbols)
 }
 
 std::string
-mtx::client::utils::query_params(const std::map<std::string, std::string> &params)
+mtx::client::utils::query_params(const std::map<std::string, std::string> &params) noexcept
 {
         if (params.empty())
                 return "";
@@ -54,7 +54,8 @@ mtx::client::utils::query_params(const std::map<std::string, std::string> &param
 }
 
 std::string
-mtx::client::utils::decompress(const boost::iostreams::array_source &src, const std::string &type)
+mtx::client::utils::decompress(const boost::iostreams::array_source &src,
+                               const std::string &type) noexcept
 {
         boost::iostreams::filtering_istream is;
         is.set_auto_close(true);

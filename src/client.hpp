@@ -128,7 +128,7 @@ public:
                   const std::string &since,
                   bool full_state,
                   uint16_t timeout,
-                  std::function<void(const mtx::responses::Sync &res, RequestErr err)>);
+                  std::function<void(const nlohmann::json &res, RequestErr err)>);
 
         //! Paginate through room messages.
         void messages(const mtx::identifiers::Room &room_id,
