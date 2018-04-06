@@ -78,4 +78,4 @@ after_success:
   - if [ $COVERAGE == ON ]; then ./.ci/coverage.sh; fi
 
   # Upload report to CodeCov.
-  - if [ $COVERAGE == ON ]; then bash <(curl -s https://codecov.io/bash) -t $COV_TOKEN || echo "Codecov did not collect coverage reports"; fi
+  - if [ $COVERAGE == ON ]; then bash <(curl -s https://codecov.io/bash) -f "!*tests*" || echo "Codecov failed"; fi
