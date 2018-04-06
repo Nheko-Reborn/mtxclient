@@ -43,16 +43,6 @@ Client::on_resolve(std::shared_ptr<Session> s,
         if (ec)
                 return s->on_failure(s->id, ec);
 
-        // Add new session to the list of active sessions so that we can access
-        // it if the user decides to cancel the corresponding request before
-        // it completes.
-        // Because active sessions list can be accessed from multiple threads,
-        //
-        // we guard it with a mutex to avoid data corruption.
-        std::unique_lock<std::mutex> lock(active_sessions_guard_);
-        active_sessions_[s->id] = s;
-        lock.unlock();
-
         boost::asio::async_connect(
           s->socket.next_layer(),
           results.begin(),
@@ -68,10 +58,6 @@ Client::on_connect(std::shared_ptr<Session> s, boost::system::error_code ec)
                 return s->on_failure(s->id, ec);
         }
 
-        // Check if the request is already cancelled and we shouldn't move forward.
-        if (s->is_cancelled)
-                return on_request_complete(s);
-
         // Perform the SSL handshake
         s->socket.async_handshake(
           boost::asio::ssl::stream_base::client,
@@ -85,10 +71,6 @@ Client::on_handshake(std::shared_ptr<Session> s, boost::system::error_code ec)
                 remove_session(s);
                 return s->on_failure(s->id, ec);
         }
-
-        // Check if the request is already cancelled and we shouldn't move forward.
-        if (s->is_cancelled)
-                return on_request_complete(s);
 
         boost::beast::http::async_write(s->socket,
                                         s->request,
@@ -110,9 +92,6 @@ Client::on_write(std::shared_ptr<Session> s,
                 remove_session(s);
                 return s->on_failure(s->id, ec);
         }
-
-        if (s->is_cancelled)
-                return on_request_complete(s);
 
         // Receive the HTTP response
         http::async_read(
@@ -149,16 +128,6 @@ Client::do_request(std::shared_ptr<Session> s)
 }
 
 void
-Client::cancel_request(RequestID request_id)
-{
-        std::unique_lock<std::mutex> lock(active_sessions_guard_);
-
-        auto it = active_sessions_.find(request_id);
-        if (it != active_sessions_.end())
-                it->second->is_cancelled = true;
-}
-
-void
 Client::remove_session(std::shared_ptr<Session> s)
 {
         // Shutting down the connection. This method may
@@ -182,15 +151,6 @@ Client::remove_session(std::shared_ptr<Session> s)
                         // TODO: propagate the error.
                         std::cout << "shutdown: " << ec.message() << std::endl;
         });
-
-        // Remove the session from the map of active sessions.
-        std::unique_lock<std::mutex> lock(active_sessions_guard_);
-
-        auto it = active_sessions_.find(s->id);
-        if (it != active_sessions_.end())
-                active_sessions_.erase(it);
-
-        lock.unlock();
 }
 
 void
@@ -198,16 +158,7 @@ Client::on_request_complete(std::shared_ptr<Session> s)
 {
         remove_session(s);
 
-        boost::system::error_code ec;
-
-        if (s->error_code == 0 && s->is_cancelled) {
-                ec = boost::asio::error::operation_aborted;
-                s->on_failure(s->id, ec);
-                return;
-        } else {
-                ec = s->error_code;
-        }
-
+        boost::system::error_code ec(s->error_code);
         s->on_success(s->id, s->parser.get(), ec);
 }
 

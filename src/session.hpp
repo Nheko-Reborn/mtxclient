@@ -36,7 +36,6 @@ struct Session
           , id{id}
           , on_success{on_success}
           , on_failure{on_failure}
-          , is_cancelled{false}
         {
                 parser.header_limit(8192);
                 parser.body_limit(1 * 1024 * 1024 * 1024); // 1 GiB
@@ -61,8 +60,6 @@ struct Session
         SuccessCallback on_success;
         //! Function to be called when the request fails.
         FailureCallback on_failure;
-        //! Whether or not the request has been cancelled.
-        std::atomic_bool is_cancelled;
 };
 }
 }

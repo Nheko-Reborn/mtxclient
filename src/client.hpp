@@ -12,10 +12,11 @@
 #include <boost/thread/thread.hpp>
 #include <json.hpp>
 
+#include <mtx/requests.hpp>
+#include <mtx/responses.hpp>
+
 #include "crypto.hpp"
 #include "errors.hpp"
-#include "mtx/requests.hpp"
-#include "mtx/responses.hpp"
 #include "session.hpp"
 #include "utils.hpp"
 
@@ -45,12 +46,8 @@ public:
 
         //! Wait for the client to close.
         void close();
-        //! Cancels the request.
-        void cancel_request(RequestID request_id);
         //! Make a new request.
         void do_request(std::shared_ptr<Session> session);
-        //! Return the number of pending requests.
-        int active_sessions() const { return active_sessions_.size(); }
         //! Add an access token.
         void set_access_token(const std::string &token) { access_token_ = token; }
         //! Retrieve the access token.
@@ -267,10 +264,6 @@ private:
 
         boost::asio::io_service ios_;
 
-        //! Keeps tracks for the active sessions.
-        std::map<RequestID, std::shared_ptr<Session>> active_sessions_;
-        //! Used to synchronize access to `active_sessions_`.
-        std::mutex active_sessions_guard_;
         //! Used to prevent the event loop from shutting down.
         std::unique_ptr<boost::asio::io_service::work> work_;
         //! Worker threads for the requests.
