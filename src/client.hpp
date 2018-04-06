@@ -172,27 +172,27 @@ public:
         template<class Payload, mtx::events::EventType Event>
         void send_room_message(
           const mtx::identifiers::Room &room_id,
-          Payload payload,
+          const Payload &payload,
           std::function<void(const mtx::responses::EventId &, RequestErr)> callback);
         //! Send a room message by providing transaction id.
         template<class Payload, mtx::events::EventType Event>
         void send_room_message(
           const mtx::identifiers::Room &room_id,
           const std::string &txn_id,
-          Payload payload,
+          const Payload &payload,
           std::function<void(const mtx::responses::EventId &, RequestErr)> callback);
         //! Send a state event by providing the state key.
         template<class Payload, mtx::events::EventType Event>
         void send_state_event(
           const mtx::identifiers::Room &room_id,
           const std::string &state_key,
-          Payload payload,
+          const Payload &payload,
           std::function<void(const mtx::responses::EventId &, RequestErr)> callback);
         //! Send a state event with an empty state key.
         template<class Payload, mtx::events::EventType Event>
         void send_state_event(
           const mtx::identifiers::Room &room_id,
-          Payload payload,
+          const Payload &payload,
           std::function<void(const mtx::responses::EventId &, RequestErr)> callback);
 
         //
@@ -215,6 +215,11 @@ public:
           const std::string &from,
           const std::string &to,
           std::function<void(const mtx::responses::KeyChanges &res, RequestErr err)> cb);
+
+        //! Enable encryption in a room by sending a `m.room.encryption` state event.
+        void enable_encryption(
+          const mtx::identifiers::Room &room,
+          std::function<void(const mtx::responses::EventId &res, RequestErr err)>);
 
 private:
         template<class Request, class Response>
@@ -510,7 +515,7 @@ template<class Payload, mtx::events::EventType Event>
 void
 mtx::client::Client::send_room_message(
   const mtx::identifiers::Room &room_id,
-  Payload payload,
+  const Payload &payload,
   std::function<void(const mtx::responses::EventId &, RequestErr)> callback)
 {
         send_room_message<Payload, Event>(room_id, generate_txn_id(), payload, callback);
@@ -521,7 +526,7 @@ void
 mtx::client::Client::send_room_message(
   const mtx::identifiers::Room &room_id,
   const std::string &txn_id,
-  Payload payload,
+  const Payload &payload,
   std::function<void(const mtx::responses::EventId &, RequestErr)> callback)
 {
         const auto api_path = "/client/r0/rooms/" + room_id.to_string() + "/send/" +
@@ -535,7 +540,7 @@ void
 mtx::client::Client::send_state_event(
   const mtx::identifiers::Room &room_id,
   const std::string &state_key,
-  Payload payload,
+  const Payload &payload,
   std::function<void(const mtx::responses::EventId &, RequestErr)> callback)
 {
         const auto api_path = "/client/r0/rooms/" + room_id.to_string() + "/state/" +
@@ -548,7 +553,7 @@ template<class Payload, mtx::events::EventType Event>
 void
 mtx::client::Client::send_state_event(
   const mtx::identifiers::Room &room_id,
-  Payload payload,
+  const Payload &payload,
   std::function<void(const mtx::responses::EventId &, RequestErr)> callback)
 {
         send_state_event<Payload, Event>(room_id, "", payload, callback);

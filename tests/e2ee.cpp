@@ -1,7 +1,4 @@
 #include <atomic>
-#include <chrono>
-#include <iostream>
-#include <thread>
 
 #include <boost/algorithm/string.hpp>
 
@@ -16,9 +13,12 @@
 #include "mtx/responses.hpp"
 #include "variant.hpp"
 
+#include "test_helpers.hpp"
+
 using namespace mtx::client;
 using namespace mtx::identifiers;
 using namespace mtx::events::collections;
+using namespace mtx::responses;
 
 using namespace std;
 
@@ -36,23 +36,6 @@ generate_keys(std::shared_ptr<olm::Account> account,
           account, idks, otks, user_id, device_id);
 }
 
-void
-check_error(RequestErr err)
-{
-        if (err) {
-                cout << "matrix (error)  : " << err->matrix_error.error << "\n";
-                cout << "matrix (errcode): " << mtx::errors::to_string(err->matrix_error.errcode)
-                     << "\n";
-                cout << "error_code      : " << err->error_code << "\n";
-                cout << "status_code     : " << err->status_code << "\n";
-
-                if (!err->parse_error.empty())
-                        cout << "parse_error     : " << err->parse_error << "\n";
-        }
-
-        ASSERT_FALSE(err);
-}
-
 TEST(Encryption, UploadIdentityKeys)
 {
         auto alice       = std::make_shared<Client>("localhost");
@@ -63,7 +46,7 @@ TEST(Encryption, UploadIdentityKeys)
         });
 
         while (alice->access_token().empty())
-                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                sleep();
 
         auto identity_keys = mtx::client::crypto::identity_keys(olm_account);
 
@@ -93,7 +76,7 @@ TEST(Encryption, UploadOneTimeKeys)
         });
 
         while (alice->access_token().empty())
-                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                sleep();
 
         auto nkeys = mtx::client::crypto::generate_one_time_keys(olm_account, 5);
         EXPECT_EQ(nkeys, 5);
@@ -130,7 +113,7 @@ TEST(Encryption, UploadSignedOneTimeKeys)
         });
 
         while (alice->access_token().empty())
-                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                sleep();
 
         auto nkeys = mtx::client::crypto::generate_one_time_keys(olm_account, 5);
         EXPECT_EQ(nkeys, 5);
@@ -160,7 +143,7 @@ TEST(Encryption, UploadKeys)
         });
 
         while (alice->access_token().empty())
-                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                sleep();
 
         auto req = ::generate_keys(olm_account, alice->user_id(), alice->device_id());
 
@@ -189,7 +172,7 @@ TEST(Encryption, QueryKeys)
           "bob", "secret", [](const mtx::responses::Login &, RequestErr err) { check_error(err); });
 
         while (alice->access_token().empty() || bob->access_token().empty())
-                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                sleep();
 
         // Create and upload keys for both users.
         auto alice_req = ::generate_keys(alice_olm, alice->user_id(), alice->device_id());
@@ -217,7 +200,7 @@ TEST(Encryption, QueryKeys)
                          });
 
         while (uploads != 2)
-                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                sleep();
 
         atomic_int responses(0);
 
@@ -265,7 +248,7 @@ TEST(Encryption, QueryKeys)
           });
 
         while (responses != 2)
-                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                sleep();
 
         alice->close();
         bob->close();
@@ -281,7 +264,7 @@ TEST(Encryption, KeyChanges)
         });
 
         while (carl->access_token().empty())
-                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                sleep();
 
         mtx::requests::CreateRoom req;
         carl->create_room(
@@ -312,7 +295,7 @@ TEST(Encryption, KeyChanges)
                               });
 
                             while (!keys_uploaded)
-                                    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                                    sleep();
 
                             // The key changes should contain his username
                             // because of the key uploading.
@@ -330,5 +313,64 @@ TEST(Encryption, KeyChanges)
                     });
           });
 
+        carl->close();
+}
+
+TEST(Encryption, EnableEncryption)
+{
+        auto bob  = make_shared<Client>("localhost");
+        auto carl = make_shared<Client>("localhost");
+
+        bob->login("bob", "secret", [](const Login &, RequestErr err) { check_error(err); });
+        carl->login("carl", "secret", [](const Login &, RequestErr err) { check_error(err); });
+
+        while (bob->access_token().empty() || carl->access_token().empty())
+                sleep();
+
+        atomic_int responses(0);
+        mtx::identifiers::Room joined_room;
+
+        mtx::requests::CreateRoom req;
+        req.invite = {"@carl:localhost"};
+        bob->create_room(
+          req,
+          [bob, carl, &responses, &joined_room](const mtx::responses::CreateRoom &res,
+                                                RequestErr err) {
+                  check_error(err);
+                  joined_room = res.room_id;
+
+                  bob->enable_encryption(
+                    res.room_id, [&responses](const mtx::responses::EventId &, RequestErr err) {
+                            check_error(err);
+                            responses += 1;
+                    });
+
+                  carl->join_room(res.room_id,
+                                  [&responses](const nlohmann::json &, RequestErr err) {
+                                          check_error(err);
+                                          responses += 1;
+                                  });
+          });
+
+        while (responses != 2)
+                sleep();
+
+        carl->sync("", "", false, 0, [&joined_room](const Sync &res, RequestErr err) {
+                check_error(err);
+
+                auto events = res.rooms.join.at(joined_room.to_string()).timeline.events;
+
+                using namespace mtx::events;
+
+                int has_encryption = 0;
+                for (const auto &e : events) {
+                        if (mpark::holds_alternative<StateEvent<state::Encryption>>(e))
+                                has_encryption = 1;
+                }
+
+                ASSERT_TRUE(has_encryption == 1);
+        });
+
+        bob->close();
         carl->close();
 }

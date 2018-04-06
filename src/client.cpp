@@ -542,3 +542,13 @@ Client::key_changes(
                                                    HeaderFields,
                                                    RequestErr err) { callback(res, err); });
 }
+
+void
+Client::enable_encryption(const mtx::identifiers::Room &room,
+                          std::function<void(const mtx::responses::EventId &, RequestErr)> callback)
+{
+        using namespace mtx::events;
+        state::Encryption event;
+
+        send_state_event<state::Encryption, EventType::RoomEncryption>(room, "", event, callback);
+}

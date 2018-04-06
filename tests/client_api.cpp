@@ -1,7 +1,5 @@
 #include <atomic>
-#include <chrono>
 #include <iostream>
-#include <thread>
 
 #include <boost/algorithm/string.hpp>
 
@@ -12,49 +10,13 @@
 #include "mtx/responses.hpp"
 #include "variant.hpp"
 
+#include "test_helpers.hpp"
+
 using namespace mtx::client;
 using namespace mtx::identifiers;
 using namespace mtx::events::collections;
 
 using namespace std;
-
-void
-check_error(RequestErr err)
-{
-        if (err) {
-                cout << "matrix (error)  : " << err->matrix_error.error << "\n";
-                cout << "matrix (errcode): " << mtx::errors::to_string(err->matrix_error.errcode)
-                     << "\n";
-                cout << "error_code      : " << err->error_code << "\n";
-                cout << "status_code     : " << err->status_code << "\n";
-
-                if (!err->parse_error.empty())
-                        cout << "parse_error     : " << err->parse_error << "\n";
-        }
-
-        ASSERT_FALSE(err);
-}
-
-void
-validate_login(const std::string &user, const mtx::responses::Login &res)
-{
-        EXPECT_EQ(res.user_id.to_string(), user);
-        EXPECT_EQ(res.home_server, "localhost");
-        ASSERT_TRUE(res.access_token.size() > 100);
-        ASSERT_TRUE(res.device_id.size() > 5);
-}
-
-template<class Collection>
-vector<string>
-get_event_ids(const std::vector<Collection> &events)
-{
-        vector<string> ids;
-
-        for (const auto &e : events)
-                ids.push_back(mpark::visit([](auto msg) { return msg.event_id; }, e));
-
-        return ids;
-}
 
 TEST(ClientAPI, Register)
 {
@@ -179,7 +141,7 @@ TEST(ClientAPI, EmptyUserAvatar)
                           });
 
                         while (!done)
-                                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                                sleep();
 
                         alice->get_avatar_url(
                           alice_id, [](const mtx::responses::AvatarUrl &res, RequestErr err) {
@@ -218,7 +180,7 @@ TEST(ClientAPI, RealUserAvatar)
                           });
 
                         while (!done)
-                                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                                sleep();
 
                         alice->get_avatar_url(
                           alice_id,
@@ -275,7 +237,7 @@ TEST(ClientAPI, CreateRoom)
           });
 
         while (mtx_client->access_token().empty())
-                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                sleep();
 
         mtx::requests::CreateRoom req;
         req.name  = "Name";
@@ -300,10 +262,10 @@ TEST(ClientAPI, LogoutSuccess)
                   check_error(err);
                   token = res.access_token;
           });
-        while (token.empty()) {
-                // Block while we are logging in
-                std::this_thread::sleep_for(std::chrono::milliseconds(300));
-        }
+
+        while (token.empty())
+                sleep();
+
         mtx_client->set_access_token(token);
         mtx::requests::CreateRoom req;
         req.name  = "Test1";
@@ -316,10 +278,10 @@ TEST(ClientAPI, LogoutSuccess)
                 check_error(err);
                 token.clear();
         });
-        while (token.size()) {
-                // Block while we are logging out
-                std::this_thread::sleep_for(std::chrono::milliseconds(300));
-        }
+
+        while (token.size())
+                sleep();
+
         // Verify that sending requests with this mtx_client fails after logout
         mtx::requests::CreateRoom failReq;
         failReq.name  = "42";
@@ -344,10 +306,10 @@ TEST(ClientAPI, LogoutInvalidatesTokenOnServer)
                   check_error(err);
                   token = res.access_token;
           });
-        while (token.empty()) {
-                // Block while we are logging in
-                std::this_thread::sleep_for(std::chrono::milliseconds(300));
-        }
+
+        while (token.empty())
+                sleep();
+
         mtx_client->set_access_token(token);
         mtx::requests::CreateRoom req;
         req.name  = "Test1";
@@ -362,10 +324,10 @@ TEST(ClientAPI, LogoutInvalidatesTokenOnServer)
                 mtx_client->set_access_token(token);
                 token.clear();
         });
-        while (token.size()) {
-                // Block while we are logging out
-                std::this_thread::sleep_for(std::chrono::milliseconds(300));
-        }
+
+        while (token.size())
+                sleep();
+
         // Verify that creating a room with the old access_token_ no longer succeeds after logout
         mtx::requests::CreateRoom failReq;
         failReq.name  = "42";
@@ -399,7 +361,7 @@ TEST(ClientAPI, CreateRoomInvites)
 
         while (alice->access_token().empty() || bob->access_token().empty() ||
                carl->access_token().empty())
-                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                sleep();
 
         mtx::requests::CreateRoom req;
         req.name   = "Name";
@@ -435,7 +397,7 @@ TEST(ClientAPI, JoinRoom)
         });
 
         while (alice->access_token().empty() || bob->access_token().empty())
-                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                sleep();
 
         // Creating a random room alias.
         // TODO: add a type for room aliases.
@@ -486,7 +448,7 @@ TEST(ClientAPI, LeaveRoom)
         });
 
         while (alice->access_token().empty() || bob->access_token().empty())
-                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                sleep();
 
         mtx::requests::CreateRoom req;
         req.name   = "Name";
@@ -531,7 +493,7 @@ TEST(ClientAPI, InviteRoom)
         });
 
         while (alice->access_token().empty() || bob->access_token().empty())
-                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                sleep();
 
         mtx::requests::CreateRoom req;
         req.name   = "Name";
@@ -572,7 +534,7 @@ TEST(ClientAPI, InvalidInvite)
         });
 
         while (alice->access_token().empty() || bob->access_token().empty())
-                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                sleep();
 
         mtx::requests::CreateRoom req;
         req.name   = "Name";
@@ -607,7 +569,7 @@ TEST(ClientAPI, Sync)
           });
 
         while (mtx_client->access_token().empty())
-                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                sleep();
 
         mtx::requests::CreateRoom req;
         req.name  = "Name";
@@ -653,7 +615,7 @@ TEST(ClientAPI, Typing)
         });
 
         while (alice->access_token().empty())
-                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                sleep();
 
         mtx::requests::CreateRoom req;
         alice->create_room(req, [alice](const mtx::responses::CreateRoom &res, RequestErr err) {
@@ -683,7 +645,7 @@ TEST(ClientAPI, Typing)
                                     });
 
                         while (!can_continue)
-                                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                                sleep();
 
                         alice->stop_typing(res.room_id, [alice, room_id](RequestErr err) {
                                 check_error(err);
@@ -719,7 +681,7 @@ TEST(ClientAPI, SendMessages)
         });
 
         while (alice->access_token().empty() || bob->access_token().empty())
-                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                sleep();
 
         mtx::requests::CreateRoom req;
         req.invite = {"@bob:localhost"};
@@ -761,7 +723,7 @@ TEST(ClientAPI, SendMessages)
                               });
 
                             while (event_ids.size() != 2)
-                                    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                                    sleep();
 
                             alice->sync(
                               "",
@@ -802,7 +764,7 @@ TEST(ClientAPI, SendStateEvents)
         });
 
         while (alice->access_token().empty() || bob->access_token().empty())
-                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                sleep();
 
         mtx::requests::CreateRoom req;
         req.invite = {"@bob:localhost"};
@@ -848,7 +810,7 @@ TEST(ClientAPI, SendStateEvents)
                     });
 
                   while (event_ids.size() != 2)
-                          std::this_thread::sleep_for(std::chrono::milliseconds(500));
+                          sleep();
 
                   alice->sync(
                     "",
@@ -881,7 +843,7 @@ TEST(ClientAPI, Pagination)
         });
 
         while (alice->access_token().empty())
-                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                sleep();
 
         mtx::requests::CreateRoom req;
         alice->create_room(req, [alice](const mtx::responses::CreateRoom &res, RequestErr err) {
@@ -930,7 +892,7 @@ TEST(ClientAPI, UploadFilter)
         });
 
         while (alice->access_token().empty())
-                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                sleep();
 
         nlohmann::json j = {
           {"room", {{"include_leave", true}, {"account_data", {{"not_types", {"*"}}}}}},
@@ -954,7 +916,7 @@ TEST(ClientAPI, ReadMarkers)
         });
 
         while (alice->access_token().empty())
-                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                sleep();
 
         mtx::requests::CreateRoom req;
         alice->create_room(req, [alice](const mtx::responses::CreateRoom &res, RequestErr err) {
@@ -983,7 +945,7 @@ TEST(ClientAPI, ReadMarkers)
                     });
 
                 while (event_id.size() == 0)
-                        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                        sleep();
 
                 alice->sync("",
                             "",

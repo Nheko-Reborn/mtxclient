@@ -141,6 +141,7 @@ if (BUILD_LIB_TESTS)
     endif()
 
     include_directories(${GTEST_INCLUDE_DIRS})
+    include_directories(tests)
 
     add_executable(client_api tests/client_api.cpp)
     target_link_libraries(client_api matrix_client ${GTEST_BOTH_LIBRARIES})
