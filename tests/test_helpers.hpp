@@ -32,6 +32,12 @@ check_error(mtx::client::RequestErr err)
 }
 
 inline void
+check_login(const mtx::responses::Login &, mtx::client::RequestErr err)
+{
+        check_error(err);
+}
+
+inline void
 validate_login(const std::string &user, const mtx::responses::Login &res)
 {
         EXPECT_EQ(res.user_id.to_string(), user);

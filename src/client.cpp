@@ -501,6 +501,16 @@ Client::flow_response(const std::string &user,
         post<nlohmann::json, mtx::responses::Register>("/client/r0/register", req, callback, false);
 }
 
+void
+Client::send_to_device(const std::string &event_type,
+                       const std::string &txid,
+                       const nlohmann::json &body,
+                       std::function<void(RequestErr)> callback)
+{
+        const auto api_path = "/client/r0/sendToDevice/" + event_type + "/" + txid;
+        put<nlohmann::json>(api_path, body, callback);
+}
+
 //
 // Encryption related endpoints
 //

@@ -111,7 +111,7 @@ if(NOT MATRIX_STRUCTS_LIBRARY)
     set(MTXCLIENT_DEPS ${MTXCLIENT_DEPS} MatrixStructs)
 endif()
 include_directories(${MATRIX_STRUCTS_INCLUDE_DIR})
-set(MTXCLIENT_LIBS ${MTXCLIENT_LIBS} matrix_structs)
+set(MTXCLIENT_LIBS ${MTXCLIENT_LIBS} ${MATRIX_STRUCTS_LIBRARY})
 
 
 #
@@ -134,7 +134,7 @@ target_include_directories(matrix_client SYSTEM PRIVATE $ENV{INCLUDE})
 
 if (BUILD_LIB_EXAMPLES)
     add_executable(room_feed examples/room_feed.cpp)
-    target_link_libraries(room_feed matrix_client matrix_structs)
+    target_link_libraries(room_feed matrix_client ${MATRIX_STRUCTS_LIBRARY})
 endif()
 
 if (BUILD_LIB_TESTS)

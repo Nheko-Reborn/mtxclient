@@ -195,6 +195,20 @@ public:
           const Payload &payload,
           std::function<void(const mtx::responses::EventId &, RequestErr)> callback);
 
+        //! Send send-to-device events to a set of client devices with a specified transaction id.
+        void send_to_device(const std::string &event_type,
+                            const std::string &txid,
+                            const nlohmann::json &body,
+                            std::function<void(RequestErr)> callback);
+
+        //! Send send-to-device events to a set of client devices with a generated transaction id.
+        void send_to_device(const std::string &event_type,
+                            const nlohmann::json &body,
+                            std::function<void(RequestErr)> callback)
+        {
+                send_to_device(event_type, generate_txn_id(), body, callback);
+        }
+
         //
         // Encryption related endpoints.
         //

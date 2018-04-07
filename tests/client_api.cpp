@@ -966,3 +966,37 @@ TEST(ClientAPI, ReadMarkers)
 
         alice->close();
 }
+
+TEST(ClientAPI, SendToDevice)
+{
+        auto alice = std::make_shared<Client>("localhost");
+        auto bob   = std::make_shared<Client>("localhost");
+
+        alice->login("alice", "secret", &check_login);
+        bob->login("bob", "secret", &check_login);
+
+        while (alice->access_token().empty() || bob->access_token().empty())
+                sleep();
+
+        json body{{"messages",
+                   {{bob->user_id().to_string(),
+                     {{bob->device_id(), {{"example_content_key", "test"}}}}}}}};
+
+        alice->send_to_device("m.test", body, [bob](RequestErr err) {
+                check_error(err);
+
+                bob->sync("", "", false, 0, [](const mtx::responses::Sync &res, RequestErr err) {
+                        check_error(err);
+
+                        EXPECT_EQ(res.to_device.size(), 1);
+
+                        auto msg = res.to_device.at(0);
+                        EXPECT_EQ(msg.at("content").at("example_content_key"), "test");
+                        EXPECT_EQ(msg.at("type"), "m.test");
+                        EXPECT_EQ(msg.at("sender"), "@alice:localhost");
+                });
+        });
+
+        alice->close();
+        bob->close();
+}
