@@ -1,5 +1,4 @@
 #include <iostream>
-#include <sodium.h>
 
 #include "crypto.hpp"
 #include <olm/base64.hh>
@@ -8,15 +7,6 @@ using json = nlohmann::json;
 using namespace mtx::client::crypto;
 
 constexpr std::size_t SIGNATURE_SIZE = 64;
-
-std::unique_ptr<BinaryBuf>
-mtx::client::crypto::create_buffer(std::size_t nbytes)
-{
-        auto buf = std::make_unique<BinaryBuf>(nbytes);
-        randombytes_buf(buf->data(), buf->size());
-
-        return buf;
-}
 
 std::shared_ptr<olm::Account>
 mtx::client::crypto::olm_new_account()
@@ -90,9 +80,7 @@ mtx::client::crypto::one_time_keys(std::shared_ptr<olm::Account> account)
         if (result == -1)
                 throw olm_exception("one_time_keys", account->last_error);
 
-        std::string data(buf->begin(), buf->end());
-
-        return json::parse(data);
+        return json::parse(std::string(buf->begin(), buf->end()));
 }
 
 std::string
@@ -224,4 +212,35 @@ std::unique_ptr<BinaryBuf>
 mtx::client::crypto::json_to_buffer(const nlohmann::json &obj)
 {
         return str_to_buffer(obj.dump());
+}
+
+_olm_curve25519_public_key
+mtx::client::crypto::str_to_curve25519_pk(const std::string &data)
+{
+        auto decoded = decode_base64(data);
+
+        if (decoded->size() != CURVE25519_KEY_LENGTH)
+                throw olm_exception("str_to_curve25519_pk: invalid input size");
+
+        _olm_curve25519_public_key pk;
+        std::copy(decoded->begin(), decoded->end(), pk.public_key);
+
+        return pk;
+}
+
+olm::Session
+mtx::client::crypto::init_outbound_group_session(std::shared_ptr<olm::Account> account,
+                                                 const std::string &peer_identity_key,
+                                                 const std::string &peer_one_time_key)
+{
+        olm::Session session;
+
+        auto buf = create_buffer(session.new_outbound_session_random_length());
+        session.new_outbound_session(*account,
+                                     str_to_curve25519_pk(peer_identity_key),
+                                     str_to_curve25519_pk(peer_one_time_key),
+                                     buf->data(),
+                                     buf->size());
+
+        return session;
 }

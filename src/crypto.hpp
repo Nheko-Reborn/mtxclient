@@ -4,10 +4,14 @@
 #include <memory>
 
 #include <json.hpp>
+#include <sodium.h>
+
 #include <mtx/identifiers.hpp>
 #include <mtx/requests.hpp>
+
 #include <olm/account.hh>
 #include <olm/error.h>
+#include <olm/session.hh>
 
 namespace mtx {
 namespace client {
@@ -67,6 +71,10 @@ public:
           , msg_(msg + ": " + std::string(_olm_error_to_string(errcode)))
         {}
 
+        olm_exception(std::string msg)
+          : msg_(msg)
+        {}
+
         OlmErrorCode get_errcode() const { return errcode_; }
         const char *get_error() const { return _olm_error_to_string(errcode_); }
 
@@ -94,8 +102,15 @@ nlohmann::json
 one_time_keys(std::shared_ptr<olm::Account> user);
 
 //! Create a uint8_t buffer which is initialized with random bytes.
-std::unique_ptr<BinaryBuf>
-create_buffer(std::size_t nbytes);
+template<class T = BinaryBuf>
+std::unique_ptr<T>
+create_buffer(std::size_t nbytes)
+{
+        auto buf = std::make_unique<T>(nbytes);
+        randombytes_buf(buf->data(), buf->size());
+
+        return buf;
+}
 
 //! Sign the given one time keys and encode it to base64.
 std::string
@@ -148,6 +163,16 @@ str_to_buffer(const std::string &data);
 //! Convert the given json struct to an uint8_t buffer.
 std::unique_ptr<BinaryBuf>
 json_to_buffer(const nlohmann::json &obj);
+
+//! Convert from base64 encoded public key.
+_olm_curve25519_public_key
+str_to_curve25519_pk(const std::string &data);
+
+//! Create an outbount megolm session.
+olm::Session
+init_outbound_group_session(std::shared_ptr<olm::Account> account,
+                            const std::string &peer_id_key,
+                            const std::string &peer_one_time_key);
 
 } // namespace crypto
 } // namespace client
