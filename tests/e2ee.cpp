@@ -396,3 +396,20 @@ TEST(Encryption, EnableEncryption)
         bob->close();
         carl->close();
 }
+
+TEST(Encryption, CreateOutboundGroupSession)
+{
+        auto alice = make_shared<mtx::client::crypto::OlmClient>();
+        auto bob   = make_shared<mtx::client::crypto::OlmClient>();
+
+        alice->create_new_account();
+        bob->create_new_account();
+
+        bob->generate_one_time_keys(1);
+        alice->generate_one_time_keys(1);
+
+        auto outbound_session = alice->init_outbound_group_session();
+
+        auto session_id  = mtx::client::crypto::session_id(outbound_session.get());
+        auto session_key = mtx::client::crypto::session_key(outbound_session.get());
+}

@@ -21,7 +21,6 @@ asan:
 		-DCMAKE_BUILD_TYPE=Debug \
 		-DCMAKE_EXPORT_COMPILE_COMMANDS=1 \
 		-DOPENSSL_ROOT_DIR=/usr/local/opt/openssl \
-		-DBUILD_OLM=1 \
 		-DASAN=1
 	@cmake --build build
 

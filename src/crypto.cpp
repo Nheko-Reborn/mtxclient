@@ -13,8 +13,7 @@ OlmClient::create_new_account()
         if (account_)
                 return;
 
-        account_ =
-          std::unique_ptr<OlmAccount, OlmDeleter>(olm_account(new uint8_t[olm_account_size()]));
+        account_ = create_olm_object<OlmAccount>();
 
         auto tmp_buf  = create_buffer(olm_create_account_random_length(account_.get()));
         const int ret = olm_create_account(account_.get(), tmp_buf->data(), tmp_buf->size());
@@ -32,15 +31,7 @@ OlmClient::create_new_utility()
         if (utility_)
                 return;
 
-        utility_ =
-          std::unique_ptr<OlmUtility, OlmDeleter>(olm_utility(new uint8_t[olm_utility_size()]));
-}
-
-std::unique_ptr<OlmSession, OlmDeleter>
-OlmClient::create_new_session()
-{
-        return std::unique_ptr<OlmSession, OlmDeleter>(
-          olm_session(new uint8_t[olm_session_size()]));
+        utility_ = create_olm_object<OlmUtility>();
 }
 
 IdentityKeys
@@ -182,24 +173,14 @@ OlmClient::create_upload_keys_request(const mtx::client::crypto::OneTimeKeys &on
         return req;
 }
 
-std::unique_ptr<OlmSession, OlmDeleter>
-OlmClient::create_outbound_group_session(const std::string &peer_identity_key,
-                                         const std::string &peer_one_time_key)
+std::unique_ptr<OlmOutboundGroupSession, OlmDeleter>
+OlmClient::init_outbound_group_session()
 {
-        auto session = create_new_session();
-        auto tmp_buf = create_buffer(olm_create_outbound_session_random_length(session.get()));
+        auto session = create_olm_object<OlmOutboundGroupSession>();
+        auto tmp_buf = create_buffer(olm_init_outbound_group_session_random_length(session.get()));
 
-        auto idk_buf = str_to_buffer(peer_identity_key);
-        auto otk_buf = str_to_buffer(peer_one_time_key);
-
-        const int ret = olm_create_outbound_session(session.get(),
-                                                    account_.get(),
-                                                    idk_buf->data(),
-                                                    idk_buf->size(),
-                                                    otk_buf->data(),
-                                                    otk_buf->size(),
-                                                    tmp_buf->data(),
-                                                    tmp_buf->size());
+        const int ret =
+          olm_init_outbound_group_session(session.get(), tmp_buf->data(), tmp_buf->size());
 
         if (ret == -1)
                 throw olm_exception("init_outbound_group_session", session.get());
@@ -254,4 +235,22 @@ std::unique_ptr<BinaryBuf>
 mtx::client::crypto::json_to_buffer(const nlohmann::json &obj)
 {
         return str_to_buffer(obj.dump());
+}
+
+std::string
+mtx::client::crypto::session_id(OlmOutboundGroupSession *s)
+{
+        auto tmp = create_buffer(olm_outbound_group_session_id_length(s));
+        olm_outbound_group_session_id(s, tmp->data(), tmp->size());
+
+        return encode_base64(tmp->data(), tmp->size());
+}
+
+std::string
+mtx::client::crypto::session_key(OlmOutboundGroupSession *s)
+{
+        auto tmp = create_buffer(olm_outbound_group_session_key_length(s));
+        olm_outbound_group_session_key(s, tmp->data(), tmp->size());
+
+        return encode_base64(tmp->data(), tmp->size());
 }

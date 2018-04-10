@@ -81,6 +81,10 @@ public:
           : msg_(func + ": " + std::string(olm_utility_last_error(util)))
         {}
 
+        olm_exception(std::string func, OlmOutboundGroupSession *s)
+          : msg_(func + ": " + std::string(olm_outbound_group_session_last_error(s)))
+        {}
+
         olm_exception(std::string msg)
           : msg_(msg)
         {}
@@ -105,8 +109,59 @@ create_buffer(std::size_t nbytes)
 struct OlmDeleter
 {
         void operator()(OlmAccount *ptr) { operator delete(ptr, olm_account_size()); }
-        void operator()(OlmSession *ptr) { operator delete(ptr, olm_session_size()); }
         void operator()(OlmUtility *ptr) { operator delete(ptr, olm_utility_size()); }
+
+        void operator()(OlmSession *ptr) { operator delete(ptr, olm_session_size()); }
+        void operator()(OlmOutboundGroupSession *ptr)
+        {
+                operator delete(ptr, olm_outbound_group_session_size());
+        }
+        void operator()(OlmInboundGroupSession *ptr)
+        {
+                operator delete(ptr, olm_inbound_group_session_size());
+        }
+};
+
+template<class T>
+struct OlmAllocator
+{
+        static T allocate() = delete;
+};
+
+template<>
+struct OlmAllocator<OlmAccount>
+{
+        static OlmAccount *allocate() { return olm_account(new uint8_t[olm_account_size()]); }
+};
+
+template<>
+struct OlmAllocator<OlmSession>
+{
+        static OlmSession *allocate() { return olm_session(new uint8_t[olm_session_size()]); }
+};
+
+template<>
+struct OlmAllocator<OlmUtility>
+{
+        static OlmUtility *allocate() { return olm_utility(new uint8_t[olm_utility_size()]); }
+};
+
+template<>
+struct OlmAllocator<OlmOutboundGroupSession>
+{
+        static OlmOutboundGroupSession *allocate()
+        {
+                return olm_outbound_group_session(new uint8_t[olm_outbound_group_session_size()]);
+        }
+};
+
+template<>
+struct OlmAllocator<OlmInboundGroupSession>
+{
+        static OlmInboundGroupSession *allocate()
+        {
+                return olm_inbound_group_session(new uint8_t[olm_inbound_group_session_size()]);
+        }
 };
 
 class OlmClient : public std::enable_shared_from_this<OlmClient>
@@ -127,10 +182,15 @@ public:
         //! Sign the given message.
         std::unique_ptr<BinaryBuf> sign_message(const std::string &msg);
 
+        template<class T>
+        std::unique_ptr<T, OlmDeleter> create_olm_object()
+        {
+                return std::unique_ptr<T, OlmDeleter>(OlmAllocator<T>::allocate());
+        }
+
         //! Create a new olm Account. Must be called before any other operation.
         void create_new_account();
         void create_new_utility();
-        std::unique_ptr<OlmSession, OlmDeleter> create_new_session();
 
         //! Retrieve the json representation of the identity keys for the given account.
         IdentityKeys identity_keys();
@@ -154,9 +214,7 @@ public:
         mtx::requests::UploadKeys create_upload_keys_request();
 
         //! Create an outbount megolm session.
-        std::unique_ptr<OlmSession, OlmDeleter> create_outbound_group_session(
-          const std::string &peer_identity_key,
-          const std::string &peer_one_time_key);
+        std::unique_ptr<OlmOutboundGroupSession, OlmDeleter> init_outbound_group_session();
 
         OlmAccount *account() { return account_.get(); }
         OlmUtility *utility() { return utility_.get(); }
@@ -183,6 +241,14 @@ json_to_buffer(const nlohmann::json &obj);
 //! Convert the given string to an uint8_t buffer.
 std::unique_ptr<BinaryBuf>
 str_to_buffer(const std::string &data);
+
+//! Retrieve the session id.
+std::string
+session_id(OlmOutboundGroupSession *s);
+
+//! Retrieve the session key.
+std::string
+session_key(OlmOutboundGroupSession *s);
 
 } // namespace crypto
 } // namespace client
