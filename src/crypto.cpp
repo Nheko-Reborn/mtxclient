@@ -6,163 +6,205 @@
 using json = nlohmann::json;
 using namespace mtx::client::crypto;
 
-constexpr std::size_t SIGNATURE_SIZE = 64;
-
-std::shared_ptr<olm::Account>
-mtx::client::crypto::olm_new_account()
+void
+OlmClient::create_new_account()
 {
-        auto olm_account = std::make_shared<olm::Account>();
+        // The method has no effect if the account is already initialized.
+        if (account_)
+                return;
 
-        const auto nbytes = olm_account->new_account_random_length();
-        auto buf          = create_buffer(nbytes);
+        account_ =
+          std::unique_ptr<OlmAccount, OlmDeleter>(olm_account(new uint8_t[olm_account_size()]));
 
-        int result = olm_account->new_account(buf->data(), buf->size());
+        auto tmp_buf  = create_buffer(olm_create_account_random_length(account_.get()));
+        const int ret = olm_create_account(account_.get(), tmp_buf->data(), tmp_buf->size());
 
-        if (result == -1)
-                throw olm_exception("olm_new_account", olm_account->last_error);
+        if (ret == -1) {
+                account_.reset();
+                throw olm_exception("create_new_account", account_.get());
+        }
+}
 
-        return olm_account;
+void
+OlmClient::create_new_utility()
+{
+        // The method has no effect if the account is already initialized.
+        if (utility_)
+                return;
+
+        utility_ =
+          std::unique_ptr<OlmUtility, OlmDeleter>(olm_utility(new uint8_t[olm_utility_size()]));
+}
+
+std::unique_ptr<OlmSession, OlmDeleter>
+OlmClient::create_new_session()
+{
+        return std::unique_ptr<OlmSession, OlmDeleter>(
+          olm_session(new uint8_t[olm_session_size()]));
 }
 
 IdentityKeys
-mtx::client::crypto::identity_keys(std::shared_ptr<olm::Account> account)
+OlmClient::identity_keys()
 {
-        const auto nbytes = account->get_identity_json_length();
-        auto buf          = create_buffer(nbytes);
-
-        int result = account->get_identity_json(buf->data(), buf->size());
+        auto tmp_buf = create_buffer(olm_account_identity_keys_length(account_.get()));
+        int result =
+          olm_account_identity_keys(account_.get(), (void *)tmp_buf->data(), tmp_buf->size());
 
         if (result == -1)
-                throw olm_exception("identity_keys", account->last_error);
+                throw olm_exception("identity_keys", account_.get());
 
-        std::string data(buf->begin(), buf->end());
-        IdentityKeys keys = json::parse(data);
-
-        return keys;
-}
-
-std::string
-mtx::client::crypto::sign_identity_keys(std::shared_ptr<olm::Account> account,
-                                        const IdentityKeys &keys,
-                                        const mtx::identifiers::User &user_id,
-                                        const std::string &device_id)
-{
-        json body{{"algorithms", {"m.olm.v1.curve25519-aes-sha2", "m.megolm.v1.aes-sha2"}},
-                  {"user_id", user_id.to_string()},
-                  {"device_id", device_id},
-                  {"keys",
-                   {
-                     {"curve25519:" + device_id, keys.curve25519},
-                     {"ed25519:" + device_id, keys.ed25519},
-                   }}};
-
-        return encode_base64(sign_message(account, body.dump())->data(), SIGNATURE_SIZE);
-}
-
-std::size_t
-mtx::client::crypto::generate_one_time_keys(std::shared_ptr<olm::Account> account,
-                                            std::size_t number_of_keys)
-{
-        const auto nbytes = account->generate_one_time_keys_random_length(number_of_keys);
-
-        auto buf = create_buffer(nbytes);
-        return account->generate_one_time_keys(number_of_keys, buf->data(), buf->size());
-}
-
-json
-mtx::client::crypto::one_time_keys(std::shared_ptr<olm::Account> account)
-{
-        const auto nbytes = account->get_one_time_keys_json_length();
-        auto buf          = create_buffer(nbytes);
-
-        int result = account->get_one_time_keys_json(buf->data(), buf->size());
-
-        if (result == -1)
-                throw olm_exception("one_time_keys", account->last_error);
-
-        return json::parse(std::string(buf->begin(), buf->end()));
-}
-
-std::string
-mtx::client::crypto::sign_one_time_key(std::shared_ptr<olm::Account> account,
-                                       const std::string &key)
-{
-        json j{{"key", key}};
-        auto str_json = j.dump();
-
-        auto signature_buf = sign_message(account, j.dump());
-
-        return encode_base64(signature_buf->data(), signature_buf->size());
-}
-
-std::map<std::string, json>
-mtx::client::crypto::sign_one_time_keys(std::shared_ptr<olm::Account> account,
-                                        const mtx::client::crypto::OneTimeKeys &keys,
-                                        const mtx::identifiers::User &user_id,
-                                        const std::string &device_id)
-{
-        // Sign & append the one time keys.
-        std::map<std::string, json> signed_one_time_keys;
-        for (const auto &elem : keys.curve25519) {
-                auto sig = sign_one_time_key(account, elem.second);
-
-                signed_one_time_keys["signed_curve25519:" + elem.first] =
-                  signed_one_time_key_json(user_id, device_id, elem.second, sig);
-        }
-
-        return signed_one_time_keys;
-}
-
-mtx::requests::UploadKeys
-mtx::client::crypto::create_upload_keys_request(
-  std::shared_ptr<olm::Account> account,
-  const mtx::client::crypto::IdentityKeys &identity_keys,
-  const mtx::client::crypto::OneTimeKeys &one_time_keys,
-  const mtx::identifiers::User &user_id,
-  const std::string &device_id)
-{
-        mtx::requests::UploadKeys req;
-        req.device_keys.user_id   = user_id.to_string();
-        req.device_keys.device_id = device_id;
-
-        req.device_keys.keys["curve25519:" + device_id] = identity_keys.curve25519;
-        req.device_keys.keys["ed25519:" + device_id]    = identity_keys.ed25519;
-
-        // Generate and add the signature to the request.
-        auto sig = sign_identity_keys(account, identity_keys, user_id, device_id);
-        req.device_keys.signatures[user_id.to_string()]["ed25519:" + device_id] = sig;
-
-        if (one_time_keys.curve25519.empty())
-                return req;
-
-        // Sign & append the one time keys.
-        req.one_time_keys =
-          mtx::client::crypto::sign_one_time_keys(account, one_time_keys, user_id, device_id);
-
-        return req;
+        return json::parse(std::string(tmp_buf->begin(), tmp_buf->end()));
 }
 
 std::unique_ptr<BinaryBuf>
-mtx::client::crypto::sign_message(std::shared_ptr<olm::Account> account, const std::string &msg)
+OlmClient::sign_message(const std::string &msg)
 {
         // Message buffer
         auto buf = str_to_buffer(msg);
 
         // Signature buffer
-        auto signature_buf = create_buffer(SIGNATURE_SIZE);
-        account->sign(buf->data(), buf->size(), signature_buf->data(), signature_buf->size());
+        auto signature_buf = create_buffer(olm_account_signature_length(account_.get()));
+        olm_account_sign(
+          account_.get(), buf->data(), buf->size(), signature_buf->data(), signature_buf->size());
 
         return signature_buf;
 }
 
+std::string
+OlmClient::sign_identity_keys()
+{
+        auto keys = identity_keys();
+
+        json body{{"algorithms", {"m.olm.v1.curve25519-aes-sha2", "m.megolm.v1.aes-sha2"}},
+                  {"user_id", user_id_},
+                  {"device_id", device_id_},
+                  {"keys",
+                   {
+                     {"curve25519:" + device_id_, keys.curve25519},
+                     {"ed25519:" + device_id_, keys.ed25519},
+                   }}};
+
+        return encode_base64(sign_message(body.dump())->data(),
+                             olm_account_signature_length(account_.get()));
+}
+
+std::size_t
+OlmClient::generate_one_time_keys(std::size_t number_of_keys)
+{
+        const std::size_t nbytes =
+          olm_account_generate_one_time_keys_random_length(account_.get(), number_of_keys);
+
+        auto buf = create_buffer(nbytes);
+
+        const int ret = olm_account_generate_one_time_keys(
+          account_.get(), number_of_keys, buf->data(), buf->size());
+
+        if (ret == -1)
+                throw olm_exception("generate_one_time_keys", account_.get());
+
+        return ret;
+}
+
+OneTimeKeys
+OlmClient::one_time_keys()
+{
+        auto buf = create_buffer(olm_account_one_time_keys_length(account_.get()));
+
+        const int ret = olm_account_one_time_keys(account_.get(), buf->data(), buf->size());
+
+        if (ret == -1)
+                throw olm_exception("one_time_keys", account_.get());
+
+        return json::parse(std::string(buf->begin(), buf->end()));
+}
+
+std::string
+OlmClient::sign_one_time_key(const std::string &key)
+{
+        json j{{"key", key}};
+        auto str_json  = j.dump();
+        auto signature = sign_message(j.dump());
+
+        return encode_base64(signature->data(), signature->size());
+}
+
+std::map<std::string, json>
+OlmClient::sign_one_time_keys(const OneTimeKeys &keys)
+{
+        // Sign & append the one time keys.
+        std::map<std::string, json> signed_one_time_keys;
+        for (const auto &elem : keys.curve25519) {
+                auto sig = sign_one_time_key(elem.second);
+
+                signed_one_time_keys["signed_curve25519:" + elem.first] =
+                  signed_one_time_key_json(elem.second, sig);
+        }
+
+        return signed_one_time_keys;
+}
+
 json
-mtx::client::crypto::signed_one_time_key_json(const mtx::identifiers::User &user_id,
-                                              const std::string &device_id,
-                                              const std::string &key,
-                                              const std::string &signature)
+OlmClient::signed_one_time_key_json(const std::string &key, const std::string &signature)
 {
         return json{{"key", key},
-                    {"signatures", {{user_id.to_string(), {{"ed25519:" + device_id, signature}}}}}};
+                    {"signatures", {{user_id_, {{"ed25519:" + device_id_, signature}}}}}};
+}
+
+mtx::requests::UploadKeys
+OlmClient::create_upload_keys_request()
+{
+        return create_upload_keys_request(one_time_keys());
+}
+
+mtx::requests::UploadKeys
+OlmClient::create_upload_keys_request(const mtx::client::crypto::OneTimeKeys &one_time_keys)
+{
+        mtx::requests::UploadKeys req;
+        req.device_keys.user_id   = user_id_;
+        req.device_keys.device_id = device_id_;
+
+        auto id_keys = identity_keys();
+
+        req.device_keys.keys["curve25519:" + device_id_] = id_keys.curve25519;
+        req.device_keys.keys["ed25519:" + device_id_]    = id_keys.ed25519;
+
+        // Generate and add the signature to the request.
+        auto sig = sign_identity_keys();
+
+        req.device_keys.signatures[user_id_]["ed25519:" + device_id_] = sig;
+
+        if (one_time_keys.curve25519.empty())
+                return req;
+
+        // Sign & append the one time keys.
+        req.one_time_keys = sign_one_time_keys(one_time_keys);
+
+        return req;
+}
+
+std::unique_ptr<OlmSession, OlmDeleter>
+OlmClient::create_outbound_group_session(const std::string &peer_identity_key,
+                                         const std::string &peer_one_time_key)
+{
+        auto session = create_new_session();
+        auto tmp_buf = create_buffer(olm_create_outbound_session_random_length(session.get()));
+
+        auto idk_buf = str_to_buffer(peer_identity_key);
+        auto otk_buf = str_to_buffer(peer_one_time_key);
+
+        const int ret = olm_create_outbound_session(session.get(),
+                                                    account_.get(),
+                                                    idk_buf->data(),
+                                                    idk_buf->size(),
+                                                    otk_buf->data(),
+                                                    otk_buf->size(),
+                                                    tmp_buf->data(),
+                                                    tmp_buf->size());
+
+        if (ret == -1)
+                throw olm_exception("init_outbound_group_session", session.get());
+
+        return session;
 }
 
 std::unique_ptr<BinaryBuf>
@@ -212,35 +254,4 @@ std::unique_ptr<BinaryBuf>
 mtx::client::crypto::json_to_buffer(const nlohmann::json &obj)
 {
         return str_to_buffer(obj.dump());
-}
-
-_olm_curve25519_public_key
-mtx::client::crypto::str_to_curve25519_pk(const std::string &data)
-{
-        auto decoded = decode_base64(data);
-
-        if (decoded->size() != CURVE25519_KEY_LENGTH)
-                throw olm_exception("str_to_curve25519_pk: invalid input size");
-
-        _olm_curve25519_public_key pk;
-        std::copy(decoded->begin(), decoded->end(), pk.public_key);
-
-        return pk;
-}
-
-olm::Session
-mtx::client::crypto::init_outbound_group_session(std::shared_ptr<olm::Account> account,
-                                                 const std::string &peer_identity_key,
-                                                 const std::string &peer_one_time_key)
-{
-        olm::Session session;
-
-        auto buf = create_buffer(session.new_outbound_session_random_length());
-        session.new_outbound_session(*account,
-                                     str_to_curve25519_pk(peer_identity_key),
-                                     str_to_curve25519_pk(peer_one_time_key),
-                                     buf->data(),
-                                     buf->size());
-
-        return session;
 }

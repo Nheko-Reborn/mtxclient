@@ -2,6 +2,7 @@
 
 #include <exception>
 #include <memory>
+#include <new>
 
 #include <json.hpp>
 #include <sodium.h>
@@ -12,6 +13,8 @@
 #include <olm/account.hh>
 #include <olm/error.h>
 #include <olm/session.hh>
+
+#include <olm/olm.h>
 
 namespace mtx {
 namespace client {
@@ -66,40 +69,27 @@ from_json(const nlohmann::json &obj, OneTimeKeys &keys)
 class olm_exception : public std::exception
 {
 public:
-        olm_exception(std::string msg, OlmErrorCode errcode)
-          : errcode_(errcode)
-          , msg_(msg + ": " + std::string(_olm_error_to_string(errcode)))
+        olm_exception(std::string func, OlmSession *s)
+          : msg_(func + ": " + std::string(olm_session_last_error(s)))
+        {}
+
+        olm_exception(std::string func, OlmAccount *acc)
+          : msg_(func + ": " + std::string(olm_account_last_error(acc)))
+        {}
+
+        olm_exception(std::string func, OlmUtility *util)
+          : msg_(func + ": " + std::string(olm_utility_last_error(util)))
         {}
 
         olm_exception(std::string msg)
           : msg_(msg)
         {}
 
-        OlmErrorCode get_errcode() const { return errcode_; }
-        const char *get_error() const { return _olm_error_to_string(errcode_); }
-
         virtual const char *what() const throw() { return msg_.c_str(); }
 
 private:
-        OlmErrorCode errcode_;
         std::string msg_;
 };
-
-//! Create a new olm Account.
-std::shared_ptr<olm::Account>
-olm_new_account();
-
-//! Retrieve the json representation of the identity keys for the given account.
-IdentityKeys
-identity_keys(std::shared_ptr<olm::Account> user);
-
-//! Generate a number of one time keys.
-std::size_t
-generate_one_time_keys(std::shared_ptr<olm::Account> account, std::size_t number_of_keys);
-
-//! Retrieve the json representation of the one time keys for the given account.
-nlohmann::json
-one_time_keys(std::shared_ptr<olm::Account> user);
 
 //! Create a uint8_t buffer which is initialized with random bytes.
 template<class T = BinaryBuf>
@@ -112,42 +102,72 @@ create_buffer(std::size_t nbytes)
         return buf;
 }
 
-//! Sign the given one time keys and encode it to base64.
-std::string
-sign_one_time_key(std::shared_ptr<olm::Account> account, const std::string &key);
+struct OlmDeleter
+{
+        void operator()(OlmAccount *ptr) { operator delete(ptr, olm_account_size()); }
+        void operator()(OlmSession *ptr) { operator delete(ptr, olm_session_size()); }
+        void operator()(OlmUtility *ptr) { operator delete(ptr, olm_utility_size()); }
+};
 
-//! Sign the identity keys. The result should be used as part of the /keys/upload/ request.
-std::string
-sign_identity_keys(std::shared_ptr<olm::Account> account,
-                   const IdentityKeys &keys,
-                   const mtx::identifiers::User &user_id,
-                   const std::string &device_id);
+class OlmClient : public std::enable_shared_from_this<OlmClient>
+{
+public:
+        OlmClient() = default;
+        OlmClient(std::string user_id, std::string device_id)
+          : user_id_(std::move(user_id))
+          , device_id_(std::move(device_id))
+        {}
 
-//! Sign the given message.
-std::unique_ptr<BinaryBuf>
-sign_message(std::shared_ptr<olm::Account> account, const std::string &msg);
+        using Base64String      = std::string;
+        using SignedOneTimeKeys = std::map<std::string, json>;
 
-//! Generate the json structure for the signed one time key.
-nlohmann::json
-signed_one_time_key_json(const mtx::identifiers::User &user_id,
-                         const std::string &device_id,
-                         const std::string &key,
-                         const std::string &signature);
+        void set_device_id(std::string device_id) { device_id_ = std::move(device_id); }
+        void set_user_id(std::string user_id) { user_id_ = std::move(user_id); }
 
-//! Sign one_time_keys and generate the appropriate structure for the /keys/upload request.
-std::map<std::string, nlohmann::json>
-sign_one_time_keys(std::shared_ptr<olm::Account> account,
-                   const mtx::client::crypto::OneTimeKeys &keys,
-                   const mtx::identifiers::User &user_id,
-                   const std::string &device_id);
+        //! Sign the given message.
+        std::unique_ptr<BinaryBuf> sign_message(const std::string &msg);
 
-//! Prepare request for the /keys/upload endpoint by signing identity & one time keys.
-mtx::requests::UploadKeys
-create_upload_keys_request(std::shared_ptr<olm::Account> account,
-                           const mtx::client::crypto::IdentityKeys &identity_keys,
-                           const mtx::client::crypto::OneTimeKeys &one_time_keys,
-                           const mtx::identifiers::User &user_id,
-                           const std::string &device_id);
+        //! Create a new olm Account. Must be called before any other operation.
+        void create_new_account();
+        void create_new_utility();
+        std::unique_ptr<OlmSession, OlmDeleter> create_new_session();
+
+        //! Retrieve the json representation of the identity keys for the given account.
+        IdentityKeys identity_keys();
+        //! Sign the identity keys.
+        //! The result should be used as part of the /keys/upload/ request.
+        Base64String sign_identity_keys();
+
+        //! Generate a number of one time keys.
+        std::size_t generate_one_time_keys(std::size_t nkeys);
+        //! Retrieve the json representation of the one time keys for the given account.
+        OneTimeKeys one_time_keys();
+        //! Sign the given one time keys and encode it to base64.
+        Base64String sign_one_time_key(const Base64String &encoded_key);
+        //! Sign one_time_keys and generate the appropriate structure for the /keys/upload request.
+        SignedOneTimeKeys sign_one_time_keys(const OneTimeKeys &keys);
+        //! Generate the json structure for the signed one time key.
+        json signed_one_time_key_json(const std::string &key, const std::string &signature);
+
+        //! Prepare request for the /keys/upload endpoint by signing identity & one time keys.
+        mtx::requests::UploadKeys create_upload_keys_request(const OneTimeKeys &keys);
+        mtx::requests::UploadKeys create_upload_keys_request();
+
+        //! Create an outbount megolm session.
+        std::unique_ptr<OlmSession, OlmDeleter> create_outbound_group_session(
+          const std::string &peer_identity_key,
+          const std::string &peer_one_time_key);
+
+        OlmAccount *account() { return account_.get(); }
+        OlmUtility *utility() { return utility_.get(); }
+
+private:
+        std::string user_id_;
+        std::string device_id_;
+
+        std::unique_ptr<OlmAccount, OlmDeleter> account_;
+        std::unique_ptr<OlmUtility, OlmDeleter> utility_;
+};
 
 std::string
 encode_base64(const uint8_t *data, std::size_t len);
@@ -156,23 +176,13 @@ encode_base64(const uint8_t *data, std::size_t len);
 std::unique_ptr<BinaryBuf>
 decode_base64(const std::string &data);
 
-//! Convert the given string to an uint8_t buffer.
-std::unique_ptr<BinaryBuf>
-str_to_buffer(const std::string &data);
-
 //! Convert the given json struct to an uint8_t buffer.
 std::unique_ptr<BinaryBuf>
 json_to_buffer(const nlohmann::json &obj);
 
-//! Convert from base64 encoded public key.
-_olm_curve25519_public_key
-str_to_curve25519_pk(const std::string &data);
-
-//! Create an outbount megolm session.
-olm::Session
-init_outbound_group_session(std::shared_ptr<olm::Account> account,
-                            const std::string &peer_id_key,
-                            const std::string &peer_one_time_key);
+//! Convert the given string to an uint8_t buffer.
+std::unique_ptr<BinaryBuf>
+str_to_buffer(const std::string &data);
 
 } // namespace crypto
 } // namespace client

@@ -23,23 +23,20 @@ using namespace mtx::responses;
 using namespace std;
 
 mtx::requests::UploadKeys
-generate_keys(std::shared_ptr<olm::Account> account,
-              const mtx::identifiers::User &user_id,
-              const std::string &device_id)
+generate_keys(std::shared_ptr<mtx::client::crypto::OlmClient> account)
 {
-        auto idks = mtx::client::crypto::identity_keys(account);
+        auto idks = account->identity_keys();
+        account->generate_one_time_keys(1);
+        auto otks = account->one_time_keys();
 
-        mtx::client::crypto::generate_one_time_keys(account, 1);
-        auto otks = mtx::client::crypto::one_time_keys(account);
-
-        return mtx::client::crypto::create_upload_keys_request(
-          account, idks, otks, user_id, device_id);
+        return account->create_upload_keys_request(otks);
 }
 
 TEST(Encryption, UploadIdentityKeys)
 {
         auto alice       = std::make_shared<Client>("localhost");
-        auto olm_account = mtx::client::crypto::olm_new_account();
+        auto olm_account = std::make_shared<mtx::client::crypto::OlmClient>();
+        olm_account->create_new_account();
 
         alice->login("alice", "secret", [](const mtx::responses::Login &, RequestErr err) {
                 check_error(err);
@@ -48,14 +45,16 @@ TEST(Encryption, UploadIdentityKeys)
         while (alice->access_token().empty())
                 sleep();
 
-        auto identity_keys = mtx::client::crypto::identity_keys(olm_account);
+        olm_account->set_user_id(alice->user_id().to_string());
+        olm_account->set_device_id(alice->device_id());
 
-        ASSERT_TRUE(identity_keys.curve25519.size() > 10);
-        ASSERT_TRUE(identity_keys.curve25519.size() > 10);
+        auto id_keys = olm_account->identity_keys();
+
+        ASSERT_TRUE(id_keys.curve25519.size() > 10);
+        ASSERT_TRUE(id_keys.curve25519.size() > 10);
 
         mtx::client::crypto::OneTimeKeys unused;
-        auto request = mtx::client::crypto::create_upload_keys_request(
-          olm_account, identity_keys, unused, alice->user_id(), alice->device_id());
+        auto request = olm_account->create_upload_keys_request(unused);
 
         // Make the request with the signed identity keys.
         alice->upload_keys(request, [](const mtx::responses::UploadKeys &res, RequestErr err) {
@@ -69,7 +68,8 @@ TEST(Encryption, UploadIdentityKeys)
 TEST(Encryption, UploadOneTimeKeys)
 {
         auto alice       = std::make_shared<Client>("localhost");
-        auto olm_account = mtx::client::crypto::olm_new_account();
+        auto olm_account = std::make_shared<mtx::client::crypto::OlmClient>();
+        olm_account->create_new_account();
 
         alice->login("alice", "secret", [](const mtx::responses::Login &, RequestErr err) {
                 check_error(err);
@@ -78,17 +78,20 @@ TEST(Encryption, UploadOneTimeKeys)
         while (alice->access_token().empty())
                 sleep();
 
-        auto nkeys = mtx::client::crypto::generate_one_time_keys(olm_account, 5);
+        olm_account->set_user_id(alice->user_id().to_string());
+        olm_account->set_device_id(alice->device_id());
+
+        auto nkeys = olm_account->generate_one_time_keys(5);
         EXPECT_EQ(nkeys, 5);
 
-        auto one_time_keys = mtx::client::crypto::one_time_keys(olm_account);
+        json otks = olm_account->one_time_keys();
 
         mtx::requests::UploadKeys req;
 
         // Create the proper structure for uploading.
         std::map<std::string, json> unsigned_keys;
 
-        auto obj = one_time_keys.at("curve25519");
+        auto obj = otks.at("curve25519");
         for (auto it = obj.begin(); it != obj.end(); ++it)
                 unsigned_keys["curve25519:" + it.key()] = it.value();
 
@@ -106,7 +109,8 @@ TEST(Encryption, UploadOneTimeKeys)
 TEST(Encryption, UploadSignedOneTimeKeys)
 {
         auto alice       = std::make_shared<Client>("localhost");
-        auto olm_account = mtx::client::crypto::olm_new_account();
+        auto olm_account = std::make_shared<mtx::client::crypto::OlmClient>();
+        olm_account->create_new_account();
 
         alice->login("alice", "secret", [](const mtx::responses::Login &, RequestErr err) {
                 check_error(err);
@@ -115,14 +119,16 @@ TEST(Encryption, UploadSignedOneTimeKeys)
         while (alice->access_token().empty())
                 sleep();
 
-        auto nkeys = mtx::client::crypto::generate_one_time_keys(olm_account, 5);
+        olm_account->set_user_id(alice->user_id().to_string());
+        olm_account->set_device_id(alice->device_id());
+
+        auto nkeys = olm_account->generate_one_time_keys(5);
         EXPECT_EQ(nkeys, 5);
 
-        auto one_time_keys = mtx::client::crypto::one_time_keys(olm_account);
+        auto one_time_keys = olm_account->one_time_keys();
 
         mtx::requests::UploadKeys req;
-        req.one_time_keys = mtx::client::crypto::sign_one_time_keys(
-          olm_account, one_time_keys, alice->user_id(), alice->device_id());
+        req.one_time_keys = olm_account->sign_one_time_keys(one_time_keys);
 
         alice->upload_keys(req, [nkeys](const mtx::responses::UploadKeys &res, RequestErr err) {
                 check_error(err);
@@ -136,7 +142,8 @@ TEST(Encryption, UploadSignedOneTimeKeys)
 TEST(Encryption, UploadKeys)
 {
         auto alice       = std::make_shared<Client>("localhost");
-        auto olm_account = mtx::client::crypto::olm_new_account();
+        auto olm_account = std::make_shared<mtx::client::crypto::OlmClient>();
+        olm_account->create_new_account();
 
         alice->login("alice", "secret", [](const mtx::responses::Login &, RequestErr err) {
                 check_error(err);
@@ -145,7 +152,10 @@ TEST(Encryption, UploadKeys)
         while (alice->access_token().empty())
                 sleep();
 
-        auto req = ::generate_keys(olm_account, alice->user_id(), alice->device_id());
+        olm_account->set_user_id(alice->user_id().to_string());
+        olm_account->set_device_id(alice->device_id());
+
+        auto req = generate_keys(olm_account);
 
         alice->upload_keys(req, [](const mtx::responses::UploadKeys &res, RequestErr err) {
                 check_error(err);
@@ -159,10 +169,13 @@ TEST(Encryption, UploadKeys)
 TEST(Encryption, QueryKeys)
 {
         auto alice     = std::make_shared<Client>("localhost");
-        auto alice_olm = mtx::client::crypto::olm_new_account();
+        auto alice_olm = std::make_shared<mtx::client::crypto::OlmClient>();
 
         auto bob     = std::make_shared<Client>("localhost");
-        auto bob_olm = mtx::client::crypto::olm_new_account();
+        auto bob_olm = std::make_shared<mtx::client::crypto::OlmClient>();
+
+        alice_olm->create_new_account();
+        bob_olm->create_new_account();
 
         alice->login("alice", "secret", [](const mtx::responses::Login &, RequestErr err) {
                 check_error(err);
@@ -174,9 +187,15 @@ TEST(Encryption, QueryKeys)
         while (alice->access_token().empty() || bob->access_token().empty())
                 sleep();
 
+        alice_olm->set_user_id(alice->user_id().to_string());
+        alice_olm->set_device_id(alice->device_id());
+
+        bob_olm->set_user_id(bob->user_id().to_string());
+        bob_olm->set_device_id(bob->device_id());
+
         // Create and upload keys for both users.
-        auto alice_req = ::generate_keys(alice_olm, alice->user_id(), alice->device_id());
-        auto bob_req   = ::generate_keys(bob_olm, bob->user_id(), bob->device_id());
+        auto alice_req = ::generate_keys(alice_olm);
+        auto bob_req   = ::generate_keys(bob_olm);
 
         // Validates that both upload requests are finished.
         atomic_int uploads(0);
@@ -257,7 +276,8 @@ TEST(Encryption, QueryKeys)
 TEST(Encryption, KeyChanges)
 {
         auto carl     = std::make_shared<Client>("localhost");
-        auto carl_olm = mtx::client::crypto::olm_new_account();
+        auto carl_olm = std::make_shared<mtx::client::crypto::OlmClient>();
+        carl_olm->create_new_account();
 
         carl->login("carl", "secret", [](const mtx::responses::Login &, RequestErr err) {
                 check_error(err);
@@ -265,6 +285,9 @@ TEST(Encryption, KeyChanges)
 
         while (carl->access_token().empty())
                 sleep();
+
+        carl_olm->set_device_id(carl->device_id());
+        carl_olm->set_user_id(carl->user_id().to_string());
 
         mtx::requests::CreateRoom req;
         carl->create_room(
@@ -281,8 +304,7 @@ TEST(Encryption, KeyChanges)
                             check_error(err);
                             const auto next_batch_token = res.next_batch;
 
-                            auto key_req =
-                              ::generate_keys(carl_olm, carl->user_id(), carl->device_id());
+                            auto key_req = ::generate_keys(carl_olm);
 
                             atomic_bool keys_uploaded(false);
 
