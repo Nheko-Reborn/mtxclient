@@ -180,7 +180,7 @@ public:
         void set_user_id(std::string user_id) { user_id_ = std::move(user_id); }
 
         //! Sign the given message.
-        std::unique_ptr<BinaryBuf> sign_message(const std::string &msg);
+        Base64String sign_message(const std::string &msg);
 
         template<class T>
         std::unique_ptr<T, OlmDeleter> create_olm_object()
@@ -236,11 +236,11 @@ decode_base64(const std::string &data);
 
 //! Convert the given json struct to an uint8_t buffer.
 std::unique_ptr<BinaryBuf>
-json_to_buffer(const nlohmann::json &obj);
+to_buffer(const nlohmann::json &obj);
 
 //! Convert the given string to an uint8_t buffer.
 std::unique_ptr<BinaryBuf>
-str_to_buffer(const std::string &data);
+to_buffer(const std::string &data);
 
 //! Retrieve the session id.
 std::string

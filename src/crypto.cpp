@@ -47,18 +47,18 @@ OlmClient::identity_keys()
         return json::parse(std::string(tmp_buf->begin(), tmp_buf->end()));
 }
 
-std::unique_ptr<BinaryBuf>
+std::string
 OlmClient::sign_message(const std::string &msg)
 {
         // Message buffer
-        auto buf = str_to_buffer(msg);
+        auto buf = to_buffer(msg);
 
         // Signature buffer
         auto signature_buf = create_buffer(olm_account_signature_length(account_.get()));
         olm_account_sign(
           account_.get(), buf->data(), buf->size(), signature_buf->data(), signature_buf->size());
 
-        return signature_buf;
+        return std::string(signature_buf->begin(), signature_buf->end());
 }
 
 std::string
@@ -75,8 +75,7 @@ OlmClient::sign_identity_keys()
                      {"ed25519:" + device_id_, keys.ed25519},
                    }}};
 
-        return encode_base64(sign_message(body.dump())->data(),
-                             olm_account_signature_length(account_.get()));
+        return sign_message(body.dump());
 }
 
 std::size_t
@@ -113,10 +112,7 @@ std::string
 OlmClient::sign_one_time_key(const std::string &key)
 {
         json j{{"key", key}};
-        auto str_json  = j.dump();
-        auto signature = sign_message(j.dump());
-
-        return encode_base64(signature->data(), signature->size());
+        return sign_message(j.dump());
 }
 
 std::map<std::string, json>
@@ -189,7 +185,7 @@ OlmClient::init_outbound_group_session()
 }
 
 std::unique_ptr<BinaryBuf>
-mtx::client::crypto::str_to_buffer(const std::string &data)
+mtx::client::crypto::to_buffer(const std::string &data)
 {
         auto str_pointer  = reinterpret_cast<const uint8_t *>(&data[0]);
         const auto nbytes = data.size();
@@ -210,7 +206,7 @@ mtx::client::crypto::decode_base64(const std::string &data)
                 throw std::runtime_error("invalid base64 input length");
 
         auto output_buf = create_buffer(output_nbytes);
-        auto input_buf  = str_to_buffer(data);
+        auto input_buf  = to_buffer(data);
 
         olm::decode_base64(input_buf->data(), nbytes, output_buf->data());
 
@@ -232,9 +228,9 @@ mtx::client::crypto::encode_base64(const uint8_t *data, std::size_t len)
 }
 
 std::unique_ptr<BinaryBuf>
-mtx::client::crypto::json_to_buffer(const nlohmann::json &obj)
+mtx::client::crypto::to_buffer(const nlohmann::json &obj)
 {
-        return str_to_buffer(obj.dump());
+        return to_buffer(obj.dump());
 }
 
 std::string
@@ -243,7 +239,7 @@ mtx::client::crypto::session_id(OlmOutboundGroupSession *s)
         auto tmp = create_buffer(olm_outbound_group_session_id_length(s));
         olm_outbound_group_session_id(s, tmp->data(), tmp->size());
 
-        return encode_base64(tmp->data(), tmp->size());
+        return std::string(tmp->begin(), tmp->end());
 }
 
 std::string
@@ -252,5 +248,5 @@ mtx::client::crypto::session_key(OlmOutboundGroupSession *s)
         auto tmp = create_buffer(olm_outbound_group_session_key_length(s));
         olm_outbound_group_session_key(s, tmp->data(), tmp->size());
 
-        return encode_base64(tmp->data(), tmp->size());
+        return std::string(tmp->begin(), tmp->end());
 }
