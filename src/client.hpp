@@ -291,7 +291,7 @@ private:
         boost::asio::io_service ios_;
 
         //! Used to prevent the event loop from shutting down.
-        std::unique_ptr<boost::asio::io_service::work> work_;
+        boost::optional<boost::asio::io_service::work> work_;
         //! Worker threads for the requests.
         boost::thread_group thread_group_;
         //! Used to resolve DNS names.

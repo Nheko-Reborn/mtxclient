@@ -1,5 +1,6 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/bind.hpp>
+#include <boost/utility/typed_in_place_factory.hpp>
 
 #include "client.hpp"
 #include "utils.hpp"
@@ -15,7 +16,8 @@ Client::Client(const std::string &server, uint16_t port)
   , server_{server}
   , port_{port}
 {
-        work_.reset(new boost::asio::io_service::work(ios_));
+        using namespace boost::asio;
+        work_ = boost::in_place<io_service::work>(io_service::work(ios_));
 
         const auto threads_num = std::max(1U, std::thread::hardware_concurrency());
 
@@ -29,7 +31,7 @@ Client::close()
         // Destroy work object. This allows the I/O thread to
         // exit the event loop when there are no more pending
         // asynchronous operations.
-        work_.reset(nullptr);
+        work_ = boost::none;
 
         // Wait for the worker threads to exit.
         thread_group_.join_all();
