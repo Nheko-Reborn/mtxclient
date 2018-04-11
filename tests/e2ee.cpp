@@ -273,6 +273,115 @@ TEST(Encryption, QueryKeys)
         bob->close();
 }
 
+TEST(Encryption, ClaimKeys)
+{
+        using namespace mtx::client::crypto;
+
+        auto alice     = std::make_shared<Client>("localhost");
+        auto alice_olm = std::make_shared<OlmClient>();
+
+        alice_olm->create_new_account();
+        alice->login("alice", "secret", check_login);
+
+        auto bob     = std::make_shared<Client>("localhost");
+        auto bob_olm = std::make_shared<OlmClient>();
+
+        bob_olm->create_new_account();
+        bob->login("bob", "secret", check_login);
+
+        while (alice->access_token().empty() || bob->access_token().empty())
+                sleep();
+
+        alice_olm->set_user_id(alice->user_id().to_string());
+        alice_olm->set_device_id(alice->device_id());
+
+        bob_olm->set_user_id(bob->user_id().to_string());
+        bob_olm->set_device_id(bob->device_id());
+
+        atomic_bool uploaded(false);
+
+        // Bob uploads his keys.
+        auto bob_req = ::generate_keys(bob_olm);
+        bob->upload_keys(bob_req,
+                         [&uploaded](const mtx::responses::UploadKeys &res, RequestErr err) {
+                                 check_error(err);
+                                 EXPECT_EQ(res.one_time_key_counts.size(), 1);
+                                 EXPECT_EQ(res.one_time_key_counts.at("signed_curve25519"), 1);
+                                 uploaded = true;
+                         });
+
+        // Waiting for the upload to finish.
+        while (!uploaded)
+                sleep();
+
+        // Alice retrieves bob's keys & claims one signed one-time key.
+        mtx::requests::QueryKeys alice_rk;
+        alice_rk.device_keys[bob->user_id().to_string()] = {};
+        alice->query_keys(
+          alice_rk,
+          [alice_olm, alice, bob, bob_req](const mtx::responses::QueryKeys &res, RequestErr err) {
+                  check_error(err);
+
+                  auto bob_devices = res.device_keys.at(bob->user_id().to_string());
+                  ASSERT_TRUE(bob_devices.size() > 0);
+
+                  auto devices = {bob->device_id()};
+
+                  // Retrieve the identity key for the current device.
+                  auto bob_ed25519 =
+                    bob_devices.at(bob->device_id()).keys.at("ed25519:" + bob->device_id());
+
+                  alice->claim_keys(
+                    bob->user_id(),
+                    devices,
+                    [alice_olm, bob, bob_req, bob_ed25519](const mtx::responses::ClaimKeys &res,
+                                                           RequestErr err) {
+                            check_error(err);
+
+                            const auto user_id   = bob->user_id().to_string();
+                            const auto device_id = bob->device_id();
+
+                            // The device exists.
+                            EXPECT_EQ(res.one_time_keys.size(), 1);
+                            EXPECT_EQ(res.one_time_keys.at(user_id).size(), 1);
+
+                            // The key is the one bob sent.
+                            auto one_time_key = res.one_time_keys.at(user_id).at(device_id);
+                            ASSERT_TRUE(one_time_key.is_object());
+
+                            auto algo     = one_time_key.begin().key();
+                            auto contents = one_time_key.begin().value();
+
+                            EXPECT_EQ(bob_req.one_time_keys.at(algo), contents);
+
+                            alice_olm->create_new_utility();
+
+                            auto msg = json{{"key", contents.at("key").get<std::string>()}}.dump();
+                            auto identity_keys = to_buffer(bob_ed25519);
+                            auto signature     = to_buffer(contents.at("signatures")
+                                                         .at(user_id)
+                                                         .at("ed25519:" + device_id)
+                                                         .get<std::string>());
+
+                            // Verify signature.
+                            auto ret = olm_ed25519_verify(alice_olm->utility(),
+                                                          identity_keys->data(),
+                                                          identity_keys->size(),
+                                                          msg.data(),
+                                                          msg.size(),
+                                                          signature->data(),
+                                                          signature->size());
+
+                            EXPECT_EQ(std::string(olm_utility_last_error(alice_olm->utility())),
+                                      "SUCCESS");
+                            EXPECT_EQ(ret, 0);
+                    });
+          });
+
+        alice->close();
+        bob->close();
+}
+
 TEST(Encryption, KeyChanges)
 {
         auto carl     = std::make_shared<Client>("localhost");

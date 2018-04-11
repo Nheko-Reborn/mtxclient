@@ -223,6 +223,12 @@ public:
           const mtx::requests::QueryKeys &req,
           std::function<void(const mtx::responses::QueryKeys &res, RequestErr err)> cb);
 
+        //! Claims one-time keys for use in pre-key messages.
+        void claim_keys(
+          const mtx::identifiers::User &user,
+          const std::vector<std::string> &devices,
+          std::function<void(const mtx::responses::ClaimKeys &res, RequestErr err)> cb);
+
         //! Gets a list of users who have updated their device identity keys
         //! since a previous sync token.
         void key_changes(
