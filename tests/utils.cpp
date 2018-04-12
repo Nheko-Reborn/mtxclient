@@ -11,6 +11,44 @@ using json = nlohmann::json;
 using namespace mtx::client::crypto;
 using namespace std;
 
+TEST(Utilities, CanonicalJSON)
+{
+        // Examples taken from
+        // https://matrix.org/docs/spec/appendices.html#canonical-json
+        json data = R"({
+        "auth": {
+          "success": true,
+          "mxid": "@john.doe:example.com",
+          "profile": {
+            "display_name": "John Doe",
+            "three_pids": [{
+              "medium": "email",
+              "address": "john.doe@example.org"
+            }, {
+              "medium": "msisdn",
+              "address": "123456789"
+            }]
+          }}})"_json;
+
+        EXPECT_EQ(
+          data.dump(),
+          "{\"auth\":{\"mxid\":\"@john.doe:example.com\",\"profile\":{\"display_name\":\"John "
+          "Doe\",\"three_pids\":[{\"address\":\"john.doe@example.org\",\"medium\":\"email\"},{"
+          "\"address\":\"123456789\",\"medium\":\"msisdn\"}]},\"success\":true}}");
+
+        json data0 = R"({"b":"2","a":"1"})"_json;
+        EXPECT_EQ(data0.dump(), "{\"a\":\"1\",\"b\":\"2\"}");
+
+        json data1 = R"({ "本": 2, "日": 1 })"_json;
+        EXPECT_EQ(data1.dump(), "{\"日\":1,\"本\":2}");
+
+        json data2 = R"({"a": "\u65E5"})"_json;
+        EXPECT_EQ(data2.dump(), "{\"a\":\"日\"}");
+
+        json data3 = R"({ "a": null })"_json;
+        EXPECT_EQ(data3.dump(), "{\"a\":null}");
+}
+
 TEST(Utilities, JsonToBuffer)
 {
         auto msg = json({{"key", "text"}});
