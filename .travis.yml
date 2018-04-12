@@ -13,7 +13,7 @@ notifications:
 matrix:
   include:
     - os: osx
-      osx_image: xcode8
+      osx_image: xcode9
       compiler: clang
       env:
         - OPENSLL_ROOT_DIR=/usr/local/opt/openssl
