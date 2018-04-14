@@ -1,6 +1,7 @@
 mtxclient
 ---
 [![Build Status](https://travis-ci.org/mujx/mtxclient.svg?branch=master)](https://travis-ci.org/mujx/mtxclient)
+[![Build status](https://ci.appveyor.com/api/projects/status/5hl7a6dc5s60xpxy/branch/master?svg=true)](https://ci.appveyor.com/project/mujx/mtxclient/branch/master)
 [![codecov](https://codecov.io/gh/mujx/mtxclient/branch/master/graph/badge.svg)](https://codecov.io/gh/mujx/mtxclient)
 
 Client API library for the Matrix protocol, built on top of Boost.Asio.
