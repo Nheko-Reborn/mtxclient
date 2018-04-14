@@ -49,14 +49,6 @@ TEST(Utilities, CanonicalJSON)
         EXPECT_EQ(data3.dump(), "{\"a\":null}");
 }
 
-TEST(Utilities, JsonToBuffer)
-{
-        auto msg = json({{"key", "text"}});
-        auto buf = to_buffer(msg);
-
-        EXPECT_EQ(std::string(buf->begin(), buf->end()), msg.dump());
-}
-
 TEST(Utilities, VerifySignedOneTimeKey)
 {
         auto alice = make_shared<OlmClient>();
@@ -71,15 +63,16 @@ TEST(Utilities, VerifySignedOneTimeKey)
         auto first_key = keys.curve25519.begin()->second;
         auto msg       = json({{"key", first_key}}).dump();
 
-        auto sig_buf = to_buffer(alice->sign_message(msg));
+        auto sig = alice->sign_message(msg);
 
-        auto res = olm_ed25519_verify(alice->utility(),
-                                      to_buffer(alice->identity_keys().ed25519)->data(),
-                                      to_buffer(alice->identity_keys().ed25519)->size(),
-                                      to_buffer(msg)->data(),
-                                      to_buffer(msg)->size(),
-                                      sig_buf->data(),
-                                      sig_buf->size());
+        auto res = olm_ed25519_verify(
+          alice->utility(),
+          reinterpret_cast<const uint8_t *>(alice->identity_keys().ed25519.data()),
+          alice->identity_keys().ed25519.size(),
+          reinterpret_cast<const uint8_t *>(msg.data()),
+          msg.size(),
+          reinterpret_cast<uint8_t *>(&sig[0]),
+          sig.size());
 
         EXPECT_EQ(std::string(olm_utility_last_error(alice->utility())), "SUCCESS");
         EXPECT_EQ(res, 0);
@@ -101,15 +94,16 @@ TEST(Utilities, VerifySignedIdentityKeys)
                            {"ed25519:some_device", keys["ed25519"]}}}})
                      .dump();
 
-        auto sig_buf = to_buffer(alice->sign_message(msg));
+        auto sig = alice->sign_message(msg);
 
-        auto res = olm_ed25519_verify(alice->utility(),
-                                      to_buffer(alice->identity_keys().ed25519)->data(),
-                                      to_buffer(alice->identity_keys().ed25519)->size(),
-                                      to_buffer(msg)->data(),
-                                      to_buffer(msg)->size(),
-                                      sig_buf->data(),
-                                      sig_buf->size());
+        auto res = olm_ed25519_verify(
+          alice->utility(),
+          reinterpret_cast<const uint8_t *>(alice->identity_keys().ed25519.data()),
+          alice->identity_keys().ed25519.size(),
+          reinterpret_cast<const uint8_t *>(msg.data()),
+          msg.size(),
+          reinterpret_cast<uint8_t *>(&sig[0]),
+          sig.size());
 
         EXPECT_EQ(std::string(olm_utility_last_error(alice->utility())), "SUCCESS");
         EXPECT_EQ(res, 0);

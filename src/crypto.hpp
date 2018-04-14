@@ -234,14 +234,6 @@ encode_base64(const uint8_t *data, std::size_t len);
 std::unique_ptr<BinaryBuf>
 decode_base64(const std::string &data);
 
-//! Convert the given json struct to an uint8_t buffer.
-std::unique_ptr<BinaryBuf>
-to_buffer(const nlohmann::json &obj);
-
-//! Convert the given string to an uint8_t buffer.
-std::unique_ptr<BinaryBuf>
-to_buffer(const std::string &data);
-
 //! Retrieve the session id.
 std::string
 session_id(OlmOutboundGroupSession *s);

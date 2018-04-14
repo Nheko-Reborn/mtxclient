@@ -50,13 +50,9 @@ OlmClient::identity_keys()
 std::string
 OlmClient::sign_message(const std::string &msg)
 {
-        // Message buffer
-        auto buf = to_buffer(msg);
-
-        // Signature buffer
         auto signature_buf = create_buffer(olm_account_signature_length(account_.get()));
         olm_account_sign(
-          account_.get(), buf->data(), buf->size(), signature_buf->data(), signature_buf->size());
+          account_.get(), msg.data(), msg.size(), signature_buf->data(), signature_buf->size());
 
         return std::string(signature_buf->begin(), signature_buf->end());
 }
@@ -185,30 +181,17 @@ OlmClient::init_outbound_group_session()
 }
 
 std::unique_ptr<BinaryBuf>
-mtx::client::crypto::to_buffer(const std::string &data)
+mtx::client::crypto::decode_base64(const std::string &msg)
 {
-        auto str_pointer  = reinterpret_cast<const uint8_t *>(&data[0]);
-        const auto nbytes = data.size();
-
-        auto buf = create_buffer(nbytes);
-        memcpy(buf->data(), str_pointer, buf->size());
-
-        return buf;
-}
-
-std::unique_ptr<BinaryBuf>
-mtx::client::crypto::decode_base64(const std::string &data)
-{
-        const auto nbytes       = data.size();
-        const int output_nbytes = olm::decode_base64_length(nbytes);
+        const int output_nbytes = olm::decode_base64_length(msg.size());
 
         if (output_nbytes == -1)
                 throw std::runtime_error("invalid base64 input length");
 
         auto output_buf = create_buffer(output_nbytes);
-        auto input_buf  = to_buffer(data);
 
-        olm::decode_base64(input_buf->data(), nbytes, output_buf->data());
+        olm::decode_base64(
+          reinterpret_cast<const uint8_t *>(msg.data()), msg.size(), output_buf->data());
 
         return output_buf;
 }
@@ -225,12 +208,6 @@ mtx::client::crypto::encode_base64(const uint8_t *data, std::size_t len)
         olm::encode_base64(data, len, output_buf->data());
 
         return std::string(output_buf->begin(), output_buf->end());
-}
-
-std::unique_ptr<BinaryBuf>
-mtx::client::crypto::to_buffer(const nlohmann::json &obj)
-{
-        return to_buffer(obj.dump());
 }
 
 std::string

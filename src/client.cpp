@@ -144,10 +144,14 @@ Client::remove_session(std::shared_ptr<Session> s)
                         ec.assign(0, ec.category());
                 }
 
-                // Ignoring short_read error.
-                if ((ec.category() == boost::asio::error::get_ssl_category()) &&
-                    (ERR_GET_REASON(ec.value()) == SSL_R_SHORT_READ))
+// SSL_R_SHORT_READ is removed in openssl-1.1
+#if defined SSL_R_SHORT_READ
+                if (ERR_GET_REASON(ec.value()) == SSL_R_SHORT_READ)
                         return;
+#else
+                if (ERR_GET_REASON(ec.value()) == boost::asio::ssl::error::stream_truncated)
+                        return;
+#endif
 
                 if (ec)
                         // TODO: propagate the error.

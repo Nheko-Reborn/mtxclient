@@ -357,20 +357,20 @@ TEST(Encryption, ClaimKeys)
                             alice_olm->create_new_utility();
 
                             auto msg = json{{"key", contents.at("key").get<std::string>()}}.dump();
-                            auto identity_keys = to_buffer(bob_ed25519);
-                            auto signature     = to_buffer(contents.at("signatures")
-                                                         .at(user_id)
-                                                         .at("ed25519:" + device_id)
-                                                         .get<std::string>());
+                            auto signature = contents.at("signatures")
+                                               .at(user_id)
+                                               .at("ed25519:" + device_id)
+                                               .get<std::string>();
 
                             // Verify signature.
-                            auto ret = olm_ed25519_verify(alice_olm->utility(),
-                                                          identity_keys->data(),
-                                                          identity_keys->size(),
-                                                          msg.data(),
-                                                          msg.size(),
-                                                          signature->data(),
-                                                          signature->size());
+                            auto ret = olm_ed25519_verify(
+                              alice_olm->utility(),
+                              reinterpret_cast<const uint8_t *>(bob_ed25519.data()),
+                              bob_ed25519.size(),
+                              msg.data(),
+                              msg.size(),
+                              reinterpret_cast<uint8_t *>(&signature[0]),
+                              signature.size());
 
                             EXPECT_EQ(std::string(olm_utility_last_error(alice_olm->utility())),
                                       "SUCCESS");
