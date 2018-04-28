@@ -6,6 +6,8 @@ configuration: Release
 image: Visual Studio 2017
 platform: x64
 
+cache: c:\tools\vcpkg\installed\
+
 build:
     verbosity: minimal
 
@@ -14,20 +16,20 @@ install:
     - set PATH=%PATH%;C:\mingw-w64\x86_64-7.2.0-posix-seh-rt_v5-rev1\mingw64\bin
     - mingw32-make.exe --version
     - call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat"
-    - vcpkg install 
-            openssl:%PLATFORM%-windows 
+    - vcpkg install
+            openssl:%PLATFORM%-windows
             boost-system:%PLATFORM%-windows
-            boost-random:%PLATFORM%-windows 
-            boost-thread:%PLATFORM%-windows 
+            boost-random:%PLATFORM%-windows
+            boost-thread:%PLATFORM%-windows
             boost-iostreams:%PLATFORM%-windows
             boost-asio:%PLATFORM%-windows
             boost-beast:%PLATFORM%-windows
-            libsodium:%PLATFORM%-windows 
+            libsodium:%PLATFORM%-windows
             zlib:%PLATFORM%-windows
 
 build_script:
     - cmake -G "Visual Studio 15 2017 Win64" -H. -Bbuild
-      -DCMAKE_BUILD_TYPE=Release 
+      -DCMAKE_BUILD_TYPE=Release
       -DCMAKE_TOOLCHAIN_FILE=C:/Tools/vcpkg/scripts/buildsystems/vcpkg.cmake
       -DBUILD_LIB_TESTS=OFF
       -DBUILD_LIB_EXAMPLES=OFF
