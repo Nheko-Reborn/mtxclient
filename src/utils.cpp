@@ -1,12 +1,16 @@
 #include "utils.hpp"
 
-#include <iostream>
 #include <sstream>
+#include <string>
+#include <utility>
 
 #include <boost/iostreams/copy.hpp>
+#include <boost/iostreams/detail/error.hpp>
+#include <boost/iostreams/detail/forward.hpp>
 #include <boost/iostreams/filter/gzip.hpp>
 #include <boost/iostreams/filter/zlib.hpp>
 #include <boost/iostreams/filtering_stream.hpp>
+#include <boost/iostreams/traits.hpp>
 #include <boost/random/random_device.hpp>
 #include <boost/random/uniform_int_distribution.hpp>
 

@@ -1,8 +1,9 @@
 #pragma once
 
-#include <boost/iostreams/stream.hpp>
+#include <_types/_uint8_t.h>
+#include <boost/iostreams/device/array.hpp>
+#include <iosfwd>
 #include <map>
-#include <string>
 
 namespace mtx {
 namespace client {
