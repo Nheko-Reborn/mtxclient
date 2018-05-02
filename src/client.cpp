@@ -184,7 +184,7 @@ Client::setup_auth(std::shared_ptr<Session> session, bool auth)
 void
 Client::login(const std::string &user,
               const std::string &password,
-              std::function<void(const mtx::responses::Login &response, RequestErr err)> callback)
+              Callback<mtx::responses::Login> callback)
 {
         mtx::requests::Login req;
         req.user     = user;
@@ -206,7 +206,7 @@ Client::login(const std::string &user,
 }
 
 void
-Client::logout(std::function<void(const mtx::responses::Logout &response, RequestErr)> callback)
+Client::logout(Callback<mtx::responses::Logout> callback)
 {
         mtx::requests::Logout req;
 
@@ -225,7 +225,7 @@ Client::logout(std::function<void(const mtx::responses::Logout &response, Reques
 }
 
 void
-Client::set_avatar_url(const std::string &avatar_url, std::function<void(RequestErr err)> callback)
+Client::set_avatar_url(const std::string &avatar_url, ErrCallback callback)
 {
         mtx::requests::AvatarUrl req;
         req.avatar_url = avatar_url;
@@ -235,7 +235,7 @@ Client::set_avatar_url(const std::string &avatar_url, std::function<void(Request
 }
 
 void
-Client::set_displayname(const std::string &displayname, std::function<void(RequestErr)> callback)
+Client::set_displayname(const std::string &displayname, ErrCallback callback)
 {
         mtx::requests::DisplayName req;
         req.displayname = displayname;
@@ -246,7 +246,7 @@ Client::set_displayname(const std::string &displayname, std::function<void(Reque
 
 void
 Client::get_profile(const mtx::identifiers::User &user_id,
-                    std::function<void(const mtx::responses::Profile &, RequestErr)> callback)
+                    Callback<mtx::responses::Profile> callback)
 {
         get<mtx::responses::Profile>("/client/r0/profile/" + user_id.to_string(),
                                      [callback](const mtx::responses::Profile &res,
@@ -256,7 +256,7 @@ Client::get_profile(const mtx::identifiers::User &user_id,
 
 void
 Client::get_avatar_url(const mtx::identifiers::User &user_id,
-                       std::function<void(const mtx::responses::AvatarUrl &, RequestErr)> callback)
+                       Callback<mtx::responses::AvatarUrl> callback)
 {
         get<mtx::responses::AvatarUrl>("/client/r0/profile/" + user_id.to_string() + "/avatar_url",
                                        [callback](const mtx::responses::AvatarUrl &res,
@@ -266,15 +266,14 @@ Client::get_avatar_url(const mtx::identifiers::User &user_id,
 
 void
 Client::create_room(const mtx::requests::CreateRoom &room_options,
-                    std::function<void(const mtx::responses::CreateRoom &, RequestErr)> callback)
+                    Callback<mtx::responses::CreateRoom> callback)
 {
         post<mtx::requests::CreateRoom, mtx::responses::CreateRoom>(
           "/client/r0/createRoom", room_options, callback);
 }
 
 void
-Client::join_room(const mtx::identifiers::Room &room_id,
-                  std::function<void(const nlohmann::json &, RequestErr)> callback)
+Client::join_room(const mtx::identifiers::Room &room_id, Callback<nlohmann::json> callback)
 {
         auto api_path = "/client/r0/rooms/" + room_id.to_string() + "/join";
 
@@ -282,8 +281,7 @@ Client::join_room(const mtx::identifiers::Room &room_id,
 }
 
 void
-Client::join_room(const std::string &room,
-                  std::function<void(const nlohmann::json &, RequestErr)> callback)
+Client::join_room(const std::string &room, Callback<nlohmann::json> callback)
 {
         auto api_path = "/client/r0/join/" + room;
 
@@ -291,8 +289,7 @@ Client::join_room(const std::string &room,
 }
 
 void
-Client::leave_room(const mtx::identifiers::Room &room_id,
-                   std::function<void(const nlohmann::json &, RequestErr)> callback)
+Client::leave_room(const mtx::identifiers::Room &room_id, Callback<nlohmann::json> callback)
 {
         auto api_path = "/client/r0/rooms/" + room_id.to_string() + "/leave";
 
@@ -302,7 +299,7 @@ Client::leave_room(const mtx::identifiers::Room &room_id,
 void
 Client::invite_user(const mtx::identifiers::Room &room_id,
                     const std::string &user_id,
-                    std::function<void(const mtx::responses::RoomInvite &, RequestErr)> callback)
+                    Callback<mtx::responses::RoomInvite> callback)
 {
         mtx::requests::RoomInvite req;
         req.user_id = user_id;
@@ -317,7 +314,7 @@ Client::sync(const std::string &filter,
              const std::string &since,
              bool full_state,
              uint16_t timeout,
-             std::function<void(const nlohmann::json &, RequestErr)> callback)
+             Callback<nlohmann::json> callback)
 {
         std::map<std::string, std::string> params;
 
@@ -339,7 +336,7 @@ Client::sync(const std::string &filter,
 }
 
 void
-Client::versions(std::function<void(const mtx::responses::Versions &, RequestErr)> callback)
+Client::versions(Callback<mtx::responses::Versions> callback)
 {
         get<mtx::responses::Versions>("/client/versions",
                                       [callback](const mtx::responses::Versions &res,
@@ -351,7 +348,7 @@ void
 Client::upload(const std::string &data,
                const std::string &content_type,
                const std::string &filename,
-               std::function<void(const mtx::responses::ContentURI &res, RequestErr err)> cb)
+               Callback<mtx::responses::ContentURI> cb)
 {
         std::map<std::string, std::string> params = {{"filename", filename}};
 
@@ -390,9 +387,7 @@ Client::download(const std::string &server,
 }
 
 void
-Client::start_typing(const mtx::identifiers::Room &room_id,
-                     uint64_t timeout,
-                     std::function<void(RequestErr)> callback)
+Client::start_typing(const mtx::identifiers::Room &room_id, uint64_t timeout, ErrCallback callback)
 {
         const auto api_path =
           "/client/r0/rooms/" + room_id.to_string() + "/typing/" + user_id_.to_string();
@@ -405,7 +400,7 @@ Client::start_typing(const mtx::identifiers::Room &room_id,
 }
 
 void
-Client::stop_typing(const mtx::identifiers::Room &room_id, std::function<void(RequestErr)> callback)
+Client::stop_typing(const mtx::identifiers::Room &room_id, ErrCallback callback)
 {
         const auto api_path =
           "/client/r0/rooms/" + room_id.to_string() + "/typing/" + user_id_.to_string();
@@ -423,7 +418,7 @@ Client::messages(const mtx::identifiers::Room &room_id,
                  PaginationDirection dir,
                  uint16_t limit,
                  const std::string &filter,
-                 std::function<void(const mtx::responses::Messages &res, RequestErr err)> callback)
+                 Callback<mtx::responses::Messages> callback)
 {
         std::map<std::string, std::string> params;
 
@@ -447,8 +442,7 @@ Client::messages(const mtx::identifiers::Room &room_id,
 }
 
 void
-Client::upload_filter(const nlohmann::json &j,
-                      std::function<void(const mtx::responses::FilterId, RequestErr err)> callback)
+Client::upload_filter(const nlohmann::json &j, Callback<mtx::responses::FilterId> callback)
 {
         const auto api_path = "/client/r0/user/" + user_id_.to_string() + "/filter";
 
@@ -458,7 +452,7 @@ Client::upload_filter(const nlohmann::json &j,
 void
 Client::read_event(const mtx::identifiers::Room &room_id,
                    const mtx::identifiers::Event &event_id,
-                   std::function<void(RequestErr err)> callback)
+                   ErrCallback callback)
 {
         const auto api_path = "/client/r0/rooms/" + room_id.to_string() + "/read_markers";
 
@@ -474,7 +468,7 @@ Client::read_event(const mtx::identifiers::Room &room_id,
 void
 Client::registration(const std::string &user,
                      const std::string &pass,
-                     std::function<void(const mtx::responses::Register &, RequestErr)> callback)
+                     Callback<mtx::responses::Register> callback)
 {
         nlohmann::json req = {{"username", user}, {"password", pass}};
 
@@ -482,10 +476,9 @@ Client::registration(const std::string &user,
 }
 
 void
-Client::flow_register(
-  const std::string &user,
-  const std::string &pass,
-  std::function<void(const mtx::responses::RegistrationFlows &, RequestErr)> callback)
+Client::flow_register(const std::string &user,
+                      const std::string &pass,
+                      Callback<mtx::responses::RegistrationFlows> callback)
 {
         nlohmann::json req = {{"username", user}, {"password", pass}};
 
@@ -498,7 +491,7 @@ Client::flow_response(const std::string &user,
                       const std::string &pass,
                       const std::string &session,
                       const std::string &flow_type,
-                      std::function<void(const mtx::responses::Register &, RequestErr)> callback)
+                      Callback<mtx::responses::Register> callback)
 {
         nlohmann::json req = {{"username", user},
                               {"password", pass},
@@ -511,7 +504,7 @@ void
 Client::send_to_device(const std::string &event_type,
                        const std::string &txid,
                        const nlohmann::json &body,
-                       std::function<void(RequestErr)> callback)
+                       ErrCallback callback)
 {
         const auto api_path = "/client/r0/sendToDevice/" + event_type + "/" + txid;
         put<nlohmann::json>(api_path, body, callback);
@@ -522,18 +515,16 @@ Client::send_to_device(const std::string &event_type,
 //
 
 void
-Client::upload_keys(
-  const mtx::requests::UploadKeys &req,
-  std::function<void(const mtx::responses::UploadKeys &res, RequestErr err)> callback)
+Client::upload_keys(const mtx::requests::UploadKeys &req,
+                    Callback<mtx::responses::UploadKeys> callback)
 {
         post<mtx::requests::UploadKeys, mtx::responses::UploadKeys>(
           "/client/r0/keys/upload", req, callback);
 }
 
 void
-Client::query_keys(
-  const mtx::requests::QueryKeys &req,
-  std::function<void(const mtx::responses::QueryKeys &res, RequestErr err)> callback)
+Client::query_keys(const mtx::requests::QueryKeys &req,
+                   Callback<mtx::responses::QueryKeys> callback)
 {
         post<mtx::requests::QueryKeys, mtx::responses::QueryKeys>(
           "/client/r0/keys/query", req, callback);
@@ -543,7 +534,7 @@ Client::query_keys(
 void
 Client::claim_keys(const mtx::identifiers::User &user,
                    const std::vector<std::string> &devices,
-                   std::function<void(const mtx::responses::ClaimKeys &res, RequestErr err)> cb)
+                   Callback<mtx::responses::ClaimKeys> cb)
 {
         mtx::requests::ClaimKeys req;
 
@@ -558,10 +549,9 @@ Client::claim_keys(const mtx::identifiers::User &user,
 }
 
 void
-Client::key_changes(
-  const std::string &from,
-  const std::string &to,
-  std::function<void(const mtx::responses::KeyChanges &res, RequestErr err)> callback)
+Client::key_changes(const std::string &from,
+                    const std::string &to,
+                    Callback<mtx::responses::KeyChanges> callback)
 {
         std::map<std::string, std::string> params;
 
@@ -579,7 +569,7 @@ Client::key_changes(
 
 void
 Client::enable_encryption(const mtx::identifiers::Room &room,
-                          std::function<void(const mtx::responses::EventId &, RequestErr)> callback)
+                          Callback<mtx::responses::EventId> callback)
 {
         using namespace mtx::events;
         state::Encryption event;

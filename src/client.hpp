@@ -38,7 +38,15 @@ to_string(PaginationDirection dir)
         return "f";
 }
 
-using RequestErr = const boost::optional<mtx::client::errors::ClientError> &;
+using RequestErr   = const boost::optional<mtx::client::errors::ClientError> &;
+using HeaderFields = const boost::optional<boost::beast::http::fields> &;
+using ErrCallback  = std::function<void(RequestErr)>;
+
+template<class Response>
+using Callback = std::function<void(const Response &, RequestErr)>;
+
+template<class Response>
+using HeadersCallback = std::function<void(const Response &, HeaderFields, RequestErr)>;
 
 //! The main object that the user will interact.
 class Client : public std::enable_shared_from_this<Client>
@@ -65,68 +73,59 @@ public:
         //! Generate a new transaction id.
         std::string generate_txn_id() { return utils::random_token(32, false); }
 
-        using HeaderFields = const boost::optional<boost::beast::http::fields> &;
-
         //! Perfom login.
         void login(const std::string &username,
                    const std::string &password,
-                   std::function<void(const mtx::responses::Login &response, RequestErr err)>);
+                   Callback<mtx::responses::Login> cb);
 
         //! Register by not expecting a registration flow.
         void registration(const std::string &user,
                           const std::string &pass,
-                          std::function<void(const mtx::responses::Register &, RequestErr)>);
+                          Callback<mtx::responses::Register> cb);
 
         //! Register through a registration flow.
-        void flow_register(
-          const std::string &user,
-          const std::string &pass,
-          std::function<void(const mtx::responses::RegistrationFlows &, RequestErr)>);
+        void flow_register(const std::string &user,
+                           const std::string &pass,
+                           Callback<mtx::responses::RegistrationFlows> cb);
 
         //! Complete the flow registration.
         void flow_response(const std::string &user,
                            const std::string &pass,
                            const std::string &session,
                            const std::string &flow_type,
-                           std::function<void(const mtx::responses::Register &, RequestErr)>);
+                           Callback<mtx::responses::Register> cb);
 
         //! Perform logout.
-        void logout(std::function<void(const mtx::responses::Logout &response, RequestErr err)>);
+        void logout(Callback<mtx::responses::Logout> cb);
         //! Change avatar.
-        void set_avatar_url(const std::string &avatar_url, std::function<void(RequestErr err)>);
+        void set_avatar_url(const std::string &avatar_url, ErrCallback cb);
         //! Change displayname.
-        void set_displayname(const std::string &displayname, std::function<void(RequestErr err)>);
+        void set_displayname(const std::string &displayname, ErrCallback cb);
         //! Get user profile.
         void get_profile(const mtx::identifiers::User &user_id,
-                         std::function<void(const mtx::responses::Profile &, RequestErr)> callback);
+                         Callback<mtx::responses::Profile> cb);
         //! Get user avatar URL.
-        void get_avatar_url(
-          const mtx::identifiers::User &user_id,
-          std::function<void(const mtx::responses::AvatarUrl &, RequestErr)> callback);
+        void get_avatar_url(const mtx::identifiers::User &user_id,
+                            Callback<mtx::responses::AvatarUrl> cb);
         //! Create a room with the given options.
-        void create_room(
-          const mtx::requests::CreateRoom &room_options,
-          std::function<void(const mtx::responses::CreateRoom &response, RequestErr err)>);
+        void create_room(const mtx::requests::CreateRoom &room_options,
+                         Callback<mtx::responses::CreateRoom> cb);
         //! Join a room by its room_id.
-        void join_room(const mtx::identifiers::Room &room_id,
-                       std::function<void(const nlohmann::json &res, RequestErr err)>);
+        void join_room(const mtx::identifiers::Room &room_id, Callback<nlohmann::json> cb);
         //! Join a room by an alias or a room_id.
-        void join_room(const std::string &room,
-                       std::function<void(const nlohmann::json &res, RequestErr err)>);
+        void join_room(const std::string &room, Callback<nlohmann::json> cb);
         //! Leave a room by its room_id.
-        void leave_room(const mtx::identifiers::Room &room_id,
-                        std::function<void(const nlohmann::json &res, RequestErr err)>);
+        void leave_room(const mtx::identifiers::Room &room_id, Callback<nlohmann::json> cb);
         //! Invite a user to a room.
-        void invite_user(
-          const mtx::identifiers::Room &room_id,
-          const std::string &user_id,
-          std::function<void(const mtx::responses::RoomInvite &res, RequestErr err)>);
+        void invite_user(const mtx::identifiers::Room &room_id,
+                         const std::string &user_id,
+                         Callback<mtx::responses::RoomInvite> cb);
         //! Perform sync.
         void sync(const std::string &filter,
                   const std::string &since,
                   bool full_state,
                   uint16_t timeout,
-                  std::function<void(const nlohmann::json &res, RequestErr err)>);
+                  Callback<nlohmann::json> cb);
 
         //! Paginate through room messages.
         void messages(const mtx::identifiers::Room &room_id,
@@ -135,25 +134,24 @@ public:
                       PaginationDirection dir,
                       uint16_t limit,
                       const std::string &filter,
-                      std::function<void(const mtx::responses::Messages &res, RequestErr err)>);
+                      Callback<mtx::responses::Messages> cb);
 
         //! Get the supported versions from the server.
-        void versions(std::function<void(const mtx::responses::Versions &res, RequestErr err)>);
+        void versions(Callback<mtx::responses::Versions> cb);
 
         //! Mark an event as read.
         void read_event(const mtx::identifiers::Room &room_id,
                         const mtx::identifiers::Event &event_id,
-                        std::function<void(RequestErr err)>);
+                        ErrCallback cb);
 
         //! Upload a filter
-        void upload_filter(const nlohmann::json &j,
-                           std::function<void(const mtx::responses::FilterId, RequestErr err)>);
+        void upload_filter(const nlohmann::json &j, Callback<mtx::responses::FilterId> cb);
 
         //! Upload data to the content repository.
         void upload(const std::string &data,
                     const std::string &content_type,
                     const std::string &filename,
-                    std::function<void(const mtx::responses::ContentURI &res, RequestErr err)> cb);
+                    Callback<mtx::responses::ContentURI> cb);
         //! Retrieve data from the content repository.
         void download(const std::string &server,
                       const std::string &media_id,
@@ -162,51 +160,44 @@ public:
                                          const std::string &original_filename,
                                          RequestErr err)> cb);
         //! Send typing notifications to the room.
-        void start_typing(const mtx::identifiers::Room &room_id,
-                          uint64_t timeout,
-                          std::function<void(RequestErr err)> cb);
+        void start_typing(const mtx::identifiers::Room &room_id, uint64_t timeout, ErrCallback cb);
         //! Remove typing notifications from the room.
-        void stop_typing(const mtx::identifiers::Room &room_id,
-                         std::function<void(RequestErr err)> cb);
+        void stop_typing(const mtx::identifiers::Room &room_id, ErrCallback cb);
         //! Send a room message with auto-generated transaction id.
         template<class Payload, mtx::events::EventType Event>
-        void send_room_message(
-          const mtx::identifiers::Room &room_id,
-          const Payload &payload,
-          std::function<void(const mtx::responses::EventId &, RequestErr)> callback);
+        void send_room_message(const mtx::identifiers::Room &room_id,
+                               const Payload &payload,
+                               Callback<mtx::responses::EventId> cb);
         //! Send a room message by providing transaction id.
         template<class Payload, mtx::events::EventType Event>
-        void send_room_message(
-          const mtx::identifiers::Room &room_id,
-          const std::string &txn_id,
-          const Payload &payload,
-          std::function<void(const mtx::responses::EventId &, RequestErr)> callback);
+        void send_room_message(const mtx::identifiers::Room &room_id,
+                               const std::string &txn_id,
+                               const Payload &payload,
+                               Callback<mtx::responses::EventId> cb);
         //! Send a state event by providing the state key.
         template<class Payload, mtx::events::EventType Event>
-        void send_state_event(
-          const mtx::identifiers::Room &room_id,
-          const std::string &state_key,
-          const Payload &payload,
-          std::function<void(const mtx::responses::EventId &, RequestErr)> callback);
+        void send_state_event(const mtx::identifiers::Room &room_id,
+                              const std::string &state_key,
+                              const Payload &payload,
+                              Callback<mtx::responses::EventId> cb);
         //! Send a state event with an empty state key.
         template<class Payload, mtx::events::EventType Event>
-        void send_state_event(
-          const mtx::identifiers::Room &room_id,
-          const Payload &payload,
-          std::function<void(const mtx::responses::EventId &, RequestErr)> callback);
+        void send_state_event(const mtx::identifiers::Room &room_id,
+                              const Payload &payload,
+                              Callback<mtx::responses::EventId> cb);
 
         //! Send send-to-device events to a set of client devices with a specified transaction id.
         void send_to_device(const std::string &event_type,
                             const std::string &txid,
                             const nlohmann::json &body,
-                            std::function<void(RequestErr)> callback);
+                            ErrCallback cb);
 
         //! Send send-to-device events to a set of client devices with a generated transaction id.
         void send_to_device(const std::string &event_type,
                             const nlohmann::json &body,
-                            std::function<void(RequestErr)> callback)
+                            ErrCallback cb)
         {
-                send_to_device(event_type, generate_txn_id(), body, callback);
+                send_to_device(event_type, generate_txn_id(), body, cb);
         }
 
         //
@@ -214,38 +205,33 @@ public:
         //
 
         //! Upload identity keys & one time keys.
-        void upload_keys(
-          const mtx::requests::UploadKeys &req,
-          std::function<void(const mtx::responses::UploadKeys &res, RequestErr err)> cb);
+        void upload_keys(const mtx::requests::UploadKeys &req,
+                         Callback<mtx::responses::UploadKeys> cb);
 
         //! Returns the current devices and identity keys for the given users.
-        void query_keys(
-          const mtx::requests::QueryKeys &req,
-          std::function<void(const mtx::responses::QueryKeys &res, RequestErr err)> cb);
+        void query_keys(const mtx::requests::QueryKeys &req,
+                        Callback<mtx::responses::QueryKeys> cb);
 
         //! Claims one-time keys for use in pre-key messages.
-        void claim_keys(
-          const mtx::identifiers::User &user,
-          const std::vector<std::string> &devices,
-          std::function<void(const mtx::responses::ClaimKeys &res, RequestErr err)> cb);
+        void claim_keys(const mtx::identifiers::User &user,
+                        const std::vector<std::string> &devices,
+                        Callback<mtx::responses::ClaimKeys> cb);
 
         //! Gets a list of users who have updated their device identity keys
         //! since a previous sync token.
-        void key_changes(
-          const std::string &from,
-          const std::string &to,
-          std::function<void(const mtx::responses::KeyChanges &res, RequestErr err)> cb);
+        void key_changes(const std::string &from,
+                         const std::string &to,
+                         Callback<mtx::responses::KeyChanges> cb);
 
         //! Enable encryption in a room by sending a `m.room.encryption` state event.
-        void enable_encryption(
-          const mtx::identifiers::Room &room,
-          std::function<void(const mtx::responses::EventId &res, RequestErr err)>);
+        void enable_encryption(const mtx::identifiers::Room &room,
+                               Callback<mtx::responses::EventId> cb);
 
 private:
         template<class Request, class Response>
         void post(const std::string &endpoint,
                   const Request &req,
-                  std::function<void(const Response &, RequestErr)>,
+                  Callback<Response> cb,
                   bool requires_auth              = true,
                   const std::string &content_type = "application/json");
 
@@ -253,23 +239,22 @@ private:
         template<class Request, class Response>
         void put(const std::string &endpoint,
                  const Request &req,
-                 std::function<void(const Response &, RequestErr)>,
+                 Callback<Response> cb,
                  bool requires_auth = true);
 
         template<class Request>
         void put(const std::string &endpoint,
                  const Request &req,
-                 std::function<void(RequestErr err)>,
+                 ErrCallback cb,
                  bool requires_auth = true);
 
         template<class Response>
         void get(const std::string &endpoint,
-                 std::function<void(const Response &res, HeaderFields fields, RequestErr err)>,
+                 HeadersCallback<Response> cb,
                  bool requires_auth = true);
 
         template<class Response>
-        std::shared_ptr<Session> create_session(
-          std::function<void(const Response &res, HeaderFields fields, RequestErr err)> callback);
+        std::shared_ptr<Session> create_session(HeadersCallback<Response> callback);
 
         //! Setup http header with the access token if needed.
         void setup_auth(std::shared_ptr<Session> session, bool auth);
@@ -344,7 +329,7 @@ template<class Request, class Response>
 void
 mtx::client::Client::post(const std::string &endpoint,
                           const Request &req,
-                          std::function<void(const Response &, RequestErr)> callback,
+                          Callback<Response> callback,
                           bool requires_auth,
                           const std::string &content_type)
 {
@@ -373,7 +358,7 @@ template<class Request, class Response>
 void
 mtx::client::Client::put(const std::string &endpoint,
                          const Request &req,
-                         std::function<void(const Response &, RequestErr)> callback,
+                         Callback<Response> callback,
                          bool requires_auth)
 {
         std::shared_ptr<Session> session = create_session<Response>(
@@ -401,7 +386,7 @@ template<class Request>
 void
 mtx::client::Client::put(const std::string &endpoint,
                          const Request &req,
-                         std::function<void(RequestErr)> callback,
+                         ErrCallback callback,
                          bool requires_auth)
 {
         mtx::client::Client::put<Request, mtx::responses::Empty>(
@@ -414,7 +399,7 @@ mtx::client::Client::put(const std::string &endpoint,
 template<class Response>
 void
 mtx::client::Client::get(const std::string &endpoint,
-                         std::function<void(const Response &, HeaderFields, RequestErr)> callback,
+                         HeadersCallback<Response> callback,
                          bool requires_auth)
 {
         std::shared_ptr<Session> session = create_session<Response>(callback);
@@ -436,8 +421,7 @@ mtx::client::Client::get(const std::string &endpoint,
 
 template<class Response>
 std::shared_ptr<mtx::client::Session>
-mtx::client::Client::create_session(
-  std::function<void(const Response &, HeaderFields, RequestErr)> callback)
+mtx::client::Client::create_session(HeadersCallback<Response> callback)
 {
         boost::asio::ssl::context ssl_ctx{boost::asio::ssl::context::sslv23_client};
 
@@ -533,21 +517,19 @@ mtx::client::Client::create_session(
 
 template<class Payload, mtx::events::EventType Event>
 void
-mtx::client::Client::send_room_message(
-  const mtx::identifiers::Room &room_id,
-  const Payload &payload,
-  std::function<void(const mtx::responses::EventId &, RequestErr)> callback)
+mtx::client::Client::send_room_message(const mtx::identifiers::Room &room_id,
+                                       const Payload &payload,
+                                       Callback<mtx::responses::EventId> callback)
 {
         send_room_message<Payload, Event>(room_id, generate_txn_id(), payload, callback);
 }
 
 template<class Payload, mtx::events::EventType Event>
 void
-mtx::client::Client::send_room_message(
-  const mtx::identifiers::Room &room_id,
-  const std::string &txn_id,
-  const Payload &payload,
-  std::function<void(const mtx::responses::EventId &, RequestErr)> callback)
+mtx::client::Client::send_room_message(const mtx::identifiers::Room &room_id,
+                                       const std::string &txn_id,
+                                       const Payload &payload,
+                                       Callback<mtx::responses::EventId> callback)
 {
         const auto api_path = "/client/r0/rooms/" + room_id.to_string() + "/send/" +
                               mtx::events::to_string(Event) + "/" + txn_id;
@@ -557,11 +539,10 @@ mtx::client::Client::send_room_message(
 
 template<class Payload, mtx::events::EventType Event>
 void
-mtx::client::Client::send_state_event(
-  const mtx::identifiers::Room &room_id,
-  const std::string &state_key,
-  const Payload &payload,
-  std::function<void(const mtx::responses::EventId &, RequestErr)> callback)
+mtx::client::Client::send_state_event(const mtx::identifiers::Room &room_id,
+                                      const std::string &state_key,
+                                      const Payload &payload,
+                                      Callback<mtx::responses::EventId> callback)
 {
         const auto api_path = "/client/r0/rooms/" + room_id.to_string() + "/state/" +
                               mtx::events::to_string(Event) + "/" + state_key;
@@ -571,10 +552,9 @@ mtx::client::Client::send_state_event(
 
 template<class Payload, mtx::events::EventType Event>
 void
-mtx::client::Client::send_state_event(
-  const mtx::identifiers::Room &room_id,
-  const Payload &payload,
-  std::function<void(const mtx::responses::EventId &, RequestErr)> callback)
+mtx::client::Client::send_state_event(const mtx::identifiers::Room &room_id,
+                                      const Payload &payload,
+                                      Callback<mtx::responses::EventId> callback)
 {
         send_state_event<Payload, Event>(room_id, "", payload, callback);
 }
