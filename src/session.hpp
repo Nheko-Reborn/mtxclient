@@ -1,10 +1,8 @@
 #pragma once
 
-#include <atomic>
 #include <boost/asio.hpp>
 #include <boost/asio/ssl.hpp>
 #include <boost/beast.hpp>
-#include <memory>
 
 namespace mtx {
 namespace client {

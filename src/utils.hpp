@@ -1,6 +1,5 @@
 #pragma once
 
-#include <_types/_uint8_t.h>
 #include <boost/iostreams/device/array.hpp>
 #include <iosfwd>
 #include <map>
