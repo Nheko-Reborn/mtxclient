@@ -522,3 +522,52 @@ TEST(Encryption, CreateOutboundGroupSession)
         auto session_id  = mtx::client::crypto::session_id(outbound_session.get());
         auto session_key = mtx::client::crypto::session_key(outbound_session.get());
 }
+
+TEST(Encryption, OlmSessions)
+{
+        using namespace mtx::client::crypto;
+
+        auto alice = std::make_shared<OlmClient>();
+        alice->create_new_account();
+        alice->generate_one_time_keys(1);
+
+        auto bob = std::make_shared<OlmClient>();
+        bob->create_new_account();
+        bob->generate_one_time_keys(1);
+
+        std::string alice_key          = alice->identity_keys().curve25519;
+        std::string alice_one_time_key = alice->one_time_keys().curve25519.begin()->second;
+
+        std::string bob_key          = bob->identity_keys().curve25519;
+        std::string bob_one_time_key = bob->one_time_keys().curve25519.begin()->second;
+
+        // Alice is preparing to send a pre-shared message to Bob by opening
+        // a new 1-1 outbound session.
+        auto alice_outbound_session = alice->create_outbound_session(bob_key, bob_one_time_key);
+
+        // Alice encrypts the message using the current session.
+        auto plaintext = "Hello, Bob!";
+        // size_t msgtype  = olm_encrypt_message_type(alice_outbound_session.get());
+        auto ciphertext = alice->encrypt_message(alice_outbound_session.get(), plaintext);
+
+        // Bob creates an inbound session to receive Alice's message.
+        auto bob_inbound_session =
+          bob->create_inbound_session(std::string((char *)ciphertext.data(), ciphertext.size()));
+
+        // Bob validates that the message was meant for him.
+        auto matches = olm_matches_inbound_session(
+          bob_inbound_session.get(), (void *)ciphertext.data(), ciphertext.size());
+
+        ASSERT_EQ(matches, 1);
+
+        // Bob decrypts the message
+        // auto decrypted =
+        //   bob->decrypt_message(bob_inbound_session.get(),
+        //                        msgtype,
+        //                        std::string((char *)ciphertext.data(), ciphertext.size()));
+
+        // auto body = std::string((char *)decrypted.data(), decrypted.size());
+        // std::cout << body << std::endl;
+
+        // ASSERT_EQ(body, "Hello, Bob!");
+}

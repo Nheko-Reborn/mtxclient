@@ -96,12 +96,11 @@ private:
 };
 
 //! Create a uint8_t buffer which is initialized with random bytes.
-template<class T = BinaryBuf>
-std::unique_ptr<T>
+inline BinaryBuf
 create_buffer(std::size_t nbytes)
 {
-        auto buf = std::make_unique<T>(nbytes);
-        randombytes_buf(buf->data(), buf->size());
+        auto buf = BinaryBuf(nbytes);
+        randombytes_buf(buf.data(), buf.size());
 
         return buf;
 }
@@ -213,8 +212,20 @@ public:
         mtx::requests::UploadKeys create_upload_keys_request(const OneTimeKeys &keys);
         mtx::requests::UploadKeys create_upload_keys_request();
 
+        //! Encrypt a message using olm.
+        BinaryBuf encrypt_message(OlmSession *session, const std::string &msg);
+        //! Decrypt a message using olm.
+        BinaryBuf decrypt_message(OlmSession *session,
+                                  std::size_t msg_type,
+                                  const std::string &msg);
+
         //! Create an outbount megolm session.
         std::unique_ptr<OlmOutboundGroupSession, OlmDeleter> init_outbound_group_session();
+        std::unique_ptr<OlmSession, OlmDeleter> create_outbound_session(
+          const std::string &identity_key,
+          const std::string &one_time_key);
+        std::unique_ptr<OlmSession, OlmDeleter> create_inbound_session(
+          const std::string &one_time_key_message);
 
         OlmAccount *account() { return account_.get(); }
         OlmUtility *utility() { return utility_.get(); }
@@ -231,7 +242,7 @@ std::string
 encode_base64(const uint8_t *data, std::size_t len);
 
 //! Decode the given base64 string
-std::unique_ptr<BinaryBuf>
+BinaryBuf
 decode_base64(const std::string &data);
 
 //! Retrieve the session id.

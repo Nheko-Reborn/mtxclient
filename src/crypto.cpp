@@ -16,7 +16,7 @@ OlmClient::create_new_account()
         account_ = create_olm_object<OlmAccount>();
 
         auto tmp_buf  = create_buffer(olm_create_account_random_length(account_.get()));
-        const int ret = olm_create_account(account_.get(), tmp_buf->data(), tmp_buf->size());
+        const int ret = olm_create_account(account_.get(), tmp_buf.data(), tmp_buf.size());
 
         if (ret == -1) {
                 account_.reset();
@@ -39,12 +39,12 @@ OlmClient::identity_keys()
 {
         auto tmp_buf = create_buffer(olm_account_identity_keys_length(account_.get()));
         int result =
-          olm_account_identity_keys(account_.get(), (void *)tmp_buf->data(), tmp_buf->size());
+          olm_account_identity_keys(account_.get(), (void *)tmp_buf.data(), tmp_buf.size());
 
         if (result == -1)
                 throw olm_exception("identity_keys", account_.get());
 
-        return json::parse(std::string(tmp_buf->begin(), tmp_buf->end()));
+        return json::parse(std::string(tmp_buf.begin(), tmp_buf.end()));
 }
 
 std::string
@@ -52,9 +52,9 @@ OlmClient::sign_message(const std::string &msg)
 {
         auto signature_buf = create_buffer(olm_account_signature_length(account_.get()));
         olm_account_sign(
-          account_.get(), msg.data(), msg.size(), signature_buf->data(), signature_buf->size());
+          account_.get(), msg.data(), msg.size(), signature_buf.data(), signature_buf.size());
 
-        return std::string(signature_buf->begin(), signature_buf->end());
+        return std::string(signature_buf.begin(), signature_buf.end());
 }
 
 std::string
@@ -83,7 +83,7 @@ OlmClient::generate_one_time_keys(std::size_t number_of_keys)
         auto buf = create_buffer(nbytes);
 
         const int ret = olm_account_generate_one_time_keys(
-          account_.get(), number_of_keys, buf->data(), buf->size());
+          account_.get(), number_of_keys, buf.data(), buf.size());
 
         if (ret == -1)
                 throw olm_exception("generate_one_time_keys", account_.get());
@@ -96,12 +96,12 @@ OlmClient::one_time_keys()
 {
         auto buf = create_buffer(olm_account_one_time_keys_length(account_.get()));
 
-        const int ret = olm_account_one_time_keys(account_.get(), buf->data(), buf->size());
+        const int ret = olm_account_one_time_keys(account_.get(), buf.data(), buf.size());
 
         if (ret == -1)
                 throw olm_exception("one_time_keys", account_.get());
 
-        return json::parse(std::string(buf->begin(), buf->end()));
+        return json::parse(std::string(buf.begin(), buf.end()));
 }
 
 std::string
@@ -172,7 +172,7 @@ OlmClient::init_outbound_group_session()
         auto tmp_buf = create_buffer(olm_init_outbound_group_session_random_length(session.get()));
 
         const int ret =
-          olm_init_outbound_group_session(session.get(), tmp_buf->data(), tmp_buf->size());
+          olm_init_outbound_group_session(session.get(), tmp_buf.data(), tmp_buf.size());
 
         if (ret == -1)
                 throw olm_exception("init_outbound_group_session", session.get());
@@ -180,7 +180,79 @@ OlmClient::init_outbound_group_session()
         return session;
 }
 
-std::unique_ptr<BinaryBuf>
+BinaryBuf
+OlmClient::decrypt_message(OlmSession *session, size_t msgtype, const std::string &msg)
+{
+        auto declen =
+          olm_decrypt_max_plaintext_length(session, msgtype, (void *)msg.data(), msg.size());
+
+        auto decrypted = create_buffer(declen);
+        const int ret  = olm_decrypt(
+          session, msgtype, (void *)msg.data(), msg.size(), decrypted.data(), decrypted.size());
+
+        if (ret == -1)
+                throw olm_exception("olm_decrypt", session);
+
+        return decrypted;
+}
+
+BinaryBuf
+OlmClient::encrypt_message(OlmSession *session, const std::string &msg)
+{
+        auto ciphertext = create_buffer(olm_encrypt_message_length(session, msg.size()));
+        auto random_buf = create_buffer(olm_encrypt_random_length(session));
+
+        const int ret = olm_encrypt(session,
+                                    msg.data(),
+                                    msg.size(),
+                                    random_buf.data(),
+                                    random_buf.size(),
+                                    ciphertext.data(),
+                                    ciphertext.size());
+        if (ret == -1)
+                throw olm_exception("olm_encrypt", session);
+
+        return ciphertext;
+}
+
+std::unique_ptr<OlmSession, OlmDeleter>
+OlmClient::create_inbound_session(const std::string &one_time_key_message)
+{
+        auto session = create_olm_object<OlmSession>();
+
+        const int ret = olm_create_inbound_session(session.get(),
+                                                   account(),
+                                                   (void *)one_time_key_message.data(),
+                                                   one_time_key_message.size());
+
+        if (ret == -1)
+                throw olm_exception("create_inbound_session", session.get());
+
+        return session;
+}
+
+std::unique_ptr<OlmSession, OlmDeleter>
+OlmClient::create_outbound_session(const std::string &identity_key, const std::string &one_time_key)
+{
+        auto session    = create_olm_object<OlmSession>();
+        auto random_buf = create_buffer(olm_create_outbound_session_random_length(session.get()));
+
+        const int ret = olm_create_outbound_session(session.get(),
+                                                    account(),
+                                                    identity_key.data(),
+                                                    identity_key.size(),
+                                                    one_time_key.data(),
+                                                    one_time_key.size(),
+                                                    random_buf.data(),
+                                                    random_buf.size());
+
+        if (ret == -1)
+                throw olm_exception("create_outbound_session", session.get());
+
+        return session;
+}
+
+BinaryBuf
 mtx::client::crypto::decode_base64(const std::string &msg)
 {
         const int output_nbytes = olm::decode_base64_length(msg.size());
@@ -191,7 +263,7 @@ mtx::client::crypto::decode_base64(const std::string &msg)
         auto output_buf = create_buffer(output_nbytes);
 
         olm::decode_base64(
-          reinterpret_cast<const uint8_t *>(msg.data()), msg.size(), output_buf->data());
+          reinterpret_cast<const uint8_t *>(msg.data()), msg.size(), output_buf.data());
 
         return output_buf;
 }
@@ -205,25 +277,25 @@ mtx::client::crypto::encode_base64(const uint8_t *data, std::size_t len)
                 throw std::runtime_error("invalid base64 input length");
 
         auto output_buf = create_buffer(output_nbytes);
-        olm::encode_base64(data, len, output_buf->data());
+        olm::encode_base64(data, len, output_buf.data());
 
-        return std::string(output_buf->begin(), output_buf->end());
+        return std::string(output_buf.begin(), output_buf.end());
 }
 
 std::string
 mtx::client::crypto::session_id(OlmOutboundGroupSession *s)
 {
         auto tmp = create_buffer(olm_outbound_group_session_id_length(s));
-        olm_outbound_group_session_id(s, tmp->data(), tmp->size());
+        olm_outbound_group_session_id(s, tmp.data(), tmp.size());
 
-        return std::string(tmp->begin(), tmp->end());
+        return std::string(tmp.begin(), tmp.end());
 }
 
 std::string
 mtx::client::crypto::session_key(OlmOutboundGroupSession *s)
 {
         auto tmp = create_buffer(olm_outbound_group_session_key_length(s));
-        olm_outbound_group_session_key(s, tmp->data(), tmp->size());
+        olm_outbound_group_session_key(s, tmp.data(), tmp.size());
 
-        return std::string(tmp->begin(), tmp->end());
+        return std::string(tmp.begin(), tmp.end());
 }
