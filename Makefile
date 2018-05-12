@@ -1,6 +1,6 @@
 FILES=`find src tests examples -type f -type f \( -iname "*.cpp" -o -iname "*.hpp" \)`
 
-SYNAPSE_IMAGE="avhost/docker-matrix:v0.28.0"
+SYNAPSE_IMAGE="avhost/docker-matrix:v0.28.1"
 
 debug:
 	@cmake -GNinja -H. -Bbuild \
@@ -33,7 +33,7 @@ synapse:
 		-p 443:8448 -p 8448:8448 \
 		-v `pwd`/data:/data ${SYNAPSE_IMAGE} start
 	@echo Waiting for synapse to start...
-	@sleep 5
+	@until curl -s -f -k https://localhost:443/_matrix/client/versions; do echo "Checking ..."; sleep 2; done
 	@echo Register alice
 	@docker exec synapse /bin/bash -c 'register_new_matrix_user --admin -u alice -p secret -c /data/homeserver.yaml http://localhost:8008'
 	@echo Register bob
@@ -44,6 +44,8 @@ synapse:
 stop-synapse:
 	@rm -rf ./data/*
 	@docker rm -f synapse 2>&1>/dev/null
+
+restart: stop-synapse synapse
 
 lint:
 	@clang-format -i ${FILES} && git diff --exit-code
