@@ -49,36 +49,37 @@ Client::on_resolve(std::shared_ptr<Session> s,
           s->socket.next_layer(),
           results.begin(),
           results.end(),
-          std::bind(&Client::on_connect, shared_from_this(), s, std::placeholders::_1));
+          std::bind(&Client::on_connect, shared_from_this(), std::move(s), std::placeholders::_1));
 }
 
 void
 Client::on_connect(std::shared_ptr<Session> s, boost::system::error_code ec)
 {
         if (ec) {
-                remove_session(s);
-                return s->on_failure(s->id, ec);
+                s->on_failure(s->id, ec);
+                return remove_session(std::move(s));
         }
 
         // Perform the SSL handshake
         s->socket.async_handshake(
           boost::asio::ssl::stream_base::client,
-          std::bind(&Client::on_handshake, shared_from_this(), s, std::placeholders::_1));
+          std::bind(
+            &Client::on_handshake, shared_from_this(), std::move(s), std::placeholders::_1));
 }
 
 void
 Client::on_handshake(std::shared_ptr<Session> s, boost::system::error_code ec)
 {
         if (ec) {
-                remove_session(s);
-                return s->on_failure(s->id, ec);
+                s->on_failure(s->id, ec);
+                return remove_session(std::move(s));
         }
 
         boost::beast::http::async_write(s->socket,
                                         s->request,
                                         std::bind(&Client::on_write,
                                                   shared_from_this(),
-                                                  s,
+                                                  std::move(s),
                                                   std::placeholders::_1,
                                                   std::placeholders::_2));
 }
@@ -91,17 +92,19 @@ Client::on_write(std::shared_ptr<Session> s,
         boost::ignore_unused(bytes_transferred);
 
         if (ec) {
-                remove_session(s);
-                return s->on_failure(s->id, ec);
+                s->on_failure(s->id, ec);
+                return remove_session(std::move(s));
         }
 
         // Receive the HTTP response
-        http::async_read(
-          s->socket,
-          s->output_buf,
-          s->parser,
-          std::bind(
-            &Client::on_read, shared_from_this(), s, std::placeholders::_1, std::placeholders::_2));
+        http::async_read(s->socket,
+                         s->output_buf,
+                         s->parser,
+                         std::bind(&Client::on_read,
+                                   shared_from_this(),
+                                   std::move(s),
+                                   std::placeholders::_1,
+                                   std::placeholders::_2));
 }
 
 void
@@ -114,7 +117,7 @@ Client::on_read(std::shared_ptr<Session> s,
         if (ec)
                 s->error_code = ec;
 
-        on_request_complete(s);
+        on_request_complete(std::move(s));
 }
 
 void
@@ -124,7 +127,7 @@ Client::do_request(std::shared_ptr<Session> s)
                                 std::to_string(port_),
                                 std::bind(&Client::on_resolve,
                                           shared_from_this(),
-                                          s,
+                                          std::move(s),
                                           std::placeholders::_1,
                                           std::placeholders::_2));
 }
@@ -137,7 +140,7 @@ Client::remove_session(std::shared_ptr<Session> s)
         // care about the error code if this function fails.
         boost::system::error_code ignored_ec;
 
-        s->socket.async_shutdown([s](boost::system::error_code ec) {
+        s->socket.async_shutdown([s = std::move(s)](boost::system::error_code ec) {
                 if (ec == boost::asio::error::eof) {
                         // Rationale:
                         // http://stackoverflow.com/questions/25587403/boost-asio-ssl-async-shutdown-always-finishes-with-an-error
@@ -162,14 +165,14 @@ Client::remove_session(std::shared_ptr<Session> s)
 void
 Client::on_request_complete(std::shared_ptr<Session> s)
 {
-        remove_session(s);
-
         boost::system::error_code ec(s->error_code);
         s->on_success(s->id, s->parser.get(), ec);
+
+        remove_session(std::move(s));
 }
 
 void
-Client::setup_auth(std::shared_ptr<Session> session, bool auth)
+Client::setup_auth(Session *session, bool auth)
 {
         const auto token = access_token();
 
