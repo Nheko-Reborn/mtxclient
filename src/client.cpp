@@ -49,7 +49,7 @@ Client::on_resolve(std::shared_ptr<Session> s,
           s->socket.next_layer(),
           results.begin(),
           results.end(),
-          std::bind(&Client::on_connect, shared_from_this(), std::move(s), std::placeholders::_1));
+          std::bind(&Client::on_connect, shared_from_this(), s, std::placeholders::_1));
 }
 
 void
@@ -63,8 +63,7 @@ Client::on_connect(std::shared_ptr<Session> s, boost::system::error_code ec)
         // Perform the SSL handshake
         s->socket.async_handshake(
           boost::asio::ssl::stream_base::client,
-          std::bind(
-            &Client::on_handshake, shared_from_this(), std::move(s), std::placeholders::_1));
+          std::bind(&Client::on_handshake, shared_from_this(), s, std::placeholders::_1));
 }
 
 void
@@ -79,7 +78,7 @@ Client::on_handshake(std::shared_ptr<Session> s, boost::system::error_code ec)
                                         s->request,
                                         std::bind(&Client::on_write,
                                                   shared_from_this(),
-                                                  std::move(s),
+                                                  s,
                                                   std::placeholders::_1,
                                                   std::placeholders::_2));
 }
@@ -97,14 +96,12 @@ Client::on_write(std::shared_ptr<Session> s,
         }
 
         // Receive the HTTP response
-        http::async_read(s->socket,
-                         s->output_buf,
-                         s->parser,
-                         std::bind(&Client::on_read,
-                                   shared_from_this(),
-                                   std::move(s),
-                                   std::placeholders::_1,
-                                   std::placeholders::_2));
+        http::async_read(
+          s->socket,
+          s->output_buf,
+          s->parser,
+          std::bind(
+            &Client::on_read, shared_from_this(), s, std::placeholders::_1, std::placeholders::_2));
 }
 
 void
@@ -140,7 +137,7 @@ Client::remove_session(std::shared_ptr<Session> s)
         // care about the error code if this function fails.
         boost::system::error_code ignored_ec;
 
-        s->socket.async_shutdown([s = std::move(s)](boost::system::error_code ec) {
+        s->socket.async_shutdown([s](boost::system::error_code ec) {
                 if (ec == boost::asio::error::eof) {
                         // Rationale:
                         // http://stackoverflow.com/questions/25587403/boost-asio-ssl-async-shutdown-always-finishes-with-an-error
