@@ -181,19 +181,30 @@ OlmClient::init_outbound_group_session()
 }
 
 BinaryBuf
-OlmClient::decrypt_message(OlmSession *session, size_t msgtype, const std::string &msg)
+OlmClient::decrypt_message(OlmSession *session,
+                           size_t msgtype,
+                           const std::string &one_time_key_message)
 {
+        auto tmp = create_buffer(one_time_key_message.size());
+        std::copy(one_time_key_message.begin(), one_time_key_message.end(), tmp.begin());
+
         auto declen =
-          olm_decrypt_max_plaintext_length(session, msgtype, (void *)msg.data(), msg.size());
+          olm_decrypt_max_plaintext_length(session, msgtype, (void *)tmp.data(), tmp.size());
 
         auto decrypted = create_buffer(declen);
-        const int ret  = olm_decrypt(
-          session, msgtype, (void *)msg.data(), msg.size(), decrypted.data(), decrypted.size());
+        std::copy(one_time_key_message.begin(), one_time_key_message.end(), tmp.begin());
 
-        if (ret == -1)
+        const int nbytes = olm_decrypt(
+          session, msgtype, (void *)tmp.data(), tmp.size(), decrypted.data(), decrypted.size());
+
+        if (nbytes == -1)
                 throw olm_exception("olm_decrypt", session);
 
-        return decrypted;
+        // Removing the extra padding from the origial buffer.
+        auto output = create_buffer(nbytes);
+        std::copy(decrypted.begin(), decrypted.end(), output.begin());
+
+        return output;
 }
 
 BinaryBuf
@@ -216,14 +227,15 @@ OlmClient::encrypt_message(OlmSession *session, const std::string &msg)
 }
 
 std::unique_ptr<OlmSession, OlmDeleter>
-OlmClient::create_inbound_session(const std::string &one_time_key_message)
+OlmClient::create_inbound_session(const BinaryBuf &one_time_key_message)
 {
         auto session = create_olm_object<OlmSession>();
 
-        const int ret = olm_create_inbound_session(session.get(),
-                                                   account(),
-                                                   (void *)one_time_key_message.data(),
-                                                   one_time_key_message.size());
+        auto tmp = create_buffer(one_time_key_message.size());
+        std::copy(one_time_key_message.begin(), one_time_key_message.end(), tmp.begin());
+
+        const int ret =
+          olm_create_inbound_session(session.get(), account(), (void *)tmp.data(), tmp.size());
 
         if (ret == -1)
                 throw olm_exception("create_inbound_session", session.get());
@@ -298,4 +310,26 @@ mtx::client::crypto::session_key(OlmOutboundGroupSession *s)
         olm_outbound_group_session_key(s, tmp.data(), tmp.size());
 
         return std::string(tmp.begin(), tmp.end());
+}
+
+bool
+mtx::client::crypto::matches_inbound_session(OlmSession *session,
+                                             const BinaryBuf &one_time_key_message)
+{
+        auto tmp = create_buffer(one_time_key_message.size());
+        std::copy(one_time_key_message.begin(), one_time_key_message.end(), tmp.begin());
+
+        return olm_matches_inbound_session(session, (void *)tmp.data(), tmp.size());
+}
+
+bool
+mtx::client::crypto::matches_inbound_session_from(OlmSession *session,
+                                                  const std::string &id_key,
+                                                  const BinaryBuf &one_time_key_message)
+{
+        auto tmp = create_buffer(one_time_key_message.size());
+        std::copy(one_time_key_message.begin(), one_time_key_message.end(), tmp.begin());
+
+        return olm_matches_inbound_session_from(
+          session, id_key.data(), id_key.size(), (void *)tmp.data(), tmp.size());
 }

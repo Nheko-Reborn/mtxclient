@@ -225,7 +225,7 @@ public:
           const std::string &identity_key,
           const std::string &one_time_key);
         std::unique_ptr<OlmSession, OlmDeleter> create_inbound_session(
-          const std::string &one_time_key_message);
+          const BinaryBuf &one_time_key_message);
 
         OlmAccount *account() { return account_.get(); }
         OlmUtility *utility() { return utility_.get(); }
@@ -252,6 +252,14 @@ session_id(OlmOutboundGroupSession *s);
 //! Retrieve the session key.
 std::string
 session_key(OlmOutboundGroupSession *s);
+
+bool
+matches_inbound_session(OlmSession *session, const BinaryBuf &one_time_key_message);
+
+bool
+matches_inbound_session_from(OlmSession *session,
+                             const std::string &id_key,
+                             const BinaryBuf &one_time_key_message);
 
 } // namespace crypto
 } // namespace client
