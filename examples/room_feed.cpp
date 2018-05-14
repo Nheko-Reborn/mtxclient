@@ -18,6 +18,10 @@ using namespace mtx::events;
 
 using TimelineEvent = mtx::events::collections::TimelineEvents;
 
+namespace {
+std::shared_ptr<Client> client = nullptr;
+}
+
 void
 print_errors(RequestErr err)
 {
@@ -81,19 +85,12 @@ print_message(const TimelineEvent &event)
 
 // Callback to executed after a /sync request completes.
 void
-sync_handler(shared_ptr<Client> client, const mtx::responses::Sync &res, RequestErr err)
+sync_handler(const mtx::responses::Sync &res, RequestErr err)
 {
         if (err) {
                 cout << "sync error:\n";
                 print_errors(err);
-
-                client->sync(
-                  "",
-                  client->next_batch_token(),
-                  false,
-                  30000,
-                  std::bind(&sync_handler, client, std::placeholders::_1, std::placeholders::_2));
-
+                client->sync("", client->next_batch_token(), false, 30000, &sync_handler);
                 return;
         }
 
@@ -103,18 +100,12 @@ sync_handler(shared_ptr<Client> client, const mtx::responses::Sync &res, Request
         }
 
         client->set_next_batch_token(res.next_batch);
-
-        client->sync(
-          "",
-          client->next_batch_token(),
-          false,
-          30000,
-          std::bind(&sync_handler, client, std::placeholders::_1, std::placeholders::_2));
+        client->sync("", client->next_batch_token(), false, 30000, &sync_handler);
 }
 
 // Callback to executed after the first (initial) /sync request completes.
 void
-initial_sync_handler(shared_ptr<Client> client, const nlohmann::json &res, RequestErr err)
+initial_sync_handler(const nlohmann::json &res, RequestErr err)
 {
         if (err) {
                 cout << "error during initial sync:\n";
@@ -122,27 +113,27 @@ initial_sync_handler(shared_ptr<Client> client, const nlohmann::json &res, Reque
 
                 if (err->status_code != boost::beast::http::status::ok) {
                         cout << "retrying initial sync ...\n";
-                        client->sync("",
-                                     "",
-                                     false,
-                                     0,
-                                     std::bind(&initial_sync_handler,
-                                               client,
-                                               std::placeholders::_1,
-                                               std::placeholders::_2));
+                        client->sync("", "", false, 0, &initial_sync_handler);
                 }
 
                 return;
         }
 
         client->set_next_batch_token(res.at("next_batch"));
+        client->sync("", client->next_batch_token(), false, 30000, &sync_handler);
+}
 
-        client->sync(
-          "",
-          client->next_batch_token(),
-          false,
-          30000,
-          std::bind(&sync_handler, client, std::placeholders::_1, std::placeholders::_2));
+void
+login_handler(const mtx::responses::Login &res, RequestErr err)
+{
+        if (err) {
+                cout << "There was an error during login: " << err->matrix_error.error << "\n";
+                return;
+        }
+
+        cout << "Logged in as: " << res.user_id.to_string() << "\n";
+        client->set_access_token(res.access_token);
+        client->sync("", "", false, 0, &initial_sync_handler);
 }
 
 int
@@ -158,28 +149,8 @@ main()
 
         password = getpass("Password: ");
 
-        auto client = std::make_shared<Client>(server);
-
-        client->login(
-          username, password, [client](const mtx::responses::Login &res, RequestErr err) {
-                  if (err) {
-                          cout << "There was an error during login: " << err->matrix_error.error
-                               << "\n";
-                          return;
-                  }
-
-                  cout << "Logged in as: " << res.user_id.to_string() << "\n";
-                  client->set_access_token(res.access_token);
-
-                  client->sync(
-                    "",
-                    "",
-                    false,
-                    0,
-                    std::bind(
-                      &initial_sync_handler, client, std::placeholders::_1, std::placeholders::_2));
-          });
-
+        client = std::make_shared<Client>(server);
+        client->login(username, password, &login_handler);
         client->close();
 
         return 0;
