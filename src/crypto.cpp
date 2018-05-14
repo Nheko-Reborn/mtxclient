@@ -202,7 +202,7 @@ OlmClient::decrypt_message(OlmSession *session,
 
         // Removing the extra padding from the origial buffer.
         auto output = create_buffer(nbytes);
-        std::copy(decrypted.begin(), decrypted.end(), output.begin());
+        std::memcpy(output.data(), decrypted.data(), nbytes);
 
         return output;
 }
