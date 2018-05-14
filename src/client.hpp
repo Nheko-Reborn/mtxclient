@@ -299,34 +299,6 @@ private:
 }
 }
 
-template<class T>
-inline T
-deserialize(const std::string &data)
-{
-        return json::parse(data);
-}
-
-template<>
-inline std::string
-deserialize<std::string>(const std::string &data)
-{
-        return data;
-}
-
-template<class T>
-inline std::string
-serialize(const T &obj)
-{
-        return json(obj).dump();
-}
-
-template<>
-inline std::string
-serialize<std::string>(const std::string &obj)
-{
-        return obj;
-}
-
 template<class Request, class Response>
 void
 mtx::client::Client::post(const std::string &endpoint,
@@ -342,15 +314,8 @@ mtx::client::Client::post(const std::string &endpoint,
                 return;
 
         setup_auth(session.get(), requires_auth);
-
-        session->request.method(boost::beast::http::verb::post);
-        session->request.target("/_matrix" + endpoint);
-        session->request.set(boost::beast::http::field::user_agent, "mtxclient v0.1.0");
-        session->request.set(boost::beast::http::field::content_type, content_type);
-        session->request.set(boost::beast::http::field::accept_encoding, "gzip,deflate");
-        session->request.set(boost::beast::http::field::host, session->host);
-        session->request.body() = serialize<Request>(req);
-        session->request.prepare_payload();
+        setup_headers<Request, boost::beast::http::verb::post>(
+          session.get(), req, endpoint, content_type);
 
         do_request(std::move(session));
 }
@@ -370,15 +335,8 @@ mtx::client::Client::put(const std::string &endpoint,
                 return;
 
         setup_auth(session.get(), requires_auth);
-
-        session->request.method(boost::beast::http::verb::put);
-        session->request.target("/_matrix" + endpoint);
-        session->request.set(boost::beast::http::field::user_agent, "mtxclient v0.1.0");
-        session->request.set(boost::beast::http::field::content_type, "application/json");
-        session->request.set(boost::beast::http::field::accept_encoding, "gzip,deflate");
-        session->request.set(boost::beast::http::field::host, session->host);
-        session->request.body() = serialize<Request>(req);
-        session->request.prepare_payload();
+        setup_headers<Request, boost::beast::http::verb::put>(
+          session.get(), req, endpoint, "application/json");
 
         do_request(std::move(session));
 }
@@ -410,13 +368,7 @@ mtx::client::Client::get(const std::string &endpoint,
                 return;
 
         setup_auth(session.get(), requires_auth);
-
-        session->request.method(boost::beast::http::verb::get);
-        session->request.target("/_matrix" + endpoint);
-        session->request.set(boost::beast::http::field::user_agent, "mtxclient v0.1.0");
-        session->request.set(boost::beast::http::field::accept_encoding, "gzip,deflate");
-        session->request.set(boost::beast::http::field::host, session->host);
-        session->request.prepare_payload();
+        setup_headers<std::string, boost::beast::http::verb::get>(session.get(), {}, endpoint);
 
         do_request(std::move(session));
 }
@@ -454,7 +406,7 @@ mtx::client::Client::create_session(HeadersCallback<Response> callback)
                           // Try to parse the response in case we have an endpoint that
                           // doesn't return an error struct for non 200 requests.
                           try {
-                                  response_data = deserialize<Response>(body);
+                                  response_data = utils::deserialize<Response>(body);
                           } catch (const nlohmann::json::exception &e) {
                           }
 
@@ -475,7 +427,7 @@ mtx::client::Client::create_session(HeadersCallback<Response> callback)
                   // If we reach that point we most likely have a valid output from the
                   // homeserver.
                   try {
-                          callback(deserialize<Response>(body), header, {});
+                          callback(utils::deserialize<Response>(body), header, {});
                   } catch (const nlohmann::json::exception &e) {
                           client_error.parse_error = std::string(e.what()) + ": " + body;
                           callback(response_data, header, client_error);

@@ -4,6 +4,8 @@
 #include <boost/asio/ssl.hpp>
 #include <boost/beast.hpp>
 
+#include "utils.hpp"
+
 namespace mtx {
 namespace client {
 
@@ -59,5 +61,25 @@ struct Session
         //! Function to be called when the request fails.
         FailureCallback on_failure;
 };
+
+template<class Request, boost::beast::http::verb HttpVerb>
+void
+setup_headers(mtx::client::Session *session,
+              const Request &req,
+              const std::string &endpoint,
+              const std::string &content_type = "")
+{
+        session->request.set(boost::beast::http::field::user_agent, "mtxclient v0.1.0");
+        session->request.set(boost::beast::http::field::accept_encoding, "gzip,deflate");
+        session->request.set(boost::beast::http::field::host, session->host);
+
+        session->request.method(HttpVerb);
+        session->request.target("/_matrix" + endpoint);
+        session->request.body() = utils::serialize(req);
+        session->request.prepare_payload();
+
+        if (!content_type.empty())
+                session->request.set(boost::beast::http::field::content_type, content_type);
+}
 }
 }
