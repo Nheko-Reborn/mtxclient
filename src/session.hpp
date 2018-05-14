@@ -23,23 +23,14 @@ using FailureCallback =
   std::function<void(RequestID request_id, const boost::system::error_code ec)>;
 
 //! Represents a context of a single request.
-struct Session
+struct Session : public std::enable_shared_from_this<Session>
 {
         Session(boost::asio::io_service &ios,
                 boost::asio::ssl::context &ssl_ctx,
                 const std::string &host,
                 RequestID id,
                 SuccessCallback on_success,
-                FailureCallback on_failure)
-          : socket{ios, ssl_ctx}
-          , host{host}
-          , id{id}
-          , on_success{on_success}
-          , on_failure{on_failure}
-        {
-                parser.header_limit(8192);
-                parser.body_limit(1 * 1024 * 1024 * 1024); // 1 GiB
-        }
+                FailureCallback on_failure);
 
         //! Socket used for communication.
         boost::asio::ssl::stream<boost::asio::ip::tcp::socket> socket;
@@ -60,6 +51,18 @@ struct Session
         SuccessCallback on_success;
         //! Function to be called when the request fails.
         FailureCallback on_failure;
+
+        void on_resolve(boost::system::error_code ec,
+                        boost::asio::ip::tcp::resolver::results_type results);
+
+private:
+        void on_close(boost::system::error_code ec);
+        void on_connect(const boost::system::error_code &ec);
+        void on_handshake(const boost::system::error_code &ec);
+        void on_read(const boost::system::error_code &ec, std::size_t bytes_transferred);
+        void on_request_complete();
+        void on_write(const boost::system::error_code &ec, std::size_t bytes_transferred);
+        void shutdown();
 };
 
 template<class Request, boost::beast::http::verb HttpVerb>

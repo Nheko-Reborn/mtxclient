@@ -125,6 +125,7 @@ set(MTXCLIENT_LIBS ${MTXCLIENT_LIBS} olm)
 include_directories(src)
 set(SRC 
     src/client.cpp
+    src/session.cpp
     src/utils.cpp
     src/crypto.cpp)
 

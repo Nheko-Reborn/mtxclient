@@ -259,20 +259,6 @@ private:
         //! Setup http header with the access token if needed.
         void setup_auth(Session *session, bool auth);
 
-        void remove_session(std::shared_ptr<Session> s);
-        void on_request_complete(std::shared_ptr<Session> s);
-        void on_resolve(std::shared_ptr<Session> s,
-                        boost::system::error_code ec,
-                        boost::asio::ip::tcp::resolver::results_type results);
-        void on_connect(std::shared_ptr<Session> s, boost::system::error_code ec);
-        void on_handshake(std::shared_ptr<Session> s, boost::system::error_code ec);
-        void on_write(std::shared_ptr<Session> s,
-                      boost::system::error_code ec,
-                      std::size_t bytes_transferred);
-        void on_read(std::shared_ptr<Session> s,
-                     boost::system::error_code ec,
-                     std::size_t bytes_transferred);
-
         boost::asio::io_service ios_;
 
         //! Used to prevent the event loop from shutting down.
