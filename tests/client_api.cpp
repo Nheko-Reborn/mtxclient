@@ -578,12 +578,13 @@ TEST(ClientAPI, Sync)
           req, [mtx_client](const mtx::responses::CreateRoom &, RequestErr err) {
                   check_error(err);
 
-                  mtx_client->sync(
-                    "", "", false, 0, [](const mtx::responses::Sync &res, RequestErr err) {
-                            check_error(err);
-                            ASSERT_TRUE(res.rooms.join.size() > 0);
-                            ASSERT_TRUE(res.next_batch.size() > 0);
-                    });
+                  SyncOpts opts;
+                  opts.timeout = 0;
+                  mtx_client->sync(opts, [](const mtx::responses::Sync &res, RequestErr err) {
+                          check_error(err);
+                          ASSERT_TRUE(res.rooms.join.size() > 0);
+                          ASSERT_TRUE(res.next_batch.size() > 0);
+                  });
           });
 
         mtx_client->close();
@@ -627,10 +628,9 @@ TEST(ClientAPI, Typing)
                         const auto room_id = res.room_id.to_string();
                         atomic_bool can_continue(false);
 
-                        alice->sync("",
-                                    "",
-                                    false,
-                                    0,
+                        SyncOpts opts;
+                        opts.timeout = 0;
+                        alice->sync(opts,
                                     [room_id, &can_continue](const mtx::responses::Sync &res,
                                                              RequestErr err) {
                                             check_error(err);
@@ -650,12 +650,10 @@ TEST(ClientAPI, Typing)
                         alice->stop_typing(res.room_id, [alice, room_id](RequestErr err) {
                                 check_error(err);
 
+                                SyncOpts opts;
+                                opts.timeout = 0;
                                 alice->sync(
-                                  "",
-                                  "",
-                                  false,
-                                  0,
-                                  [room_id](const mtx::responses::Sync &res, RequestErr err) {
+                                  opts, [room_id](const mtx::responses::Sync &res, RequestErr err) {
                                           check_error(err);
                                           auto room = res.rooms.join.at(room_id);
                                           EXPECT_EQ(room.ephemeral.typing.size(), 0);
@@ -725,11 +723,10 @@ TEST(ClientAPI, SendMessages)
                             while (event_ids.size() != 2)
                                     sleep();
 
+                            SyncOpts opts;
+                            opts.timeout = 0;
                             alice->sync(
-                              "",
-                              "",
-                              false,
-                              0,
+                              opts,
                               [room_id, event_ids](const mtx::responses::Sync &res,
                                                    RequestErr err) {
                                       check_error(err);
@@ -812,12 +809,10 @@ TEST(ClientAPI, SendStateEvents)
                   while (event_ids.size() != 2)
                           sleep();
 
+                  SyncOpts opts;
+                  opts.timeout = 0;
                   alice->sync(
-                    "",
-                    "",
-                    false,
-                    0,
-                    [room_id, event_ids](const mtx::responses::Sync &res, RequestErr err) {
+                    opts, [room_id, event_ids](const mtx::responses::Sync &res, RequestErr err) {
                             check_error(err);
 
                             auto ids = get_event_ids<TimelineEvents>(
@@ -947,21 +942,19 @@ TEST(ClientAPI, ReadMarkers)
                 while (event_id.size() == 0)
                         sleep();
 
-                alice->sync("",
-                            "",
-                            false,
-                            0,
-                            [room_id, event_id](const mtx::responses::Sync &res, RequestErr err) {
-                                    check_error(err);
+                SyncOpts opts;
+                opts.timeout = 0;
+                alice->sync(
+                  opts, [room_id, event_id](const mtx::responses::Sync &res, RequestErr err) {
+                          check_error(err);
 
-                                    auto receipts =
-                                      res.rooms.join.at(room_id.to_string()).ephemeral.receipts;
-                                    EXPECT_EQ(receipts.size(), 1);
+                          auto receipts = res.rooms.join.at(room_id.to_string()).ephemeral.receipts;
+                          EXPECT_EQ(receipts.size(), 1);
 
-                                    auto users = receipts[event_id];
-                                    EXPECT_EQ(users.size(), 1);
-                                    ASSERT_TRUE(users["@alice:localhost"] > 0);
-                            });
+                          auto users = receipts[event_id];
+                          EXPECT_EQ(users.size(), 1);
+                          ASSERT_TRUE(users["@alice:localhost"] > 0);
+                  });
         });
 
         alice->close();
@@ -985,7 +978,9 @@ TEST(ClientAPI, SendToDevice)
         alice->send_to_device("m.test", body, [bob](RequestErr err) {
                 check_error(err);
 
-                bob->sync("", "", false, 0, [](const mtx::responses::Sync &res, RequestErr err) {
+                SyncOpts opts;
+                opts.timeout = 0;
+                bob->sync(opts, [](const mtx::responses::Sync &res, RequestErr err) {
                         check_error(err);
 
                         EXPECT_EQ(res.to_device.size(), 1);

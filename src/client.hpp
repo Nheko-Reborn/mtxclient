@@ -48,6 +48,19 @@ using Callback = std::function<void(const Response &, RequestErr)>;
 template<class Response>
 using HeadersCallback = std::function<void(const Response &, HeaderFields, RequestErr)>;
 
+//! Sync configuration options.
+struct SyncOpts
+{
+        //! Filter to apply.
+        std::string filter;
+        //! Sync pagination token.
+        std::string since;
+        //! The amount of msecs to wait for long polling.
+        uint16_t timeout = 30'000;
+        //! Wheter to include the full state of each room.
+        bool full_state = false;
+};
+
 //! The main object that the user will interact.
 class Client : public std::enable_shared_from_this<Client>
 {
@@ -120,12 +133,9 @@ public:
         void invite_user(const mtx::identifiers::Room &room_id,
                          const std::string &user_id,
                          Callback<mtx::responses::RoomInvite> cb);
+
         //! Perform sync.
-        void sync(const std::string &filter,
-                  const std::string &since,
-                  bool full_state,
-                  uint16_t timeout,
-                  Callback<nlohmann::json> cb);
+        void sync(const SyncOpts &opts, Callback<nlohmann::json> cb);
 
         //! Paginate through room messages.
         void messages(const mtx::identifiers::Room &room_id,

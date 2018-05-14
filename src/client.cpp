@@ -189,24 +189,20 @@ Client::invite_user(const mtx::identifiers::Room &room_id,
 }
 
 void
-Client::sync(const std::string &filter,
-             const std::string &since,
-             bool full_state,
-             uint16_t timeout,
-             Callback<nlohmann::json> callback)
+Client::sync(const SyncOpts &opts, Callback<nlohmann::json> callback)
 {
         std::map<std::string, std::string> params;
 
-        if (!filter.empty())
-                params.emplace("filter", filter);
+        if (!opts.filter.empty())
+                params.emplace("filter", opts.filter);
 
-        if (!since.empty())
-                params.emplace("since", since);
+        if (!opts.since.empty())
+                params.emplace("since", opts.since);
 
-        if (full_state)
+        if (opts.full_state)
                 params.emplace("full_state", "true");
 
-        params.emplace("timeout", std::to_string(timeout));
+        params.emplace("timeout", std::to_string(opts.timeout));
 
         get<nlohmann::json>("/client/r0/sync?" + utils::query_params(params),
                             [callback](const nlohmann::json &res, HeaderFields, RequestErr err) {

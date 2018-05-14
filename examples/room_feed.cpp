@@ -87,10 +87,13 @@ print_message(const TimelineEvent &event)
 void
 sync_handler(const mtx::responses::Sync &res, RequestErr err)
 {
+        SyncOpts opts;
+
         if (err) {
                 cout << "sync error:\n";
                 print_errors(err);
-                client->sync("", client->next_batch_token(), false, 30000, &sync_handler);
+                opts.since = client->next_batch_token();
+                client->sync(opts, &sync_handler);
                 return;
         }
 
@@ -99,28 +102,33 @@ sync_handler(const mtx::responses::Sync &res, RequestErr err)
                         print_message(msg);
         }
 
+        opts.since = res.next_batch;
         client->set_next_batch_token(res.next_batch);
-        client->sync("", client->next_batch_token(), false, 30000, &sync_handler);
+        client->sync(opts, &sync_handler);
 }
 
 // Callback to executed after the first (initial) /sync request completes.
 void
 initial_sync_handler(const mtx::responses::Sync &res, RequestErr err)
 {
+        SyncOpts opts;
+
         if (err) {
                 cout << "error during initial sync:\n";
                 print_errors(err);
 
                 if (err->status_code != boost::beast::http::status::ok) {
                         cout << "retrying initial sync ...\n";
-                        client->sync("", "", false, 0, &initial_sync_handler);
+                        opts.timeout = 0;
+                        client->sync(opts, &initial_sync_handler);
                 }
 
                 return;
         }
 
+        opts.since = res.next_batch;
         client->set_next_batch_token(res.next_batch);
-        client->sync("", client->next_batch_token(), false, 30000, &sync_handler);
+        client->sync(opts, &sync_handler);
 }
 
 void
@@ -132,8 +140,11 @@ login_handler(const mtx::responses::Login &res, RequestErr err)
         }
 
         cout << "Logged in as: " << res.user_id.to_string() << "\n";
+        SyncOpts opts;
+        opts.timeout = 0;
+
         client->set_access_token(res.access_token);
-        client->sync("", "", false, 0, &initial_sync_handler);
+        client->sync(opts, &initial_sync_handler);
 }
 
 int

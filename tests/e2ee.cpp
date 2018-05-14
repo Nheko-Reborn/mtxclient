@@ -404,12 +404,10 @@ TEST(Encryption, KeyChanges)
                   check_error(err);
 
                   // Carl syncs to get the first next_batch token.
+                  SyncOpts opts;
+                  opts.timeout = 0;
                   carl->sync(
-                    "",
-                    "",
-                    false,
-                    0,
-                    [carl, carl_olm](const mtx::responses::Sync &res, RequestErr err) {
+                    opts, [carl, carl_olm](const mtx::responses::Sync &res, RequestErr err) {
                             check_error(err);
                             const auto next_batch_token = res.next_batch;
 
@@ -486,7 +484,9 @@ TEST(Encryption, EnableEncryption)
         while (responses != 2)
                 sleep();
 
-        carl->sync("", "", false, 0, [&joined_room](const Sync &res, RequestErr err) {
+        SyncOpts opts;
+        opts.timeout = 0;
+        carl->sync(opts, [&joined_room](const Sync &res, RequestErr err) {
                 check_error(err);
 
                 auto events = res.rooms.join.at(joined_room.to_string()).timeline.events;
