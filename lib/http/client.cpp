@@ -12,13 +12,10 @@ using namespace mtx::http;
 using namespace boost::beast;
 
 Client::Client(const std::string &server, uint16_t port)
-  : resolver_{ios_}
-  , server_{server}
+  : server_{server}
   , port_{port}
 {
         using namespace boost::asio;
-        work_ = boost::in_place<io_service::work>(io_service::work(ios_));
-
         const auto threads_num = std::max(1U, std::thread::hardware_concurrency());
 
         for (unsigned int i = 0; i < threads_num; ++i)
@@ -31,20 +28,10 @@ Client::close()
         // Destroy work object. This allows the I/O thread to
         // exit the event loop when there are no more pending
         // asynchronous operations.
-        work_ = boost::none;
+        work_.reset();
 
         // Wait for the worker threads to exit.
         thread_group_.join_all();
-}
-
-void
-Client::do_request(std::shared_ptr<Session> s)
-{
-        resolver_.async_resolve(
-          server_,
-          std::to_string(port_),
-          std::bind(
-            &Session::on_resolve, std::move(s), std::placeholders::_1, std::placeholders::_2));
 }
 
 void

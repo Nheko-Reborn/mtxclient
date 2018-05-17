@@ -146,7 +146,9 @@ endif()
 
 if (BUILD_LIB_EXAMPLES)
     add_executable(room_feed examples/room_feed.cpp)
+    add_executable(simple_bot examples/simple_bot.cpp)
     target_link_libraries(room_feed matrix_client ${MATRIX_STRUCTS_LIBRARY})
+    target_link_libraries(simple_bot matrix_client ${MATRIX_STRUCTS_LIBRARY})
 endif()
 
 if (BUILD_LIB_TESTS)

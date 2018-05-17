@@ -69,8 +69,6 @@ public:
 
         //! Wait for the client to close.
         void close();
-        //! Make a new request.
-        void do_request(std::shared_ptr<Session> session);
         //! Add an access token.
         void set_access_token(const std::string &token) { access_token_ = token; }
         //! Retrieve the access token.
@@ -270,13 +268,10 @@ private:
         void setup_auth(Session *session, bool auth);
 
         boost::asio::io_service ios_;
-
         //! Used to prevent the event loop from shutting down.
-        boost::optional<boost::asio::io_service::work> work_;
+        boost::optional<boost::asio::io_context::work> work_{ios_};
         //! Worker threads for the requests.
         boost::thread_group thread_group_;
-        //! Used to resolve DNS names.
-        boost::asio::ip::tcp::resolver resolver_;
         //! SSL context for requests.
         boost::asio::ssl::context ssl_ctx_{boost::asio::ssl::context::sslv23_client};
         //! The homeserver to connect to.
@@ -313,7 +308,7 @@ mtx::http::Client::post(const std::string &endpoint,
         setup_headers<Request, boost::beast::http::verb::post>(
           session.get(), req, endpoint, content_type);
 
-        do_request(std::move(session));
+        session->run();
 }
 
 // put function for the PUT HTTP requests that send responses
@@ -334,7 +329,7 @@ mtx::http::Client::put(const std::string &endpoint,
         setup_headers<Request, boost::beast::http::verb::put>(
           session.get(), req, endpoint, "application/json");
 
-        do_request(std::move(session));
+        session->run();
 }
 
 // provides PUT functionality for the endpoints which dont respond with a body
@@ -366,7 +361,7 @@ mtx::http::Client::get(const std::string &endpoint,
         setup_auth(session.get(), requires_auth);
         setup_headers<std::string, boost::beast::http::verb::get>(session.get(), {}, endpoint);
 
-        do_request(std::move(session));
+        session->run();
 }
 
 template<class Response>
@@ -374,9 +369,10 @@ std::shared_ptr<mtx::http::Session>
 mtx::http::Client::create_session(HeadersCallback<Response> callback)
 {
         auto session = std::make_shared<Session>(
-          ios_,
-          ssl_ctx_,
+          std::ref(ios_),
+          std::ref(ssl_ctx_),
           server_,
+          port_,
           client::utils::random_token(),
           [callback](RequestID,
                      const boost::beast::http::response<boost::beast::http::string_body> &response,
@@ -437,23 +433,6 @@ mtx::http::Client::create_session(HeadersCallback<Response> callback)
 
                   callback(response_data, {}, client_error);
           });
-
-        // Set SNI Hostname (many hosts need this to handshake successfully)
-        if (!SSL_set_tlsext_host_name(session->socket.native_handle(), server_.c_str())) {
-                boost::system::error_code ec{static_cast<int>(::ERR_get_error()),
-                                             boost::asio::error::get_ssl_category()};
-                std::cerr << ec.message() << "\n";
-
-                Response response_data;
-
-                mtx::http::ClientError client_error;
-                client_error.error_code = ec;
-
-                callback(response_data, {}, client_error);
-
-                // Initialization failed.
-                return nullptr;
-        }
 
         return std::move(session);
 }

@@ -5,11 +5,14 @@ using namespace mtx::http;
 Session::Session(boost::asio::io_service &ios,
                  boost::asio::ssl::context &ssl_ctx,
                  const std::string &host,
+                 uint16_t port,
                  RequestID id,
                  SuccessCallback on_success,
                  FailureCallback on_failure)
-  : socket(ios, ssl_ctx)
+  : resolver_(ios)
+  , socket(ios, ssl_ctx)
   , host(std::move(host))
+  , port{port}
   , id(std::move(id))
   , on_success(std::move(on_success))
   , on_failure(std::move(on_failure))

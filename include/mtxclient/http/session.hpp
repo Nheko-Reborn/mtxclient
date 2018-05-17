@@ -4,6 +4,7 @@
 #include <boost/asio/ssl.hpp>
 #include <boost/beast.hpp>
 
+#include "mtxclient/http/errors.hpp"
 #include "mtxclient/utils.hpp"
 
 namespace mtx {
@@ -28,14 +29,19 @@ struct Session : public std::enable_shared_from_this<Session>
         Session(boost::asio::io_service &ios,
                 boost::asio::ssl::context &ssl_ctx,
                 const std::string &host,
+                uint16_t port,
                 RequestID id,
                 SuccessCallback on_success,
                 FailureCallback on_failure);
 
+        //! DNS resolver.
+        boost::asio::ip::tcp::resolver resolver_;
         //! Socket used for communication.
         boost::asio::ssl::stream<boost::asio::ip::tcp::socket> socket;
         //! Remote host.
         std::string host;
+        //! Remote port.
+        uint16_t port;
         //! Buffer where the response will be stored.
         boost::beast::flat_buffer output_buf;
         //! Parser that will the response data.
@@ -52,10 +58,28 @@ struct Session : public std::enable_shared_from_this<Session>
         //! Function to be called when the request fails.
         FailureCallback on_failure;
 
-        void on_resolve(boost::system::error_code ec,
-                        boost::asio::ip::tcp::resolver::results_type results);
+        void run()
+        {
+                // Set SNI Hostname (many hosts need this to handshake successfully)
+                if (!SSL_set_tlsext_host_name(socket.native_handle(), host.c_str())) {
+                        boost::system::error_code ec{static_cast<int>(::ERR_get_error()),
+                                                     boost::asio::error::get_ssl_category()};
+                        std::cerr << ec.message() << "\n";
+
+                        return on_failure(id, ec);
+                }
+
+                resolver_.async_resolve(host,
+                                        std::to_string(port),
+                                        std::bind(&Session::on_resolve,
+                                                  shared_from_this(),
+                                                  std::placeholders::_1,
+                                                  std::placeholders::_2));
+        }
 
 private:
+        void on_resolve(boost::system::error_code ec,
+                        boost::asio::ip::tcp::resolver::results_type results);
         void on_close(boost::system::error_code ec);
         void on_connect(const boost::system::error_code &ec);
         void on_handshake(const boost::system::error_code &ec);
