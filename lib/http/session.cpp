@@ -1,6 +1,6 @@
-#include "session.hpp"
+#include "mtxclient/http/session.hpp"
 
-using namespace mtx::client;
+using namespace mtx::http;
 
 Session::Session(boost::asio::io_service &ios,
                  boost::asio::ssl::context &ssl_ctx,

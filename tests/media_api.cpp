@@ -7,11 +7,11 @@
 
 #include <gtest/gtest.h>
 
-#include "client.hpp"
-#include "mtx/requests.hpp"
-#include "mtx/responses.hpp"
+#include <mtx/requests.hpp>
+#include <mtx/responses.hpp>
+#include <mtxclient/http/client.hpp>
 
-using namespace mtx::client;
+using namespace mtx::http;
 using namespace mtx::identifiers;
 
 using namespace std;

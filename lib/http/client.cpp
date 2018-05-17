@@ -2,13 +2,13 @@
 #include <boost/bind.hpp>
 #include <boost/utility/typed_in_place_factory.hpp>
 
-#include "client.hpp"
-#include "utils.hpp"
+#include "mtxclient/http/client.hpp"
+#include "mtxclient/utils.hpp"
 
 #include "mtx/requests.hpp"
 #include "mtx/responses.hpp"
 
-using namespace mtx::client;
+using namespace mtx::http;
 using namespace boost::beast;
 
 Client::Client(const std::string &server, uint16_t port)
@@ -204,7 +204,7 @@ Client::sync(const SyncOpts &opts, Callback<nlohmann::json> callback)
 
         params.emplace("timeout", std::to_string(opts.timeout));
 
-        get<nlohmann::json>("/client/r0/sync?" + utils::query_params(params),
+        get<nlohmann::json>("/client/r0/sync?" + mtx::client::utils::query_params(params),
                             [callback](const nlohmann::json &res, HeaderFields, RequestErr err) {
                                     callback(res, err);
                             });
@@ -227,7 +227,7 @@ Client::upload(const std::string &data,
 {
         std::map<std::string, std::string> params = {{"filename", filename}};
 
-        const auto api_path = "/media/r0/upload?" + utils::query_params(params);
+        const auto api_path = "/media/r0/upload?" + client::utils::query_params(params);
         post<std::string, mtx::responses::ContentURI>(api_path, data, cb, true, content_type);
 }
 
@@ -307,8 +307,8 @@ Client::messages(const mtx::identifiers::Room &room_id,
         if (!filter.empty())
                 params.emplace("filter", filter);
 
-        const auto api_path =
-          "/client/r0/rooms/" + room_id.to_string() + "/messages?" + utils::query_params(params);
+        const auto api_path = "/client/r0/rooms/" + room_id.to_string() + "/messages?" +
+                              client::utils::query_params(params);
 
         get<mtx::responses::Messages>(
           api_path, [callback](const mtx::responses::Messages &res, HeaderFields, RequestErr err) {
@@ -436,10 +436,11 @@ Client::key_changes(const std::string &from,
         if (!to.empty())
                 params.emplace("to", to);
 
-        get<mtx::responses::KeyChanges>("/client/r0/keys/changes?" + utils::query_params(params),
-                                        [callback](const mtx::responses::KeyChanges &res,
-                                                   HeaderFields,
-                                                   RequestErr err) { callback(res, err); });
+        get<mtx::responses::KeyChanges>(
+          "/client/r0/keys/changes?" + mtx::client::utils::query_params(params),
+          [callback](const mtx::responses::KeyChanges &res, HeaderFields, RequestErr err) {
+                  callback(res, err);
+          });
 }
 
 void

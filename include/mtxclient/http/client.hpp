@@ -15,13 +15,13 @@
 #include <mtx/requests.hpp>
 #include <mtx/responses.hpp>
 
-#include "crypto.hpp"
-#include "errors.hpp"
-#include "session.hpp"
-#include "utils.hpp"
+#include "mtxclient/crypto/client.hpp"
+#include "mtxclient/http/errors.hpp"
+#include "mtxclient/http/session.hpp"
+#include "mtxclient/utils.hpp"
 
 namespace mtx {
-namespace client {
+namespace http {
 
 enum class PaginationDirection
 {
@@ -38,7 +38,7 @@ to_string(PaginationDirection dir)
         return "f";
 }
 
-using RequestErr   = const boost::optional<mtx::client::errors::ClientError> &;
+using RequestErr   = const boost::optional<mtx::http::ClientError> &;
 using HeaderFields = const boost::optional<boost::beast::http::fields> &;
 using ErrCallback  = std::function<void(RequestErr)>;
 
@@ -84,7 +84,7 @@ public:
         //! Retrieve the device_id.
         std::string device_id() const { return device_id_; }
         //! Generate a new transaction id.
-        std::string generate_txn_id() { return utils::random_token(32, false); }
+        std::string generate_txn_id() { return client::utils::random_token(32, false); }
 
         //! Perfom login.
         void login(const std::string &username,
@@ -297,11 +297,11 @@ private:
 
 template<class Request, class Response>
 void
-mtx::client::Client::post(const std::string &endpoint,
-                          const Request &req,
-                          Callback<Response> callback,
-                          bool requires_auth,
-                          const std::string &content_type)
+mtx::http::Client::post(const std::string &endpoint,
+                        const Request &req,
+                        Callback<Response> callback,
+                        bool requires_auth,
+                        const std::string &content_type)
 {
         auto session = create_session<Response>(
           [callback](const Response &res, HeaderFields, RequestErr err) { callback(res, err); });
@@ -319,10 +319,10 @@ mtx::client::Client::post(const std::string &endpoint,
 // put function for the PUT HTTP requests that send responses
 template<class Request, class Response>
 void
-mtx::client::Client::put(const std::string &endpoint,
-                         const Request &req,
-                         Callback<Response> callback,
-                         bool requires_auth)
+mtx::http::Client::put(const std::string &endpoint,
+                       const Request &req,
+                       Callback<Response> callback,
+                       bool requires_auth)
 {
         auto session = create_session<Response>(
           [callback](const Response &res, HeaderFields, RequestErr err) { callback(res, err); });
@@ -340,12 +340,12 @@ mtx::client::Client::put(const std::string &endpoint,
 // provides PUT functionality for the endpoints which dont respond with a body
 template<class Request>
 void
-mtx::client::Client::put(const std::string &endpoint,
-                         const Request &req,
-                         ErrCallback callback,
-                         bool requires_auth)
+mtx::http::Client::put(const std::string &endpoint,
+                       const Request &req,
+                       ErrCallback callback,
+                       bool requires_auth)
 {
-        mtx::client::Client::put<Request, mtx::responses::Empty>(
+        mtx::http::Client::put<Request, mtx::responses::Empty>(
           endpoint,
           req,
           [callback](const mtx::responses::Empty, RequestErr err) { callback(err); },
@@ -354,9 +354,9 @@ mtx::client::Client::put(const std::string &endpoint,
 
 template<class Response>
 void
-mtx::client::Client::get(const std::string &endpoint,
-                         HeadersCallback<Response> callback,
-                         bool requires_auth)
+mtx::http::Client::get(const std::string &endpoint,
+                       HeadersCallback<Response> callback,
+                       bool requires_auth)
 {
         auto session = create_session<Response>(callback);
 
@@ -370,19 +370,19 @@ mtx::client::Client::get(const std::string &endpoint,
 }
 
 template<class Response>
-std::shared_ptr<mtx::client::Session>
-mtx::client::Client::create_session(HeadersCallback<Response> callback)
+std::shared_ptr<mtx::http::Session>
+mtx::http::Client::create_session(HeadersCallback<Response> callback)
 {
         auto session = std::make_shared<Session>(
           ios_,
           ssl_ctx_,
           server_,
-          utils::random_token(),
+          client::utils::random_token(),
           [callback](RequestID,
                      const boost::beast::http::response<boost::beast::http::string_body> &response,
                      const boost::system::error_code &err_code) {
                   Response response_data;
-                  mtx::client::errors::ClientError client_error;
+                  mtx::http::ClientError client_error;
 
                   const auto header = response.base();
 
@@ -392,7 +392,7 @@ mtx::client::Client::create_session(HeadersCallback<Response> callback)
                   }
 
                   // Decompress the response.
-                  const auto body = utils::decompress(
+                  const auto body = client::utils::decompress(
                     boost::iostreams::array_source{response.body().data(), response.body().size()},
                     header["Content-Encoding"].to_string());
 
@@ -402,7 +402,7 @@ mtx::client::Client::create_session(HeadersCallback<Response> callback)
                           // Try to parse the response in case we have an endpoint that
                           // doesn't return an error struct for non 200 requests.
                           try {
-                                  response_data = utils::deserialize<Response>(body);
+                                  response_data = client::utils::deserialize<Response>(body);
                           } catch (const nlohmann::json::exception &e) {
                           }
 
@@ -423,7 +423,7 @@ mtx::client::Client::create_session(HeadersCallback<Response> callback)
                   // If we reach that point we most likely have a valid output from the
                   // homeserver.
                   try {
-                          callback(utils::deserialize<Response>(body), header, {});
+                          callback(client::utils::deserialize<Response>(body), header, {});
                   } catch (const nlohmann::json::exception &e) {
                           client_error.parse_error = std::string(e.what()) + ": " + body;
                           callback(response_data, header, client_error);
@@ -432,7 +432,7 @@ mtx::client::Client::create_session(HeadersCallback<Response> callback)
           [callback](RequestID, const boost::system::error_code ec) {
                   Response response_data;
 
-                  mtx::client::errors::ClientError client_error;
+                  mtx::http::ClientError client_error;
                   client_error.error_code = ec;
 
                   callback(response_data, {}, client_error);
@@ -446,7 +446,7 @@ mtx::client::Client::create_session(HeadersCallback<Response> callback)
 
                 Response response_data;
 
-                mtx::client::errors::ClientError client_error;
+                mtx::http::ClientError client_error;
                 client_error.error_code = ec;
 
                 callback(response_data, {}, client_error);
@@ -460,19 +460,19 @@ mtx::client::Client::create_session(HeadersCallback<Response> callback)
 
 template<class Payload, mtx::events::EventType Event>
 void
-mtx::client::Client::send_room_message(const mtx::identifiers::Room &room_id,
-                                       const Payload &payload,
-                                       Callback<mtx::responses::EventId> callback)
+mtx::http::Client::send_room_message(const mtx::identifiers::Room &room_id,
+                                     const Payload &payload,
+                                     Callback<mtx::responses::EventId> callback)
 {
         send_room_message<Payload, Event>(room_id, generate_txn_id(), payload, callback);
 }
 
 template<class Payload, mtx::events::EventType Event>
 void
-mtx::client::Client::send_room_message(const mtx::identifiers::Room &room_id,
-                                       const std::string &txn_id,
-                                       const Payload &payload,
-                                       Callback<mtx::responses::EventId> callback)
+mtx::http::Client::send_room_message(const mtx::identifiers::Room &room_id,
+                                     const std::string &txn_id,
+                                     const Payload &payload,
+                                     Callback<mtx::responses::EventId> callback)
 {
         const auto api_path = "/client/r0/rooms/" + room_id.to_string() + "/send/" +
                               mtx::events::to_string(Event) + "/" + txn_id;
@@ -482,10 +482,10 @@ mtx::client::Client::send_room_message(const mtx::identifiers::Room &room_id,
 
 template<class Payload, mtx::events::EventType Event>
 void
-mtx::client::Client::send_state_event(const mtx::identifiers::Room &room_id,
-                                      const std::string &state_key,
-                                      const Payload &payload,
-                                      Callback<mtx::responses::EventId> callback)
+mtx::http::Client::send_state_event(const mtx::identifiers::Room &room_id,
+                                    const std::string &state_key,
+                                    const Payload &payload,
+                                    Callback<mtx::responses::EventId> callback)
 {
         const auto api_path = "/client/r0/rooms/" + room_id.to_string() + "/state/" +
                               mtx::events::to_string(Event) + "/" + state_key;
@@ -495,9 +495,9 @@ mtx::client::Client::send_state_event(const mtx::identifiers::Room &room_id,
 
 template<class Payload, mtx::events::EventType Event>
 void
-mtx::client::Client::send_state_event(const mtx::identifiers::Room &room_id,
-                                      const Payload &payload,
-                                      Callback<mtx::responses::EventId> callback)
+mtx::http::Client::send_state_event(const mtx::identifiers::Room &room_id,
+                                    const Payload &payload,
+                                    Callback<mtx::responses::EventId> callback)
 {
         send_state_event<Payload, Event>(room_id, "", payload, callback);
 }

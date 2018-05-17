@@ -1,10 +1,10 @@
 #include <iostream>
 
-#include "crypto.hpp"
+#include "mtxclient/crypto/client.hpp"
 #include <olm/base64.hh>
 
 using json = nlohmann::json;
-using namespace mtx::client::crypto;
+using namespace mtx::crypto;
 
 void
 OlmClient::create_new_account()
@@ -140,7 +140,7 @@ OlmClient::create_upload_keys_request()
 }
 
 mtx::requests::UploadKeys
-OlmClient::create_upload_keys_request(const mtx::client::crypto::OneTimeKeys &one_time_keys)
+OlmClient::create_upload_keys_request(const mtx::crypto::OneTimeKeys &one_time_keys)
 {
         mtx::requests::UploadKeys req;
         req.device_keys.user_id   = user_id_;
@@ -265,7 +265,7 @@ OlmClient::create_outbound_session(const std::string &identity_key, const std::s
 }
 
 BinaryBuf
-mtx::client::crypto::decode_base64(const std::string &msg)
+mtx::crypto::decode_base64(const std::string &msg)
 {
         const int output_nbytes = olm::decode_base64_length(msg.size());
 
@@ -281,7 +281,7 @@ mtx::client::crypto::decode_base64(const std::string &msg)
 }
 
 std::string
-mtx::client::crypto::encode_base64(const uint8_t *data, std::size_t len)
+mtx::crypto::encode_base64(const uint8_t *data, std::size_t len)
 {
         const int output_nbytes = olm::encode_base64_length(len);
 
@@ -295,7 +295,7 @@ mtx::client::crypto::encode_base64(const uint8_t *data, std::size_t len)
 }
 
 std::string
-mtx::client::crypto::session_id(OlmOutboundGroupSession *s)
+mtx::crypto::session_id(OlmOutboundGroupSession *s)
 {
         auto tmp = create_buffer(olm_outbound_group_session_id_length(s));
         olm_outbound_group_session_id(s, tmp.data(), tmp.size());
@@ -304,7 +304,7 @@ mtx::client::crypto::session_id(OlmOutboundGroupSession *s)
 }
 
 std::string
-mtx::client::crypto::session_key(OlmOutboundGroupSession *s)
+mtx::crypto::session_key(OlmOutboundGroupSession *s)
 {
         auto tmp = create_buffer(olm_outbound_group_session_key_length(s));
         olm_outbound_group_session_key(s, tmp.data(), tmp.size());
@@ -313,8 +313,7 @@ mtx::client::crypto::session_key(OlmOutboundGroupSession *s)
 }
 
 bool
-mtx::client::crypto::matches_inbound_session(OlmSession *session,
-                                             const BinaryBuf &one_time_key_message)
+mtx::crypto::matches_inbound_session(OlmSession *session, const BinaryBuf &one_time_key_message)
 {
         auto tmp = create_buffer(one_time_key_message.size());
         std::copy(one_time_key_message.begin(), one_time_key_message.end(), tmp.begin());
@@ -323,9 +322,9 @@ mtx::client::crypto::matches_inbound_session(OlmSession *session,
 }
 
 bool
-mtx::client::crypto::matches_inbound_session_from(OlmSession *session,
-                                                  const std::string &id_key,
-                                                  const BinaryBuf &one_time_key_message)
+mtx::crypto::matches_inbound_session_from(OlmSession *session,
+                                          const std::string &id_key,
+                                          const BinaryBuf &one_time_key_message)
 {
         auto tmp = create_buffer(one_time_key_message.size());
         std::copy(one_time_key_message.begin(), one_time_key_message.end(), tmp.begin());

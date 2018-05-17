@@ -4,8 +4,7 @@
 #include <boost/beast.hpp>
 
 namespace mtx {
-namespace client {
-namespace errors {
+namespace http {
 
 //! Compound type that includes matrix & network related errors.
 struct ClientError
@@ -19,6 +18,5 @@ struct ClientError
         //! Parsing response error.
         std::string parse_error;
 };
-}
-}
-}
+} // namespace http
+} // namespace mtx

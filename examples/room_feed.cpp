@@ -3,9 +3,9 @@
 #include <unistd.h>
 #include <variant.hpp>
 
-#include "client.hpp"
-#include "errors.hpp"
 #include "mtx.hpp"
+#include "mtxclient/http/client.hpp"
+#include "mtxclient/http/errors.hpp"
 
 //
 // Simple usage example of the /login & /sync endpoints which
@@ -14,6 +14,7 @@
 
 using namespace std;
 using namespace mtx::client;
+using namespace mtx::http;
 using namespace mtx::events;
 
 using TimelineEvent = mtx::events::collections::TimelineEvents;

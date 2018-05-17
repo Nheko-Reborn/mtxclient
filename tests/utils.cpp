@@ -1,14 +1,14 @@
 #include <gtest/gtest.h>
 
-#include "crypto.hpp"
 #include "json.hpp"
+#include <mtxclient/crypto/client.hpp>
 
 #include <olm/olm.h>
 #include <olm/utility.hh>
 
 using json = nlohmann::json;
 
-using namespace mtx::client::crypto;
+using namespace mtx::crypto;
 using namespace std;
 
 TEST(Utilities, CanonicalJSON)

@@ -19,6 +19,7 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU")
         -Wall \
         -Wextra \
         -Werror \
+        -ferror-limit=5 \
         -pipe \
         -pedantic \
         -Wunreachable-code")
@@ -122,12 +123,12 @@ include(Olm)
 set(MTXCLIENT_DEPS ${MTXCLIENT_DEPS} Olm)
 set(MTXCLIENT_LIBS ${MTXCLIENT_LIBS} olm)
 
-include_directories(src)
+include_directories(include)
 set(SRC 
-    src/client.cpp
-    src/session.cpp
-    src/utils.cpp
-    src/crypto.cpp)
+    lib/http/client.cpp
+    lib/http/session.cpp
+    lib/crypto/client.cpp
+    lib/utils.cpp)
 
 add_library(matrix_client ${SRC})
 add_dependencies(matrix_client ${MTXCLIENT_DEPS})

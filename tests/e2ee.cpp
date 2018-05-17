@@ -6,8 +6,8 @@
 
 #include "olm/account.hh"
 
-#include "client.hpp"
-#include "crypto.hpp"
+#include "mtxclient/crypto/client.hpp"
+#include "mtxclient/http/client.hpp"
 
 #include "mtx/requests.hpp"
 #include "mtx/responses.hpp"
@@ -16,6 +16,9 @@
 #include "test_helpers.hpp"
 
 using namespace mtx::client;
+using namespace mtx::http;
+using namespace mtx::crypto;
+
 using namespace mtx::identifiers;
 using namespace mtx::events::collections;
 using namespace mtx::responses;
@@ -23,7 +26,7 @@ using namespace mtx::responses;
 using namespace std;
 
 mtx::requests::UploadKeys
-generate_keys(std::shared_ptr<mtx::client::crypto::OlmClient> account)
+generate_keys(std::shared_ptr<mtx::crypto::OlmClient> account)
 {
         auto idks = account->identity_keys();
         account->generate_one_time_keys(1);
@@ -35,7 +38,7 @@ generate_keys(std::shared_ptr<mtx::client::crypto::OlmClient> account)
 TEST(Encryption, UploadIdentityKeys)
 {
         auto alice       = std::make_shared<Client>("localhost");
-        auto olm_account = std::make_shared<mtx::client::crypto::OlmClient>();
+        auto olm_account = std::make_shared<mtx::crypto::OlmClient>();
         olm_account->create_new_account();
 
         alice->login("alice", "secret", [](const mtx::responses::Login &, RequestErr err) {
@@ -53,7 +56,7 @@ TEST(Encryption, UploadIdentityKeys)
         ASSERT_TRUE(id_keys.curve25519.size() > 10);
         ASSERT_TRUE(id_keys.curve25519.size() > 10);
 
-        mtx::client::crypto::OneTimeKeys unused;
+        mtx::crypto::OneTimeKeys unused;
         auto request = olm_account->create_upload_keys_request(unused);
 
         // Make the request with the signed identity keys.
@@ -68,7 +71,7 @@ TEST(Encryption, UploadIdentityKeys)
 TEST(Encryption, UploadOneTimeKeys)
 {
         auto alice       = std::make_shared<Client>("localhost");
-        auto olm_account = std::make_shared<mtx::client::crypto::OlmClient>();
+        auto olm_account = std::make_shared<mtx::crypto::OlmClient>();
         olm_account->create_new_account();
 
         alice->login("alice", "secret", [](const mtx::responses::Login &, RequestErr err) {
@@ -109,7 +112,7 @@ TEST(Encryption, UploadOneTimeKeys)
 TEST(Encryption, UploadSignedOneTimeKeys)
 {
         auto alice       = std::make_shared<Client>("localhost");
-        auto olm_account = std::make_shared<mtx::client::crypto::OlmClient>();
+        auto olm_account = std::make_shared<mtx::crypto::OlmClient>();
         olm_account->create_new_account();
 
         alice->login("alice", "secret", [](const mtx::responses::Login &, RequestErr err) {
@@ -142,7 +145,7 @@ TEST(Encryption, UploadSignedOneTimeKeys)
 TEST(Encryption, UploadKeys)
 {
         auto alice       = std::make_shared<Client>("localhost");
-        auto olm_account = std::make_shared<mtx::client::crypto::OlmClient>();
+        auto olm_account = std::make_shared<mtx::crypto::OlmClient>();
         olm_account->create_new_account();
 
         alice->login("alice", "secret", [](const mtx::responses::Login &, RequestErr err) {
@@ -169,10 +172,10 @@ TEST(Encryption, UploadKeys)
 TEST(Encryption, QueryKeys)
 {
         auto alice     = std::make_shared<Client>("localhost");
-        auto alice_olm = std::make_shared<mtx::client::crypto::OlmClient>();
+        auto alice_olm = std::make_shared<mtx::crypto::OlmClient>();
 
         auto bob     = std::make_shared<Client>("localhost");
-        auto bob_olm = std::make_shared<mtx::client::crypto::OlmClient>();
+        auto bob_olm = std::make_shared<mtx::crypto::OlmClient>();
 
         alice_olm->create_new_account();
         bob_olm->create_new_account();
@@ -275,7 +278,7 @@ TEST(Encryption, QueryKeys)
 
 TEST(Encryption, ClaimKeys)
 {
-        using namespace mtx::client::crypto;
+        using namespace mtx::crypto;
 
         auto alice     = std::make_shared<Client>("localhost");
         auto alice_olm = std::make_shared<OlmClient>();
@@ -385,7 +388,7 @@ TEST(Encryption, ClaimKeys)
 TEST(Encryption, KeyChanges)
 {
         auto carl     = std::make_shared<Client>("localhost");
-        auto carl_olm = std::make_shared<mtx::client::crypto::OlmClient>();
+        auto carl_olm = std::make_shared<mtx::crypto::OlmClient>();
         carl_olm->create_new_account();
 
         carl->login("carl", "secret", [](const mtx::responses::Login &, RequestErr err) {
@@ -508,8 +511,8 @@ TEST(Encryption, EnableEncryption)
 
 TEST(Encryption, CreateOutboundGroupSession)
 {
-        auto alice = make_shared<mtx::client::crypto::OlmClient>();
-        auto bob   = make_shared<mtx::client::crypto::OlmClient>();
+        auto alice = make_shared<mtx::crypto::OlmClient>();
+        auto bob   = make_shared<mtx::crypto::OlmClient>();
 
         alice->create_new_account();
         bob->create_new_account();
@@ -519,13 +522,13 @@ TEST(Encryption, CreateOutboundGroupSession)
 
         auto outbound_session = alice->init_outbound_group_session();
 
-        auto session_id  = mtx::client::crypto::session_id(outbound_session.get());
-        auto session_key = mtx::client::crypto::session_key(outbound_session.get());
+        auto session_id  = mtx::crypto::session_id(outbound_session.get());
+        auto session_key = mtx::crypto::session_key(outbound_session.get());
 }
 
 TEST(Encryption, OlmSessions)
 {
-        using namespace mtx::client::crypto;
+        using namespace mtx::crypto;
 
         auto alice = std::make_shared<OlmClient>();
         alice->create_new_account();

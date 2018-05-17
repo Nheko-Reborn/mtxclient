@@ -6,7 +6,7 @@
 #include <thread>
 #include <vector>
 
-#include "client.hpp"
+#include <mtxclient/http/client.hpp>
 
 inline void
 sleep()
@@ -15,7 +15,7 @@ sleep()
 }
 
 inline void
-check_error(mtx::client::RequestErr err)
+check_error(mtx::http::RequestErr err)
 {
         if (err) {
                 std::cout << "matrix (error)  : " << err->matrix_error.error << "\n";
@@ -32,7 +32,7 @@ check_error(mtx::client::RequestErr err)
 }
 
 inline void
-check_login(const mtx::responses::Login &, mtx::client::RequestErr err)
+check_login(const mtx::responses::Login &, mtx::http::RequestErr err)
 {
         check_error(err);
 }

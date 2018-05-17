@@ -4,10 +4,10 @@
 #include <boost/asio/ssl.hpp>
 #include <boost/beast.hpp>
 
-#include "utils.hpp"
+#include "mtxclient/utils.hpp"
 
 namespace mtx {
-namespace client {
+namespace http {
 
 //! Type of the unique request id.
 using RequestID = std::string;
@@ -67,7 +67,7 @@ private:
 
 template<class Request, boost::beast::http::verb HttpVerb>
 void
-setup_headers(mtx::client::Session *session,
+setup_headers(mtx::http::Session *session,
               const Request &req,
               const std::string &endpoint,
               const std::string &content_type = "")
@@ -78,11 +78,11 @@ setup_headers(mtx::client::Session *session,
 
         session->request.method(HttpVerb);
         session->request.target("/_matrix" + endpoint);
-        session->request.body() = utils::serialize(req);
+        session->request.body() = client::utils::serialize(req);
         session->request.prepare_payload();
 
         if (!content_type.empty())
                 session->request.set(boost::beast::http::field::content_type, content_type);
 }
-}
-}
+} // namespace http
+} // namespace mtx
