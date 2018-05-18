@@ -19,7 +19,6 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU")
         -Wall \
         -Wextra \
         -Werror \
-        -ferror-limit=5 \
         -pipe \
         -pedantic \
         -Wunreachable-code")
