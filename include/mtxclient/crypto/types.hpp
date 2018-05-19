@@ -53,4 +53,4 @@ from_json(const nlohmann::json &obj, OneTimeKeys &keys)
         keys.curve25519 = obj.at("curve25519").get<std::map<std::string, std::string>>();
 }
 }
-};
+}

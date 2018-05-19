@@ -1,9 +1,9 @@
 #include <iostream>
 
 #include "mtxclient/crypto/client.hpp"
-#include <olm/base64.hh>
 
-#include <spdlog/spdlog.h>
+#include "spdlog/spdlog.h"
+#include <olm/base64.hh>
 
 namespace {
 auto logger = spdlog::stdout_color_mt("crypto");

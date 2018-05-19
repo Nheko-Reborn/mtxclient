@@ -1,10 +1,10 @@
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/beast.hpp>
 
+#include "spdlog/spdlog.h"
 #include <atomic>
 #include <iostream>
 #include <json.hpp>
-#include <spdlog/spdlog.h>
 #include <unistd.h>
 #include <variant.hpp>
 
@@ -46,6 +46,9 @@ save_device_keys(const mtx::responses::QueryKeys &res);
 
 void
 mark_encrypted_room(const RoomId &id);
+
+void
+handle_to_device_msgs(const std::vector<nlohmann::json> &to_device);
 
 //! Metadata associated with each active megolm session.
 struct GroupSessionMsgData
@@ -196,9 +199,7 @@ parse_messages(const mtx::responses::Sync &res)
         }
 
         // Check if we have any new m.room_key messages (i.e starting a new megolm session)
-        for (const auto &id : res.to_device) {
-                cout << id.dump(2) << endl;
-        }
+        handle_to_device_msgs(res.to_device);
 
         // Check if the uploaded one time keys are enough
         for (const auto &device : res.device_one_time_keys_count) {
@@ -364,6 +365,12 @@ get_device_keys(const UserId &user)
 
                 save_device_keys(std::move(res));
         });
+}
+
+void
+handle_to_device_msgs(const std::vector<nlohmann::json> &to_device)
+{
+        (void)to_device;
 }
 
 void
