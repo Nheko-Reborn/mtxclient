@@ -3,6 +3,7 @@ mtxclient
 [![Build Status](https://travis-ci.org/mujx/mtxclient.svg?branch=master)](https://travis-ci.org/mujx/mtxclient)
 [![Build status](https://ci.appveyor.com/api/projects/status/5hl7a6dc5s60xpxy/branch/master?svg=true)](https://ci.appveyor.com/project/mujx/mtxclient/branch/master)
 [![codecov](https://codecov.io/gh/mujx/mtxclient/branch/master/graph/badge.svg)](https://codecov.io/gh/mujx/mtxclient)
+[![experimental](http://badges.github.io/stability-badges/dist/experimental.svg)](http://github.com/badges/stability-badges)
 
 Client API library for the Matrix protocol, built on top of Boost.Asio.
 
@@ -12,7 +13,7 @@ Client API library for the Matrix protocol, built on top of Boost.Asio.
 
 - Boost 1.66 (includes Boost.Beast)
 - OpenSSL
-- C++ 11 compiler
+- C++ 14 compiler
 - CMake 3.1 or greater
 - Google Test (for testing)
 

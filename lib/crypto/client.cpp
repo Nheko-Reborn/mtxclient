@@ -3,6 +3,12 @@
 #include "mtxclient/crypto/client.hpp"
 #include <olm/base64.hh>
 
+#include <spdlog/spdlog.h>
+
+namespace {
+auto logger = spdlog::stdout_color_mt("crypto");
+}
+
 using json = nlohmann::json;
 using namespace mtx::crypto;
 
@@ -117,10 +123,13 @@ OlmClient::sign_one_time_keys(const OneTimeKeys &keys)
         // Sign & append the one time keys.
         std::map<std::string, json> signed_one_time_keys;
         for (const auto &elem : keys.curve25519) {
-                auto sig = sign_one_time_key(elem.second);
+                const auto key_id       = elem.first;
+                const auto one_time_key = elem.second;
 
-                signed_one_time_keys["signed_curve25519:" + elem.first] =
-                  signed_one_time_key_json(elem.second, sig);
+                auto sig = sign_one_time_key(one_time_key);
+
+                signed_one_time_keys["signed_curve25519:" + key_id] =
+                  signed_one_time_key_json(one_time_key, sig);
         }
 
         return signed_one_time_keys;
@@ -331,4 +340,44 @@ mtx::crypto::matches_inbound_session_from(OlmSession *session,
 
         return olm_matches_inbound_session_from(
           session, id_key.data(), id_key.size(), (void *)tmp.data(), tmp.size());
+}
+
+bool
+mtx::crypto::verify_identity_signature(nlohmann::json obj,
+                                       const DeviceId &device_id,
+                                       const UserId &user_id,
+                                       const std::string &signing_key)
+{
+        using namespace client::utils;
+
+        try {
+                const auto sign_key_id = "ed25519:" + device_id.get();
+                const auto signature =
+                  obj.at("signatures").at(user_id.get()).at(sign_key_id).get<std::string>();
+
+                if (signature.empty())
+                        return false;
+
+                obj.erase("unsigned");
+                obj.erase("signatures");
+
+                const auto msg = obj.dump();
+
+                auto utility = create_olm_object<OlmUtility>();
+                auto ret     = olm_ed25519_verify(utility.get(),
+                                              signing_key.data(),
+                                              signing_key.size(),
+                                              msg.data(),
+                                              msg.size(),
+                                              (void *)signature.data(),
+                                              signature.size());
+
+                if (ret != 0)
+                        throw olm_exception("verify_identity_signature", utility.get());
+
+                return true;
+        } catch (const nlohmann::json::exception &e) {
+                logger->warn("verify_identity_signature: {}", e.what());
+                return false;
+        }
 }

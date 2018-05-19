@@ -55,8 +55,6 @@ TEST(Utilities, VerifySignedOneTimeKey)
         alice->create_new_account();
         alice->create_new_utility();
 
-        alice->identity_keys();
-
         alice->generate_one_time_keys(1);
         auto keys = alice->one_time_keys();
 
@@ -65,17 +63,52 @@ TEST(Utilities, VerifySignedOneTimeKey)
 
         auto sig = alice->sign_message(msg);
 
-        auto res = olm_ed25519_verify(
-          alice->utility(),
-          reinterpret_cast<const uint8_t *>(alice->identity_keys().ed25519.data()),
-          alice->identity_keys().ed25519.size(),
-          reinterpret_cast<const uint8_t *>(msg.data()),
-          msg.size(),
-          reinterpret_cast<uint8_t *>(&sig[0]),
-          sig.size());
+        auto res = olm_ed25519_verify(alice->utility(),
+                                      alice->identity_keys().ed25519.data(),
+                                      alice->identity_keys().ed25519.size(),
+                                      msg.data(),
+                                      msg.size(),
+                                      (void *)sig.data(),
+                                      sig.size());
 
         EXPECT_EQ(std::string(olm_utility_last_error(alice->utility())), "SUCCESS");
         EXPECT_EQ(res, 0);
+}
+
+TEST(Utilities, ValidUploadKeysRequest)
+{
+        const std::string user_id   = "@alice:matrix.org";
+        const std::string device_id = "FKALSOCCC";
+
+        auto alice = make_shared<OlmClient>();
+        alice->create_new_account();
+        alice->set_device_id(device_id);
+        alice->set_user_id(user_id);
+        alice->generate_one_time_keys(1);
+
+        auto id_sig = alice->sign_identity_keys();
+
+        json body{{"algorithms", {"m.olm.v1.curve25519-aes-sha2", "m.megolm.v1.aes-sha2"}},
+                  {"user_id", user_id},
+                  {"device_id", device_id},
+                  {"keys",
+                   {
+                     {"curve25519:" + device_id, alice->identity_keys().curve25519},
+                     {"ed25519:" + device_id, alice->identity_keys().ed25519},
+                   }}};
+
+        body["signatures"][user_id]["ed25519:" + device_id] = id_sig;
+
+        json obj         = alice->create_upload_keys_request();
+        json device_keys = obj.at("device_keys");
+
+        ASSERT_TRUE(device_keys.dump() == body.dump());
+
+        ASSERT_TRUE(verify_identity_signature(
+          body, DeviceId(device_id), UserId(user_id), alice->identity_keys().ed25519));
+
+        ASSERT_TRUE(verify_identity_signature(
+          device_keys, DeviceId(device_id), UserId(user_id), alice->identity_keys().ed25519));
 }
 
 TEST(Utilities, VerifySignedIdentityKeys)
@@ -96,15 +129,64 @@ TEST(Utilities, VerifySignedIdentityKeys)
 
         auto sig = alice->sign_message(msg);
 
-        auto res = olm_ed25519_verify(
-          alice->utility(),
-          reinterpret_cast<const uint8_t *>(alice->identity_keys().ed25519.data()),
-          alice->identity_keys().ed25519.size(),
-          reinterpret_cast<const uint8_t *>(msg.data()),
-          msg.size(),
-          reinterpret_cast<uint8_t *>(&sig[0]),
-          sig.size());
+        auto res = olm_ed25519_verify(alice->utility(),
+                                      alice->identity_keys().ed25519.data(),
+                                      alice->identity_keys().ed25519.size(),
+                                      msg.data(),
+                                      msg.size(),
+                                      (void *)sig.data(),
+                                      sig.size());
 
         EXPECT_EQ(std::string(olm_utility_last_error(alice->utility())), "SUCCESS");
         EXPECT_EQ(res, 0);
+}
+
+TEST(Utilities, VerifyIdentityKeyJson)
+{
+        //! JSON extracted from an account created through Riot.
+        json data = R"({
+	"algorithms": [
+	  "m.olm.v1.curve25519-aes-sha2",
+          "m.megolm.v1.aes-sha2"
+        ],
+        "device_id": "VVLXGGTJGN",
+        "keys": {
+          "curve25519:VVLXGGTJGN": "TEdjuBVstvGMy0NYJxpeD7Zo97bLEgT2ukefWDPbe0w",
+          "ed25519:VVLXGGTJGN": "L5IUXmjZGzZO9IwB/j61lTjuD79TCMRDM4bBHvGstT4"
+        },
+        "signatures": {
+          "@nheko_test:matrix.org": {
+            "ed25519:VVLXGGTJGN": "tVWnGmZ5cMHiLJiaMhkZjNThQXlvFBsal3dclgPyiqkm/dG7F65U8xHpRb3QWFWALo9iy+L7W+fwv0yGhJFxBQ"
+          }
+        },
+        "unsigned": {
+          "device_display_name": "https://riot.im/develop/ via Firefox on Linux"
+        },
+        "user_id": "@nheko_test:matrix.org"
+        })"_json;
+
+        const auto signing_key = data.at("keys").at("ed25519:VVLXGGTJGN").get<std::string>();
+        const auto signature   = data.at("signatures")
+                                 .at("@nheko_test:matrix.org")
+                                 .at("ed25519:VVLXGGTJGN")
+                                 .get<std::string>();
+
+        auto tmp = data;
+        tmp.erase("unsigned");
+        tmp.erase("signatures");
+
+        auto msg = tmp.dump();
+
+        auto utility = create_olm_object<OlmUtility>();
+        EXPECT_EQ(olm_ed25519_verify(utility.get(),
+                                     signing_key.data(),
+                                     signing_key.size(),
+                                     msg.data(),
+                                     msg.size(),
+                                     (void *)signature.data(),
+                                     signature.size()),
+                  0);
+
+        ASSERT_TRUE(verify_identity_signature(
+          data, DeviceId("VVLXGGTJGN"), UserId("@nheko_test:matrix.org"), signing_key));
 }

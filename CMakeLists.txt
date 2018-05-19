@@ -114,6 +114,14 @@ endif()
 include_directories(${MATRIX_STRUCTS_INCLUDE_DIR})
 set(MTXCLIENT_LIBS ${MTXCLIENT_LIBS} ${MATRIX_STRUCTS_LIBRARY})
 
+#
+# spdlog
+#
+if(NOT SPDLOG_INCLUDE_DIR)
+    include(SpdLog)
+    set(EXTERNAL_PROJECT_DEPS ${EXTERNAL_PROJECT_DEPS} SpdLog)
+endif()
+include_directories(SYSTEM ${SPDLOG_INCLUDE_DIR})
 
 #
 # libolm
@@ -145,9 +153,13 @@ endif()
 
 if (BUILD_LIB_EXAMPLES)
     add_executable(room_feed examples/room_feed.cpp)
-    add_executable(simple_bot examples/simple_bot.cpp)
     target_link_libraries(room_feed matrix_client ${MATRIX_STRUCTS_LIBRARY})
+
+    add_executable(simple_bot examples/simple_bot.cpp)
     target_link_libraries(simple_bot matrix_client ${MATRIX_STRUCTS_LIBRARY})
+
+    add_executable(crypto_bot examples/crypto_bot.cpp)
+    target_link_libraries(crypto_bot matrix_client ${MATRIX_STRUCTS_LIBRARY})
 endif()
 
 if (BUILD_LIB_TESTS)

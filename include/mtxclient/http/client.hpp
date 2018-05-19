@@ -419,7 +419,8 @@ mtx::http::Client::create_session(HeadersCallback<Response> callback)
                   // If we reach that point we most likely have a valid output from the
                   // homeserver.
                   try {
-                          callback(client::utils::deserialize<Response>(body), header, {});
+                          auto res = client::utils::deserialize<Response>(body);
+                          callback(std::move(res), header, {});
                   } catch (const nlohmann::json::exception &e) {
                           client_error.parse_error = std::string(e.what()) + ": " + body;
                           callback(response_data, header, client_error);

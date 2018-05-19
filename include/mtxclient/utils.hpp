@@ -49,6 +49,35 @@ serialize<std::string>(const std::string &obj)
 {
         return obj;
 }
+
+template<class T, class Name>
+class strong_type
+{
+public:
+        strong_type() = default;
+        explicit strong_type(const T &value)
+          : value_(value)
+        {}
+        explicit strong_type(T &&value)
+          : value_(std::forward<T>(value))
+        {}
+
+        operator T &() noexcept { return value_; }
+        constexpr operator const T &() const noexcept { return value_; }
+
+        T &get() { return value_; }
+        T const &get() const { return value_; }
+
+private:
+        T value_;
+};
+
+// Macro for concisely defining a strong type
+#define STRONG_TYPE(type_name, value_type)                                                         \
+        struct type_name : mtx::client::utils::strong_type<value_type, type_name>                  \
+        {                                                                                          \
+                using strong_type::strong_type;                                                    \
+        };
 }
 }
 }

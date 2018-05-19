@@ -1,6 +1,11 @@
 #pragma once
 
+#include "mtxclient/utils.hpp"
 #include <json.hpp>
+
+STRONG_TYPE(UserId, std::string)
+STRONG_TYPE(DeviceId, std::string)
+STRONG_TYPE(RoomId, std::string)
 
 namespace mtx {
 namespace crypto {

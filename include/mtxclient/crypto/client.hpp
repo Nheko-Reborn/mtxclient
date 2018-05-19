@@ -120,6 +120,13 @@ struct OlmAllocator<OlmInboundGroupSession>
         }
 };
 
+template<class T>
+std::unique_ptr<T, OlmDeleter>
+create_olm_object()
+{
+        return std::unique_ptr<T, OlmDeleter>(OlmAllocator<T>::allocate());
+}
+
 class OlmClient : public std::enable_shared_from_this<OlmClient>
 {
 public:
@@ -137,12 +144,6 @@ public:
 
         //! Sign the given message.
         Base64String sign_message(const std::string &msg);
-
-        template<class T>
-        std::unique_ptr<T, OlmDeleter> create_olm_object()
-        {
-                return std::unique_ptr<T, OlmDeleter>(OlmAllocator<T>::allocate());
-        }
 
         //! Create a new olm Account. Must be called before any other operation.
         void create_new_account();
@@ -217,6 +218,13 @@ bool
 matches_inbound_session_from(OlmSession *session,
                              const std::string &id_key,
                              const BinaryBuf &one_time_key_message);
+
+//! Verify a signature object as obtained from the response of /keys/query endpoint
+bool
+verify_identity_signature(nlohmann::json obj,
+                          const DeviceId &device_id,
+                          const UserId &user_id,
+                          const std::string &signing_key);
 
 } // namespace crypto
 } // namespace mtx

@@ -304,8 +304,8 @@ TEST(Encryption, ClaimKeys)
         atomic_bool uploaded(false);
 
         // Bob uploads his keys.
-        auto bob_req = ::generate_keys(bob_olm);
-        bob->upload_keys(bob_req,
+        bob_olm->generate_one_time_keys(1);
+        bob->upload_keys(bob_olm->create_upload_keys_request(),
                          [&uploaded](const mtx::responses::UploadKeys &res, RequestErr err) {
                                  check_error(err);
                                  EXPECT_EQ(res.one_time_key_counts.size(), 1);
@@ -321,8 +321,7 @@ TEST(Encryption, ClaimKeys)
         mtx::requests::QueryKeys alice_rk;
         alice_rk.device_keys[bob->user_id().to_string()] = {};
         alice->query_keys(
-          alice_rk,
-          [alice_olm, alice, bob, bob_req](const mtx::responses::QueryKeys &res, RequestErr err) {
+          alice_rk, [alice_olm, alice, bob](const mtx::responses::QueryKeys &res, RequestErr err) {
                   check_error(err);
 
                   auto bob_devices = res.device_keys.at(bob->user_id().to_string());
@@ -334,51 +333,35 @@ TEST(Encryption, ClaimKeys)
                   auto bob_ed25519 =
                     bob_devices.at(bob->device_id()).keys.at("ed25519:" + bob->device_id());
 
-                  alice->claim_keys(
-                    bob->user_id(),
-                    devices,
-                    [alice_olm, bob, bob_req, bob_ed25519](const mtx::responses::ClaimKeys &res,
-                                                           RequestErr err) {
-                            check_error(err);
+                  const auto current_device = bob_devices.at(bob->device_id());
 
-                            const auto user_id   = bob->user_id().to_string();
-                            const auto device_id = bob->device_id();
+                  // Verify signature.
+                  ASSERT_TRUE(verify_identity_signature(json(current_device),
+                                                        DeviceId(bob->device_id()),
+                                                        UserId(bob->user_id().to_string()),
+                                                        bob_ed25519));
 
-                            // The device exists.
-                            EXPECT_EQ(res.one_time_keys.size(), 1);
-                            EXPECT_EQ(res.one_time_keys.at(user_id).size(), 1);
+                  alice->claim_keys(bob->user_id(),
+                                    devices,
+                                    [alice_olm, bob, bob_ed25519](
+                                      const mtx::responses::ClaimKeys &res, RequestErr err) {
+                                            check_error(err);
 
-                            // The key is the one bob sent.
-                            auto one_time_key = res.one_time_keys.at(user_id).at(device_id);
-                            ASSERT_TRUE(one_time_key.is_object());
+                                            const auto user_id   = bob->user_id().to_string();
+                                            const auto device_id = bob->device_id();
 
-                            auto algo     = one_time_key.begin().key();
-                            auto contents = one_time_key.begin().value();
+                                            // The device exists.
+                                            EXPECT_EQ(res.one_time_keys.size(), 1);
+                                            EXPECT_EQ(res.one_time_keys.at(user_id).size(), 1);
 
-                            EXPECT_EQ(bob_req.one_time_keys.at(algo), contents);
+                                            // The key is the one bob sent.
+                                            auto one_time_key =
+                                              res.one_time_keys.at(user_id).at(device_id);
+                                            ASSERT_TRUE(one_time_key.is_object());
 
-                            alice_olm->create_new_utility();
-
-                            auto msg = json{{"key", contents.at("key").get<std::string>()}}.dump();
-                            auto signature = contents.at("signatures")
-                                               .at(user_id)
-                                               .at("ed25519:" + device_id)
-                                               .get<std::string>();
-
-                            // Verify signature.
-                            auto ret = olm_ed25519_verify(
-                              alice_olm->utility(),
-                              reinterpret_cast<const uint8_t *>(bob_ed25519.data()),
-                              bob_ed25519.size(),
-                              msg.data(),
-                              msg.size(),
-                              reinterpret_cast<uint8_t *>(&signature[0]),
-                              signature.size());
-
-                            EXPECT_EQ(std::string(olm_utility_last_error(alice_olm->utility())),
-                                      "SUCCESS");
-                            EXPECT_EQ(ret, 0);
-                    });
+                                            auto algo     = one_time_key.begin().key();
+                                            auto contents = one_time_key.begin().value();
+                                    });
           });
 
         alice->close();
