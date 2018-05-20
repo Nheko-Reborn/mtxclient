@@ -532,29 +532,30 @@ TEST(Encryption, OlmSessions)
         auto alice_outbound_session = alice->create_outbound_session(bob_key, bob_one_time_key);
 
         // Alice encrypts the message using the current session.
-        auto plaintext  = "Hello, Bob!";
-        size_t msgtype  = olm_encrypt_message_type(alice_outbound_session.get());
-        auto ciphertext = alice->encrypt_message(alice_outbound_session.get(), plaintext);
+        auto plaintext      = "Hello, Bob!";
+        size_t msgtype      = olm_encrypt_message_type(alice_outbound_session.get());
+        auto ciphertext     = alice->encrypt_message(alice_outbound_session.get(), plaintext);
+        auto ciphertext_str = std::string((char *)ciphertext.data(), ciphertext.size());
 
         EXPECT_EQ(msgtype, 0);
 
         // Bob creates an inbound session to receive Alice's message.
-        auto bob_inbound_session = bob->create_inbound_session(ciphertext);
+        auto bob_inbound_session = bob->create_inbound_session(ciphertext_str);
 
         // Bob validates that the message was meant for him.
-        ASSERT_EQ(1, matches_inbound_session(bob_inbound_session.get(), ciphertext));
+        ASSERT_EQ(1, matches_inbound_session(bob_inbound_session.get(), ciphertext_str));
 
         // Bob validates that the message was sent from Alice.
-        ASSERT_EQ(1,
-                  matches_inbound_session_from(bob_inbound_session.get(), alice_key, ciphertext));
+        ASSERT_EQ(
+          1, matches_inbound_session_from(bob_inbound_session.get(), alice_key, ciphertext_str));
 
         // Bob validates that the message wasn't sent by someone else.
-        ASSERT_EQ(0, matches_inbound_session_from(bob_inbound_session.get(), bob_key, ciphertext));
+        ASSERT_EQ(0,
+                  matches_inbound_session_from(bob_inbound_session.get(), bob_key, ciphertext_str));
 
         // Bob decrypts the message
-        auto ciphertext_str = std::string((char *)ciphertext.data(), ciphertext.size());
         auto decrypted = bob->decrypt_message(bob_inbound_session.get(), msgtype, ciphertext_str);
 
         auto body_str = std::string((char *)decrypted.data(), decrypted.size());
-        ASSERT_EQ(body_str, "Hello, Bob!");
+        ASSERT_EQ(body_str, plaintext);
 }

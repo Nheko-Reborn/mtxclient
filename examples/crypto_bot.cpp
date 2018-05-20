@@ -5,6 +5,7 @@
 #include <atomic>
 #include <iostream>
 #include <json.hpp>
+#include <stdexcept>
 #include <unistd.h>
 #include <variant.hpp>
 
@@ -30,6 +31,46 @@ using namespace mtx::events;
 using namespace mtx::identifiers;
 
 using TimelineEvent = mtx::events::collections::TimelineEvents;
+
+constexpr auto OLM_ALGO = "m.olm.v1.curve25519-aes-sha2";
+
+struct OlmCipherContent
+{
+        std::string body;
+        uint8_t type;
+};
+
+inline void
+from_json(const nlohmann::json &obj, OlmCipherContent &msg)
+{
+        msg.body = obj.at("body");
+        msg.type = obj.at("type");
+}
+
+struct OlmMessage
+{
+        std::string sender_key;
+        std::string sender;
+
+        using RecipientKey = std::string;
+        std::map<RecipientKey, OlmCipherContent> ciphertext;
+};
+
+inline void
+from_json(const nlohmann::json &obj, OlmMessage &msg)
+{
+        if (obj.at("type") != "m.room.encrypted") {
+                throw std::invalid_argument("invalid type for olm message");
+        }
+
+        if (obj.at("content").at("algorithm") != OLM_ALGO)
+                throw std::invalid_argument("invalid algorithm for olm message");
+
+        msg.sender     = obj.at("sender");
+        msg.sender_key = obj.at("content").at("sender_key");
+        msg.ciphertext =
+          obj.at("content").at("ciphertext").get<std::map<std::string, OlmCipherContent>>();
+}
 
 template<class Container, class Item>
 bool
@@ -69,6 +110,36 @@ struct Storage
         std::map<std::string, std::string> device_keys_;
         //! Flag that indicate if a specific room has encryption enabled.
         std::map<std::string, bool> encrypted_rooms_;
+
+        //! Mapping from curve25519 to session.
+        std::map<std::string, OlmSessionPtr> olm_sessions;
+
+        std::map<std::string, InboundGroupSessionPtr> inbound_group_sessions;
+
+        bool inbound_group_exists(const std::string &room_id,
+                                  const std::string &session_id,
+                                  const std::string &sender_key)
+        {
+                const auto key = room_id + session_id + sender_key;
+                return inbound_group_sessions.find(key) != inbound_group_sessions.end();
+        }
+
+        void set_inbound_group_session(const std::string &room_id,
+                                       const std::string &session_id,
+                                       const std::string &sender_key,
+                                       InboundGroupSessionPtr session)
+        {
+                const auto key              = room_id + session_id + sender_key;
+                inbound_group_sessions[key] = std::move(session);
+        }
+
+        OlmInboundGroupSession *get_inbound_group_session(const std::string &room_id,
+                                                          const std::string &session_id,
+                                                          const std::string &sender_key)
+        {
+                const auto key = room_id + session_id + sender_key;
+                return inbound_group_sessions[key].get();
+        }
 };
 
 namespace {
@@ -183,6 +254,73 @@ mark_encrypted_room(const RoomId &id)
 }
 
 void
+decrypt_olm_message(const OlmMessage &olm_msg)
+{
+        console->info("OLM message");
+        console->info("sender: {}", olm_msg.sender);
+        console->info("sender_key: {}", olm_msg.sender_key);
+
+        const auto my_id_key = olm_client->identity_keys().curve25519;
+        for (const auto &cipher : olm_msg.ciphertext) {
+                if (cipher.first == my_id_key) {
+                        const auto msg_body = cipher.second.body;
+                        const auto msg_type = cipher.second.type;
+
+                        console->info("the message is meant for us");
+                        console->info("body: {}", msg_body);
+                        console->info("type: {}", msg_type);
+
+                        if (msg_type == 0) {
+                                console->info("opening session with {}", olm_msg.sender);
+                                auto inbound_session = olm_client->create_inbound_session(msg_body);
+
+                                auto ok = matches_inbound_session_from(
+                                  inbound_session.get(), olm_msg.sender_key, msg_body);
+
+                                if (!ok) {
+                                        console->error("session could not be established");
+
+                                } else {
+                                        auto output = olm_client->decrypt_message(
+                                          inbound_session.get(), msg_type, msg_body);
+
+                                        auto plaintext = json::parse(
+                                          std::string((char *)output.data(), output.size()));
+                                        console->info("decrypted message: \n {}",
+                                                      plaintext.dump(2));
+
+                                        storage.olm_sessions.emplace(olm_msg.sender_key,
+                                                                     std::move(inbound_session));
+
+                                        std::string room_id = plaintext.at("content").at("room_id");
+                                        std::string session_id =
+                                          plaintext.at("content").at("session_id");
+                                        std::string session_key =
+                                          plaintext.at("content").at("session_key");
+
+                                        if (storage.inbound_group_exists(
+                                              room_id, session_id, olm_msg.sender_key)) {
+                                                console->warn("megolm session already exists");
+                                        } else {
+                                                auto megolm_session =
+                                                  olm_client->init_inbound_group_session(
+                                                    session_key);
+
+                                                storage.set_inbound_group_session(
+                                                  room_id,
+                                                  session_id,
+                                                  olm_msg.sender_key,
+                                                  std::move(megolm_session));
+
+                                                console->info("megolm_session saved");
+                                        }
+                                }
+                        }
+                }
+        }
+}
+
+void
 parse_messages(const mtx::responses::Sync &res)
 {
         for (const auto &room : res.rooms.invite) {
@@ -227,7 +365,28 @@ parse_messages(const mtx::responses::Sync &res)
                                 console->debug("{}", get_json(e));
                         } else if (is_encrypted(e)) {
                                 console->info("received an encrypted event: {}", room_id);
-                                console->debug("{}", get_json(e));
+                                console->info("{}", get_json(e));
+
+                                auto msg = mpark::get<EncryptedEvent<msg::Encrypted>>(e);
+
+                                if (storage.inbound_group_exists(
+                                      room_id, msg.content.session_id, msg.content.sender_key)) {
+                                        auto res = olm_client->decrypt_group_message(
+                                          storage.get_inbound_group_session(room_id,
+                                                                            msg.content.session_id,
+                                                                            msg.content.sender_key),
+                                          msg.content.ciphertext);
+
+                                        auto msg_str =
+                                          std::string((char *)res.data.data(), res.data.size());
+
+                                        console->info("decrypted data: {}", msg_str);
+                                        console->info("decrypted message_index: {}",
+                                                      res.message_index);
+                                } else {
+                                        console->warn(
+                                          "no megolm session found to decrypt the event");
+                                }
                         }
                 }
         }
@@ -368,9 +527,23 @@ get_device_keys(const UserId &user)
 }
 
 void
-handle_to_device_msgs(const std::vector<nlohmann::json> &to_device)
+handle_to_device_msgs(const std::vector<nlohmann::json> &msgs)
 {
-        (void)to_device;
+        if (!msgs.empty())
+                console->info("inspecting {} to_device messages", msgs.size());
+
+        for (const auto &msg : msgs) {
+                console->info(msg.dump(2));
+
+                try {
+                        OlmMessage olm_msg = msg;
+                        decrypt_olm_message(std::move(olm_msg));
+                } catch (const nlohmann::json::exception &e) {
+                        console->warn("parsing error for olm message: {}", e.what());
+                } catch (const std::invalid_argument &e) {
+                        console->warn("validation error for olm message: {}", e.what());
+                }
+        }
 }
 
 void
@@ -424,20 +597,25 @@ main()
 {
         spdlog::set_pattern("[%H:%M:%S] [tid %t] [%^%l%$] %v");
 
-        std::string username, server, password;
+        std::string username("mtx_bot");
+        std::string server("matrix.org");
+        std::string password("dzyvrwB09GdyEqiyBnfAEvZI3");
 
-        cout << "username: ";
-        std::getline(std::cin, username);
+        // cout << "username: ";
+        // std::getline(std::cin, username);
 
-        cout << "server: ";
-        std::getline(std::cin, server);
+        // cout << "server: ";
+        // std::getline(std::cin, server);
 
-        password = getpass("password: ");
+        // password = getpass("password: ");
 
         client = std::make_shared<Client>(server);
 
         olm_client = make_shared<OlmClient>();
         olm_client->create_new_account();
+
+        console->info("ed25519: {}", olm_client->identity_keys().ed25519);
+        console->info("curve25519: {}", olm_client->identity_keys().curve25519);
 
         client->login(username, password, login_cb);
         client->close();

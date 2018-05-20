@@ -174,7 +174,7 @@ OlmClient::create_upload_keys_request(const mtx::crypto::OneTimeKeys &one_time_k
         return req;
 }
 
-std::unique_ptr<OlmOutboundGroupSession, OlmDeleter>
+OutboundGroupSessionPtr
 OlmClient::init_outbound_group_session()
 {
         auto session = create_olm_object<OlmOutboundGroupSession>();
@@ -187,6 +187,54 @@ OlmClient::init_outbound_group_session()
                 throw olm_exception("init_outbound_group_session", session.get());
 
         return session;
+}
+
+InboundGroupSessionPtr
+OlmClient::init_inbound_group_session(const std::string &session_key)
+{
+        auto session = create_olm_object<OlmInboundGroupSession>();
+
+        const int ret = olm_init_inbound_group_session(
+          session.get(), reinterpret_cast<const uint8_t *>(session_key.data()), session_key.size());
+
+        if (ret == -1)
+                throw olm_exception("init_inbound_group_session", session.get());
+
+        return session;
+}
+
+GroupPlaintext
+OlmClient::decrypt_group_message(OlmInboundGroupSession *session,
+                                 const std::string &message,
+                                 uint32_t message_index)
+{
+        // TODO handle errors
+        auto tmp_msg = create_buffer(message.size());
+        std::copy(message.begin(), message.end(), tmp_msg.begin());
+
+        auto plaintext_len =
+          olm_group_decrypt_max_plaintext_length(session, tmp_msg.data(), tmp_msg.size());
+        auto plaintext = create_buffer(plaintext_len);
+
+        tmp_msg = create_buffer(message.size());
+        std::copy(message.begin(), message.end(), tmp_msg.begin());
+
+        const int nbytes = olm_group_decrypt(session,
+                                             tmp_msg.data(),
+                                             tmp_msg.size(),
+                                             plaintext.data(),
+                                             plaintext.size(),
+                                             &message_index);
+
+        logger->info("new message_index: {}", message_index);
+
+        if (nbytes == -1)
+                throw olm_exception("olm_group_decrypt", session);
+
+        auto output = create_buffer(nbytes);
+        std::memcpy(output.data(), plaintext.data(), nbytes);
+
+        return GroupPlaintext{std::move(output), message_index};
 }
 
 BinaryBuf
@@ -235,7 +283,16 @@ OlmClient::encrypt_message(OlmSession *session, const std::string &msg)
         return ciphertext;
 }
 
-std::unique_ptr<OlmSession, OlmDeleter>
+OlmSessionPtr
+OlmClient::create_inbound_session(const std::string &one_time_key_message)
+{
+        BinaryBuf tmp(one_time_key_message.size());
+        memcpy(tmp.data(), one_time_key_message.data(), one_time_key_message.size());
+
+        return create_inbound_session(std::move(tmp));
+}
+
+OlmSessionPtr
 OlmClient::create_inbound_session(const BinaryBuf &one_time_key_message)
 {
         auto session = create_olm_object<OlmSession>();
@@ -252,7 +309,7 @@ OlmClient::create_inbound_session(const BinaryBuf &one_time_key_message)
         return session;
 }
 
-std::unique_ptr<OlmSession, OlmDeleter>
+OlmSessionPtr
 OlmClient::create_outbound_session(const std::string &identity_key, const std::string &one_time_key)
 {
         auto session    = create_olm_object<OlmSession>();
@@ -322,7 +379,7 @@ mtx::crypto::session_key(OlmOutboundGroupSession *s)
 }
 
 bool
-mtx::crypto::matches_inbound_session(OlmSession *session, const BinaryBuf &one_time_key_message)
+mtx::crypto::matches_inbound_session(OlmSession *session, const std::string &one_time_key_message)
 {
         auto tmp = create_buffer(one_time_key_message.size());
         std::copy(one_time_key_message.begin(), one_time_key_message.end(), tmp.begin());
@@ -333,7 +390,7 @@ mtx::crypto::matches_inbound_session(OlmSession *session, const BinaryBuf &one_t
 bool
 mtx::crypto::matches_inbound_session_from(OlmSession *session,
                                           const std::string &id_key,
-                                          const BinaryBuf &one_time_key_message)
+                                          const std::string &one_time_key_message)
 {
         auto tmp = create_buffer(one_time_key_message.size());
         std::copy(one_time_key_message.begin(), one_time_key_message.end(), tmp.begin());

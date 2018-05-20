@@ -42,6 +42,10 @@ public:
           : msg_(func + ": " + std::string(olm_outbound_group_session_last_error(s)))
         {}
 
+        olm_exception(std::string func, OlmInboundGroupSession *s)
+          : msg_(func + ": " + std::string(olm_inbound_group_session_last_error(s)))
+        {}
+
         olm_exception(std::string msg)
           : msg_(msg)
         {}
@@ -127,6 +131,16 @@ create_olm_object()
         return std::unique_ptr<T, OlmDeleter>(OlmAllocator<T>::allocate());
 }
 
+using OlmSessionPtr           = std::unique_ptr<OlmSession, OlmDeleter>;
+using OutboundGroupSessionPtr = std::unique_ptr<OlmOutboundGroupSession, OlmDeleter>;
+using InboundGroupSessionPtr  = std::unique_ptr<OlmInboundGroupSession, OlmDeleter>;
+
+struct GroupPlaintext
+{
+        BinaryBuf data;
+        uint32_t message_index;
+};
+
 class OlmClient : public std::enable_shared_from_this<OlmClient>
 {
 public:
@@ -170,6 +184,10 @@ public:
         mtx::requests::UploadKeys create_upload_keys_request(const OneTimeKeys &keys);
         mtx::requests::UploadKeys create_upload_keys_request();
 
+        //! Decrypt a message using megolm.
+        GroupPlaintext decrypt_group_message(OlmInboundGroupSession *session,
+                                             const std::string &message,
+                                             uint32_t message_index = 0);
         //! Encrypt a message using olm.
         BinaryBuf encrypt_message(OlmSession *session, const std::string &msg);
         //! Decrypt a message using olm.
@@ -178,12 +196,12 @@ public:
                                   const std::string &msg);
 
         //! Create an outbount megolm session.
-        std::unique_ptr<OlmOutboundGroupSession, OlmDeleter> init_outbound_group_session();
-        std::unique_ptr<OlmSession, OlmDeleter> create_outbound_session(
-          const std::string &identity_key,
-          const std::string &one_time_key);
-        std::unique_ptr<OlmSession, OlmDeleter> create_inbound_session(
-          const BinaryBuf &one_time_key_message);
+        OutboundGroupSessionPtr init_outbound_group_session();
+        InboundGroupSessionPtr init_inbound_group_session(const std::string &session_key);
+        OlmSessionPtr create_outbound_session(const std::string &identity_key,
+                                              const std::string &one_time_key);
+        OlmSessionPtr create_inbound_session(const BinaryBuf &one_time_key_message);
+        OlmSessionPtr create_inbound_session(const std::string &one_time_key_message);
 
         OlmAccount *account() { return account_.get(); }
         OlmUtility *utility() { return utility_.get(); }
@@ -212,12 +230,12 @@ std::string
 session_key(OlmOutboundGroupSession *s);
 
 bool
-matches_inbound_session(OlmSession *session, const BinaryBuf &one_time_key_message);
+matches_inbound_session(OlmSession *session, const std::string &one_time_key_message);
 
 bool
 matches_inbound_session_from(OlmSession *session,
                              const std::string &id_key,
-                             const BinaryBuf &one_time_key_message);
+                             const std::string &one_time_key_message);
 
 //! Verify a signature object as obtained from the response of /keys/query endpoint
 bool
