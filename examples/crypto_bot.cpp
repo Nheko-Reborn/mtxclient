@@ -597,17 +597,17 @@ main()
 {
         spdlog::set_pattern("[%H:%M:%S] [tid %t] [%^%l%$] %v");
 
-        std::string username("mtx_bot");
-        std::string server("matrix.org");
-        std::string password("dzyvrwB09GdyEqiyBnfAEvZI3");
+        std::string username;
+        std::string server;
+        std::string password;
 
-        // cout << "username: ";
-        // std::getline(std::cin, username);
+        cout << "username: ";
+        std::getline(std::cin, username);
 
-        // cout << "server: ";
-        // std::getline(std::cin, server);
+        cout << "server: ";
+        std::getline(std::cin, server);
 
-        // password = getpass("password: ");
+        password = getpass("password: ");
 
         client = std::make_shared<Client>(server);
 
