@@ -30,7 +30,9 @@ synapse:
 	@./.ci/adjust-config.sh
 	@docker run -d \
 		--name synapse \
-		-p 443:8448 -p 8448:8448 \
+		-p 443:8448 \
+		-p 8448:8448 \
+		-p 8008:8008 \
 		-v `pwd`/data:/data ${SYNAPSE_IMAGE} start
 	@echo Waiting for synapse to start...
 	@until curl -s -f -k https://localhost:443/_matrix/client/versions; do echo "Checking ..."; sleep 2; done

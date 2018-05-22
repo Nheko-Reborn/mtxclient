@@ -226,8 +226,6 @@ OlmClient::decrypt_group_message(OlmInboundGroupSession *session,
                                              plaintext.size(),
                                              &message_index);
 
-        logger->info("new message_index: {}", message_index);
-
         if (nbytes == -1)
                 throw olm_exception("olm_group_decrypt", session);
 
@@ -235,6 +233,24 @@ OlmClient::decrypt_group_message(OlmInboundGroupSession *session,
         std::memcpy(output.data(), plaintext.data(), nbytes);
 
         return GroupPlaintext{std::move(output), message_index};
+}
+
+BinaryBuf
+OlmClient::encrypt_group_message(OlmOutboundGroupSession *session, const std::string &plaintext)
+{
+        auto encrypted_len     = olm_group_encrypt_message_length(session, plaintext.size());
+        auto encrypted_message = create_buffer(encrypted_len);
+
+        const int nbytes = olm_group_encrypt(session,
+                                             reinterpret_cast<const uint8_t *>(plaintext.data()),
+                                             plaintext.size(),
+                                             encrypted_message.data(),
+                                             encrypted_message.size());
+
+        if (nbytes == -1)
+                throw olm_exception("olm_group_encrypt", session);
+
+        return encrypted_message;
 }
 
 BinaryBuf

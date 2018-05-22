@@ -188,6 +188,9 @@ public:
         GroupPlaintext decrypt_group_message(OlmInboundGroupSession *session,
                                              const std::string &message,
                                              uint32_t message_index = 0);
+        //! Encrypt a message using megolm.
+        BinaryBuf encrypt_group_message(OlmOutboundGroupSession *session,
+                                        const std::string &plaintext);
         //! Encrypt a message using olm.
         BinaryBuf encrypt_message(OlmSession *session, const std::string &msg);
         //! Decrypt a message using olm.

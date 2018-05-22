@@ -102,19 +102,72 @@ struct GroupSessionMsgData
         uint64_t message_index;
 };
 
+struct OutboundSessionData
+{
+        std::string session_id;
+        std::string session_key;
+        uint64_t message_index = 0;
+};
+
+struct OutboundSessionDataRef
+{
+        OlmOutboundGroupSession *session;
+        OutboundSessionData data;
+};
+
+struct DevKeys
+{
+        std::string ed25519;
+        std::string curve25519;
+};
+
 struct Storage
 {
         //! Storage for the user_id -> list of devices mapping.
         std::map<std::string, std::vector<std::string>> devices_;
         //! Storage for the identity key for a device.
-        std::map<std::string, std::string> device_keys_;
+        std::map<std::string, DevKeys> device_keys;
         //! Flag that indicate if a specific room has encryption enabled.
         std::map<std::string, bool> encrypted_rooms_;
 
-        //! Mapping from curve25519 to session.
-        std::map<std::string, OlmSessionPtr> olm_sessions;
+        //! Keep track of members per room.
+        std::map<std::string, std::map<std::string, bool>> members;
 
+        void add_member(const std::string &room_id, const std::string &user_id)
+        {
+                members[room_id][user_id] = true;
+        }
+
+        //! Mapping from curve25519 to session.
+        std::map<std::string, OlmSessionPtr> olm_inbound_sessions;
+        std::map<std::string, OlmSessionPtr> olm_outbound_sessions;
+
+        // TODO: store message_index / event_id
         std::map<std::string, InboundGroupSessionPtr> inbound_group_sessions;
+        // TODO: store rotation period
+        std::map<std::string, OutboundSessionData> outbound_group_session_data;
+        std::map<std::string, OutboundGroupSessionPtr> outbound_group_sessions;
+
+        bool outbound_group_exists(const std::string &room_id)
+        {
+                return (outbound_group_sessions.find(room_id) != outbound_group_sessions.end()) &&
+                       (outbound_group_session_data.find(room_id) !=
+                        outbound_group_session_data.end());
+        }
+
+        void set_outbound_group_session(const std::string &room_id,
+                                        OutboundGroupSessionPtr session,
+                                        OutboundSessionData data)
+        {
+                outbound_group_session_data[room_id] = data;
+                outbound_group_sessions[room_id]     = std::move(session);
+        }
+
+        OutboundSessionDataRef get_outbound_group_session(const std::string &room_id)
+        {
+                return OutboundSessionDataRef{outbound_group_sessions[room_id].get(),
+                                              outbound_group_session_data[room_id]};
+        }
 
         bool inbound_group_exists(const std::string &room_id,
                                   const std::string &session_id,
@@ -168,6 +221,185 @@ is_room_encryption(const T &event)
         using namespace mtx::events;
         using namespace mtx::events::state;
         return mpark::holds_alternative<StateEvent<Encryption>>(event);
+}
+
+std::string
+create_room_key_event(const json &megolm_payload,
+                      const std::string &recipient,
+                      const std::string &recipient_key)
+{
+        auto room_key = json{{"content", megolm_payload},
+                             {"keys", {{"ed25519", olm_client->identity_keys().ed25519}}},
+                             {"recipient", recipient},
+                             {"recipient_keys", {{"ed25519", recipient_key}}},
+                             {"sender", client->user_id().to_string()},
+                             {"sender_device", client->device_id()},
+                             {"type", "m.room_key"}};
+
+        return room_key.dump();
+}
+
+json
+encrypt_to_device_message(OlmSession *session,
+                          const std::string &room_key_event,
+                          const std::string &recipient_key)
+{
+        auto encrypted = olm_client->encrypt_message(session, room_key_event);
+
+        auto final_payload = json{
+          {"algorithm", "m.olm.v1.curve25519-aes-sha2"},
+          {"sender_key", olm_client->identity_keys().curve25519},
+          {"ciphertext",
+           {{recipient_key,
+             {{"body", std::string((char *)encrypted.data(), encrypted.size())}, {"type", 0}}}}}};
+
+        console->info("about to send: \n {}", final_payload.dump(2));
+
+        return final_payload;
+}
+
+void
+send_group_message(OlmOutboundGroupSession *session,
+                   const std::string &session_id,
+                   const std::string &room_id,
+                   const std::string &msg)
+{
+        // Create event payload
+        json doc{{"type", "m.room.message"},
+                 {"content", {{"type", "m.text"}, {"body", msg}}},
+                 {"room_id", room_id}};
+
+        auto payload = olm_client->encrypt_group_message(session, doc.dump());
+
+        using namespace mtx::events;
+        using namespace mtx::identifiers;
+
+        msg::Encrypted data;
+        data.ciphertext = std::string((char *)payload.data(), payload.size());
+        data.sender_key = olm_client->identity_keys().curve25519;
+        data.session_id = session_id;
+        data.device_id  = client->device_id();
+
+        client->send_room_message<msg::Encrypted, EventType::RoomEncrypted>(
+          parse<Room>(room_id), data, [](const mtx::responses::EventId &res, RequestErr err) {
+                  if (err) {
+                          print_errors(err);
+                          return;
+                  }
+
+                  console->info("message sent with event_id: {}", res.event_id.to_string());
+          });
+}
+
+void
+create_outbound_megolm_session(const std::string &room_id, const std::string &reply_msg)
+{
+        // Create an outbound session
+        auto outbound_session = olm_client->init_outbound_group_session();
+
+        const auto session_id  = mtx::crypto::session_id(outbound_session.get());
+        const auto session_key = mtx::crypto::session_key(outbound_session.get());
+
+        auto megolm_payload = json{{"algorithm", "m.megolm.v1.aes-sha2"},
+                                   {"room_id", room_id},
+                                   {"session_id", session_id},
+                                   {"session_key", session_key}};
+
+        if (storage.members.find(room_id) == storage.members.end()) {
+                console->error("no members found for room {}", room_id);
+                return;
+        }
+
+        const auto members = storage.members[room_id];
+        for (const auto &member : members) {
+                const auto devices = storage.devices_[member.first];
+
+                // TODO: Figure out for which devices we don't have olm sessions.
+                for (const auto &dev : devices) {
+                        // TODO: check if we have downloaded the keys
+                        const auto device_keys = storage.device_keys[dev];
+                        auto room_key =
+                          create_room_key_event(megolm_payload, member.first, device_keys.ed25519);
+
+                        auto to_device_cb = [](RequestErr err) {
+                                if (err) {
+                                        print_errors(err);
+                                }
+                        };
+
+                        if (storage.olm_outbound_sessions.find(device_keys.curve25519) !=
+                            storage.olm_outbound_sessions.end()) {
+                                console->info("found existing olm outbound session with device {}",
+                                              dev);
+                                auto olm_session =
+                                  storage.olm_outbound_sessions[device_keys.curve25519].get();
+
+                                auto device_msg = encrypt_to_device_message(
+                                  olm_session, room_key, device_keys.curve25519);
+
+                                json body{{"messages", {{member, {{dev, device_msg}}}}}};
+
+                                client->send_to_device("m.room.encrypted", body, to_device_cb);
+                                // TODO: send message to device
+                        } else {
+                                console->info("claiming one time keys for device {}", dev);
+                                auto cb = [member = member.first, dev, room_key, to_device_cb](
+                                            const mtx::responses::ClaimKeys &res, RequestErr err) {
+                                        if (err) {
+                                                print_errors(err);
+                                                return;
+                                        }
+
+                                        console->info("claimed keys for {} - {}", member, dev);
+                                        console->info("room_key", room_key);
+
+                                        console->warn("signed one time keys");
+                                        auto retrieved_devices = res.one_time_keys.at(member);
+                                        for (const auto &rd : retrieved_devices) {
+                                                console->info(
+                                                  "{} : \n {}", rd.first, rd.second.dump(2));
+
+                                                // TODO: Verify signatures
+                                                auto otk    = rd.second.begin()->at("key");
+                                                auto id_key = storage.device_keys[dev].curve25519;
+
+                                                auto session =
+                                                  olm_client->create_outbound_session(id_key, otk);
+
+                                                auto device_msg = encrypt_to_device_message(
+                                                  session.get(),
+                                                  room_key,
+                                                  storage.device_keys[dev].curve25519);
+
+                                                // TODO: saving should happen when the message is
+                                                // sent.
+                                                storage.olm_outbound_sessions[id_key] =
+                                                  std::move(session);
+
+                                                json body{
+                                                  {"messages", {{member, {{dev, device_msg}}}}}};
+
+                                                client->send_to_device(
+                                                  "m.room.encrypted", body, to_device_cb);
+                                        }
+                                };
+
+                                // TODO: we should bulk request device keys here
+                                client->claim_keys(parse<User>(member.first), {dev}, cb);
+                        }
+                }
+        }
+
+        console->info("waiting to send sendToDevice messages");
+        std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+        console->info("sending encrypted group message");
+
+        // TODO: This should be done after all sendToDevice messages have been sent.
+        send_group_message(outbound_session.get(), session_id, room_id, reply_msg);
+
+        // TODO: save message index also.
+        storage.set_outbound_group_session(
+          room_id, std::move(outbound_session), {session_id, session_key});
 }
 
 bool
@@ -254,6 +486,24 @@ mark_encrypted_room(const RoomId &id)
 }
 
 void
+send_encrypted_reply(const std::string &room_id, const std::string &reply_msg)
+{
+        console->info("sending reply");
+
+        // Create a megolm session if it doesn't already exist.
+        if (storage.outbound_group_exists(room_id)) {
+                auto session_obj = storage.get_outbound_group_session(room_id);
+
+                send_group_message(
+                  session_obj.session, session_obj.data.session_id, room_id, reply_msg);
+
+        } else {
+                console->info("creating new megolm outbound session");
+                create_outbound_megolm_session(room_id, reply_msg);
+        }
+}
+
+void
 decrypt_olm_message(const OlmMessage &olm_msg)
 {
         console->info("OLM message");
@@ -289,8 +539,8 @@ decrypt_olm_message(const OlmMessage &olm_msg)
                                         console->info("decrypted message: \n {}",
                                                       plaintext.dump(2));
 
-                                        storage.olm_sessions.emplace(olm_msg.sender_key,
-                                                                     std::move(inbound_session));
+                                        storage.olm_inbound_sessions.emplace(
+                                          olm_msg.sender_key, std::move(inbound_session));
 
                                         std::string room_id = plaintext.at("content").at("room_id");
                                         std::string session_id =
@@ -342,6 +592,7 @@ parse_messages(const mtx::responses::Sync &res)
         // Check if the uploaded one time keys are enough
         for (const auto &device : res.device_one_time_keys_count) {
                 if (device.second < 50) {
+                        console->info("number of one time keys: {}", device.second);
                         olm_client->generate_one_time_keys(50 - device.second);
                         // TODO: Mark keys as sent
                         client->upload_keys(olm_client->create_upload_keys_request(),
@@ -356,6 +607,13 @@ parse_messages(const mtx::responses::Sync &res)
                         if (is_room_encryption(e)) {
                                 mark_encrypted_room(RoomId(room_id));
                                 console->debug("{}", get_json(e));
+                        } else if (is_member_event(e)) {
+                                auto m =
+                                  mpark::get<mtx::events::StateEvent<mtx::events::state::Member>>(
+                                    e);
+
+                                get_device_keys(UserId(m.state_key));
+                                storage.add_member(room_id, m.state_key);
                         }
                 }
 
@@ -363,6 +621,13 @@ parse_messages(const mtx::responses::Sync &res)
                         if (is_room_encryption(e)) {
                                 mark_encrypted_room(RoomId(room_id));
                                 console->debug("{}", get_json(e));
+                        } else if (is_member_event(e)) {
+                                auto m =
+                                  mpark::get<mtx::events::StateEvent<mtx::events::state::Member>>(
+                                    e);
+
+                                get_device_keys(UserId(m.state_key));
+                                storage.add_member(room_id, m.state_key);
                         } else if (is_encrypted(e)) {
                                 console->info("received an encrypted event: {}", room_id);
                                 console->info("{}", get_json(e));
@@ -379,10 +644,22 @@ parse_messages(const mtx::responses::Sync &res)
 
                                         auto msg_str =
                                           std::string((char *)res.data.data(), res.data.size());
+                                        const auto body = json::parse(msg_str)
+                                                            .at("content")
+                                                            .at("body")
+                                                            .get<std::string>();
 
-                                        console->info("decrypted data: {}", msg_str);
+                                        console->info("decrypted data: {}", body);
                                         console->info("decrypted message_index: {}",
                                                       res.message_index);
+
+                                        if (msg.sender != client->user_id().to_string()) {
+                                                // Send a reply back to the sender.
+                                                std::string reply_txt(msg.sender + ": you said '" +
+                                                                      body + "'");
+                                                send_encrypted_reply(room_id, reply_txt);
+                                        }
+
                                 } else {
                                         console->warn(
                                           "no megolm session found to decrypt the event");
@@ -435,6 +712,8 @@ initial_sync_handler(const mtx::responses::Sync &res, RequestErr err)
         parse_messages(res);
 
         for (const auto &room : res.rooms.join) {
+                const auto room_id = room.first;
+
                 for (const auto &e : room.second.state.events) {
                         if (is_member_event(e)) {
                                 auto m =
@@ -442,6 +721,7 @@ initial_sync_handler(const mtx::responses::Sync &res, RequestErr err)
                                     e);
 
                                 get_device_keys(UserId(m.state_key));
+                                storage.add_member(room_id, m.state_key);
                         }
                 }
         }
@@ -472,9 +752,11 @@ save_device_keys(const mtx::responses::QueryKeys &res)
 
                         const auto key = key_struct.keys.at(index);
 
-                        if (!exists(storage.device_keys_, device_id)) {
+                        if (!exists(storage.device_keys, device_id)) {
                                 console->info("{} => {}", device_id, key);
-                                storage.device_keys_[device_id] = key;
+                                storage.device_keys[device_id] = {
+                                  key_struct.keys.at("ed25519:" + device_id),
+                                  key_struct.keys.at("curve25519:" + device_id)};
                         }
 
                         device_list.push_back(device_id);
@@ -597,17 +879,9 @@ main()
 {
         spdlog::set_pattern("[%H:%M:%S] [tid %t] [%^%l%$] %v");
 
-        std::string username;
-        std::string server;
-        std::string password;
-
-        cout << "username: ";
-        std::getline(std::cin, username);
-
-        cout << "server: ";
-        std::getline(std::cin, server);
-
-        password = getpass("password: ");
+        std::string username("alice");
+        std::string server("localhost");
+        std::string password("secret");
 
         client = std::make_shared<Client>(server);
 
