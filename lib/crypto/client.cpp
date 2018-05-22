@@ -142,6 +142,12 @@ OlmClient::signed_one_time_key_json(const std::string &key, const std::string &s
                     {"signatures", {{user_id_, {{"ed25519:" + device_id_, signature}}}}}};
 }
 
+void
+OlmClient::mark_keys_as_published()
+{
+        olm_account_mark_keys_as_published(account_.get());
+}
+
 mtx::requests::UploadKeys
 OlmClient::create_upload_keys_request()
 {

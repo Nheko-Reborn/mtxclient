@@ -180,6 +180,9 @@ public:
         //! Generate the json structure for the signed one time key.
         json signed_one_time_key_json(const std::string &key, const std::string &signature);
 
+        //! Marks the current set of one time keys as being published.
+        void mark_keys_as_published();
+
         //! Prepare request for the /keys/upload endpoint by signing identity & one time keys.
         mtx::requests::UploadKeys create_upload_keys_request(const OneTimeKeys &keys);
         mtx::requests::UploadKeys create_upload_keys_request();

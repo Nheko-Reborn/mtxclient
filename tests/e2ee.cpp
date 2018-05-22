@@ -559,3 +559,83 @@ TEST(Encryption, OlmSessions)
         auto body_str = std::string((char *)decrypted.data(), decrypted.size());
         ASSERT_EQ(body_str, plaintext);
 }
+
+TEST(Encryption, MegolmSessions)
+{
+        auto alice = std::make_shared<OlmClient>();
+        alice->create_new_account();
+        alice->generate_one_time_keys(1);
+
+        auto bob = std::make_shared<OlmClient>();
+        bob->create_new_account();
+        bob->generate_one_time_keys(1);
+
+        // Alice wants to send an encrypted megolm message to Bob.
+        const std::string secret_message = "Hey, Bob!";
+
+        // Alice creates an outbound megolm session that will be used by both parties.
+        auto outbound_megolm_session = alice->init_outbound_group_session();
+        auto msg_index = olm_outbound_group_session_message_index(outbound_megolm_session.get());
+        ASSERT_EQ(msg_index, 0);
+
+        // Alice extracts the session id & session key so she can share them with Bob.
+        const auto session_id  = mtx::crypto::session_id(outbound_megolm_session.get());
+        const auto session_key = mtx::crypto::session_key(outbound_megolm_session.get());
+
+        // Encrypt the message using megolm.
+        auto encrypted_secret_message =
+          alice->encrypt_group_message(outbound_megolm_session.get(), secret_message);
+
+        msg_index = olm_outbound_group_session_message_index(outbound_megolm_session.get());
+        ASSERT_EQ(msg_index, 1);
+
+        // First she will create an outbound olm session so she can share the session data.
+        // Alice will need Bob's curve25519 key and one claimed one time key.
+        auto outbound_olm_session = alice->create_outbound_session(
+          bob->identity_keys().curve25519, bob->one_time_keys().curve25519.begin()->second);
+        const auto msg_type = olm_encrypt_message_type(outbound_olm_session.get());
+
+        // Plaintext version of the session data to be shared.
+        const auto session_data = json{{"session_id", session_id}, {"session_key", session_key}};
+
+        // Alice encrypts the session data using olm.
+        const auto encrypted_session_data =
+          alice->encrypt_message(outbound_olm_session.get(), session_data.dump());
+        const auto encrypted_session_data_str =
+          std::string((char *)encrypted_session_data.data(), encrypted_session_data.size());
+
+        //
+        // Alice sends the olm & megolm messages to Bob ...
+        //
+
+        // Bob creates an inbound olm session to receive the session data.
+        auto inbound_olm_session = bob->create_inbound_session(encrypted_session_data);
+
+        // and validates that the message was indeed from Alice.
+        ASSERT_EQ(1,
+                  matches_inbound_session_from(inbound_olm_session.get(),
+                                               alice->identity_keys().curve25519,
+                                               encrypted_session_data_str));
+
+        // Bob decrypts the encrypted olm message.
+        auto plaintext_session_data =
+          bob->decrypt_message(inbound_olm_session.get(), msg_type, encrypted_session_data_str);
+        auto session_str_data = json::parse(
+          std::string((char *)plaintext_session_data.data(), plaintext_session_data.size()));
+
+        // Validate that the output matches the input.
+        ASSERT_EQ(session_id, session_str_data.at("session_id").get<std::string>());
+        ASSERT_EQ(session_key, session_str_data.at("session_key").get<std::string>());
+
+        // Bob will use the session_key to create an inbound megolm session.
+        // The session_id will be used to map future messages to this session.
+        auto inbound_megolm_session = bob->init_inbound_group_session(session_key);
+
+        // Bob can finally decrypt Alice's original message.
+        auto ciphertext =
+          std::string((char *)encrypted_secret_message.data(), encrypted_secret_message.size());
+        auto bob_plaintext = bob->decrypt_group_message(inbound_megolm_session.get(), ciphertext);
+
+        auto output_str = std::string((char *)bob_plaintext.data.data(), bob_plaintext.data.size());
+        ASSERT_EQ(output_str, secret_message);
+}

@@ -475,6 +475,7 @@ keys_uploaded_cb(const mtx::responses::UploadKeys &, RequestErr err)
                 return;
         }
 
+        olm_client->mark_keys_as_published();
         console->info("keys uploaded");
 }
 
@@ -852,6 +853,7 @@ login_cb(const mtx::responses::Login &, RequestErr err)
                                             return;
                                     }
 
+                                    olm_client->mark_keys_as_published();
                                     console->info("keys uploaded");
                                     console->debug("starting initial sync");
 
