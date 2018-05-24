@@ -1,6 +1,6 @@
 FILES=`find src tests examples -type f -type f \( -iname "*.cpp" -o -iname "*.hpp" \)`
 
-SYNAPSE_IMAGE="avhost/docker-matrix:v0.28.1"
+SYNAPSE_IMAGE="avhost/docker-matrix:v0.29.0"
 
 debug:
 	@cmake -GNinja -H. -Bbuild \

@@ -290,7 +290,6 @@ TEST(ClientAPI, LogoutSuccess)
         mtx_client->create_room(failReq, [](const mtx::responses::CreateRoom &, RequestErr err) {
                 ASSERT_TRUE(err);
                 EXPECT_EQ(mtx::errors::to_string(err->matrix_error.errcode), "M_MISSING_TOKEN");
-                EXPECT_EQ(err->status_code, boost::beast::http::status::forbidden);
         });
 
         mtx_client->close();
@@ -336,7 +335,6 @@ TEST(ClientAPI, LogoutInvalidatesTokenOnServer)
         mtx_client->create_room(failReq, [](const mtx::responses::CreateRoom &, RequestErr err) {
                 ASSERT_TRUE(err);
                 EXPECT_EQ(mtx::errors::to_string(err->matrix_error.errcode), "M_UNKNOWN_TOKEN");
-                EXPECT_EQ(err->status_code, boost::beast::http::status::forbidden);
         });
 
         mtx_client->close();
