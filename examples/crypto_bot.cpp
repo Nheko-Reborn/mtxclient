@@ -223,41 +223,6 @@ is_room_encryption(const T &event)
         return mpark::holds_alternative<StateEvent<Encryption>>(event);
 }
 
-std::string
-create_room_key_event(const json &megolm_payload,
-                      const std::string &recipient,
-                      const std::string &recipient_key)
-{
-        auto room_key = json{{"content", megolm_payload},
-                             {"keys", {{"ed25519", olm_client->identity_keys().ed25519}}},
-                             {"recipient", recipient},
-                             {"recipient_keys", {{"ed25519", recipient_key}}},
-                             {"sender", client->user_id().to_string()},
-                             {"sender_device", client->device_id()},
-                             {"type", "m.room_key"}};
-
-        return room_key.dump();
-}
-
-json
-encrypt_to_device_message(OlmSession *session,
-                          const std::string &room_key_event,
-                          const std::string &recipient_key)
-{
-        auto encrypted = olm_client->encrypt_message(session, room_key_event);
-
-        auto final_payload = json{
-          {"algorithm", "m.olm.v1.curve25519-aes-sha2"},
-          {"sender_key", olm_client->identity_keys().curve25519},
-          {"ciphertext",
-           {{recipient_key,
-             {{"body", std::string((char *)encrypted.data(), encrypted.size())}, {"type", 0}}}}}};
-
-        console->info("about to send: \n {}", final_payload.dump(2));
-
-        return final_payload;
-}
-
 void
 send_group_message(OlmOutboundGroupSession *session,
                    const std::string &session_id,
@@ -318,8 +283,11 @@ create_outbound_megolm_session(const std::string &room_id, const std::string &re
                 for (const auto &dev : devices) {
                         // TODO: check if we have downloaded the keys
                         const auto device_keys = storage.device_keys[dev];
-                        auto room_key =
-                          create_room_key_event(megolm_payload, member.first, device_keys.ed25519);
+                        auto room_key          = olm_client
+                                          ->create_room_key_event(UserId(member.first),
+                                                                  device_keys.ed25519,
+                                                                  megolm_payload)
+                                          .dump();
 
                         auto to_device_cb = [](RequestErr err) {
                                 if (err) {
@@ -334,7 +302,7 @@ create_outbound_megolm_session(const std::string &room_id, const std::string &re
                                 auto olm_session =
                                   storage.olm_outbound_sessions[device_keys.curve25519].get();
 
-                                auto device_msg = encrypt_to_device_message(
+                                auto device_msg = olm_client->create_olm_encrypted_content(
                                   olm_session, room_key, device_keys.curve25519);
 
                                 json body{{"messages", {{member, {{dev, device_msg}}}}}};
@@ -366,10 +334,11 @@ create_outbound_megolm_session(const std::string &room_id, const std::string &re
                                                 auto session =
                                                   olm_client->create_outbound_session(id_key, otk);
 
-                                                auto device_msg = encrypt_to_device_message(
-                                                  session.get(),
-                                                  room_key,
-                                                  storage.device_keys[dev].curve25519);
+                                                auto device_msg =
+                                                  olm_client->create_olm_encrypted_content(
+                                                    session.get(),
+                                                    room_key,
+                                                    storage.device_keys[dev].curve25519);
 
                                                 // TODO: saving should happen when the message is
                                                 // sent.

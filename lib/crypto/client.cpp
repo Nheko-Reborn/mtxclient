@@ -41,7 +41,7 @@ OlmClient::create_new_utility()
 }
 
 IdentityKeys
-OlmClient::identity_keys()
+OlmClient::identity_keys() const
 {
         auto tmp_buf = create_buffer(olm_account_identity_keys_length(account_.get()));
         int result =
@@ -54,7 +54,7 @@ OlmClient::identity_keys()
 }
 
 std::string
-OlmClient::sign_message(const std::string &msg)
+OlmClient::sign_message(const std::string &msg) const
 {
         auto signature_buf = create_buffer(olm_account_signature_length(account_.get()));
         olm_account_sign(
@@ -350,6 +350,35 @@ OlmClient::create_outbound_session(const std::string &identity_key, const std::s
                 throw olm_exception("create_outbound_session", session.get());
 
         return session;
+}
+
+nlohmann::json
+OlmClient::create_room_key_event(const UserId &recipient,
+                                 const std::string &ed25519_recipient_key,
+                                 const nlohmann::json &content) const noexcept
+{
+        return json{{"content", content},
+                    {"keys", {{"ed25519", identity_keys().ed25519}}},
+                    {"recipient", recipient.get()},
+                    {"recipient_keys", {{"ed25519", ed25519_recipient_key}}},
+                    {"sender", user_id_},
+                    {"sender_device", device_id_},
+                    {"type", "m.room_key"}};
+}
+
+nlohmann::json
+OlmClient::create_olm_encrypted_content(OlmSession *session,
+                                        const std::string &room_key_event,
+                                        const std::string &recipient_key)
+{
+        size_t msg_type    = olm_encrypt_message_type(session);
+        auto encrypted     = encrypt_message(session, room_key_event);
+        auto encrypted_str = std::string((char *)encrypted.data(), encrypted.size());
+
+        return json{
+          {"algorithm", "m.olm.v1.curve25519-aes-sha2"},
+          {"sender_key", identity_keys().curve25519},
+          {"ciphertext", {{recipient_key, {{"body", encrypted_str}, {"type", msg_type}}}}}};
 }
 
 BinaryBuf

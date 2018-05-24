@@ -14,6 +14,11 @@ sleep()
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
 }
 
+#define WAIT_UNTIL(condition)                                                                      \
+        while (!(condition)) {                                                                     \
+                sleep();                                                                           \
+        };
+
 inline void
 check_error(mtx::http::RequestErr err)
 {

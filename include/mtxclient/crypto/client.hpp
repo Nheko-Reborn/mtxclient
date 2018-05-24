@@ -157,14 +157,14 @@ public:
         void set_user_id(std::string user_id) { user_id_ = std::move(user_id); }
 
         //! Sign the given message.
-        Base64String sign_message(const std::string &msg);
+        Base64String sign_message(const std::string &msg) const;
 
         //! Create a new olm Account. Must be called before any other operation.
         void create_new_account();
         void create_new_utility();
 
         //! Retrieve the json representation of the identity keys for the given account.
-        IdentityKeys identity_keys();
+        IdentityKeys identity_keys() const;
         //! Sign the identity keys.
         //! The result should be used as part of the /keys/upload/ request.
         Base64String sign_identity_keys();
@@ -208,6 +208,18 @@ public:
                                               const std::string &one_time_key);
         OlmSessionPtr create_inbound_session(const BinaryBuf &one_time_key_message);
         OlmSessionPtr create_inbound_session(const std::string &one_time_key_message);
+
+        //! The `m.room_key` event is used to share the session_id & session_key
+        //! of an outbound megolm session.
+        nlohmann::json create_room_key_event(const UserId &user_id,
+                                             const std::string &ed25519_device_key,
+                                             const nlohmann::json &content) const noexcept;
+
+        //! Create the content for an m.room.encrypted event.
+        //! algorithm: m.olm.v1.curve25519-aes-sha2
+        nlohmann::json create_olm_encrypted_content(OlmSession *session,
+                                                    const std::string &room_key_event,
+                                                    const std::string &recipient_key);
 
         OlmAccount *account() { return account_.get(); }
         OlmUtility *utility() { return utility_.get(); }
