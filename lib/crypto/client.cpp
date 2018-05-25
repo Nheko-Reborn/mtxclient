@@ -19,7 +19,7 @@ OlmClient::create_new_account()
         if (account_)
                 return;
 
-        account_ = create_olm_object<OlmAccount>();
+        account_ = create_olm_object<AccountObject>();
 
         auto tmp_buf  = create_buffer(olm_create_account_random_length(account_.get()));
         const int ret = olm_create_account(account_.get(), tmp_buf.data(), tmp_buf.size());
@@ -37,7 +37,13 @@ OlmClient::create_new_utility()
         if (utility_)
                 return;
 
-        utility_ = create_olm_object<OlmUtility>();
+        utility_ = create_olm_object<UtilityObject>();
+}
+
+void
+OlmClient::restore_account(const std::string &saved_data, const std::string &key)
+{
+        account_ = unpickle<AccountObject>(saved_data, key);
 }
 
 IdentityKeys
@@ -183,7 +189,7 @@ OlmClient::create_upload_keys_request(const mtx::crypto::OneTimeKeys &one_time_k
 OutboundGroupSessionPtr
 OlmClient::init_outbound_group_session()
 {
-        auto session = create_olm_object<OlmOutboundGroupSession>();
+        auto session = create_olm_object<OutboundSessionObject>();
         auto tmp_buf = create_buffer(olm_init_outbound_group_session_random_length(session.get()));
 
         const int ret =
@@ -198,7 +204,7 @@ OlmClient::init_outbound_group_session()
 InboundGroupSessionPtr
 OlmClient::init_inbound_group_session(const std::string &session_key)
 {
-        auto session = create_olm_object<OlmInboundGroupSession>();
+        auto session = create_olm_object<InboundSessionObject>();
 
         const int ret = olm_init_inbound_group_session(
           session.get(), reinterpret_cast<const uint8_t *>(session_key.data()), session_key.size());
@@ -317,7 +323,7 @@ OlmClient::create_inbound_session(const std::string &one_time_key_message)
 OlmSessionPtr
 OlmClient::create_inbound_session(const BinaryBuf &one_time_key_message)
 {
-        auto session = create_olm_object<OlmSession>();
+        auto session = create_olm_object<SessionObject>();
 
         auto tmp = create_buffer(one_time_key_message.size());
         std::copy(one_time_key_message.begin(), one_time_key_message.end(), tmp.begin());
@@ -334,7 +340,7 @@ OlmClient::create_inbound_session(const BinaryBuf &one_time_key_message)
 OlmSessionPtr
 OlmClient::create_outbound_session(const std::string &identity_key, const std::string &one_time_key)
 {
-        auto session    = create_olm_object<OlmSession>();
+        auto session    = create_olm_object<SessionObject>();
         auto random_buf = create_buffer(olm_create_outbound_session_random_length(session.get()));
 
         const int ret = olm_create_outbound_session(session.get(),
@@ -471,7 +477,7 @@ mtx::crypto::verify_identity_signature(nlohmann::json obj,
 
                 const auto msg = obj.dump();
 
-                auto utility = create_olm_object<OlmUtility>();
+                auto utility = create_olm_object<UtilityObject>();
                 auto ret     = olm_ed25519_verify(utility.get(),
                                               signing_key.data(),
                                               signing_key.size(),

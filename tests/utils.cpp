@@ -177,7 +177,7 @@ TEST(Utilities, VerifyIdentityKeyJson)
 
         auto msg = tmp.dump();
 
-        auto utility = create_olm_object<OlmUtility>();
+        auto utility = create_olm_object<UtilityObject>();
         EXPECT_EQ(olm_ed25519_verify(utility.get(),
                                      signing_key.data(),
                                      signing_key.size(),

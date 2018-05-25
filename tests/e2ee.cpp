@@ -832,6 +832,135 @@ TEST(Encryption, OlmRoomKeyEncryption)
         bob_http->close();
 }
 
+TEST(Encryption, PickleAccount)
+{
+        auto alice = std::make_shared<OlmClient>();
+        alice->create_new_account();
+        alice->generate_one_time_keys(10);
+
+        auto alice_pickled = pickle<AccountObject>(alice->account(), "secret");
+
+        auto bob = std::make_shared<OlmClient>();
+        bob->restore_account(alice_pickled, "secret");
+
+        EXPECT_EQ(json(bob->identity_keys()).dump(), json(alice->identity_keys()).dump());
+        EXPECT_EQ(json(bob->one_time_keys()).dump(), json(alice->one_time_keys()).dump());
+
+        auto carl = std::make_shared<OlmClient>();
+
+        // BAD_ACCOUNT_KEY
+        EXPECT_THROW(carl->restore_account(alice_pickled, "another_secret"), olm_exception);
+}
+
+TEST(Encryption, PickleOlmSessions)
+{
+        auto alice = std::make_shared<OlmClient>();
+        alice->create_new_account();
+
+        auto bob = std::make_shared<OlmClient>();
+        bob->create_new_account();
+        bob->generate_one_time_keys(1);
+
+        std::string bob_key          = bob->identity_keys().curve25519;
+        std::string bob_one_time_key = bob->one_time_keys().curve25519.begin()->second;
+
+        auto outbound_session = alice->create_outbound_session(bob_key, bob_one_time_key);
+
+        auto plaintext      = "Hello, Bob!";
+        size_t msgtype      = olm_encrypt_message_type(outbound_session.get());
+        auto ciphertext     = alice->encrypt_message(outbound_session.get(), plaintext);
+        auto ciphertext_str = std::string((char *)ciphertext.data(), ciphertext.size());
+
+        EXPECT_EQ(msgtype, 0);
+
+        auto saved_outbound_session    = pickle<SessionObject>(outbound_session.get(), "wat");
+        auto restored_outbound_session = unpickle<SessionObject>(saved_outbound_session, "wat");
+
+        EXPECT_THROW(unpickle<SessionObject>(saved_outbound_session, "another_secret"),
+                     olm_exception);
+
+        msgtype = olm_encrypt_message_type(restored_outbound_session.get());
+        EXPECT_EQ(msgtype, 0);
+
+        auto restored_ciphertext =
+          alice->encrypt_message(restored_outbound_session.get(), plaintext);
+        auto restored_ciphertext_str =
+          std::string((char *)restored_ciphertext.data(), restored_ciphertext.size());
+
+        auto inbound_session          = bob->create_inbound_session(ciphertext_str);
+        auto saved_inbound_session    = pickle<SessionObject>(inbound_session.get(), "woot");
+        auto restored_inbound_session = unpickle<SessionObject>(saved_inbound_session, "woot");
+
+        EXPECT_THROW(unpickle<SessionObject>(saved_inbound_session, "another_secret"),
+                     olm_exception);
+
+        ASSERT_EQ(1, matches_inbound_session(inbound_session.get(), ciphertext_str));
+        ASSERT_EQ(1, matches_inbound_session(inbound_session.get(), restored_ciphertext_str));
+        ASSERT_EQ(1,
+                  matches_inbound_session(restored_inbound_session.get(), restored_ciphertext_str));
+        ASSERT_EQ(1, matches_inbound_session(restored_inbound_session.get(), ciphertext_str));
+
+        auto d1 = bob->decrypt_message(inbound_session.get(), msgtype, ciphertext_str);
+        auto d2 = bob->decrypt_message(restored_inbound_session.get(), msgtype, ciphertext_str);
+        auto d3 = bob->decrypt_message(inbound_session.get(), msgtype, restored_ciphertext_str);
+        auto d4 =
+          bob->decrypt_message(restored_inbound_session.get(), msgtype, restored_ciphertext_str);
+
+        EXPECT_EQ(d1, d2);
+        EXPECT_EQ(d2, d3);
+        EXPECT_EQ(d3, d4);
+        EXPECT_EQ(d1, d4);
+        EXPECT_EQ(d2, d4);
+
+        EXPECT_EQ(std::string((char *)d1.data(), d1.size()), "Hello, Bob!");
+}
+
+TEST(Encryption, PickleMegolmSessions)
+{
+        // Outbound Session
+        auto alice = make_shared<mtx::crypto::OlmClient>();
+        alice->create_new_account();
+
+        auto outbound_session = alice->init_outbound_group_session();
+
+        const auto original_session_id  = mtx::crypto::session_id(outbound_session.get());
+        const auto original_session_key = mtx::crypto::session_key(outbound_session.get());
+
+        auto saved_session = pickle<OutboundSessionObject>(outbound_session.get(), "secret");
+        auto restored_outbound_session = unpickle<OutboundSessionObject>(saved_session, "secret");
+
+        const auto restored_session_id  = mtx::crypto::session_id(restored_outbound_session.get());
+        const auto restored_session_key = mtx::crypto::session_key(restored_outbound_session.get());
+
+        EXPECT_EQ(original_session_id, restored_session_id);
+        EXPECT_EQ(original_session_key, restored_session_key);
+
+        // BAD_ACCOUNT_KEY
+        EXPECT_THROW(unpickle<OutboundSessionObject>(saved_session, "another_secret"),
+                     olm_exception);
+
+        const auto SECRET = "Hello World!";
+
+        auto encrypted  = alice->encrypt_group_message(outbound_session.get(), SECRET);
+        auto ciphertext = std::string((char *)encrypted.data(), encrypted.size());
+
+        // Inbound Session
+        auto inbound_session = alice->init_inbound_group_session(original_session_key);
+        auto plaintext       = alice->decrypt_group_message(inbound_session.get(), ciphertext);
+
+        saved_session = pickle<InboundSessionObject>(inbound_session.get(), "secret");
+
+        auto restored_inbound_session = unpickle<InboundSessionObject>(saved_session, "secret");
+        auto restored_plaintext =
+          alice->decrypt_group_message(restored_inbound_session.get(), ciphertext);
+
+        EXPECT_EQ(
+          std::string((char *)plaintext.data.data(), plaintext.data.size()),
+          std::string((char *)restored_plaintext.data.data(), restored_plaintext.data.size()));
+
+        EXPECT_EQ(std::string((char *)plaintext.data.data(), plaintext.data.size()), SECRET);
+}
+
 TEST(Encryption, DISABLED_HandleRoomKeyEvent) {}
 TEST(Encryption, DISABLED_HandleRoomKeyRequestEvent) {}
 TEST(Encryption, DISABLED_HandleNewDevices) {}

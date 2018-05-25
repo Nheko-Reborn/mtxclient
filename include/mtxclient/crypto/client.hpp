@@ -15,6 +15,7 @@
 #include <olm/olm.h>
 #include <olm/session.hh>
 
+#include "mtxclient/crypto/objects.hpp"
 #include "mtxclient/crypto/types.hpp"
 
 namespace mtx {
@@ -66,69 +67,32 @@ create_buffer(std::size_t nbytes)
         return buf;
 }
 
-struct OlmDeleter
+template<class T>
+std::string
+pickle(typename T::olm_type *object, const std::string &key)
 {
-        void operator()(OlmAccount *ptr) { operator delete(ptr, olm_account_size()); }
-        void operator()(OlmUtility *ptr) { operator delete(ptr, olm_utility_size()); }
+        auto tmp      = create_buffer(T::pickle_length(object));
+        const int ret = T::pickle(object, key.data(), key.size(), tmp.data(), tmp.size());
 
-        void operator()(OlmSession *ptr) { operator delete(ptr, olm_session_size()); }
-        void operator()(OlmOutboundGroupSession *ptr)
-        {
-                operator delete(ptr, olm_outbound_group_session_size());
-        }
-        void operator()(OlmInboundGroupSession *ptr)
-        {
-                operator delete(ptr, olm_inbound_group_session_size());
-        }
-};
+        if (ret == -1)
+                throw olm_exception("pickle", object);
+
+        return std::string((char *)tmp.data(), tmp.size());
+}
 
 template<class T>
-struct OlmAllocator
+std::unique_ptr<typename T::olm_type, OlmDeleter>
+unpickle(const std::string &pickled, const std::string &key)
 {
-        static T allocate() = delete;
-};
+        auto object = create_olm_object<T>();
 
-template<>
-struct OlmAllocator<OlmAccount>
-{
-        static OlmAccount *allocate() { return olm_account(new uint8_t[olm_account_size()]); }
-};
+        const int ret =
+          T::unpickle(object.get(), key.data(), key.size(), (void *)pickled.data(), pickled.size());
 
-template<>
-struct OlmAllocator<OlmSession>
-{
-        static OlmSession *allocate() { return olm_session(new uint8_t[olm_session_size()]); }
-};
+        if (ret == -1)
+                throw olm_exception("unpickle", object.get());
 
-template<>
-struct OlmAllocator<OlmUtility>
-{
-        static OlmUtility *allocate() { return olm_utility(new uint8_t[olm_utility_size()]); }
-};
-
-template<>
-struct OlmAllocator<OlmOutboundGroupSession>
-{
-        static OlmOutboundGroupSession *allocate()
-        {
-                return olm_outbound_group_session(new uint8_t[olm_outbound_group_session_size()]);
-        }
-};
-
-template<>
-struct OlmAllocator<OlmInboundGroupSession>
-{
-        static OlmInboundGroupSession *allocate()
-        {
-                return olm_inbound_group_session(new uint8_t[olm_inbound_group_session_size()]);
-        }
-};
-
-template<class T>
-std::unique_ptr<T, OlmDeleter>
-create_olm_object()
-{
-        return std::unique_ptr<T, OlmDeleter>(OlmAllocator<T>::allocate());
+        return std::move(object);
 }
 
 using OlmSessionPtr           = std::unique_ptr<OlmSession, OlmDeleter>;
@@ -162,6 +126,8 @@ public:
         //! Create a new olm Account. Must be called before any other operation.
         void create_new_account();
         void create_new_utility();
+
+        void restore_account(const std::string &saved_data, const std::string &key);
 
         //! Retrieve the json representation of the identity keys for the given account.
         IdentityKeys identity_keys() const;
