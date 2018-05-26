@@ -17,7 +17,6 @@
 #include "mtxclient/http/errors.hpp"
 
 #include "mtxclient/utils.hpp"
-#include "test_helpers.hpp"
 
 //
 // Simple example bot that will accept any invite.
