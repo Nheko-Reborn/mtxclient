@@ -223,10 +223,7 @@ matches_inbound_session_from(OlmSession *session,
 
 //! Verify a signature object as obtained from the response of /keys/query endpoint
 bool
-verify_identity_signature(nlohmann::json obj,
-                          const DeviceId &device_id,
-                          const UserId &user_id,
-                          const std::string &signing_key);
+verify_identity_signature(nlohmann::json obj, const DeviceId &device_id, const UserId &user_id);
 
 } // namespace crypto
 } // namespace mtx

@@ -459,13 +459,13 @@ mtx::crypto::matches_inbound_session_from(OlmSession *session,
 bool
 mtx::crypto::verify_identity_signature(nlohmann::json obj,
                                        const DeviceId &device_id,
-                                       const UserId &user_id,
-                                       const std::string &signing_key)
+                                       const UserId &user_id)
 {
         using namespace client::utils;
 
         try {
                 const auto sign_key_id = "ed25519:" + device_id.get();
+                const auto signing_key = obj.at("keys").at(sign_key_id).get<std::string>();
                 const auto signature =
                   obj.at("signatures").at(user_id.get()).at(sign_key_id).get<std::string>();
 
@@ -492,6 +492,7 @@ mtx::crypto::verify_identity_signature(nlohmann::json obj,
                 return true;
         } catch (const nlohmann::json::exception &e) {
                 logger->warn("verify_identity_signature: {}", e.what());
-                return false;
         }
+
+        return false;
 }

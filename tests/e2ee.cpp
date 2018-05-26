@@ -378,8 +378,7 @@ TEST(Encryption, ClaimKeys)
                   // Verify signature.
                   ASSERT_TRUE(verify_identity_signature(json(current_device),
                                                         DeviceId(bob->device_id()),
-                                                        UserId(bob->user_id().to_string()),
-                                                        bob_ed25519));
+                                                        UserId(bob->user_id().to_string())));
 
                   alice->claim_keys(bob->user_id(),
                                     devices,

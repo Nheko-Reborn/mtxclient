@@ -151,17 +151,6 @@ if (IWYU)
     endif()
 endif()
 
-if (BUILD_LIB_EXAMPLES)
-    add_executable(room_feed examples/room_feed.cpp)
-    target_link_libraries(room_feed matrix_client ${MATRIX_STRUCTS_LIBRARY})
-
-    add_executable(simple_bot examples/simple_bot.cpp)
-    target_link_libraries(simple_bot matrix_client ${MATRIX_STRUCTS_LIBRARY})
-
-    add_executable(crypto_bot examples/crypto_bot.cpp)
-    target_link_libraries(crypto_bot matrix_client ${MATRIX_STRUCTS_LIBRARY})
-endif()
-
 if (BUILD_LIB_TESTS)
     enable_testing()
 
@@ -207,4 +196,17 @@ if (BUILD_LIB_TESTS)
     add_test(MediaAPI media_api)
     add_test(Encryption e2ee)
     add_test(Utilities utils)
+endif()
+
+if (BUILD_LIB_EXAMPLES)
+    include_directories(tests)
+
+    add_executable(room_feed examples/room_feed.cpp)
+    target_link_libraries(room_feed matrix_client ${MATRIX_STRUCTS_LIBRARY})
+
+    add_executable(simple_bot examples/simple_bot.cpp)
+    target_link_libraries(simple_bot matrix_client ${MATRIX_STRUCTS_LIBRARY})
+
+    add_executable(crypto_bot examples/crypto_bot.cpp)
+    target_link_libraries(crypto_bot matrix_client ${MATRIX_STRUCTS_LIBRARY})
 endif()

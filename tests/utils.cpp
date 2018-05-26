@@ -104,11 +104,8 @@ TEST(Utilities, ValidUploadKeysRequest)
 
         ASSERT_TRUE(device_keys.dump() == body.dump());
 
-        ASSERT_TRUE(verify_identity_signature(
-          body, DeviceId(device_id), UserId(user_id), alice->identity_keys().ed25519));
-
-        ASSERT_TRUE(verify_identity_signature(
-          device_keys, DeviceId(device_id), UserId(user_id), alice->identity_keys().ed25519));
+        ASSERT_TRUE(verify_identity_signature(body, DeviceId(device_id), UserId(user_id)));
+        ASSERT_TRUE(verify_identity_signature(device_keys, DeviceId(device_id), UserId(user_id)));
 }
 
 TEST(Utilities, VerifySignedIdentityKeys)
@@ -165,28 +162,8 @@ TEST(Utilities, VerifyIdentityKeyJson)
         "user_id": "@nheko_test:matrix.org"
         })"_json;
 
-        const auto signing_key = data.at("keys").at("ed25519:VVLXGGTJGN").get<std::string>();
-        const auto signature   = data.at("signatures")
-                                 .at("@nheko_test:matrix.org")
-                                 .at("ed25519:VVLXGGTJGN")
-                                 .get<std::string>();
+        const auto user_id   = data.at("user_id").get<std::string>();
+        const auto device_id = data.at("device_id").get<std::string>();
 
-        auto tmp = data;
-        tmp.erase("unsigned");
-        tmp.erase("signatures");
-
-        auto msg = tmp.dump();
-
-        auto utility = create_olm_object<UtilityObject>();
-        EXPECT_EQ(olm_ed25519_verify(utility.get(),
-                                     signing_key.data(),
-                                     signing_key.size(),
-                                     msg.data(),
-                                     msg.size(),
-                                     (void *)signature.data(),
-                                     signature.size()),
-                  0);
-
-        ASSERT_TRUE(verify_identity_signature(
-          data, DeviceId("VVLXGGTJGN"), UserId("@nheko_test:matrix.org"), signing_key));
+        ASSERT_TRUE(verify_identity_signature(data, DeviceId(device_id), UserId(user_id)));
 }

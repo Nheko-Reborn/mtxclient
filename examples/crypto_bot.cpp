@@ -756,13 +756,12 @@ get_device_keys(const UserId &user)
                         const auto devices = key.second;
 
                         for (const auto &device : devices) {
-                                const auto id          = device.first;
-                                const auto data        = device.second;
-                                const auto signing_key = data.keys.at("ed25519:" + id);
+                                const auto id   = device.first;
+                                const auto data = device.second;
 
                                 try {
                                         auto ok = verify_identity_signature(
-                                          json(data), DeviceId(id), UserId(user_id), signing_key);
+                                          json(data), DeviceId(id), UserId(user_id));
 
                                         if (!ok) {
                                                 console->warn("signature could not be verified");
