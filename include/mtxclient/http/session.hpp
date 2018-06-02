@@ -77,7 +77,11 @@ struct Session : public std::enable_shared_from_this<Session>
                                                   std::placeholders::_2));
         }
 
+        //! Force shutdown all connections. Pending responses will not be processed.
+        void terminate();
+
 private:
+        void shutdown();
         void on_resolve(boost::system::error_code ec,
                         boost::asio::ip::tcp::resolver::results_type results);
         void on_close(boost::system::error_code ec);
@@ -86,7 +90,10 @@ private:
         void on_read(const boost::system::error_code &ec, std::size_t bytes_transferred);
         void on_request_complete();
         void on_write(const boost::system::error_code &ec, std::size_t bytes_transferred);
-        void shutdown();
+
+        //! Flag to indicate that the connection of this session is closing and no
+        //! response should be processed.
+        std::atomic_bool is_shutting_down_;
 };
 
 template<class Request, boost::beast::http::verb HttpVerb>

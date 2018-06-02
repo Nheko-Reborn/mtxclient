@@ -16,6 +16,7 @@ Session::Session(boost::asio::io_service &ios,
   , id(std::move(id))
   , on_success(std::move(on_success))
   , on_failure(std::move(on_failure))
+  , is_shutting_down_(false)
 {
         parser.header_limit(8192);
         parser.body_limit(1 * 1024 * 1024 * 1024); // 1 GiB
@@ -76,6 +77,13 @@ Session::on_connect(const boost::system::error_code &ec)
 }
 
 void
+Session::terminate()
+{
+        is_shutting_down_ = true;
+        shutdown();
+}
+
+void
 Session::shutdown()
 {
         socket.async_shutdown(
@@ -85,6 +93,9 @@ Session::shutdown()
 void
 Session::on_request_complete()
 {
+        if (is_shutting_down_)
+                return;
+
         boost::system::error_code ec(error_code);
         on_success(id, parser.get(), ec);
 

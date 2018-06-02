@@ -176,7 +176,7 @@ Client::invite_user(const mtx::identifiers::Room &room_id,
 }
 
 void
-Client::sync(const SyncOpts &opts, Callback<nlohmann::json> callback)
+Client::sync(const SyncOpts &opts, Callback<mtx::responses::Sync> callback)
 {
         std::map<std::string, std::string> params;
 
@@ -191,10 +191,10 @@ Client::sync(const SyncOpts &opts, Callback<nlohmann::json> callback)
 
         params.emplace("timeout", std::to_string(opts.timeout));
 
-        get<nlohmann::json>("/client/r0/sync?" + mtx::client::utils::query_params(params),
-                            [callback](const nlohmann::json &res, HeaderFields, RequestErr err) {
-                                    callback(res, err);
-                            });
+        get<mtx::responses::Sync>("/client/r0/sync?" + mtx::client::utils::query_params(params),
+                                  [callback](const mtx::responses::Sync &res,
+                                             HeaderFields,
+                                             RequestErr err) { callback(res, err); });
 }
 
 void

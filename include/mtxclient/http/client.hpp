@@ -9,6 +9,8 @@
 #include <boost/beast.hpp>
 #include <boost/iostreams/stream.hpp>
 #include <boost/optional.hpp>
+#include <boost/signals2.hpp>
+#include <boost/signals2/signal_type.hpp>
 #include <boost/thread/thread.hpp>
 #include <json.hpp>
 
@@ -83,6 +85,8 @@ public:
         std::string device_id() const { return device_id_; }
         //! Generate a new transaction id.
         std::string generate_txn_id() { return client::utils::random_token(32, false); }
+        //! Abort all active pending requests.
+        void shutdown() { shutdown_signal(); }
 
         //! Perfom login.
         void login(const std::string &username,
@@ -133,7 +137,7 @@ public:
                          Callback<mtx::responses::RoomInvite> cb);
 
         //! Perform sync.
-        void sync(const SyncOpts &opts, Callback<nlohmann::json> cb);
+        void sync(const SyncOpts &opts, Callback<mtx::responses::Sync> cb);
 
         //! Paginate through room messages.
         void messages(const mtx::identifiers::Room &room_id,
@@ -286,6 +290,8 @@ private:
         std::string next_batch_token_;
         //! The homeserver port to connect.
         uint16_t port_ = 443;
+        //! All the active sessions will shutdown the connection.
+        boost::signals2::signal<void()> shutdown_signal;
 };
 }
 }
@@ -434,6 +440,11 @@ mtx::http::Client::create_session(HeadersCallback<Response> callback)
 
                   callback(response_data, {}, client_error);
           });
+
+        if (session)
+                shutdown_signal.connect(
+                  boost::signals2::signal<void()>::slot_type(&Session::terminate, session.get())
+                    .track_foreign(session));
 
         return std::move(session);
 }

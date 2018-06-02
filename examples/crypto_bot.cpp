@@ -1,6 +1,9 @@
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/beast.hpp>
 
+#include <csignal>
+#include <cstdlib>
+
 #include "spdlog/spdlog.h"
 #include <atomic>
 #include <iostream>
@@ -843,10 +846,23 @@ join_room_cb(const nlohmann::json &obj, RequestErr err)
         // Fetch device list for all users.
 }
 
+void
+shutdown_handler(int sig)
+{
+        console->warn("received {} signal", sig);
+        console->info("saving storage");
+        console->info("shutting down");
+
+        // The sync calls will stop.
+        client->shutdown();
+}
+
 int
 main()
 {
         spdlog::set_pattern("[%H:%M:%S] [tid %t] [%^%l%$] %v");
+
+        std::signal(SIGINT, shutdown_handler);
 
         std::string username("alice");
         std::string server("localhost");
@@ -862,6 +878,8 @@ main()
 
         client->login(username, password, login_cb);
         client->close();
+
+        console->info("exit");
 
         return 0;
 }
