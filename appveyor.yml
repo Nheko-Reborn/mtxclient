@@ -17,14 +17,15 @@ install:
     - mingw32-make.exe --version
     - call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat"
     - vcpkg install
-            openssl:%PLATFORM%-windows
-            boost-system:%PLATFORM%-windows
-            boost-random:%PLATFORM%-windows
-            boost-thread:%PLATFORM%-windows
-            boost-iostreams:%PLATFORM%-windows
             boost-asio:%PLATFORM%-windows
             boost-beast:%PLATFORM%-windows
+            boost-iostreams:%PLATFORM%-windows
+            boost-random:%PLATFORM%-windows
+            boost-signals2:%PLATFORM%-windows
+            boost-system:%PLATFORM%-windows
+            boost-thread:%PLATFORM%-windows
             libsodium:%PLATFORM%-windows
+            openssl:%PLATFORM%-windows
             zlib:%PLATFORM%-windows
 
 build_script:
