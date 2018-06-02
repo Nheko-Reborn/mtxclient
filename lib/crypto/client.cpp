@@ -387,6 +387,21 @@ OlmClient::create_olm_encrypted_content(OlmSession *session,
           {"ciphertext", {{recipient_key, {{"body", encrypted_str}, {"type", msg_type}}}}}};
 }
 
+std::string
+OlmClient::save(const std::string &key)
+{
+        if (!account_)
+                return std::string();
+
+        return pickle<AccountObject>(account(), key);
+}
+
+void
+OlmClient::load(const std::string &data, const std::string &key)
+{
+        account_ = unpickle<AccountObject>(data, key);
+}
+
 BinaryBuf
 mtx::crypto::decode_base64(const std::string &msg)
 {

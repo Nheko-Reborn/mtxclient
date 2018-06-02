@@ -187,6 +187,9 @@ public:
                                                     const std::string &room_key_event,
                                                     const std::string &recipient_key);
 
+        std::string save(const std::string &key);
+        void load(const std::string &data, const std::string &key);
+
         OlmAccount *account() { return account_.get(); }
         OlmUtility *utility() { return utility_.get(); }
 
