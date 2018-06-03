@@ -18,12 +18,14 @@ matrix:
       env:
         - OPENSLL_ROOT_DIR=/usr/local/opt/openssl
         - TESTS=OFF
+        - USE_BUNDLED_BOOST=OFF
     - os: linux
       compiler: gcc
       env:
         - CXX_VERSION=g++-6
         - TESTS=ON
         - COVERAGE=ON
+        - USE_BUNDLED_BOOST=ON
       addons:
         apt:
           sources:
@@ -36,6 +38,7 @@ matrix:
       env:
         - CXX_VERSION=clang++-6.0
         - TESTS=ON
+        - USE_BUNDLED_BOOST=ON
       addons:
         apt:
           sources:
@@ -61,6 +64,11 @@ script:
   - cmake --version
 
   # Build library, examples & tests
+  - mkdir -p .deps/usr/{lib,include}/
+  - cmake -Hdeps -B.deps -DCMAKE_BUILD_TYPE=Release
+      -DUSE_BUNDLED_BOOST=${USE_BUNDLED_BOOST}
+      -DUSE_BUNDLED_GTEST=${TESTS}
+  - cmake --build .deps
   - cmake -H. -Bbuild -DOPENSSL_ROOT_DIR=$OPENSLL_ROOT_DIR -DBUILD_LIB_TESTS=$TESTS -DCOVERAGE=$COVERAGE
   - cmake --build build
 

@@ -2,29 +2,42 @@ FILES=`find src tests examples -type f -type f \( -iname "*.cpp" -o -iname "*.hp
 
 SYNAPSE_IMAGE="avhost/docker-matrix:v0.29.0"
 
-debug:
+DEPS_BUILD_DIR=.deps
+DEPS_SOURCE_DIR=deps
+
+help: ## This help message
+	@grep -E '^[0-9a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
+	@# Change the digit following by an 's' to adjust the width of the help text
+
+third_party: ## Build & install third party dependencies
+	@mkdir -p ${DEPS_BUILD_DIR}/usr/{lib,include}/
+	@cmake -GNinja -H${DEPS_SOURCE_DIR} -B${DEPS_BUILD_DIR} -DCMAKE_BUILD_TYPE=Release -DUSE_BUNDLED_BOOST=OFF
+	@cmake --build ${DEPS_BUILD_DIR}
+
+debug: ## Create a debug build
 	@cmake -GNinja -H. -Bbuild \
 		-DCMAKE_BUILD_TYPE=Debug \
 		-DCMAKE_EXPORT_COMPILE_COMMANDS=1 \
 		-DOPENSSL_ROOT_DIR=/usr/local/opt/openssl
 	@cmake --build build
 
-release:
-	@cmake -GNinja -H. -Bbuild -DCMAKE_BUILD_TYPE=Release
+release: ## Create an optimized build
+	@cmake -GNinja -H. -Bbuild \
+		-DCMAKE_BUILD_TYPE=Release \
+		-DOPENSSL_ROOT_DIR=/usr/local/opt/openssl
 	@cmake --build build
 
-test:
+test: ## Run the tests
 	@cd build && GTEST_COLOR=1 ctest --verbose
 
-asan:
+asan: ## Create a debug build using address sanitizers
 	@cmake -GNinja -H. -Bbuild \
 		-DCMAKE_BUILD_TYPE=Debug \
-		-DCMAKE_EXPORT_COMPILE_COMMANDS=1 \
 		-DOPENSSL_ROOT_DIR=/usr/local/opt/openssl \
 		-DASAN=1
 	@cmake --build build
 
-synapse:
+synapse: ## Start a synapse instance on docker
 	@docker run -v `pwd`/data:/data --rm \
 		-e SERVER_NAME=localhost -e REPORT_STATS=no ${SYNAPSE_IMAGE} generate
 	@./.ci/adjust-config.sh
@@ -43,14 +56,14 @@ synapse:
 	@echo Register carl
 	@docker exec synapse /bin/bash -c 'register_new_matrix_user --admin -u carl -p secret -c /data/homeserver.yaml http://localhost:8008'
 
-stop-synapse:
+stop-synapse: ## Stop any running instance of synapse
 	@rm -rf ./data/*
 	@docker rm -f synapse 2>&1>/dev/null
 
 restart: stop-synapse synapse
 
-lint:
+lint: ## Run clang-format on the source code
 	@clang-format -i ${FILES} && git diff --exit-code
 
-clean:
+clean: ## Delete the build directory
 	rm -rf build
