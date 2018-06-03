@@ -68,9 +68,9 @@ target_include_directories(matrix_client
                            SYSTEM
                            PUBLIC
                            ${OPENSSL_INCLUDE_DIR}
+                           ${Boost_INCLUDE_DIRS}
                            PRIVATE
                            ${OLM_INCLUDE_DIR}
-                           ${Boost_INCLUDE_DIRS}
                            ${sodium_INCLUDE_DIR})
 target_include_directories(
   matrix_client
@@ -80,10 +80,12 @@ target_include_directories(
 target_link_libraries(matrix_client
                       PUBLIC
                       MatrixStructs::MatrixStructs
+                      Boost::boost
+                      Boost::system
                       ${Boost_LIBRARIES}
-                      PRIVATE
                       OpenSSL::Crypto
                       OpenSSL::SSL
+                      PRIVATE
                       ${OLM_LIBRARY}
                       sodium
                       ZLIB::ZLIB)
@@ -154,3 +156,52 @@ if(BUILD_LIB_EXAMPLES)
   target_link_libraries(crypto_bot matrix_client)
   target_include_directories(crypto_bot PRIVATE ${OLM_INCLUDE_DIR})
 endif()
+
+#
+# Installation & Target configuration.
+#
+include(GNUInstallDirs)
+set(INSTALL_CONFIGDIR ${CMAKE_INSTALL_LIBDIR}/cmake/MatrixClient)
+
+install(TARGETS matrix_client
+        EXPORT matrix_client-targets
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
+
+set_target_properties(matrix_client PROPERTIES EXPORT_NAME MatrixClient)
+
+install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+install(EXPORT matrix_client-targets
+               FILE
+               MatrixClientTargets.cmake
+               NAMESPACE
+               MatrixClient::
+               DESTINATION
+               ${INSTALL_CONFIGDIR})
+
+include(CMakePackageConfigHelpers)
+write_basic_package_version_file(
+  ${CMAKE_CURRENT_BINARY_DIR}/MatrixClientConfigVersion.cmake
+  VERSION
+  ${PROJECT_VERSION}
+  COMPATIBILITY
+  AnyNewerVersion)
+
+configure_package_config_file(
+  ${CMAKE_CURRENT_LIST_DIR}/cmake/MatrixClientConfig.cmake.in
+  ${CMAKE_CURRENT_BINARY_DIR}/MatrixClientConfig.cmake
+  INSTALL_DESTINATION
+  ${INSTALL_CONFIGDIR})
+
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/MatrixClientConfig.cmake
+              ${CMAKE_CURRENT_BINARY_DIR}/MatrixClientConfigVersion.cmake
+              DESTINATION
+              ${INSTALL_CONFIGDIR})
+
+export(EXPORT
+       matrix_client-targets
+       FILE
+       ${CMAKE_CURRENT_BINARY_DIR}/MatrixClientTargets.cmake
+       NAMESPACE
+       MatrixClient::)
+export(PACKAGE MatrixClient)
