@@ -23,6 +23,21 @@ Client::Client(const std::string &server, uint16_t port)
 }
 
 void
+Client::set_server(const std::string &server)
+{
+        // Check if the input also contains the port.
+        std::vector<std::string> parts;
+        boost::split(parts, server, [](char c) { return c == ':'; });
+
+        if (parts.size() == 2 && mtx::client::utils::is_number(parts.at(1))) {
+                server_ = parts.at(0);
+                port_   = std::stoi(parts.at(1));
+        } else {
+                server_ = server;
+        }
+};
+
+void
 Client::close()
 {
         // Destroy work object. This allows the I/O thread to

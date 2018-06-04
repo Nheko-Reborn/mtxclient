@@ -14,6 +14,13 @@
 #include <boost/random/random_device.hpp>
 #include <boost/random/uniform_int_distribution.hpp>
 
+bool
+mtx::client::utils::is_number(const std::string &s)
+{
+        return !s.empty() &&
+               std::find_if(s.begin(), s.end(), [](char c) { return !std::isdigit(c); }) == s.end();
+}
+
 std::string
 mtx::client::utils::random_token(uint8_t len, bool with_symbols) noexcept
 {

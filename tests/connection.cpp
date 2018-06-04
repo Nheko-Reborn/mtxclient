@@ -25,6 +25,19 @@ TEST(Basic, Connection)
         alice->close();
 }
 
+TEST(Basic, ServerWithPort)
+{
+        auto alice = std::make_shared<Client>("matrix.org");
+        alice->set_server("localhost:8448");
+
+        EXPECT_EQ(alice->server(), "localhost");
+        EXPECT_EQ(alice->port(), 8448);
+
+        alice->versions(
+          [](const mtx::responses::Versions &, RequestErr err) { ASSERT_FALSE(err); });
+        alice->close();
+}
+
 TEST(Basic, Failure)
 {
         auto alice = std::make_shared<Client>("not-resolvable-example-domain.wrong");

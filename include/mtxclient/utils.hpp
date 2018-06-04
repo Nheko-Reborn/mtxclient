@@ -10,6 +10,10 @@ namespace mtx {
 namespace client {
 namespace utils {
 
+//! Check if the given string represents a number.
+bool
+is_number(const std::string &s);
+
 //! Generates a random string of the given size.
 std::string
 random_token(uint8_t len = 12, bool with_symbols = true) noexcept;

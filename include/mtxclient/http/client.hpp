@@ -73,7 +73,7 @@ public:
         //! Wait for the client to close.
         void close();
         //! Set the homeserver domain name.
-        void set_server(const std::string &server) { server_ = server; };
+        void set_server(const std::string &server);
         //! Retrieve the homeserver domain name.
         std::string server() { return server_; };
         //! Set the homeserver port.
