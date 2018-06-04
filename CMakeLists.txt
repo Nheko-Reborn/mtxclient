@@ -80,8 +80,6 @@ target_include_directories(
 target_link_libraries(matrix_client
                       PUBLIC
                       MatrixStructs::MatrixStructs
-                      Boost::boost
-                      Boost::system
                       ${Boost_LIBRARIES}
                       OpenSSL::Crypto
                       OpenSSL::SSL
