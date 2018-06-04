@@ -126,20 +126,18 @@ Client::set_displayname(const std::string &displayname, ErrCallback callback)
 }
 
 void
-Client::get_profile(const mtx::identifiers::User &user_id,
-                    Callback<mtx::responses::Profile> callback)
+Client::get_profile(const std::string &user_id, Callback<mtx::responses::Profile> callback)
 {
-        get<mtx::responses::Profile>("/client/r0/profile/" + user_id.to_string(),
+        get<mtx::responses::Profile>("/client/r0/profile/" + user_id,
                                      [callback](const mtx::responses::Profile &res,
                                                 HeaderFields,
                                                 RequestErr err) { callback(res, err); });
 }
 
 void
-Client::get_avatar_url(const mtx::identifiers::User &user_id,
-                       Callback<mtx::responses::AvatarUrl> callback)
+Client::get_avatar_url(const std::string &user_id, Callback<mtx::responses::AvatarUrl> callback)
 {
-        get<mtx::responses::AvatarUrl>("/client/r0/profile/" + user_id.to_string() + "/avatar_url",
+        get<mtx::responses::AvatarUrl>("/client/r0/profile/" + user_id + "/avatar_url",
                                        [callback](const mtx::responses::AvatarUrl &res,
                                                   HeaderFields,
                                                   RequestErr err) { callback(res, err); });
@@ -409,7 +407,7 @@ Client::query_keys(const mtx::requests::QueryKeys &req,
 
 //! Claims one-time keys for use in pre-key messages.
 void
-Client::claim_keys(const mtx::identifiers::User &user,
+Client::claim_keys(const std::string &user,
                    const std::vector<std::string> &devices,
                    Callback<mtx::responses::ClaimKeys> cb)
 {
@@ -419,7 +417,7 @@ Client::claim_keys(const mtx::identifiers::User &user,
         for (const auto &d : devices)
                 dev_to_algorithm.emplace(d, "signed_curve25519");
 
-        req.one_time_keys[user.to_string()] = dev_to_algorithm;
+        req.one_time_keys[user] = dev_to_algorithm;
 
         post<mtx::requests::ClaimKeys, mtx::responses::ClaimKeys>(
           "/client/r0/keys/claim", std::move(req), std::move(cb));

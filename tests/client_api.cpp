@@ -135,7 +135,8 @@ TEST(ClientAPI, EmptyUserAvatar)
                         auto done = false;
 
                         alice->get_profile(
-                          alice_id, [&done](const mtx::responses::Profile &res, RequestErr err) {
+                          alice_id.to_string(),
+                          [&done](const mtx::responses::Profile &res, RequestErr err) {
                                   ASSERT_FALSE(err);
                                   ASSERT_TRUE(res.avatar_url.size() == 0);
                                   done = true;
@@ -145,7 +146,8 @@ TEST(ClientAPI, EmptyUserAvatar)
                                 sleep();
 
                         alice->get_avatar_url(
-                          alice_id, [](const mtx::responses::AvatarUrl &res, RequestErr err) {
+                          alice_id.to_string(),
+                          [](const mtx::responses::AvatarUrl &res, RequestErr err) {
                                   ASSERT_FALSE(err);
                                   ASSERT_TRUE(res.avatar_url.size() == 0);
                           });
@@ -173,7 +175,7 @@ TEST(ClientAPI, RealUserAvatar)
                         auto done = false;
 
                         alice->get_profile(
-                          alice_id,
+                          alice_id.to_string(),
                           [avatar_url, &done](const mtx::responses::Profile &res, RequestErr err) {
                                   ASSERT_FALSE(err);
                                   ASSERT_TRUE(res.avatar_url == avatar_url);
@@ -184,7 +186,7 @@ TEST(ClientAPI, RealUserAvatar)
                                 sleep();
 
                         alice->get_avatar_url(
-                          alice_id,
+                          alice_id.to_string(),
                           [avatar_url](const mtx::responses::AvatarUrl &res, RequestErr err) {
                                   ASSERT_FALSE(err);
                                   ASSERT_TRUE(res.avatar_url == avatar_url);

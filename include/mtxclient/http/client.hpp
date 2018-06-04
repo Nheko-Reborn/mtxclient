@@ -126,11 +126,9 @@ public:
         //! Change displayname.
         void set_displayname(const std::string &displayname, ErrCallback cb);
         //! Get user profile.
-        void get_profile(const mtx::identifiers::User &user_id,
-                         Callback<mtx::responses::Profile> cb);
+        void get_profile(const std::string &user_id, Callback<mtx::responses::Profile> cb);
         //! Get user avatar URL.
-        void get_avatar_url(const mtx::identifiers::User &user_id,
-                            Callback<mtx::responses::AvatarUrl> cb);
+        void get_avatar_url(const std::string &user_id, Callback<mtx::responses::AvatarUrl> cb);
         //! Create a room with the given options.
         void create_room(const mtx::requests::CreateRoom &room_options,
                          Callback<mtx::responses::CreateRoom> cb);
@@ -234,7 +232,7 @@ public:
                         Callback<mtx::responses::QueryKeys> cb);
 
         //! Claims one-time keys for use in pre-key messages.
-        void claim_keys(const mtx::identifiers::User &user,
+        void claim_keys(const std::string &user,
                         const std::vector<std::string> &devices,
                         Callback<mtx::responses::ClaimKeys> cb);
 

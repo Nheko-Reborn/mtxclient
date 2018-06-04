@@ -473,7 +473,7 @@ create_outbound_megolm_session(const std::string &room_id, const std::string &re
                                 };
 
                                 // TODO: we should bulk request device keys here
-                                client->claim_keys(parse<User>(member.first), {dev}, cb);
+                                client->claim_keys(member.first, {dev}, cb);
                         }
                 }
         }
