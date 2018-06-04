@@ -67,10 +67,19 @@ struct SyncOpts
 class Client : public std::enable_shared_from_this<Client>
 {
 public:
+        Client() = default;
         Client(const std::string &server = "", uint16_t port = 443);
 
         //! Wait for the client to close.
         void close();
+        //! Set the homeserver domain name.
+        void set_server(const std::string &server) { server_ = server; };
+        //! Retrieve the homeserver domain name.
+        std::string server() { return server_; };
+        //! Set the homeserver port.
+        void set_port(uint16_t port) { port_ = port; };
+        //! Retrieve the homeserver port.
+        uint16_t port() { return port_; };
         //! Add an access token.
         void set_access_token(const std::string &token) { access_token_ = token; }
         //! Retrieve the access token.
