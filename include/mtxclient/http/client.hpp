@@ -166,6 +166,11 @@ public:
         //! Mark an event as read.
         void read_event(const std::string &room_id, const std::string &event_id, ErrCallback cb);
 
+        //! Redact an event from a room.
+        void redact_event(const std::string &room_id,
+                          const std::string &event_id,
+                          Callback<mtx::responses::EventId> cb);
+
         //! Upload a filter
         void upload_filter(const nlohmann::json &j, Callback<mtx::responses::FilterId> cb);
 

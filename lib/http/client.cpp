@@ -334,6 +334,18 @@ Client::read_event(const std::string &room_id, const std::string &event_id, ErrC
 }
 
 void
+Client::redact_event(const std::string &room_id,
+                     const std::string &event_id,
+                     Callback<mtx::responses::EventId> callback)
+{
+        const auto api_path = "/client/r0/rooms/" + room_id + "/redact/" + event_id + "/" +
+                              mtx::client::utils::random_token();
+
+        json body = json::object();
+        put<nlohmann::json, mtx::responses::EventId>(api_path, body, callback);
+}
+
+void
 Client::registration(const std::string &user,
                      const std::string &pass,
                      Callback<mtx::responses::Register> callback)

@@ -751,6 +751,42 @@ TEST(ClientAPI, SendMessages)
         bob->close();
 }
 
+TEST(ClientAPI, RedactEvent)
+{
+        auto alice = std::make_shared<Client>("localhost");
+        alice->login("alice", "secret", check_login);
+
+        while (alice->access_token().empty())
+                sleep();
+
+        mtx::requests::CreateRoom req;
+        alice->create_room(req, [alice](const mtx::responses::CreateRoom &res, RequestErr err) {
+                check_error(err);
+                auto room_id = res.room_id.to_string();
+
+                mtx::events::msg::Text text;
+                text.body = "hello alice!";
+
+                alice
+                  ->send_room_message<mtx::events::msg::Text, mtx::events::EventType::RoomMessage>(
+                    room_id,
+                    text,
+                    [room_id, alice](const mtx::responses::EventId &res, RequestErr err) {
+                            check_error(err);
+
+                            alice->redact_event(
+                              room_id,
+                              res.event_id.to_string(),
+                              [](const mtx::responses::EventId &res, RequestErr err) {
+                                      check_error(err);
+                                      ASSERT_FALSE(res.event_id.to_string().empty());
+                              });
+                    });
+        });
+
+        alice->close();
+}
+
 TEST(ClientAPI, SendStateEvents)
 {
         auto alice = std::make_shared<Client>("localhost");
