@@ -132,14 +132,12 @@ public:
         //! Create a room with the given options.
         void create_room(const mtx::requests::CreateRoom &room_options,
                          Callback<mtx::responses::CreateRoom> cb);
-        //! Join a room by its room_id.
-        void join_room(const mtx::identifiers::Room &room_id, Callback<nlohmann::json> cb);
         //! Join a room by an alias or a room_id.
         void join_room(const std::string &room, Callback<nlohmann::json> cb);
         //! Leave a room by its room_id.
-        void leave_room(const mtx::identifiers::Room &room_id, Callback<nlohmann::json> cb);
+        void leave_room(const std::string &room_id, Callback<nlohmann::json> cb);
         //! Invite a user to a room.
-        void invite_user(const mtx::identifiers::Room &room_id,
+        void invite_user(const std::string &room_id,
                          const std::string &user_id,
                          Callback<mtx::responses::RoomInvite> cb);
 
@@ -147,7 +145,7 @@ public:
         void sync(const SyncOpts &opts, Callback<mtx::responses::Sync> cb);
 
         //! Paginate through room messages.
-        void messages(const mtx::identifiers::Room &room_id,
+        void messages(const std::string &room_id,
                       const std::string &from,
                       const std::string &to,
                       PaginationDirection dir,
@@ -159,9 +157,7 @@ public:
         void versions(Callback<mtx::responses::Versions> cb);
 
         //! Mark an event as read.
-        void read_event(const mtx::identifiers::Room &room_id,
-                        const mtx::identifiers::Event &event_id,
-                        ErrCallback cb);
+        void read_event(const std::string &room_id, const std::string &event_id, ErrCallback cb);
 
         //! Upload a filter
         void upload_filter(const nlohmann::json &j, Callback<mtx::responses::FilterId> cb);
@@ -184,29 +180,29 @@ public:
                                          const std::string &original_filename,
                                          RequestErr err)> cb);
         //! Send typing notifications to the room.
-        void start_typing(const mtx::identifiers::Room &room_id, uint64_t timeout, ErrCallback cb);
+        void start_typing(const std::string &room_id, uint64_t timeout, ErrCallback cb);
         //! Remove typing notifications from the room.
-        void stop_typing(const mtx::identifiers::Room &room_id, ErrCallback cb);
+        void stop_typing(const std::string &room_id, ErrCallback cb);
         //! Send a room message with auto-generated transaction id.
         template<class Payload, mtx::events::EventType Event>
-        void send_room_message(const mtx::identifiers::Room &room_id,
+        void send_room_message(const std::string &room_id,
                                const Payload &payload,
                                Callback<mtx::responses::EventId> cb);
         //! Send a room message by providing transaction id.
         template<class Payload, mtx::events::EventType Event>
-        void send_room_message(const mtx::identifiers::Room &room_id,
+        void send_room_message(const std::string &room_id,
                                const std::string &txn_id,
                                const Payload &payload,
                                Callback<mtx::responses::EventId> cb);
         //! Send a state event by providing the state key.
         template<class Payload, mtx::events::EventType Event>
-        void send_state_event(const mtx::identifiers::Room &room_id,
+        void send_state_event(const std::string &room_id,
                               const std::string &state_key,
                               const Payload &payload,
                               Callback<mtx::responses::EventId> cb);
         //! Send a state event with an empty state key.
         template<class Payload, mtx::events::EventType Event>
-        void send_state_event(const mtx::identifiers::Room &room_id,
+        void send_state_event(const std::string &room_id,
                               const Payload &payload,
                               Callback<mtx::responses::EventId> cb);
 
@@ -248,8 +244,7 @@ public:
                          Callback<mtx::responses::KeyChanges> cb);
 
         //! Enable encryption in a room by sending a `m.room.encryption` state event.
-        void enable_encryption(const mtx::identifiers::Room &room,
-                               Callback<mtx::responses::EventId> cb);
+        void enable_encryption(const std::string &room, Callback<mtx::responses::EventId> cb);
 
 private:
         template<class Request, class Response>
@@ -463,7 +458,7 @@ mtx::http::Client::create_session(HeadersCallback<Response> callback)
 
 template<class Payload, mtx::events::EventType Event>
 void
-mtx::http::Client::send_room_message(const mtx::identifiers::Room &room_id,
+mtx::http::Client::send_room_message(const std::string &room_id,
                                      const Payload &payload,
                                      Callback<mtx::responses::EventId> callback)
 {
@@ -472,25 +467,25 @@ mtx::http::Client::send_room_message(const mtx::identifiers::Room &room_id,
 
 template<class Payload, mtx::events::EventType Event>
 void
-mtx::http::Client::send_room_message(const mtx::identifiers::Room &room_id,
+mtx::http::Client::send_room_message(const std::string &room_id,
                                      const std::string &txn_id,
                                      const Payload &payload,
                                      Callback<mtx::responses::EventId> callback)
 {
-        const auto api_path = "/client/r0/rooms/" + room_id.to_string() + "/send/" +
-                              mtx::events::to_string(Event) + "/" + txn_id;
+        const auto api_path =
+          "/client/r0/rooms/" + room_id + "/send/" + mtx::events::to_string(Event) + "/" + txn_id;
 
         put<Payload, mtx::responses::EventId>(api_path, payload, callback);
 }
 
 template<class Payload, mtx::events::EventType Event>
 void
-mtx::http::Client::send_state_event(const mtx::identifiers::Room &room_id,
+mtx::http::Client::send_state_event(const std::string &room_id,
                                     const std::string &state_key,
                                     const Payload &payload,
                                     Callback<mtx::responses::EventId> callback)
 {
-        const auto api_path = "/client/r0/rooms/" + room_id.to_string() + "/state/" +
+        const auto api_path = "/client/r0/rooms/" + room_id + "/state/" +
                               mtx::events::to_string(Event) + "/" + state_key;
 
         put<Payload, mtx::responses::EventId>(api_path, payload, callback);
@@ -498,7 +493,7 @@ mtx::http::Client::send_state_event(const mtx::identifiers::Room &room_id,
 
 template<class Payload, mtx::events::EventType Event>
 void
-mtx::http::Client::send_state_event(const mtx::identifiers::Room &room_id,
+mtx::http::Client::send_state_event(const std::string &room_id,
                                     const Payload &payload,
                                     Callback<mtx::responses::EventId> callback)
 {

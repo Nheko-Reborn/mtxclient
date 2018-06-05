@@ -494,12 +494,13 @@ TEST(Encryption, EnableEncryption)
                   joined_room = res.room_id;
 
                   bob->enable_encryption(
-                    res.room_id, [&responses](const mtx::responses::EventId &, RequestErr err) {
+                    res.room_id.to_string(),
+                    [&responses](const mtx::responses::EventId &, RequestErr err) {
                             check_error(err);
                             responses += 1;
                     });
 
-                  carl->join_room(res.room_id,
+                  carl->join_room(res.room_id.to_string(),
                                   [&responses](const nlohmann::json &, RequestErr err) {
                                           check_error(err);
                                           responses += 1;

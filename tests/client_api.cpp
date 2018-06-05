@@ -370,12 +370,12 @@ TEST(ClientAPI, CreateRoomInvites)
         req.invite = {"@bob:localhost", "@carl:localhost"};
         alice->create_room(req, [bob, carl](const mtx::responses::CreateRoom &res, RequestErr err) {
                 check_error(err);
-                auto room_id = res.room_id;
+                auto room_id = res.room_id.to_string();
 
-                bob->join_room(res.room_id,
+                bob->join_room(room_id,
                                [](const nlohmann::json &, RequestErr err) { check_error(err); });
 
-                carl->join_room(res.room_id,
+                carl->join_room(room_id,
                                 [](const nlohmann::json &, RequestErr err) { check_error(err); });
         });
 
@@ -412,19 +412,18 @@ TEST(ClientAPI, JoinRoom)
         alice->create_room(
           req, [bob, alias](const mtx::responses::CreateRoom &res, RequestErr err) {
                   check_error(err);
-                  auto room_id = res.room_id;
+                  auto room_id = res.room_id.to_string();
 
-                  bob->join_room(res.room_id,
+                  bob->join_room(room_id,
                                  [](const nlohmann::json &, RequestErr err) { check_error(err); });
 
                   using namespace mtx::identifiers;
-                  bob->join_room(parse<Room>("!random_room_id:localhost"),
-                                 [](const nlohmann::json &, RequestErr err) {
-                                         ASSERT_TRUE(err);
-                                         EXPECT_EQ(
-                                           mtx::errors::to_string(err->matrix_error.errcode),
-                                           "M_UNRECOGNIZED");
-                                 });
+                  bob->join_room(
+                    "!random_room_id:localhost", [](const nlohmann::json &, RequestErr err) {
+                            ASSERT_TRUE(err);
+                            EXPECT_EQ(mtx::errors::to_string(err->matrix_error.errcode),
+                                      "M_UNRECOGNIZED");
+                    });
 
                   // Join the room using an alias.
                   bob->join_room("#" + alias + ":localhost",
@@ -459,22 +458,23 @@ TEST(ClientAPI, LeaveRoom)
                 check_error(err);
                 auto room_id = res.room_id;
 
-                bob->join_room(res.room_id, [room_id, bob](const nlohmann::json &, RequestErr err) {
-                        check_error(err);
+                bob->join_room(res.room_id.to_string(),
+                               [room_id, bob](const nlohmann::json &, RequestErr err) {
+                                       check_error(err);
 
-                        bob->leave_room(room_id, [](const nlohmann::json &, RequestErr err) {
-                                check_error(err);
-                        });
-                });
+                                       bob->leave_room(room_id.to_string(),
+                                                       [](const nlohmann::json &, RequestErr err) {
+                                                               check_error(err);
+                                                       });
+                               });
         });
 
         // Trying to leave a non-existent room should fail.
-        bob->leave_room(
-          parse<Room>("!random_room_id:localhost"), [](const nlohmann::json &, RequestErr err) {
-                  ASSERT_TRUE(err);
-                  EXPECT_EQ(mtx::errors::to_string(err->matrix_error.errcode), "M_UNRECOGNIZED");
-                  EXPECT_EQ(err->matrix_error.error, "Not a known room");
-          });
+        bob->leave_room("!random_room_id:localhost", [](const nlohmann::json &, RequestErr err) {
+                ASSERT_TRUE(err);
+                EXPECT_EQ(mtx::errors::to_string(err->matrix_error.errcode), "M_UNRECOGNIZED");
+                EXPECT_EQ(err->matrix_error.error, "Not a known room");
+        });
 
         alice->close();
         bob->close();
@@ -503,7 +503,7 @@ TEST(ClientAPI, InviteRoom)
         alice->create_room(
           req, [alice, bob](const mtx::responses::CreateRoom &res, RequestErr err) {
                   check_error(err);
-                  auto room_id = res.room_id;
+                  auto room_id = res.room_id.to_string();
 
                   alice->invite_user(room_id,
                                      "@bob:localhost",
@@ -544,7 +544,7 @@ TEST(ClientAPI, InvalidInvite)
         alice->create_room(
           req, [alice, bob](const mtx::responses::CreateRoom &res, RequestErr err) {
                   check_error(err);
-                  auto room_id = res.room_id;
+                  auto room_id = res.room_id.to_string();
 
                   bob->invite_user(room_id,
                                    "@carl:localhost",
@@ -623,7 +623,7 @@ TEST(ClientAPI, Typing)
         alice->create_room(req, [alice](const mtx::responses::CreateRoom &res, RequestErr err) {
                 check_error(err);
 
-                alice->start_typing(res.room_id, 10000, [alice, res](RequestErr err) {
+                alice->start_typing(res.room_id.to_string(), 10000, [alice, res](RequestErr err) {
                         check_error(err);
 
                         const auto room_id = res.room_id.to_string();
@@ -648,18 +648,20 @@ TEST(ClientAPI, Typing)
                         while (!can_continue)
                                 sleep();
 
-                        alice->stop_typing(res.room_id, [alice, room_id](RequestErr err) {
-                                check_error(err);
+                        alice->stop_typing(
+                          res.room_id.to_string(), [alice, room_id](RequestErr err) {
+                                  check_error(err);
 
-                                SyncOpts opts;
-                                opts.timeout = 0;
-                                alice->sync(
-                                  opts, [room_id](const mtx::responses::Sync &res, RequestErr err) {
-                                          check_error(err);
-                                          auto room = res.rooms.join.at(room_id);
-                                          EXPECT_EQ(room.ephemeral.typing.size(), 0);
-                                  });
-                        });
+                                  SyncOpts opts;
+                                  opts.timeout = 0;
+                                  alice->sync(
+                                    opts,
+                                    [room_id](const mtx::responses::Sync &res, RequestErr err) {
+                                            check_error(err);
+                                            auto room = res.rooms.join.at(room_id);
+                                            EXPECT_EQ(room.ephemeral.typing.size(), 0);
+                                    });
+                          });
                 });
         });
 
@@ -687,10 +689,10 @@ TEST(ClientAPI, SendMessages)
         alice->create_room(
           req, [alice, bob](const mtx::responses::CreateRoom &res, RequestErr err) {
                   check_error(err);
-                  auto room_id = res.room_id;
+                  auto room_id = res.room_id.to_string();
 
                   bob->join_room(
-                    res.room_id, [alice, bob, room_id](const nlohmann::json &, RequestErr err) {
+                    room_id, [alice, bob, room_id](const nlohmann::json &, RequestErr err) {
                             check_error(err);
 
                             // Flag to indicate when those messages would be ready to be read by
@@ -726,21 +728,22 @@ TEST(ClientAPI, SendMessages)
 
                             SyncOpts opts;
                             opts.timeout = 0;
-                            alice->sync(
-                              opts,
-                              [room_id, event_ids](const mtx::responses::Sync &res,
-                                                   RequestErr err) {
-                                      check_error(err);
+                            alice->sync(opts,
+                                        [room_id, event_ids](const mtx::responses::Sync &res,
+                                                             RequestErr err) {
+                                                check_error(err);
 
-                                      auto ids = get_event_ids<TimelineEvents>(
-                                        res.rooms.join.at(room_id.to_string()).timeline.events);
+                                                auto ids = get_event_ids<TimelineEvents>(
+                                                  res.rooms.join.at(room_id).timeline.events);
 
-                                      // The sent event ids should be visible in the timeline.
-                                      for (const auto &event_id : event_ids)
-                                              ASSERT_TRUE(std::find(ids.begin(),
-                                                                    ids.end(),
-                                                                    event_id) != std::end(ids));
-                              });
+                                                // The sent event ids should be visible in the
+                                                // timeline.
+                                                for (const auto &event_id : event_ids)
+                                                        ASSERT_TRUE(std::find(ids.begin(),
+                                                                              ids.end(),
+                                                                              event_id) !=
+                                                                    std::end(ids));
+                                        });
                     });
           });
 
@@ -779,7 +782,9 @@ TEST(ClientAPI, SendStateEvents)
                   event.name = "Bob's room";
 
                   bob->send_state_event<mtx::events::state::Name, mtx::events::EventType::RoomName>(
-                    room_id, event, [](const mtx::responses::EventId &, RequestErr err) {
+                    room_id.to_string(),
+                    event,
+                    [](const mtx::responses::EventId &, RequestErr err) {
                             ASSERT_TRUE(err);
                             ASSERT_EQ("M_FORBIDDEN",
                                       mtx::errors::to_string(err->matrix_error.errcode));
@@ -789,7 +794,7 @@ TEST(ClientAPI, SendStateEvents)
                   name_event.name = "Alice's room";
                   alice
                     ->send_state_event<mtx::events::state::Name, mtx::events::EventType::RoomName>(
-                      room_id,
+                      room_id.to_string(),
                       name_event,
                       [&event_ids](const mtx::responses::EventId &res, RequestErr err) {
                               check_error(err);
@@ -800,7 +805,7 @@ TEST(ClientAPI, SendStateEvents)
                   avatar.url = "mxc://localhost/random";
                   alice->send_state_event<mtx::events::state::Avatar,
                                           mtx::events::EventType::RoomAvatar>(
-                    room_id,
+                    room_id.to_string(),
                     avatar,
                     [&event_ids](const mtx::responses::EventId &res, RequestErr err) {
                             check_error(err);
@@ -847,7 +852,7 @@ TEST(ClientAPI, Pagination)
                 auto room_id = res.room_id;
 
                 alice->messages(
-                  res.room_id,
+                  res.room_id.to_string(),
                   "", // from
                   "", // to
                   PaginationDirection::Backwards,
@@ -860,7 +865,7 @@ TEST(ClientAPI, Pagination)
                           ASSERT_TRUE(res.chunk.size() > 5);
                           ASSERT_NE(res.start, res.end);
 
-                          alice->messages(room_id,
+                          alice->messages(room_id.to_string(),
                                           res.end,
                                           "",
                                           PaginationDirection::Backwards,
@@ -927,17 +932,18 @@ TEST(ClientAPI, ReadMarkers)
 
                 alice
                   ->send_room_message<mtx::events::msg::Text, mtx::events::EventType::RoomMessage>(
-                    room_id,
+                    room_id.to_string(),
                     text,
                     [alice, &event_id, room_id](const mtx::responses::EventId &res,
                                                 RequestErr err) {
                             check_error(err);
 
-                            alice->read_event(
-                              room_id, res.event_id, [&event_id, res](RequestErr err) {
-                                      check_error(err);
-                                      event_id = res.event_id.to_string();
-                              });
+                            alice->read_event(room_id.to_string(),
+                                              res.event_id.to_string(),
+                                              [&event_id, res](RequestErr err) {
+                                                      check_error(err);
+                                                      event_id = res.event_id.to_string();
+                                              });
                     });
 
                 while (event_id.size() == 0)

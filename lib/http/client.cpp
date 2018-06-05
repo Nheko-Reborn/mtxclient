@@ -35,7 +35,7 @@ Client::set_server(const std::string &server)
         } else {
                 server_ = server;
         }
-};
+}
 
 void
 Client::close()
@@ -152,14 +152,6 @@ Client::create_room(const mtx::requests::CreateRoom &room_options,
 }
 
 void
-Client::join_room(const mtx::identifiers::Room &room_id, Callback<nlohmann::json> callback)
-{
-        auto api_path = "/client/r0/rooms/" + room_id.to_string() + "/join";
-
-        post<std::string, nlohmann::json>(api_path, "", callback);
-}
-
-void
 Client::join_room(const std::string &room, Callback<nlohmann::json> callback)
 {
         auto api_path = "/client/r0/join/" + room;
@@ -168,22 +160,22 @@ Client::join_room(const std::string &room, Callback<nlohmann::json> callback)
 }
 
 void
-Client::leave_room(const mtx::identifiers::Room &room_id, Callback<nlohmann::json> callback)
+Client::leave_room(const std::string &room_id, Callback<nlohmann::json> callback)
 {
-        auto api_path = "/client/r0/rooms/" + room_id.to_string() + "/leave";
+        auto api_path = "/client/r0/rooms/" + room_id + "/leave";
 
         post<std::string, nlohmann::json>(api_path, "", callback);
 }
 
 void
-Client::invite_user(const mtx::identifiers::Room &room_id,
+Client::invite_user(const std::string &room_id,
                     const std::string &user_id,
                     Callback<mtx::responses::RoomInvite> callback)
 {
         mtx::requests::RoomInvite req;
         req.user_id = user_id;
 
-        auto api_path = "/client/r0/rooms/" + room_id.to_string() + "/invite";
+        auto api_path = "/client/r0/rooms/" + room_id + "/invite";
 
         post<mtx::requests::RoomInvite, mtx::responses::RoomInvite>(api_path, req, callback);
 }
@@ -273,10 +265,9 @@ Client::download(const std::string &server,
 }
 
 void
-Client::start_typing(const mtx::identifiers::Room &room_id, uint64_t timeout, ErrCallback callback)
+Client::start_typing(const std::string &room_id, uint64_t timeout, ErrCallback callback)
 {
-        const auto api_path =
-          "/client/r0/rooms/" + room_id.to_string() + "/typing/" + user_id_.to_string();
+        const auto api_path = "/client/r0/rooms/" + room_id + "/typing/" + user_id_.to_string();
 
         mtx::requests::TypingNotification req;
         req.typing  = true;
@@ -286,10 +277,9 @@ Client::start_typing(const mtx::identifiers::Room &room_id, uint64_t timeout, Er
 }
 
 void
-Client::stop_typing(const mtx::identifiers::Room &room_id, ErrCallback callback)
+Client::stop_typing(const std::string &room_id, ErrCallback callback)
 {
-        const auto api_path =
-          "/client/r0/rooms/" + room_id.to_string() + "/typing/" + user_id_.to_string();
+        const auto api_path = "/client/r0/rooms/" + room_id + "/typing/" + user_id_.to_string();
 
         mtx::requests::TypingNotification req;
         req.typing = false;
@@ -298,7 +288,7 @@ Client::stop_typing(const mtx::identifiers::Room &room_id, ErrCallback callback)
 }
 
 void
-Client::messages(const mtx::identifiers::Room &room_id,
+Client::messages(const std::string &room_id,
                  const std::string &from,
                  const std::string &to,
                  PaginationDirection dir,
@@ -318,8 +308,8 @@ Client::messages(const mtx::identifiers::Room &room_id,
         if (!filter.empty())
                 params.emplace("filter", filter);
 
-        const auto api_path = "/client/r0/rooms/" + room_id.to_string() + "/messages?" +
-                              client::utils::query_params(params);
+        const auto api_path =
+          "/client/r0/rooms/" + room_id + "/messages?" + client::utils::query_params(params);
 
         get<mtx::responses::Messages>(
           api_path, [callback](const mtx::responses::Messages &res, HeaderFields, RequestErr err) {
@@ -336,14 +326,11 @@ Client::upload_filter(const nlohmann::json &j, Callback<mtx::responses::FilterId
 }
 
 void
-Client::read_event(const mtx::identifiers::Room &room_id,
-                   const mtx::identifiers::Event &event_id,
-                   ErrCallback callback)
+Client::read_event(const std::string &room_id, const std::string &event_id, ErrCallback callback)
 {
-        const auto api_path = "/client/r0/rooms/" + room_id.to_string() + "/read_markers";
+        const auto api_path = "/client/r0/rooms/" + room_id + "/read_markers";
 
-        nlohmann::json body = {{"m.fully_read", event_id.to_string()},
-                               {"m.read", event_id.to_string()}};
+        nlohmann::json body = {{"m.fully_read", event_id}, {"m.read", event_id}};
 
         post<nlohmann::json, mtx::responses::Empty>(
           api_path, body, [callback](const mtx::responses::Empty, RequestErr err) {
@@ -455,8 +442,7 @@ Client::key_changes(const std::string &from,
 }
 
 void
-Client::enable_encryption(const mtx::identifiers::Room &room,
-                          Callback<mtx::responses::EventId> callback)
+Client::enable_encryption(const std::string &room, Callback<mtx::responses::EventId> callback)
 {
         using namespace mtx::events;
         state::Encryption event;

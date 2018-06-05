@@ -85,13 +85,13 @@ void
 parse_messages(const mtx::responses::Sync &res, bool parse_repeat_cmd = false)
 {
         for (const auto room : res.rooms.invite) {
-                auto room_id = parse<Room>(room.first);
+                auto room_id = room.first;
 
-                printf("joining room %s\n", room_id.to_string().c_str());
+                printf("joining room %s\n", room_id.c_str());
                 client->join_room(room_id, [room_id](const nlohmann::json &obj, RequestErr e) {
                         if (e) {
                                 print_errors(e);
-                                printf("failed to join room %s\n", room_id.to_string().c_str());
+                                printf("failed to join room %s\n", room_id.c_str());
                                 return;
                         }
 
@@ -108,7 +108,7 @@ parse_messages(const mtx::responses::Sync &res, bool parse_repeat_cmd = false)
                                           return;
                                   }
 
-                                  printf("sent message to %s\n", room_id.to_string().c_str());
+                                  printf("sent message to %s\n", room_id.c_str());
                           });
                 });
         }
@@ -136,9 +136,7 @@ parse_messages(const mtx::responses::Sync &res, bool parse_repeat_cmd = false)
 
                         client->send_room_message<mtx::events::msg::Text,
                                                   mtx::events::EventType::RoomMessage>(
-                          parse<Room>(room_id),
-                          text,
-                          [room_id](const mtx::responses::EventId &, RequestErr e) {
+                          room_id, text, [room_id](const mtx::responses::EventId &, RequestErr e) {
                                   if (e) {
                                           print_errors(e);
                                           return;

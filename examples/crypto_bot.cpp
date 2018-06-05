@@ -365,7 +365,7 @@ send_group_message(OlmOutboundGroupSession *session,
         data.device_id  = client->device_id();
 
         client->send_room_message<msg::Encrypted, EventType::RoomEncrypted>(
-          parse<Room>(room_id), data, [](const mtx::responses::EventId &res, RequestErr err) {
+          room_id, data, [](const mtx::responses::EventId &res, RequestErr err) {
                   if (err) {
                           print_errors(err);
                           return;
@@ -663,13 +663,13 @@ void
 parse_messages(const mtx::responses::Sync &res)
 {
         for (const auto &room : res.rooms.invite) {
-                auto room_id = parse<Room>(room.first);
+                auto room_id = room.first;
 
-                console->info("joining room {}", room_id.to_string());
+                console->info("joining room {}", room_id);
                 client->join_room(room_id, [room_id](const nlohmann::json &, RequestErr e) {
                         if (e) {
                                 print_errors(e);
-                                console->error("failed to join room {}", room_id.to_string());
+                                console->error("failed to join room {}", room_id);
                                 return;
                         }
                 });
