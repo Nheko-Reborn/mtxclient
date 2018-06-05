@@ -63,6 +63,19 @@ struct SyncOpts
         bool full_state = false;
 };
 
+//! Configuration for the /messages endpoint.
+struct MessagesOpts
+{
+        std::string room_id;
+        std::string from;
+        std::string to;
+        std::string filter;
+
+        PaginationDirection dir = PaginationDirection::Backwards;
+
+        uint16_t limit = 30;
+};
+
 //! The main object that the user will interact.
 class Client : public std::enable_shared_from_this<Client>
 {
@@ -145,13 +158,7 @@ public:
         void sync(const SyncOpts &opts, Callback<mtx::responses::Sync> cb);
 
         //! Paginate through room messages.
-        void messages(const std::string &room_id,
-                      const std::string &from,
-                      const std::string &to,
-                      PaginationDirection dir,
-                      uint16_t limit,
-                      const std::string &filter,
-                      Callback<mtx::responses::Messages> cb);
+        void messages(const MessagesOpts &opts, Callback<mtx::responses::Messages> cb);
 
         //! Get the supported versions from the server.
         void versions(Callback<mtx::responses::Versions> cb);

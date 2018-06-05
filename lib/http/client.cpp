@@ -288,28 +288,23 @@ Client::stop_typing(const std::string &room_id, ErrCallback callback)
 }
 
 void
-Client::messages(const std::string &room_id,
-                 const std::string &from,
-                 const std::string &to,
-                 PaginationDirection dir,
-                 uint16_t limit,
-                 const std::string &filter,
-                 Callback<mtx::responses::Messages> callback)
+Client::messages(const MessagesOpts &opts, Callback<mtx::responses::Messages> callback)
 {
         std::map<std::string, std::string> params;
 
-        params.emplace("from", from);
-        params.emplace("dir", to_string(dir));
+        params.emplace("dir", to_string(opts.dir));
 
-        if (!to.empty())
-                params.emplace("to", to);
-        if (limit > 0)
-                params.emplace("limit", std::to_string(limit));
-        if (!filter.empty())
-                params.emplace("filter", filter);
+        if (!opts.from.empty())
+                params.emplace("from", opts.from);
+        if (!opts.to.empty())
+                params.emplace("to", opts.to);
+        if (opts.limit > 0)
+                params.emplace("limit", std::to_string(opts.limit));
+        if (!opts.filter.empty())
+                params.emplace("filter", opts.filter);
 
         const auto api_path =
-          "/client/r0/rooms/" + room_id + "/messages?" + client::utils::query_params(params);
+          "/client/r0/rooms/" + opts.room_id + "/messages?" + client::utils::query_params(params);
 
         get<mtx::responses::Messages>(
           api_path, [callback](const mtx::responses::Messages &res, HeaderFields, RequestErr err) {

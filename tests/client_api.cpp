@@ -851,26 +851,20 @@ TEST(ClientAPI, Pagination)
                 check_error(err);
                 auto room_id = res.room_id;
 
+                MessagesOpts opts;
+                opts.room_id = res.room_id.to_string();
+
                 alice->messages(
-                  res.room_id.to_string(),
-                  "", // from
-                  "", // to
-                  PaginationDirection::Backwards,
-                  30, // limit. Just enough messages so can fetch the whole history on
-                      // this newly created room.
-                  "", // filter
-                  [room_id, alice](const mtx::responses::Messages &res, RequestErr err) {
+                  opts, [room_id, alice](const mtx::responses::Messages &res, RequestErr err) {
                           check_error(err);
 
                           ASSERT_TRUE(res.chunk.size() > 5);
                           ASSERT_NE(res.start, res.end);
 
-                          alice->messages(room_id.to_string(),
-                                          res.end,
-                                          "",
-                                          PaginationDirection::Backwards,
-                                          30,
-                                          "",
+                          MessagesOpts opts;
+                          opts.from    = res.end;
+                          opts.room_id = room_id.to_string();
+                          alice->messages(opts,
                                           [](const mtx::responses::Messages &res, RequestErr err) {
                                                   check_error(err);
 
