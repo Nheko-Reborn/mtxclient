@@ -17,15 +17,6 @@ using namespace mtx::identifiers;
 using namespace std;
 
 string
-get_media_id(const mtx::responses::ContentURI &res)
-{
-        vector<string> results;
-        boost::split(results, res.content_uri, [](char c) { return c == '/'; });
-
-        return results.back();
-}
-
-string
 read_file(const string &file_path)
 {
         ifstream file(file_path);
@@ -56,8 +47,7 @@ TEST(MediaAPI, UploadTextFile)
                               [alice, text](const mtx::responses::ContentURI &res, RequestErr err) {
                                       validate_upload(res, err);
 
-                                      alice->download("localhost",
-                                                      get_media_id(res),
+                                      alice->download(res.content_uri,
                                                       [text](const string &data,
                                                              const string &content_type,
                                                              const string &original_filename,
@@ -89,8 +79,7 @@ TEST(MediaAPI, UploadAudio)
                             [bob, audio](const mtx::responses::ContentURI &res, RequestErr err) {
                                     validate_upload(res, err);
 
-                                    bob->download("localhost",
-                                                  get_media_id(res),
+                                    bob->download(res.content_uri,
                                                   [audio](const string &data,
                                                           const string &content_type,
                                                           const string &original_filename,
@@ -121,8 +110,7 @@ TEST(MediaAPI, UploadImage)
                              [carl, img](const mtx::responses::ContentURI &res, RequestErr err) {
                                      validate_upload(res, err);
 
-                                     carl->download("localhost",
-                                                    get_media_id(res),
+                                     carl->download(res.content_uri,
                                                     [img](const string &data,
                                                           const string &content_type,
                                                           const string &original_filename,

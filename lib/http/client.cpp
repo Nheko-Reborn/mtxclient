@@ -232,6 +232,17 @@ Client::upload(const std::string &data,
 }
 
 void
+Client::download(const std::string &mxc_url,
+                 std::function<void(const std::string &res,
+                                    const std::string &content_type,
+                                    const std::string &original_filename,
+                                    RequestErr err)> callback)
+{
+        auto url = mtx::client::utils::parse_mxc_url(mxc_url);
+        download(url.server, url.media_id, std::move(callback));
+}
+
+void
 Client::download(const std::string &server,
                  const std::string &media_id,
                  std::function<void(const std::string &res,

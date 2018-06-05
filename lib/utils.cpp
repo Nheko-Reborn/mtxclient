@@ -4,6 +4,7 @@
 #include <string>
 #include <utility>
 
+#include <boost/algorithm/string.hpp>
 #include <boost/iostreams/copy.hpp>
 #include <boost/iostreams/detail/error.hpp>
 #include <boost/iostreams/detail/forward.hpp>
@@ -13,6 +14,31 @@
 #include <boost/iostreams/traits.hpp>
 #include <boost/random/random_device.hpp>
 #include <boost/random/uniform_int_distribution.hpp>
+
+mtx::client::utils::MxcUrl
+mtx::client::utils::parse_mxc_url(const std::string &url)
+{
+        constexpr auto mxc_uri_protocol = "mxc://";
+        MxcUrl res;
+
+        if (url.find(mxc_uri_protocol) != 0)
+                return res;
+
+        auto str_left = url.substr(6);
+
+        std::vector<std::string> parts;
+        boost::split(parts, str_left, [](char c) { return c == '/'; });
+
+        if (parts.size() != 2) {
+                res.server = parts.at(0);
+                return res;
+        }
+
+        res.server   = parts.at(0);
+        res.media_id = parts.at(1);
+
+        return res;
+}
 
 bool
 mtx::client::utils::is_number(const std::string &s)

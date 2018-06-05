@@ -172,6 +172,11 @@ public:
                     const std::string &filename,
                     Callback<mtx::responses::ContentURI> cb);
         //! Retrieve data from the content repository.
+        void download(const std::string &mxc_url,
+                      std::function<void(const std::string &data,
+                                         const std::string &content_type,
+                                         const std::string &original_filename,
+                                         RequestErr err)> cb);
         void download(const std::string &server,
                       const std::string &media_id,
                       std::function<void(const std::string &data,

@@ -10,6 +10,19 @@ namespace mtx {
 namespace client {
 namespace utils {
 
+//! Representation of Matrix Content (MXC) URIs.
+struct MxcUrl
+{
+        //! The name of the homeserver where the content originated.
+        std::string server;
+        //! An opaque ID which identifies the content.
+        std::string media_id;
+};
+
+//! Parse a matrix content URI into its server & media_id components.
+MxcUrl
+parse_mxc_url(const std::string &url);
+
 //! Check if the given string represents a number.
 bool
 is_number(const std::string &s);
