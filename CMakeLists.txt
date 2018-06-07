@@ -69,9 +69,9 @@ target_include_directories(matrix_client
                            PUBLIC
                            ${OPENSSL_INCLUDE_DIR}
                            ${Boost_INCLUDE_DIRS}
+                           ${sodium_INCLUDE_DIR}
                            PRIVATE
-                           ${OLM_INCLUDE_DIR}
-                           ${sodium_INCLUDE_DIR})
+                           ${OLM_INCLUDE_DIR})
 target_include_directories(
   matrix_client
   PUBLIC
@@ -81,11 +81,11 @@ target_link_libraries(matrix_client
                       PUBLIC
                       MatrixStructs::MatrixStructs
                       ${Boost_LIBRARIES}
+                      ${sodium_LIBRARY_RELEASE}
                       OpenSSL::Crypto
                       OpenSSL::SSL
                       PRIVATE
                       ${OLM_LIBRARY}
-                      sodium
                       ZLIB::ZLIB)
 
 if(NOT MSVC AND NOT APPLE)
