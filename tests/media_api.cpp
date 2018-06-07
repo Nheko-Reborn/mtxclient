@@ -104,24 +104,31 @@ TEST(MediaAPI, UploadImage)
 
                 const auto img = read_file("./fixtures/test.jpeg");
 
-                carl->upload(img,
-                             "image/jpeg",
-                             "test.jpeg",
-                             [carl, img](const mtx::responses::ContentURI &res, RequestErr err) {
-                                     validate_upload(res, err);
+                carl->upload(
+                  img,
+                  "image/jpeg",
+                  "test.jpeg",
+                  [carl, img](const mtx::responses::ContentURI &res, RequestErr err) {
+                          validate_upload(res, err);
 
-                                     carl->download(res.content_uri,
-                                                    [img](const string &data,
-                                                          const string &content_type,
-                                                          const string &original_filename,
-                                                          RequestErr err) {
-                                                            ASSERT_FALSE(err);
-                                                            EXPECT_EQ(data, img);
-                                                            EXPECT_EQ(content_type, "image/jpeg");
-                                                            EXPECT_EQ(original_filename,
-                                                                      "test.jpeg");
-                                                    });
-                             });
+                          ThumbOpts opts;
+                          opts.mxc_url = res.content_uri;
+                          carl->get_thumbnail(opts, [](const std::string &res, RequestErr err) {
+                                  ASSERT_FALSE(err);
+                                  ASSERT_FALSE(res.empty());
+                          });
+
+                          carl->download(res.content_uri,
+                                         [img](const string &data,
+                                               const string &content_type,
+                                               const string &original_filename,
+                                               RequestErr err) {
+                                                 ASSERT_FALSE(err);
+                                                 EXPECT_EQ(data, img);
+                                                 EXPECT_EQ(content_type, "image/jpeg");
+                                                 EXPECT_EQ(original_filename, "test.jpeg");
+                                         });
+                  });
         });
 
         carl->close();

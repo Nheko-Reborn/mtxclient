@@ -76,11 +76,23 @@ struct MessagesOpts
         uint16_t limit = 30;
 };
 
+//! Configuration for thumbnail retrieving.
+struct ThumbOpts
+{
+        //! The desired width of the thumbnail.
+        uint16_t width = 128;
+        //! The desired height of the thumbnail.
+        uint16_t height = 128;
+        //! The desired resizing method. One of: ["crop", "scale"]
+        std::string method = "crop";
+        //! A mxc URI which points to the content.
+        std::string mxc_url;
+};
+
 //! The main object that the user will interact.
 class Client : public std::enable_shared_from_this<Client>
 {
 public:
-        Client() = default;
         Client(const std::string &server = "", uint16_t port = 443);
 
         //! Wait for the client to close.
@@ -191,6 +203,10 @@ public:
                                          const std::string &content_type,
                                          const std::string &original_filename,
                                          RequestErr err)> cb);
+
+        //! Retrieve a thumbnail from the given mxc url.
+        void get_thumbnail(const ThumbOpts &opts, Callback<std::string> cb);
+
         //! Send typing notifications to the room.
         void start_typing(const std::string &room_id, uint64_t timeout, ErrCallback cb);
         //! Remove typing notifications from the room.
