@@ -78,14 +78,14 @@ mtx::client::utils::query_params(const std::map<std::string, std::string> &param
         auto pb = params.cbegin();
         auto pe = params.cend();
 
-        std::string data = pb->first + "=" + pb->second;
+        std::string data = pb->first + "=" + url_encode(pb->second);
         ++pb;
 
         if (pb == pe)
                 return data;
 
         for (; pb != pe; ++pb)
-                data += "&" + pb->first + "=" + pb->second;
+                data += "&" + pb->first + "=" + url_encode(pb->second);
 
         return data;
 }
@@ -108,4 +108,30 @@ mtx::client::utils::decompress(const boost::iostreams::array_source &src,
         boost::iostreams::copy(is, decompressed);
 
         return decompressed.str();
+}
+
+std::string
+mtx::client::utils::url_encode(const std::string &value) noexcept
+{
+        // https: // stackoverflow.com/questions/154536/encode-decode-urls-in-c
+        std::ostringstream escaped;
+        escaped.fill('0');
+        escaped << std::hex;
+
+        for (auto i = value.begin(), n = value.end(); i != n; ++i) {
+                std::string::value_type c = (*i);
+
+                // Keep alphanumeric and other accepted characters intact
+                if (std::isalnum(c) || c == '-' || c == '_' || c == '.' || c == '~') {
+                        escaped << c;
+                        continue;
+                }
+
+                // Any other characters are percent-encoded
+                escaped << std::uppercase;
+                escaped << '%' << std::setw(2) << int((unsigned char)c);
+                escaped << std::nouppercase;
+        }
+
+        return escaped.str();
 }

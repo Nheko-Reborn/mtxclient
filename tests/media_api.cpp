@@ -104,6 +104,13 @@ TEST(MediaAPI, UploadImage)
 
                 const auto img = read_file("./fixtures/test.jpeg");
 
+                carl->upload(img,
+                             "image/jpeg",
+                             "a name that needs to be encode/d.jpeg",
+                             [carl, img](const mtx::responses::ContentURI &res, RequestErr err) {
+                                     validate_upload(res, err);
+                             });
+
                 carl->upload(
                   img,
                   "image/jpeg",

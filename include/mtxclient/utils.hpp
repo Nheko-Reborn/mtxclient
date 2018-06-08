@@ -39,6 +39,10 @@ query_params(const std::map<std::string, std::string> &params) noexcept;
 std::string
 decompress(const boost::iostreams::array_source &src, const std::string &type) noexcept;
 
+//! URL-encode the input string.
+std::string
+url_encode(const std::string &s) noexcept;
+
 template<class T>
 inline T
 deserialize(const std::string &data)
