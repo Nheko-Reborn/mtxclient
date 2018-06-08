@@ -111,8 +111,11 @@ Client::set_avatar_url(const std::string &avatar_url, ErrCallback callback)
         mtx::requests::AvatarUrl req;
         req.avatar_url = avatar_url;
 
-        put<mtx::requests::AvatarUrl>(
-          "/client/r0/profile/" + user_id_.to_string() + "/avatar_url", req, callback);
+        put<mtx::requests::AvatarUrl>("/client/r0/profile/" +
+                                        mtx::client::utils::url_encode(user_id_.to_string()) +
+                                        "/avatar_url",
+                                      req,
+                                      callback);
 }
 
 void
@@ -121,8 +124,11 @@ Client::set_displayname(const std::string &displayname, ErrCallback callback)
         mtx::requests::DisplayName req;
         req.displayname = displayname;
 
-        put<mtx::requests::DisplayName>(
-          "/client/r0/profile/" + user_id_.to_string() + "/displayname", req, callback);
+        put<mtx::requests::DisplayName>("/client/r0/profile/" +
+                                          mtx::client::utils::url_encode(user_id_.to_string()) +
+                                          "/displayname",
+                                        req,
+                                        callback);
 }
 
 void
@@ -283,7 +289,8 @@ Client::download(const std::string &server,
 void
 Client::start_typing(const std::string &room_id, uint64_t timeout, ErrCallback callback)
 {
-        const auto api_path = "/client/r0/rooms/" + room_id + "/typing/" + user_id_.to_string();
+        const auto api_path = "/client/r0/rooms/" + room_id + "/typing/" +
+                              mtx::client::utils::url_encode(user_id_.to_string());
 
         mtx::requests::TypingNotification req;
         req.typing  = true;
@@ -295,7 +302,8 @@ Client::start_typing(const std::string &room_id, uint64_t timeout, ErrCallback c
 void
 Client::stop_typing(const std::string &room_id, ErrCallback callback)
 {
-        const auto api_path = "/client/r0/rooms/" + room_id + "/typing/" + user_id_.to_string();
+        const auto api_path = "/client/r0/rooms/" + room_id + "/typing/" +
+                              mtx::client::utils::url_encode(user_id_.to_string());
 
         mtx::requests::TypingNotification req;
         req.typing = false;
@@ -331,7 +339,8 @@ Client::messages(const MessagesOpts &opts, Callback<mtx::responses::Messages> ca
 void
 Client::upload_filter(const nlohmann::json &j, Callback<mtx::responses::FilterId> callback)
 {
-        const auto api_path = "/client/r0/user/" + user_id_.to_string() + "/filter";
+        const auto api_path =
+          "/client/r0/user/" + mtx::client::utils::url_encode(user_id_.to_string()) + "/filter";
 
         post<nlohmann::json, mtx::responses::FilterId>(api_path, j, callback);
 }

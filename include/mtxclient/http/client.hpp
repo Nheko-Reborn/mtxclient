@@ -98,6 +98,8 @@ public:
         //! Wait for the client to close.
         void close();
         //! Set the homeserver domain name.
+        void set_user(const mtx::identifiers::User &user) { user_id_ = user; }
+        //! Set the homeserver domain name.
         void set_server(const std::string &server);
         //! Retrieve the homeserver domain name.
         std::string server() { return server_; };
