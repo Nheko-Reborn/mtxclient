@@ -65,12 +65,32 @@ Client::setup_auth(Session *session, bool auth)
 void
 Client::login(const std::string &user,
               const std::string &password,
+              const std::string &device_name,
+              Callback<mtx::responses::Login> callback)
+{
+        mtx::requests::Login req;
+        req.user                        = user;
+        req.password                    = password;
+        req.initial_device_display_name = device_name;
+
+        login(req, callback);
+}
+
+void
+Client::login(const std::string &user,
+              const std::string &password,
               Callback<mtx::responses::Login> callback)
 {
         mtx::requests::Login req;
         req.user     = user;
         req.password = password;
 
+        login(req, callback);
+}
+
+void
+Client::login(const mtx::requests::Login &req, Callback<mtx::responses::Login> callback)
+{
         post<mtx::requests::Login, mtx::responses::Login>(
           "/client/r0/login",
           req,
@@ -85,7 +105,6 @@ Client::login(const std::string &user,
           },
           false);
 }
-
 void
 Client::logout(Callback<mtx::responses::Logout> callback)
 {
@@ -102,6 +121,19 @@ Client::logout(Callback<mtx::responses::Logout> callback)
                   }
                   // Pass up response and error to supplied callback
                   callback(res, err);
+          });
+}
+
+void
+Client::notifications(uint64_t limit, Callback<mtx::responses::Notifications> cb)
+{
+        std::map<std::string, std::string> params;
+        params.emplace("limit", std::to_string(limit));
+
+        get<mtx::responses::Notifications>(
+          "/client/r0/notifications?" + mtx::client::utils::query_params(params),
+          [cb](const mtx::responses::Notifications &res, HeaderFields, RequestErr err) {
+                  cb(res, err);
           });
 }
 

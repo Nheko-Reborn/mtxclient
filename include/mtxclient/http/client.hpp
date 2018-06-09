@@ -123,11 +123,25 @@ public:
         std::string generate_txn_id() { return client::utils::random_token(32, false); }
         //! Abort all active pending requests.
         void shutdown() { shutdown_signal(); }
+        //! Remove all saved configuration.
+        void clear()
+        {
+                device_id_.clear();
+                access_token_.clear();
+                next_batch_token_.clear();
+                server_.clear();
+                port_ = 443;
+        }
 
         //! Perfom login.
         void login(const std::string &username,
                    const std::string &password,
                    Callback<mtx::responses::Login> cb);
+        void login(const std::string &username,
+                   const std::string &password,
+                   const std::string &device_name,
+                   Callback<mtx::responses::Login> cb);
+        void login(const mtx::requests::Login &req, Callback<mtx::responses::Login> cb);
 
         //! Register by not expecting a registration flow.
         void registration(const std::string &user,
@@ -145,6 +159,10 @@ public:
                            const std::string &session,
                            const std::string &flow_type,
                            Callback<mtx::responses::Register> cb);
+
+        //! Paginate through the list of events that the user has been,
+        //! or would have been notified about.
+        void notifications(uint64_t limit, Callback<mtx::responses::Notifications> cb);
 
         //! Perform logout.
         void logout(Callback<mtx::responses::Logout> cb);
