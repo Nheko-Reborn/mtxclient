@@ -69,7 +69,7 @@ script:
       -DUSE_BUNDLED_BOOST=${USE_BUNDLED_BOOST}
       -DUSE_BUNDLED_GTEST=${TESTS}
   - cmake --build .deps
-  - cmake -H. -Bbuild -DOPENSSL_ROOT_DIR=$OPENSLL_ROOT_DIR -DBUILD_LIB_TESTS=$TESTS -DCOVERAGE=$COVERAGE
+  - cmake -H. -Bbuild -DOPENSSL_ROOT_DIR=$OPENSLL_ROOT_DIR -DBUILD_LIB_TESTS=$TESTS -DCOVERAGE=$COVERAGE || true
   - cmake --build build
 
   # Unit & Integration tests

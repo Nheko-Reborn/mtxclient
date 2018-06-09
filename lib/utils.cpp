@@ -1,5 +1,6 @@
 #include "mtxclient/utils.hpp"
 
+#include <cctype>
 #include <sstream>
 #include <string>
 #include <utility>

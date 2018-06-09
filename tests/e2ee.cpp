@@ -815,9 +815,8 @@ TEST(Encryption, OlmRoomKeyEncryption)
                   assert(msg_type == 0);
 
                   auto inbound_session = bob->create_inbound_session(msg_body);
-                  auto ok              = matches_inbound_session_from(
-                    inbound_session.get(), olm_msg.sender_key, msg_body);
-                  assert(ok == true);
+                  ASSERT_TRUE(matches_inbound_session_from(
+                    inbound_session.get(), olm_msg.sender_key, msg_body));
 
                   auto output = bob->decrypt_message(inbound_session.get(), msg_type, msg_body);
 

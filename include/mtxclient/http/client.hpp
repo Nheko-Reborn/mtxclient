@@ -99,6 +99,8 @@ public:
         void close();
         //! Set the homeserver domain name.
         void set_user(const mtx::identifiers::User &user) { user_id_ = user; }
+        //! Set the device ID.
+        void set_device_id(const std::string &device_id) { device_id_ = device_id; }
         //! Set the homeserver domain name.
         void set_server(const std::string &server);
         //! Retrieve the homeserver domain name.
