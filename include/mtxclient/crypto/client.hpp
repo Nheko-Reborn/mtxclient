@@ -125,7 +125,7 @@ public:
 
         //! Create a new olm Account. Must be called before any other operation.
         void create_new_account();
-        void create_new_utility();
+        void create_new_utility() { utility_ = create_olm_object<UtilityObject>(); }
 
         void restore_account(const std::string &saved_data, const std::string &key);
 
@@ -147,7 +147,7 @@ public:
         json signed_one_time_key_json(const std::string &key, const std::string &signature);
 
         //! Marks the current set of one time keys as being published.
-        void mark_keys_as_published();
+        void mark_keys_as_published() { olm_account_mark_keys_as_published(account_.get()); }
 
         //! Prepare request for the /keys/upload endpoint by signing identity & one time keys.
         mtx::requests::UploadKeys create_upload_keys_request(const OneTimeKeys &keys);
@@ -188,7 +188,10 @@ public:
                                                     const std::string &recipient_key);
 
         std::string save(const std::string &key);
-        void load(const std::string &data, const std::string &key);
+        void load(const std::string &data, const std::string &key)
+        {
+                account_ = unpickle<AccountObject>(data, key);
+        }
 
         OlmAccount *account() { return account_.get(); }
         OlmUtility *utility() { return utility_.get(); }

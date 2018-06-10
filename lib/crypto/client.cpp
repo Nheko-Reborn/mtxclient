@@ -15,29 +15,13 @@ using namespace mtx::crypto;
 void
 OlmClient::create_new_account()
 {
-        // The method has no effect if the account is already initialized.
-        if (account_)
-                return;
-
         account_ = create_olm_object<AccountObject>();
 
         auto tmp_buf  = create_buffer(olm_create_account_random_length(account_.get()));
         const int ret = olm_create_account(account_.get(), tmp_buf.data(), tmp_buf.size());
 
-        if (ret == -1) {
-                account_.reset();
+        if (ret == -1)
                 throw olm_exception("create_new_account", account_.get());
-        }
-}
-
-void
-OlmClient::create_new_utility()
-{
-        // The method has no effect if the account is already initialized.
-        if (utility_)
-                return;
-
-        utility_ = create_olm_object<UtilityObject>();
 }
 
 void
@@ -146,12 +130,6 @@ OlmClient::signed_one_time_key_json(const std::string &key, const std::string &s
 {
         return json{{"key", key},
                     {"signatures", {{user_id_, {{"ed25519:" + device_id_, signature}}}}}};
-}
-
-void
-OlmClient::mark_keys_as_published()
-{
-        olm_account_mark_keys_as_published(account_.get());
 }
 
 mtx::requests::UploadKeys
@@ -394,12 +372,6 @@ OlmClient::save(const std::string &key)
                 return std::string();
 
         return pickle<AccountObject>(account(), key);
-}
-
-void
-OlmClient::load(const std::string &data, const std::string &key)
-{
-        account_ = unpickle<AccountObject>(data, key);
 }
 
 BinaryBuf
