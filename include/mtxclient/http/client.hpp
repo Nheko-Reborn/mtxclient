@@ -522,8 +522,9 @@ mtx::http::Client::send_room_message(const std::string &room_id,
                                      const Payload &payload,
                                      Callback<mtx::responses::EventId> callback)
 {
-        const auto api_path =
-          "/client/r0/rooms/" + room_id + "/send/" + mtx::events::to_string(Event) + "/" + txn_id;
+        const auto api_path = "/client/r0/rooms/" + room_id + "/send/" +
+                              mtx::events::to_string(Event) + "/" +
+                              mtx::client::utils::url_encode(txn_id);
 
         put<Payload, mtx::responses::EventId>(api_path, payload, callback);
 }

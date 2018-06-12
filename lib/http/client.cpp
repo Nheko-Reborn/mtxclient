@@ -439,11 +439,12 @@ Client::flow_response(const std::string &user,
 
 void
 Client::send_to_device(const std::string &event_type,
-                       const std::string &txid,
+                       const std::string &txn_id,
                        const nlohmann::json &body,
                        ErrCallback callback)
 {
-        const auto api_path = "/client/r0/sendToDevice/" + event_type + "/" + txid;
+        const auto api_path =
+          "/client/r0/sendToDevice/" + event_type + "/" + mtx::client::utils::url_encode(txn_id);
         put<nlohmann::json>(api_path, body, callback);
 }
 
