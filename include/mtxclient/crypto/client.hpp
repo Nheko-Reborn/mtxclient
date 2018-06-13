@@ -10,10 +10,7 @@
 #include <mtx/identifiers.hpp>
 #include <mtx/requests.hpp>
 
-#include <olm/account.hh>
-#include <olm/error.h>
 #include <olm/olm.h>
-#include <olm/session.hh>
 
 #include "mtxclient/crypto/objects.hpp"
 #include "mtxclient/crypto/types.hpp"

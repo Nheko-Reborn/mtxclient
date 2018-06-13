@@ -4,7 +4,6 @@
 #include <mtxclient/crypto/client.hpp>
 
 #include <olm/olm.h>
-#include <olm/utility.hh>
 
 using json = nlohmann::json;
 

@@ -4,8 +4,6 @@
 
 #include <gtest/gtest.h>
 
-#include "olm/account.hh"
-
 #include "mtxclient/crypto/client.hpp"
 #include "mtxclient/http/client.hpp"
 
