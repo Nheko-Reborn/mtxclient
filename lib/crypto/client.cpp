@@ -3,7 +3,6 @@
 #include "mtxclient/crypto/client.hpp"
 
 #include "spdlog/spdlog.h"
-#include <olm/base64.hh>
 
 namespace {
 auto logger = spdlog::stdout_color_mt("crypto");
@@ -372,36 +371,6 @@ OlmClient::save(const std::string &key)
                 return std::string();
 
         return pickle<AccountObject>(account(), key);
-}
-
-BinaryBuf
-mtx::crypto::decode_base64(const std::string &msg)
-{
-        const int output_nbytes = olm::decode_base64_length(msg.size());
-
-        if (output_nbytes == -1)
-                throw std::runtime_error("invalid base64 input length");
-
-        auto output_buf = create_buffer(output_nbytes);
-
-        olm::decode_base64(
-          reinterpret_cast<const uint8_t *>(msg.data()), msg.size(), output_buf.data());
-
-        return output_buf;
-}
-
-std::string
-mtx::crypto::encode_base64(const uint8_t *data, std::size_t len)
-{
-        const int output_nbytes = olm::encode_base64_length(len);
-
-        if (output_nbytes == -1)
-                throw std::runtime_error("invalid base64 input length");
-
-        auto output_buf = create_buffer(output_nbytes);
-        olm::encode_base64(data, len, output_buf.data());
-
-        return std::string(output_buf.begin(), output_buf.end());
 }
 
 std::string

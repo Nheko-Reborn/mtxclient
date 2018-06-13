@@ -204,13 +204,6 @@ private:
         std::unique_ptr<OlmUtility, OlmDeleter> utility_;
 };
 
-std::string
-encode_base64(const uint8_t *data, std::size_t len);
-
-//! Decode the given base64 string
-BinaryBuf
-decode_base64(const std::string &data);
-
 //! Retrieve the session id.
 std::string
 session_id(OlmOutboundGroupSession *s);
