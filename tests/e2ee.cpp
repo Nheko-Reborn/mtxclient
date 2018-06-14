@@ -861,7 +861,8 @@ TEST(Encryption, PickleOlmSessions)
         std::string bob_key          = bob->identity_keys().curve25519;
         std::string bob_one_time_key = bob->one_time_keys().curve25519.begin()->second;
 
-        auto outbound_session = alice->create_outbound_session(bob_key, bob_one_time_key);
+        auto outbound_session   = alice->create_outbound_session(bob_key, bob_one_time_key);
+        auto initial_session_id = session_id(outbound_session.get());
 
         auto plaintext      = "Hello, Bob!";
         size_t msgtype      = olm_encrypt_message_type(outbound_session.get());
@@ -872,6 +873,8 @@ TEST(Encryption, PickleOlmSessions)
 
         auto saved_outbound_session    = pickle<SessionObject>(outbound_session.get(), "wat");
         auto restored_outbound_session = unpickle<SessionObject>(saved_outbound_session, "wat");
+
+        EXPECT_EQ(session_id(restored_outbound_session.get()), initial_session_id);
 
         EXPECT_THROW(unpickle<SessionObject>(saved_outbound_session, "another_secret"),
                      olm_exception);

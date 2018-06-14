@@ -172,6 +172,11 @@ public:
         OlmSessionPtr create_inbound_session(const BinaryBuf &one_time_key_message);
         OlmSessionPtr create_inbound_session(const std::string &one_time_key_message);
 
+        OlmSessionPtr create_inbound_session_from(const std::string &their_curve25519,
+                                                  const BinaryBuf &one_time_key_message);
+        OlmSessionPtr create_inbound_session_from(const std::string &their_curve25519,
+                                                  const std::string &one_time_key_message);
+
         //! The `m.room_key` event is used to share the session_id & session_key
         //! of an outbound megolm session.
         nlohmann::json create_room_key_event(const UserId &user_id,
@@ -200,6 +205,10 @@ private:
         std::unique_ptr<OlmAccount, OlmDeleter> account_;
         std::unique_ptr<OlmUtility, OlmDeleter> utility_;
 };
+
+//! Retrieve the session id for an Olm session.
+std::string
+session_id(OlmSession *s);
 
 //! Retrieve the session id.
 std::string

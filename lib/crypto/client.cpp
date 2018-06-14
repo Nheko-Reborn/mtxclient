@@ -289,6 +289,43 @@ OlmClient::encrypt_message(OlmSession *session, const std::string &msg)
 }
 
 OlmSessionPtr
+OlmClient::create_inbound_session_from(const std::string &their_curve25519,
+                                       const std::string &one_time_key_message)
+{
+        BinaryBuf tmp(one_time_key_message.size());
+        memcpy(tmp.data(), one_time_key_message.data(), one_time_key_message.size());
+
+        return create_inbound_session_from(std::move(their_curve25519), std::move(tmp));
+}
+
+OlmSessionPtr
+OlmClient::create_inbound_session_from(const std::string &their_curve25519,
+                                       const BinaryBuf &one_time_key_message)
+{
+        auto session = create_olm_object<SessionObject>();
+
+        auto tmp = create_buffer(one_time_key_message.size());
+        std::copy(one_time_key_message.begin(), one_time_key_message.end(), tmp.begin());
+
+        int ret = olm_create_inbound_session_from(session.get(),
+                                                  account(),
+                                                  their_curve25519.data(),
+                                                  their_curve25519.size(),
+                                                  (void *)tmp.data(),
+                                                  tmp.size());
+
+        if (ret == -1)
+                throw olm_exception("create_inbound_session_from", session.get());
+
+        ret = olm_remove_one_time_keys(account_.get(), session.get());
+
+        if (ret == -1)
+                throw olm_exception("inbound_session_from_remove_one_time_keys", account_.get());
+
+        return session;
+}
+
+OlmSessionPtr
 OlmClient::create_inbound_session(const std::string &one_time_key_message)
 {
         BinaryBuf tmp(one_time_key_message.size());
@@ -305,11 +342,16 @@ OlmClient::create_inbound_session(const BinaryBuf &one_time_key_message)
         auto tmp = create_buffer(one_time_key_message.size());
         std::copy(one_time_key_message.begin(), one_time_key_message.end(), tmp.begin());
 
-        const int ret =
+        int ret =
           olm_create_inbound_session(session.get(), account(), (void *)tmp.data(), tmp.size());
 
         if (ret == -1)
                 throw olm_exception("create_inbound_session", session.get());
+
+        ret = olm_remove_one_time_keys(account_.get(), session.get());
+
+        if (ret == -1)
+                throw olm_exception("inbound_session_remove_one_time_keys", account_.get());
 
         return session;
 }
@@ -371,6 +413,15 @@ OlmClient::save(const std::string &key)
                 return std::string();
 
         return pickle<AccountObject>(account(), key);
+}
+
+std::string
+mtx::crypto::session_id(OlmSession *s)
+{
+        auto tmp = create_buffer(olm_session_id_length(s));
+        olm_session_id(s, tmp.data(), tmp.size());
+
+        return std::string(tmp.begin(), tmp.end());
 }
 
 std::string
