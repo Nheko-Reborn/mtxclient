@@ -9,8 +9,7 @@ help: ## This help message
 	@grep -E '^[0-9a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
 	@# Change the digit following by an 's' to adjust the width of the help text
 
-third_party: ## Build & install third party dependencies
-	@mkdir -p ${DEPS_BUILD_DIR}/usr/{lib,include}/
+third-party: ## Build & install third party dependencies
 	@cmake -GNinja -H${DEPS_SOURCE_DIR} -B${DEPS_BUILD_DIR} -DCMAKE_BUILD_TYPE=Release -DUSE_BUNDLED_BOOST=OFF
 	@cmake --build ${DEPS_BUILD_DIR}
 
@@ -18,13 +17,15 @@ debug: ## Create a debug build
 	@cmake -GNinja -H. -Bbuild \
 		-DCMAKE_BUILD_TYPE=Debug \
 		-DCMAKE_EXPORT_COMPILE_COMMANDS=1 \
-		-DOPENSSL_ROOT_DIR=/usr/local/opt/openssl
+		-DOPENSSL_ROOT_DIR=/usr/local/opt/openssl \
+		-DCMAKE_INSTALL_PREFIX=${DEPS_BUILD_DIR}/usr
 	@cmake --build build
 
 release: ## Create an optimized build
 	@cmake -GNinja -H. -Bbuild \
 		-DCMAKE_BUILD_TYPE=Release \
-		-DOPENSSL_ROOT_DIR=/usr/local/opt/openssl
+		-DOPENSSL_ROOT_DIR=/usr/local/opt/openssl \
+		-DCMAKE_INSTALL_PREFIX=${DEPS_BUILD_DIR}/usr
 	@cmake --build build
 
 test: ## Run the tests
@@ -34,6 +35,7 @@ asan: ## Create a debug build using address sanitizers
 	@cmake -GNinja -H. -Bbuild \
 		-DCMAKE_BUILD_TYPE=Debug \
 		-DOPENSSL_ROOT_DIR=/usr/local/opt/openssl \
+		-DCMAKE_INSTALL_PREFIX=${DEPS_BUILD_DIR}/usr
 		-DASAN=1
 	@cmake --build build
 

@@ -12,10 +12,6 @@ set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-set(DEPS_PREFIX "${CMAKE_CURRENT_SOURCE_DIR}/.deps/usr"
-    CACHE PATH "Path prefix for finding dependencies")
-list(INSERT CMAKE_PREFIX_PATH 0 ${DEPS_PREFIX})
-
 if(NOT MSVC)
   set(
     CMAKE_CXX_FLAGS
@@ -52,7 +48,7 @@ find_package(OpenSSL REQUIRED)
 find_package(ZLIB REQUIRED)
 find_package(MatrixStructs REQUIRED)
 find_package(spdlog 0.16.0 CONFIG REQUIRED)
-find_package(olm REQUIRED)
+find_package(Olm REQUIRED)
 find_package(sodium REQUIRED)
 
 set(Boost_USE_STATIC_LIBS OFF)
@@ -69,9 +65,7 @@ target_include_directories(matrix_client
                            PUBLIC
                            ${OPENSSL_INCLUDE_DIR}
                            ${Boost_INCLUDE_DIRS}
-                           ${sodium_INCLUDE_DIR}
-                           PRIVATE
-                           ${OLM_INCLUDE_DIR})
+                           ${sodium_INCLUDE_DIR})
 target_include_directories(
   matrix_client
   PUBLIC
@@ -84,8 +78,8 @@ target_link_libraries(matrix_client
                       ${sodium_LIBRARY_RELEASE}
                       OpenSSL::Crypto
                       OpenSSL::SSL
+                      Olm::Olm
                       PRIVATE
-                      ${OLM_LIBRARY}
                       ZLIB::ZLIB)
 
 if(NOT MSVC AND NOT APPLE)
@@ -144,15 +138,12 @@ if(BUILD_LIB_EXAMPLES)
 
   add_executable(room_feed examples/room_feed.cpp)
   target_link_libraries(room_feed matrix_client)
-  target_include_directories(room_feed PRIVATE ${OLM_INCLUDE_DIR})
 
   add_executable(simple_bot examples/simple_bot.cpp)
   target_link_libraries(simple_bot matrix_client)
-  target_include_directories(simple_bot PRIVATE ${OLM_INCLUDE_DIR})
 
   add_executable(crypto_bot examples/crypto_bot.cpp)
-  target_link_libraries(crypto_bot matrix_client)
-  target_include_directories(crypto_bot PRIVATE ${OLM_INCLUDE_DIR})
+  target_link_libraries(crypto_bot matrix_client Olm::Olm)
 endif()
 
 #
