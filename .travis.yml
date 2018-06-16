@@ -64,12 +64,14 @@ script:
   - cmake --version
 
   # Build library, examples & tests
-  - mkdir -p .deps/usr/{lib,include}/
   - cmake -Hdeps -B.deps -DCMAKE_BUILD_TYPE=Release
       -DUSE_BUNDLED_BOOST=${USE_BUNDLED_BOOST}
       -DUSE_BUNDLED_GTEST=${TESTS}
   - cmake --build .deps
-  - cmake -H. -Bbuild -DOPENSSL_ROOT_DIR=$OPENSLL_ROOT_DIR -DBUILD_LIB_TESTS=$TESTS -DCOVERAGE=$COVERAGE || true
+  - cmake -H. -Bbuild -DOPENSSL_ROOT_DIR=${OPENSLL_ROOT_DIR}
+      -DBUILD_LIB_TESTS=${TESTS}
+      -DCMAKE_INSTALL_PREFIX=.deps/usr
+      -DCOVERAGE=${COVERAGE} || true
   - cmake --build build
 
   # Unit & Integration tests

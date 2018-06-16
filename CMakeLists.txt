@@ -46,14 +46,22 @@ endif()
 
 find_package(OpenSSL REQUIRED)
 find_package(ZLIB REQUIRED)
-find_package(MatrixStructs REQUIRED)
+find_package(MatrixStructs 0.1.0 REQUIRED)
 find_package(spdlog 0.16.0 CONFIG REQUIRED)
-find_package(Olm REQUIRED)
+find_package(Olm 2 REQUIRED)
 find_package(sodium REQUIRED)
 
 set(Boost_USE_STATIC_LIBS OFF)
 set(Boost_USE_MULTITHREADED ON)
-find_package(Boost 1.66 REQUIRED COMPONENTS system random thread iostreams)
+find_package(Boost 1.66 REQUIRED
+             COMPONENTS atomic
+                        chrono
+                        date_time
+                        iostreams
+                        random
+                        regex
+                        system
+                        thread)
 
 add_library(matrix_client
             lib/http/client.cpp
@@ -79,7 +87,7 @@ target_link_libraries(matrix_client
                       OpenSSL::Crypto
                       OpenSSL::SSL
                       Olm::Olm
-                      PRIVATE
+                      spdlog::spdlog
                       ZLIB::ZLIB)
 
 if(NOT MSVC AND NOT APPLE)

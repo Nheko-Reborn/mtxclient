@@ -38,12 +38,11 @@ build_script:
         -DUSE_BUNDLED_SPDLOG=OFF
         -DUSE_BUNDLED_GTEST=OFF
     - cmake --build .deps --config Release
-    - ls -l C:\projects\mtxclient\.deps\usr\lib
-    - ls -l C:\projects\mtxclient\.deps\usr\include
-    - ls -l C:\projects\mtxclient\.deps\build\olm\build
+
     - cmake -G "Visual Studio 15 2017 Win64" -H. -Bbuild
       -DCMAKE_BUILD_TYPE=Release
       -DCMAKE_TOOLCHAIN_FILE=C:/Tools/vcpkg/scripts/buildsystems/vcpkg.cmake
       -DBUILD_LIB_TESTS=OFF
       -DBUILD_LIB_EXAMPLES=OFF
+      -DCMAKE_INSTALL_PREFIX=.deps/usr
     - cmake --build build --config Release
