@@ -96,7 +96,7 @@ public:
         Client(const std::string &server = "", uint16_t port = 443);
 
         //! Wait for the client to close.
-        void close();
+        void close(bool force = false);
         //! Set the homeserver domain name.
         void set_user(const mtx::identifiers::User &user) { user_id_ = user; }
         //! Set the device ID.

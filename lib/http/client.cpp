@@ -38,12 +38,16 @@ Client::set_server(const std::string &server)
 }
 
 void
-Client::close()
+Client::close(bool force)
 {
         // Destroy work object. This allows the I/O thread to
         // exit the event loop when there are no more pending
         // asynchronous operations.
         work_.reset();
+
+        // We close all open connections.
+        if (force)
+                shutdown();
 
         // Wait for the worker threads to exit.
         thread_group_.join_all();
