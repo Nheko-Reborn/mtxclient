@@ -202,3 +202,5 @@ export(EXPORT
        NAMESPACE
        MatrixClient::)
 export(PACKAGE MatrixClient)
+
+set_property(TARGET matrix_client PROPERTY SOVERSION ${PROJECT_VERSION})
