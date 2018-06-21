@@ -11,6 +11,7 @@ option(IWYU "Check headers with include-what-you-use" OFF)
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 if(NOT MSVC)
   set(
@@ -52,6 +53,7 @@ find_package(Olm 2 REQUIRED)
 find_package(sodium REQUIRED)
 
 set(Boost_USE_STATIC_LIBS OFF)
+set(Boost_USE_STATIC_RUNTIME OFF)
 set(Boost_USE_MULTITHREADED ON)
 find_package(Boost 1.66 REQUIRED
              COMPONENTS atomic
@@ -68,11 +70,12 @@ add_library(matrix_client
             lib/http/session.cpp
             lib/crypto/client.cpp
             lib/utils.cpp)
+add_library(MatrixClient::MatrixClient ALIAS matrix_client)
 target_include_directories(matrix_client
                            SYSTEM
                            PUBLIC
-                           ${OPENSSL_INCLUDE_DIR}
                            ${Boost_INCLUDE_DIRS}
+                           ${OPENSSL_INCLUDE_DIR}
                            ${sodium_INCLUDE_DIR})
 target_include_directories(
   matrix_client
@@ -91,7 +94,7 @@ target_link_libraries(matrix_client
                       ZLIB::ZLIB)
 
 if(NOT MSVC AND NOT APPLE)
-  target_link_libraries(matrix_client PRIVATE Threads::Threads)
+  target_link_libraries(matrix_client PUBLIC Threads::Threads)
 endif()
 
 if(IWYU)
@@ -112,25 +115,40 @@ if(BUILD_LIB_TESTS)
   file(COPY fixtures DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
   add_executable(client_api tests/client_api.cpp)
-  target_link_libraries(client_api matrix_client GTest::GTest GTest::Main)
+  target_link_libraries(client_api
+                        MatrixClient::MatrixClient
+                        GTest::GTest
+                        GTest::Main)
   target_include_directories(client_api PRIVATE
                              ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 
   add_executable(media_api tests/media_api.cpp)
-  target_link_libraries(media_api matrix_client GTest::GTest GTest::Main)
+  target_link_libraries(media_api
+                        MatrixClient::MatrixClient
+                        GTest::GTest
+                        GTest::Main)
   target_include_directories(media_api PRIVATE
                              ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 
   add_executable(e2ee tests/e2ee.cpp)
-  target_link_libraries(e2ee matrix_client GTest::GTest GTest::Main)
+  target_link_libraries(e2ee
+                        MatrixClient::MatrixClient
+                        GTest::GTest
+                        GTest::Main)
   target_include_directories(e2ee PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 
   add_executable(utils tests/utils.cpp)
-  target_link_libraries(utils matrix_client GTest::GTest GTest::Main)
+  target_link_libraries(utils
+                        MatrixClient::MatrixClient
+                        GTest::GTest
+                        GTest::Main)
   target_include_directories(utils PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 
   add_executable(connection tests/connection.cpp)
-  target_link_libraries(connection matrix_client GTest::GTest GTest::Main)
+  target_link_libraries(connection
+                        MatrixClient::MatrixClient
+                        GTest::GTest
+                        GTest::Main)
   target_include_directories(connection PRIVATE
                              ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 
@@ -145,13 +163,13 @@ if(BUILD_LIB_EXAMPLES)
   include_directories(tests)
 
   add_executable(room_feed examples/room_feed.cpp)
-  target_link_libraries(room_feed matrix_client)
+  target_link_libraries(room_feed MatrixClient::MatrixClient)
 
   add_executable(simple_bot examples/simple_bot.cpp)
-  target_link_libraries(simple_bot matrix_client)
+  target_link_libraries(simple_bot MatrixClient::MatrixClient)
 
   add_executable(crypto_bot examples/crypto_bot.cpp)
-  target_link_libraries(crypto_bot matrix_client Olm::Olm)
+  target_link_libraries(crypto_bot MatrixClient::MatrixClient Olm::Olm)
 endif()
 
 #
