@@ -405,6 +405,80 @@ TEST(Encryption, ClaimKeys)
         bob->close();
 }
 
+TEST(Encryption, ClaimMultipleDeviceKeys)
+{
+        using namespace mtx::crypto;
+
+        // Login with alice multiple times
+        auto alice1 = std::make_shared<Client>("localhost");
+        auto alice2 = std::make_shared<Client>("localhost");
+        auto alice3 = std::make_shared<Client>("localhost");
+        alice1->login("alice", "secret", check_login);
+        alice2->login("alice", "secret", check_login);
+        alice3->login("alice", "secret", check_login);
+
+        WAIT_UNTIL(!alice1->access_token().empty() && !alice2->access_token().empty() &&
+                   !alice3->access_token().empty())
+
+        atomic_int uploads(0);
+        auto upload_cb = [&uploads](const mtx::responses::UploadKeys &res, RequestErr err) {
+                check_error(err);
+                EXPECT_EQ(res.one_time_key_counts.size(), 1);
+                EXPECT_EQ(res.one_time_key_counts.at("signed_curve25519"), 10);
+                uploads += 1;
+        };
+
+        auto olm1 = std::make_shared<OlmClient>();
+        olm1->create_new_account();
+        olm1->generate_one_time_keys(10);
+        olm1->set_user_id(alice1->user_id().to_string());
+        olm1->set_device_id(alice1->device_id());
+
+        auto olm2 = std::make_shared<OlmClient>();
+        olm2->create_new_account();
+        olm2->generate_one_time_keys(10);
+        olm2->set_user_id(alice2->user_id().to_string());
+        olm2->set_device_id(alice2->device_id());
+
+        auto olm3 = std::make_shared<OlmClient>();
+        olm3->create_new_account();
+        olm3->generate_one_time_keys(10);
+        olm3->set_user_id(alice3->user_id().to_string());
+        olm3->set_device_id(alice3->device_id());
+
+        alice1->upload_keys(olm1->create_upload_keys_request(), upload_cb);
+        alice2->upload_keys(olm2->create_upload_keys_request(), upload_cb);
+        alice3->upload_keys(olm3->create_upload_keys_request(), upload_cb);
+
+        WAIT_UNTIL(uploads == 3);
+
+        // Bob will claim all keys from alice
+        auto bob = std::make_shared<Client>("localhost");
+        bob->login("bob", "secret", check_login);
+
+        WAIT_UNTIL(!bob->access_token().empty())
+
+        std::vector<std::string> devices_;
+        devices_.push_back(alice1->device_id());
+        devices_.push_back(alice2->device_id());
+        devices_.push_back(alice3->device_id());
+
+        bob->claim_keys(alice1->user_id().to_string(),
+                        devices_,
+                        [user_id = alice1->user_id().to_string()](
+                          const mtx::responses::ClaimKeys &res, RequestErr err) {
+                                check_error(err);
+                                auto retrieved_devices = res.one_time_keys.at(user_id);
+                                EXPECT_EQ(retrieved_devices.size(), 3);
+                        });
+
+        bob->close();
+
+        alice1->close();
+        alice2->close();
+        alice3->close();
+}
+
 TEST(Encryption, KeyChanges)
 {
         auto carl     = std::make_shared<Client>("localhost");
