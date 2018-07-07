@@ -44,7 +44,7 @@ set(GTEST_URL https://github.com/google/googletest/archive/release-1.8.0.tar.gz)
 set(GTEST_SHA1 e7e646a6204638fe8e87e165292b8dd9cd4c36ed)
 
 set(MATRIX_STRUCTS_URL https://github.com/mujx/matrix-structs)
-set(MATRIX_STRUCTS_TAG 314b6fe7bedda20f3586b58be804d8fc0845d1a2)
+set(MATRIX_STRUCTS_TAG 92a5e99db51301b5abf626aa872a1a87b7727634)
 
 set(OLM_URL https://git.matrix.org/git/olm.git)
 set(OLM_TAG 4065c8e11a33ba41133a086ed3de4da94dcb6bae)

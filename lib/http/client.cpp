@@ -350,6 +350,22 @@ Client::stop_typing(const std::string &room_id, ErrCallback callback)
 }
 
 void
+Client::get_event(const std::string &room_id,
+                  const std::string &event_id,
+                  Callback<mtx::events::collections::TimelineEvents> callback)
+{
+        using namespace mtx::client::utils;
+        const auto api_path =
+          "/client/r0/rooms/" + url_encode(room_id) + "/event/" + url_encode(event_id);
+
+        get<mtx::events::collections::TimelineEvent>(
+          api_path,
+          [callback](const mtx::events::collections::TimelineEvent &res,
+                     HeaderFields,
+                     RequestErr err) { callback(res.data, err); });
+}
+
+void
 Client::messages(const MessagesOpts &opts, Callback<mtx::responses::Messages> callback)
 {
         std::map<std::string, std::string> params;

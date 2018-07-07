@@ -1032,3 +1032,56 @@ TEST(ClientAPI, SendToDevice)
         alice->close();
         bob->close();
 }
+
+TEST(ClientAPI, RetrieveSingleEvent)
+{
+        auto bob = std::make_shared<Client>("localhost");
+        bob->login("bob", "secret", check_login);
+
+        while (bob->access_token().empty())
+                sleep();
+
+        mtx::requests::CreateRoom req;
+        bob->create_room(req, [bob](const mtx::responses::CreateRoom &res, RequestErr err) {
+                check_error(err);
+                auto room_id = res.room_id.to_string();
+
+                mtx::events::msg::Text text;
+                text.body = "Hello Alice!";
+
+                bob->send_room_message<mtx::events::msg::Text, mtx::events::EventType::RoomMessage>(
+                  room_id,
+                  text,
+                  [room_id, bob](const mtx::responses::EventId &res, RequestErr err) {
+                          check_error(err);
+
+                          bob->get_event(
+                            room_id,
+                            res.event_id.to_string(),
+                            [event_id = res.event_id.to_string()](
+                              const mtx::events::collections::TimelineEvents &res, RequestErr err) {
+                                    check_error(err);
+                                    ASSERT_TRUE(
+                                      mpark::holds_alternative<
+                                        mtx::events::RoomEvent<mtx::events::msg::Text>>(res));
+                                    auto e =
+                                      mpark::get<mtx::events::RoomEvent<mtx::events::msg::Text>>(
+                                        res);
+                                    EXPECT_EQ(e.content.body, "Hello Alice!");
+                                    EXPECT_EQ(e.sender, "@bob:localhost");
+                                    EXPECT_EQ(e.event_id, event_id);
+                            });
+
+                          bob->get_event(
+                            room_id,
+                            "$random_event:localhost",
+                            [event_id = res.event_id.to_string()](
+                              const mtx::events::collections::TimelineEvents &, RequestErr err) {
+                                    ASSERT_TRUE(err);
+                                    EXPECT_EQ(static_cast<int>(err->status_code), 404);
+                            });
+                  });
+        });
+
+        bob->close();
+}

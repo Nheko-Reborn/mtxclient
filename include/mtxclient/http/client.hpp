@@ -233,6 +233,10 @@ public:
         void start_typing(const std::string &room_id, uint64_t timeout, ErrCallback cb);
         //! Remove typing notifications from the room.
         void stop_typing(const std::string &room_id, ErrCallback cb);
+        //! Get a single event.
+        void get_event(const std::string &room_id,
+                       const std::string &event_id,
+                       Callback<mtx::events::collections::TimelineEvents> cb);
         //! Send a room message with auto-generated transaction id.
         template<class Payload, mtx::events::EventType Event>
         void send_room_message(const std::string &room_id,
