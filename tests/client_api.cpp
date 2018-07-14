@@ -1085,3 +1085,109 @@ TEST(ClientAPI, RetrieveSingleEvent)
 
         bob->close();
 }
+
+TEST(Groups, Rooms)
+{
+        auto alice = std::make_shared<Client>("localhost");
+        alice->login("alice", "secret", check_login);
+
+        WAIT_UNTIL(!alice->access_token().empty())
+
+        std::atomic<int> rooms_created(0);
+        std::vector<std::string> rooms_ids;
+
+        auto create_room_cb = [&rooms_created, &rooms_ids](const mtx::responses::CreateRoom &res,
+                                                           RequestErr err) {
+                check_error(err);
+                rooms_created += 1;
+                rooms_ids.push_back(res.room_id.to_string());
+        };
+
+        mtx::requests::CreateRoom req;
+        alice->create_room(req, create_room_cb);
+        alice->create_room(req, create_room_cb);
+
+        WAIT_UNTIL(rooms_created == 2)
+
+        auto random_group_id = to_string(random_number());
+
+        alice->create_group(
+          random_group_id,
+          [alice, rooms_ids, random_group_id](const mtx::responses::GroupId &res, RequestErr err) {
+                  check_error(err);
+
+                  std::atomic<int> rooms_added(0);
+
+                  alice->add_room_to_group(
+                    rooms_ids.at(0), res.group_id, [&rooms_added](RequestErr err) {
+                            check_error(err);
+                            rooms_added += 1;
+                    });
+
+                  alice->add_room_to_group(
+                    rooms_ids.at(1), res.group_id, [&rooms_added](RequestErr err) {
+                            check_error(err);
+                            rooms_added += 1;
+                    });
+
+                  WAIT_UNTIL(rooms_added == 2)
+
+                  alice->joined_groups(
+                    [random_group_id](const mtx::responses::JoinedGroups &res, RequestErr err) {
+                            check_error(err);
+
+                            ASSERT_GE(res.groups.size(), 1);
+
+                            for (const auto &g : res.groups) {
+                                    if (g == std::string("+" + random_group_id + ":localhost"))
+                                            return;
+                            }
+
+                            FAIL();
+                    });
+
+                  alice->group_rooms("+" + random_group_id + ":localhost",
+                                     [](const nlohmann::json &res, RequestErr err) {
+                                             check_error(err);
+                                             EXPECT_GE(res.at("chunk").size(), 2);
+                                     });
+          });
+
+        alice->close();
+}
+
+TEST(Groups, Profiles)
+{
+        auto alice = std::make_shared<Client>("localhost");
+        alice->login("alice", "secret", check_login);
+
+        WAIT_UNTIL(!alice->access_token().empty())
+
+        auto random_group_id = to_string(random_number());
+        alice->create_group(
+          random_group_id,
+          [alice, random_group_id](const mtx::responses::GroupId &res, RequestErr err) {
+                  check_error(err);
+
+                  EXPECT_GE(res.group_id.size(), random_group_id.size());
+
+                  json profile;
+                  profile["name"] = "Name";
+                  alice->set_group_profile(
+                    "+" + random_group_id + ":localhost",
+                    profile,
+                    [alice, random_group_id](const nlohmann::json &, RequestErr err) {
+                            check_error(err);
+
+                            alice->group_profile(
+                              "+" + random_group_id + ":localhost",
+                              [](const mtx::responses::GroupProfile &res, RequestErr err) {
+                                      check_error(err);
+                                      EXPECT_EQ(res.name, "Name");
+                                      EXPECT_EQ(res.avatar_url, "");
+                              });
+                    });
+          });
+
+        alice->close();
+}

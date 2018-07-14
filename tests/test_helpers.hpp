@@ -2,11 +2,23 @@
 
 #include "gtest/gtest.h"
 #include <iostream>
+#include <limits>
 #include <string>
 #include <thread>
 #include <vector>
 
 #include <mtxclient/http/client.hpp>
+
+inline int
+random_number()
+{
+        std::mt19937 rng;
+        rng.seed(std::random_device()());
+        std::uniform_int_distribution<std::mt19937::result_type> dist(
+          1, std::numeric_limits<int>::max());
+
+        return dist(rng);
+}
 
 inline void
 sleep()

@@ -471,6 +471,60 @@ Client::send_to_device(const std::string &event_type,
 }
 
 //
+// Group related endpoints.
+//
+
+void
+Client::create_group(const std::string &localpart, Callback<mtx::responses::GroupId> cb)
+{
+        json req;
+        req["localpart"] = localpart;
+
+        post<nlohmann::json, mtx::responses::GroupId>("/client/r0/create_group", req, cb);
+}
+
+void
+Client::joined_groups(Callback<mtx::responses::JoinedGroups> cb)
+{
+        get<nlohmann::json>("/client/r0/joined_groups",
+                            [cb](const mtx::responses::JoinedGroups &res,
+                                 HeaderFields,
+                                 RequestErr err) { cb(res, err); });
+}
+
+void
+Client::group_profile(const std::string &group_id, Callback<mtx::responses::GroupProfile> cb)
+{
+        get<mtx::responses::GroupProfile>("/client/r0/groups/" + group_id + "/profile",
+                                          [cb](const mtx::responses::GroupProfile &res,
+                                               HeaderFields,
+                                               RequestErr err) { cb(res, err); });
+}
+
+void
+Client::group_rooms(const std::string &group_id, Callback<nlohmann::json> cb)
+{
+        get<nlohmann::json>(
+          "/client/r0/groups/" + group_id + "/rooms",
+          [cb](const nlohmann::json &res, HeaderFields, RequestErr err) { cb(res, err); });
+}
+
+void
+Client::set_group_profile(const std::string &group_id,
+                          nlohmann::json &req,
+                          Callback<nlohmann::json> cb)
+{
+        post<nlohmann::json, nlohmann::json>("/client/r0/groups/" + group_id + "/profile", req, cb);
+}
+
+void
+Client::add_room_to_group(const std::string &room_id, const std::string &group_id, ErrCallback cb)
+{
+        put<nlohmann::json>(
+          "/client/r0/groups/" + group_id + "/admin/rooms/" + room_id, json::object(), cb);
+}
+
+//
 // Encryption related endpoints
 //
 

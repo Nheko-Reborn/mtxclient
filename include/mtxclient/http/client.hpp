@@ -275,6 +275,21 @@ public:
         }
 
         //
+        // Group related endpoints.
+        //
+
+        void create_group(const std::string &localpart, Callback<mtx::responses::GroupId> cb);
+        void joined_groups(Callback<mtx::responses::JoinedGroups> cb);
+        void group_profile(const std::string &group_id, Callback<mtx::responses::GroupProfile> cb);
+        void group_rooms(const std::string &group_id, Callback<nlohmann::json> cb);
+        void set_group_profile(const std::string &group_id,
+                               nlohmann::json &req,
+                               Callback<nlohmann::json> cb);
+        void add_room_to_group(const std::string &room_id,
+                               const std::string &group_id,
+                               ErrCallback cb);
+
+        //
         // Encryption related endpoints.
         //
 
