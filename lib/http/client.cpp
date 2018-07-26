@@ -486,10 +486,10 @@ Client::create_group(const std::string &localpart, Callback<mtx::responses::Grou
 void
 Client::joined_groups(Callback<mtx::responses::JoinedGroups> cb)
 {
-        get<nlohmann::json>("/client/r0/joined_groups",
-                            [cb](const mtx::responses::JoinedGroups &res,
-                                 HeaderFields,
-                                 RequestErr err) { cb(res, err); });
+        get<mtx::responses::JoinedGroups>("/client/r0/joined_groups",
+                                          [cb](const mtx::responses::JoinedGroups &res,
+                                               HeaderFields,
+                                               RequestErr err) { cb(res, err); });
 }
 
 void

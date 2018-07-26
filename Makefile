@@ -35,7 +35,7 @@ asan: ## Create a debug build using address sanitizers
 	@cmake -GNinja -H. -Bbuild \
 		-DCMAKE_BUILD_TYPE=Debug \
 		-DOPENSSL_ROOT_DIR=/usr/local/opt/openssl \
-		-DCMAKE_INSTALL_PREFIX=${DEPS_BUILD_DIR}/usr
+		-DCMAKE_INSTALL_PREFIX=${DEPS_BUILD_DIR}/usr \
 		-DASAN=1
 	@cmake --build build
 
