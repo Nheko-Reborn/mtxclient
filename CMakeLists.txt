@@ -48,7 +48,6 @@ endif()
 find_package(OpenSSL REQUIRED)
 find_package(ZLIB REQUIRED)
 find_package(MatrixStructs 0.1.0 REQUIRED)
-find_package(spdlog 0.16.0 CONFIG REQUIRED)
 find_package(Olm 2 REQUIRED)
 find_package(sodium REQUIRED)
 
@@ -90,7 +89,6 @@ target_link_libraries(matrix_client
                       OpenSSL::Crypto
                       OpenSSL::SSL
                       Olm::Olm
-                      spdlog::spdlog
                       ZLIB::ZLIB)
 
 if(NOT MSVC AND NOT APPLE)
@@ -160,6 +158,8 @@ if(BUILD_LIB_TESTS)
 endif()
 
 if(BUILD_LIB_EXAMPLES)
+  find_package(spdlog 1.0.0 CONFIG REQUIRED)
+
   include_directories(tests)
 
   add_executable(room_feed examples/room_feed.cpp)
@@ -169,7 +169,10 @@ if(BUILD_LIB_EXAMPLES)
   target_link_libraries(simple_bot MatrixClient::MatrixClient)
 
   add_executable(crypto_bot examples/crypto_bot.cpp)
-  target_link_libraries(crypto_bot MatrixClient::MatrixClient Olm::Olm)
+  target_link_libraries(crypto_bot
+                        spdlog::spdlog
+                        MatrixClient::MatrixClient
+                        Olm::Olm)
 endif()
 
 #

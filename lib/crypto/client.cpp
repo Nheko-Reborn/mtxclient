@@ -2,12 +2,6 @@
 
 #include "mtxclient/crypto/client.hpp"
 
-#include "spdlog/spdlog.h"
-
-namespace {
-auto logger = spdlog::stdout_color_mt("crypto");
-}
-
 using json = nlohmann::json;
 using namespace mtx::crypto;
 
@@ -498,7 +492,7 @@ mtx::crypto::verify_identity_signature(nlohmann::json obj,
 
                 return true;
         } catch (const nlohmann::json::exception &e) {
-                logger->warn("verify_identity_signature: {}", e.what());
+                std::cerr << "verify_identity_signature: " << e.what();
         }
 
         return false;

@@ -43,14 +43,19 @@ set(BOOST_SHA256
 set(GTEST_URL https://github.com/google/googletest/archive/release-1.8.0.tar.gz)
 set(GTEST_SHA1 e7e646a6204638fe8e87e165292b8dd9cd4c36ed)
 
-set(MATRIX_STRUCTS_URL https://github.com/mujx/matrix-structs)
-set(MATRIX_STRUCTS_TAG 8de04afea34e95c14d1dde82af390592dfde90dd)
+set(
+  MATRIX_STRUCTS_URL
+  https://github.com/mujx/matrix-structs/archive/8de04afea34e95c14d1dde82af390592dfde90dd.tar.gz
+  )
+set(MATRIX_STRUCTS_HASH
+    255a82a9e463261858cd7da18f34fd60d19882ab507d214e47ea47ff78ae68b6)
 
 set(OLM_URL https://git.matrix.org/git/olm.git)
 set(OLM_TAG 4065c8e11a33ba41133a086ed3de4da94dcb6bae)
 
-set(SPDLOG_URL https://github.com/gabime/spdlog)
-set(SPDLOG_TAG 560df2878ad308b27873b3cc5e810635d69cfad6)
+set(SPDLOG_URL https://github.com/gabime/spdlog/archive/v1.0.0.tar.gz)
+set(SPDLOG_HASH
+    90d5365121bcd2c41ce94dfe6a460e89507a2dfef6133fe5fad5bb35ac4ef0a1)
 
 if(USE_BUNDLED_BOOST)
   include(Boost)

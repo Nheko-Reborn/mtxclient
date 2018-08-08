@@ -1,6 +1,6 @@
 FILES=`find src tests examples -type f -type f \( -iname "*.cpp" -o -iname "*.hpp" \)`
 
-SYNAPSE_IMAGE="avhost/docker-matrix:v0.32.0"
+SYNAPSE_IMAGE="avhost/docker-matrix:v0.33.0"
 
 DEPS_BUILD_DIR=.deps
 DEPS_SOURCE_DIR=deps
