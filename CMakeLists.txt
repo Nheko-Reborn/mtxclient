@@ -26,7 +26,6 @@ if(NOT MSVC)
         -pipe \
         -pedantic \
         -fsized-deallocation \
-        -ferror-limit=1 \
         -fdiagnostics-color=always \
         -Wunreachable-code"
     )
