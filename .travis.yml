@@ -23,6 +23,7 @@ matrix:
       compiler: gcc
       env:
         - CXX_VERSION=g++-6
+        - CC_VERSION=gcc-6
         - TESTS=ON
         - COVERAGE=ON
         - USE_BUNDLED_BOOST=ON
@@ -37,6 +38,7 @@ matrix:
       compiler: clang
       env:
         - CXX_VERSION=clang++-6.0
+        - CC_VERSION=clang-6.0
         - TESTS=ON
         - USE_BUNDLED_BOOST=ON
       addons:
@@ -50,6 +52,9 @@ matrix:
             - "g++-7"
 
 install:
+  - if [[ "${CXX_VERSION}" != "" ]]; then export CXX=${CXX_VERSION}; fi
+  - if [[ "${CC_VERSION}" != "" ]]; then export CC=${CC_VERSION}; fi
+
   - if [ $TRAVIS_OS_NAME == osx ]; then brew update && brew upgrade boost cmake && brew install libsodium; fi
 
   - if [ $TRAVIS_OS_NAME == linux ]; then sudo add-apt-repository -y ppa:chris-lea/libsodium; fi
@@ -63,6 +68,7 @@ install:
 
 script:
   - if [[ "${CXX_VERSION}" != "" ]]; then export CXX=${CXX_VERSION}; fi
+  - if [[ "${CC_VERSION}" != "" ]]; then export CC=${CC_VERSION}; fi
 
   - $CXX --version
   - cmake --version
