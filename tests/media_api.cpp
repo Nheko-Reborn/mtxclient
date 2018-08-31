@@ -28,6 +28,15 @@ read_file(const string &file_path)
 void
 validate_upload(const mtx::responses::ContentURI &res, RequestErr err)
 {
+        if (err) {
+                if (err->status_code != boost::beast::http::status::unknown)
+                        cout << err->status_code << "\n";
+                if (!err->matrix_error.error.empty())
+                        cout << err->matrix_error.error << "\n";
+                if (err->error_code)
+                        cout << err->error_code.message() << "\n";
+        }
+
         ASSERT_FALSE(err);
         ASSERT_TRUE(res.content_uri.size() > 10);
 }

@@ -9,9 +9,12 @@ option(COVERAGE "Calculate test coverage" OFF)
 option(IWYU "Check headers with include-what-you-use" OFF)
 
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
+add_definitions(-DBOOST_MPL_LIMIT_LIST_SIZE=30)
+add_definitions(-DBOOST_MPL_CFG_NO_PREPROCESSED_HEADERS)
 
 if(NOT MSVC)
   set(
@@ -23,6 +26,7 @@ if(NOT MSVC)
         -pipe \
         -pedantic \
         -fsized-deallocation \
+        -ferror-limit=1 \
         -fdiagnostics-color=always \
         -Wunreachable-code"
     )
@@ -47,7 +51,6 @@ endif()
 
 find_package(OpenSSL REQUIRED)
 find_package(ZLIB REQUIRED)
-find_package(MatrixStructs 0.1.0 REQUIRED)
 find_package(Olm 2 REQUIRED)
 find_package(sodium REQUIRED)
 
@@ -68,7 +71,47 @@ add_library(matrix_client
             lib/http/client.cpp
             lib/http/session.cpp
             lib/crypto/client.cpp
-            lib/utils.cpp)
+            lib/utils.cpp
+            lib/structs/common.cpp
+            lib/structs/errors.cpp
+            lib/structs/events.cpp
+            lib/structs/requests.cpp
+            lib/structs/events/aliases.cpp
+            lib/structs/events/avatar.cpp
+            lib/structs/events/canonical_alias.cpp
+            lib/structs/events/common.cpp
+            lib/structs/events/create.cpp
+            lib/structs/events/encrypted.cpp
+            lib/structs/events/encryption.cpp
+            lib/structs/events/guest_access.cpp
+            lib/structs/events/history_visibility.cpp
+            lib/structs/events/join_rules.cpp
+            lib/structs/events/member.cpp
+            lib/structs/events/name.cpp
+            lib/structs/events/pinned_events.cpp
+            lib/structs/events/power_levels.cpp
+            lib/structs/events/redaction.cpp
+            lib/structs/events/tag.cpp
+            lib/structs/events/topic.cpp
+            lib/structs/events/messages/audio.cpp
+            lib/structs/events/messages/emote.cpp
+            lib/structs/events/messages/file.cpp
+            lib/structs/events/messages/image.cpp
+            lib/structs/events/messages/notice.cpp
+            lib/structs/events/messages/text.cpp
+            lib/structs/events/messages/video.cpp
+            lib/structs/responses/common.cpp
+            lib/structs/responses/create_room.cpp
+            lib/structs/responses/crypto.cpp
+            lib/structs/responses/empty.cpp
+            lib/structs/responses/login.cpp
+            lib/structs/responses/media.cpp
+            lib/structs/responses/messages.cpp
+            lib/structs/responses/notifications.cpp
+            lib/structs/responses/profile.cpp
+            lib/structs/responses/register.cpp
+            lib/structs/responses/sync.cpp
+            lib/structs/responses/version.cpp)
 add_library(MatrixClient::MatrixClient ALIAS matrix_client)
 target_include_directories(matrix_client
                            SYSTEM
@@ -83,7 +126,6 @@ target_include_directories(
   $<INSTALL_INTERFACE:include>)
 target_link_libraries(matrix_client
                       PUBLIC
-                      MatrixStructs::MatrixStructs
                       ${Boost_LIBRARIES}
                       ${sodium_LIBRARY_RELEASE}
                       OpenSSL::Crypto
@@ -106,73 +148,11 @@ if(IWYU)
 endif()
 
 if(BUILD_LIB_TESTS)
-  enable_testing()
-
-  find_package(GTest REQUIRED)
-
-  file(COPY fixtures DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-
-  add_executable(client_api tests/client_api.cpp)
-  target_link_libraries(client_api
-                        MatrixClient::MatrixClient
-                        GTest::GTest
-                        GTest::Main)
-  target_include_directories(client_api PRIVATE
-                             ${CMAKE_CURRENT_SOURCE_DIR}/tests)
-
-  add_executable(media_api tests/media_api.cpp)
-  target_link_libraries(media_api
-                        MatrixClient::MatrixClient
-                        GTest::GTest
-                        GTest::Main)
-  target_include_directories(media_api PRIVATE
-                             ${CMAKE_CURRENT_SOURCE_DIR}/tests)
-
-  add_executable(e2ee tests/e2ee.cpp)
-  target_link_libraries(e2ee
-                        MatrixClient::MatrixClient
-                        GTest::GTest
-                        GTest::Main)
-  target_include_directories(e2ee PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
-
-  add_executable(utils tests/utils.cpp)
-  target_link_libraries(utils
-                        MatrixClient::MatrixClient
-                        GTest::GTest
-                        GTest::Main)
-  target_include_directories(utils PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
-
-  add_executable(connection tests/connection.cpp)
-  target_link_libraries(connection
-                        MatrixClient::MatrixClient
-                        GTest::GTest
-                        GTest::Main)
-  target_include_directories(connection PRIVATE
-                             ${CMAKE_CURRENT_SOURCE_DIR}/tests)
-
-  add_test(BasicConnectivity connection)
-  add_test(ClientAPI client_api)
-  add_test(MediaAPI media_api)
-  add_test(Encryption e2ee)
-  add_test(Utilities utils)
+  add_subdirectory(tests)
 endif()
 
 if(BUILD_LIB_EXAMPLES)
-  find_package(spdlog 1.0.0 CONFIG REQUIRED)
-
-  include_directories(tests)
-
-  add_executable(room_feed examples/room_feed.cpp)
-  target_link_libraries(room_feed MatrixClient::MatrixClient)
-
-  add_executable(simple_bot examples/simple_bot.cpp)
-  target_link_libraries(simple_bot MatrixClient::MatrixClient)
-
-  add_executable(crypto_bot examples/crypto_bot.cpp)
-  target_link_libraries(crypto_bot
-                        spdlog::spdlog
-                        MatrixClient::MatrixClient
-                        Olm::Olm)
+  add_subdirectory(examples)
 endif()
 
 #

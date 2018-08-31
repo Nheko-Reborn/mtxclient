@@ -1,6 +1,6 @@
 FILES=`find src tests examples -type f -type f \( -iname "*.cpp" -o -iname "*.hpp" \)`
 
-SYNAPSE_IMAGE="avhost/docker-matrix:v0.33.0"
+SYNAPSE_IMAGE="avhost/docker-matrix:v0.33.3"
 
 DEPS_BUILD_DIR=.deps
 DEPS_SOURCE_DIR=deps
@@ -29,7 +29,7 @@ release: ## Create an optimized build
 	@cmake --build build
 
 test: ## Run the tests
-	@cd build && GTEST_COLOR=1 ctest --verbose
+	@cd build/tests && GTEST_COLOR=1 ctest --verbose
 
 asan: ## Create a debug build using address sanitizers
 	@cmake -GNinja -H. -Bbuild \

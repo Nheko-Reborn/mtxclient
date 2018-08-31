@@ -1,6 +1,7 @@
 #include <atomic>
 
 #include <boost/algorithm/string.hpp>
+#include <boost/variant.hpp>
 
 #include <gtest/gtest.h>
 
@@ -9,7 +10,6 @@
 
 #include "mtx/requests.hpp"
 #include "mtx/responses.hpp"
-#include "variant.hpp"
 
 #include "test_helpers.hpp"
 
@@ -593,7 +593,7 @@ TEST(Encryption, EnableEncryption)
 
                 int has_encryption = 0;
                 for (const auto &e : events) {
-                        if (mpark::holds_alternative<StateEvent<state::Encryption>>(e))
+                        if (boost::get<StateEvent<state::Encryption>>(&e) != nullptr)
                                 has_encryption = 1;
                 }
 

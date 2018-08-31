@@ -70,7 +70,7 @@ get_event_ids(const std::vector<Collection> &events)
         std::vector<std::string> ids;
 
         for (const auto &e : events)
-                ids.push_back(mpark::visit([](auto msg) { return msg.event_id; }, e));
+                ids.push_back(boost::apply_visitor([](auto msg) { return msg.event_id; }, e));
 
         return ids;
 }

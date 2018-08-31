@@ -1,0 +1,216 @@
+{
+  "device_lists": {
+    "changed": [
+      "@carl:matrix.org"
+    ],
+    "left": [
+      "@alice:matrix.org",
+      "@bob:matrix.org"
+    ]
+  },
+  "device_one_time_keys_count": {
+    "curve25519": 10,
+    "signed_curve25519": 50
+  },
+  "next_batch": "s494057840_423411319_1821908_113293863_47864708_266862_5484556_5263815_7649",
+  "rooms": {
+    "invite": {},
+    "join": {
+      "!IPVqGoHnIWsdDXumBP:matrix.org": {
+        "account_data": {
+          "events": [
+            {
+              "content": {
+                "disable": false
+              },
+              "type": "org.matrix.room.preview_urls"
+            },
+            {
+              "content": {
+                "event_id": "$15228448975390942fkGNW:matrix.org"
+              },
+              "type": "m.fully_read"
+            }
+          ]
+        },
+        "ephemeral": {
+          "events": [
+            {
+              "content": {
+                "user_ids": []
+              },
+              "type": "m.typing"
+            }
+          ]
+        },
+        "state": {
+          "events": []
+        },
+        "timeline": {
+          "events": [
+            {
+              "content": {
+                "creator": "@nheko_test:matrix.org"
+              },
+              "event_id": "$1522842370112623guywH:matrix.org",
+              "origin_server_ts": 1522842370396,
+              "sender": "@nheko_test:matrix.org",
+              "state_key": "",
+              "type": "m.room.create",
+              "unsigned": {
+                "age": 8760031
+              }
+            },
+            {
+              "content": {
+                "avatar_url": "mxc://matrix.org/JdKiSOBDDxCHxmaLAgoQwSAHaddd",
+                "displayname": "NhekoTest",
+                "membership": "join"
+              },
+              "event_id": "$1522842376112627lBkqf:matrix.org",
+              "membership": "join",
+              "origin_server_ts": 1522842376792,
+              "sender": "@nheko_test:matrix.org",
+              "state_key": "@nheko_test:matrix.org",
+              "type": "m.room.member",
+              "unsigned": {
+                "age": 8753635
+              }
+            },
+            {
+              "content": {
+                "ban": 50,
+                "events": {
+                  "m.room.avatar": 50,
+                  "m.room.canonical_alias": 50,
+                  "m.room.history_visibility": 100,
+                  "m.room.name": 50,
+                  "m.room.power_levels": 100
+                },
+                "events_default": 0,
+                "invite": 0,
+                "kick": 50,
+                "redact": 50,
+                "state_default": 50,
+                "users": {
+                  "@nheko_test:matrix.org": 100
+                },
+                "users_default": 0
+              },
+              "event_id": "$1522842378112631SMZXu:matrix.org",
+              "origin_server_ts": 1522842378844,
+              "sender": "@nheko_test:matrix.org",
+              "state_key": "",
+              "type": "m.room.power_levels",
+              "unsigned": {
+                "age": 8751583
+              }
+            },
+            {
+              "content": {
+                "join_rule": "invite"
+              },
+              "event_id": "$1522842379112633iYqxJ:matrix.org",
+              "origin_server_ts": 1522842379916,
+              "sender": "@nheko_test:matrix.org",
+              "state_key": "",
+              "type": "m.room.join_rules",
+              "unsigned": {
+                "age": 8750511
+              }
+            },
+            {
+              "content": {
+                "history_visibility": "shared"
+              },
+              "event_id": "$1522842380112635MjSag:matrix.org",
+              "origin_server_ts": 1522842380953,
+              "sender": "@nheko_test:matrix.org",
+              "state_key": "",
+              "type": "m.room.history_visibility",
+              "unsigned": {
+                "age": 8749474
+              }
+            },
+            {
+              "content": {
+                "guest_access": "can_join"
+              },
+              "event_id": "$1522842381112637VVAcs:matrix.org",
+              "origin_server_ts": 1522842381216,
+              "sender": "@nheko_test:matrix.org",
+              "state_key": "",
+              "type": "m.room.guest_access",
+              "unsigned": {
+                "age": 8749211
+              }
+            },
+            {
+              "content": {
+                "name": "Encry"
+              },
+              "event_id": "$1522842381112639RJdHA:matrix.org",
+              "origin_server_ts": 1522842381350,
+              "sender": "@nheko_test:matrix.org",
+              "state_key": "",
+              "type": "m.room.name",
+              "unsigned": {
+                "age": 8749077
+              }
+            },
+            {
+              "content": {
+                "disable": true
+              },
+              "event_id": "$1522842442112651RJkob:matrix.org",
+              "origin_server_ts": 1522842442143,
+              "sender": "@nheko_test:matrix.org",
+              "state_key": "",
+              "type": "org.matrix.room.preview_urls",
+              "unsigned": {
+                "age": 8688284
+              }
+            },
+            {
+              "content": {
+                "algorithm": "m.megolm.v1.aes-sha2"
+              },
+              "event_id": "$1522842442112652dsEBQ:matrix.org",
+              "origin_server_ts": 1522842442325,
+              "sender": "@nheko_test:matrix.org",
+              "state_key": "",
+              "type": "m.room.encryption",
+              "unsigned": {
+                "age": 8688102
+              }
+            },
+            {
+              "content": {
+                "algorithm": "m.megolm.v1.aes-sha2",
+                "ciphertext": "AwgAEnASZJwgOIzs56NQxMygoU2Io5ErzBHRjjyip3oQLX8YJaIOjkxr0r+8LHp3aBy1qZe6uL8/aDM2mGVOH7t918Q+3PnebNeniseyUaS2SBBuZ5ahOLxxPBx4ARXn/wx1PGw9h2Q1bsux/el/91nQabSP3/BZwdqWZTJ60M4wYVSEtGWaeIfcSp3OIvIwbnsdRI+vSVUU2Y+Mju9tkYTw2cBR3FeKoSo8E20Zohe5XDKtQaWKjWudhC0H",
+                "device_id": "MRJSQFIBFM",
+                "sender_key": "I5Uh9SWD6eZyM6WO1Ylms0iLWw6081O8VZFnp4OYyE0",
+                "session_id": "I0BQWDfgQiZ/6bXj4Gy1NCHdX9Jb0KQ9cj7pk02vdoE"
+              },
+              "event_id": "$15228448975390942fkGNW:matrix.org",
+              "origin_server_ts": 1522844897577,
+              "sender": "@nheko_test:matrix.org",
+              "type": "m.room.encrypted",
+              "unsigned": {
+                "age": 6232850,
+                "transaction_id": "m1522844896690.0"
+              }
+            }
+          ],
+          "limited": false,
+          "prev_batch": "s494057840_423411319_1821908_113293863_47864708_266862_5484556_5263815_7649"
+        },
+        "unread_notifications": {}
+      }
+    },
+    "leave": {}
+  },
+  "to_device": {
+    "events": []
+  }
+}

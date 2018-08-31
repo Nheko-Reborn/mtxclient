@@ -2,13 +2,13 @@
 #include <iostream>
 
 #include <boost/algorithm/string.hpp>
+#include <boost/variant.hpp>
 
 #include <gtest/gtest.h>
 
 #include "mtx/requests.hpp"
 #include "mtx/responses.hpp"
 #include "mtxclient/http/client.hpp"
-#include "variant.hpp"
 
 #include "test_helpers.hpp"
 
@@ -1062,10 +1062,10 @@ TEST(ClientAPI, RetrieveSingleEvent)
                               const mtx::events::collections::TimelineEvents &res, RequestErr err) {
                                     check_error(err);
                                     ASSERT_TRUE(
-                                      mpark::holds_alternative<
-                                        mtx::events::RoomEvent<mtx::events::msg::Text>>(res));
+                                      boost::get<mtx::events::RoomEvent<mtx::events::msg::Text>>(
+                                        &res) != nullptr);
                                     auto e =
-                                      mpark::get<mtx::events::RoomEvent<mtx::events::msg::Text>>(
+                                      boost::get<mtx::events::RoomEvent<mtx::events::msg::Text>>(
                                         res);
                                     EXPECT_EQ(e.content.body, "Hello Alice!");
                                     EXPECT_EQ(e.sender, "@bob:localhost");
