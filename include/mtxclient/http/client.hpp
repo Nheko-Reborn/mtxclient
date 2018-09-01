@@ -473,8 +473,10 @@ mtx::http::Client::create_session(HeadersCallback<Response> callback)
                   const auto body = client::utils::decompress(
                     boost::iostreams::array_source{response.body().data(), response.body().size()},
                     header["Content-Encoding"].to_string());
+                  const int status_code = static_cast<int>(response.result());
 
-                  if (response.result() != boost::beast::http::status::ok) {
+                  // We only count 2xx status codes as success.
+                  if (status_code < 200 || status_code >= 300) {
                           client_error.status_code = response.result();
 
                           // Try to parse the response in case we have an endpoint that
