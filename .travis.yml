@@ -58,7 +58,7 @@ script:
   - $CXX --version
   - cmake --version
 
-  - ./script.sh
+  - ./.ci/script.sh
 
 after_success:
   # Generate coverage report and upload report to CodeCov.
