@@ -52,53 +52,16 @@ matrix:
             - "g++-7"
 
 install:
-  - if [[ "${CXX_VERSION}" != "" ]]; then export CXX=${CXX_VERSION}; fi
-  - if [[ "${CC_VERSION}" != "" ]]; then export CC=${CC_VERSION}; fi
-
-  - if [ $TRAVIS_OS_NAME == osx ]; then brew update && brew upgrade boost cmake && brew install libsodium; fi
-
-  - if [ $TRAVIS_OS_NAME == linux ]; then sudo add-apt-repository -y ppa:chris-lea/libsodium; fi
-  - if [ $TRAVIS_OS_NAME == linux ]; then sudo apt-get update -qq; fi
-  - if [ $TRAVIS_OS_NAME == linux ]; then sudo apt-get install -qq -y libsodium-dev; fi
-  - if [ $TRAVIS_OS_NAME == linux ]; then sudo apt-get remove -y cmake; fi
-
-  - if [ $TRAVIS_OS_NAME == linux ]; then wget https://cmake.org/files/v3.11/cmake-3.11.4-Linux-x86_64.sh; fi
-  - if [ $TRAVIS_OS_NAME == linux ]; then sudo sh cmake-3.11.4-Linux-x86_64.sh  --skip-license  --prefix=/usr/local; fi
-  - if [ $TRAVIS_OS_NAME == linux ]; then export PATH="/usr/local/bin:$PATH"; fi
+  - ./.ci/install.sh
 
 script:
-  - if [[ "${CXX_VERSION}" != "" ]]; then export CXX=${CXX_VERSION}; fi
-  - if [[ "${CC_VERSION}" != "" ]]; then export CC=${CC_VERSION}; fi
-
   - $CXX --version
   - cmake --version
 
-  # Build dependencies.
-  - cmake -Hdeps -B.deps -DCMAKE_BUILD_TYPE=Release
-      -DUSE_BUNDLED_BOOST=${USE_BUNDLED_BOOST}
-      -DUSE_BUNDLED_GTEST=${TESTS}
-  - cmake --build .deps
-
-  # Build the library.
-  - cmake -H. -Bbuild -DOPENSSL_ROOT_DIR=${OPENSLL_ROOT_DIR}
-      -DBUILD_LIB_TESTS=${TESTS}
-      -DBUILD_SHARED_LIBS=ON
-      -DCMAKE_INSTALL_PREFIX=.deps/usr
-      -DCOVERAGE=${COVERAGE} || true
-  - cmake --build build
-
-  # Unit & Integration tests
-  - if [ $TESTS == ON ]; then make synapse; fi
-  - if [ $TESTS == ON ]; then make test; fi
-
-  # Linting
-  - if [ $LINT == ON ]; then make lint; fi
+  - ./script.sh
 
 after_success:
+  # Generate coverage report and upload report to CodeCov.
   - if [ $COVERAGE == ON ]; then make -C build matrix_client_coverage; fi
-
-  # Generate coverage report.
   - if [ $COVERAGE == ON ]; then ./.ci/coverage.sh; fi
-
-  # Upload report to CodeCov.
   - if [ $COVERAGE == ON ]; then bash <(curl -s https://codecov.io/bash) -f "!*tests*" || echo "Codecov failed"; fi
