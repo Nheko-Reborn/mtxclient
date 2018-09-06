@@ -350,3 +350,67 @@ TEST(RoomEvents, Sticker)
         EXPECT_EQ(event.content.info.h, 200);
         EXPECT_EQ(event.content.info.size, 73602);
 }
+
+TEST(FormattedMessages, Deserialization)
+{
+        json notice_data = R"({
+          "origin_server_ts": 1510435865515,
+          "sender": "@_neb_github:matrix.org",
+          "event_id": "$15104358652239178iCnZy:matrix.org",
+          "content": {
+            "body": "https://github.com/postmarketOS/pmbootstrap/issues/900 : Package nheko",
+            "msgtype": "m.notice",
+            "format": "org.matrix.custom.html",
+            "formatted_body": "<h1> Hello World! </h1>"
+          },
+          "type": "m.room.message",
+          "room_id": "!BPvgRcBVHzyFSlYkrg:matrix.org"
+        })"_json;
+
+        RoomEvent<msg::Notice> notice = notice_data;
+
+        EXPECT_EQ(notice.type, EventType::RoomMessage);
+        EXPECT_EQ(notice.content.msgtype, "m.notice");
+        EXPECT_EQ(notice.content.format, "org.matrix.custom.html");
+        EXPECT_EQ(notice.content.formatted_body, "<h1> Hello World! </h1>");
+
+        json text_data = R"({
+          "origin_server_ts": 1510489356530,
+          "sender": "@nheko_test:matrix.org",
+          "event_id": "$15104893562785758wEgEU:matrix.org",
+          "content": {
+            "body": "hey there",
+            "msgtype": "m.text",
+            "format": "org.matrix.custom.html",
+            "formatted_body": "<h1> Hello World! </h1>"
+          },
+          "type": "m.room.message",
+          "room_id": "!lfoDRlNFWlvOnvkBwQ:matrix.org"
+         })"_json;
+
+        RoomEvent<msg::Text> text = text_data;
+
+        EXPECT_EQ(text.content.msgtype, "m.text");
+        EXPECT_EQ(text.content.format, "org.matrix.custom.html");
+        EXPECT_EQ(text.content.formatted_body, "<h1> Hello World! </h1>");
+
+        json emote_data = R"({
+          "origin_server_ts": 1509878682149,
+          "sender": "@mujx:matrix.org",
+          "event_id": "$15098786822025533uttji:matrix.org",
+          "content": {
+            "body": "tests",
+            "msgtype": "m.emote",
+            "format": "org.matrix.custom.html",
+            "formatted_body": "<h1> Hello World! </h1>"
+          },
+          "type": "m.room.message",
+          "room_id": "!VaMCVKSVcyPtXbcMXh:matrix.org"
+        })"_json;
+
+        RoomEvent<msg::Emote> emote = emote_data;
+
+        EXPECT_EQ(emote.content.msgtype, "m.emote");
+        EXPECT_EQ(emote.content.format, "org.matrix.custom.html");
+        EXPECT_EQ(emote.content.formatted_body, "<h1> Hello World! </h1>");
+}

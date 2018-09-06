@@ -15,6 +15,10 @@ struct Notice
         std::string body;
         // Must be 'm.notice'.
         std::string msgtype;
+        //! We only handle org.matrix.custom.html.
+        std::string format;
+        //! HTML formatted message.
+        std::string formatted_body;
 };
 
 void

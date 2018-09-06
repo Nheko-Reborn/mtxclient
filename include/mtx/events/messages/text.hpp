@@ -11,10 +11,14 @@ namespace msg {
 
 struct Text
 {
-        // The body of the message.
+        //! The body of the message.
         std::string body;
-        // Must be 'm.text'.
+        //! Must be 'm.text'.
         std::string msgtype;
+        //! We only handle org.matrix.custom.html.
+        std::string format;
+        //! HTML formatted message.
+        std::string formatted_body;
 };
 
 void

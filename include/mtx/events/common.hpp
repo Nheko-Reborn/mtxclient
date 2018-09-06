@@ -9,6 +9,8 @@ namespace mtx {
 //! Common structs used among many different event content types.
 namespace common {
 
+constexpr auto FORMAT_MSG_TYPE = "org.matrix.custom.html";
+
 //! Metadata about an image thumbnail.
 struct ThumbnailInfo
 {

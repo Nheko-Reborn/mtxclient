@@ -15,6 +15,10 @@ struct Emote
         std::string body;
         // Must be 'm.emote'.
         std::string msgtype;
+        //! We only handle org.matrix.custom.html.
+        std::string format;
+        //! HTML formatted message.
+        std::string formatted_body;
 };
 
 void
