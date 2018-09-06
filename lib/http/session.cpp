@@ -28,7 +28,6 @@ Session::on_resolve(boost::system::error_code ec,
 {
         if (ec) {
                 on_failure(id, ec);
-                shutdown();
                 return;
         }
 
@@ -66,7 +65,6 @@ Session::on_connect(const boost::system::error_code &ec)
 {
         if (ec) {
                 on_failure(id, ec);
-                shutdown();
                 return;
         }
 
@@ -107,7 +105,6 @@ Session::on_handshake(const boost::system::error_code &ec)
 {
         if (ec) {
                 on_failure(id, ec);
-                shutdown();
                 return;
         }
 
@@ -125,7 +122,6 @@ Session::on_write(const boost::system::error_code &ec, std::size_t bytes_transfe
 
         if (ec) {
                 on_failure(id, ec);
-                shutdown();
                 return;
         }
 
@@ -147,4 +143,24 @@ Session::on_read(const boost::system::error_code &ec, std::size_t bytes_transfer
                 error_code = ec;
 
         on_request_complete();
+}
+
+void
+Session::run() noexcept
+{
+        // Set SNI Hostname (many hosts need this to handshake successfully)
+        if (!SSL_set_tlsext_host_name(socket.native_handle(), host.c_str())) {
+                boost::system::error_code ec{static_cast<int>(::ERR_get_error()),
+                                             boost::asio::error::get_ssl_category()};
+                std::cerr << ec.message() << "\n";
+
+                return on_failure(id, ec);
+        }
+
+        resolver_.async_resolve(host,
+                                std::to_string(port),
+                                std::bind(&Session::on_resolve,
+                                          shared_from_this(),
+                                          std::placeholders::_1,
+                                          std::placeholders::_2));
 }
