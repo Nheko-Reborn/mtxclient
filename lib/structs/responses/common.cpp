@@ -13,8 +13,8 @@
 #include "mtx/events/pinned_events.hpp"
 #include "mtx/events/power_levels.hpp"
 #include "mtx/events/redaction.hpp"
-#include "mtx/events/topic.hpp"
 #include "mtx/events/tag.hpp"
+#include "mtx/events/topic.hpp"
 
 #include <iostream>
 
@@ -60,8 +60,9 @@ log_error(std::string err, const json &event)
 }
 
 void
-parse_room_account_data_events(const json &events,
-                               std::vector<mtx::events::collections::RoomAccountDataEvents> &container)
+parse_room_account_data_events(
+  const json &events,
+  std::vector<mtx::events::collections::RoomAccountDataEvents> &container)
 {
         container.clear();
         container.reserve(events.size());
@@ -356,7 +357,7 @@ parse_timeline_events(const json &events,
                 }
                 case events::EventType::RoomPinnedEvents:
                 case events::EventType::RoomKeyRequest: // Not part of the timeline
-                case events::EventType::Tag: // Not part of the timeline or state
+                case events::EventType::Tag:            // Not part of the timeline or state
                 case events::EventType::Unsupported:
                         continue;
                 }

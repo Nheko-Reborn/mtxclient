@@ -149,3 +149,42 @@ TEST(MediaAPI, UploadImage)
 
         carl->close();
 }
+
+TEST(MediaAPI, UploadSVG)
+{
+        std::shared_ptr<Client> carl = std::make_shared<Client>("localhost");
+
+        carl->login("carl", "secret", [carl](const mtx::responses::Login &, RequestErr err) {
+                ASSERT_FALSE(err);
+
+                const auto img = read_file("./fixtures/kiwi.svg");
+
+                carl->upload(
+                  img,
+                  "image/svg",
+                  "kiwi.svg",
+                  [carl, img](const mtx::responses::ContentURI &res, RequestErr err) {
+                          validate_upload(res, err);
+
+                          ThumbOpts opts;
+                          opts.mxc_url = res.content_uri;
+                          carl->get_thumbnail(opts, [img](const std::string &res, RequestErr err) {
+                                  ASSERT_FALSE(err);
+                                  EXPECT_EQ(res, img);
+                          });
+
+                          carl->download(res.content_uri,
+                                         [img](const string &data,
+                                               const string &content_type,
+                                               const string &original_filename,
+                                               RequestErr err) {
+                                                 ASSERT_FALSE(err);
+                                                 EXPECT_EQ(data, img);
+                                                 EXPECT_EQ(content_type, "image/svg");
+                                                 EXPECT_EQ(original_filename, "kiwi.svg");
+                                         });
+                  });
+        });
+
+        carl->close();
+}

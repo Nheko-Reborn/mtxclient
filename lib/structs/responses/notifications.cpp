@@ -1,5 +1,5 @@
-#include "mtx/responses/common.hpp"
 #include "mtx/responses/notifications.hpp"
+#include "mtx/responses/common.hpp"
 
 using json = nlohmann::json;
 

@@ -227,7 +227,11 @@ public:
                                          RequestErr err)> cb);
 
         //! Retrieve a thumbnail from the given mxc url.
-        void get_thumbnail(const ThumbOpts &opts, Callback<std::string> cb);
+        //! If the thumbnail isn't found and `try_download` is `true` it will try
+        //! to use the `/download` endpoint to retrieve the media.
+        void get_thumbnail(const ThumbOpts &opts,
+                           Callback<std::string> cb,
+                           bool try_download = true);
 
         //! Send typing notifications to the room.
         void start_typing(const std::string &room_id, uint64_t timeout, ErrCallback cb);

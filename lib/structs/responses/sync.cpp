@@ -1,6 +1,6 @@
+#include "mtx/responses/sync.hpp"
 #include "mtx/events/collections.hpp"
 #include "mtx/responses/common.hpp"
-#include "mtx/responses/sync.hpp"
 
 #include <boost/variant.hpp>
 

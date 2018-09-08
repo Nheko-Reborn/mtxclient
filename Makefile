@@ -1,4 +1,4 @@
-FILES=`find src tests examples -type f -type f \( -iname "*.cpp" -o -iname "*.hpp" \)`
+FILES=`find lib include tests examples -type f -type f \( -iname "*.cpp" -o -iname "*.hpp" \)`
 
 SYNAPSE_IMAGE="avhost/docker-matrix:v0.33.3"
 
