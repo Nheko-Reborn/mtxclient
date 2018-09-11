@@ -22,7 +22,6 @@ if(NOT MSVC)
     "${CMAKE_CXX_FLAGS} \
         -Wall \
         -Wextra \
-        -Werror \
         -pipe \
         -pedantic \
         -fsized-deallocation \
