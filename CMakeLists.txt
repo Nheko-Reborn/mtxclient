@@ -51,6 +51,7 @@ find_package(OpenSSL REQUIRED)
 find_package(ZLIB REQUIRED)
 find_package(Olm 2 REQUIRED)
 find_package(sodium REQUIRED)
+find_package(nlohmann_json 3.2.0)
 
 set(Boost_USE_STATIC_LIBS OFF)
 set(Boost_USE_STATIC_RUNTIME OFF)
