@@ -1,7 +1,7 @@
 #pragma once
 
 #include "mtxclient/utils.hpp"
-#include <json.hpp>
+#include <nlohmann/json.hpp>
 
 STRONG_TYPE(UserId, std::string)
 STRONG_TYPE(DeviceId, std::string)

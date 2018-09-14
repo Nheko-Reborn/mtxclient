@@ -2,7 +2,7 @@
 
 #include <string>
 
-#include <json.hpp>
+#include <nlohmann/json.hpp>
 
 #include "mtx/events/collections.hpp"
 
