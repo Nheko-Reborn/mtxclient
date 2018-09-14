@@ -6,6 +6,7 @@
 #include <gtest/gtest.h>
 
 #include "mtxclient/crypto/client.hpp"
+#include "mtxclient/crypto/types.hpp"
 #include "mtxclient/http/client.hpp"
 
 #include "mtx/requests.hpp"
@@ -1033,6 +1034,41 @@ TEST(Encryption, PickleMegolmSessions)
           std::string((char *)restored_plaintext.data.data(), restored_plaintext.data.size()));
 
         EXPECT_EQ(std::string((char *)plaintext.data.data(), plaintext.data.size()), SECRET);
+}
+
+TEST(Base64, EncodingDecoding)
+{
+        std::string random_str =
+          "+7TE+9qmFWHPnrBLd03MtoXsRlhYaQt2tLBg4kZJI+NFcXVxqNUI1S3c97eV8aVgSj1/"
+          "eo8PsnRNO29c2TgPLXvah2GDl90ehHjzH/"
+          "vMBJKPdqyE31ch7NYBgvLBVoesrRyDoIYDlbRhHiRDTmLKMC55WN1YvDJu2Pvg3WxZiANobk"
+          "0EPzHABqOYLaYiVxFrdko7mm8pDZXlatys+dvLv9Zf6lxfd/5MPK1C52m/UhnrZ3shS/"
+          "XBzxRfBikZQjl7C9IMo7l170ffipN8QHb5LmZlj4V41DUJHCU=";
+
+        EXPECT_EQ(base642bin(bin2base64(random_str)), random_str);
+        EXPECT_EQ(bin2base64(base642bin(random_str)), random_str);
+}
+
+TEST(ExportSessions, EncryptDecrypt)
+{
+        constexpr auto PASS = "secret_passphrase";
+
+        ExportedSession s1;
+        s1.room_id     = "!room_id:example.org";
+        s1.session_id  = "sid";
+        s1.session_key = "skey";
+
+        ExportedSessionKeys keys;
+        keys.sessions = {s1, s1, s1};
+
+        std::string ciphertext = mtx::crypto::encrypt_exported_sessions(keys, PASS);
+        EXPECT_TRUE(ciphertext.size() > 0);
+
+        auto encoded = bin2base64(ciphertext);
+        auto decoded = base642bin(encoded);
+
+        auto restored_keys = mtx::crypto::decrypt_exported_sessions(decoded, PASS);
+        EXPECT_EQ(json(keys).dump(), json(restored_keys).dump());
 }
 
 TEST(Encryption, DISABLED_HandleRoomKeyEvent) {}

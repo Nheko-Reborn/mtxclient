@@ -226,6 +226,21 @@ matches_inbound_session_from(OlmSession *session,
                              const std::string &id_key,
                              const std::string &one_time_key_message);
 
+std::string
+encrypt_exported_sessions(const mtx::crypto::ExportedSessionKeys &keys, std::string pass);
+
+mtx::crypto::ExportedSessionKeys
+decrypt_exported_sessions(const std::string &data, std::string pass);
+
+std::string
+base642bin(const std::string &b64);
+
+std::string
+bin2base64(const std::string &b64);
+
+BinaryBuf
+derive_key(const std::string &pass, const BinaryBuf &salt);
+
 //! Verify a signature object as obtained from the response of /keys/query endpoint
 bool
 verify_identity_signature(nlohmann::json obj, const DeviceId &device_id, const UserId &user_id);

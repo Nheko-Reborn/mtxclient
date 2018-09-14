@@ -1,6 +1,6 @@
 FILES=`find lib include tests examples -type f -type f \( -iname "*.cpp" -o -iname "*.hpp" \)`
 
-SYNAPSE_IMAGE="avhost/docker-matrix:v0.33.3"
+SYNAPSE_IMAGE="avhost/docker-matrix:v0.33.4"
 
 DEPS_BUILD_DIR=.deps
 DEPS_SOURCE_DIR=deps

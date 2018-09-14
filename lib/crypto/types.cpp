@@ -1,51 +1,9 @@
-#pragma once
-
-#include "mtxclient/utils.hpp"
-#include <json.hpp>
-
-STRONG_TYPE(UserId, std::string)
-STRONG_TYPE(DeviceId, std::string)
-STRONG_TYPE(RoomId, std::string)
+#include "mtxclient/crypto/types.hpp"
 
 namespace mtx {
 namespace crypto {
 
-constexpr auto ED25519     = "ed25519";
-constexpr auto CURVE25519  = "curve25519";
-constexpr auto MEGOLM_ALGO = "m.megolm.v1.aes-sha2";
-
-struct ExportedSession
-{
-        std::map<std::string, std::string> sender_claimed_keys;   // currently unused.
-        std::vector<std::string> forwarding_curve25519_key_chain; // currently unused.
-
-        std::string algorithm = MEGOLM_ALGO;
-        std::string room_id;
-        std::string sender_key;
-        std::string session_id;
-        std::string session_key;
-};
-
-struct ExportedSessionKeys
-{
-        std::vector<ExportedSession> sessions;
-};
-
-struct IdentityKeys
-{
-        std::string curve25519;
-        std::string ed25519;
-};
-
-struct OneTimeKeys
-{
-        using KeyId      = std::string;
-        using EncodedKey = std::string;
-
-        std::map<KeyId, EncodedKey> curve25519;
-};
-
-inline void
+void
 to_json(nlohmann::json &obj, const ExportedSession &s)
 {
         obj["sender_claimed_keys"]             = s.sender_claimed_keys;
@@ -58,7 +16,7 @@ to_json(nlohmann::json &obj, const ExportedSession &s)
         obj["session_key"] = s.session_key;
 }
 
-inline void
+void
 from_json(const nlohmann::json &obj, ExportedSession &s)
 {
         s.room_id     = obj.at("room_id").get<std::string>();
@@ -77,39 +35,39 @@ from_json(const nlohmann::json &obj, ExportedSession &s)
                   obj.at("forwarding_curve25519_key_chain").get<KeyChain>();
 }
 
-inline void
+void
 to_json(nlohmann::json &obj, const ExportedSessionKeys &keys)
 {
         obj["sessions"] = keys.sessions;
 }
 
-inline void
+void
 from_json(const nlohmann::json &obj, ExportedSessionKeys &keys)
 {
         keys.sessions = obj.at("sessions").get<std::vector<ExportedSession>>();
 }
 
-inline void
+void
 to_json(nlohmann::json &obj, const IdentityKeys &keys)
 {
         obj[ED25519]    = keys.ed25519;
         obj[CURVE25519] = keys.curve25519;
 }
 
-inline void
+void
 from_json(const nlohmann::json &obj, IdentityKeys &keys)
 {
         keys.ed25519    = obj.at(ED25519).get<std::string>();
         keys.curve25519 = obj.at(CURVE25519).get<std::string>();
 }
 
-inline void
+void
 to_json(nlohmann::json &obj, const OneTimeKeys &keys)
 {
         obj[CURVE25519] = keys.curve25519;
 }
 
-inline void
+void
 from_json(const nlohmann::json &obj, OneTimeKeys &keys)
 {
         keys.curve25519 = obj.at(CURVE25519).get<std::map<std::string, std::string>>();

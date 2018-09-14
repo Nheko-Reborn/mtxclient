@@ -1,6 +1,7 @@
 #include <iostream>
 
 #include "mtxclient/crypto/client.hpp"
+#include "mtxclient/crypto/types.hpp"
 
 using json = nlohmann::json;
 using namespace mtx::crypto;
@@ -23,7 +24,7 @@ OlmClient::restore_account(const std::string &saved_data, const std::string &key
         account_ = unpickle<AccountObject>(saved_data, key);
 }
 
-IdentityKeys
+mtx::crypto::IdentityKeys
 OlmClient::identity_keys() const
 {
         auto tmp_buf = create_buffer(olm_account_identity_keys_length(account_.get()));
@@ -80,7 +81,7 @@ OlmClient::generate_one_time_keys(std::size_t number_of_keys)
         return ret;
 }
 
-OneTimeKeys
+mtx::crypto::OneTimeKeys
 OlmClient::one_time_keys()
 {
         auto buf = create_buffer(olm_account_one_time_keys_length(account_.get()));
@@ -496,4 +497,131 @@ mtx::crypto::verify_identity_signature(nlohmann::json obj,
         }
 
         return false;
+}
+
+std::string
+mtx::crypto::encrypt_exported_sessions(const mtx::crypto::ExportedSessionKeys &keys,
+                                       std::string pass)
+{
+        const auto plaintext      = json(keys).dump();
+        const auto msg_len        = plaintext.size();
+        const auto ciphertext_len = crypto_secretbox_MACBYTES + msg_len;
+
+        auto nonce      = create_buffer(crypto_secretbox_NONCEBYTES);
+        auto ciphertext = create_buffer(ciphertext_len);
+
+        auto salt = create_buffer(crypto_pwhash_SALTBYTES);
+        auto key  = derive_key(pass, salt);
+
+        crypto_secretbox_easy(reinterpret_cast<unsigned char *>(ciphertext.data()),
+                              reinterpret_cast<const unsigned char *>(plaintext.data()),
+                              msg_len,
+                              nonce.data(),
+                              reinterpret_cast<const unsigned char *>(key.data()));
+
+        // Format of the output buffer: (nonce + salt + ciphertext)
+        BinaryBuf output{nonce};
+        output.insert(
+          output.end(), std::make_move_iterator(salt.begin()), std::make_move_iterator(salt.end()));
+        output.insert(output.end(),
+                      std::make_move_iterator(ciphertext.begin()),
+                      std::make_move_iterator(ciphertext.end()));
+
+        return std::string(output.begin(), output.end());
+}
+
+mtx::crypto::ExportedSessionKeys
+mtx::crypto::decrypt_exported_sessions(const std::string &data, std::string pass)
+{
+        if (data.size() <
+            crypto_secretbox_MACBYTES + crypto_secretbox_NONCEBYTES + crypto_pwhash_SALTBYTES)
+                throw std::runtime_error{"decrypt_exported_sessions ciphertext too small"};
+
+        const auto nonce_start = data.begin();
+        const auto nonce_end   = nonce_start + crypto_secretbox_NONCEBYTES;
+        auto nonce             = BinaryBuf(nonce_start, nonce_end);
+
+        const auto salt_end = nonce_end + crypto_pwhash_SALTBYTES;
+        auto salt           = BinaryBuf(nonce_end, salt_end);
+
+        auto ciphertext = BinaryBuf(salt_end, data.end());
+        auto decrypted  = create_buffer(ciphertext.size() - crypto_secretbox_MACBYTES);
+
+        auto key = derive_key(pass, salt);
+
+        if (crypto_secretbox_open_easy(decrypted.data(),
+                                       reinterpret_cast<const unsigned char *>(ciphertext.data()),
+                                       ciphertext.size(),
+                                       nonce.data(),
+                                       reinterpret_cast<const unsigned char *>(key.data())) != 0)
+                throw std::runtime_error{"crypto_secretbox_open_easy: failed to decrypt"};
+
+        return json::parse(std::string(decrypted.begin(), decrypted.end()));
+}
+
+std::string
+mtx::crypto::base642bin(const std::string &b64)
+{
+        std::size_t bin_maxlen = b64.size();
+        std::size_t bin_len;
+
+        const char *max_end;
+
+        auto ciphertext = create_buffer(bin_maxlen);
+
+        const int rc = sodium_base642bin(reinterpret_cast<unsigned char *>(ciphertext.data()),
+                                         ciphertext.size(),
+                                         b64.data(),
+                                         b64.size(),
+                                         nullptr,
+                                         &bin_len,
+                                         &max_end,
+                                         sodium_base64_VARIANT_ORIGINAL);
+        if (rc != 0)
+                throw std::runtime_error{"base642bin failed"};
+
+        if (bin_len != bin_maxlen)
+                ciphertext.resize(bin_len);
+
+        return std::string(std::make_move_iterator(ciphertext.begin()),
+                           std::make_move_iterator(ciphertext.end()));
+}
+
+std::string
+mtx::crypto::bin2base64(const std::string &bin)
+{
+        auto base64buf =
+          create_buffer(sodium_base64_encoded_len(bin.size(), sodium_base64_VARIANT_ORIGINAL));
+
+        sodium_bin2base64(reinterpret_cast<char *>(base64buf.data()),
+                          base64buf.size(),
+                          reinterpret_cast<const unsigned char *>(bin.data()),
+                          bin.size(),
+                          sodium_base64_VARIANT_ORIGINAL);
+
+        // Removing the null byte.
+        return std::string(base64buf.begin(), base64buf.end() - 1);
+}
+
+BinaryBuf
+mtx::crypto::derive_key(const std::string &pass, const BinaryBuf &salt)
+{
+        if (salt.size() != crypto_pwhash_SALTBYTES)
+                throw std::runtime_error{"derive_key: invalid buffer size for salt"};
+
+        auto key = create_buffer(crypto_secretbox_KEYBYTES);
+
+        // Derive a key from the user provided password.
+        if (crypto_pwhash(key.data(),
+                          key.size(),
+                          pass.data(),
+                          pass.size(),
+                          salt.data(),
+                          crypto_pwhash_OPSLIMIT_INTERACTIVE,
+                          crypto_pwhash_MEMLIMIT_INTERACTIVE,
+                          crypto_pwhash_ALG_DEFAULT) != 0) {
+                throw std::runtime_error{"crypto_pwhash: out of memory"};
+        }
+
+        return key;
 }
