@@ -2,7 +2,12 @@ enable_testing()
 
 file(COPY fixtures DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
-find_package(GTest REQUIRED)
+find_package(GTest)
+set_package_properties(GTest PROPERTIES
+    DESCRIPTION "Google's framework for writing C++ tests"
+    URL "https://github.com/google/googletest"
+    TYPE REQUIRED
+)
 
 file(COPY fixtures DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 

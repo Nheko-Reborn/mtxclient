@@ -47,16 +47,47 @@ if(NOT MSVC AND NOT APPLE)
   find_package(Threads REQUIRED)
 endif()
 
-find_package(OpenSSL REQUIRED)
-find_package(ZLIB REQUIRED)
-find_package(Olm 2 REQUIRED)
-find_package(sodium REQUIRED)
+include(FeatureSummary)
+
+find_package(OpenSSL)
+set_package_properties(OpenSSL PROPERTIES
+    DESCRIPTION "Open source SSL and TLS implementation and cryptographic library"
+    URL "https://www.openssl.org/"
+    TYPE REQUIRED
+)
+
+find_package(ZLIB)
+set_package_properties(ZLIB PROPERTIES
+    DESCRIPTION "A free compression library unencumbered by patents"
+    URL "https://www.zlib.net/"
+    TYPE REQUIRED
+)
+
+find_package(Olm 2)
+set_package_properties(Olm PROPERTIES
+    DESCRIPTION "An implementation of the Double Ratchet cryptographic ratchet"
+    URL "https://git.matrix.org/git/olm/about/"
+    TYPE REQUIRED
+)
+
+find_package(sodium)
+set_package_properties(sodium PROPERTIES
+    DESCRIPTION "A modern, portable, easy to use crypto library"
+    URL "https://github.com/jedisct1/libsodium"
+    TYPE REQUIRED
+)
+
 find_package(nlohmann_json 3.2.0)
+set_package_properties(nlohmann_json PROPERTIES
+    DESCRIPTION "JSON for Modern C++, a C++11 header-only JSON class"
+    URL "https://nlohmann.github.io/json/"
+    TYPE REQUIRED
+)
 
 set(Boost_USE_STATIC_LIBS OFF)
 set(Boost_USE_STATIC_RUNTIME OFF)
 set(Boost_USE_MULTITHREADED ON)
-find_package(Boost 1.66 REQUIRED
+find_package(Boost 1.66
              COMPONENTS atomic
                         chrono
                         date_time
@@ -65,6 +96,11 @@ find_package(Boost 1.66 REQUIRED
                         regex
                         system
                         thread)
+set_package_properties(Boost PROPERTIES
+    DESCRIPTION "Free peer-reviewed portable C++ source libraries"
+    URL "https://www.boost.org/"
+    TYPE REQUIRED
+)
 
 add_library(matrix_client
             lib/http/client.cpp
@@ -153,6 +189,8 @@ endif()
 if(BUILD_LIB_EXAMPLES)
   add_subdirectory(examples)
 endif()
+
+feature_summary(WHAT ALL INCLUDE_QUIET_PACKAGES FATAL_ON_MISSING_REQUIRED_PACKAGES)
 
 #
 # Installation & Target configuration.
