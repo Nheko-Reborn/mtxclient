@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -ex
+
 if [ $TRAVIS_OS_NAME == linux ]; then
     sudo update-alternatives --remove-all gcc
     sudo update-alternatives --remove-all g++

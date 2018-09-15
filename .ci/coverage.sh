@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -ex
+
 cd build/
 
 # Capture coverage info.

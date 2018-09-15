@@ -3,6 +3,8 @@
 #include "mtxclient/crypto/client.hpp"
 #include "mtxclient/crypto/types.hpp"
 
+#include "sodium.h"
+
 using json = nlohmann::json;
 using namespace mtx::crypto;
 
