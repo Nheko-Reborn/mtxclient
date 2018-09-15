@@ -1071,6 +1071,65 @@ TEST(ExportSessions, EncryptDecrypt)
         EXPECT_EQ(json(keys).dump(), json(restored_keys).dump());
 }
 
+TEST(ExportSessions, InboundMegolmSessions)
+{
+        auto alice = std::make_shared<OlmClient>();
+        alice->create_new_account();
+        alice->generate_one_time_keys(1);
+
+        auto bob = std::make_shared<OlmClient>();
+        bob->create_new_account();
+        bob->generate_one_time_keys(1);
+
+        // ==================== SESSION SETUP =================== //
+
+        // Alice wants to send an encrypted megolm message to Bob.
+        const std::string secret_message = "Hey, Bob!";
+
+        // Alice creates an outbound megolm session that will be used by both parties.
+        auto outbound_megolm_session = alice->init_outbound_group_session();
+        auto msg_index = olm_outbound_group_session_message_index(outbound_megolm_session.get());
+        ASSERT_EQ(msg_index, 0);
+
+        // Alice extracts the session id & session key so she can share them with Bob.
+        const auto session_id  = mtx::crypto::session_id(outbound_megolm_session.get());
+        const auto session_key = mtx::crypto::session_key(outbound_megolm_session.get());
+
+        // Encrypt the message using megolm.
+        auto encrypted_secret_message =
+          alice->encrypt_group_message(outbound_megolm_session.get(), secret_message);
+
+        msg_index = olm_outbound_group_session_message_index(outbound_megolm_session.get());
+        ASSERT_EQ(msg_index, 1);
+
+        // Bob will use the session_key to create an inbound megolm session.
+        // The session_id will be used to map future messages to this session.
+        auto inbound_megolm_session = bob->init_inbound_group_session(session_key);
+
+        // Bob can finally decrypt Alice's original message.
+        auto ciphertext =
+          std::string((char *)encrypted_secret_message.data(), encrypted_secret_message.size());
+        auto bob_plaintext = bob->decrypt_group_message(inbound_megolm_session.get(), ciphertext);
+
+        auto output_str = std::string((char *)bob_plaintext.data.data(), bob_plaintext.data.size());
+        ASSERT_EQ(output_str, secret_message);
+
+        // ==================== SESSION IMPORT/EXPORT =================== //
+
+        auto exported_session_key     = export_session(inbound_megolm_session.get());
+        auto restored_inbound_session = import_session(exported_session_key);
+
+        // Decrypt message again.
+        auto restored_ciphertext =
+          std::string((char *)encrypted_secret_message.data(), encrypted_secret_message.size());
+        auto restored_plaintext =
+          bob->decrypt_group_message(restored_inbound_session.get(), restored_ciphertext);
+
+        auto restored_output_str =
+          std::string((char *)restored_plaintext.data.data(), restored_plaintext.data.size());
+        ASSERT_EQ(restored_output_str, secret_message);
+}
+
 TEST(Encryption, DISABLED_HandleRoomKeyEvent) {}
 TEST(Encryption, DISABLED_HandleRoomKeyRequestEvent) {}
 TEST(Encryption, DISABLED_HandleNewDevices) {}

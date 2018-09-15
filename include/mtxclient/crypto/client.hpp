@@ -214,9 +214,17 @@ session_id(OlmSession *s);
 std::string
 session_id(OlmOutboundGroupSession *s);
 
-//! Retrieve the session key.
+//! Retrieve the session key from an *outbound* megolm session.
 std::string
 session_key(OlmOutboundGroupSession *s);
+
+//! Retrieve the session key from an *inbound* megolm session.
+std::string
+export_session(OlmInboundGroupSession *s);
+
+//! Create an *inbound* megolm session from an exported session key.
+InboundGroupSessionPtr
+import_session(const std::string &session_key);
 
 bool
 matches_inbound_session(OlmSession *session, const std::string &one_time_key_message);

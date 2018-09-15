@@ -437,6 +437,36 @@ mtx::crypto::session_key(OlmOutboundGroupSession *s)
         return std::string(tmp.begin(), tmp.end());
 }
 
+std::string
+mtx::crypto::export_session(OlmInboundGroupSession *s)
+{
+        const size_t len     = olm_export_inbound_group_session_length(s);
+        const uint32_t index = olm_inbound_group_session_first_known_index(s);
+
+        auto session_key = create_buffer(len);
+        const int rc =
+          olm_export_inbound_group_session(s, session_key.data(), session_key.size(), index);
+
+        if (rc == -1)
+                throw olm_exception("session_key", s);
+
+        return std::string(session_key.begin(), session_key.end());
+}
+
+InboundGroupSessionPtr
+mtx::crypto::import_session(const std::string &session_key)
+{
+        auto session = create_olm_object<InboundSessionObject>();
+
+        const int rc = olm_import_inbound_group_session(
+          session.get(), reinterpret_cast<const uint8_t *>(session_key.data()), session_key.size());
+
+        if (rc == -1)
+                throw olm_exception("import_session", session.get());
+
+        return session;
+}
+
 bool
 mtx::crypto::matches_inbound_session(OlmSession *session, const std::string &one_time_key_message)
 {
