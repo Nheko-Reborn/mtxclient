@@ -2,7 +2,7 @@
 
 set -ex
 
-cd build/
+cd build/tests
 
 # Capture coverage info.
 lcov --directory . --capture --output-file coverage.info 
