@@ -39,6 +39,9 @@ asan: ## Create a debug build using address sanitizers
 		-DASAN=1
 	@cmake --build build
 
+image:
+	docker build -t mtxclient-dev .
+
 synapse: ## Start a synapse instance on docker
 	@docker run -v `pwd`/data:/data --rm \
 		-e SERVER_NAME=localhost -e REPORT_STATS=no ${SYNAPSE_IMAGE} generate

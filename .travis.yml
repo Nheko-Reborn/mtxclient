@@ -63,6 +63,6 @@ script:
 
 after_success:
   # Generate coverage report and upload report to CodeCov.
-  - if [ $COVERAGE == ON ]; then make -C build matrix_client_coverage; fi
+  - if [ $COVERAGE == ON ]; then make -C build/tests matrix_client_coverage; fi
   - if [ $COVERAGE == ON ]; then ./.ci/coverage.sh; fi
   - if [ $COVERAGE == ON ]; then bash <(curl -s https://codecov.io/bash) -f "!*tests*" || echo "Codecov failed"; fi
