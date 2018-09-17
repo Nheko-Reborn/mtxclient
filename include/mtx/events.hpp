@@ -141,6 +141,7 @@ to_json(json &obj, const Event<Content> &event)
                 break;
         case EventType::Tag:
                 obj["type"] = "m.tag";
+                break;
         case EventType::Unsupported:
                 std::cout << "Unsupported type to serialize" << std::endl;
                 break;

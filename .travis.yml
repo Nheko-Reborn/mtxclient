@@ -22,21 +22,6 @@ matrix:
     - os: linux
       compiler: gcc
       env:
-        - CXX_VERSION=g++-5
-        - CC_VERSION=gcc-5
-        - TESTS=ON
-        - USE_BUNDLED_BOOST=ON
-        - LIBSODIUM_VERSION=1.0.16
-      addons:
-        apt:
-          sources:
-            - "ubuntu-toolchain-r-test"
-          packages:
-            - "g++-5"
-            - "lcov"
-    - os: linux
-      compiler: gcc
-      env:
         - CXX_VERSION=g++-8
         - CC_VERSION=gcc-8
         - TESTS=ON
