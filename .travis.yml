@@ -27,6 +27,7 @@ matrix:
         - TESTS=ON
         - COVERAGE=ON
         - USE_BUNDLED_BOOST=ON
+        - LIBSODIUM_VERSION=1.0.16
       addons:
         apt:
           sources:
@@ -41,6 +42,7 @@ matrix:
         - CC_VERSION=clang-6.0
         - TESTS=ON
         - USE_BUNDLED_BOOST=ON
+        - LIBSODIUM_VERSION=1.0.16
       addons:
         apt:
           sources:
