@@ -11,29 +11,30 @@ if [ $TRAVIS_OS_NAME == linux ]; then
 
     sudo update-alternatives --set gcc "/usr/bin/${CC_VERSION}"
     sudo update-alternatives --set g++ "/usr/bin/${CXX_VERSION}"
-fi
 
-# Build dependencies.
-cmake -Hdeps -B.deps -DCMAKE_BUILD_TYPE=Release \
-    -DUSE_BUNDLED_BOOST=${USE_BUNDLED_BOOST} \
-    -DUSE_BUNDLED_GTEST=${TESTS}
-cmake --build .deps
+    # Build the library.
+    cmake -H. -Bbuild -DCMAKE_BUILD_TYPE=Debug \
+        -DBUILD_LIB_TESTS=ON \
+        -DBUILD_SHARED_LIBS=ON \
+        -DCOVERAGE=${COVERAGE} || true
+    cmake --build build
 
-# Build the library.
-cmake -H. -Bbuild -DOPENSSL_ROOT_DIR=${OPENSLL_ROOT_DIR} \
-    -DBUILD_LIB_TESTS=${TESTS} \
-    -DBUILD_SHARED_LIBS=ON \
-    -DCMAKE_INSTALL_PREFIX=.deps/usr \
-    -DCOVERAGE=${COVERAGE} || true
-cmake --build build
-
-# Unit & Integration tests
-if [ $TESTS == ON ]; then
-    make synapse
     make test
 fi
 
-# Linting
-if [ $LINT == ON ]; then
+if [ $TRAVIS_OS_NAME == osx ]; then
+    # Build dependencies.
+    cmake -Hdeps -B.deps -DCMAKE_BUILD_TYPE=Release \
+        -DUSE_BUNDLED_BOOST=OFF \
+        -DUSE_BUNDLED_GTEST=OFF
+    cmake --build .deps
+
+    # Build the library.
+    cmake -H. -Bbuild -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl \
+        -DBUILD_LIB_TESTS=OFF \
+        -DBUILD_SHARED_LIBS=ON \
+        -DCMAKE_INSTALL_PREFIX=.deps/usr || true
+    cmake --build build
+
     make lint
 fi
