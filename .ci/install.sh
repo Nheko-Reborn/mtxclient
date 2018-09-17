@@ -22,7 +22,7 @@ if [ $TRAVIS_OS_NAME == linux ]; then
         -o libsodium-${LIBSODIUM_VERSION}.tar.gz
     tar xfz libsodium-${LIBSODIUM_VERSION}.tar.gz
     pushd libsodium-${LIBSODIUM_VERSION}/
-    ./configure && make && make check && make install         
+    ./configure && make && make check && sudo make install         
     popd
     popd
 
