@@ -567,7 +567,7 @@ mtx::crypto::decrypt_exported_sessions(const std::string &data, std::string pass
 {
         if (data.size() <
             crypto_secretbox_MACBYTES + crypto_secretbox_NONCEBYTES + crypto_pwhash_SALTBYTES)
-                throw std::runtime_error{"decrypt_exported_sessions ciphertext too small"};
+                throw sodium_exception{"decrypt_exported_sessions", "ciphertext too small"};
 
         const auto nonce_start = data.begin();
         const auto nonce_end   = nonce_start + crypto_secretbox_NONCEBYTES;
@@ -586,7 +586,7 @@ mtx::crypto::decrypt_exported_sessions(const std::string &data, std::string pass
                                        ciphertext.size(),
                                        nonce.data(),
                                        reinterpret_cast<const unsigned char *>(key.data())) != 0)
-                throw std::runtime_error{"crypto_secretbox_open_easy: failed to decrypt"};
+                throw sodium_exception{"crypto_secretbox_open_easy", "failed to decrypt"};
 
         return json::parse(std::string(decrypted.begin(), decrypted.end()));
 }
@@ -610,7 +610,7 @@ mtx::crypto::base642bin(const std::string &b64)
                                          &max_end,
                                          sodium_base64_VARIANT_ORIGINAL);
         if (rc != 0)
-                throw std::runtime_error{"base642bin failed"};
+                throw sodium_exception{"sodium_base642bin", "encoding failed"};
 
         if (bin_len != bin_maxlen)
                 ciphertext.resize(bin_len);
@@ -639,7 +639,7 @@ BinaryBuf
 mtx::crypto::derive_key(const std::string &pass, const BinaryBuf &salt)
 {
         if (salt.size() != crypto_pwhash_SALTBYTES)
-                throw std::runtime_error{"derive_key: invalid buffer size for salt"};
+                throw sodium_exception{"derive_key", "invalid buffer size for salt"};
 
         auto key = create_buffer(crypto_secretbox_KEYBYTES);
 
@@ -652,7 +652,7 @@ mtx::crypto::derive_key(const std::string &pass, const BinaryBuf &salt)
                           crypto_pwhash_OPSLIMIT_INTERACTIVE,
                           crypto_pwhash_MEMLIMIT_INTERACTIVE,
                           crypto_pwhash_ALG_DEFAULT) != 0) {
-                throw std::runtime_error{"crypto_pwhash: out of memory"};
+                throw sodium_exception{"crypto_pwhash", "out of memory"};
         }
 
         return key;

@@ -54,6 +54,19 @@ private:
         std::string msg_;
 };
 
+class sodium_exception : public std::exception
+{
+public:
+        sodium_exception(std::string func, const char *msg)
+          : msg_(func + ": " + std::string(msg))
+        {}
+
+        virtual const char *what() const throw() { return msg_.c_str(); }
+
+private:
+        std::string msg_;
+};
+
 //! Create a uint8_t buffer which is initialized with random bytes.
 inline BinaryBuf
 create_buffer(std::size_t nbytes)

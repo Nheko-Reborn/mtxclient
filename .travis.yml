@@ -61,6 +61,6 @@ after_success:
     if [ $COVERAGE == ON ]; then
       docker run -v `pwd`:/build \
         --net=host mujx/mtxclient-dev:0.1.0 \
-        /bin/bash -c "cmake --build --target test_coverage && ./.ci/coverage.sh" && \
+        /bin/bash -c "cmake --build build --target test_coverage && ./.ci/coverage.sh" && \
       bash <(curl -s https://codecov.io/bash) -f "!*tests*" || echo "Codecov failed"
     fi
