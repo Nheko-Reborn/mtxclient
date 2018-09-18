@@ -39,7 +39,7 @@ if(COVERAGE)
   add_custom_target(ctest COMMAND ${CMAKE_CTEST_COMMAND})
   set(CMAKE_CXX_FLAGS
       "${CMAKE_CXX_FLAGS} -g -O0 -fprofile-arcs -ftest-coverage")
-  setup_target_for_coverage(${PROJECT_NAME}_coverage ctest coverage)
+  setup_target_for_coverage(test_coverage ctest coverage)
 endif()
 
 if(NOT MSVC AND NOT APPLE)
@@ -145,10 +145,6 @@ if(IWYU)
   endif()
 endif()
 
-if(BUILD_LIB_TESTS)
-  add_subdirectory(tests)
-endif()
-
 if(BUILD_LIB_EXAMPLES)
   add_subdirectory(examples)
 endif()
@@ -203,3 +199,104 @@ export(EXPORT
 export(PACKAGE MatrixClient)
 
 set_property(TARGET matrix_client PROPERTY SOVERSION ${PROJECT_VERSION})
+
+if(BUILD_LIB_TESTS)
+  enable_testing()
+
+  find_package(GTest REQUIRED)
+
+  file(COPY tests/fixtures DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+
+  add_executable(client_api tests/client_api.cpp)
+  target_link_libraries(client_api
+                        MatrixClient::MatrixClient
+                        GTest::GTest
+                        GTest::Main)
+  target_include_directories(client_api PRIVATE
+                             ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+
+  add_executable(media_api tests/media_api.cpp)
+  target_link_libraries(media_api
+                        MatrixClient::MatrixClient
+                        GTest::GTest
+                        GTest::Main)
+  target_include_directories(media_api PRIVATE
+                             ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+
+  add_executable(e2ee tests/e2ee.cpp)
+  target_link_libraries(e2ee
+                        MatrixClient::MatrixClient
+                        GTest::GTest
+                        GTest::Main)
+  target_include_directories(e2ee PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+
+  add_executable(utils tests/utils.cpp)
+  target_link_libraries(utils
+                        MatrixClient::MatrixClient
+                        GTest::GTest
+                        GTest::Main)
+  target_include_directories(utils PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+
+  add_executable(connection tests/connection.cpp)
+  target_link_libraries(connection
+                        MatrixClient::MatrixClient
+                        GTest::GTest
+                        GTest::Main)
+  target_include_directories(connection PRIVATE
+                             ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+
+  add_executable(identifiers tests/identifiers.cpp)
+  target_link_libraries(identifiers
+                        MatrixClient::MatrixClient
+                        GTest::GTest
+                        GTest::Main)
+
+  add_executable(events tests/events.cpp)
+  target_link_libraries(events
+                        MatrixClient::MatrixClient
+                        GTest::GTest
+                        GTest::Main)
+
+  add_executable(messages tests/messages.cpp)
+  target_link_libraries(messages
+                        MatrixClient::MatrixClient
+                        GTest::GTest
+                        GTest::Main)
+
+  add_executable(responses tests/responses.cpp)
+  target_link_libraries(responses
+                        MatrixClient::MatrixClient
+                        GTest::GTest
+                        GTest::Main)
+
+  add_executable(requests tests/requests.cpp)
+  target_link_libraries(requests
+                        MatrixClient::MatrixClient
+                        GTest::GTest
+                        GTest::Main)
+
+  add_executable(errors tests/errors.cpp)
+  target_link_libraries(errors
+                        MatrixClient::MatrixClient
+                        GTest::GTest
+                        GTest::Main)
+
+  add_executable(crypto tests/crypto.cpp)
+  target_link_libraries(crypto
+                        MatrixClient::MatrixClient
+                        GTest::GTest
+                        GTest::Main)
+
+  add_test(BasicConnectivity connection)
+  add_test(ClientAPI client_api)
+  add_test(MediaAPI media_api)
+  add_test(Encryption e2ee)
+  add_test(Utilities utils)
+  add_test(Identifiers identifiers)
+  add_test(Errors errors)
+  add_test(CryptoStructs crypto)
+  add_test(StateEvents events)
+  add_test(RoomEvents messages)
+  add_test(Responses responses)
+  add_test(Requests requests)
+endif()

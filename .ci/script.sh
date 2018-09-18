@@ -19,7 +19,10 @@ if [ $TRAVIS_OS_NAME == linux ]; then
         -DCOVERAGE=${COVERAGE} || true
     cmake --build build
 
-    make test
+    # The tests will run anyway during coverage.
+    if [ $COVERAGE != ON ]; then
+        make test
+    fi
 fi
 
 if [ $TRAVIS_OS_NAME == osx ]; then

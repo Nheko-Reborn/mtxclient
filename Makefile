@@ -29,7 +29,7 @@ release: ## Create an optimized build
 	@cmake --build build
 
 test: ## Run the tests
-	@cd build/tests && GTEST_COLOR=1 ctest --verbose
+	@cd build/ && GTEST_COLOR=1 ctest --verbose
 
 asan: ## Create a debug build using address sanitizers
 	@cmake -GNinja -H. -Bbuild \

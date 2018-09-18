@@ -20,12 +20,12 @@ matrix:
       env:
         - CXX_VERSION=g++-8
         - CC_VERSION=gcc-8
-        - COVERAGE=ON
     - os: linux
       compiler: clang
       env:
         - CXX_VERSION=clang++-6.0
         - CC_VERSION=clang-6.0
+        - COVERAGE=ON
 
 install:
   - ./.ci/install.sh
@@ -61,6 +61,6 @@ after_success:
     if [ $COVERAGE == ON ]; then
       docker run -v `pwd`:/build \
         --net=host mujx/mtxclient-dev:0.1.0 \
-        /bin/bash -c "./.ci/coverage.sh" && \
+        /bin/bash -c "cmake --build --target test_coverage && ./.ci/coverage.sh" && \
       bash <(curl -s https://codecov.io/bash) -f "!*tests*" || echo "Codecov failed"
     fi
