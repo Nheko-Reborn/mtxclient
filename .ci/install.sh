@@ -4,6 +4,6 @@ set -ex
 
 if [ $TRAVIS_OS_NAME == osx ]; then
     brew update || true
-    brew upgrade boost
+    brew upgrade boost || true
     brew install libsodium
 fi
