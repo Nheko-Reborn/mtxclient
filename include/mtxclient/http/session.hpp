@@ -85,7 +85,7 @@ setup_headers(mtx::http::Session *session,
               const std::string &endpoint,
               const std::string &content_type = "")
 {
-        session->request.set(boost::beast::http::field::user_agent, "mtxclient v0.1.0");
+        session->request.set(boost::beast::http::field::user_agent, "mtxclient v0.2.0");
         session->request.set(boost::beast::http::field::accept_encoding, "gzip,deflate");
         session->request.set(boost::beast::http::field::host, session->host);
 

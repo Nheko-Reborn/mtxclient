@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.1)
 
-project(matrix_client VERSION 0.1.0 LANGUAGES CXX C)
+project(matrix_client VERSION 0.2.0 LANGUAGES CXX C)
 
 option(ASAN "Compile with address sanitizers" OFF)
 option(BUILD_LIB_TESTS "Build tests" ON)
