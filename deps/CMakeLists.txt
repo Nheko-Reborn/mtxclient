@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.11)
 project(MTXCLIENT_DEPS)
 
 # Point CMake at any custom modules we may ship
@@ -32,6 +32,11 @@ option(USE_EXISTING_SRC_DIR
        OFF)
 
 include(ExternalProject)
+
+if(USE_BUNDLED_BOOST)
+  # bundled boost is 1.68, which requires CMake 3.13 or greater.
+  cmake_minimum_required(VERSION 3.13)
+endif()
 
 set(BOOST_URL
     https://dl.bintray.com/boostorg/release/1.68.0/source/boost_1_68_0.tar.bz2)

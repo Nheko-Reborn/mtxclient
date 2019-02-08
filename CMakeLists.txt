@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.11)
 
 project(matrix_client VERSION 0.2.0 LANGUAGES CXX C)
 
@@ -54,7 +54,7 @@ endif()
 find_package(OpenSSL REQUIRED)
 find_package(ZLIB REQUIRED)
 find_package(Olm 2 REQUIRED)
-find_package(sodium REQUIRED)
+find_package(sodium 1.0.14 REQUIRED)
 
 set(Boost_USE_STATIC_LIBS OFF)
 set(Boost_USE_STATIC_RUNTIME OFF)
