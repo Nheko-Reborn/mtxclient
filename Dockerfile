@@ -78,7 +78,7 @@ RUN \
     cd json && \
     cmake . && \
     make && \
-    make install
+    make install && \
     #curl -L https://github.com/nlohmann/json/releases/download/v3.2.0/json.hpp -o /usr/local/include/json.hpp && \
     rm -rf /build/* && \
     rm -rf /var/lib/apt/lists/* && \
