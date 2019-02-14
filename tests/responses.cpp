@@ -3,7 +3,7 @@
 #include <fstream>
 
 #include <boost/variant.hpp>
-#include <json.hpp>
+#include <nlohmann/json.hpp>
 
 #include <mtx.hpp>
 

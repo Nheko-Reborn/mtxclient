@@ -1,6 +1,6 @@
 #include <string>
 
-#include <json.hpp>
+#include <nlohmann/json.hpp>
 
 #include "mtx/events/avatar.hpp"
 

@@ -4,7 +4,7 @@
 #include <memory>
 #include <new>
 
-#include <json.hpp>
+#include <nlohmann/json.hpp>
 #include <sodium.h>
 
 #include <mtx/identifiers.hpp>
