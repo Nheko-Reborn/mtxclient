@@ -1,7 +1,7 @@
 mtxclient
 ---
-[![Build Status](https://travis-ci.org/mujx/mtxclient.svg?branch=master)](https://travis-ci.org/mujx/mtxclient)
-[![Build status](https://ci.appveyor.com/api/projects/status/5hl7a6dc5s60xpxy/branch/master?svg=true)](https://ci.appveyor.com/project/mujx/mtxclient/branch/master)
+[![Build Status](https://travis-ci.org/Nheko-Reborn/mtxclient.svg?branch=master)](https://travis-ci.org/Nheko-Reborn/mtxclient)
+[![Build status](https://ci.appveyor.com/api/projects/status/hyp1n9pq3wtv8dqu/branch/master?svg=true)](https://ci.appveyor.com/project/redsky17/mtxclient/branch/master)
 [![codecov](https://codecov.io/gh/mujx/mtxclient/branch/master/graph/badge.svg)](https://codecov.io/gh/mujx/mtxclient)
 [![experimental](https://img.shields.io/badge/stability-experimental-orange.svg)](http://github.com/badges/stability-badges)
 
@@ -16,6 +16,7 @@ Client API library for the Matrix protocol, built on top of Boost.Asio.
 - C++ 14 compiler
 - CMake 3.1 or greater
 - Google Test (for testing)
+- libsodium 1.0.14 or greater
 
 Boost and GTest will be built automatically by CMake if they're not found on  your system.
 
