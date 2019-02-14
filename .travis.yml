@@ -40,7 +40,8 @@ script:
   # Build the lib and run the test suite against synapse.
   - |
     if [ $TRAVIS_OS_NAME == linux ]; then
-      docker build -t nheko-reborn/mtxclient .
+      ls `pwd`
+      docker build -t nheko-reborn/mtxclient `pwd`/Dockerfile
       docker run -v `pwd`:/build --net=host \
         -e CXX_VERSION=${CXX_VERSION} \
         -e CC_VERSION=${CC_VERSION} \
