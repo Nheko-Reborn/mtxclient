@@ -12,7 +12,7 @@
 #include <boost/signals2.hpp>
 #include <boost/signals2/signal_type.hpp>
 #include <boost/thread/thread.hpp>
-#include <json.hpp>
+#include <nlohmann/json.hpp>
 
 #include <mtx/requests.hpp>
 #include <mtx/responses.hpp>

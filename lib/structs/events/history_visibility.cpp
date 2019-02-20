@@ -1,4 +1,4 @@
-#include <json.hpp>
+#include <nlohmann/json.hpp>
 #include <string>
 
 #include "mtx/events/history_visibility.hpp"

@@ -7,7 +7,7 @@
 #include "mtx/events.hpp"
 #include "mtx/events/collections.hpp"
 #include "mtx/identifiers.hpp"
-#include <json.hpp>
+#include <nlohmann/json.hpp>
 
 using json = nlohmann::json;
 

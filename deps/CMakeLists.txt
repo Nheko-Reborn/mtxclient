@@ -34,8 +34,8 @@ option(USE_EXISTING_SRC_DIR
 include(ExternalProject)
 
 if(USE_BUNDLED_BOOST)
-  # bundled boost is 1.68, which requires CMake 3.13 or greater.
-  cmake_minimum_required(VERSION 3.13)
+  # bundled boost is 1.68, which requires CMake 3.12 or greater.
+  cmake_minimum_required(VERSION 3.12)
 endif()
 
 set(BOOST_URL
@@ -58,7 +58,7 @@ set(JSON_HEADER_URL
 set(JSON_HEADER_HASH
     ce6b5610a051ec6795fa11c33854abebb086f0fd67c311f5921c3c07f9531b44)
 
-file(DOWNLOAD ${JSON_HEADER_URL} ${DEPS_INSTALL_DIR}/include/json.hpp
+file(DOWNLOAD ${JSON_HEADER_URL} ${DEPS_INSTALL_DIR}/nlohmann/include/json.hpp
      EXPECTED_HASH SHA256=${JSON_HEADER_HASH})
 
 if(USE_BUNDLED_BOOST)

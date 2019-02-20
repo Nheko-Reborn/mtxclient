@@ -4,7 +4,7 @@
 #include <iosfwd>
 #include <map>
 
-#include <json.hpp>
+#include <nlohmann/json.hpp>
 
 namespace mtx {
 namespace client {

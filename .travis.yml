@@ -28,6 +28,11 @@ matrix:
         - COVERAGE=ON
 
 install:
+  - |
+    if [ "$TRAVIS_OS_NAME" = "linux" ]; then 
+        docker build -t nheko-reborn/mtxclient -f Dockerfile .
+    fi
+
   - ./.ci/install.sh
 
 script:
@@ -45,7 +50,7 @@ script:
         -e CC_VERSION=${CC_VERSION} \
         -e COVERAGE=${COVERAGE} \
         -e TRAVIS_OS_NAME=${TRAVIS_OS_NAME} \
-        mujx/mtxclient-dev:0.1.0 \
+        nheko-reborn/mtxclient \
         /bin/bash -c "./.ci/script.sh"
     fi
 
@@ -60,7 +65,7 @@ after_success:
   - |
     if [ $COVERAGE == ON ]; then
       docker run -v `pwd`:/build \
-        --net=host mujx/mtxclient-dev:0.1.0 \
+        --net=host nheko-reborn/mtxclient \
         /bin/bash -c "make -C build -j1 test_coverage && ./.ci/coverage.sh" && \
       bash <(curl -s https://codecov.io/bash) -f "!*tests*" || echo "Codecov failed"
     fi

@@ -3,7 +3,7 @@ FROM ubuntu:14.04
 ENV LIBSODIUM_VERSION=1.0.16
 ENV SPDLOG_VERSION=1.1.0
 ENV OLM_VERSION=2.2.2
-
+ENV NLOHMANN_VERSION=v3.2.0
 ENV CMAKE_VERSION=3.12.1
 ENV CMAKE_SHORT_VERSION=3.12
 
@@ -68,12 +68,18 @@ RUN \
     git clone https://git.matrix.org/git/olm.git && \
     cd olm && mkdir -p cmake && \
     git checkout ${OLM_VERSION} && \
-    curl -L https://raw.githubusercontent.com/mujx/mtxclient/master/deps/cmake/OlmCMakeLists.txt -o CMakeLists.txt && \
-    curl -L https://raw.githubusercontent.com/mujx/mtxclient/master/deps/cmake/OlmConfig.cmake.in -o cmake/OlmConfig.cmake.in && \
+    curl -L https://raw.githubusercontent.com/Nheko-Reborn/mtxclient/master/deps/cmake/OlmCMakeLists.txt -o CMakeLists.txt && \
+    curl -L https://raw.githubusercontent.com/Nheko-Reborn/mtxclient/master/deps/cmake/OlmConfig.cmake.in -o cmake/OlmConfig.cmake.in && \
     cmake -H. -Bbuild -GNinja -DCMAKE_BUILD_TYPE=Release && \
     cmake --build build --target install && \
     # json.hpp
-    curl -L https://github.com/nlohmann/json/releases/download/v3.2.0/json.hpp -o /usr/local/include/json.hpp && \
+    mkdir /build/json && cd /build/json && \
+    git clone --branch ${NLOHMANN_VERSION} --depth 1 https://github.com/nlohmann/json && \
+    cd json && \
+    cmake . && \
+    make && \
+    make install && \
+    #curl -L https://github.com/nlohmann/json/releases/download/v3.2.0/json.hpp -o /usr/local/include/json.hpp && \
     rm -rf /build/* && \
     rm -rf /var/lib/apt/lists/* && \
     apt-get clean && \

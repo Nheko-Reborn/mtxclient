@@ -1,4 +1,9 @@
-find_package(spdlog 1.0.0 CONFIG REQUIRED)
+find_package(spdlog 1.0.0 CONFIG)
+set_package_properties(spdlog PROPERTIES
+    DESCRIPTION "Very fast, header only, C++ logging library"
+    URL "https://github.com/gabime/spdlog"
+    TYPE REQUIRED
+)
 
 include_directories(../tests)
 
