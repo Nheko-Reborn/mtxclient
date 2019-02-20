@@ -28,7 +28,10 @@ matrix:
         - COVERAGE=ON
 
 install:
-  if [ "$TRAVIS_OS_NAME" = "linux" ]; then docker build -t nheko-reborn/mtxclient -f Dockerfile . ; fi
+  - |
+    if [ "$TRAVIS_OS_NAME" = "linux" ]; then 
+        docker build -t nheko-reborn/mtxclient -f Dockerfile .
+    fi
 
   - ./.ci/install.sh
 
