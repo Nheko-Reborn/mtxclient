@@ -90,7 +90,10 @@ parse(const std::string &id)
                 identifier.hostname_  = id.substr(parts + 1);
                 identifier.id_        = id;
         } else {
-                throw std::invalid_argument(id + ": invalid format\n");
+                // V3 event ids don't use ':' at all, don't parse them the same way.
+                identifier.localpart_ = id;
+                identifier.hostname_ = id;
+                identifier.id_ = id;
         }
 
         return identifier;
