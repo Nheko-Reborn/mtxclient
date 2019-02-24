@@ -170,7 +170,8 @@ target_link_libraries(matrix_client
                       OpenSSL::Crypto
                       OpenSSL::SSL
                       Olm::Olm
-                      ZLIB::ZLIB)
+                      ZLIB::ZLIB
+                      nlohmann_json::nlohmann_json)
 
 if(NOT MSVC AND NOT APPLE)
   target_link_libraries(matrix_client PUBLIC Threads::Threads)

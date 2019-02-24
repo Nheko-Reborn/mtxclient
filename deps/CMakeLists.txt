@@ -26,6 +26,7 @@ option(USE_BUNDLED_SPDLOG "Use the bundled version of spdlog." ${USE_BUNDLED})
 option(USE_BUNDLED_OLM "Use the bundled version of libolm." ${USE_BUNDLED})
 option(USE_BUNDLED_GTEST "Use the bundled version of Google Test."
        ${USE_BUNDLED})
+option(USE_BUNDLED_JSON "Use the bundled version of nlohmann json." ${USE_BUNDLED})
 
 option(USE_EXISTING_SRC_DIR
        "Skip download of deps sources in case of existing source directory."
@@ -53,13 +54,14 @@ set(SPDLOG_URL https://github.com/gabime/spdlog/archive/v1.1.0.tar.gz)
 set(SPDLOG_HASH
     3dbcbfd8c07e25f5e0d662b194d3a7772ef214358c49ada23c044c4747ce8b19)
 
-set(JSON_HEADER_URL
-    https://github.com/nlohmann/json/releases/download/v3.2.0/json.hpp)
-set(JSON_HEADER_HASH
-    ce6b5610a051ec6795fa11c33854abebb086f0fd67c311f5921c3c07f9531b44)
+set(JSON_URL
+    https://github.com/nlohmann/json.git)
+set(JSON_TAG
+    v3.2.0)
 
-file(DOWNLOAD ${JSON_HEADER_URL} ${DEPS_INSTALL_DIR}/nlohmann/include/json.hpp
-     EXPECTED_HASH SHA256=${JSON_HEADER_HASH})
+if(USE_BUNDLED_JSON)
+  include(Json)
+endif()
 
 if(USE_BUNDLED_BOOST)
   include(Boost)

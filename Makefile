@@ -10,7 +10,7 @@ help: ## This help message
 	@# Change the digit following by an 's' to adjust the width of the help text
 
 third-party: ## Build & install third party dependencies
-	@cmake -GNinja -H${DEPS_SOURCE_DIR} -B${DEPS_BUILD_DIR} -DCMAKE_BUILD_TYPE=Release -DUSE_BUNDLED_BOOST=OFF
+	@cmake -GNinja -H${DEPS_SOURCE_DIR} -B${DEPS_BUILD_DIR} -DCMAKE_BUILD_TYPE=Release -DUSE_BUNDLED_BOOST=OFF -DUSE_BUNDLED_JSON=OFF
 	@cmake --build ${DEPS_BUILD_DIR}
 
 debug: ## Create a debug build

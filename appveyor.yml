@@ -38,6 +38,7 @@ build_script:
         -DUSE_BUNDLED_BOOST=OFF
         -DUSE_BUNDLED_SPDLOG=OFF
         -DUSE_BUNDLED_GTEST=OFF
+        -DUSE_BUNDLED_JSON=OFF
     - cmake --build .deps --config Release
 
     - cmake -G "Visual Studio 15 2017 Win64" -H. -Bbuild
