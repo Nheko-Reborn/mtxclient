@@ -31,7 +31,7 @@ if [ $TRAVIS_OS_NAME == osx ]; then
     # Build dependencies.
     cmake -Hdeps -B.deps -DCMAKE_BUILD_TYPE=Release \
         -DUSE_BUNDLED_BOOST=OFF \
-        -DUSE_BUNDLED_GTEST=OFF
+        -DUSE_BUNDLED_GTEST=OFF \
         -DUSE_BUNDLED_JSON=OFF
     cmake --build .deps
 
