@@ -7,5 +7,7 @@ if [ $TRAVIS_OS_NAME == osx ]; then
     brew upgrade boost || true
     brew install libsodium clang-format
     brew tap nlohmann/json
-    brew install nlohmann_json
+    # the nlohmann install seems to make travis angry 
+    # because of the number of log messages
+    brew install --with-cmake nlohmann_json > /dev/null
 fi
