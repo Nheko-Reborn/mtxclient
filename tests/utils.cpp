@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
-#include <nlohmann/json.hpp>
 #include <mtxclient/crypto/client.hpp>
+#include <nlohmann/json.hpp>
 
 #include <olm/olm.h>
 

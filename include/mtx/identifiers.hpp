@@ -92,8 +92,8 @@ parse(const std::string &id)
         } else {
                 // V3 event ids don't use ':' at all, don't parse them the same way.
                 identifier.localpart_ = id;
-                identifier.hostname_ = id;
-                identifier.id_ = id;
+                identifier.hostname_  = id;
+                identifier.id_        = id;
         }
 
         return identifier;

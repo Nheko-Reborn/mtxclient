@@ -2,8 +2,8 @@
 
 #include <string>
 
-#include <nlohmann/json.hpp>
 #include <mtx/common.hpp>
+#include <nlohmann/json.hpp>
 
 using json = nlohmann::json;
 

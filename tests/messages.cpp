@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
-#include <nlohmann/json.hpp>
 #include <mtx.hpp>
+#include <nlohmann/json.hpp>
 
 using json = nlohmann::json;
 
