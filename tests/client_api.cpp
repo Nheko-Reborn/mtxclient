@@ -706,7 +706,7 @@ TEST(ClientAPI, SendMessages)
                               room_id,
                               text,
                               [&event_ids](const mtx::responses::EventId &res, RequestErr err) {
-                                      event_ids.push_back(res.event_id.to_string());
+                                      event_ids.push_back(res.event_id);
                                       check_error(err);
                               });
 
@@ -718,7 +718,7 @@ TEST(ClientAPI, SendMessages)
                               room_id,
                               emote,
                               [&event_ids](const mtx::responses::EventId &res, RequestErr err) {
-                                      event_ids.push_back(res.event_id.to_string());
+                                      event_ids.push_back(res.event_id);
                                       check_error(err);
                               });
 
@@ -775,10 +775,10 @@ TEST(ClientAPI, RedactEvent)
 
                             alice->redact_event(
                               room_id,
-                              res.event_id.to_string(),
+                              res.event_id,
                               [](const mtx::responses::EventId &res, RequestErr err) {
                                       check_error(err);
-                                      ASSERT_FALSE(res.event_id.to_string().empty());
+                                      ASSERT_FALSE(res.event_id.empty());
                               });
                     });
         });
@@ -833,7 +833,7 @@ TEST(ClientAPI, SendStateEvents)
                       name_event,
                       [&event_ids](const mtx::responses::EventId &res, RequestErr err) {
                               check_error(err);
-                              event_ids.push_back(res.event_id.to_string());
+                              event_ids.push_back(res.event_id);
                       });
 
                   mtx::events::state::Avatar avatar;
@@ -844,7 +844,7 @@ TEST(ClientAPI, SendStateEvents)
                     avatar,
                     [&event_ids](const mtx::responses::EventId &res, RequestErr err) {
                             check_error(err);
-                            event_ids.push_back(res.event_id.to_string());
+                            event_ids.push_back(res.event_id);
                     });
 
                   while (event_ids.size() != 2)
@@ -968,10 +968,10 @@ TEST(ClientAPI, ReadMarkers)
                             check_error(err);
 
                             alice->read_event(room_id.to_string(),
-                                              res.event_id.to_string(),
+                                              res.event_id,
                                               [&event_id, res](RequestErr err) {
                                                       check_error(err);
-                                                      event_id = res.event_id.to_string();
+                                                      event_id = res.event_id;
                                               });
                     });
 
@@ -1056,8 +1056,8 @@ TEST(ClientAPI, RetrieveSingleEvent)
 
                           bob->get_event(
                             room_id,
-                            res.event_id.to_string(),
-                            [event_id = res.event_id.to_string()](
+                            res.event_id,
+                            [event_id = res.event_id](
                               const mtx::events::collections::TimelineEvents &res, RequestErr err) {
                                     check_error(err);
                                     ASSERT_TRUE(
@@ -1074,7 +1074,7 @@ TEST(ClientAPI, RetrieveSingleEvent)
                           bob->get_event(
                             room_id,
                             "$random_event:localhost",
-                            [event_id = res.event_id.to_string()](
+                            [event_id = res.event_id](
                               const mtx::events::collections::TimelineEvents &, RequestErr err) {
                                     ASSERT_TRUE(err);
                                     EXPECT_EQ(static_cast<int>(err->status_code), 404);

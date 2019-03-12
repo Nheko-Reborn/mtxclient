@@ -4,34 +4,13 @@
 
 using namespace mtx::identifiers;
 
-TEST(MatrixIdentifiers, EventValid)
-{
-        Event eventid = parse<Event>("$39hvsi03hlne:example.com");
-
-        EXPECT_EQ(eventid.to_string(), "$39hvsi03hlne:example.com");
-        EXPECT_EQ(eventid.localpart(), "39hvsi03hlne");
-        EXPECT_EQ(eventid.hostname(), "example.com");
-}
-
 TEST(MatrixIdentifiers, Hostname)
 {
-        Event eventid = parse<Event>("$39hvsi03hlne:22.23.112.44:8080");
-
-        EXPECT_EQ(eventid.to_string(), "$39hvsi03hlne:22.23.112.44:8080");
-        EXPECT_EQ(eventid.localpart(), "39hvsi03hlne");
-        EXPECT_EQ(eventid.hostname(), "22.23.112.44:8080");
-
         auto t1 = parse<User>("@39fasdsdfsdf:333.22.22.22:5000");
         EXPECT_EQ(t1.hostname(), "333.22.22.22:5000");
 
         auto t2 = parse<User>("@39fasdsdfsdf:333:22:22.22:5000");
         EXPECT_EQ(t2.hostname(), "333:22:22.22:5000");
-
-        auto t3 = parse<Event>("$39hvsi03hlne:com:109999");
-        EXPECT_EQ(t3.hostname(), "com:109999");
-
-        auto t4 = parse<Event>("$39hvsi03hlne:[33:ssdf:sd:2323]:333");
-        EXPECT_EQ(t4.hostname(), "[33:ssdf:sd:2323]:333");
 }
 
 TEST(MatrixIdentifiers, RoomValid)

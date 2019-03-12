@@ -14,7 +14,7 @@ namespace responses {
 
 struct EventId
 {
-        mtx::identifiers::Event event_id;
+	std::string event_id;
 };
 
 void

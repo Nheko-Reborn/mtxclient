@@ -373,7 +373,7 @@ send_group_message(OlmOutboundGroupSession *session,
                           return;
                   }
 
-                  console->info("message sent with event_id: {}", res.event_id.to_string());
+                  console->info("message sent with event_id: {}", res.event_id);
           });
 }
 
