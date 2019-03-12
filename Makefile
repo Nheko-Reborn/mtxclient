@@ -1,6 +1,6 @@
 FILES=`find lib include tests examples -type f -type f \( -iname "*.cpp" -o -iname "*.hpp" \)`
 
-SYNAPSE_IMAGE="avhost/docker-matrix:v0.33.4"
+SYNAPSE_IMAGE="avhost/docker-matrix:v0.99.2"
 
 DEPS_BUILD_DIR=.deps
 DEPS_SOURCE_DIR=deps
@@ -45,7 +45,12 @@ image:
 synapse: ## Start a synapse instance on docker
 	@docker run -v `pwd`/data:/data --rm \
 		-e SERVER_NAME=localhost -e REPORT_STATS=no ${SYNAPSE_IMAGE} generate
-	@./.ci/adjust-config.sh
+	@openssl req \
+		-newkey rsa:2048 -nodes \
+		-keyout ./data/localhost.tls.key -x509 -days 365 \
+		-out ./data/localhost.tls.crt \
+		-subj "/C=NL/ST=Zuid Holland/L=Rotterdam/O=Sparkling Network/OU=IT Department/CN=ssl.raymii.org"
+	@cp .ci/homeserver.yaml data/homeserver.yaml
 	@docker run -d \
 		--name synapse \
 		-p 443:8448 \
@@ -53,7 +58,7 @@ synapse: ## Start a synapse instance on docker
 		-p 8008:8008 \
 		-v `pwd`/data:/data ${SYNAPSE_IMAGE} start
 	@echo Waiting for synapse to start...
-	@until curl -s -f -k https://localhost:443/_matrix/client/versions; do echo "Checking ..."; sleep 2; done
+	@until curl -sfk https://localhost:8448/_matrix/client/versions; do echo "Checking ..."; sleep 2; done
 	@echo Register alice
 	@docker exec synapse /bin/bash -c 'register_new_matrix_user --admin -u alice -p secret -c /data/homeserver.yaml http://localhost:8008'
 	@echo Register bob
