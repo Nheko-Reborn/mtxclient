@@ -14,6 +14,7 @@
 
 #include "mtxclient/crypto/objects.hpp"
 #include "mtxclient/crypto/types.hpp"
+#include "mtxclient/crypto/utils.hpp"
 
 namespace mtx {
 namespace crypto {

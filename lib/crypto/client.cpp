@@ -2,8 +2,9 @@
 
 #include "mtxclient/crypto/client.hpp"
 #include "mtxclient/crypto/types.hpp"
+#include "mtxclient/crypto/utils.hpp"
 
-#include "sodium.h"
+#include <sodium.h>
 
 using json = nlohmann::json;
 using namespace mtx::crypto;
@@ -536,35 +537,64 @@ mtx::crypto::encrypt_exported_sessions(const mtx::crypto::ExportedSessionKeys &k
                                        std::string pass)
 {
         const auto plaintext      = json(keys).dump();
-        const auto msg_len        = plaintext.size();
-        const auto ciphertext_len = crypto_secretbox_MACBYTES + msg_len;
 
-        auto nonce      = create_buffer(crypto_secretbox_NONCEBYTES);
-        auto ciphertext = create_buffer(ciphertext_len);
+        auto nonce      = create_buffer(AES_BLOCK_SIZE);
 
         auto salt = create_buffer(crypto_pwhash_SALTBYTES);
-        auto key  = derive_key(pass, salt);
 
-        crypto_secretbox_easy(reinterpret_cast<unsigned char *>(ciphertext.data()),
-                              reinterpret_cast<const unsigned char *>(plaintext.data()),
-                              msg_len,
-                              nonce.data(),
-                              reinterpret_cast<const unsigned char *>(key.data()));
+        //auto key  = derive_key(pass, salt);
+        auto buf = create_buffer(64U);
 
-        // Format of the output buffer: (nonce + salt + ciphertext)
-        BinaryBuf output{nonce};
+
+        //crypto_secretbox_easy(reinterpret_cast<unsigned char *>(ciphertext.data()),
+        //                      reinterpret_cast<const unsigned char *>(plaintext.data()),
+        //                      msg_len,
+        //                      nonce.data(),
+        //                      reinterpret_cast<const unsigned char *>(key.data()));
+        uint32_t iterations = 100000;
+        buf = mtx::crypto::PBKDF2_HMAC_SHA_512(pass,
+                                   salt,
+                                   iterations);
+
+        BinaryBuf aes256 = BinaryBuf(buf.begin(), buf.begin() + 32);
+
+
+        BinaryBuf hmac256 = BinaryBuf(buf.begin() + 32, buf.begin() + (2 * 32));
+
+        auto ciphertext = mtx::crypto::AES_CTR_256(plaintext,
+                                aes256,
+                                nonce);
+
+        uint8_t iterationsArr[4];
+        mtx::crypto::uint32_to_uint8(iterationsArr, iterations);
+
+        // Format of the output buffer: (0x01 + salt + IV + number of rounds + ciphertext + hmac-sha-256)
+        BinaryBuf output{0x01};
         output.insert(
           output.end(), std::make_move_iterator(salt.begin()), std::make_move_iterator(salt.end()));
+        output.insert(output.end(),
+                      std::make_move_iterator(nonce.begin()),
+                      std::make_move_iterator(nonce.end()));
+        output.insert(output.end(), &iterationsArr[0], &iterationsArr[4]);
         output.insert(output.end(),
                       std::make_move_iterator(ciphertext.begin()),
                       std::make_move_iterator(ciphertext.end()));
 
-        return std::string(output.begin(), output.end());
+        // Need to hmac-sha256 our string so far, and then use that to finish making the output.
+        auto hmacSha256 = mtx::crypto::HMAC_SHA256(hmac256, output);
+
+        output.insert(output.end(),
+                      std::make_move_iterator(hmacSha256.begin()),
+                      std::make_move_iterator(hmacSha256.end()));
+        auto encrypted = std::string(output.begin(), output.end());
+
+        return encrypted;
 }
 
 mtx::crypto::ExportedSessionKeys
 mtx::crypto::decrypt_exported_sessions(const std::string &data, std::string pass)
 {
+        std::cout << "decrypt_exported_sessions data: " << data << std::endl;
         if (data.size() <
             crypto_secretbox_MACBYTES + crypto_secretbox_NONCEBYTES + crypto_pwhash_SALTBYTES)
                 throw sodium_exception{"decrypt_exported_sessions", "ciphertext too small"};
