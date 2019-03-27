@@ -106,10 +106,11 @@ set_package_properties(Boost PROPERTIES
     TYPE REQUIRED
 )
 
-add_library(matrix_client
+add_library(matrix_client SHARED
             lib/http/client.cpp
             lib/http/session.cpp
             lib/crypto/client.cpp
+            lib/crypto/utils.cpp
             lib/utils.cpp
             lib/structs/common.cpp
             lib/structs/errors.cpp
