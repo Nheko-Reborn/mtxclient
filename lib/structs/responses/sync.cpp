@@ -69,7 +69,7 @@ from_json(const json &obj, Ephemeral &ephemeral)
                                 auto users    = it.value().at("m.read");
 
                                 for (auto uit = users.begin(); uit != users.end(); ++uit) {
-					uint64_t ts = 0;
+                                        uint64_t ts = 0;
                                         try {
                                                 ts = uit.value().at("ts");
                                         } catch (json::type_error &) {
@@ -77,7 +77,7 @@ from_json(const json &obj, Ephemeral &ephemeral)
                                                   << "mtxclient: Workaround synapse bug #4898, "
                                                      "ignoring timestamp for m.receipt event\n";
                                         }
-					user_times.emplace(uit.key(), ts);
+                                        user_times.emplace(uit.key(), ts);
                                 }
 
                                 receipts.emplace(event_id, user_times);
