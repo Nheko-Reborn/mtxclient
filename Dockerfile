@@ -69,6 +69,7 @@ RUN \
     cd olm && mkdir -p cmake && \
     git checkout ${OLM_VERSION} && \
     curl -L https://raw.githubusercontent.com/Nheko-Reborn/mtxclient/master/deps/cmake/OlmCMakeLists.txt -o CMakeLists.txt && \
+    mkdir -p cmake && \
     curl -L https://raw.githubusercontent.com/Nheko-Reborn/mtxclient/master/deps/cmake/OlmConfig.cmake.in -o cmake/OlmConfig.cmake.in && \
     cmake -H. -Bbuild -GNinja -DCMAKE_BUILD_TYPE=Release && \
     cmake --build build --target install && \
