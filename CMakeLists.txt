@@ -88,6 +88,7 @@ set_package_properties(nlohmann_json PROPERTIES
     TYPE REQUIRED
 )
 
+set(BUILD_SHARED_LIBS ON)
 set(Boost_USE_STATIC_LIBS OFF)
 set(Boost_USE_STATIC_RUNTIME OFF)
 set(Boost_USE_MULTITHREADED ON)
