@@ -8,18 +8,15 @@ namespace crypto {
 
 struct OlmDeleter
 {
-        void operator()(OlmAccount *ptr) { operator delete(ptr, olm_account_size()); }
-        void operator()(OlmUtility *ptr) { operator delete(ptr, olm_utility_size()); }
+        void operator()(OlmAccount *ptr) { delete[](reinterpret_cast<uint8_t *>(ptr)); }
+        void operator()(OlmUtility *ptr) { delete[](reinterpret_cast<uint8_t *>(ptr)); }
 
-        void operator()(OlmSession *ptr) { operator delete(ptr, olm_session_size()); }
+        void operator()(OlmSession *ptr) { delete[](reinterpret_cast<uint8_t *>(ptr)); }
         void operator()(OlmOutboundGroupSession *ptr)
         {
-                operator delete(ptr, olm_outbound_group_session_size());
+                delete[](reinterpret_cast<uint8_t *>(ptr));
         }
-        void operator()(OlmInboundGroupSession *ptr)
-        {
-                operator delete(ptr, olm_inbound_group_session_size());
-        }
+        void operator()(OlmInboundGroupSession *ptr) { delete[](reinterpret_cast<uint8_t *>(ptr)); }
 };
 
 struct UtilityObject

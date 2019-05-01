@@ -1,5 +1,7 @@
 #include "mtxclient/http/session.hpp"
 
+#include <iostream>
+
 using namespace mtx::http;
 
 Session::Session(boost::asio::io_service &ios,
