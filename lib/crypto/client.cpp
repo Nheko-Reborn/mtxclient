@@ -536,39 +536,34 @@ std::string
 mtx::crypto::encrypt_exported_sessions(const mtx::crypto::ExportedSessionKeys &keys,
                                        std::string pass)
 {
-        const auto plaintext      = json(keys).dump();
+        const auto plaintext = json(keys).dump();
 
-        auto nonce      = create_buffer(AES_BLOCK_SIZE);
+        auto nonce = create_buffer(AES_BLOCK_SIZE);
 
         auto salt = create_buffer(crypto_pwhash_SALTBYTES);
 
-        //auto key  = derive_key(pass, salt);
+        // auto key  = derive_key(pass, salt);
         auto buf = create_buffer(64U);
 
-
-        //crypto_secretbox_easy(reinterpret_cast<unsigned char *>(ciphertext.data()),
+        // crypto_secretbox_easy(reinterpret_cast<unsigned char *>(ciphertext.data()),
         //                      reinterpret_cast<const unsigned char *>(plaintext.data()),
         //                      msg_len,
         //                      nonce.data(),
         //                      reinterpret_cast<const unsigned char *>(key.data()));
         uint32_t iterations = 100000;
-        buf = mtx::crypto::PBKDF2_HMAC_SHA_512(pass,
-                                   salt,
-                                   iterations);
+        buf                 = mtx::crypto::PBKDF2_HMAC_SHA_512(pass, salt, iterations);
 
         BinaryBuf aes256 = BinaryBuf(buf.begin(), buf.begin() + 32);
 
-
         BinaryBuf hmac256 = BinaryBuf(buf.begin() + 32, buf.begin() + (2 * 32));
 
-        auto ciphertext = mtx::crypto::AES_CTR_256_Encrypt(plaintext,
-                                aes256,
-                                nonce);
+        auto ciphertext = mtx::crypto::AES_CTR_256_Encrypt(plaintext, aes256, nonce);
 
         uint8_t iterationsArr[4];
         mtx::crypto::uint32_to_uint8(iterationsArr, iterations);
 
-        // Format of the output buffer: (0x01 + salt + IV + number of rounds + ciphertext + hmac-sha-256)
+        // Format of the output buffer: (0x01 + salt + IV + number of rounds + ciphertext +
+        // hmac-sha-256)
         BinaryBuf output{0x01};
         output.insert(
           output.end(), std::make_move_iterator(salt.begin()), std::make_move_iterator(salt.end()));
@@ -600,19 +595,19 @@ mtx::crypto::decrypt_exported_sessions(const std::string &data, std::string pass
         std::string binary_str = base642bin(unpacked);
 
         const auto binary_start = binary_str.begin();
-        const auto binary_end = binary_str.end();
+        const auto binary_end   = binary_str.end();
 
         // Format version 0x01, 1 byte
         const auto format_end = binary_start + 1;
         auto format           = BinaryBuf(binary_start, format_end);
 
         // Salt, 16 bytes
-        const auto salt_end   = format_end + crypto_pwhash_SALTBYTES;
-        auto salt             = BinaryBuf(format_end, salt_end);
+        const auto salt_end = format_end + crypto_pwhash_SALTBYTES;
+        auto salt           = BinaryBuf(format_end, salt_end);
 
         // IV, 16 bytes
-        const auto iv_end     = salt_end + AES_BLOCK_SIZE;
-        auto iv               = BinaryBuf(salt_end, iv_end);
+        const auto iv_end = salt_end + AES_BLOCK_SIZE;
+        auto iv           = BinaryBuf(salt_end, iv_end);
 
         // Number of rounds, 4 bytes
         const auto rounds_end = iv_end + sizeof(uint32_t);
@@ -627,12 +622,10 @@ mtx::crypto::decrypt_exported_sessions(const std::string &data, std::string pass
         auto json           = BinaryBuf(rounds_end, json_end);
 
         // HMAC of the above, 32 bytes
-        auto hmac           = BinaryBuf(json_end, binary_end);
+        auto hmac = BinaryBuf(json_end, binary_end);
 
         // derive the keys
-        auto buf = mtx::crypto::PBKDF2_HMAC_SHA_512(pass,
-                                   salt,
-                                   rounds);
+        auto buf = mtx::crypto::PBKDF2_HMAC_SHA_512(pass, salt, rounds);
 
         BinaryBuf aes256 = BinaryBuf(buf.begin(), buf.begin() + 32);
 
@@ -668,9 +661,8 @@ mtx::crypto::decrypt_exported_sessions(const std::string &data, std::string pass
         // auto key = derive_key(pass, salt);
 
         // if (crypto_secretbox_open_easy(decrypted.data(),
-        //                                reinterpret_cast<const unsigned char *>(ciphertext.data()),
-        //                                ciphertext.size(),
-        //                                nonce.data(),
+        //                                reinterpret_cast<const unsigned char
+        //                                *>(ciphertext.data()), ciphertext.size(), nonce.data(),
         //                                reinterpret_cast<const unsigned char *>(key.data())) != 0)
         //         throw sodium_exception{"crypto_secretbox_open_easy", "failed to decrypt"};
         std::string plaintext(decrypted.begin(), decrypted.end());

@@ -88,8 +88,8 @@ from_json(const nlohmann::json &obj, ExportedSessionKeys &keys)
 {
         try {
                 keys.sessions = obj.get<std::vector<ExportedSession>>();
-        // might be the old format.
-        } catch (const nlohmann::json::exception&) {
+                // might be the old format.
+        } catch (const nlohmann::json::exception &) {
                 keys.sessions = obj.at("sessions").get<std::vector<ExportedSession>>();
         }
 }
