@@ -9,6 +9,8 @@
 #include <openssl/hmac.h>
 #include <openssl/sha.h>
 
+#include <sodium.h>
+
 #include <boost/algorithm/string.hpp>
 
 namespace mtx {
@@ -19,6 +21,16 @@ using BinaryBuf = std::vector<uint8_t>;
 
 const std::string HEADER_LINE("-----BEGIN MEGOLM SESSION DATA-----");
 const std::string TRAILER_LINE("-----END MEGOLM SESSION DATA-----");
+
+//! Create a uint8_t buffer which is initialized with random bytes.
+inline BinaryBuf
+create_buffer(std::size_t nbytes)
+{
+        auto buf = BinaryBuf(nbytes);
+        randombytes_buf(buf.data(), buf.size());
+
+        return buf;
+}
 
 //! Simple wrapper around the OpenSSL PKCS5_PBKDF2_HMAC function
 BinaryBuf

@@ -32,7 +32,7 @@ AES_CTR_256_Encrypt(const std::string plaintext, const BinaryBuf aes256Key, Bina
 
         int ciphertext_len;
 
-        unsigned char *cipher = new unsigned char[plaintext.size()];
+        BinaryBuf encrypted = create_buffer(plaintext.size());
 
         uint8_t *iv_data = iv.data();
         // need to set bit 63 to 0
@@ -51,7 +51,7 @@ AES_CTR_256_Encrypt(const std::string plaintext, const BinaryBuf aes256Key, Bina
          * EVP_EncryptUpdate can be called multiple times if necessary
          */
         if (1 != EVP_EncryptUpdate(ctx,
-                                   cipher,
+                                   encrypted.data(),
                                    &len,
                                    reinterpret_cast<const unsigned char *>(&plaintext.c_str()[0]),
                                    plaintext.size())) {
@@ -62,7 +62,7 @@ AES_CTR_256_Encrypt(const std::string plaintext, const BinaryBuf aes256Key, Bina
         /* Finalise the encryption. Further ciphertext bytes may be written at
          * this stage.
          */
-        if (1 != EVP_EncryptFinal_ex(ctx, cipher + len, &len)) {
+        if (1 != EVP_EncryptFinal_ex(ctx, encrypted.data() + len, &len)) {
                 // handleErrors();
         }
 
@@ -71,8 +71,6 @@ AES_CTR_256_Encrypt(const std::string plaintext, const BinaryBuf aes256Key, Bina
         /* Clean up */
         EVP_CIPHER_CTX_free(ctx);
 
-        BinaryBuf encrypted(reinterpret_cast<uint8_t *>(cipher), cipher + ciphertext_len);
-        delete[] cipher;
         return encrypted;
 }
 
@@ -85,7 +83,7 @@ AES_CTR_256_Decrypt(const std::string ciphertext, const BinaryBuf aes256Key, Bin
 
         int plaintext_len;
 
-        unsigned char *plaintext = new unsigned char[ciphertext.size()];
+        BinaryBuf decrypted = create_buffer(ciphertext.size());
 
         /* Create and initialise the context */
         if (!(ctx = EVP_CIPHER_CTX_new())) {
@@ -105,7 +103,7 @@ AES_CTR_256_Decrypt(const std::string ciphertext, const BinaryBuf aes256Key, Bin
          * EVP_DecryptUpdate can be called multiple times if necessary
          */
         if (1 != EVP_DecryptUpdate(ctx,
-                                   plaintext,
+                                   decrypted.data(),
                                    &len,
                                    reinterpret_cast<const unsigned char *>(&ciphertext.data()[0]),
                                    ciphertext.size())) {
@@ -116,7 +114,7 @@ AES_CTR_256_Decrypt(const std::string ciphertext, const BinaryBuf aes256Key, Bin
         /* Finalise the decryption. Further plaintext bytes may be written at
          * this stage.
          */
-        if (1 != EVP_DecryptFinal_ex(ctx, plaintext + len, &len)) {
+        if (1 != EVP_DecryptFinal_ex(ctx, decrypted.data() + len, &len)) {
                 //  handleErrors();
         }
         plaintext_len += len;
@@ -124,8 +122,6 @@ AES_CTR_256_Decrypt(const std::string ciphertext, const BinaryBuf aes256Key, Bin
         /* Clean up */
         EVP_CIPHER_CTX_free(ctx);
 
-        BinaryBuf decrypted(reinterpret_cast<uint8_t *>(plaintext), plaintext + plaintext_len);
-        delete[] plaintext;
         return decrypted;
 }
 

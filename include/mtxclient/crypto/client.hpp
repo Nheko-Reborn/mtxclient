@@ -68,16 +68,6 @@ private:
         std::string msg_;
 };
 
-//! Create a uint8_t buffer which is initialized with random bytes.
-inline BinaryBuf
-create_buffer(std::size_t nbytes)
-{
-        auto buf = BinaryBuf(nbytes);
-        randombytes_buf(buf.data(), buf.size());
-
-        return buf;
-}
-
 template<class T>
 std::string
 pickle(typename T::olm_type *object, const std::string &key)
