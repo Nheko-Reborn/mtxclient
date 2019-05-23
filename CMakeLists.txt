@@ -7,7 +7,7 @@ option(BUILD_LIB_TESTS "Build tests" ON)
 option(BUILD_LIB_EXAMPLES "Build examples" ON)
 option(COVERAGE "Calculate test coverage" OFF)
 option(IWYU "Check headers with include-what-you-use" OFF)
-option(MTX_STATIC "Specifies whether to build mtxclient as a static lib or not" OFF)
+option(BUILD_SHARED_LIBS "Specifies whether to build mtxclient as a shared library lib or not" ON)
 
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 set(CMAKE_CXX_STANDARD 14)
@@ -89,7 +89,6 @@ set_package_properties(nlohmann_json PROPERTIES
     TYPE REQUIRED
 )
 
-set(BUILD_SHARED_LIBS ON)
 set(Boost_USE_STATIC_LIBS OFF)
 set(Boost_USE_STATIC_RUNTIME OFF)
 set(Boost_USE_MULTITHREADED ON)
@@ -108,12 +107,7 @@ set_package_properties(Boost PROPERTIES
     TYPE REQUIRED
 )
 
-set(LINK_TYPE SHARED)
-if(MTX_STATIC)
-    set(LINK_TYPE STATIC)
-endif(MTX_STATIC)
-
-add_library(matrix_client ${LINK_TYPE}
+add_library(matrix_client
             lib/http/client.cpp
             lib/http/session.cpp
             lib/crypto/client.cpp
