@@ -1,12 +1,13 @@
 cmake_minimum_required(VERSION 3.11)
 
-project(matrix_client VERSION 0.2.0 LANGUAGES CXX C)
+project(matrix_client VERSION 0.2.1 LANGUAGES CXX C)
 
 option(ASAN "Compile with address sanitizers" OFF)
 option(BUILD_LIB_TESTS "Build tests" ON)
 option(BUILD_LIB_EXAMPLES "Build examples" ON)
 option(COVERAGE "Calculate test coverage" OFF)
 option(IWYU "Check headers with include-what-you-use" OFF)
+option(BUILD_SHARED_LIBS "Specifies whether to build mtxclient as a shared library lib or not" ON)
 
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 set(CMAKE_CXX_STANDARD 14)
@@ -88,7 +89,6 @@ set_package_properties(nlohmann_json PROPERTIES
     TYPE REQUIRED
 )
 
-set(BUILD_SHARED_LIBS ON)
 set(Boost_USE_STATIC_LIBS OFF)
 set(Boost_USE_STATIC_RUNTIME OFF)
 set(Boost_USE_MULTITHREADED ON)
@@ -107,7 +107,7 @@ set_package_properties(Boost PROPERTIES
     TYPE REQUIRED
 )
 
-add_library(matrix_client SHARED
+add_library(matrix_client
             lib/http/client.cpp
             lib/http/session.cpp
             lib/crypto/client.cpp
