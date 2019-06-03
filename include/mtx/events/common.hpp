@@ -124,5 +124,35 @@ from_json(const json &obj, VideoInfo &info);
 void
 to_json(json &obj, const VideoInfo &info);
 
+//! In reply to data for rich replies (notice and text events)
+struct InReplyTo
+{
+        //! Event id being replied to
+        std::string event_id;
+};
+
+//! Deserialization method needed by @p nlohmann::json.
+void
+from_json(const json &obj, InReplyTo &in_reply_to);
+
+//! Serialization method needed by @p nlohmann::json.
+void
+to_json(json &obj, const InReplyTo &in_reply_to);
+
+//! Relates to data for rich replies (notice and text events)
+struct RelatesTo
+{
+        //! What the message is in reply to
+        InReplyTo in_reply_to;
+};
+
+//! Deserialization method needed by @p nlohmann::json.
+void
+from_json(const json &obj, RelatesTo &relates_to);
+
+//! Serialization method needed by @p nlohmann::json.
+void
+to_json(json &obj, const RelatesTo &relates_to);
+
 } // namespace common
 } // namespace mtx

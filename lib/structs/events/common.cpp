@@ -148,5 +148,31 @@ to_json(json &obj, const VideoInfo &info)
         obj["mimetype"]       = info.mimetype;
 }
 
+void
+from_json(const json &obj, InReplyTo &in_reply_to)
+{
+        if (obj.find("event_id") != obj.end())
+                in_reply_to.event_id = obj.at("event_id").get<std::string>();
+}
+
+void
+to_json(json &obj, const InReplyTo &in_reply_to)
+{
+        obj["event_id"] = in_reply_to.event_id;
+}
+
+void
+from_json(const json &obj, RelatesTo &relates_to)
+{
+        if (obj.find("m.in_reply_to") != obj.end())
+                relates_to.in_reply_to = obj.at("m.in_reply_to").get<InReplyTo>();
+}
+
+void
+to_json(json &obj, const RelatesTo &relates_to)
+{
+        obj["m.in_reply_to"] = relates_to.in_reply_to;
+}
+
 } // namespace common
 } // namespace mtx

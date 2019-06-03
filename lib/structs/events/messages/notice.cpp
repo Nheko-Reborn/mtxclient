@@ -21,6 +21,9 @@ from_json(const json &obj, Notice &content)
 
         if (obj.count("formatted_body") != 0)
                 content.formatted_body = obj.at("formatted_body").get<std::string>();
+
+        if (obj.count("m.relates_to") != 0)
+                content.relates_to = obj.at("m.relates_to").get<common::RelatesTo>();
 }
 
 void
@@ -33,6 +36,8 @@ to_json(json &obj, const Notice &content)
                 obj["format"]         = mtx::common::FORMAT_MSG_TYPE;
                 obj["formatted_body"] = content.formatted_body;
         }
+
+        obj["m.relates_to"] = content.relates_to;
 }
 
 } // namespace msg

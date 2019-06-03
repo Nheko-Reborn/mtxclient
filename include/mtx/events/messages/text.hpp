@@ -3,7 +3,11 @@
 #include <nlohmann/json.hpp>
 #include <string>
 
+#include "mtx/events/common.hpp"
+
 using json = nlohmann::json;
+
+namespace common = mtx::common;
 
 namespace mtx {
 namespace events {
@@ -19,6 +23,8 @@ struct Text
         std::string format;
         //! HTML formatted message.
         std::string formatted_body;
+        //! Relates to for rich replies
+        common::RelatesTo relates_to;
 };
 
 void
