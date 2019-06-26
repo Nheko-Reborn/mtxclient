@@ -528,7 +528,7 @@ mtx::http::Client::create_session(HeadersCallback<Response> callback)
                   boost::signals2::signal<void()>::slot_type(&Session::terminate, session.get())
                     .track_foreign(session));
 
-        return std::move(session);
+        return session;
 }
 
 template<class Payload, mtx::events::EventType Event>
