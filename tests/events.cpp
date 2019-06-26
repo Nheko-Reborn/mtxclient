@@ -51,6 +51,7 @@ TEST(Events, Conversions)
         EXPECT_EQ("m.room.name", ns::to_string(ns::EventType::RoomName));
         EXPECT_EQ("m.room.power_levels", ns::to_string(ns::EventType::RoomPowerLevels));
         EXPECT_EQ("m.room.topic", ns::to_string(ns::EventType::RoomTopic));
+        EXPECT_EQ("m.room.tombstone", ns::to_string(ns::EventType::RoomTombstone));
         EXPECT_EQ("m.room.redaction", ns::to_string(ns::EventType::RoomRedaction));
         EXPECT_EQ("m.room.pinned_events", ns::to_string(ns::EventType::RoomPinnedEvents));
         EXPECT_EQ("m.tag", ns::to_string(ns::EventType::Tag));
@@ -545,6 +546,37 @@ TEST(StateEvents, PowerLevels)
 
         EXPECT_EQ(event.content.user_level("@mujx:matrix.org"), 30);
         EXPECT_EQ(event.content.user_level("@not:matrix.org"), event.content.users_default);
+}
+
+TEST(StateEvents, Tombstone)
+{
+        json data = R"({
+            "content": {
+                "body": "This room has been replaced",
+                "replacement_room": "!newroom:example.org"
+            },
+            "event_id": "$143273582443PhrSn:example.org",
+            "origin_server_ts": 1432735824653,
+            "room_id": "!jEsUZKDJdhlrceRyVU:example.org",
+            "sender": "@example:example.org",
+            "state_key": "",
+            "type": "m.room.tombstone",
+            "unsigned": {
+                "age": 1234
+            }
+        })"_json;
+
+        ns::StateEvent<ns::state::Tombstone> event = data;
+
+        EXPECT_EQ(event.type, ns::EventType::RoomTombstone);
+        EXPECT_EQ(event.event_id, "$143273582443PhrSn:example.org");
+        EXPECT_EQ(event.room_id, "!jEsUZKDJdhlrceRyVU:example.org");
+        EXPECT_EQ(event.sender, "@example:example.org");
+        EXPECT_EQ(event.origin_server_ts, 1432735824653);
+        EXPECT_EQ(event.unsigned_data.age, 1234);
+        EXPECT_EQ(event.state_key, "");
+        EXPECT_EQ(event.content.body, "This room has been replaced");
+        EXPECT_EQ(event.content.replacement_room, "!newroom:example.org");
 }
 
 TEST(StateEvents, Topic)

@@ -42,6 +42,8 @@ getEventType(const std::string &type)
                 return EventType::RoomRedaction;
         else if (type == "m.room.pinned_events")
                 return EventType::RoomPinnedEvents;
+        else if (type == "m.room.tombstone")
+                return EventType::RoomTombstone;
         else if (type == "m.sticker")
                 return EventType::Sticker;
         else if (type == "m.tag")
@@ -88,6 +90,8 @@ to_string(EventType type)
                 return "m.room.redaction";
         case EventType::RoomPinnedEvents:
                 return "m.room.pinned_events";
+        case EventType::RoomTombstone:
+                return "m.room.tombstone";
         case EventType::Sticker:
                 return "m.sticker";
         case EventType::Tag:

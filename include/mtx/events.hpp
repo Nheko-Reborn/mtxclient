@@ -48,6 +48,8 @@ enum class EventType
         RoomRedaction,
         /// m.room.pinned_events
         RoomPinnedEvents,
+        /// m.room.tombstone
+        RoomTombstone,
         // m.sticker
         Sticker,
         // m.tag
@@ -135,6 +137,9 @@ to_json(json &obj, const Event<Content> &event)
                 break;
         case EventType::RoomPinnedEvents:
                 obj["type"] = "m.room.pinned_events";
+                break;
+        case EventType::RoomTombstone:
+                obj["type"] = "m.room.tombstone";
                 break;
         case EventType::Sticker:
                 obj["type"] = "m.sticker";
