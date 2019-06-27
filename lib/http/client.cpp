@@ -29,6 +29,8 @@ Client::set_server(const std::string &server)
         // Remove https prefix, if it exists
         if (boost::algorithm::starts_with(server_name, "https://"))
                 boost::algorithm::erase_first(server_name, "https://");
+        if (server_name.size() > 0 && server_name.back() == '/')
+                server_name.erase(server_name.end() - 1);
 
         // Check if the input also contains the port.
         std::vector<std::string> parts;
