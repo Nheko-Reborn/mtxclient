@@ -25,15 +25,20 @@ Client::Client(const std::string &server, uint16_t port)
 void
 Client::set_server(const std::string &server)
 {
+        std::string server_name = server;
+        // Remove https prefix, if it exists
+        if (boost::algorithm::starts_with(server_name, "https://"))
+                boost::algorithm::erase_first(server_name, "https://");
+
         // Check if the input also contains the port.
         std::vector<std::string> parts;
-        boost::split(parts, server, [](char c) { return c == ':'; });
+        boost::split(parts, server_name, [](char c) { return c == ':'; });
 
         if (parts.size() == 2 && mtx::client::utils::is_number(parts.at(1))) {
                 server_ = parts.at(0);
                 port_   = std::stoi(parts.at(1));
         } else {
-                server_ = server;
+                server_ = server_name;
         }
 }
 
