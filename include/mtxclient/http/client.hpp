@@ -144,6 +144,9 @@ public:
                    const std::string &device_name,
                    Callback<mtx::responses::Login> cb);
         void login(const mtx::requests::Login &req, Callback<mtx::responses::Login> cb);
+        //! Lookup real server to connect to.
+        //! Call set_server with the returned homeserver url after this
+        void well_known(Callback<mtx::responses::WellKnown> cb);
 
         //! Register by not expecting a registration flow.
         void registration(const std::string &user,
@@ -343,7 +346,8 @@ private:
         template<class Response>
         void get(const std::string &endpoint,
                  HeadersCallback<Response> cb,
-                 bool requires_auth = true);
+                 bool requires_auth                    = true,
+                 const std::string &endpoint_namespace = "/_matrix");
 
         template<class Response>
         std::shared_ptr<Session> create_session(HeadersCallback<Response> callback);
@@ -437,7 +441,8 @@ template<class Response>
 void
 mtx::http::Client::get(const std::string &endpoint,
                        HeadersCallback<Response> callback,
-                       bool requires_auth)
+                       bool requires_auth,
+                       const std::string &endpoint_namespace)
 {
         auto session = create_session<Response>(callback);
 
@@ -445,7 +450,8 @@ mtx::http::Client::get(const std::string &endpoint,
                 return;
 
         setup_auth(session.get(), requires_auth);
-        setup_headers<std::string, boost::beast::http::verb::get>(session.get(), {}, endpoint);
+        setup_headers<std::string, boost::beast::http::verb::get>(
+          session.get(), {}, endpoint, "", endpoint_namespace);
 
         session->run();
 }

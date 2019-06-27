@@ -457,6 +457,25 @@ TEST(Responses, Versions)
         ASSERT_THROW(Versions versions = error_data, std::invalid_argument);
 }
 
+TEST(Responses, WellKnown)
+{
+        json data = R"({
+          "m.homeserver": {
+            "base_url": "https://matrix.example.com"
+          },
+          "m.identity_server": {
+            "base_url": "https://identity.example.com"
+          },
+          "org.example.custom.property": {
+            "app_url": "https://custom.app.example.org"
+          }
+        })"_json;
+
+        WellKnown wellknown = data;
+        EXPECT_EQ(wellknown.homeserver.base_url, "https://matrix.example.com");
+        EXPECT_EQ(wellknown.identity_server->base_url, "https://identity.example.com");
+}
+
 TEST(Responses, CreateRoom)
 {
         json data = R"({"room_id" : "!sefiuhWgwghwWgh:example.com"})"_json;
@@ -475,7 +494,15 @@ TEST(Responses, Login)
           "user_id": "@cheeky_monkey:matrix.org",
           "access_token": "abc123", 
 	  "home_server": "matrix.org",
-          "device_id": "GHTYAJCE"
+          "device_id": "GHTYAJCE",
+	  "well_known": {
+	     "m.homeserver": {
+	       "base_url": "https://example.org"
+	     },
+	     "m.identity_server": {
+	       "base_url": "https://id.example.org"
+	     }
+	  }
         })"_json;
 
         Login login = data;
@@ -483,6 +510,8 @@ TEST(Responses, Login)
         EXPECT_EQ(login.access_token, "abc123");
         EXPECT_EQ(login.home_server, "matrix.org");
         EXPECT_EQ(login.device_id, "GHTYAJCE");
+        EXPECT_EQ(login.well_known->homeserver.base_url, "https://example.org");
+        EXPECT_EQ(login.well_known->identity_server->base_url, "https://id.example.org");
 
         json data2 = R"({
           "user_id": "@cheeky_monkey:matrix.org",

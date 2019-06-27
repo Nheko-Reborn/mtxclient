@@ -111,6 +111,19 @@ Client::login(const mtx::requests::Login &req, Callback<mtx::responses::Login> c
           },
           false);
 }
+
+void
+Client::well_known(Callback<mtx::responses::WellKnown> callback)
+{
+        get<mtx::responses::WellKnown>(
+          "/matrix/client",
+          [callback](const mtx::responses::WellKnown &res, HeaderFields, RequestErr err) {
+                  callback(res, err);
+          },
+          false,
+          "/.well-known");
+}
+
 void
 Client::logout(Callback<mtx::responses::Logout> callback)
 {
