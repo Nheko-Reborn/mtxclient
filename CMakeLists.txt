@@ -133,6 +133,7 @@ add_library(matrix_client
             lib/structs/events/power_levels.cpp
             lib/structs/events/redaction.cpp
             lib/structs/events/tag.cpp
+            lib/structs/events/tombstone.cpp
             lib/structs/events/topic.cpp
             lib/structs/events/messages/audio.cpp
             lib/structs/events/messages/emote.cpp

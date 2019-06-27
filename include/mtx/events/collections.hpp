@@ -18,6 +18,7 @@
 #include "mtx/events/power_levels.hpp"
 #include "mtx/events/redaction.hpp"
 #include "mtx/events/tag.hpp"
+#include "mtx/events/tombstone.hpp"
 #include "mtx/events/topic.hpp"
 
 #include "mtx/events/messages/audio.hpp"
@@ -54,6 +55,7 @@ using StateEvents = boost::variant<events::StateEvent<states::Aliases>,
                                    events::StateEvent<states::Name>,
                                    events::StateEvent<states::PinnedEvents>,
                                    events::StateEvent<states::PowerLevels>,
+                                   events::StateEvent<states::Tombstone>,
                                    events::StateEvent<states::Topic>,
                                    events::StateEvent<msgs::Redacted>>;
 
@@ -69,6 +71,7 @@ using StrippedEvents = boost::variant<events::StrippedEvent<states::Aliases>,
                                       events::StrippedEvent<states::Name>,
                                       events::StrippedEvent<states::PinnedEvents>,
                                       events::StrippedEvent<states::PowerLevels>,
+                                      events::StrippedEvent<states::Tombstone>,
                                       events::StrippedEvent<states::Topic>>;
 
 //! Collection of @p StateEvent and @p RoomEvent. Those events would be
@@ -85,6 +88,7 @@ using TimelineEvents = boost::variant<events::StateEvent<states::Aliases>,
                                       events::StateEvent<states::Name>,
                                       events::StateEvent<states::PinnedEvents>,
                                       events::StateEvent<states::PowerLevels>,
+                                      events::StateEvent<states::Tombstone>,
                                       events::StateEvent<states::Topic>,
                                       events::EncryptedEvent<msgs::Encrypted>,
                                       events::RedactionEvent<msgs::Redaction>,
@@ -162,6 +166,10 @@ from_json(const json &obj, TimelineEvent &e)
         }
         case events::EventType::RoomRedaction: {
                 e.data = events::RedactionEvent<mtx::events::msg::Redaction>(obj);
+                break;
+        }
+        case events::EventType::RoomTombstone: {
+                e.data = events::StateEvent<Tombstone>(obj);
                 break;
         }
         case events::EventType::RoomTopic: {

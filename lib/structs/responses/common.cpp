@@ -93,6 +93,7 @@ parse_room_account_data_events(
                 case events::EventType::RoomMessage:
                 case events::EventType::RoomName:
                 case events::EventType::RoomPowerLevels:
+                case events::EventType::RoomTombstone:
                 case events::EventType::RoomTopic:
                 case events::EventType::RoomRedaction:
                 case events::EventType::RoomPinnedEvents:
@@ -227,6 +228,15 @@ parse_timeline_events(const json &events,
                         try {
                                 container.emplace_back(
                                   events::RedactionEvent<mtx::events::msg::Redaction>(e));
+                        } catch (json::exception &err) {
+                                log_error(err, e);
+                        }
+
+                        break;
+                }
+                case events::EventType::RoomTombstone: {
+                        try {
+                                container.emplace_back(events::StateEvent<Tombstone>(e));
                         } catch (json::exception &err) {
                                 log_error(err, e);
                         }
@@ -474,6 +484,15 @@ parse_state_events(const json &events,
 
                         break;
                 }
+                case events::EventType::RoomTombstone: {
+                        try {
+                                container.emplace_back(events::StateEvent<Tombstone>(e));
+                        } catch (json::exception &err) {
+                                log_error(err, e);
+                        }
+
+                        break;
+                }
                 case events::EventType::RoomTopic: {
                         try {
                                 container.emplace_back(events::StateEvent<Topic>(e));
@@ -591,6 +610,15 @@ parse_stripped_events(const json &events,
                 case events::EventType::RoomPowerLevels: {
                         try {
                                 container.emplace_back(events::StrippedEvent<PowerLevels>(e));
+                        } catch (json::exception &err) {
+                                log_error(err, e);
+                        }
+
+                        break;
+                }
+                case events::EventType::RoomTombstone: {
+                        try {
+                                container.emplace_back(events::StrippedEvent<Tombstone>(e));
                         } catch (json::exception &err) {
                                 log_error(err, e);
                         }

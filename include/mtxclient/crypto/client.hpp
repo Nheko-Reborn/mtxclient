@@ -93,7 +93,7 @@ unpickle(const std::string &pickled, const std::string &key)
         if (ret == -1)
                 throw olm_exception("unpickle", object.get());
 
-        return std::move(object);
+        return object;
 }
 
 using OlmSessionPtr           = std::unique_ptr<OlmSession, OlmDeleter>;
