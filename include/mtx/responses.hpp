@@ -14,3 +14,4 @@
 #include "responses/register.hpp"
 #include "responses/sync.hpp"
 #include "responses/version.hpp"
+#include "responses/well-known.hpp"

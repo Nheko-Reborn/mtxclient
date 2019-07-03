@@ -153,7 +153,8 @@ add_library(matrix_client
             lib/structs/responses/profile.cpp
             lib/structs/responses/register.cpp
             lib/structs/responses/sync.cpp
-            lib/structs/responses/version.cpp)
+            lib/structs/responses/version.cpp
+            lib/structs/responses/well-known.cpp)
 add_library(MatrixClient::MatrixClient ALIAS matrix_client)
 target_include_directories(matrix_client
                            SYSTEM

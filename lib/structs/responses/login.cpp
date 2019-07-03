@@ -16,6 +16,9 @@ from_json(const json &obj, Login &response)
 
         if (obj.count("device_id") != 0)
                 response.device_id = obj.at("device_id").get<std::string>();
+
+        if (obj.count("well_known") != 0)
+                response.well_known = obj.at("well_known").get<WellKnown>();
 }
 }
 }

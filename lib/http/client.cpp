@@ -25,15 +25,22 @@ Client::Client(const std::string &server, uint16_t port)
 void
 Client::set_server(const std::string &server)
 {
+        std::string server_name = server;
+        // Remove https prefix, if it exists
+        if (boost::algorithm::starts_with(server_name, "https://"))
+                boost::algorithm::erase_first(server_name, "https://");
+        if (server_name.size() > 0 && server_name.back() == '/')
+                server_name.erase(server_name.end() - 1);
+
         // Check if the input also contains the port.
         std::vector<std::string> parts;
-        boost::split(parts, server, [](char c) { return c == ':'; });
+        boost::split(parts, server_name, [](char c) { return c == ':'; });
 
         if (parts.size() == 2 && mtx::client::utils::is_number(parts.at(1))) {
                 server_ = parts.at(0);
                 port_   = std::stoi(parts.at(1));
         } else {
-                server_ = server;
+                server_ = server_name;
         }
 }
 
@@ -111,6 +118,19 @@ Client::login(const mtx::requests::Login &req, Callback<mtx::responses::Login> c
           },
           false);
 }
+
+void
+Client::well_known(Callback<mtx::responses::WellKnown> callback)
+{
+        get<mtx::responses::WellKnown>(
+          "/matrix/client",
+          [callback](const mtx::responses::WellKnown &res, HeaderFields, RequestErr err) {
+                  callback(res, err);
+          },
+          false,
+          "/.well-known");
+}
+
 void
 Client::logout(Callback<mtx::responses::Logout> callback)
 {
