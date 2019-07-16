@@ -167,7 +167,10 @@ public:
 
         //! Paginate through the list of events that the user has been,
         //! or would have been notified about.
-        void notifications(uint64_t limit, Callback<mtx::responses::Notifications> cb);
+        void notifications(uint64_t limit,
+                           const std::string &from,
+                           const std::string &only,
+                           Callback<mtx::responses::Notifications> cb);
 
         //! Perform logout.
         void logout(Callback<mtx::responses::Logout> cb);

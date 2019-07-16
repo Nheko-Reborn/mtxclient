@@ -151,10 +151,21 @@ Client::logout(Callback<mtx::responses::Logout> callback)
 }
 
 void
-Client::notifications(uint64_t limit, Callback<mtx::responses::Notifications> cb)
+Client::notifications(uint64_t limit,
+                      const std::string &from,
+                      const std::string &only,
+                      Callback<mtx::responses::Notifications> cb)
 {
         std::map<std::string, std::string> params;
         params.emplace("limit", std::to_string(limit));
+
+        if (!from.empty()) {
+                params.emplace("from", from);
+        }
+
+        if (!only.empty()) {
+                params.emplace("only", only);
+        }
 
         get<mtx::responses::Notifications>(
           "/client/r0/notifications?" + mtx::client::utils::query_params(params),
