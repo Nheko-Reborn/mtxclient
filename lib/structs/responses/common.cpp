@@ -105,6 +105,14 @@ parse_room_account_data_events(
 }
 
 void
+compose_timeline_events(json &events,
+                        const std::vector<mtx::events::collections::TimelineEvents> &container)
+{
+        const auto c = container.at(0);
+        events = boost::apply_visitor(TimelineEventVisitor(), c);
+}
+
+void
 parse_timeline_events(const json &events,
                       std::vector<mtx::events::collections::TimelineEvents> &container)
 {
