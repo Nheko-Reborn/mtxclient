@@ -38,9 +38,9 @@ void
 to_json(json &obj, const Notification &res)
 {
         obj["actions"] = res.actions;
-        obj["read"] = res.read;
+        obj["read"]    = res.read;
         obj["room_id"] = res.room_id;
-        obj["ts"] = res.ts;
+        obj["ts"]      = res.ts;
 
         // HACK to work around the fact that there isn't
         // a method to parse a timeline event from a json object.

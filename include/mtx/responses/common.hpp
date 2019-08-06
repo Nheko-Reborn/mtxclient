@@ -43,8 +43,8 @@ using TimelineEvents        = std::vector<mtx::events::collections::TimelineEven
 using StateEvents           = std::vector<mtx::events::collections::StateEvents>;
 using StrippedEvents        = std::vector<mtx::events::collections::StrippedEvents>;
 
-namespace states       = mtx::events::state;
-namespace msgs         = mtx::events::msg;
+namespace states = mtx::events::state;
+namespace msgs   = mtx::events::msg;
 
 struct TimelineEventVisitor : public boost::static_visitor<json>
 {
