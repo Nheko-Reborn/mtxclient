@@ -13,7 +13,7 @@ namespace state {
 void
 from_json(const json &obj, CanonicalAlias &canonical_alias)
 {
-        if (!obj.at("alias").is_null())
+        if (obj.find("alias") != obj.end() && !obj.at("alias").is_null())
                 canonical_alias.alias = obj.at("alias").get<std::string>();
 }
 

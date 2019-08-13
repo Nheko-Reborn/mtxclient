@@ -14,7 +14,7 @@ from_json(const json &obj, Notification &res)
         res.room_id = obj.at("room_id");
         res.ts      = obj.at("ts");
 
-        if (!obj.at("profile_tag").is_null())
+        if (obj.find("profile_tag") != obj.end() && !obj.at("profile_tag").is_null())
                 res.profile_tag = obj.at("profile_tag");
 
         // HACK to work around the fact that there isn't
