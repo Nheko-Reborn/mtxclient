@@ -524,6 +524,16 @@ TEST(Responses, Login)
         EXPECT_EQ(login2.access_token, "abc123");
         EXPECT_EQ(login2.home_server, "matrix.org");
         EXPECT_EQ(login2.device_id, "");
+
+        json data3   = R"({
+          "user_id": "@cheeky_monkey:matrix.org",
+          "access_token": "abc123"
+        })"_json;
+        Login login3 = data3;
+        EXPECT_EQ(login3.user_id.to_string(), "@cheeky_monkey:matrix.org");
+        EXPECT_EQ(login3.access_token, "abc123");
+        EXPECT_EQ(login3.home_server, "");
+        EXPECT_EQ(login3.device_id, "");
 }
 
 TEST(Responses, Messages)
