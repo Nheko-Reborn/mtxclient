@@ -726,6 +726,31 @@ TEST(RoomEvents, Encrypted)
           "\"session_id\":\"/bHcdWPHsJLFd8dkyvG0n7q/RTDmfBIc+gC4laHJCQQ\"}");
 }
 
+TEST(ToDevice, KeyVerificationRequest)
+{
+        json request_data = R"({
+    "content": {
+        "from_device": "AliceDevice2",
+        "methods": [
+            "m.sas.v1"
+        ],
+        "timestamp": 1559598944869,
+        "transaction_id": "S0meUniqueAndOpaqueString"
+    },
+    "type": "m.key.verification.request"
+})"_json;
+
+        ns::msg::KeyVerificationRequest event = request_data;
+        EXPECT_EQ(event.from_device, "AliceDevice2");
+        EXPECT_EQ(event.type, mtx::events::EventType::KeyVerificationRequest);
+        EXPECT_EQ(event.transaction_id, "S0meUniqueAndOpaqueString");
+        EXPECT_EQ(event.methods[0], "m.sas.v1");
+        EXPECT_EQ(event.timestamp, 1559598944869);
+        EXPECT_EQ(request_data.dump(), json(event).dump());
+}
+
+// TODO: KeyVerificationStart, KeyVerificationAccept, and KeyVerificationCancel
+
 TEST(ToDevice, KeyRequest)
 {
         json request_data = R"({

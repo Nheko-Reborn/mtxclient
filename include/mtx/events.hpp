@@ -14,6 +14,18 @@ namespace events {
 
 enum class EventType
 {
+        /// m.key.verification.cancel
+        KeyVerificationCancel,
+        /// m.key.verification.request
+        KeyVerificationRequest,
+        /// m.key.verification.start
+        KeyVerificationStart,
+        /// m.key.verification.accept
+        KeyVerificationAccept,
+        /// m.key.verification.key
+        KeyVerificationKey,
+        /// m.key.verification.mac
+        KeyVerificationMac,
         /// m.room_key_request
         RoomKeyRequest,
         /// m.room.aliases
@@ -87,6 +99,24 @@ to_json(json &obj, const Event<Content> &event)
         obj["content"] = event.content;
 
         switch (event.type) {
+        case EventType::KeyVerificationStart:
+                obj["type"] = "m.key.verification.start";
+                break;
+        case EventType::KeyVerificationAccept:
+                obj["type"] = "m.key.verification.accept";
+                break;
+        case EventType::KeyVerificationMac:
+                obj["type"] = "m.key.verification.mac";
+                break;
+        case EventType::KeyVerificationKey:
+                obj["type"] = "m.key.verification.accept";
+                break;
+        case EventType::KeyVerificationCancel:
+                obj["type"] = "m.key.verification.cancel";
+                break;
+        case EventType::KeyVerificationRequest:
+                obj["type"] = "m.key.verification.request";
+                break;
         case EventType::RoomKeyRequest:
                 obj["type"] = "m.room_key_request";
                 break;

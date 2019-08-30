@@ -79,6 +79,12 @@ parse_room_account_data_events(
                         }
                         break;
                 }
+                case events::EventType::KeyVerificationCancel:
+                case events::EventType::KeyVerificationRequest:
+                case events::EventType::KeyVerificationStart:
+                case events::EventType::KeyVerificationAccept:
+                case events::EventType::KeyVerificationKey:
+                case events::EventType::KeyVerificationMac:
                 case events::EventType::RoomKeyRequest:
                 case events::EventType::RoomAliases:
                 case events::EventType::RoomAvatar:
@@ -377,6 +383,12 @@ parse_timeline_events(const json &events,
                 case events::EventType::RoomKeyRequest: // Not part of the timeline
                 case events::EventType::Tag:            // Not part of the timeline or state
                 case events::EventType::Unsupported:
+                case events::EventType::KeyVerificationCancel:
+                case events::EventType::KeyVerificationRequest:
+                case events::EventType::KeyVerificationStart:
+                case events::EventType::KeyVerificationAccept:
+                case events::EventType::KeyVerificationKey:
+                case events::EventType::KeyVerificationMac:
                         continue;
                 }
         }
@@ -518,6 +530,12 @@ parse_state_events(const json &events,
                 case events::EventType::RoomRedaction:
                 case events::EventType::Tag: // Not part of the timeline or state
                 case events::EventType::Unsupported:
+                case events::EventType::KeyVerificationCancel:
+                case events::EventType::KeyVerificationRequest:
+                case events::EventType::KeyVerificationStart:
+                case events::EventType::KeyVerificationAccept:
+                case events::EventType::KeyVerificationKey:
+                case events::EventType::KeyVerificationMac:
                         continue;
                 }
         }
@@ -651,6 +669,12 @@ parse_stripped_events(const json &events,
                 case events::EventType::RoomPinnedEvents:
                 case events::EventType::Tag: // Not part of the timeline or state
                 case events::EventType::Unsupported:
+                case events::EventType::KeyVerificationCancel:
+                case events::EventType::KeyVerificationRequest:
+                case events::EventType::KeyVerificationStart:
+                case events::EventType::KeyVerificationAccept:
+                case events::EventType::KeyVerificationKey:
+                case events::EventType::KeyVerificationMac:
                         continue;
                 }
         }

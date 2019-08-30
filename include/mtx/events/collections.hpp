@@ -246,6 +246,12 @@ from_json(const json &obj, TimelineEvent &e)
         case events::EventType::RoomPinnedEvents:
         case events::EventType::RoomKeyRequest: // Not part of the timeline
         case events::EventType::Tag:            // Not part of the timeline
+        case events::EventType::KeyVerificationCancel:
+        case events::EventType::KeyVerificationRequest:
+        case events::EventType::KeyVerificationStart:
+        case events::EventType::KeyVerificationAccept:
+        case events::EventType::KeyVerificationKey:
+        case events::EventType::KeyVerificationMac:
         case events::EventType::Unsupported:
                 return;
         }

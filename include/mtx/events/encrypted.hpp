@@ -116,6 +116,32 @@ from_json(const json &obj, KeyRequest &event);
 void
 to_json(json &obj, const KeyRequest &event);
 
+//! Content of the `m.key.verification.request` event
+struct KeyVerificationRequest
+{
+        //! The device ID which is initiating the request.
+        std::string from_device;
+        //! An opaque identifier for the verification request. Must be unique with respect to the
+        //! devices involved.
+        std::string transaction_id;
+        //! The verification methods supported by the sender.
+        std::vector<std::string> methods;
+        //! The POSIX timestamp in milliseconds for when the request was made. If the request is in
+        //! the future by more than 5 minutes or more than 10 minutes in the past, the message
+        //! should be ignored by the receiver.
+        uint32_t timestamp;
+        //! The type of the event.
+        mtx::events::EventType type;
+};
+
+// TODO: KeyVerificationStart, KeyVerificationAccept, and KeyVerificationCancel
+
+void
+from_json(const json &obj, KeyVerificationRequest &event);
+
+void
+to_json(json &obj, const KeyVerificationRequest &event);
+
 } // namespace msg
 } // namespace events
 } // namespace mtx

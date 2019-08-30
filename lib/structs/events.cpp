@@ -8,7 +8,19 @@ namespace events {
 EventType
 getEventType(const std::string &type)
 {
-        if (type == "m.room_key_request")
+        if (type == "m.key.verification.request")
+                return EventType::KeyVerificationRequest;
+        else if (type == "m.key.verification.start")
+                return EventType::KeyVerificationStart;
+        else if (type == "m.key.verification.accept")
+                return EventType::KeyVerificationAccept;
+        else if (type == "m.key.verification.key")
+                return EventType::KeyVerificationKey;
+        else if (type == "m.key.verification.key")
+                return EventType::KeyVerificationKey;
+        else if (type == "m.key.verification.cancel")
+                return EventType::KeyVerificationCancel;
+        else if (type == "m.room_key_request")
                 return EventType::RoomKeyRequest;
         else if (type == "m.room.aliases")
                 return EventType::RoomAliases;
@@ -56,6 +68,18 @@ std::string
 to_string(EventType type)
 {
         switch (type) {
+        case EventType::KeyVerificationCancel:
+                return "m.key.verification.cancel";
+        case EventType::KeyVerificationRequest:
+                return "m.key.verification.request";
+        case EventType::KeyVerificationStart:
+                return "m.key.verification.start";
+        case EventType::KeyVerificationAccept:
+                return "m.key.verification.accept";
+        case EventType::KeyVerificationKey:
+                return "m.key.verification.key";
+        case EventType::KeyVerificationMac:
+                return "m.key.verification.mac";
         case EventType::RoomKeyRequest:
                 return "m.room_key_request";
         case EventType::RoomAliases:
