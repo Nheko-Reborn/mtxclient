@@ -129,7 +129,7 @@ struct KeyVerificationRequest
         //! The POSIX timestamp in milliseconds for when the request was made. If the request is in
         //! the future by more than 5 minutes or more than 10 minutes in the past, the message
         //! should be ignored by the receiver.
-        uint32_t timestamp;
+        uint64_t timestamp;
         //! The type of the event.
         mtx::events::EventType type;
 };

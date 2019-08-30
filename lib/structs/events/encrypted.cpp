@@ -135,21 +135,21 @@ to_json(json &obj, const KeyRequest &event)
 void
 from_json(const json &obj, KeyVerificationRequest &event)
 {
-        event.from_device    = obj.at("from_device").get<std::string>();
-        event.methods        = obj.at("methods").get<std::vector<std::string>>();
-        event.timestamp      = obj.at("timestamp").get<uint32_t>();
-        event.transaction_id = obj.at("transaction_id").get<std::string>();
+        event.from_device    = obj.at("content").at("from_device").get<std::string>();
+        event.methods        = obj.at("content").at("methods").get<std::vector<std::string>>();
+        event.timestamp      = obj.at("content").at("timestamp").get<uint64_t>();
+        event.transaction_id = obj.at("content").at("transaction_id").get<std::string>();
         event.type           = mtx::events::getEventType(obj.at("type").get<std::string>());
 }
 
 void
 to_json(json &obj, const KeyVerificationRequest &event)
 {
-        obj["from_device"]    = event.from_device;
-        obj["methods"]        = event.methods;
-        obj["timestamp"]      = event.timestamp;
-        obj["transaction_id"] = event.transaction_id;
-        obj["type"]           = to_string(event.type);
+        obj["content"]["from_device"]    = event.from_device;
+        obj["content"]["methods"]        = event.methods;
+        obj["content"]["timestamp"]      = event.timestamp;
+        obj["content"]["transaction_id"] = event.transaction_id;
+        obj["type"]                      = to_string(event.type);
 }
 
 } // namespace msg
