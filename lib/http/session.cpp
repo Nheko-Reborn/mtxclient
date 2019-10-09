@@ -1,5 +1,7 @@
 #include "mtxclient/http/session.hpp"
 
+#include <boost/asio/strand.hpp>
+
 #include <iostream>
 
 using namespace mtx::http;
@@ -11,8 +13,12 @@ Session::Session(boost::asio::io_service &ios,
                  RequestID id,
                  SuccessCallback on_success,
                  FailureCallback on_failure)
-  : resolver_(ios)
-  , socket(ios, ssl_ctx)
+  // Use a strand for synchronisation.
+  // I don't know, if we need to use the same strand for both the socket and the resolver or if one
+  // for each works as well. Taken from this example:
+  // https://www.boost.org/doc/libs/1_71_0/libs/beast/example/http/client/async-ssl/http_client_async_ssl.cpp
+  : resolver_(boost::asio::make_strand(ios))
+  , socket(boost::asio::make_strand(ios), ssl_ctx)
   , host(std::move(host))
   , port{port}
   , id(std::move(id))
