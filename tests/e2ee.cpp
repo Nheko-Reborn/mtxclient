@@ -24,6 +24,8 @@ using namespace mtx::responses;
 
 using namespace std;
 
+using namespace nlohmann;
+
 struct OlmCipherContent
 {
         std::string body;
@@ -1128,6 +1130,60 @@ TEST(ExportSessions, InboundMegolmSessions)
         auto restored_output_str =
           std::string((char *)restored_plaintext.data.data(), restored_plaintext.data.size());
         ASSERT_EQ(restored_output_str, secret_message);
+}
+
+TEST(Encryption, EncryptedFile)
+{
+        std::string plaintext = "This is some plain text payload";
+        auto encryption_data  = mtx::crypto::encrypt_file(plaintext);
+        ASSERT_NE(plaintext, mtx::crypto::to_string(encryption_data.first));
+        ASSERT_EQ(plaintext,
+                  mtx::crypto::to_string(mtx::crypto::decrypt_file(
+                    mtx::crypto::to_string(encryption_data.first), encryption_data.second)));
+
+        json j                                            = R"({
+  "type": "m.room.message",
+  "content": {
+    "body": "test.txt",
+    "info": {
+      "size": 8,
+      "mimetype": "text/plain"
+    },
+    "msgtype": "m.file",
+    "file": {
+      "v": "v2",
+      "key": {
+        "alg": "A256CTR",
+        "ext": true,
+        "k": "6osKLzUKV1YZ06WEX0b77D784Te8oAj5eNU-gAgkjs4",
+        "key_ops": [
+          "encrypt",
+          "decrypt"
+        ],
+        "kty": "oct"
+      },
+      "iv": "7zRP/t89YWcAAAAAAAAAAA",
+      "hashes": {
+        "sha256": "5g41hn7n10sCw3+2j7CQ9SJl6R/v5EBT4MshdFgHhzo"
+      },
+      "url": "mxc://neko.dev/WPKoOAPfPlcHiZZTEoaIoZhN",
+      "mimetype": "text/plain"
+    }
+ },
+ "event_id": "$1575320135447DEPky:neko.dev",
+  "origin_server_ts": 1575320135324,
+  "sender": "@test:neko.dev",
+  "unsigned": {
+    "age": 1081,
+    "transaction_id": "m1575320142400.8"
+  },
+  "room_id": "!YnUlhwgbBaGcAFsJOJ:neko.dev"
+})"_json;
+        mtx::events::RoomEvent<mtx::events::msg::File> ev = j;
+
+        ASSERT_EQ("abcdefg\n",
+                  mtx::crypto::to_string(mtx::crypto::decrypt_file("=\xFDX\xAB\xCA\xEB\x8F\xFF",
+                                                                   ev.content.file.value())));
 }
 
 TEST(Encryption, DISABLED_HandleRoomKeyEvent) {}

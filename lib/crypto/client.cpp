@@ -1,5 +1,8 @@
 #include <iostream>
 
+#include <openssl/aes.h>
+#include <openssl/sha.h>
+
 #include "mtxclient/crypto/client.hpp"
 #include "mtxclient/crypto/types.hpp"
 #include "mtxclient/crypto/utils.hpp"
@@ -667,50 +670,6 @@ mtx::crypto::decrypt_exported_sessions(const std::string &data, std::string pass
         //         throw sodium_exception{"crypto_secretbox_open_easy", "failed to decrypt"};
         std::string plaintext(decrypted.begin(), decrypted.end());
         return json::parse(plaintext);
-}
-
-std::string
-mtx::crypto::base642bin(const std::string &b64)
-{
-        std::size_t bin_maxlen = b64.size();
-        std::size_t bin_len;
-
-        const char *max_end;
-
-        auto ciphertext = create_buffer(bin_maxlen);
-
-        const int rc = sodium_base642bin(reinterpret_cast<unsigned char *>(ciphertext.data()),
-                                         ciphertext.size(),
-                                         b64.data(),
-                                         b64.size(),
-                                         nullptr,
-                                         &bin_len,
-                                         &max_end,
-                                         sodium_base64_VARIANT_ORIGINAL);
-        if (rc != 0)
-                throw sodium_exception{"sodium_base642bin", "encoding failed"};
-
-        if (bin_len != bin_maxlen)
-                ciphertext.resize(bin_len);
-
-        return std::string(std::make_move_iterator(ciphertext.begin()),
-                           std::make_move_iterator(ciphertext.end()));
-}
-
-std::string
-mtx::crypto::bin2base64(const std::string &bin)
-{
-        auto base64buf =
-          create_buffer(sodium_base64_encoded_len(bin.size(), sodium_base64_VARIANT_ORIGINAL));
-
-        sodium_bin2base64(reinterpret_cast<char *>(base64buf.data()),
-                          base64buf.size(),
-                          reinterpret_cast<const unsigned char *>(bin.data()),
-                          bin.size(),
-                          sodium_base64_VARIANT_ORIGINAL);
-
-        // Removing the null byte.
-        return std::string(base64buf.begin(), base64buf.end() - 1);
 }
 
 BinaryBuf

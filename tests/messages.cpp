@@ -144,7 +144,7 @@ TEST(RoomEvents, FileMessage)
 
 TEST(RoomEvents, EncryptedImageMessage)
 {
-        json data = R"(
+        json data                   = R"(
 {
   "content": {
     "body": "something-important.jpg",
