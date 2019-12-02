@@ -52,6 +52,9 @@ from_json(const json &obj, ImageInfo &info)
 
         if (obj.find("thumbnail_info") != obj.end())
                 info.thumbnail_info = obj.at("thumbnail_info").get<ThumbnailInfo>();
+
+        if (obj.find("thumbnail_file") != obj.end())
+                info.thumbnail_file = obj.at("thumbnail_file").get<crypto::EncryptedFile>();
 }
 
 void
@@ -63,6 +66,8 @@ to_json(json &obj, const ImageInfo &info)
         obj["mimetype"]       = info.mimetype;
         obj["thumbnail_url"]  = info.thumbnail_url;
         obj["thumbnail_info"] = info.thumbnail_info;
+        if (info.thumbnail_file)
+                obj["thumbnail_file"] = info.thumbnail_file.value();
 }
 
 void
@@ -79,6 +84,9 @@ from_json(const json &obj, FileInfo &info)
 
         if (obj.find("thumbnail_info") != obj.end())
                 info.thumbnail_info = obj.at("thumbnail_info").get<ThumbnailInfo>();
+
+        if (obj.find("thumbnail_file") != obj.end())
+                info.thumbnail_file = obj.at("thumbnail_file").get<crypto::EncryptedFile>();
 }
 
 void
@@ -88,6 +96,8 @@ to_json(json &obj, const FileInfo &info)
         obj["mimetype"]       = info.mimetype;
         obj["thumbnail_url"]  = info.thumbnail_url;
         obj["thumbnail_info"] = info.thumbnail_info;
+        if (info.thumbnail_file)
+                obj["thumbnail_file"] = info.thumbnail_file.value();
 }
 
 void
@@ -134,6 +144,9 @@ from_json(const json &obj, VideoInfo &info)
 
         if (obj.find("thumbnail_info") != obj.end())
                 info.thumbnail_info = obj.at("thumbnail_info").get<ThumbnailInfo>();
+
+        if (obj.find("thumbnail_file") != obj.end())
+                info.thumbnail_file = obj.at("thumbnail_file").get<crypto::EncryptedFile>();
 }
 
 void
@@ -146,6 +159,8 @@ to_json(json &obj, const VideoInfo &info)
         obj["thumbnail_url"]  = info.thumbnail_url;
         obj["thumbnail_info"] = info.thumbnail_info;
         obj["mimetype"]       = info.mimetype;
+        if (info.thumbnail_file)
+                obj["thumbnail_file"] = info.thumbnail_file.value();
 }
 
 void

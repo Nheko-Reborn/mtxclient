@@ -1,6 +1,9 @@
 #pragma once
 
+#include <boost/optional.hpp>
 #include <nlohmann/json.hpp>
+
+#include "mtx/common.hpp"
 
 using json = nlohmann::json;
 
@@ -47,6 +50,8 @@ struct ImageInfo
         std::string thumbnail_url;
         //! The mimetype of the image, `e.g. image/jpeg`.
         std::string mimetype;
+        //! Encryption members. If present, they replace thumbnail_url.
+        boost::optional<crypto::EncryptedFile> thumbnail_file;
 };
 
 //! Deserialization method needed by @p nlohmann::json.
@@ -68,6 +73,8 @@ struct FileInfo
         std::string thumbnail_url;
         //! The mimetype of the file e.g `application/pdf`.
         std::string mimetype;
+        //! Encryption members. If present, they replace thumbnail_url.
+        boost::optional<crypto::EncryptedFile> thumbnail_file;
 };
 
 //! Deserialization method needed by @p nlohmann::json.
@@ -114,6 +121,8 @@ struct VideoInfo
         std::string thumbnail_url;
         //! Metadata about the image referred to in @p thumbnail_url.
         ThumbnailInfo thumbnail_info;
+        //! Encryption members. If present, they replace thumbnail_url.
+        boost::optional<crypto::EncryptedFile> thumbnail_file;
 };
 
 //! Deserialization method needed by @p nlohmann::json.

@@ -3,6 +3,9 @@
 #include <nlohmann/json.hpp>
 #include <string>
 
+#include <boost/optional.hpp>
+
+#include "mtx/common.hpp"
 #include "mtx/events/common.hpp"
 
 using json = nlohmann::json;
@@ -27,6 +30,8 @@ struct File
         std::string url;
         // Information about the file referred to in the url.
         common::FileInfo info;
+        // Encryption members. If present, they replace url.
+        boost::optional<crypto::EncryptedFile> file;
 };
 
 void
