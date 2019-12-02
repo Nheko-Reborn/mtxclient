@@ -32,7 +32,8 @@ AES_CTR_256_Encrypt(const std::string plaintext, const BinaryBuf aes256Key, Bina
 
         int ciphertext_len;
 
-        BinaryBuf encrypted = create_buffer(plaintext.size());
+        // The ciphertext expand up to block size, which is 128 for AES256
+        BinaryBuf encrypted = create_buffer(plaintext.size() + 128);
 
         uint8_t *iv_data = iv.data();
         // need to set bit 63 to 0
@@ -67,6 +68,7 @@ AES_CTR_256_Encrypt(const std::string plaintext, const BinaryBuf aes256Key, Bina
         }
 
         ciphertext_len += len;
+        encrypted.resize(ciphertext_len);
 
         /* Clean up */
         EVP_CIPHER_CTX_free(ctx);
@@ -118,6 +120,7 @@ AES_CTR_256_Decrypt(const std::string ciphertext, const BinaryBuf aes256Key, Bin
                 //  handleErrors();
         }
         plaintext_len += len;
+        decrypted.resize(plaintext_len);
 
         /* Clean up */
         EVP_CIPHER_CTX_free(ctx);
