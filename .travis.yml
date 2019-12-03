@@ -13,7 +13,7 @@ notifications:
 matrix:
   include:
     - os: osx
-      osx_image: xcode9
+      # osx_image: xcode9 # don't specify an image here to use the default
       compiler: clang
     - os: linux
       compiler: gcc
