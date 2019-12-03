@@ -9,7 +9,7 @@ ENV CMAKE_SHORT_VERSION=3.15
 
 RUN \
     apt-get update -qq && \
-    apt-get install -y --no-install-recommends apt-transport-https software-properties-common curl && \
+    apt-get install -y --no-install-recommends apt-transport-https software-properties-common curl ninja-build && \
     # cmake
     curl https://cmake.org/files/v${CMAKE_SHORT_VERSION}/cmake-${CMAKE_VERSION}-Linux-x86_64.sh -o cmake-install.sh && \
     bash cmake-install.sh --skip-license --prefix=/usr/local && \
