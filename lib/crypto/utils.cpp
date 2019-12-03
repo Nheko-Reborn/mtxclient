@@ -141,7 +141,11 @@ sha256(const std::string &data)
         bool success = false;
         std::string hashed;
 
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
+        EVP_MD_CTX *context = EVP_MD_CTX_create();
+#else
         EVP_MD_CTX *context = EVP_MD_CTX_new();
+#endif
 
         if (context != NULL) {
                 if (EVP_DigestInit_ex(context, EVP_sha256(), NULL)) {
@@ -156,7 +160,11 @@ sha256(const std::string &data)
                         }
                 }
 
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
+                EVP_MD_CTX_destroy(context);
+#else
                 EVP_MD_CTX_free(context);
+#endif
         }
 
         if (success)
