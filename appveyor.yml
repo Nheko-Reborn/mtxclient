@@ -1,6 +1,6 @@
 ---
 
-version: 0.2.0-{build}
+version: 0.3.0-{build}
 
 configuration: Release
 image: Visual Studio 2017
@@ -30,6 +30,7 @@ install:
             openssl:%PLATFORM%-windows
             spdlog:%PLATFORM%-windows
             zlib:%PLATFORM%-windows
+    - vcpkg upgrade --no-dry-run
 
 build_script:
     - cmake --version

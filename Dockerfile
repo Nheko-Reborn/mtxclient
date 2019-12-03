@@ -52,8 +52,8 @@ RUN \
     cmake --build build --target install && \
     # boost
     mkdir -p /build/boost && cd /build/boost && \
-    curl -L https://dl.bintray.com/boostorg/release/1.68.0/source/boost_1_68_0.tar.gz -o boost_1_68_0.tar.gz && \
-    tar xfz boost_1_68_0.tar.gz && cd /build/boost/boost_1_68_0/ && \
+    curl -L https://dl.bintray.com/boostorg/release/1.70.0/source/boost_1_70_0.tar.gz -o boost_1_70_0.tar.gz && \
+    tar xfz boost_1_70_0.tar.gz && cd /build/boost/boost_1_70_0/ && \
     ./bootstrap.sh --with-libraries=random,thread,system,iostreams,atomic,chrono,date_time,regex && \
     ./b2 -d0 cxxstd=14 variant=release link=static threading=multi --layout=system && \
     ./b2 -d0 install && \
