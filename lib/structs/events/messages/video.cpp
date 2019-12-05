@@ -23,6 +23,9 @@ from_json(const json &obj, Video &content)
 
         if (obj.find("info") != obj.end())
                 content.info = obj.at("info").get<common::VideoInfo>();
+
+        if (obj.find("file") != obj.end())
+                content.file = obj.at("file").get<crypto::EncryptedFile>();
 }
 
 void
@@ -32,6 +35,9 @@ to_json(json &obj, const Video &content)
         obj["body"]    = content.body;
         obj["url"]     = content.url;
         obj["info"]    = content.info;
+
+        if (content.file)
+                obj["file"] = content.file.value();
 }
 
 } // namespace msg

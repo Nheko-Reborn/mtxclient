@@ -11,10 +11,10 @@ Client API library for the Matrix protocol, built on top of Boost.Asio.
 
 ### Dependencies
 
-- Boost 1.66 (includes Boost.Beast)
+- Boost 1.70 (includes Boost.Beast and makes the strand interface usable)
 - OpenSSL
 - C++ 14 compiler
-- CMake 3.1 or greater
+- CMake 3.15 or greater (lower versions can work, but they tend to mess up linking the right boost libraries)
 - Google Test (for testing)
 - libsodium 1.0.14 or greater
 

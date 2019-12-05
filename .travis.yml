@@ -13,18 +13,20 @@ notifications:
 matrix:
   include:
     - os: osx
-      osx_image: xcode9
+      # osx_image: xcode9 # don't specify an image here to use the default
       compiler: clang
     - os: linux
       compiler: gcc
       env:
         - CXX_VERSION=g++-8
         - CC_VERSION=gcc-8
+        - CMAKE_GENERATOR=Ninja
     - os: linux
       compiler: clang
       env:
         - CXX_VERSION=clang++-6.0
         - CC_VERSION=clang-6.0
+        - CMAKE_GENERATOR=Ninja
         - COVERAGE=ON
 
 install:

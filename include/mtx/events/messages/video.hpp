@@ -1,8 +1,10 @@
 #pragma once
 
+#include <boost/optional.hpp>
 #include <nlohmann/json.hpp>
 #include <string>
 
+#include "mtx/common.hpp"
 #include "mtx/events/common.hpp"
 
 using json = nlohmann::json;
@@ -24,6 +26,8 @@ struct Video
         std::string url;
         // Metadata for the video clip referred to in url.
         common::VideoInfo info;
+        // Encryption members. If present, they replace url.
+        boost::optional<crypto::EncryptedFile> file;
 };
 
 void

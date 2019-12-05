@@ -92,7 +92,7 @@ set_package_properties(nlohmann_json PROPERTIES
 set(Boost_USE_STATIC_LIBS OFF)
 set(Boost_USE_STATIC_RUNTIME OFF)
 set(Boost_USE_MULTITHREADED ON)
-find_package(Boost 1.66
+find_package(Boost 1.70
              COMPONENTS atomic
                         chrono
                         date_time

@@ -142,6 +142,86 @@ TEST(RoomEvents, FileMessage)
         EXPECT_EQ(event.content.info.size, 40565);
 }
 
+TEST(RoomEvents, EncryptedImageMessage)
+{
+        json data                   = R"(
+{
+  "content": {
+    "body": "something-important.jpg",
+    "file": {
+      "url": "mxc://example.org/FHyPlCeYUSFFxlgbQYZmoEoe",
+      "mimetype": "image/jpeg",
+      "v": "v2",
+      "key": {
+        "alg": "A256CTR",
+        "ext": true,
+        "k": "aWF6-32KGYaC3A_FEUCk1Bt0JA37zP0wrStgmdCaW-0",
+        "key_ops": ["encrypt","decrypt"],
+        "kty": "oct"
+      },
+      "iv": "w+sE15fzSc0AAAAAAAAAAA",
+      "hashes": {
+        "sha256": "fdSLu/YkRx3Wyh3KQabP3rd6+SFiKg5lsJZQHtkSAYA"
+      }
+    },
+    "info": {
+      "mimetype": "image/jpeg",
+      "h": 1536,
+      "size": 422018,
+      "thumbnail_file": {
+        "hashes": {
+          "sha256": "/NogKqW5bz/m8xHgFiH5haFGjCNVmUIPLzfvOhHdrxY"
+        },
+        "iv": "U+k7PfwLr6UAAAAAAAAAAA",
+        "key": {
+          "alg": "A256CTR",
+          "ext": true,
+          "k": "RMyd6zhlbifsACM1DXkCbioZ2u0SywGljTH8JmGcylg",
+          "key_ops": ["encrypt", "decrypt"],
+          "kty": "oct"
+        },
+        "mimetype": "image/jpeg",
+        "url": "mxc://example.org/pmVJxyxGlmxHposwVSlOaEOv",
+        "v": "v2"
+      },
+      "thumbnail_info": {
+        "h": 768,
+        "mimetype": "image/jpeg",
+        "size": 211009,
+        "w": 432
+      },
+      "w": 864
+    },
+    "msgtype": "m.image"
+  },
+  "event_id": "$143273582443PhrSn:example.org",
+  "origin_server_ts": 1432735824653,
+  "room_id": "!jEsUZKDJdhlrceRyVU:example.org",
+  "sender": "@example:example.org",
+  "type": "m.room.message",
+  "unsigned": {
+      "age": 1234
+  }
+})"_json;
+        RoomEvent<msg::Image> event = data;
+
+        EXPECT_EQ(event.type, EventType::RoomMessage);
+        EXPECT_EQ(event.event_id, "$143273582443PhrSn:example.org");
+        EXPECT_EQ(event.room_id, "!jEsUZKDJdhlrceRyVU:example.org");
+        EXPECT_EQ(event.sender, "@example:example.org");
+        EXPECT_EQ(event.origin_server_ts, 1432735824653L);
+        EXPECT_EQ(event.unsigned_data.age, 1234);
+
+        EXPECT_EQ(event.content.body, "something-important.jpg");
+        EXPECT_EQ(event.content.msgtype, "m.image");
+        EXPECT_EQ(event.content.url, "");
+        EXPECT_EQ(event.content.info.mimetype, "image/jpeg");
+        EXPECT_EQ(event.content.info.size, 422018);
+        EXPECT_EQ(event.content.file.value().url, "mxc://example.org/FHyPlCeYUSFFxlgbQYZmoEoe");
+        EXPECT_EQ(event.content.info.thumbnail_file.value().url,
+                  "mxc://example.org/pmVJxyxGlmxHposwVSlOaEOv");
+}
+
 TEST(RoomEvents, ImageMessage)
 {
         json data = R"({

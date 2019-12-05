@@ -4,12 +4,12 @@ ENV LIBSODIUM_VERSION=1.0.16
 ENV SPDLOG_VERSION=1.1.0
 ENV OLM_VERSION=2.2.2
 ENV NLOHMANN_VERSION=v3.2.0
-ENV CMAKE_VERSION=3.12.1
-ENV CMAKE_SHORT_VERSION=3.12
+ENV CMAKE_VERSION=3.15.5
+ENV CMAKE_SHORT_VERSION=3.15
 
 RUN \
     apt-get update -qq && \
-    apt-get install -y --no-install-recommends apt-transport-https software-properties-common curl && \
+    apt-get install -y --no-install-recommends apt-transport-https software-properties-common curl ninja-build && \
     # cmake
     curl https://cmake.org/files/v${CMAKE_SHORT_VERSION}/cmake-${CMAKE_VERSION}-Linux-x86_64.sh -o cmake-install.sh && \
     bash cmake-install.sh --skip-license --prefix=/usr/local && \
@@ -52,8 +52,8 @@ RUN \
     cmake --build build --target install && \
     # boost
     mkdir -p /build/boost && cd /build/boost && \
-    curl -L https://dl.bintray.com/boostorg/release/1.68.0/source/boost_1_68_0.tar.gz -o boost_1_68_0.tar.gz && \
-    tar xfz boost_1_68_0.tar.gz && cd /build/boost/boost_1_68_0/ && \
+    curl -L https://dl.bintray.com/boostorg/release/1.70.0/source/boost_1_70_0.tar.gz -o boost_1_70_0.tar.gz && \
+    tar xfz boost_1_70_0.tar.gz && cd /build/boost/boost_1_70_0/ && \
     ./bootstrap.sh --with-libraries=random,thread,system,iostreams,atomic,chrono,date_time,regex && \
     ./b2 -d0 cxxstd=14 variant=release link=static threading=multi --layout=system && \
     ./b2 -d0 install && \

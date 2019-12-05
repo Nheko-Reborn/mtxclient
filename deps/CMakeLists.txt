@@ -40,9 +40,9 @@ if(USE_BUNDLED_BOOST)
 endif()
 
 set(BOOST_URL
-    https://dl.bintray.com/boostorg/release/1.69.0/source/boost_1_69_0.tar.bz2)
+    https://dl.bintray.com/boostorg/release/1.70.0/source/boost_1_70_0.tar.bz2)
 set(BOOST_SHA256
-    8f32d4617390d1c2d16f26a27ab60d97807b35440d45891fa340fc2648b04406)
+    430ae8354789de4fd19ee52f3b1f739e1fba576f0aded0897c3c2bc00fb38778)
 
 set(GTEST_URL https://github.com/google/googletest/archive/release-1.8.0.tar.gz)
 set(GTEST_SHA1 e7e646a6204638fe8e87e165292b8dd9cd4c36ed)

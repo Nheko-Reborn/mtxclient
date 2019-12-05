@@ -1,8 +1,10 @@
 #pragma once
 
+#include <boost/optional.hpp>
 #include <nlohmann/json.hpp>
 #include <string>
 
+#include "mtx/common.hpp"
 #include "mtx/events/common.hpp"
 
 using json = nlohmann::json;
@@ -25,6 +27,8 @@ struct Image
         std::string url;
         // Metadata about the image referred to in `url`.
         common::ImageInfo info;
+        // Encryption members. If present, they replace url.
+        boost::optional<crypto::EncryptedFile> file;
 };
 
 struct StickerImage
@@ -37,6 +41,8 @@ struct StickerImage
         std::string url;
         // Metadata about the image referred to in `url`.
         common::ImageInfo info;
+        // Encryption members. If present, they replace url.
+        boost::optional<crypto::EncryptedFile> file;
 };
 
 void
