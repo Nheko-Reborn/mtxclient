@@ -1067,9 +1067,8 @@ TEST(ExportSessions, EncryptDecrypt)
         EXPECT_TRUE(ciphertext.size() > 0);
 
         auto encoded = bin2base64(ciphertext);
-        auto decoded = base642bin(encoded);
 
-        auto restored_keys = mtx::crypto::decrypt_exported_sessions(decoded, PASS);
+        auto restored_keys = mtx::crypto::decrypt_exported_sessions(encoded, PASS);
         EXPECT_EQ(json(keys).dump(), json(restored_keys).dump());
 }
 

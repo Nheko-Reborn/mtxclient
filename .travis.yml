@@ -52,7 +52,7 @@ script:
         -e CC_VERSION=${CC_VERSION} \
         -e COVERAGE=${COVERAGE} \
         -e TRAVIS_OS_NAME=${TRAVIS_OS_NAME} \
-        nheko-reborn/mtxclient \
+        nhekoreborn/mtxclient \
         /bin/bash -c "./.ci/script.sh"
     fi
 
@@ -67,7 +67,7 @@ after_success:
   - |
     if [ $COVERAGE == ON ]; then
       docker run -v `pwd`:/build \
-        --net=host nheko-reborn/mtxclient \
+        --net=host nhekoreborn/mtxclient \
         /bin/bash -c "make -C build -j1 test_coverage && ./.ci/coverage.sh" && \
       bash <(curl -s https://codecov.io/bash) -f "!*tests*" || echo "Codecov failed"
     fi
