@@ -34,8 +34,10 @@ RUN \
         openssl && \
     sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 10 && \
     sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-8 10 && \
+    sudo update-alternatives --install /usr/bin/gcov gcov /usr/bin/gcov-8 10 && \
     sudo update-alternatives --set gcc "/usr/bin/gcc-8" && \
     sudo update-alternatives --set g++ "/usr/bin/g++-8" && \
+    sudo update-alternatives --set gcov "/usr/bin/gcov-8" && \
     # libsodium
     mkdir -p /build/libsodium && cd /build/libsodium && \
     curl -L https://download.libsodium.org/libsodium/releases/libsodium-${LIBSODIUM_VERSION}.tar.gz -o libsodium-${LIBSODIUM_VERSION}.tar.gz && \

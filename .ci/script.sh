@@ -8,9 +8,11 @@ if [ $TRAVIS_OS_NAME == linux ]; then
 
     sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/${CC_VERSION} 10
     sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/${CXX_VERSION} 10
+    sudo update-alternatives --install /usr/bin/gcov gcov /usr/bin/gcov-8 10
 
     sudo update-alternatives --set gcc "/usr/bin/${CC_VERSION}"
     sudo update-alternatives --set g++ "/usr/bin/${CXX_VERSION}"
+    sudo update-alternatives --set gcov "/usr/bin/gcov-8"
 
     # Build the library.
     cmake -H. -Bbuild -DCMAKE_BUILD_TYPE=Debug \
