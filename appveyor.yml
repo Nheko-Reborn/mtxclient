@@ -6,7 +6,9 @@ configuration: Release
 image: Visual Studio 2017
 platform: x64
 
-cache: c:\tools\vcpkg\installed\
+cache: 
+    - c:\tools\vcpkg\installed\ -> appveyor.yml
+    - .deps -> appveyor.yml, deps/CMakeLists.txt
 
 build:
     verbosity: minimal
