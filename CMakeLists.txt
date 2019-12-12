@@ -39,14 +39,6 @@ if(ASAN)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address,undefined")
 endif()
 
-if(COVERAGE)
-  include(CodeCoverage)
-  add_custom_target(ctest COMMAND ${CMAKE_CTEST_COMMAND})
-  set(CMAKE_CXX_FLAGS
-      "${CMAKE_CXX_FLAGS} -g -O0 -fprofile-arcs -ftest-coverage")
-  setup_target_for_coverage(test_coverage ctest coverage)
-endif()
-
 if(NOT MSVC AND NOT APPLE)
   set(THREADS_PREFER_PTHREAD_FLAG ON)
   find_package(Threads REQUIRED)
@@ -180,6 +172,20 @@ target_link_libraries(matrix_client
 if(NOT MSVC AND NOT APPLE)
   target_link_libraries(matrix_client PUBLIC Threads::Threads)
 endif()
+
+if(COVERAGE)
+  include(CodeCoverage)
+  add_custom_target(ctest COMMAND ${CMAKE_CTEST_COMMAND})
+  target_compile_options(matrix_client PUBLIC
+	  -O0        # no optimization
+	  -g         # generate debug info
+	  --coverage # sets all required flags
+	  -fprofile-arcs -ftest-coverage # just to be sure, for clang!
+	  )
+  target_link_options(matrix_client PUBLIC --coverage)
+  setup_target_for_coverage(test_coverage ctest coverage)
+endif()
+
 
 if(IWYU)
   find_program(iwyu_path NAMES include-what-you-use iwyu)

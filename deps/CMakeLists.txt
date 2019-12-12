@@ -35,8 +35,8 @@ option(USE_EXISTING_SRC_DIR
 include(ExternalProject)
 
 if(USE_BUNDLED_BOOST)
-  # bundled boost is 1.68, which requires CMake 3.12 or greater.
-  cmake_minimum_required(VERSION 3.12)
+  # bundled boost is 1.70, which requires CMake 3.15 or greater.
+  cmake_minimum_required(VERSION 3.15)
 endif()
 
 set(BOOST_URL
