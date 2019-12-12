@@ -1133,16 +1133,24 @@ TEST(ExportSessions, InboundMegolmSessions)
 
 TEST(Encryption, EncryptedFile)
 {
+        {
+                auto buffer = mtx::crypto::create_buffer(16);
+                ASSERT_EQ(buffer.size(), 16);
+                auto buf_str = mtx::crypto::to_string(buffer);
+                ASSERT_EQ(buf_str.size(), 16);
+        }
+
         std::string plaintext = "This is some plain text payload";
         auto encryption_data  = mtx::crypto::encrypt_file(plaintext);
         ASSERT_NE(plaintext, mtx::crypto::to_string(encryption_data.first));
         ASSERT_EQ(plaintext,
                   mtx::crypto::to_string(mtx::crypto::decrypt_file(
                     mtx::crypto::to_string(encryption_data.first), encryption_data.second)));
-	// IV needs to be 16 bytes/128 bits
-        ASSERT_EQ(16, encryption_data.second.iv.size());
-	// key needs to be 32 bytes/256 bits
-        ASSERT_EQ(32, encryption_data.second.key.k.size());
+        // key needs to be 32 bytes/256 bits
+        ASSERT_EQ(32,
+                  mtx::crypto::base642bin_urlsafe_unpadded(encryption_data.second.key.k).size());
+        // IV needs to be 16 bytes/128 bits
+        ASSERT_EQ(16, mtx::crypto::base642bin_unpadded(encryption_data.second.iv).size());
 
         json j                                            = R"({
   "type": "m.room.message",
