@@ -330,6 +330,8 @@ TEST(StateEvents, JoinRules)
         EXPECT_EQ(event.origin_server_ts, 1506761924018L);
         EXPECT_EQ(event.state_key, "");
         EXPECT_EQ(event.content.join_rule, ns::state::JoinRule::Invite);
+
+	EXPECT_EQ(data, json(event));
 }
 
 TEST(StateEvents, Member)
