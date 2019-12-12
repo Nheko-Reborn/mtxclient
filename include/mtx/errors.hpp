@@ -57,7 +57,7 @@ from_string(const std::string &code);
 struct Error
 {
         //! Error code.
-        ErrorCode errcode;
+        ErrorCode errcode = {};
         //! Human readable version of the error.
         std::string error;
 };
