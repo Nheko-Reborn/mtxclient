@@ -347,7 +347,7 @@ TEST(StateEvents, JoinRules)
           "type": "m.room.join_rules"
         })"_json;
 
-	EXPECT_EQ(data, json(ns::StateEvent<ns::state::JoinRules>(data)));
+        EXPECT_EQ(data, json(ns::StateEvent<ns::state::JoinRules>(data)));
 
         data = R"({
           "origin_server_ts": 1506761924018,
@@ -363,7 +363,7 @@ TEST(StateEvents, JoinRules)
           "type": "m.room.join_rules"
         })"_json;
 
-	EXPECT_EQ(data, json(ns::StateEvent<ns::state::JoinRules>(data)));
+        EXPECT_EQ(data, json(ns::StateEvent<ns::state::JoinRules>(data)));
 
         data = R"({
           "origin_server_ts": 1506761924018,
@@ -379,7 +379,7 @@ TEST(StateEvents, JoinRules)
           "type": "m.room.join_rules"
         })"_json;
 
-	EXPECT_EQ(data, json(ns::StateEvent<ns::state::JoinRules>(data)));
+        EXPECT_EQ(data, json(ns::StateEvent<ns::state::JoinRules>(data)));
 }
 
 TEST(StateEvents, Member)

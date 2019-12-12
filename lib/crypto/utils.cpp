@@ -203,9 +203,9 @@ encrypt_file(const std::string &plaintext)
 {
         mtx::crypto::EncryptedFile encryption_info;
 
-        // not sure if 16 bytes would be enough, 32 seems to be safe though
+        // iv has to be 16 bytes, key 32!
         BinaryBuf key = create_buffer(32);
-        BinaryBuf iv  = create_buffer(32);
+        BinaryBuf iv  = create_buffer(16);
 
         BinaryBuf cyphertext = AES_CTR_256_Encrypt(plaintext, key, iv);
 

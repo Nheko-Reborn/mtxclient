@@ -1139,6 +1139,10 @@ TEST(Encryption, EncryptedFile)
         ASSERT_EQ(plaintext,
                   mtx::crypto::to_string(mtx::crypto::decrypt_file(
                     mtx::crypto::to_string(encryption_data.first), encryption_data.second)));
+	// IV needs to be 16 bytes/128 bits
+        ASSERT_EQ(16, encryption_data.second.iv.size());
+	// key needs to be 32 bytes/256 bits
+        ASSERT_EQ(32, encryption_data.second.key.k.size());
 
         json j                                            = R"({
   "type": "m.room.message",
