@@ -33,7 +33,7 @@ stringToJoinRule(const std::string &rule)
                 return JoinRule::Public;
         else if (rule == "invite")
                 return JoinRule::Invite;
-        else if (rule == "Knock")
+        else if (rule == "knock")
                 return JoinRule::Knock;
 
         return JoinRule::Private;

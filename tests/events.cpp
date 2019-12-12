@@ -332,6 +332,54 @@ TEST(StateEvents, JoinRules)
         EXPECT_EQ(event.content.join_rule, ns::state::JoinRule::Invite);
 
         EXPECT_EQ(data, json(event));
+
+        data = R"({
+          "origin_server_ts": 1506761924018,
+          "sender": "@mujx:matrix.org",
+          "event_id": "$15067619241414401ASocy:matrix.org",
+          "unsigned": {
+            "age": 3715756273
+	  },
+          "state_key": "",
+          "content": {
+            "join_rule": "public"
+	  },
+          "type": "m.room.join_rules"
+        })"_json;
+
+	EXPECT_EQ(data, json(ns::StateEvent<ns::state::JoinRules>(data)));
+
+        data = R"({
+          "origin_server_ts": 1506761924018,
+          "sender": "@mujx:matrix.org",
+          "event_id": "$15067619241414401ASocy:matrix.org",
+          "unsigned": {
+            "age": 3715756273
+	  },
+          "state_key": "",
+          "content": {
+            "join_rule": "knock"
+	  },
+          "type": "m.room.join_rules"
+        })"_json;
+
+	EXPECT_EQ(data, json(ns::StateEvent<ns::state::JoinRules>(data)));
+
+        data = R"({
+          "origin_server_ts": 1506761924018,
+          "sender": "@mujx:matrix.org",
+          "event_id": "$15067619241414401ASocy:matrix.org",
+          "unsigned": {
+            "age": 3715756273
+	  },
+          "state_key": "",
+          "content": {
+            "join_rule": "private"
+	  },
+          "type": "m.room.join_rules"
+        })"_json;
+
+	EXPECT_EQ(data, json(ns::StateEvent<ns::state::JoinRules>(data)));
 }
 
 TEST(StateEvents, Member)
