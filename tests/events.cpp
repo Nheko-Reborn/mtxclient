@@ -331,7 +331,7 @@ TEST(StateEvents, JoinRules)
         EXPECT_EQ(event.state_key, "");
         EXPECT_EQ(event.content.join_rule, ns::state::JoinRule::Invite);
 
-	EXPECT_EQ(data, json(event));
+        EXPECT_EQ(data, json(event));
 }
 
 TEST(StateEvents, Member)
