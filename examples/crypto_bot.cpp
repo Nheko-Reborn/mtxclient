@@ -1,6 +1,5 @@
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/beast.hpp>
-#include <boost/variant.hpp>
 
 #include <csignal>
 #include <cstdlib>
@@ -14,6 +13,7 @@
 #include <nlohmann/json.hpp>
 #include <stdexcept>
 #include <unistd.h>
+#include <variant>
 
 #include <mtx.hpp>
 #include <mtx/identifiers.hpp>
@@ -341,7 +341,7 @@ is_room_encryption(const T &event)
 {
         using namespace mtx::events;
         using namespace mtx::events::state;
-        return boost::get<StateEvent<Encryption>>(&event) != nullptr;
+        return std::holds_alternative<StateEvent<Encryption>>(event);
 }
 
 void
@@ -496,7 +496,7 @@ bool
 is_encrypted(const TimelineEvent &event)
 {
         using namespace mtx::events;
-        return boost::get<EncryptedEvent<msg::Encrypted>>(&event) != nullptr;
+        return std::holds_alternative<EncryptedEvent<msg::Encrypted>>(event);
 }
 
 template<class T>
@@ -505,40 +505,40 @@ is_member_event(const T &event)
 {
         using namespace mtx::events;
         using namespace mtx::events::state;
-        return boost::get<StateEvent<Member>>(&event) != nullptr;
+        return std::holds_alternative<StateEvent<Member>>(event);
 }
 
 // Check if the given event has a textual representation.
 bool
 is_room_message(const TimelineEvent &e)
 {
-        return (boost::get<mtx::events::RoomEvent<msg::Audio>>(&e) != nullptr) ||
-               (boost::get<mtx::events::RoomEvent<msg::Emote>>(&e) != nullptr) ||
-               (boost::get<mtx::events::RoomEvent<msg::File>>(&e) != nullptr) ||
-               (boost::get<mtx::events::RoomEvent<msg::Image>>(&e) != nullptr) ||
-               (boost::get<mtx::events::RoomEvent<msg::Notice>>(&e) != nullptr) ||
-               (boost::get<mtx::events::RoomEvent<msg::Text>>(&e) != nullptr) ||
-               (boost::get<mtx::events::RoomEvent<msg::Video>>(&e) != nullptr);
+        return (std::holds_alternative<mtx::events::RoomEvent<msg::Audio>>(e)) ||
+               (std::holds_alternative<mtx::events::RoomEvent<msg::Emote>>(e)) ||
+               (std::holds_alternative<mtx::events::RoomEvent<msg::File>>(e)) ||
+               (std::holds_alternative<mtx::events::RoomEvent<msg::Image>>(e)) ||
+               (std::holds_alternative<mtx::events::RoomEvent<msg::Notice>>(e)) ||
+               (std::holds_alternative<mtx::events::RoomEvent<msg::Text>>(e)) ||
+               (std::holds_alternative<mtx::events::RoomEvent<msg::Video>>(e));
 }
 
 // Retrieves the fallback body value from the event.
 std::string
 get_body(const TimelineEvent &e)
 {
-        if (boost::get<RoomEvent<msg::Audio>>(&e) != nullptr)
-                return boost::get<RoomEvent<msg::Audio>>(e).content.body;
-        else if (boost::get<RoomEvent<msg::Emote>>(&e) != nullptr)
-                return boost::get<RoomEvent<msg::Emote>>(e).content.body;
-        else if (boost::get<RoomEvent<msg::File>>(&e) != nullptr)
-                return boost::get<RoomEvent<msg::File>>(e).content.body;
-        else if (boost::get<RoomEvent<msg::Image>>(&e) != nullptr)
-                return boost::get<RoomEvent<msg::Image>>(e).content.body;
-        else if (boost::get<RoomEvent<msg::Notice>>(&e) != nullptr)
-                return boost::get<RoomEvent<msg::Notice>>(e).content.body;
-        else if (boost::get<RoomEvent<msg::Text>>(&e) != nullptr)
-                return boost::get<RoomEvent<msg::Text>>(e).content.body;
-        else if (boost::get<RoomEvent<msg::Video>>(&e) != nullptr)
-                return boost::get<RoomEvent<msg::Video>>(e).content.body;
+        if (auto ev = std::get_if<RoomEvent<msg::Audio>>(&e); ev != nullptr)
+                return ev->content.body;
+        else if (auto ev = std::get_if<RoomEvent<msg::Emote>>(&e); ev != nullptr)
+                return ev->content.body;
+        else if (auto ev = std::get_if<RoomEvent<msg::File>>(&e); ev != nullptr)
+                return ev->content.body;
+        else if (auto ev = std::get_if<RoomEvent<msg::Image>>(&e); ev != nullptr)
+                return ev->content.body;
+        else if (auto ev = std::get_if<RoomEvent<msg::Notice>>(&e); ev != nullptr)
+                return ev->content.body;
+        else if (auto ev = std::get_if<RoomEvent<msg::Text>>(&e); ev != nullptr)
+                return ev->content.body;
+        else if (auto ev = std::get_if<RoomEvent<msg::Video>>(&e); ev != nullptr)
+                return ev->content.body;
 
         return "";
 }
@@ -547,14 +547,14 @@ get_body(const TimelineEvent &e)
 std::string
 get_sender(const TimelineEvent &event)
 {
-        return boost::apply_visitor([](auto e) { return e.sender; }, event);
+        return std::visit([](auto e) { return e.sender; }, event);
 }
 
 template<class T>
 std::string
 get_json(const T &event)
 {
-        return boost::apply_visitor([](auto e) { return json(e).dump(2); }, event);
+        return std::visit([](auto e) { return json(e).dump(2); }, event);
 }
 
 void
@@ -700,8 +700,7 @@ parse_messages(const mtx::responses::Sync &res)
                                 console->debug("{}", get_json(e));
                         } else if (is_member_event(e)) {
                                 auto m =
-                                  boost::get<mtx::events::StateEvent<mtx::events::state::Member>>(
-                                    e);
+                                  std::get<mtx::events::StateEvent<mtx::events::state::Member>>(e);
 
                                 get_device_keys(UserId(m.state_key));
                                 storage.add_member(room_id, m.state_key);
@@ -714,8 +713,7 @@ parse_messages(const mtx::responses::Sync &res)
                                 console->debug("{}", get_json(e));
                         } else if (is_member_event(e)) {
                                 auto m =
-                                  boost::get<mtx::events::StateEvent<mtx::events::state::Member>>(
-                                    e);
+                                  std::get<mtx::events::StateEvent<mtx::events::state::Member>>(e);
 
                                 get_device_keys(UserId(m.state_key));
                                 storage.add_member(room_id, m.state_key);
@@ -723,7 +721,7 @@ parse_messages(const mtx::responses::Sync &res)
                                 console->info("received an encrypted event: {}", room_id);
                                 console->info("{}", get_json(e));
 
-                                auto msg = boost::get<EncryptedEvent<msg::Encrypted>>(e);
+                                auto msg = std::get<EncryptedEvent<msg::Encrypted>>(e);
 
                                 if (storage.inbound_group_exists(
                                       room_id, msg.content.session_id, msg.content.sender_key)) {
@@ -808,8 +806,7 @@ initial_sync_handler(const mtx::responses::Sync &res, RequestErr err)
                 for (const auto &e : room.second.state.events) {
                         if (is_member_event(e)) {
                                 auto m =
-                                  boost::get<mtx::events::StateEvent<mtx::events::state::Member>>(
-                                    e);
+                                  std::get<mtx::events::StateEvent<mtx::events::state::Member>>(e);
 
                                 get_device_keys(UserId(m.state_key));
                                 storage.add_member(room_id, m.state_key);

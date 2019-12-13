@@ -2,13 +2,13 @@
 
 #include <memory>
 #include <mutex>
+#include <optional>
 #include <thread>
 
 #include <boost/asio.hpp>
 #include <boost/asio/ssl.hpp>
 #include <boost/beast.hpp>
 #include <boost/iostreams/stream.hpp>
-#include <boost/optional.hpp>
 #include <boost/signals2.hpp>
 #include <boost/signals2/signal_type.hpp>
 #include <boost/thread/thread.hpp>
@@ -40,8 +40,8 @@ to_string(PaginationDirection dir)
         return "f";
 }
 
-using RequestErr   = const boost::optional<mtx::http::ClientError> &;
-using HeaderFields = const boost::optional<boost::beast::http::fields> &;
+using RequestErr   = const std::optional<mtx::http::ClientError> &;
+using HeaderFields = const std::optional<boost::beast::http::fields> &;
 using ErrCallback  = std::function<void(RequestErr)>;
 
 template<class Response>
@@ -360,7 +360,7 @@ private:
 
         boost::asio::io_service ios_;
         //! Used to prevent the event loop from shutting down.
-        boost::optional<boost::asio::io_context::work> work_{ios_};
+        std::optional<boost::asio::io_context::work> work_{ios_};
         //! Worker threads for the requests.
         boost::thread_group thread_group_;
         //! SSL context for requests.

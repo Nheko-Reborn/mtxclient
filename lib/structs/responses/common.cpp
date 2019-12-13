@@ -115,7 +115,7 @@ compose_timeline_events(json &events,
                         const std::vector<mtx::events::collections::TimelineEvents> &container)
 {
         const auto c = container.at(0);
-        events       = boost::apply_visitor(TimelineEventVisitor(), c);
+        events       = std::visit(TimelineEventVisitor(), c);
 }
 
 void

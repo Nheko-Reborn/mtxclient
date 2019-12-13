@@ -1,6 +1,7 @@
 #pragma once
 
-#include <boost/optional.hpp>
+#include <optional>
+
 #include <nlohmann/json.hpp>
 
 using json = nlohmann::json;
@@ -34,7 +35,7 @@ struct Create
         std::string room_version = "1";
 
         //! A reference to the room this room replaces, if the previous room was upgraded.
-        boost::optional<PreviousRoom> predecessor;
+        std::optional<PreviousRoom> predecessor;
 };
 
 void

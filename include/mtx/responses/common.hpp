@@ -46,7 +46,7 @@ using StrippedEvents        = std::vector<mtx::events::collections::StrippedEven
 namespace states = mtx::events::state;
 namespace msgs   = mtx::events::msg;
 
-struct TimelineEventVisitor : public boost::static_visitor<json>
+struct TimelineEventVisitor
 {
         json operator()(const events::StateEvent<states::Aliases> &aliasEv) const
         {

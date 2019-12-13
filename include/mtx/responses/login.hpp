@@ -1,5 +1,6 @@
 #pragma once
 
+#include <optional>
 #include <string>
 
 #include <nlohmann/json.hpp>
@@ -28,7 +29,7 @@ struct Login
         //! Optional client configuration provided by the server.
         //! If present, clients SHOULD use the provided object to reconfigure themselves,
         //! optionally validating the URLs within.
-        boost::optional<WellKnown> well_known;
+        std::optional<WellKnown> well_known;
 };
 
 void

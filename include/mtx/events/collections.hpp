@@ -1,6 +1,6 @@
 #pragma once
 
-#include <boost/variant.hpp>
+#include <variant>
 
 #include "mtx/events.hpp"
 #include "mtx/events/aliases.hpp"
@@ -40,68 +40,68 @@ namespace states       = mtx::events::state;
 namespace msgs         = mtx::events::msg;
 
 //! Collection of room specific account data
-using RoomAccountDataEvents = boost::variant<events::Event<account_data::Tag>>;
+using RoomAccountDataEvents = std::variant<events::Event<account_data::Tag>>;
 
 //! Collection of @p StateEvent only.
-using StateEvents = boost::variant<events::StateEvent<states::Aliases>,
-                                   events::StateEvent<states::Avatar>,
-                                   events::StateEvent<states::CanonicalAlias>,
-                                   events::StateEvent<states::Create>,
-                                   events::StateEvent<states::Encryption>,
-                                   events::StateEvent<states::GuestAccess>,
-                                   events::StateEvent<states::HistoryVisibility>,
-                                   events::StateEvent<states::JoinRules>,
-                                   events::StateEvent<states::Member>,
-                                   events::StateEvent<states::Name>,
-                                   events::StateEvent<states::PinnedEvents>,
-                                   events::StateEvent<states::PowerLevels>,
-                                   events::StateEvent<states::Tombstone>,
-                                   events::StateEvent<states::Topic>,
-                                   events::StateEvent<msgs::Redacted>>;
+using StateEvents = std::variant<events::StateEvent<states::Aliases>,
+                                 events::StateEvent<states::Avatar>,
+                                 events::StateEvent<states::CanonicalAlias>,
+                                 events::StateEvent<states::Create>,
+                                 events::StateEvent<states::Encryption>,
+                                 events::StateEvent<states::GuestAccess>,
+                                 events::StateEvent<states::HistoryVisibility>,
+                                 events::StateEvent<states::JoinRules>,
+                                 events::StateEvent<states::Member>,
+                                 events::StateEvent<states::Name>,
+                                 events::StateEvent<states::PinnedEvents>,
+                                 events::StateEvent<states::PowerLevels>,
+                                 events::StateEvent<states::Tombstone>,
+                                 events::StateEvent<states::Topic>,
+                                 events::StateEvent<msgs::Redacted>>;
 
 //! Collection of @p StrippedEvent only.
-using StrippedEvents = boost::variant<events::StrippedEvent<states::Aliases>,
-                                      events::StrippedEvent<states::Avatar>,
-                                      events::StrippedEvent<states::CanonicalAlias>,
-                                      events::StrippedEvent<states::Create>,
-                                      events::StrippedEvent<states::GuestAccess>,
-                                      events::StrippedEvent<states::HistoryVisibility>,
-                                      events::StrippedEvent<states::JoinRules>,
-                                      events::StrippedEvent<states::Member>,
-                                      events::StrippedEvent<states::Name>,
-                                      events::StrippedEvent<states::PinnedEvents>,
-                                      events::StrippedEvent<states::PowerLevels>,
-                                      events::StrippedEvent<states::Tombstone>,
-                                      events::StrippedEvent<states::Topic>>;
+using StrippedEvents = std::variant<events::StrippedEvent<states::Aliases>,
+                                    events::StrippedEvent<states::Avatar>,
+                                    events::StrippedEvent<states::CanonicalAlias>,
+                                    events::StrippedEvent<states::Create>,
+                                    events::StrippedEvent<states::GuestAccess>,
+                                    events::StrippedEvent<states::HistoryVisibility>,
+                                    events::StrippedEvent<states::JoinRules>,
+                                    events::StrippedEvent<states::Member>,
+                                    events::StrippedEvent<states::Name>,
+                                    events::StrippedEvent<states::PinnedEvents>,
+                                    events::StrippedEvent<states::PowerLevels>,
+                                    events::StrippedEvent<states::Tombstone>,
+                                    events::StrippedEvent<states::Topic>>;
 
 //! Collection of @p StateEvent and @p RoomEvent. Those events would be
 //! available on the returned timeline.
-using TimelineEvents = boost::variant<events::StateEvent<states::Aliases>,
-                                      events::StateEvent<states::Avatar>,
-                                      events::StateEvent<states::CanonicalAlias>,
-                                      events::StateEvent<states::Create>,
-                                      events::StateEvent<states::Encryption>,
-                                      events::StateEvent<states::GuestAccess>,
-                                      events::StateEvent<states::HistoryVisibility>,
-                                      events::StateEvent<states::JoinRules>,
-                                      events::StateEvent<states::Member>,
-                                      events::StateEvent<states::Name>,
-                                      events::StateEvent<states::PinnedEvents>,
-                                      events::StateEvent<states::PowerLevels>,
-                                      events::StateEvent<states::Tombstone>,
-                                      events::StateEvent<states::Topic>,
-                                      events::EncryptedEvent<msgs::Encrypted>,
-                                      events::RedactionEvent<msgs::Redaction>,
-                                      events::Sticker,
-                                      events::RoomEvent<msgs::Redacted>,
-                                      events::RoomEvent<msgs::Audio>,
-                                      events::RoomEvent<msgs::Emote>,
-                                      events::RoomEvent<msgs::File>,
-                                      events::RoomEvent<msgs::Image>,
-                                      // TODO: events::RoomEvent<msgs::Location>,
-                                      events::RoomEvent<msgs::Notice>,
-                                      events::RoomEvent<msgs::Text>,
-                                      events::RoomEvent<msgs::Video>>;
+using TimelineEvents = std::variant<events::StateEvent<states::Aliases>,
+                                    events::StateEvent<states::Avatar>,
+                                    events::StateEvent<states::CanonicalAlias>,
+                                    events::StateEvent<states::Create>,
+                                    events::StateEvent<states::Encryption>,
+                                    events::StateEvent<states::GuestAccess>,
+                                    events::StateEvent<states::HistoryVisibility>,
+                                    events::StateEvent<states::JoinRules>,
+                                    events::StateEvent<states::Member>,
+                                    events::StateEvent<states::Name>,
+                                    events::StateEvent<states::PinnedEvents>,
+                                    events::StateEvent<states::PowerLevels>,
+                                    events::StateEvent<states::Tombstone>,
+                                    events::StateEvent<states::Topic>,
+                                    events::EncryptedEvent<msgs::Encrypted>,
+                                    events::RedactionEvent<msgs::Redaction>,
+                                    events::Sticker,
+                                    events::RoomEvent<msgs::Redacted>,
+                                    events::RoomEvent<msgs::Audio>,
+                                    events::RoomEvent<msgs::Emote>,
+                                    events::RoomEvent<msgs::File>,
+                                    events::RoomEvent<msgs::Image>,
+                                    // TODO: events::RoomEvent<msgs::Location>,
+                                    events::RoomEvent<msgs::Notice>,
+                                    events::RoomEvent<msgs::Text>,
+                                    events::RoomEvent<msgs::Video>>;
 
 struct TimelineEvent
 {

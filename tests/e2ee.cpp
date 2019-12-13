@@ -1,7 +1,6 @@
 #include <atomic>
 
 #include <boost/algorithm/string.hpp>
-#include <boost/variant.hpp>
 
 #include <gtest/gtest.h>
 
@@ -596,7 +595,7 @@ TEST(Encryption, EnableEncryption)
 
                 int has_encryption = 0;
                 for (const auto &e : events) {
-                        if (boost::get<StateEvent<state::Encryption>>(&e) != nullptr)
+                        if (std::holds_alternative<StateEvent<state::Encryption>>(e))
                                 has_encryption = 1;
                 }
 

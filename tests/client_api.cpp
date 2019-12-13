@@ -1062,11 +1062,10 @@ TEST(ClientAPI, RetrieveSingleEvent)
                               const mtx::events::collections::TimelineEvents &res, RequestErr err) {
                                     check_error(err);
                                     ASSERT_TRUE(
-                                      boost::get<mtx::events::RoomEvent<mtx::events::msg::Text>>(
-                                        &res) != nullptr);
+                                      std::holds_alternative<
+                                        mtx::events::RoomEvent<mtx::events::msg::Text>>(res));
                                     auto e =
-                                      boost::get<mtx::events::RoomEvent<mtx::events::msg::Text>>(
-                                        res);
+                                      std::get<mtx::events::RoomEvent<mtx::events::msg::Text>>(res);
                                     EXPECT_EQ(e.content.body, "Hello Alice!");
                                     EXPECT_EQ(e.sender, "@bob:localhost");
                                     EXPECT_EQ(e.event_id, event_id);
