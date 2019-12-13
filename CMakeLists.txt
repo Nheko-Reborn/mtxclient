@@ -10,7 +10,7 @@ option(IWYU "Check headers with include-what-you-use" OFF)
 option(BUILD_SHARED_LIBS "Specifies whether to build mtxclient as a shared library lib or not" ON)
 
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 

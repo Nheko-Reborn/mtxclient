@@ -28,11 +28,14 @@
 *.app
 
 # Build artifacts
-build/
+build*/
 
 # Editor
 tags
 compile_commands.json
+.exrc
+.ccls-cache/
+.clangd/
 
 # Synapse data
 data/

@@ -1,4 +1,4 @@
-FROM ubuntu:14.04
+FROM ubuntu:16.04
 
 ENV LIBSODIUM_VERSION=1.0.16
 ENV SPDLOG_VERSION=1.1.0
@@ -18,7 +18,7 @@ RUN \
     # Toolchains
     add-apt-repository -y ppa:ubuntu-toolchain-r/test && \
     curl -L https://apt.llvm.org/llvm-snapshot.gpg.key | apt-key add - && \
-    apt-add-repository "deb https://apt.llvm.org/trusty/ llvm-toolchain-trusty-6.0 main" && \
+    apt-add-repository "deb https://apt.llvm.org/xenial/ llvm-toolchain-xenial-6.0 main" && \
     apt-get update -qq && \
     apt-get install -y --no-install-recommends \
         ninja-build \
@@ -57,7 +57,7 @@ RUN \
     curl -L https://dl.bintray.com/boostorg/release/1.70.0/source/boost_1_70_0.tar.gz -o boost_1_70_0.tar.gz && \
     tar xfz boost_1_70_0.tar.gz && cd /build/boost/boost_1_70_0/ && \
     ./bootstrap.sh --with-libraries=random,thread,system,iostreams,atomic,chrono,date_time,regex && \
-    ./b2 -d0 cxxstd=14 variant=release link=static threading=multi --layout=system && \
+    ./b2 -d0 cxxstd=17 variant=release link=static threading=multi --layout=system && \
     ./b2 -d0 install && \
     # Gtest
     mkdir -p /build/gtest && cd /build/gtest && \
