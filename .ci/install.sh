@@ -16,7 +16,7 @@ if [ $TRAVIS_OS_NAME == linux ]; then
     # Toolchains
     sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test && \
     curl -L https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
-    sudo apt-add-repository "deb https://apt.llvm.org/trusty/ llvm-toolchain-trusty-6.0 main"
+    sudo apt-add-repository "deb https://apt.llvm.org/xenial/ llvm-toolchain-xenial-6.0 main"
     sudo apt-get update -qq
     sudo apt-get install -y --no-install-recommends \
         pkg-config \
