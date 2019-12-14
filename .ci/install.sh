@@ -6,27 +6,10 @@ CMAKE_VERSION=3.15.5
 CMAKE_SHORT_VERSION=3.15
 
 if [ $TRAVIS_OS_NAME == linux ]; then
-    sudo apt-get update -qq
-    sudo apt-get install -y --no-install-recommends apt-transport-https software-properties-common curl ninja-build
     # cmake
     curl https://cmake.org/files/v${CMAKE_SHORT_VERSION}/cmake-${CMAKE_VERSION}-Linux-x86_64.sh -o cmake-install.sh
     sudo bash cmake-install.sh --skip-license --prefix=/usr/local
     export PATH="/usr/local/bin:$PATH"
-
-    # Toolchains
-    sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test && \
-    curl -L https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
-    sudo apt-add-repository "deb https://apt.llvm.org/xenial/ llvm-toolchain-xenial-6.0 main"
-    sudo apt-get update -qq
-    sudo apt-get install -y --no-install-recommends \
-        pkg-config \
-        make \
-        clang++-6.0 \
-        clang-6.0 \
-        g++-8 \
-        unzip git \
-        libssl-dev \
-        openssl
 
     mkdir -p build-libsodium
     ( cd build-libsodium
