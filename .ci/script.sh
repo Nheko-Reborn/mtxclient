@@ -34,8 +34,6 @@ if [ $TRAVIS_OS_NAME == linux ]; then
 fi
 
 if [ $TRAVIS_OS_NAME == osx ]; then
-    brew update
-    brew upgrade cmake boost || true
     # Build dependencies.
     cmake -Hdeps -B.deps -DCMAKE_BUILD_TYPE=Release \
         -DUSE_BUNDLED_BOOST=OFF \
