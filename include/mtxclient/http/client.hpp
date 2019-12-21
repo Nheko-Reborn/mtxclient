@@ -463,73 +463,79 @@ template<class Response>
 std::shared_ptr<mtx::http::Session>
 mtx::http::Client::create_session(HeadersCallback<Response> callback)
 {
+        auto type_erased_cb = [callback](const HeaderFields &headers,
+                                         const std::string &body,
+                                         const boost::system::error_code &err_code,
+                                         boost::beast::http::status status_code) {
+                Response response_data;
+                mtx::http::ClientError client_error;
+
+                if (err_code) {
+                        client_error.error_code = err_code;
+                        return callback(response_data, headers, client_error);
+                }
+
+                // We only count 2xx status codes as success.
+                if (static_cast<int>(status_code) < 200 || static_cast<int>(status_code) >= 300) {
+                        client_error.status_code = status_code;
+
+                        // Try to parse the response in case we have an endpoint that
+                        // doesn't return an error struct for non 200 requests.
+                        try {
+                                response_data = client::utils::deserialize<Response>(body);
+                        } catch (const nlohmann::json::exception &e) {
+                        }
+
+                        // The homeserver should return an error struct.
+                        try {
+                                nlohmann::json json_error       = json::parse(body);
+                                mtx::errors::Error matrix_error = json_error;
+
+                                client_error.matrix_error = matrix_error;
+                                return callback(response_data, headers, client_error);
+                        } catch (const nlohmann::json::exception &e) {
+                                client_error.parse_error = std::string(e.what()) + ": " + body;
+
+                                return callback(response_data, headers, client_error);
+                        }
+                }
+
+                // If we reach that point we most likely have a valid output from the
+                // homeserver.
+                try {
+                        auto res = client::utils::deserialize<Response>(body);
+                        callback(std::move(res), headers, {});
+                } catch (const nlohmann::json::exception &e) {
+                        client_error.parse_error = std::string(e.what()) + ": " + body;
+                        callback(response_data, headers, client_error);
+                }
+        };
+
         auto session = std::make_shared<Session>(
           std::ref(ios_),
           std::ref(ssl_ctx_),
           server_,
           port_,
           client::utils::random_token(),
-          [callback](RequestID,
-                     const boost::beast::http::response<boost::beast::http::string_body> &response,
-                     const boost::system::error_code &err_code) {
-                  Response response_data;
-                  mtx::http::ClientError client_error;
-
+          [type_erased_cb](
+            RequestID,
+            const boost::beast::http::response<boost::beast::http::string_body> &response,
+            const boost::system::error_code &err_code) {
                   const auto header = response.base();
 
                   if (err_code) {
-                          client_error.error_code = err_code;
-                          return callback(response_data, header, client_error);
+                          return type_erased_cb(header, "", err_code, {});
                   }
 
                   // Decompress the response.
                   const auto body = client::utils::decompress(
                     boost::iostreams::array_source{response.body().data(), response.body().size()},
                     header["Content-Encoding"].to_string());
-                  const int status_code = static_cast<int>(response.result());
 
-                  // We only count 2xx status codes as success.
-                  if (status_code < 200 || status_code >= 300) {
-                          client_error.status_code = response.result();
-
-                          // Try to parse the response in case we have an endpoint that
-                          // doesn't return an error struct for non 200 requests.
-                          try {
-                                  response_data = client::utils::deserialize<Response>(body);
-                          } catch (const nlohmann::json::exception &e) {
-                          }
-
-                          // The homeserver should return an error struct.
-                          try {
-                                  nlohmann::json json_error       = json::parse(body);
-                                  mtx::errors::Error matrix_error = json_error;
-
-                                  client_error.matrix_error = matrix_error;
-                                  return callback(response_data, header, client_error);
-                          } catch (const nlohmann::json::exception &e) {
-                                  client_error.parse_error = std::string(e.what()) + ": " + body;
-
-                                  return callback(response_data, header, client_error);
-                          }
-                  }
-
-                  // If we reach that point we most likely have a valid output from the
-                  // homeserver.
-                  try {
-                          auto res = client::utils::deserialize<Response>(body);
-                          callback(std::move(res), header, {});
-                  } catch (const nlohmann::json::exception &e) {
-                          client_error.parse_error = std::string(e.what()) + ": " + body;
-                          callback(response_data, header, client_error);
-                  }
+                  type_erased_cb(header, body, err_code, response.result());
           },
-          [callback](RequestID, const boost::system::error_code ec) {
-                  Response response_data;
-
-                  mtx::http::ClientError client_error;
-                  client_error.error_code = ec;
-
-                  callback(response_data, {}, client_error);
+          [type_erased_cb](RequestID, const boost::system::error_code ec) {
+                  type_erased_cb(std::nullopt, "", ec, {});
           });
 
         if (session)
