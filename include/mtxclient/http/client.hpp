@@ -41,7 +41,7 @@ using Callback = std::function<void(const Response &, RequestErr)>;
 
 template<class Response>
 using HeadersCallback    = std::function<void(const Response &, HeaderFields, RequestErr)>;
-using TypeErasedCallback = std::function<void(const HeaderFields &,
+using TypeErasedCallback = std::function<void(HeaderFields,
                                               const std::string &,
                                               const boost::system::error_code &,
                                               boost::beast::http::status)>;
@@ -457,7 +457,7 @@ template<class Response>
 mtx::http::TypeErasedCallback
 mtx::http::Client::prepare_callback(HeadersCallback<Response> callback)
 {
-        auto type_erased_cb = [callback](const HeaderFields &headers,
+        auto type_erased_cb = [callback](HeaderFields headers,
                                          const std::string &body,
                                          const boost::system::error_code &err_code,
                                          boost::beast::http::status status_code) {

@@ -55,10 +55,7 @@ Client::Client(const std::string &server, uint16_t port)
 Client::~Client() { p.reset(); }
 
 std::shared_ptr<Session>
-Client::create_session(std::function<void(const HeaderFields &,
-                                          const std::string &,
-                                          const boost::system::error_code &,
-                                          boost::beast::http::status)> type_erased_cb)
+Client::create_session(TypeErasedCallback type_erased_cb)
 {
         auto session = std::make_shared<Session>(
           std::ref(p->ios_),
