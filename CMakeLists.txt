@@ -110,6 +110,7 @@ add_library(matrix_client
             lib/structs/events/avatar.cpp
             lib/structs/events/canonical_alias.cpp
             lib/structs/events/common.cpp
+            lib/structs/events/collections.cpp
             lib/structs/events/create.cpp
             lib/structs/events/encrypted.cpp
             lib/structs/events/encryption.cpp
