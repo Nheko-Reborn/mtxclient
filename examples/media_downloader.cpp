@@ -155,12 +155,10 @@ message_handler(const mtx::responses::Messages &res, RequestErr err)
         for (const auto msg : res.chunk)
                 print_message(msg);
 
-	if (res.chunk.empty())
-	{
+        if (res.chunk.empty()) {
                 cout << "No more messages, exiting.\n";
-		return;
-	}
-
+                return;
+        }
 
         client->messages(opts, &message_handler);
 }

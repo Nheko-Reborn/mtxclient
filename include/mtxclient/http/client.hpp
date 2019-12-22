@@ -40,7 +40,7 @@ template<class Response>
 using Callback = std::function<void(const Response &, RequestErr)>;
 
 template<class Response>
-using HeadersCallback = std::function<void(const Response &, HeaderFields, RequestErr)>;
+using HeadersCallback    = std::function<void(const Response &, HeaderFields, RequestErr)>;
 using TypeErasedCallback = std::function<void(const HeaderFields &,
                                               const std::string &,
                                               const boost::system::error_code &,
