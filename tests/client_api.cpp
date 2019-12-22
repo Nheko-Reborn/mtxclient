@@ -40,9 +40,8 @@ TEST(ClientAPI, Register)
                   if (res.flows.size() == 0)
                           return;
 
-                  EXPECT_EQ(res.flows.size(), 2);
+                  EXPECT_EQ(res.flows.size(), 1);
                   EXPECT_EQ(res.flows[0].stages[0], "m.login.dummy");
-                  EXPECT_EQ(res.flows[1].stages[0], "m.login.email.identity");
 
                   user->flow_response(
                     username,
@@ -596,11 +595,13 @@ TEST(ClientAPI, Versions)
         mtx_client->versions([](const mtx::responses::Versions &res, RequestErr err) {
                 check_error(err);
 
-                EXPECT_EQ(res.versions.size(), 4);
+                EXPECT_EQ(res.versions.size(), 6);
                 EXPECT_EQ(res.versions.at(0), "r0.0.1");
                 EXPECT_EQ(res.versions.at(1), "r0.1.0");
                 EXPECT_EQ(res.versions.at(2), "r0.2.0");
                 EXPECT_EQ(res.versions.at(3), "r0.3.0");
+                EXPECT_EQ(res.versions.at(4), "r0.4.0");
+                EXPECT_EQ(res.versions.at(5), "r0.5.0");
         });
 
         mtx_client->close();
