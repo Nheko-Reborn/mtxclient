@@ -1,17 +1,10 @@
 #pragma once
 
 #include <memory>
-#include <mutex>
 #include <optional>
-#include <thread>
 
-#include <boost/asio.hpp>
-#include <boost/asio/ssl.hpp>
-#include <boost/beast.hpp>
-#include <boost/iostreams/stream.hpp>
-#include <boost/signals2.hpp>
-#include <boost/signals2/signal_type.hpp>
-#include <boost/thread/thread.hpp>
+#include <boost/beast/http/fields.hpp>
+
 #include <nlohmann/json.hpp>
 
 #include <mtx/requests.hpp>
@@ -19,7 +12,6 @@
 
 #include "mtxclient/crypto/client.hpp"
 #include "mtxclient/http/errors.hpp"
-#include "mtxclient/http/session.hpp"
 #include "mtxclient/utils.hpp"
 
 namespace mtx {
@@ -49,6 +41,10 @@ using Callback = std::function<void(const Response &, RequestErr)>;
 
 template<class Response>
 using HeadersCallback = std::function<void(const Response &, HeaderFields, RequestErr)>;
+using TypeErasedCallback = std::function<void(const HeaderFields &,
+                                              const std::string &,
+                                              const boost::system::error_code &,
+                                              boost::beast::http::status)>;
 
 //! Sync configuration options.
 struct SyncOpts
@@ -89,18 +85,8 @@ struct ThumbOpts
         std::string mxc_url;
 };
 
-struct ClientPrivate
-{
-        boost::asio::io_service ios_;
-        //! Used to prevent the event loop from shutting down.
-        std::optional<boost::asio::io_context::work> work_{ios_};
-        //! Worker threads for the requests.
-        boost::thread_group thread_group_;
-        //! SSL context for requests.
-        boost::asio::ssl::context ssl_ctx_{boost::asio::ssl::context::sslv23_client};
-        //! All the active sessions will shutdown the connection.
-        boost::signals2::signal<void()> shutdown_signal;
-};
+struct ClientPrivate;
+struct Session;
 
 //! The main object that the user will interact.
 class Client : public std::enable_shared_from_this<Client>
@@ -138,7 +124,7 @@ public:
         //! Generate a new transaction id.
         std::string generate_txn_id() { return client::utils::random_token(32, false); }
         //! Abort all active pending requests.
-        void shutdown() { p->shutdown_signal(); }
+        void shutdown();
         //! Remove all saved configuration.
         void clear()
         {
@@ -366,14 +352,27 @@ private:
                  bool requires_auth                    = true,
                  const std::string &endpoint_namespace = "/_matrix");
 
-        template<class Response>
-        std::shared_ptr<Session> create_session(HeadersCallback<Response> callback);
+        // type erased versions of http verbs
+        void post(const std::string &endpoint,
+                  const json &req,
+                  TypeErasedCallback cb,
+                  bool requires_auth,
+                  const std::string &content_type);
 
-        std::shared_ptr<Session> create_session(
-          std::function<void(const HeaderFields &,
-                             const std::string &,
-                             const boost::system::error_code &,
-                             boost::beast::http::status)> type_erased_cb);
+        void put(const std::string &endpoint,
+                 const json &req,
+                 TypeErasedCallback cb,
+                 bool requires_auth);
+
+        void get(const std::string &endpoint,
+                 TypeErasedCallback cb,
+                 bool requires_auth,
+                 const std::string &endpoint_namespace);
+
+        template<class Response>
+        TypeErasedCallback prepare_callback(HeadersCallback<Response> callback);
+
+        std::shared_ptr<Session> create_session(TypeErasedCallback type_erased_cb);
 
         //! Setup http header with the access token if needed.
         void setup_auth(Session *session, bool auth);
@@ -404,17 +403,13 @@ mtx::http::Client::post(const std::string &endpoint,
                         bool requires_auth,
                         const std::string &content_type)
 {
-        auto session = create_session<Response>(
-          [callback](const Response &res, HeaderFields, RequestErr err) { callback(res, err); });
-
-        if (!session)
-                return;
-
-        setup_auth(session.get(), requires_auth);
-        setup_headers<Request, boost::beast::http::verb::post>(
-          session.get(), req, endpoint, content_type);
-
-        session->run();
+        post(
+          endpoint,
+          client::utils::serialize(req),
+          prepare_callback<Response>(
+            [callback](const Response &res, HeaderFields, RequestErr err) { callback(res, err); }),
+          requires_auth,
+          content_type);
 }
 
 // put function for the PUT HTTP requests that send responses
@@ -425,17 +420,12 @@ mtx::http::Client::put(const std::string &endpoint,
                        Callback<Response> callback,
                        bool requires_auth)
 {
-        auto session = create_session<Response>(
-          [callback](const Response &res, HeaderFields, RequestErr err) { callback(res, err); });
-
-        if (!session)
-                return;
-
-        setup_auth(session.get(), requires_auth);
-        setup_headers<Request, boost::beast::http::verb::put>(
-          session.get(), req, endpoint, "application/json");
-
-        session->run();
+        put(
+          endpoint,
+          client::utils::serialize(req),
+          prepare_callback<Response>(
+            [callback](const Response &res, HeaderFields, RequestErr err) { callback(res, err); }),
+          requires_auth);
 }
 
 // provides PUT functionality for the endpoints which dont respond with a body
@@ -460,21 +450,12 @@ mtx::http::Client::get(const std::string &endpoint,
                        bool requires_auth,
                        const std::string &endpoint_namespace)
 {
-        auto session = create_session<Response>(callback);
-
-        if (!session)
-                return;
-
-        setup_auth(session.get(), requires_auth);
-        setup_headers<std::string, boost::beast::http::verb::get>(
-          session.get(), {}, endpoint, "", endpoint_namespace);
-
-        session->run();
+        get(endpoint, prepare_callback<Response>(callback), requires_auth, endpoint_namespace);
 }
 
 template<class Response>
-std::shared_ptr<mtx::http::Session>
-mtx::http::Client::create_session(HeadersCallback<Response> callback)
+mtx::http::TypeErasedCallback
+mtx::http::Client::prepare_callback(HeadersCallback<Response> callback)
 {
         auto type_erased_cb = [callback](const HeaderFields &headers,
                                          const std::string &body,
@@ -524,8 +505,7 @@ mtx::http::Client::create_session(HeadersCallback<Response> callback)
                 }
         };
 
-        return create_session(type_erased_cb);
-
+        return type_erased_cb;
 }
 
 template<class Payload, mtx::events::EventType Event>

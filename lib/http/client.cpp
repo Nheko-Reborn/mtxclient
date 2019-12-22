@@ -1,8 +1,21 @@
+#include "mtxclient/http/client.hpp"
+
+#include <mutex>
+#include <thread>
+
 #include <boost/algorithm/string.hpp>
 #include <boost/bind.hpp>
 #include <boost/utility/typed_in_place_factory.hpp>
 
-#include "mtxclient/http/client.hpp"
+#include <boost/asio.hpp>
+#include <boost/asio/ssl.hpp>
+#include <boost/beast.hpp>
+#include <boost/iostreams/stream.hpp>
+#include <boost/signals2.hpp>
+#include <boost/signals2/signal_type.hpp>
+#include <boost/thread/thread.hpp>
+
+#include "mtxclient/http/session.hpp"
 #include "mtxclient/utils.hpp"
 
 #include "mtx/requests.hpp"
@@ -10,6 +23,21 @@
 
 using namespace mtx::http;
 using namespace boost::beast;
+
+namespace mtx::http {
+struct ClientPrivate
+{
+        boost::asio::io_service ios_;
+        //! Used to prevent the event loop from shutting down.
+        std::optional<boost::asio::io_context::work> work_{ios_};
+        //! Worker threads for the requests.
+        boost::thread_group thread_group_;
+        //! SSL context for requests.
+        boost::asio::ssl::context ssl_ctx_{boost::asio::ssl::context::sslv23_client};
+        //! All the active sessions will shutdown the connection.
+        boost::signals2::signal<void()> shutdown_signal;
+};
+}
 
 Client::Client(const std::string &server, uint16_t port)
   : server_{server}
@@ -64,6 +92,66 @@ Client::create_session(std::function<void(const HeaderFields &,
                     .track_foreign(session));
 
         return session;
+}
+
+void
+Client::shutdown()
+{
+        p->shutdown_signal();
+}
+
+void
+mtx::http::Client::post(const std::string &endpoint,
+                        const nlohmann::json &req,
+                        mtx::http::TypeErasedCallback cb,
+                        bool requires_auth,
+                        const std::string &content_type)
+{
+        auto session = create_session(cb);
+
+        if (!session)
+                return;
+
+        setup_auth(session.get(), requires_auth);
+        setup_headers<boost::beast::http::verb::post>(session.get(), req, endpoint, content_type);
+
+        session->run();
+}
+
+void
+mtx::http::Client::put(const std::string &endpoint,
+                       const nlohmann::json &req,
+                       mtx::http::TypeErasedCallback cb,
+                       bool requires_auth)
+{
+        auto session = create_session(cb);
+
+        if (!session)
+                return;
+
+        setup_auth(session.get(), requires_auth);
+        setup_headers<boost::beast::http::verb::put>(
+          session.get(), req, endpoint, "application/json");
+
+        session->run();
+}
+
+void
+mtx::http::Client::get(const std::string &endpoint,
+                       mtx::http::TypeErasedCallback cb,
+                       bool requires_auth,
+                       const std::string &endpoint_namespace)
+{
+        auto session = create_session(cb);
+
+        if (!session)
+                return;
+
+        setup_auth(session.get(), requires_auth);
+        setup_headers<boost::beast::http::verb::get>(
+          session.get(), client::utils::serialize(std::string{}), endpoint, "", endpoint_namespace);
+
+        session->run();
 }
 
 void

@@ -5,8 +5,6 @@
 
 #include <sodium.h>
 
-#include <boost/algorithm/string.hpp>
-
 #include "mtx/common.hpp"
 
 namespace mtx {
