@@ -89,11 +89,25 @@ struct ThumbOpts
         std::string mxc_url;
 };
 
+struct ClientPrivate
+{
+        boost::asio::io_service ios_;
+        //! Used to prevent the event loop from shutting down.
+        std::optional<boost::asio::io_context::work> work_{ios_};
+        //! Worker threads for the requests.
+        boost::thread_group thread_group_;
+        //! SSL context for requests.
+        boost::asio::ssl::context ssl_ctx_{boost::asio::ssl::context::sslv23_client};
+        //! All the active sessions will shutdown the connection.
+        boost::signals2::signal<void()> shutdown_signal;
+};
+
 //! The main object that the user will interact.
 class Client : public std::enable_shared_from_this<Client>
 {
 public:
         Client(const std::string &server = "", uint16_t port = 443);
+        ~Client();
 
         //! Wait for the client to close.
         void close(bool force = false);
@@ -124,7 +138,7 @@ public:
         //! Generate a new transaction id.
         std::string generate_txn_id() { return client::utils::random_token(32, false); }
         //! Abort all active pending requests.
-        void shutdown() { shutdown_signal(); }
+        void shutdown() { p->shutdown_signal(); }
         //! Remove all saved configuration.
         void clear()
         {
@@ -355,16 +369,15 @@ private:
         template<class Response>
         std::shared_ptr<Session> create_session(HeadersCallback<Response> callback);
 
+        std::shared_ptr<Session> create_session(
+          std::function<void(const HeaderFields &,
+                             const std::string &,
+                             const boost::system::error_code &,
+                             boost::beast::http::status)> type_erased_cb);
+
         //! Setup http header with the access token if needed.
         void setup_auth(Session *session, bool auth);
 
-        boost::asio::io_service ios_;
-        //! Used to prevent the event loop from shutting down.
-        std::optional<boost::asio::io_context::work> work_{ios_};
-        //! Worker threads for the requests.
-        boost::thread_group thread_group_;
-        //! SSL context for requests.
-        boost::asio::ssl::context ssl_ctx_{boost::asio::ssl::context::sslv23_client};
         //! The homeserver to connect to.
         std::string server_;
         //! The access token that would be used for authentication.
@@ -377,8 +390,8 @@ private:
         std::string next_batch_token_;
         //! The homeserver port to connect.
         uint16_t port_ = 443;
-        //! All the active sessions will shutdown the connection.
-        boost::signals2::signal<void()> shutdown_signal;
+
+        std::unique_ptr<ClientPrivate> p;
 };
 }
 }
@@ -511,39 +524,8 @@ mtx::http::Client::create_session(HeadersCallback<Response> callback)
                 }
         };
 
-        auto session = std::make_shared<Session>(
-          std::ref(ios_),
-          std::ref(ssl_ctx_),
-          server_,
-          port_,
-          client::utils::random_token(),
-          [type_erased_cb](
-            RequestID,
-            const boost::beast::http::response<boost::beast::http::string_body> &response,
-            const boost::system::error_code &err_code) {
-                  const auto header = response.base();
+        return create_session(type_erased_cb);
 
-                  if (err_code) {
-                          return type_erased_cb(header, "", err_code, {});
-                  }
-
-                  // Decompress the response.
-                  const auto body = client::utils::decompress(
-                    boost::iostreams::array_source{response.body().data(), response.body().size()},
-                    header["Content-Encoding"].to_string());
-
-                  type_erased_cb(header, body, err_code, response.result());
-          },
-          [type_erased_cb](RequestID, const boost::system::error_code ec) {
-                  type_erased_cb(std::nullopt, "", ec, {});
-          });
-
-        if (session)
-                shutdown_signal.connect(
-                  boost::signals2::signal<void()>::slot_type(&Session::terminate, session.get())
-                    .track_foreign(session));
-
-        return session;
 }
 
 template<class Payload, mtx::events::EventType Event>

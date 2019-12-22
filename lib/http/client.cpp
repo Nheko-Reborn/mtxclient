@@ -14,12 +14,56 @@ using namespace boost::beast;
 Client::Client(const std::string &server, uint16_t port)
   : server_{server}
   , port_{port}
+  , p{new ClientPrivate}
 {
         using namespace boost::asio;
         const auto threads_num = std::max(1U, std::thread::hardware_concurrency());
 
         for (unsigned int i = 0; i < threads_num; ++i)
-                thread_group_.add_thread(new boost::thread([this]() { ios_.run(); }));
+                p->thread_group_.add_thread(new boost::thread([this]() { p->ios_.run(); }));
+}
+
+// call destuctor of work queue and ios first!
+Client::~Client() { p.reset(); }
+
+std::shared_ptr<Session>
+Client::create_session(std::function<void(const HeaderFields &,
+                                          const std::string &,
+                                          const boost::system::error_code &,
+                                          boost::beast::http::status)> type_erased_cb)
+{
+        auto session = std::make_shared<Session>(
+          std::ref(p->ios_),
+          std::ref(p->ssl_ctx_),
+          server_,
+          port_,
+          client::utils::random_token(),
+          [type_erased_cb](
+            RequestID,
+            const boost::beast::http::response<boost::beast::http::string_body> &response,
+            const boost::system::error_code &err_code) {
+                  const auto header = response.base();
+
+                  if (err_code) {
+                          return type_erased_cb(header, "", err_code, {});
+                  }
+
+                  // Decompress the response.
+                  const auto body = client::utils::decompress(
+                    boost::iostreams::array_source{response.body().data(), response.body().size()},
+                    header["Content-Encoding"].to_string());
+
+                  type_erased_cb(header, body, err_code, response.result());
+          },
+          [type_erased_cb](RequestID, const boost::system::error_code ec) {
+                  type_erased_cb(std::nullopt, "", ec, {});
+          });
+        if (session)
+                p->shutdown_signal.connect(
+                  boost::signals2::signal<void()>::slot_type(&Session::terminate, session.get())
+                    .track_foreign(session));
+
+        return session;
 }
 
 void
@@ -50,16 +94,16 @@ Client::close(bool force)
         // We close all open connections.
         if (force) {
                 shutdown();
-                ios_.stop();
+                p->ios_.stop();
         }
 
         // Destroy work object. This allows the I/O thread to
         // exit the event loop when there are no more pending
         // asynchronous operations.
-        work_.reset();
+        p->work_.reset();
 
         // Wait for the worker threads to exit.
-        thread_group_.join_all();
+        p->thread_group_.join_all();
 }
 
 void
