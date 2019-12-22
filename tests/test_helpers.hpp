@@ -59,7 +59,6 @@ inline void
 validate_login(const std::string &user, const mtx::responses::Login &res)
 {
         EXPECT_EQ(res.user_id.to_string(), user);
-        EXPECT_EQ(res.home_server, "localhost");
         ASSERT_TRUE(res.access_token.size() > 100);
         ASSERT_TRUE(res.device_id.size() > 5);
 }

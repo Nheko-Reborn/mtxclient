@@ -94,7 +94,6 @@ TEST(ClientAPI, LoginWrongPassword)
 
                   EXPECT_EQ(res.user_id.to_string(), "");
                   EXPECT_EQ(res.device_id, "");
-                  EXPECT_EQ(res.home_server, "");
                   EXPECT_EQ(res.access_token, "");
           });
 
@@ -112,7 +111,6 @@ TEST(ClientAPI, LoginWrongUsername)
 
                 EXPECT_EQ(res.user_id.to_string(), "");
                 EXPECT_EQ(res.device_id, "");
-                EXPECT_EQ(res.home_server, "");
                 EXPECT_EQ(res.access_token, "");
         });
 

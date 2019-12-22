@@ -508,7 +508,6 @@ TEST(Responses, Login)
         Login login = data;
         EXPECT_EQ(login.user_id.to_string(), "@cheeky_monkey:matrix.org");
         EXPECT_EQ(login.access_token, "abc123");
-        EXPECT_EQ(login.home_server, "matrix.org");
         EXPECT_EQ(login.device_id, "GHTYAJCE");
         EXPECT_EQ(login.well_known->homeserver.base_url, "https://example.org");
         EXPECT_EQ(login.well_known->identity_server->base_url, "https://id.example.org");
@@ -522,7 +521,6 @@ TEST(Responses, Login)
         Login login2 = data2;
         EXPECT_EQ(login2.user_id.to_string(), "@cheeky_monkey:matrix.org");
         EXPECT_EQ(login2.access_token, "abc123");
-        EXPECT_EQ(login2.home_server, "matrix.org");
         EXPECT_EQ(login2.device_id, "");
 
         json data3   = R"({
@@ -532,7 +530,6 @@ TEST(Responses, Login)
         Login login3 = data3;
         EXPECT_EQ(login3.user_id.to_string(), "@cheeky_monkey:matrix.org");
         EXPECT_EQ(login3.access_token, "abc123");
-        EXPECT_EQ(login3.home_server, "");
         EXPECT_EQ(login3.device_id, "");
 }
 

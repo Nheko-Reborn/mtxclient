@@ -13,9 +13,6 @@ from_json(const json &obj, Login &response)
 
         response.access_token = obj.at("access_token").get<std::string>();
 
-        if (obj.count("home_server") != 0)
-                response.home_server = obj.at("home_server").get<std::string>();
-
         if (obj.count("device_id") != 0)
                 response.device_id = obj.at("device_id").get<std::string>();
 
