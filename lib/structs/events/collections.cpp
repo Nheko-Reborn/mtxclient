@@ -88,9 +88,6 @@ from_json(const json &obj, TimelineEvent &e)
                                           << obj.dump(2) << '\n';
                                 return;
                         }
-
-                        std::cout << "Invalid event type: " << obj.dump(2) << '\n';
-                        break;
                 }
 
                 switch (msg_type) {
