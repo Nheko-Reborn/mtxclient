@@ -1,4 +1,5 @@
 #include "mtx/events/collections.hpp"
+#include "mtx/log.hpp"
 
 namespace mtx::events::collections {
 void
@@ -84,8 +85,8 @@ from_json(const json &obj, TimelineEvent &e)
                                 e.data = events::RoomEvent<events::msg::Redacted>(obj);
                                 return;
                         } catch (json::exception &err) {
-                                std::cout << "Invalid event type: " << err.what() << " "
-                                          << obj.dump(2) << '\n';
+                                mtx::utils::log::log_error(std::string("Invalid event type: ") +
+                                                           err.what() + " " + obj.dump(2));
                                 return;
                         }
                 }

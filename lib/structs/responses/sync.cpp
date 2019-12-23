@@ -1,5 +1,6 @@
 #include "mtx/responses/sync.hpp"
 #include "mtx/events/collections.hpp"
+#include "mtx/log.hpp"
 #include "mtx/responses/common.hpp"
 
 #include <variant>
@@ -73,9 +74,9 @@ from_json(const json &obj, Ephemeral &ephemeral)
                                         try {
                                                 ts = uit.value().at("ts");
                                         } catch (json::type_error &) {
-                                                std::cerr
-                                                  << "mtxclient: Workaround synapse bug #4898, "
-                                                     "ignoring timestamp for m.receipt event\n";
+                                                mtx::utils::log::log_warning(
+                                                  "mtxclient: Workaround synapse bug #4898, "
+                                                  "ignoring timestamp for m.receipt event");
                                         }
                                         user_times.emplace(uit.key(), ts);
                                 }

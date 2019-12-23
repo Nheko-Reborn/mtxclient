@@ -102,6 +102,7 @@ add_library(matrix_client
             lib/crypto/client.cpp
             lib/crypto/utils.cpp
             lib/utils.cpp
+            lib/log.cpp
             lib/structs/common.cpp
             lib/structs/errors.cpp
             lib/structs/events.cpp

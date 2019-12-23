@@ -2,8 +2,6 @@
 
 #include <nlohmann/json.hpp>
 
-#include <iostream>
-
 #include "mtx/events/messages/image.hpp"
 #include "mtx/identifiers.hpp"
 
@@ -178,7 +176,7 @@ to_json(json &obj, const Event<Content> &event)
                 obj["type"] = "m.tag";
                 break;
         case EventType::Unsupported:
-                std::cout << "Unsupported type to serialize" << std::endl;
+        default:
                 break;
         }
 }
