@@ -25,6 +25,9 @@ from_json(const json &obj, Image &content)
 
         if (obj.find("file") != obj.end())
                 content.file = obj.at("file").get<crypto::EncryptedFile>();
+
+        if (obj.count("m.relates_to") != 0)
+                content.relates_to = obj.at("m.relates_to").get<common::RelatesTo>();
 }
 
 void
@@ -37,6 +40,9 @@ to_json(json &obj, const Image &content)
 
         if (content.file)
                 obj["file"] = content.file.value();
+
+        if (!content.relates_to.in_reply_to.event_id.empty())
+                obj["m.relates_to"] = content.relates_to;
 }
 
 void
@@ -52,6 +58,9 @@ from_json(const json &obj, StickerImage &content)
 
         if (obj.find("file") != obj.end())
                 content.file = obj.at("file").get<crypto::EncryptedFile>();
+
+        if (obj.count("m.relates_to") != 0)
+                content.relates_to = obj.at("m.relates_to").get<common::RelatesTo>();
 }
 
 void
@@ -63,6 +72,9 @@ to_json(json &obj, const StickerImage &content)
 
         if (content.file)
                 obj["file"] = content.file.value();
+
+        if (!content.relates_to.in_reply_to.event_id.empty())
+                obj["m.relates_to"] = content.relates_to;
 }
 
 } // namespace msg

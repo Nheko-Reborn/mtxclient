@@ -3,6 +3,8 @@
 #include <nlohmann/json.hpp>
 #include <string>
 
+#include <mtx/events/common.hpp>
+
 using json = nlohmann::json;
 
 namespace mtx {
@@ -19,6 +21,8 @@ struct Emote
         std::string format;
         //! HTML formatted message.
         std::string formatted_body;
+        //! Relates to for rich replies
+        common::RelatesTo relates_to;
 };
 
 void

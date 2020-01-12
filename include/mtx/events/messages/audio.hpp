@@ -29,6 +29,8 @@ struct Audio
         common::AudioInfo info;
         // Encryption members. If present, they replace url.
         std::optional<crypto::EncryptedFile> file;
+        //! Relates to for rich replies
+        common::RelatesTo relates_to;
 };
 
 void
