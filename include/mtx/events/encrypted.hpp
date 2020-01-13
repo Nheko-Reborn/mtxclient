@@ -3,6 +3,7 @@
 #include <nlohmann/json.hpp>
 
 #include "mtx/events.hpp"
+#include "mtx/events/common.hpp"
 
 using json = nlohmann::json;
 
@@ -51,6 +52,8 @@ struct Encrypted
         std::string sender_key;
         //! Outbound group session id.
         std::string session_id;
+        //! Relates to for rich replies
+        common::RelatesTo relates_to;
 };
 
 void

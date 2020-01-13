@@ -47,6 +47,9 @@ from_json(const json &obj, Encrypted &content)
         content.device_id  = obj.at("device_id").get<std::string>();
         content.sender_key = obj.at("sender_key").get<std::string>();
         content.session_id = obj.at("session_id").get<std::string>();
+
+        if (obj.count("m.relates_to") != 0)
+                content.relates_to = obj.at("m.relates_to").get<common::RelatesTo>();
 }
 
 void
@@ -57,6 +60,9 @@ to_json(json &obj, const Encrypted &content)
         obj["device_id"]  = content.device_id;
         obj["sender_key"] = content.sender_key;
         obj["session_id"] = content.session_id;
+
+        if (!content.relates_to.in_reply_to.event_id.empty())
+                obj["m.relates_to"] = content.relates_to;
 }
 
 void

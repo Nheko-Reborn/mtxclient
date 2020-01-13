@@ -550,3 +550,47 @@ TEST(FormattedMessages, Deserialization)
         EXPECT_EQ(emote.content.format, "org.matrix.custom.html");
         EXPECT_EQ(emote.content.formatted_body, "<h1> Hello World! </h1>");
 }
+
+TEST(RoomEvents, Encrypted)
+{
+        json data = R"({
+	    "content": {
+		"algorithm": "m.megolm.v1.aes-sha2",
+		"ciphertext": "AwgAEnACgAkLmt6qF84IK++J7UDH2Za1YVchHyprqTqsg...",
+		"device_id": "RJYKSTBOIE",
+		"sender_key": "IlRMeOPX2e0MurIyfWEucYBRVOEEUMrOHqn/8mLqMjA",
+		"session_id": "X3lUlvLELLYxeTx4yOVu6UDpasGEVO0Jbu+QFnm0cKQ",
+	        "m.relates_to": {
+		    "m.in_reply_to": {
+                         "event_id": "$6GKhAfJOcwNd69lgSizdcTob8z2pWQgBOZPrnsWMA1E"
+                    }
+                }
+	    },
+	    "event_id": "$143273582443PhrSn:example.org",
+	    "origin_server_ts": 1432735824653,
+	    "room_id": "!jEsUZKDJdhlrceRyVU:example.org",
+	    "sender": "@example:example.org",
+	    "type": "m.room.encrypted",
+	    "unsigned": {
+		"age": 1234
+	    }
+	})"_json;
+
+        RoomEvent<msg::Encrypted> event = data;
+
+        EXPECT_EQ(event.type, EventType::RoomEncrypted);
+        EXPECT_EQ(event.event_id, "$143273582443PhrSn:example.org");
+        EXPECT_EQ(event.room_id, "!jEsUZKDJdhlrceRyVU:example.org");
+        EXPECT_EQ(event.sender, "@example:example.org");
+        EXPECT_EQ(event.origin_server_ts, 1432735824653L);
+        EXPECT_EQ(event.unsigned_data.age, 1234);
+        EXPECT_EQ(event.content.algorithm, "m.megolm.v1.aes-sha2");
+        EXPECT_EQ(event.content.ciphertext, "AwgAEnACgAkLmt6qF84IK++J7UDH2Za1YVchHyprqTqsg...");
+        EXPECT_EQ(event.content.device_id, "RJYKSTBOIE");
+        EXPECT_EQ(event.content.sender_key, "IlRMeOPX2e0MurIyfWEucYBRVOEEUMrOHqn/8mLqMjA");
+        EXPECT_EQ(event.content.session_id, "X3lUlvLELLYxeTx4yOVu6UDpasGEVO0Jbu+QFnm0cKQ");
+        EXPECT_EQ(event.content.relates_to.in_reply_to.event_id,
+                  "$6GKhAfJOcwNd69lgSizdcTob8z2pWQgBOZPrnsWMA1E");
+
+        EXPECT_EQ(data, json(event));
+}
