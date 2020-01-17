@@ -14,8 +14,9 @@ option(HUNTER_ENABLED "Enable Hunter package manager" OFF)
 include("cmake/HunterGate.cmake")
 #set(HUNTER_ENABLED OFF)
 HunterGate(
-    URL "https://github.com/cpp-pm/hunter/archive/v0.23.242.tar.gz"
-    SHA1 "503b149d0ebdbc598e498f1669ae828a2136b838"
+    URL "https://github.com/cpp-pm/hunter/archive/v0.23.244.tar.gz"
+    SHA1 "2c0f491fd0b80f7b09e3d21adb97237161ef9835"
+    LOCAL
 )
 
 option(USE_BUNDLED_BOOST "Use the bundled version of Boost." ${HUNTER_ENABLED})
