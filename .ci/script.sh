@@ -17,15 +17,13 @@ if [ $TRAVIS_OS_NAME == linux ]; then
     sudo update-alternatives --set g++ "/usr/bin/${CXX_VERSION}"
     sudo update-alternatives --set gcov "/usr/bin/gcov-8"
 
-    # Build dependencies.
-    cmake -GNinja -Hdeps -B.deps -DCMAKE_BUILD_TYPE=Debug
-    cmake --build .deps
-
     # Build the library.
     cmake -GNinja -H. -Bbuild -DCMAKE_BUILD_TYPE=Debug \
         -DBUILD_LIB_TESTS=ON \
         -DBUILD_SHARED_LIBS=ON \
-	-DCMAKE_INSTALL_PREFIX=.deps/usr \
+	-DHUNTER_ENABLED=ON \
+	-DHUNTER_ROOT=.deps \
+	-DUSE_BUNDLED_OPENSSL=OFF \
         -DCOVERAGE=${COVERAGE} || true
     cmake --build build
 
@@ -45,7 +43,12 @@ if [ $TRAVIS_OS_NAME == osx ]; then
     cmake -H. -Bbuild -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl \
         -DBUILD_LIB_TESTS=OFF \
         -DBUILD_SHARED_LIBS=ON \
-        -DCMAKE_INSTALL_PREFIX=.deps/usr || true
+	-DHUNTER_ENABLED=ON \
+	-DHUNTER_ROOT=.deps \
+	-DUSE_BUNDLED_OPENSSL=OFF \
+        -DUSE_BUNDLED_BOOST=OFF \
+        -DUSE_BUNDLED_GTEST=OFF \
+        -DUSE_BUNDLED_JSON=OFF || true
     cmake --build build
 
     make lint
