@@ -1,3 +1,6 @@
+if(USE_BUNDLED_SPDLOG)
+	hunter_add_package(spdlog)
+endif()
 find_package(spdlog 1.0.0 CONFIG)
 set_package_properties(spdlog PROPERTIES
     DESCRIPTION "Very fast, header only, C++ logging library"
