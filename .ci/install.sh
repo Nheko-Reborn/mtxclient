@@ -19,9 +19,3 @@ if [ $TRAVIS_OS_NAME == linux ]; then
       sudo make install )
 fi
 
-if [ $TRAVIS_OS_NAME == osx ]; then
-    # the nlohmann install seems to make travis angry
-    # because of the number of log messages
-    brew install --with-cmake nlohmann_json > /dev/null
-fi
-

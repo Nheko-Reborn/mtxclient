@@ -38,9 +38,7 @@ if [ $TRAVIS_OS_NAME == osx ]; then
         -DBUILD_SHARED_LIBS=ON \
 	-DHUNTER_ENABLED=ON \
 	-DHUNTER_ROOT=/tmp/.deps \
-        -DUSE_BUNDLED_BOOST=OFF \
-        -DUSE_BUNDLED_GTEST=OFF \
-        -DUSE_BUNDLED_JSON=OFF || true
+        -DUSE_BUNDLED_GTEST=OFF || true
     cmake --build build
 
     make lint
