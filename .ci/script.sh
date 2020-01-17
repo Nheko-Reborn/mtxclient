@@ -22,7 +22,7 @@ if [ $TRAVIS_OS_NAME == linux ]; then
         -DBUILD_LIB_TESTS=ON \
         -DBUILD_SHARED_LIBS=ON \
 	-DHUNTER_ENABLED=ON \
-	-DHUNTER_ROOT=.deps \
+	-DHUNTER_ROOT=/tmp/.deps \
 	-DUSE_BUNDLED_OPENSSL=OFF \
         -DCOVERAGE=${COVERAGE} || true
     cmake --build build
@@ -37,7 +37,7 @@ if [ $TRAVIS_OS_NAME == osx ]; then
         -DBUILD_LIB_TESTS=OFF \
         -DBUILD_SHARED_LIBS=ON \
 	-DHUNTER_ENABLED=ON \
-	-DHUNTER_ROOT=.deps \
+	-DHUNTER_ROOT=/tmp/.deps \
 	-DUSE_BUNDLED_OPENSSL=OFF \
         -DUSE_BUNDLED_BOOST=OFF \
         -DUSE_BUNDLED_GTEST=OFF \

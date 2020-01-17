@@ -76,7 +76,7 @@ matrix:
 
 cache:
   directories:
-    - .deps
+    - /tmp/.deps
 
 install: ./.ci/install.sh
 
