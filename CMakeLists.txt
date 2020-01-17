@@ -101,13 +101,14 @@ if(USE_BUNDLED_OLM)
 		GIT_TAG        3.1.4
 		)
 	FetchContent_MakeAvailable(Olm)
+else()
+	find_package(Olm 3)
+	set_package_properties(Olm PROPERTIES
+		DESCRIPTION "An implementation of the Double Ratchet cryptographic ratchet"
+		URL "https://git.matrix.org/git/olm/about/"
+		TYPE REQUIRED
+		)
 endif()
-find_package(Olm 3)
-set_package_properties(Olm PROPERTIES
-    DESCRIPTION "An implementation of the Double Ratchet cryptographic ratchet"
-    URL "https://git.matrix.org/git/olm/about/"
-    TYPE REQUIRED
-)
 
 if(USE_BUNDLED_SODIUM)
         hunter_add_package(libsodium)
