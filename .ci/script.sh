@@ -22,6 +22,7 @@ if [ $TRAVIS_OS_NAME == linux ]; then
         -DBUILD_LIB_TESTS=ON \
         -DBUILD_SHARED_LIBS=ON \
 	-DHUNTER_ENABLED=ON \
+	#-DHUNTER_CONFIGURATION_TYPES=Debug \ << needs gtest release for some reason
 	-DHUNTER_ROOT=/tmp/.deps \
 	-DUSE_BUNDLED_OPENSSL=OFF \
         -DCOVERAGE=${COVERAGE} || true
@@ -34,12 +35,13 @@ fi
 if [ $TRAVIS_OS_NAME == osx ]; then
     # Build the library.
     export OPENSSL_ROOT_DIR=/usr/local/opt/openssl
-    cmake -H. -Bbuild \
+    cmake -H. -Bbuild -DCMAKE_BUILD_TYPE=Release \
 	-DOPENSSL_ROOT_DIR=/usr/local/opt/openssl \
 	-DOPENSSL_INCLUDE_DIR=/usr/local/opt/openssl/include \
         -DBUILD_LIB_TESTS=OFF \
         -DBUILD_SHARED_LIBS=ON \
 	-DHUNTER_ENABLED=ON \
+	-DHUNTER_CONFIGURATION_TYPES=Release \
 	-DHUNTER_ROOT=/tmp/.deps \
 	-DUSE_BUNDLED_OPENSSL=OFF \
         -DUSE_BUNDLED_GTEST=OFF || true
