@@ -134,28 +134,12 @@ set_package_properties(nlohmann_json PROPERTIES
 )
 
 if(USE_BUNDLED_BOOST)
-        hunter_add_package(Boost
-                           COMPONENTS atomic
-                                      chrono
-                                      date_time
-                                      iostreams
-                                      random
-                                      regex
-                                      system
-                                      thread)
+        hunter_add_package(Boost COMPONENTS iostreams system thread)
 endif()
 #set(Boost_USE_STATIC_LIBS OFF)
 #set(Boost_USE_STATIC_RUNTIME OFF)
 #set(Boost_USE_MULTITHREADED ON)
-find_package(Boost 1.70
-     COMPONENTS atomic
-                chrono
-                date_time
-                iostreams
-                random
-                regex
-                system
-                thread)
+find_package(Boost 1.70 COMPONENTS iostreams system thread)
 set_package_properties(Boost PROPERTIES
 DESCRIPTION "Free peer-reviewed portable C++ source libraries"
 URL "https://www.boost.org/"
@@ -226,12 +210,7 @@ $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
 $<INSTALL_INTERFACE:include>)
 target_link_libraries(matrix_client
               PUBLIC
-                      Boost::atomic
-                      Boost::chrono
-                      Boost::date_time
                       Boost::iostreams
-                      Boost::random
-                      Boost::regex
                       Boost::system
                       Boost::thread
                       libsodium::libsodium
