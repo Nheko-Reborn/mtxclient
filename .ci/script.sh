@@ -2,6 +2,8 @@
 
 set -ex
 
+mkdir -p /tmp/.deps
+
 if [ $TRAVIS_OS_NAME == linux ]; then
     export CXX=${CXX_VERSION}
     export CC=${CC_VERSION}
