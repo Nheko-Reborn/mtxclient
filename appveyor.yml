@@ -22,5 +22,5 @@ build_script:
     - cmake --version
 
     - cmake -G "Visual Studio 15 2017 Win64" -H. -Bbuild -DHUNTER_ENABLED=ON -DHUNTER_ROOT="C:\hunter"
-      -DCMAKE_BUILD_TYPE=Release -DHUNTER_CONFIGURATION_TYPES=Release
+      -DCMAKE_BUILD_TYPE=Release -DHUNTER_CONFIGURATION_TYPES=Release -DUSE_BUNDLED_GTEST=OFF -DBUILD_LIB_TESTS=OFF
     - cmake --build build --config Release
