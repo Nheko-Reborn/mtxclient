@@ -12,7 +12,6 @@ set(
 
 option(HUNTER_ENABLED "Enable Hunter package manager" OFF)
 include("cmake/HunterGate.cmake")
-#set(HUNTER_ENABLED OFF)
 HunterGate(
     URL "https://github.com/cpp-pm/hunter/archive/v0.23.244.tar.gz"
     SHA1 "2c0f491fd0b80f7b09e3d21adb97237161ef9835"
@@ -113,9 +112,9 @@ endif()
 
 if(USE_BUNDLED_SODIUM)
         hunter_add_package(libsodium)
-	find_package(libsodium 1.0.14)
+	find_package(libsodium 1.0.14 REQUIRED)
 else()
-	find_package(sodium 1.0.14)
+	find_package(sodium 1.0.14 REQUIRED)
 	set_package_properties(sodium PROPERTIES
 		DESCRIPTION "A modern, portable, easy to use crypto library"
 		URL "https://github.com/jedisct1/libsodium"
@@ -136,9 +135,6 @@ set_package_properties(nlohmann_json PROPERTIES
 if(USE_BUNDLED_BOOST)
         hunter_add_package(Boost COMPONENTS iostreams system thread)
 endif()
-#set(Boost_USE_STATIC_LIBS OFF)
-#set(Boost_USE_STATIC_RUNTIME OFF)
-#set(Boost_USE_MULTITHREADED ON)
 find_package(Boost 1.70 COMPONENTS iostreams system thread)
 set_package_properties(Boost PROPERTIES
 DESCRIPTION "Free peer-reviewed portable C++ source libraries"
@@ -197,28 +193,35 @@ add_library(matrix_client
     lib/structs/responses/version.cpp
     lib/structs/responses/well-known.cpp)
 add_library(MatrixClient::MatrixClient ALIAS matrix_client)
-target_include_directories(matrix_client
-                   SYSTEM
-                   PUBLIC
-                   ${Boost_INCLUDE_DIRS}
-                   ${OPENSSL_INCLUDE_DIR}
-                   ${sodium_INCLUDE_DIR})
 target_include_directories(
-matrix_client
-PUBLIC
-$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-$<INSTALL_INTERFACE:include>)
+	matrix_client
+	PUBLIC
+	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+	$<INSTALL_INTERFACE:include>)
 target_link_libraries(matrix_client
-              PUBLIC
-                      Boost::iostreams
-                      Boost::system
-                      Boost::thread
-                      libsodium::libsodium
-                      OpenSSL::Crypto
-                      OpenSSL::SSL
-                      Olm::Olm
-                      ZLIB::ZLIB
-                      nlohmann_json::nlohmann_json)
+	PUBLIC
+	Boost::iostreams
+	Boost::system
+	Boost::thread
+	OpenSSL::Crypto
+	OpenSSL::SSL
+	Olm::Olm
+	ZLIB::ZLIB
+	nlohmann_json::nlohmann_json)
+
+# NOTE(Nico): I can't figure out for the life of me, how to export that target
+# correctly, so that it actually works downstream without including Findsodium
+# in every project, so I just link the library and not the target, when not
+# using the bundled dep...
+if (USE_BUNDLED_SODIUM)
+	target_link_libraries(matrix_client PUBLIC
+		libsodium::libsodium)
+else()
+	target_include_directories(matrix_client PUBLIC
+		${libsodium_INCLUDE_DIR})
+	target_link_libraries(matrix_client PUBLIC
+		${libsodium_LIBRARY_RELEASE})
+endif()
 
 if(NOT MSVC AND NOT APPLE)
   target_link_libraries(matrix_client PUBLIC Threads::Threads)
