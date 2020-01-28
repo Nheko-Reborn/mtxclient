@@ -5,7 +5,6 @@
 #include <new>
 
 #include <nlohmann/json.hpp>
-#include <sodium.h>
 
 #include <mtx/identifiers.hpp>
 #include <mtx/requests.hpp>

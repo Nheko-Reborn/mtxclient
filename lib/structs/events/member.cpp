@@ -56,6 +56,9 @@ from_json(const json &obj, Member &member)
 
         if (obj.find("is_direct") != obj.end())
                 member.is_direct = obj.at("is_direct").get<bool>();
+
+        if (obj.find("reason") != obj.end())
+                member.reason = obj.at("reason").get<std::string>();
 }
 
 void
@@ -65,6 +68,7 @@ to_json(json &obj, const Member &member)
         obj["avatar_url"]  = member.avatar_url;
         obj["displayname"] = member.display_name;
         obj["is_direct"]   = member.is_direct;
+        obj["reason"]      = member.reason;
 }
 
 } // namespace state

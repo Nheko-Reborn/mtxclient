@@ -374,14 +374,62 @@ Client::leave_room(const std::string &room_id, Callback<nlohmann::json> callback
 void
 Client::invite_user(const std::string &room_id,
                     const std::string &user_id,
-                    Callback<mtx::responses::RoomInvite> callback)
+                    Callback<mtx::responses::RoomInvite> callback,
+                    const std::string &reason)
 {
-        mtx::requests::RoomInvite req;
+        mtx::requests::RoomMembershipChange req;
         req.user_id = user_id;
+        req.reason  = reason;
 
         auto api_path = "/client/r0/rooms/" + room_id + "/invite";
 
-        post<mtx::requests::RoomInvite, mtx::responses::RoomInvite>(api_path, req, callback);
+        post<mtx::requests::RoomMembershipChange, mtx::responses::RoomInvite>(
+          api_path, req, callback);
+}
+
+void
+Client::kick_user(const std::string &room_id,
+                  const std::string &user_id,
+                  Callback<mtx::responses::Empty> callback,
+                  const std::string &reason)
+{
+        mtx::requests::RoomMembershipChange req;
+        req.user_id = user_id;
+        req.reason  = reason;
+
+        auto api_path = "/client/r0/rooms/" + room_id + "/kick";
+
+        post<mtx::requests::RoomMembershipChange, mtx::responses::Empty>(api_path, req, callback);
+}
+
+void
+Client::ban_user(const std::string &room_id,
+                 const std::string &user_id,
+                 Callback<mtx::responses::Empty> callback,
+                 const std::string &reason)
+{
+        mtx::requests::RoomMembershipChange req;
+        req.user_id = user_id;
+        req.reason  = reason;
+
+        auto api_path = "/client/r0/rooms/" + room_id + "/ban";
+
+        post<mtx::requests::RoomMembershipChange, mtx::responses::Empty>(api_path, req, callback);
+}
+
+void
+Client::unban_user(const std::string &room_id,
+                   const std::string &user_id,
+                   Callback<mtx::responses::Empty> callback,
+                   const std::string &reason)
+{
+        mtx::requests::RoomMembershipChange req;
+        req.user_id = user_id;
+        req.reason  = reason;
+
+        auto api_path = "/client/r0/rooms/" + room_id + "/unban";
+
+        post<mtx::requests::RoomMembershipChange, mtx::responses::Empty>(api_path, req, callback);
 }
 
 void
