@@ -518,6 +518,110 @@ TEST(ClientAPI, InviteRoom)
         bob->close();
 }
 
+TEST(ClientAPI, KickRoom)
+{
+        auto alice = std::make_shared<Client>("localhost");
+        auto bob   = std::make_shared<Client>("localhost");
+
+        alice->login("alice", "secret", [alice](const mtx::responses::Login &, RequestErr err) {
+                check_error(err);
+        });
+
+        bob->login("bob", "secret", [bob](const mtx::responses::Login &, RequestErr err) {
+                check_error(err);
+        });
+
+        while (alice->access_token().empty() || bob->access_token().empty())
+                sleep();
+
+        mtx::requests::CreateRoom req;
+        req.name   = "Name";
+        req.topic  = "Topic";
+        req.invite = {};
+        alice->create_room(
+          req, [alice, bob](const mtx::responses::CreateRoom &res, RequestErr err) {
+                  check_error(err);
+                  auto room_id = res.room_id.to_string();
+
+                  alice->invite_user(
+                    room_id,
+                    "@bob:localhost",
+                    [room_id, alice, bob](const mtx::responses::Empty &, RequestErr err) {
+                            check_error(err);
+
+                            bob->join_room(
+                              room_id, [alice, room_id](const nlohmann::json &, RequestErr err) {
+                                      check_error(err);
+
+                                      alice->kick_user(room_id,
+                                                       "@bob:localhost",
+                                                       [](const mtx::responses::Empty &,
+                                                          RequestErr err) { check_error(err); });
+                              });
+                    });
+          });
+
+        alice->close();
+        bob->close();
+}
+
+TEST(ClientAPI, BanRoom)
+{
+        auto alice = std::make_shared<Client>("localhost");
+        auto bob   = std::make_shared<Client>("localhost");
+
+        alice->login("alice", "secret", [alice](const mtx::responses::Login &, RequestErr err) {
+                check_error(err);
+        });
+
+        bob->login("bob", "secret", [bob](const mtx::responses::Login &, RequestErr err) {
+                check_error(err);
+        });
+
+        while (alice->access_token().empty() || bob->access_token().empty())
+                sleep();
+
+        mtx::requests::CreateRoom req;
+        req.name   = "Name";
+        req.topic  = "Topic";
+        req.invite = {};
+        alice->create_room(
+          req, [alice, bob](const mtx::responses::CreateRoom &res, RequestErr err) {
+                  check_error(err);
+                  auto room_id = res.room_id.to_string();
+
+                  alice->invite_user(
+                    room_id,
+                    "@bob:localhost",
+                    [room_id, alice, bob](const mtx::responses::Empty &, RequestErr err) {
+                            check_error(err);
+
+                            bob->join_room(
+                              room_id, [alice, room_id](const nlohmann::json &, RequestErr err) {
+                                      check_error(err);
+
+                                      alice->ban_user(
+                                        room_id,
+                                        "@bob:localhost",
+                                        [alice, room_id](const mtx::responses::Empty &,
+                                                         RequestErr err) {
+                                                check_error(err);
+                                                alice->unban_user(
+                                                  room_id,
+                                                  "@bob:localhost",
+                                                  [](const mtx::responses::Empty &,
+                                                     RequestErr err) { check_error(err); },
+                                                  "You not bad anymore!");
+                                        },
+                                        "You bad!");
+                              });
+                    });
+          });
+
+        alice->close();
+        bob->close();
+}
+
 TEST(ClientAPI, InvalidInvite)
 {
         auto alice = std::make_shared<Client>("localhost");

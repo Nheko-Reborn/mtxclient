@@ -42,6 +42,9 @@ struct Member
         //! with the intention of being a direct chat.
         bool is_direct = false;
 
+        //! reason for the membership change, empty in most cases
+        std::string reason;
+
         /* ThirdPartyInvite third_party_invite; */
 };
 

@@ -102,14 +102,18 @@ struct DisplayName
 void
 to_json(json &obj, const DisplayName &request);
 
-//! Request payload for the `POST /_matrix/client/r0/rooms/{roomId}/invite` endpoint.
-struct RoomInvite
+//! Request payload for the `POST /_matrix/client/r0/rooms/{roomId}/invite` endpoint as well as ban,
+//! unban and kick.
+struct RoomMembershipChange
 {
         std::string user_id;
+
+        //! optional kick, invite or ban reason
+        std::string reason;
 };
 
 void
-to_json(json &obj, const RoomInvite &request);
+to_json(json &obj, const RoomMembershipChange &request);
 
 //! Request payload for the `PUT /_matrix/client/r0/rooms/{roomId}/typing/{userId}` endpoint.
 struct TypingNotification

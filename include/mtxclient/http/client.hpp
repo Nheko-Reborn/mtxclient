@@ -192,7 +192,23 @@ public:
         //! Invite a user to a room.
         void invite_user(const std::string &room_id,
                          const std::string &user_id,
-                         Callback<mtx::responses::RoomInvite> cb);
+                         Callback<mtx::responses::RoomInvite> cb,
+                         const std::string &reason = "");
+        //! Kick a user from a room.
+        void kick_user(const std::string &room_id,
+                       const std::string &user_id,
+                       Callback<mtx::responses::Empty> cb,
+                       const std::string &reason = "");
+        //! Ban a user from a room.
+        void ban_user(const std::string &room_id,
+                      const std::string &user_id,
+                      Callback<mtx::responses::Empty> cb,
+                      const std::string &reason = "");
+        //! Unban a user from a room.
+        void unban_user(const std::string &room_id,
+                        const std::string &user_id,
+                        Callback<mtx::responses::Empty> cb,
+                        const std::string &reason = "");
 
         //! Perform sync.
         void sync(const SyncOpts &opts, Callback<mtx::responses::Sync> cb);
