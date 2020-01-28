@@ -18,13 +18,10 @@ matrix:
       compiler: clang
       addons:
         homebrew:
-          taps: nlohmann/json
           packages:
-            - libsodium
             - clang-format
             - ninja
             - openssl
-            - boost
     - os: linux
       compiler: gcc
       env:
@@ -76,7 +73,7 @@ matrix:
 
 cache:
   directories:
-    - .deps
+    - /tmp/.deps
 
 install: ./.ci/install.sh
 

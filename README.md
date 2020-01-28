@@ -18,7 +18,18 @@ Client API library for the Matrix protocol, built on top of Boost.Asio.
 - Google Test (for testing)
 - libsodium 1.0.14 or greater
 
-Boost and GTest will be built automatically by CMake if they're not found on  your system.
+If you are missing some or all of those above dependencies, you can add `-DHUNTER_ENABLED=ON` to the cmake configure command to use bundled dependencies. You can finetune them with the following variables. They default to ON, if Hunter is enabled and to OFF otherwise.
+
+| cmake flag          | description |
+|---------------------|-------------|
+| USE_BUNDLED_BOOST   | Use the bundled version of Boost. |
+| USE_BUNDLED_SPDLOG  | Use the bundled version of spdlog. |
+| USE_BUNDLED_OLM     | Use the bundled version of libolm. |
+| USE_BUNDLED_GTEST   | Use the bundled version of Google Test. |
+| USE_BUNDLED_JSON    | Use the bundled version of nlohmann json. |
+| USE_BUNDLED_OPENSSL | Use the bundled version of OpenSSL. |
+| USE_BUNDLED_SODIUM  | Use the bundled version of libsodium. |
+| USE_BUNDLED_ZLIB    | Use the bundled version of zlib. |
 
 Below is an example which will build the library along with the tests & examples.
 

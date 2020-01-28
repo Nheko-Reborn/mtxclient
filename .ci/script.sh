@@ -2,6 +2,8 @@
 
 set -ex
 
+mkdir -p /tmp/.deps
+
 if [ $TRAVIS_OS_NAME == linux ]; then
     export CXX=${CXX_VERSION}
     export CC=${CC_VERSION}
@@ -17,15 +19,14 @@ if [ $TRAVIS_OS_NAME == linux ]; then
     sudo update-alternatives --set g++ "/usr/bin/${CXX_VERSION}"
     sudo update-alternatives --set gcov "/usr/bin/gcov-8"
 
-    # Build dependencies.
-    cmake -GNinja -Hdeps -B.deps -DCMAKE_BUILD_TYPE=Debug
-    cmake --build .deps
-
     # Build the library.
     cmake -GNinja -H. -Bbuild -DCMAKE_BUILD_TYPE=Debug \
         -DBUILD_LIB_TESTS=ON \
         -DBUILD_SHARED_LIBS=ON \
-	-DCMAKE_INSTALL_PREFIX=.deps/usr \
+	-DHUNTER_ENABLED=ON \
+	#-DHUNTER_CONFIGURATION_TYPES=Debug \ << needs gtest release for some reason
+	-DHUNTER_ROOT=/tmp/.deps \
+	-DUSE_BUNDLED_OPENSSL=OFF \
         -DCOVERAGE=${COVERAGE} || true
     cmake --build build
 
@@ -34,18 +35,18 @@ if [ $TRAVIS_OS_NAME == linux ]; then
 fi
 
 if [ $TRAVIS_OS_NAME == osx ]; then
-    # Build dependencies.
-    cmake -Hdeps -B.deps -DCMAKE_BUILD_TYPE=Release \
-        -DUSE_BUNDLED_BOOST=OFF \
-        -DUSE_BUNDLED_GTEST=OFF \
-        -DUSE_BUNDLED_JSON=OFF
-    cmake --build .deps
-
     # Build the library.
-    cmake -H. -Bbuild -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl \
+    export OPENSSL_ROOT_DIR=/usr/local/opt/openssl
+    cmake -H. -Bbuild -DCMAKE_BUILD_TYPE=Release \
+	-DOPENSSL_ROOT_DIR=/usr/local/opt/openssl \
+	-DOPENSSL_INCLUDE_DIR=/usr/local/opt/openssl/include \
         -DBUILD_LIB_TESTS=OFF \
         -DBUILD_SHARED_LIBS=ON \
-        -DCMAKE_INSTALL_PREFIX=.deps/usr || true
+	-DHUNTER_ENABLED=ON \
+	-DHUNTER_CONFIGURATION_TYPES=Release \
+	-DHUNTER_ROOT=/tmp/.deps \
+	-DUSE_BUNDLED_OPENSSL=OFF \
+        -DUSE_BUNDLED_GTEST=OFF || true
     cmake --build build
 
     make lint

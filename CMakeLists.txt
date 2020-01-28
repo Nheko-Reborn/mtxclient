@@ -1,4 +1,37 @@
-cmake_minimum_required(VERSION 3.11)
+cmake_minimum_required(VERSION 3.12)
+
+
+set(
+    CMAKE_TOOLCHAIN_FILE
+    "${CMAKE_CURRENT_LIST_DIR}/toolchain.cmake"
+    CACHE
+    FILEPATH
+    "Default toolchain"
+)
+
+
+option(HUNTER_ENABLED "Enable Hunter package manager" OFF)
+include("cmake/HunterGate.cmake")
+HunterGate(
+    URL "https://github.com/cpp-pm/hunter/archive/v0.23.244.tar.gz"
+    SHA1 "2c0f491fd0b80f7b09e3d21adb97237161ef9835"
+    LOCAL
+)
+
+option(USE_BUNDLED_BOOST "Use the bundled version of Boost." ${HUNTER_ENABLED})
+option(USE_BUNDLED_SPDLOG "Use the bundled version of spdlog."
+        ${HUNTER_ENABLED})
+option(USE_BUNDLED_OLM "Use the bundled version of libolm." ${HUNTER_ENABLED})
+option(USE_BUNDLED_GTEST "Use the bundled version of Google Test."
+        ${HUNTER_ENABLED})
+option(USE_BUNDLED_JSON "Use the bundled version of nlohmann json."
+        ${HUNTER_ENABLED})
+option(USE_BUNDLED_OPENSSL "Use the bundled version of OpenSSL."
+        ${HUNTER_ENABLED})
+option(USE_BUNDLED_SODIUM "Use the bundled version of libsodium."
+        ${HUNTER_ENABLED})
+option(USE_BUNDLED_ZLIB "Use the bundled version of zlib."
+        ${HUNTER_ENABLED})
 
 project(matrix_client VERSION 0.3.0 LANGUAGES CXX C)
 
@@ -9,10 +42,7 @@ option(COVERAGE "Calculate test coverage" OFF)
 option(IWYU "Check headers with include-what-you-use" OFF)
 option(BUILD_SHARED_LIBS "Specifies whether to build mtxclient as a shared library lib or not" ON)
 
-set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 if(NOT MSVC)
   set(
@@ -43,13 +73,19 @@ endif()
 
 include(FeatureSummary)
 
-find_package(OpenSSL)
+if(USE_BUNDLED_OPENSSL)
+        hunter_add_package(OpenSSL)
+endif()
+find_package(OpenSSL REQUIRED)
 set_package_properties(OpenSSL PROPERTIES
     DESCRIPTION "Open source SSL and TLS implementation and cryptographic library"
     URL "https://www.openssl.org/"
     TYPE REQUIRED
 )
 
+if(USE_BUNDLED_ZLIB)
+        hunter_add_package(ZLIB)
+endif()
 find_package(ZLIB)
 set_package_properties(ZLIB PROPERTIES
     DESCRIPTION "A free compression library unencumbered by patents"
@@ -57,20 +93,38 @@ set_package_properties(ZLIB PROPERTIES
     TYPE REQUIRED
 )
 
-find_package(Olm 2)
-set_package_properties(Olm PROPERTIES
-    DESCRIPTION "An implementation of the Double Ratchet cryptographic ratchet"
-    URL "https://git.matrix.org/git/olm/about/"
-    TYPE REQUIRED
-)
+if(USE_BUNDLED_OLM)
+	include(FetchContent)
+	FetchContent_Declare(
+		Olm
+		GIT_REPOSITORY https://gitlab.matrix.org/matrix-org/olm.git
+		GIT_TAG        3.1.4
+		)
+	FetchContent_MakeAvailable(Olm)
+else()
+	find_package(Olm 3)
+	set_package_properties(Olm PROPERTIES
+		DESCRIPTION "An implementation of the Double Ratchet cryptographic ratchet"
+		URL "https://git.matrix.org/git/olm/about/"
+		TYPE REQUIRED
+		)
+endif()
 
-find_package(sodium 1.0.14)
-set_package_properties(sodium PROPERTIES
-    DESCRIPTION "A modern, portable, easy to use crypto library"
-    URL "https://github.com/jedisct1/libsodium"
-    TYPE REQUIRED
-)
+if(USE_BUNDLED_SODIUM)
+        hunter_add_package(libsodium)
+	find_package(libsodium 1.0.14 REQUIRED)
+else()
+	find_package(sodium 1.0.14 REQUIRED)
+	set_package_properties(sodium PROPERTIES
+		DESCRIPTION "A modern, portable, easy to use crypto library"
+		URL "https://github.com/jedisct1/libsodium"
+		TYPE REQUIRED
+		)
+endif()
 
+if(USE_BUNDLED_JSON)
+        hunter_add_package(nlohmann_json)
+endif()
 find_package(nlohmann_json 3.2.0)
 set_package_properties(nlohmann_json PROPERTIES
     DESCRIPTION "JSON for Modern C++, a C++11 header-only JSON class"
@@ -78,95 +132,96 @@ set_package_properties(nlohmann_json PROPERTIES
     TYPE REQUIRED
 )
 
-set(Boost_USE_STATIC_LIBS OFF)
-set(Boost_USE_STATIC_RUNTIME OFF)
-set(Boost_USE_MULTITHREADED ON)
-find_package(Boost 1.70
-             COMPONENTS atomic
-                        chrono
-                        date_time
-                        iostreams
-                        random
-                        regex
-                        system
-                        thread)
+if(USE_BUNDLED_BOOST)
+        hunter_add_package(Boost COMPONENTS iostreams system thread)
+endif()
+find_package(Boost 1.70 COMPONENTS iostreams system thread)
 set_package_properties(Boost PROPERTIES
-    DESCRIPTION "Free peer-reviewed portable C++ source libraries"
-    URL "https://www.boost.org/"
-    TYPE REQUIRED
+DESCRIPTION "Free peer-reviewed portable C++ source libraries"
+URL "https://www.boost.org/"
+TYPE REQUIRED
 )
 
 add_library(matrix_client
-            lib/http/client.cpp
-            lib/http/session.cpp
-            lib/crypto/client.cpp
-            lib/crypto/utils.cpp
-            lib/utils.cpp
-            lib/log.cpp
-            lib/structs/common.cpp
-            lib/structs/errors.cpp
-            lib/structs/events.cpp
-            lib/structs/requests.cpp
-            lib/structs/events/aliases.cpp
-            lib/structs/events/avatar.cpp
-            lib/structs/events/canonical_alias.cpp
-            lib/structs/events/common.cpp
-            lib/structs/events/collections.cpp
-            lib/structs/events/create.cpp
-            lib/structs/events/encrypted.cpp
-            lib/structs/events/encryption.cpp
-            lib/structs/events/guest_access.cpp
-            lib/structs/events/history_visibility.cpp
-            lib/structs/events/join_rules.cpp
-            lib/structs/events/member.cpp
-            lib/structs/events/name.cpp
-            lib/structs/events/pinned_events.cpp
-            lib/structs/events/power_levels.cpp
-            lib/structs/events/redaction.cpp
-            lib/structs/events/tag.cpp
-            lib/structs/events/tombstone.cpp
-            lib/structs/events/topic.cpp
-            lib/structs/events/messages/audio.cpp
-            lib/structs/events/messages/emote.cpp
-            lib/structs/events/messages/file.cpp
-            lib/structs/events/messages/image.cpp
-            lib/structs/events/messages/notice.cpp
-            lib/structs/events/messages/text.cpp
-            lib/structs/events/messages/video.cpp
-            lib/structs/responses/common.cpp
-            lib/structs/responses/create_room.cpp
-            lib/structs/responses/crypto.cpp
-            lib/structs/responses/empty.cpp
-            lib/structs/responses/login.cpp
-            lib/structs/responses/media.cpp
-            lib/structs/responses/messages.cpp
-            lib/structs/responses/notifications.cpp
-            lib/structs/responses/profile.cpp
-            lib/structs/responses/register.cpp
-            lib/structs/responses/sync.cpp
-            lib/structs/responses/version.cpp
-            lib/structs/responses/well-known.cpp)
+    lib/http/client.cpp
+    lib/http/session.cpp
+    lib/crypto/client.cpp
+    lib/crypto/utils.cpp
+    lib/utils.cpp
+    lib/log.cpp
+    lib/structs/common.cpp
+    lib/structs/errors.cpp
+    lib/structs/events.cpp
+    lib/structs/requests.cpp
+    lib/structs/events/aliases.cpp
+    lib/structs/events/avatar.cpp
+    lib/structs/events/canonical_alias.cpp
+    lib/structs/events/common.cpp
+    lib/structs/events/collections.cpp
+    lib/structs/events/create.cpp
+    lib/structs/events/encrypted.cpp
+    lib/structs/events/encryption.cpp
+    lib/structs/events/guest_access.cpp
+    lib/structs/events/history_visibility.cpp
+    lib/structs/events/join_rules.cpp
+    lib/structs/events/member.cpp
+    lib/structs/events/name.cpp
+    lib/structs/events/pinned_events.cpp
+    lib/structs/events/power_levels.cpp
+    lib/structs/events/redaction.cpp
+    lib/structs/events/tag.cpp
+    lib/structs/events/tombstone.cpp
+    lib/structs/events/topic.cpp
+    lib/structs/events/messages/audio.cpp
+    lib/structs/events/messages/emote.cpp
+    lib/structs/events/messages/file.cpp
+    lib/structs/events/messages/image.cpp
+    lib/structs/events/messages/notice.cpp
+    lib/structs/events/messages/text.cpp
+    lib/structs/events/messages/video.cpp
+    lib/structs/responses/common.cpp
+    lib/structs/responses/create_room.cpp
+    lib/structs/responses/crypto.cpp
+    lib/structs/responses/empty.cpp
+    lib/structs/responses/login.cpp
+    lib/structs/responses/media.cpp
+    lib/structs/responses/messages.cpp
+    lib/structs/responses/notifications.cpp
+    lib/structs/responses/profile.cpp
+    lib/structs/responses/register.cpp
+    lib/structs/responses/sync.cpp
+    lib/structs/responses/version.cpp
+    lib/structs/responses/well-known.cpp)
 add_library(MatrixClient::MatrixClient ALIAS matrix_client)
-target_include_directories(matrix_client
-                           SYSTEM
-                           PUBLIC
-                           ${Boost_INCLUDE_DIRS}
-                           ${OPENSSL_INCLUDE_DIR}
-                           ${sodium_INCLUDE_DIR})
 target_include_directories(
-  matrix_client
-  PUBLIC
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-  $<INSTALL_INTERFACE:include>)
+	matrix_client
+	PUBLIC
+	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+	$<INSTALL_INTERFACE:include>)
 target_link_libraries(matrix_client
-                      PUBLIC
-                      ${Boost_LIBRARIES}
-                      ${sodium_LIBRARY_RELEASE}
-                      OpenSSL::Crypto
-                      OpenSSL::SSL
-                      Olm::Olm
-                      ZLIB::ZLIB
-                      nlohmann_json::nlohmann_json)
+	PUBLIC
+	Boost::iostreams
+	Boost::system
+	Boost::thread
+	OpenSSL::Crypto
+	OpenSSL::SSL
+	Olm::Olm
+	ZLIB::ZLIB
+	nlohmann_json::nlohmann_json)
+
+# NOTE(Nico): I can't figure out for the life of me, how to export that target
+# correctly, so that it actually works downstream without including Findsodium
+# in every project, so I just link the library and not the target, when not
+# using the bundled dep...
+if (USE_BUNDLED_SODIUM)
+	target_link_libraries(matrix_client PUBLIC
+		libsodium::libsodium)
+else()
+	target_include_directories(matrix_client PUBLIC
+		${libsodium_INCLUDE_DIR})
+	target_link_libraries(matrix_client PUBLIC
+		${libsodium_LIBRARY_RELEASE})
+endif()
 
 if(NOT MSVC AND NOT APPLE)
   target_link_libraries(matrix_client PUBLIC Threads::Threads)
@@ -176,11 +231,11 @@ if(COVERAGE)
   include(CodeCoverage)
   add_custom_target(ctest COMMAND ${CMAKE_CTEST_COMMAND})
   target_compile_options(matrix_client PUBLIC
-	  -O0        # no optimization
-	  -g         # generate debug info
-	  --coverage # sets all required flags
-	  -fprofile-arcs -ftest-coverage # just to be sure, for clang!
-	  )
+          -O0        # no optimization
+          -g         # generate debug info
+          --coverage # sets all required flags
+          -fprofile-arcs -ftest-coverage # just to be sure, for clang!
+          )
   target_link_options(matrix_client PUBLIC --coverage)
   setup_target_for_coverage(test_coverage ctest coverage)
 endif()
@@ -256,6 +311,9 @@ set_property(TARGET matrix_client PROPERTY SOVERSION ${PROJECT_VERSION})
 if(BUILD_LIB_TESTS)
   enable_testing()
 
+  if(USE_BUNDLED_GTEST)
+	  hunter_add_package(GTest)
+  endif()
   find_package(GTest REQUIRED)
 
   file(COPY tests/fixtures DESTINATION ${CMAKE_CURRENT_BINARY_DIR})

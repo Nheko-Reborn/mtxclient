@@ -2,7 +2,6 @@
 #include <boost/beast.hpp>
 
 #include <iostream>
-#include <unistd.h>
 #include <variant>
 
 #include <nlohmann/json.hpp>
