@@ -24,10 +24,10 @@ if [ $TRAVIS_OS_NAME == linux ]; then
         -DBUILD_LIB_TESTS=ON \
         -DBUILD_SHARED_LIBS=ON \
 	-DHUNTER_ENABLED=ON \
-	#-DHUNTER_CONFIGURATION_TYPES=Debug \ << needs gtest release for some reason
 	-DHUNTER_ROOT=.deps \
 	-DUSE_BUNDLED_OPENSSL=OFF \
         -DCOVERAGE=${COVERAGE} || true
+	#-DHUNTER_CONFIGURATION_TYPES=Debug \ << needs gtest release for some reason
     cmake --build build
 
     # The tests will run anyway during coverage.
