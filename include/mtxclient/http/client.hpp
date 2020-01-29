@@ -1,22 +1,67 @@
 #pragma once
 
-#include <memory>
-#include <optional>
-
-#include <boost/beast/http/fields.hpp>
-
 #if __has_include(<nlohmann/json_fwd.hpp>)
 #include <nlohmann/json_fwd.hpp>
 #else
 #include <nlohmann/json.hpp>
 #endif
 
-#include <mtx/requests.hpp>
-#include <mtx/responses.hpp>
+#include "mtx/errors.hpp"              // for Error
+#include "mtx/events.hpp"              // for EventType, to_string, json
+#include "mtx/events/collections.hpp"  // for TimelineEvents
+#include "mtx/identifiers.hpp"         // for User
+#include "mtx/responses/empty.hpp"     // for Empty, Logout, RoomInvite
+#include "mtxclient/http/errors.hpp"   // for ClientError
+#include "mtxclient/utils.hpp"         // for random_token, url_encode, des...
 
-#include "mtxclient/crypto/client.hpp"
-#include "mtxclient/http/errors.hpp"
-#include "mtxclient/utils.hpp"
+#include <boost/beast/http/fields.hpp> // for fields
+#include <boost/beast/http/status.hpp> // for status
+#include <boost/system/error_code.hpp> // for error_code
+
+#include <cstdint>    // for uint16_t, uint64_t
+#include <functional> // for function
+#include <memory>     // for allocator, shared_ptr, enable...
+#include <optional>   // for optional
+#include <string>     // for string, operator+, char_traits
+#include <utility>    // for move
+#include <vector>     // for vector
+
+// forward declarations
+namespace mtx {
+namespace http {
+struct ClientPrivate;
+struct Session;
+}
+namespace requests {
+struct CreateRoom;
+struct Login;
+struct QueryKeys;
+struct UploadKeys;
+}
+namespace responses {
+struct AvatarUrl;
+struct ClaimKeys;
+struct ContentURI;
+struct CreateRoom;
+struct EventId;
+struct FilterId;
+struct GroupId;
+struct GroupProfile;
+struct JoinedGroups;
+struct KeyChanges;
+struct Login;
+struct Messages;
+struct Notifications;
+struct Profile;
+struct QueryKeys;
+struct Register;
+struct RegistrationFlows;
+struct Sync;
+struct UploadKeys;
+struct Versions;
+struct WellKnown;
+}
+}
 
 namespace mtx {
 namespace http {
