@@ -2,7 +2,7 @@
 
 set -ex
 
-mkdir -p /tmp/.deps
+mkdir -p .deps
 
 if [ $TRAVIS_OS_NAME == linux ]; then
     export CXX=${CXX_VERSION}
@@ -25,7 +25,7 @@ if [ $TRAVIS_OS_NAME == linux ]; then
         -DBUILD_SHARED_LIBS=ON \
 	-DHUNTER_ENABLED=ON \
 	#-DHUNTER_CONFIGURATION_TYPES=Debug \ << needs gtest release for some reason
-	-DHUNTER_ROOT=/tmp/.deps \
+	-DHUNTER_ROOT=.deps \
 	-DUSE_BUNDLED_OPENSSL=OFF \
         -DCOVERAGE=${COVERAGE} || true
     cmake --build build
@@ -44,7 +44,7 @@ if [ $TRAVIS_OS_NAME == osx ]; then
         -DBUILD_SHARED_LIBS=ON \
 	-DHUNTER_ENABLED=ON \
 	-DHUNTER_CONFIGURATION_TYPES=Release \
-	-DHUNTER_ROOT=/tmp/.deps \
+	-DHUNTER_ROOT=.deps \
 	-DUSE_BUNDLED_OPENSSL=OFF \
         -DUSE_BUNDLED_GTEST=OFF || true
     cmake --build build
