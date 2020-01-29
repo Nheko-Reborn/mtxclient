@@ -1,8 +1,11 @@
 #include "mtx/common.hpp"
 
+#include <nlohmann/json.hpp>
+
+using json = nlohmann::json;
+
 namespace mtx {
 namespace crypto {
-
 void
 from_json(const json &obj, UnsignedDeviceInfo &res)
 {

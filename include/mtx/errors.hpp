@@ -1,9 +1,11 @@
 #pragma once
 
+#if __has_include(<nlohmann/json_fwd.hpp>)
+#include <nlohmann/json_fwd.hpp>
+#else
 #include <nlohmann/json.hpp>
+#endif
 #include <string>
-
-using json = nlohmann::json;
 
 namespace mtx {
 namespace errors {
@@ -63,6 +65,6 @@ struct Error
 };
 
 void
-from_json(const json &obj, Error &error);
+from_json(const nlohmann::json &obj, Error &error);
 }
 }

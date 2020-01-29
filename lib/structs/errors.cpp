@@ -1,5 +1,7 @@
 #include "mtx/errors.hpp"
 
+#include <nlohmann/json.hpp>
+
 namespace mtx {
 namespace errors {
 std::string
@@ -81,7 +83,7 @@ from_string(const std::string &code)
 }
 
 void
-from_json(const json &obj, Error &error)
+from_json(const nlohmann::json &obj, Error &error)
 {
         error.errcode = from_string(obj.at("errcode").get<std::string>());
         error.error   = obj.at("error").get<std::string>();

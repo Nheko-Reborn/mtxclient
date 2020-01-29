@@ -7,9 +7,8 @@
 #include "mtx/events.hpp"
 #include "mtx/events/collections.hpp"
 #include "mtx/identifiers.hpp"
-#include <nlohmann/json.hpp>
 
-using json = nlohmann::json;
+#include <nlohmann/json.hpp>
 
 namespace mtx {
 namespace responses {
@@ -22,7 +21,7 @@ struct RoomAccountData
 };
 
 void
-from_json(const json &obj, RoomAccountData &account_data);
+from_json(const nlohmann::json &obj, RoomAccountData &account_data);
 
 //! State events.
 struct State
@@ -32,7 +31,7 @@ struct State
 };
 
 void
-from_json(const json &obj, State &state);
+from_json(const nlohmann::json &obj, State &state);
 
 //! State and Room events.
 struct Timeline
@@ -48,7 +47,7 @@ struct Timeline
 };
 
 void
-from_json(const json &obj, Timeline &timeline);
+from_json(const nlohmann::json &obj, Timeline &timeline);
 
 //! Counts of unread notifications for this room
 struct UnreadNotifications
@@ -61,7 +60,7 @@ struct UnreadNotifications
 };
 
 void
-from_json(const json &obj, UnreadNotifications &notifications);
+from_json(const nlohmann::json &obj, UnreadNotifications &notifications);
 
 //! The ephemeral events in the room that aren't recorded in
 //! the timeline or state of the room. e.g. typing.
@@ -74,7 +73,7 @@ struct Ephemeral
 };
 
 void
-from_json(const json &obj, Ephemeral &ephemeral);
+from_json(const nlohmann::json &obj, Ephemeral &ephemeral);
 
 //! A room that the user has joined.
 struct JoinedRoom
@@ -95,7 +94,7 @@ struct JoinedRoom
 };
 
 void
-from_json(const json &obj, JoinedRoom &room);
+from_json(const nlohmann::json &obj, JoinedRoom &room);
 
 //! A room that the user has left or been banned from.
 struct LeftRoom
@@ -108,7 +107,7 @@ struct LeftRoom
 };
 
 void
-from_json(const json &obj, LeftRoom &room);
+from_json(const nlohmann::json &obj, LeftRoom &room);
 
 //! A room that the user has been invited to.
 struct InvitedRoom
@@ -124,7 +123,7 @@ struct InvitedRoom
 };
 
 void
-from_json(const json &obj, InvitedRoom &room);
+from_json(const nlohmann::json &obj, InvitedRoom &room);
 
 //! Room updates.
 struct Rooms
@@ -138,7 +137,7 @@ struct Rooms
 };
 
 void
-from_json(const json &obj, Rooms &rooms);
+from_json(const nlohmann::json &obj, Rooms &rooms);
 
 //! Information on e2e device updates.
 struct DeviceLists
@@ -152,7 +151,7 @@ struct DeviceLists
 };
 
 void
-from_json(const json &obj, DeviceLists &device_lists);
+from_json(const nlohmann::json &obj, DeviceLists &device_lists);
 
 //! Response from the `GET /_matrix/client/r0/sync` endpoint.
 struct Sync
@@ -174,6 +173,6 @@ struct Sync
 };
 
 void
-from_json(const json &obj, Sync &response);
+from_json(const nlohmann::json &obj, Sync &response);
 }
 }

@@ -1,4 +1,3 @@
-#include <boost/beast.hpp>
 #include <filesystem>
 #include <fstream>
 #include <iostream>

@@ -1,6 +1,6 @@
-#include <string>
-
 #include "mtx/events/topic.hpp"
+
+#include <nlohmann/json.hpp>
 
 using json = nlohmann::json;
 

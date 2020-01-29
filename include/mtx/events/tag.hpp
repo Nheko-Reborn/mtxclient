@@ -3,8 +3,6 @@
 #include <nlohmann/json.hpp>
 #include <string>
 
-using json = nlohmann::json;
-
 namespace mtx {
 namespace events {
 namespace account_data {
@@ -15,14 +13,14 @@ struct Tag
 {
         //! The tag list.
         //! A tag can have arbitrary JSON data attached
-        std::map<std::string, json> tags;
+        std::map<std::string, nlohmann::json> tags;
 };
 
 void
-from_json(const json &obj, Tag &content);
+from_json(const nlohmann::json &obj, Tag &content);
 
 void
-to_json(json &obj, const Tag &content);
+to_json(nlohmann::json &obj, const Tag &content);
 
 } // namespace account_data
 } // namespace events

@@ -1,6 +1,10 @@
 #pragma once
 
+#if __has_include(<nlohmann/json_fwd.hpp>)
+#include <nlohmann/json_fwd.hpp>
+#else
 #include <nlohmann/json.hpp>
+#endif
 
 #include "mtx/common.hpp"
 
@@ -51,14 +55,8 @@ struct ClaimKeys
         std::map<std::string, std::map<std::string, nlohmann::json>> one_time_keys;
 };
 
-inline void
-from_json(const nlohmann::json &obj, ClaimKeys &response)
-{
-        response.failures = obj.at("failures").get<std::map<std::string, nlohmann::json>>();
-        response.one_time_keys =
-          obj.at("one_time_keys")
-            .get<std::map<std::string, std::map<std::string, nlohmann::json>>>();
-}
+void
+from_json(const nlohmann::json &obj, ClaimKeys &response);
 
 //! Response from the `GET /_matrix/client/r0/keys/changes` endpoint.
 struct KeyChanges
@@ -70,12 +68,8 @@ struct KeyChanges
         std::vector<std::string> left;
 };
 
-inline void
-from_json(const nlohmann::json &obj, KeyChanges &response)
-{
-        response.changed = obj.at("changed").get<std::vector<std::string>>();
-        response.left    = obj.at("left").get<std::vector<std::string>>();
-}
+void
+from_json(const nlohmann::json &obj, KeyChanges &response);
 
 } // namespace responses
 } // namespace mtx

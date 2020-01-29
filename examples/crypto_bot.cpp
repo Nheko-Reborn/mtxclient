@@ -1,5 +1,4 @@
 #include <boost/algorithm/string/predicate.hpp>
-#include <boost/beast.hpp>
 
 #include <csignal>
 #include <cstdlib>

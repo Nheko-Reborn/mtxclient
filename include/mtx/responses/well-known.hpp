@@ -1,7 +1,12 @@
 #pragma once
 
-#include <boost/optional.hpp>
+#include <optional>
+
+#if __has_include(<nlohmann/json_fwd.hpp>)
+#include <nlohmann/json_fwd.hpp>
+#else
 #include <nlohmann/json.hpp>
+#endif
 
 namespace mtx {
 namespace responses {
@@ -20,7 +25,7 @@ struct WellKnown
         //! Required. Used by clients to discover homeserver information.
         ServerInformation homeserver;
         //! Used by clients to discover identity server information.
-        boost::optional<ServerInformation> identity_server;
+        std::optional<ServerInformation> identity_server;
 };
 
 void

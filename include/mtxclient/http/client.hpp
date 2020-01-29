@@ -5,7 +5,11 @@
 
 #include <boost/beast/http/fields.hpp>
 
+#if __has_include(<nlohmann/json_fwd.hpp>)
+#include <nlohmann/json_fwd.hpp>
+#else
 #include <nlohmann/json.hpp>
+#endif
 
 #include <mtx/requests.hpp>
 #include <mtx/responses.hpp>

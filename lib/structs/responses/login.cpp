@@ -1,12 +1,12 @@
 #include "mtx/responses/login.hpp"
 
-using json = nlohmann::json;
+#include <nlohmann/json.hpp>
 
 namespace mtx {
 namespace responses {
 
 void
-from_json(const json &obj, Login &response)
+from_json(const nlohmann::json &obj, Login &response)
 {
         using namespace mtx::identifiers;
         response.user_id = obj.at("user_id").get<User>();

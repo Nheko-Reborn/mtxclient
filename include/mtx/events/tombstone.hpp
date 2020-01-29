@@ -1,8 +1,10 @@
 #pragma once
 
+#if __has_include(<nlohmann/json_fwd.hpp>)
+#include <nlohmann/json_fwd.hpp>
+#else
 #include <nlohmann/json.hpp>
-
-using json = nlohmann::json;
+#endif
 
 namespace mtx {
 namespace events {
@@ -23,11 +25,11 @@ struct Tombstone
 
 //! Deserialization method needed by @p nlohmann::json.
 void
-from_json(const json &obj, Tombstone &content);
+from_json(const nlohmann::json &obj, Tombstone &content);
 
 //! Serialization method needed by @p nlohmann::json.
 void
-to_json(json &obj, const Tombstone &content);
+to_json(nlohmann::json &obj, const Tombstone &content);
 
 } // namespace state
 } // namespace events

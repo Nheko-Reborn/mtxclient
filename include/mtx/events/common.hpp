@@ -1,11 +1,14 @@
 #pragma once
 
+#if __has_include(<nlohmann/json_fwd.hpp>)
+#include <nlohmann/json_fwd.hpp>
+#else
 #include <nlohmann/json.hpp>
+#endif
+
 #include <optional>
 
 #include "mtx/common.hpp"
-
-using json = nlohmann::json;
 
 namespace mtx {
 
@@ -29,11 +32,11 @@ struct ThumbnailInfo
 
 //! Deserialization method needed by @p nlohmann::json.
 void
-from_json(const json &obj, ThumbnailInfo &info);
+from_json(const nlohmann::json &obj, ThumbnailInfo &info);
 
 //! Serialization method needed by @p nlohmann::json.
 void
-to_json(json &obj, const ThumbnailInfo &info);
+to_json(nlohmann::json &obj, const ThumbnailInfo &info);
 
 //! Metadata about an image.
 struct ImageInfo
@@ -56,11 +59,11 @@ struct ImageInfo
 
 //! Deserialization method needed by @p nlohmann::json.
 void
-from_json(const json &obj, ImageInfo &info);
+from_json(const nlohmann::json &obj, ImageInfo &info);
 
 //! Serialization method needed by @p nlohmann::json.
 void
-to_json(json &obj, const ImageInfo &info);
+to_json(nlohmann::json &obj, const ImageInfo &info);
 
 //! Metadata about a file.
 struct FileInfo
@@ -79,11 +82,11 @@ struct FileInfo
 
 //! Deserialization method needed by @p nlohmann::json.
 void
-from_json(const json &obj, FileInfo &info);
+from_json(const nlohmann::json &obj, FileInfo &info);
 
 //! Serialization method needed by @p nlohmann::json.
 void
-to_json(json &obj, const FileInfo &info);
+to_json(nlohmann::json &obj, const FileInfo &info);
 
 //! Audio clip metadata.
 struct AudioInfo
@@ -98,11 +101,11 @@ struct AudioInfo
 
 //! Deserialization method needed by @p nlohmann::json.
 void
-from_json(const json &obj, AudioInfo &info);
+from_json(const nlohmann::json &obj, AudioInfo &info);
 
 //! Serialization method needed by @p nlohmann::json.
 void
-to_json(json &obj, const AudioInfo &info);
+to_json(nlohmann::json &obj, const AudioInfo &info);
 
 //! Video clip metadata.
 struct VideoInfo
@@ -127,11 +130,11 @@ struct VideoInfo
 
 //! Deserialization method needed by @p nlohmann::json.
 void
-from_json(const json &obj, VideoInfo &info);
+from_json(const nlohmann::json &obj, VideoInfo &info);
 
 //! Serialization method needed by @p nlohmann::json.
 void
-to_json(json &obj, const VideoInfo &info);
+to_json(nlohmann::json &obj, const VideoInfo &info);
 
 //! In reply to data for rich replies (notice and text events)
 struct InReplyTo
@@ -142,11 +145,11 @@ struct InReplyTo
 
 //! Deserialization method needed by @p nlohmann::json.
 void
-from_json(const json &obj, InReplyTo &in_reply_to);
+from_json(const nlohmann::json &obj, InReplyTo &in_reply_to);
 
 //! Serialization method needed by @p nlohmann::json.
 void
-to_json(json &obj, const InReplyTo &in_reply_to);
+to_json(nlohmann::json &obj, const InReplyTo &in_reply_to);
 
 //! Relates to data for rich replies (notice and text events)
 struct RelatesTo
@@ -157,11 +160,11 @@ struct RelatesTo
 
 //! Deserialization method needed by @p nlohmann::json.
 void
-from_json(const json &obj, RelatesTo &relates_to);
+from_json(const nlohmann::json &obj, RelatesTo &relates_to);
 
 //! Serialization method needed by @p nlohmann::json.
 void
-to_json(json &obj, const RelatesTo &relates_to);
+to_json(nlohmann::json &obj, const RelatesTo &relates_to);
 
 } // namespace common
 } // namespace mtx

@@ -1,17 +1,16 @@
-#include <regex>
-#include <string>
-
 #include "mtx/responses/version.hpp"
 
-using json = nlohmann::json;
+#include <regex>
 
-static std::regex VERSION_REGEX("r(\\d+)\\.(\\d+)\\.(\\d+)");
+#include <nlohmann/json.hpp>
+
+const static std::regex VERSION_REGEX("r(\\d+)\\.(\\d+)\\.(\\d+)");
 
 namespace mtx {
 namespace responses {
 
 void
-from_json(const json &obj, Versions &response)
+from_json(const nlohmann::json &obj, Versions &response)
 {
         response.versions = obj.at("versions").get<std::vector<std::string>>();
 

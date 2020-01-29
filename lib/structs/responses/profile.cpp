@@ -1,6 +1,6 @@
-#include <string>
-
 #include "mtx/responses/profile.hpp"
+
+#include <nlohmann/json.hpp>
 
 using json = nlohmann::json;
 

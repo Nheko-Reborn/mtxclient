@@ -1,4 +1,3 @@
-#include <boost/beast.hpp>
 #include <iostream>
 #include <variant>
 

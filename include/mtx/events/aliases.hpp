@@ -1,8 +1,13 @@
 #pragma once
 
-#include <nlohmann/json.hpp>
+#include <string>
+#include <vector>
 
-using json = nlohmann::json;
+#if __has_include(<nlohmann/json_fwd.hpp>)
+#include <nlohmann/json_fwd.hpp>
+#else
+#include <nlohmann/json.hpp>
+#endif
 
 namespace mtx {
 namespace events {
@@ -23,11 +28,11 @@ struct Aliases
 
 //! Deserialization method needed by @p nlohmann::json.
 void
-from_json(const json &obj, Aliases &content);
+from_json(const nlohmann::json &obj, Aliases &content);
 
 //! Serialization method needed by @p nlohmann::json.
 void
-to_json(json &obj, const Aliases &content);
+to_json(nlohmann::json &obj, const Aliases &content);
 
 } // namespace state
 } // namespace events

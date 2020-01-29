@@ -1,11 +1,13 @@
 #pragma once
 
+#if __has_include(<nlohmann/json_fwd.hpp>)
+#include <nlohmann/json_fwd.hpp>
+#else
 #include <nlohmann/json.hpp>
+#endif
 
 #include "mtx/events.hpp"
 #include "mtx/events/common.hpp"
-
-using json = nlohmann::json;
 
 namespace mtx {
 namespace events {
@@ -18,10 +20,10 @@ struct OlmCipherContent
 };
 
 void
-from_json(const json &obj, OlmCipherContent &event);
+from_json(const nlohmann::json &obj, OlmCipherContent &event);
 
 void
-to_json(json &obj, const OlmCipherContent &event);
+to_json(nlohmann::json &obj, const OlmCipherContent &event);
 
 //! Content of the `m.room.encrypted` Olm event.
 struct OlmEncrypted
@@ -34,10 +36,10 @@ struct OlmEncrypted
 };
 
 void
-from_json(const json &obj, OlmEncrypted &event);
+from_json(const nlohmann::json &obj, OlmEncrypted &event);
 
 void
-to_json(json &obj, const OlmEncrypted &event);
+to_json(nlohmann::json &obj, const OlmEncrypted &event);
 
 //! Content of the `m.room.encrypted` event.
 struct Encrypted
@@ -57,10 +59,10 @@ struct Encrypted
 };
 
 void
-from_json(const json &obj, Encrypted &event);
+from_json(const nlohmann::json &obj, Encrypted &event);
 
 void
-to_json(json &obj, const Encrypted &event);
+to_json(nlohmann::json &obj, const Encrypted &event);
 
 //! Content of the `m.room_key` event.
 struct RoomKey
@@ -72,10 +74,10 @@ struct RoomKey
 };
 
 void
-from_json(const json &obj, RoomKey &event);
+from_json(const nlohmann::json &obj, RoomKey &event);
 
 void
-to_json(json &obj, const RoomKey &event);
+to_json(nlohmann::json &obj, const RoomKey &event);
 
 enum class RequestAction
 {
@@ -114,10 +116,10 @@ struct KeyRequest
 };
 
 void
-from_json(const json &obj, KeyRequest &event);
+from_json(const nlohmann::json &obj, KeyRequest &event);
 
 void
-to_json(json &obj, const KeyRequest &event);
+to_json(nlohmann::json &obj, const KeyRequest &event);
 
 //! Content of the `m.key.verification.request` event
 struct KeyVerificationRequest
@@ -140,10 +142,10 @@ struct KeyVerificationRequest
 // TODO: KeyVerificationStart, KeyVerificationAccept, and KeyVerificationCancel
 
 void
-from_json(const json &obj, KeyVerificationRequest &event);
+from_json(const nlohmann::json &obj, KeyVerificationRequest &event);
 
 void
-to_json(json &obj, const KeyVerificationRequest &event);
+to_json(nlohmann::json &obj, const KeyVerificationRequest &event);
 
 } // namespace msg
 } // namespace events

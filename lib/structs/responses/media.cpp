@@ -1,5 +1,7 @@
 #include "mtx/responses/media.hpp"
 
+#include <nlohmann/json.hpp>
+
 using json = nlohmann::json;
 
 namespace mtx {

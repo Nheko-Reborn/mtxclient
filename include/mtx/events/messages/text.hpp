@@ -1,13 +1,14 @@
 #pragma once
 
+#if __has_include(<nlohmann/json_fwd.hpp>)
+#include <nlohmann/json_fwd.hpp>
+#else
 #include <nlohmann/json.hpp>
+#endif
+
 #include <string>
 
 #include "mtx/events/common.hpp"
-
-using json = nlohmann::json;
-
-namespace common = mtx::common;
 
 namespace mtx {
 namespace events {
@@ -24,14 +25,14 @@ struct Text
         //! HTML formatted message.
         std::string formatted_body;
         //! Relates to for rich replies
-        common::RelatesTo relates_to;
+        mtx::common::RelatesTo relates_to;
 };
 
 void
-from_json(const json &obj, Text &content);
+from_json(const nlohmann::json &obj, Text &content);
 
 void
-to_json(json &obj, const Text &content);
+to_json(nlohmann::json &obj, const Text &content);
 
 } // namespace msg
 } // namespace events

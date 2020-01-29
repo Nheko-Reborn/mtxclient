@@ -3,14 +3,14 @@
 #include <optional>
 #include <string>
 
+#if __has_include(<nlohmann/json_fwd.hpp>)
+#include <nlohmann/json_fwd.hpp>
+#else
 #include <nlohmann/json.hpp>
+#endif
 
 #include "mtx/common.hpp"
 #include "mtx/events/common.hpp"
-
-using json = nlohmann::json;
-
-namespace common = mtx::common;
 
 namespace mtx {
 namespace events {
@@ -27,11 +27,11 @@ struct Image
         // The Matrix URL to the image.
         std::string url;
         // Metadata about the image referred to in `url`.
-        common::ImageInfo info;
+        mtx::common::ImageInfo info;
         // Encryption members. If present, they replace url.
         std::optional<crypto::EncryptedFile> file;
         //! Relates to for rich replies
-        common::RelatesTo relates_to;
+        mtx::common::RelatesTo relates_to;
 };
 
 struct StickerImage
@@ -43,24 +43,24 @@ struct StickerImage
         // The Matrix URL to the image.
         std::string url;
         // Metadata about the image referred to in `url`.
-        common::ImageInfo info;
+        mtx::common::ImageInfo info;
         // Encryption members. If present, they replace url.
         std::optional<crypto::EncryptedFile> file;
         //! Relates to for rich replies
-        common::RelatesTo relates_to;
+        mtx::common::RelatesTo relates_to;
 };
 
 void
-from_json(const json &obj, Image &content);
+from_json(const nlohmann::json &obj, Image &content);
 
 void
-to_json(json &obj, const Image &content);
+to_json(nlohmann::json &obj, const Image &content);
 
 void
-from_json(const json &obj, StickerImage &content);
+from_json(const nlohmann::json &obj, StickerImage &content);
 
 void
-to_json(json &obj, const StickerImage &content);
+to_json(nlohmann::json &obj, const StickerImage &content);
 
 } // namespace msg
 } // namespace events

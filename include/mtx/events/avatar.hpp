@@ -1,8 +1,10 @@
 #pragma once
 
+#if __has_include(<nlohmann/json_fwd.hpp>)
+#include <nlohmann/json_fwd.hpp>
+#else
 #include <nlohmann/json.hpp>
-
-using json = nlohmann::json;
+#endif
 
 #include "mtx/events/common.hpp"
 
@@ -24,11 +26,11 @@ struct Avatar
 
 //! Deserialization method needed by @p nlohmann::json.
 void
-from_json(const json &obj, Avatar &avatar);
+from_json(const nlohmann::json &obj, Avatar &avatar);
 
 //! Serialization method needed by @p nlohmann::json.
 void
-to_json(json &obj, const Avatar &avatar);
+to_json(nlohmann::json &obj, const Avatar &avatar);
 
 } // namespace state
 } // namespace events

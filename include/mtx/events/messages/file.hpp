@@ -3,14 +3,14 @@
 #include <optional>
 #include <string>
 
+#if __has_include(<nlohmann/json_fwd.hpp>)
+#include <nlohmann/json_fwd.hpp>
+#else
 #include <nlohmann/json.hpp>
+#endif
 
 #include "mtx/common.hpp"
 #include "mtx/events/common.hpp"
-
-using json = nlohmann::json;
-
-namespace common = mtx::common;
 
 namespace mtx {
 namespace events {
@@ -29,18 +29,18 @@ struct File
         // The matrix URL of the file.
         std::string url;
         // Information about the file referred to in the url.
-        common::FileInfo info;
+        mtx::common::FileInfo info;
         // Encryption members. If present, they replace url.
         std::optional<crypto::EncryptedFile> file;
         //! Relates to for rich replies
-        common::RelatesTo relates_to;
+        mtx::common::RelatesTo relates_to;
 };
 
 void
-from_json(const json &obj, File &content);
+from_json(const nlohmann::json &obj, File &content);
 
 void
-to_json(json &obj, const File &content);
+to_json(nlohmann::json &obj, const File &content);
 
 } // namespace msg
 } // namespace events

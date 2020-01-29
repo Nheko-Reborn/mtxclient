@@ -154,11 +154,13 @@ target_sources(matrix_client
 	lib/http/session.cpp
 	lib/crypto/client.cpp
 	lib/crypto/utils.cpp
+	lib/crypto/types.cpp
 	lib/utils.cpp
 	lib/log.cpp
 	lib/structs/common.cpp
 	lib/structs/errors.cpp
 	lib/structs/events.cpp
+	lib/structs/identifiers.cpp
 	lib/structs/requests.cpp
 	lib/structs/events/aliases.cpp
 	lib/structs/events/avatar.cpp
@@ -190,6 +192,7 @@ target_sources(matrix_client
 	lib/structs/responses/create_room.cpp
 	lib/structs/responses/crypto.cpp
 	lib/structs/responses/empty.cpp
+	lib/structs/responses/groups.cpp
 	lib/structs/responses/login.cpp
 	lib/structs/responses/media.cpp
 	lib/structs/responses/messages.cpp

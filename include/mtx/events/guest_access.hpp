@@ -1,9 +1,12 @@
 #pragma once
 
+#if __has_include(<nlohmann/json_fwd.hpp>)
+#include <nlohmann/json_fwd.hpp>
+#else
 #include <nlohmann/json.hpp>
-#include <string>
+#endif
 
-using json = nlohmann::json;
+#include <string>
 
 namespace mtx {
 namespace events {
@@ -31,10 +34,10 @@ struct GuestAccess
 };
 
 void
-from_json(const json &obj, GuestAccess &guest_access);
+from_json(const nlohmann::json &obj, GuestAccess &guest_access);
 
 void
-to_json(json &obj, const GuestAccess &guest_access);
+to_json(nlohmann::json &obj, const GuestAccess &guest_access);
 
 } // namespace state
 } // namespace events

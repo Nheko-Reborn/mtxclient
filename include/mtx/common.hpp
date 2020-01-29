@@ -1,12 +1,14 @@
 #pragma once
 
+#if __has_include(<nlohmann/json_fwd.hpp>)
+#include <nlohmann/json_fwd.hpp>
+#else
 #include <nlohmann/json.hpp>
+#endif
 
 #include <map>
 #include <string>
 #include <vector>
-
-using json = nlohmann::json;
 
 //! Common types used by the crypto related endpoints.
 
@@ -22,10 +24,10 @@ struct UnsignedDeviceInfo
 };
 
 void
-from_json(const json &obj, UnsignedDeviceInfo &res);
+from_json(const nlohmann::json &obj, UnsignedDeviceInfo &res);
 
 void
-to_json(json &obj, const UnsignedDeviceInfo &res);
+to_json(nlohmann::json &obj, const UnsignedDeviceInfo &res);
 
 struct DeviceKeys
 {
@@ -49,10 +51,10 @@ struct DeviceKeys
 };
 
 void
-from_json(const json &obj, DeviceKeys &res);
+from_json(const nlohmann::json &obj, DeviceKeys &res);
 
 void
-to_json(json &obj, const DeviceKeys &res);
+to_json(nlohmann::json &obj, const DeviceKeys &res);
 
 struct JWK
 {
@@ -69,10 +71,10 @@ struct JWK
 };
 
 void
-from_json(const json &obj, JWK &res);
+from_json(const nlohmann::json &obj, JWK &res);
 
 void
-to_json(json &obj, const JWK &res);
+to_json(nlohmann::json &obj, const JWK &res);
 
 struct EncryptedFile
 {
@@ -90,10 +92,10 @@ struct EncryptedFile
 };
 
 void
-from_json(const json &obj, EncryptedFile &res);
+from_json(const nlohmann::json &obj, EncryptedFile &res);
 
 void
-to_json(json &obj, const EncryptedFile &res);
+to_json(nlohmann::json &obj, const EncryptedFile &res);
 
 } // namespace crypto
 } // namespace mtx

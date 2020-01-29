@@ -3,14 +3,14 @@
 #include <optional>
 #include <string>
 
+#if __has_include(<nlohmann/json_fwd.hpp>)
+#include <nlohmann/json_fwd.hpp>
+#else
 #include <nlohmann/json.hpp>
+#endif
 
 #include "mtx/common.hpp"
 #include "mtx/events/common.hpp"
-
-using json = nlohmann::json;
-
-namespace common = mtx::common;
 
 namespace mtx {
 namespace events {
@@ -26,18 +26,18 @@ struct Audio
         // The matrix URL of the audio clip.
         std::string url;
         // Metadata for the audio clip referred to in url.
-        common::AudioInfo info;
+        mtx::common::AudioInfo info;
         // Encryption members. If present, they replace url.
         std::optional<crypto::EncryptedFile> file;
         //! Relates to for rich replies
-        common::RelatesTo relates_to;
+        mtx::common::RelatesTo relates_to;
 };
 
 void
-from_json(const json &obj, Audio &content);
+from_json(const nlohmann::json &obj, Audio &content);
 
 void
-to_json(json &obj, const Audio &content);
+to_json(nlohmann::json &obj, const Audio &content);
 
 } // namespace msg
 } // namespace events

@@ -1,9 +1,12 @@
 #pragma once
 
+#if __has_include(<nlohmann/json_fwd.hpp>)
+#include <nlohmann/json_fwd.hpp>
+#else
 #include <nlohmann/json.hpp>
-#include <string>
+#endif
 
-using json = nlohmann::json;
+#include <string>
 
 namespace mtx {
 namespace events {
@@ -18,10 +21,10 @@ struct Topic
 };
 
 void
-from_json(const json &obj, Topic &event);
+from_json(const nlohmann::json &obj, Topic &event);
 
 void
-to_json(json &obj, const Topic &event);
+to_json(nlohmann::json &obj, const Topic &event);
 
 } // namespace state
 } // namespace events
