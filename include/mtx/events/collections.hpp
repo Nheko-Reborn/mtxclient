@@ -20,6 +20,7 @@
 #include "mtx/events/tag.hpp"
 #include "mtx/events/tombstone.hpp"
 #include "mtx/events/topic.hpp"
+#include "mtx/pushrules.hpp"
 
 #include "mtx/events/messages/audio.hpp"
 #include "mtx/events/messages/emote.hpp"
@@ -40,7 +41,8 @@ namespace states       = mtx::events::state;
 namespace msgs         = mtx::events::msg;
 
 //! Collection of room specific account data
-using RoomAccountDataEvents = std::variant<events::Event<account_data::Tag>>;
+using RoomAccountDataEvents =
+  std::variant<events::Event<account_data::Tag>, events::Event<pushrules::GlobalRuleset>>;
 
 //! Collection of @p StateEvent only.
 using StateEvents = std::variant<events::StateEvent<states::Aliases>,

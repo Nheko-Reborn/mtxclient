@@ -235,6 +235,14 @@ parse_room_account_data_events(
                         }
                         break;
                 }
+                case events::EventType::PushRules: {
+                        try {
+                                container.emplace_back(events::Event<pushrules::GlobalRuleset>(e));
+                        } catch (json::exception &err) {
+                                log_error(err, e);
+                        }
+                        break;
+                }
                 case events::EventType::KeyVerificationCancel:
                 case events::EventType::KeyVerificationRequest:
                 case events::EventType::KeyVerificationStart:
@@ -538,6 +546,7 @@ parse_timeline_events(const json &events,
                 case events::EventType::RoomPinnedEvents:
                 case events::EventType::RoomKeyRequest: // Not part of the timeline
                 case events::EventType::Tag:            // Not part of the timeline or state
+                case events::EventType::PushRules:      // Not part of the timeline or state
                 case events::EventType::Unsupported:
                 case events::EventType::KeyVerificationCancel:
                 case events::EventType::KeyVerificationRequest:
@@ -684,7 +693,8 @@ parse_state_events(const json &events,
                 case events::EventType::RoomMessage:
                 case events::EventType::RoomPinnedEvents:
                 case events::EventType::RoomRedaction:
-                case events::EventType::Tag: // Not part of the timeline or state
+                case events::EventType::Tag:       // Not part of the timeline or state
+                case events::EventType::PushRules: // Not part of the timeline or state
                 case events::EventType::Unsupported:
                 case events::EventType::KeyVerificationCancel:
                 case events::EventType::KeyVerificationRequest:
@@ -823,7 +833,8 @@ parse_stripped_events(const json &events,
                 case events::EventType::RoomRedaction:
                 case events::EventType::RoomKeyRequest: // Not part of the timeline or state
                 case events::EventType::RoomPinnedEvents:
-                case events::EventType::Tag: // Not part of the timeline or state
+                case events::EventType::Tag:       // Not part of the timeline or state
+                case events::EventType::PushRules: // Not part of the timeline or state
                 case events::EventType::Unsupported:
                 case events::EventType::KeyVerificationCancel:
                 case events::EventType::KeyVerificationRequest:

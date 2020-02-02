@@ -60,6 +60,8 @@ getEventType(const std::string &type)
                 return EventType::Sticker;
         else if (type == "m.tag")
                 return EventType::Tag;
+        else if (type == "m.push_rules")
+                return EventType::PushRules;
 
         return EventType::Unsupported;
 }
@@ -120,6 +122,8 @@ to_string(EventType type)
                 return "m.sticker";
         case EventType::Tag:
                 return "m.tag";
+        case EventType::PushRules:
+                return "m.push_rules";
         case EventType::Unsupported:
                 return "";
         }

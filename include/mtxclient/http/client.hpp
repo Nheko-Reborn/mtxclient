@@ -10,9 +10,10 @@
 #include "mtx/events.hpp"             // for EventType, to_string, json
 #include "mtx/events/collections.hpp" // for TimelineEvents
 #include "mtx/identifiers.hpp"        // for User
-#include "mtx/responses/empty.hpp"    // for Empty, Logout, RoomInvite
-#include "mtxclient/http/errors.hpp"  // for ClientError
-#include "mtxclient/utils.hpp"        // for random_token, url_encode, des...
+#include "mtx/pushrules.hpp"
+#include "mtx/responses/empty.hpp"   // for Empty, Logout, RoomInvite
+#include "mtxclient/http/errors.hpp" // for ClientError
+#include "mtxclient/utils.hpp"       // for random_token, url_encode, des...
 
 #include <boost/beast/http/fields.hpp> // for fields
 #include <boost/beast/http/status.hpp> // for status
@@ -220,6 +221,58 @@ public:
                            const std::string &from,
                            const std::string &only,
                            Callback<mtx::responses::Notifications> cb);
+
+        //! Retrieve all push rulesets for this user.
+        void get_pushrules(Callback<pushrules::GlobalRuleset> cb);
+
+        //! Retrieve a single specified push rule.
+        void get_pushrules(const std::string &scope,
+                           const std::string &kind,
+                           const std::string &ruleId,
+                           Callback<pushrules::PushRule> cb);
+
+        //! This endpoint removes the push rule defined in the path.
+        void delete_pushrules(const std::string &scope,
+                              const std::string &kind,
+                              const std::string &ruleId,
+                              ErrCallback cb);
+
+        //! This endpoint allows the creation, modification and deletion of pushers for this user
+        //! ID.
+        void put_pushrules(const std::string &scope,
+                           const std::string &kind,
+                           const std::string &ruleId,
+                           const pushrules::PushRule &rule,
+                           ErrCallback cb,
+                           const std::string &before = "",
+                           const std::string &after  = "");
+
+        //! Retrieve a single specified push rule.
+        void get_pushrules_enabled(const std::string &scope,
+                                   const std::string &kind,
+                                   const std::string &ruleId,
+                                   Callback<pushrules::Enabled> cb);
+
+        //! This endpoint allows clients to enable or disable the specified push rule.
+        void put_pushrules_enabled(const std::string &scope,
+                                   const std::string &kind,
+                                   const std::string &ruleId,
+                                   bool enabled,
+                                   ErrCallback cb);
+
+        //! This endpoint get the actions for the specified push rule.
+        void get_pushrules_actions(const std::string &scope,
+                                   const std::string &kind,
+                                   const std::string &ruleId,
+                                   Callback<pushrules::actions::Actions> cb);
+
+        //! This endpoint allows clients to change the actions of a push rule. This can be used to
+        //! change the actions of builtin rules.
+        void put_pushrules_actions(const std::string &scope,
+                                   const std::string &kind,
+                                   const std::string &ruleId,
+                                   const pushrules::actions::Actions &actions,
+                                   ErrCallback cb);
 
         //! Perform logout.
         void logout(Callback<mtx::responses::Logout> cb);
@@ -433,6 +486,8 @@ private:
                  TypeErasedCallback cb,
                  bool requires_auth,
                  const std::string &endpoint_namespace);
+
+        void delete_(const std::string &endpoint, ErrCallback cb, bool requires_auth = true);
 
         template<class Response>
         TypeErasedCallback prepare_callback(HeadersCallback<Response> callback);

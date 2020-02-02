@@ -116,6 +116,49 @@ mtx::http::Client::post(const std::string &endpoint,
 }
 
 void
+mtx::http::Client::delete_(const std::string &endpoint, ErrCallback cb, bool requires_auth)
+{
+        auto type_erased_cb = [cb](HeaderFields,
+                                   const std::string &body,
+                                   const boost::system::error_code &err_code,
+                                   boost::beast::http::status status_code) {
+                mtx::http::ClientError client_error;
+
+                if (err_code) {
+                        client_error.error_code = err_code;
+                        return cb(client_error);
+                }
+
+                client_error.status_code = status_code;
+
+                // We only count 2xx status codes as success.
+                if (static_cast<int>(status_code) < 200 || static_cast<int>(status_code) >= 300) {
+                        // The homeserver should return an error struct.
+                        try {
+                                nlohmann::json json_error       = json::parse(body);
+                                mtx::errors::Error matrix_error = json_error;
+
+                                client_error.matrix_error = matrix_error;
+                        } catch (const nlohmann::json::exception &e) {
+                                client_error.parse_error = std::string(e.what()) + ": " + body;
+                        }
+                        return cb(client_error);
+                }
+                return cb({});
+        };
+
+        auto session = create_session(type_erased_cb);
+
+        if (!session)
+                return;
+
+        setup_auth(session.get(), requires_auth);
+        setup_headers<boost::beast::http::verb::delete_>(session.get(), "", endpoint, "");
+
+        session->run();
+}
+
+void
 mtx::http::Client::put(const std::string &endpoint,
                        const nlohmann::json &req,
                        mtx::http::TypeErasedCallback cb,
@@ -301,6 +344,105 @@ Client::notifications(uint64_t limit,
           [cb](const mtx::responses::Notifications &res, HeaderFields, RequestErr err) {
                   cb(res, err);
           });
+}
+
+void
+Client::get_pushrules(Callback<mtx::pushrules::GlobalRuleset> cb)
+{
+        get<mtx::pushrules::GlobalRuleset>("/client/r0/pushrules/",
+                                           [cb](const mtx::pushrules::GlobalRuleset &res,
+                                                HeaderFields,
+                                                RequestErr err) { cb(res, err); });
+}
+
+void
+Client::get_pushrules(const std::string &scope,
+                      const std::string &kind,
+                      const std::string &ruleId,
+                      Callback<mtx::pushrules::PushRule> cb)
+{
+        get<mtx::pushrules::PushRule>("/client/r0/pushrules/" + scope + "/" + kind + "/" + ruleId,
+                                      [cb](const mtx::pushrules::PushRule &res,
+                                           HeaderFields,
+                                           RequestErr err) { cb(res, err); });
+}
+
+void
+Client::delete_pushrules(const std::string &scope,
+                         const std::string &kind,
+                         const std::string &ruleId,
+                         ErrCallback cb)
+{
+        delete_("/client/r0/pushrules/" + scope + "/" + kind + "/" + ruleId, cb);
+}
+
+void
+Client::put_pushrules(const std::string &scope,
+                      const std::string &kind,
+                      const std::string &ruleId,
+                      const mtx::pushrules::PushRule &rule,
+                      ErrCallback cb,
+                      const std::string &before,
+                      const std::string &after)
+{
+        std::map<std::string, std::string> params;
+
+        if (!before.empty())
+                params.emplace("before", before);
+
+        if (!after.empty())
+                params.emplace("after", after);
+
+        put<mtx::pushrules::PushRule>("/client/r0/pushrules/" + scope + "/" + kind + "/" + ruleId +
+                                        "?" + mtx::client::utils::query_params(params),
+                                      rule,
+                                      cb);
+}
+
+void
+Client::get_pushrules_enabled(const std::string &scope,
+                              const std::string &kind,
+                              const std::string &ruleId,
+                              Callback<mtx::pushrules::Enabled> cb)
+{
+        get<mtx::pushrules::Enabled>(
+          "/client/r0/pushrules/" + scope + "/" + kind + "/" + ruleId + "/enabled",
+          [cb](const mtx::pushrules::Enabled &res, HeaderFields, RequestErr err) { cb(res, err); });
+}
+
+void
+Client::put_pushrules_enabled(const std::string &scope,
+                              const std::string &kind,
+                              const std::string &ruleId,
+                              bool enabled,
+                              ErrCallback cb)
+{
+        put<mtx::pushrules::Enabled>(
+          "/client/r0/pushrules/" + scope + "/" + kind + "/" + ruleId + "/enabled", {enabled}, cb);
+}
+
+void
+Client::get_pushrules_actions(const std::string &scope,
+                              const std::string &kind,
+                              const std::string &ruleId,
+                              Callback<mtx::pushrules::actions::Actions> cb)
+{
+        get<mtx::pushrules::actions::Actions>(
+          "/client/r0/pushrules/" + scope + "/" + kind + "/" + ruleId + "/actions",
+          [cb](const mtx::pushrules::actions::Actions &res, HeaderFields, RequestErr err) {
+                  cb(res, err);
+          });
+}
+
+void
+Client::put_pushrules_actions(const std::string &scope,
+                              const std::string &kind,
+                              const std::string &ruleId,
+                              const mtx::pushrules::actions::Actions &actions,
+                              ErrCallback cb)
+{
+        put<mtx::pushrules::actions::Actions>(
+          "/client/r0/pushrules/" + scope + "/" + kind + "/" + ruleId + "/actions", actions, cb);
 }
 
 void

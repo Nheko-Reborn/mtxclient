@@ -8,6 +8,7 @@
 #include <thread>
 #include <vector>
 
+#include <mtx/responses/login.hpp>
 #include <mtxclient/http/client.hpp>
 
 inline int

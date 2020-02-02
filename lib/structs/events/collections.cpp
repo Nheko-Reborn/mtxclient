@@ -137,6 +137,7 @@ from_json(const json &obj, TimelineEvent &e)
         case events::EventType::RoomPinnedEvents:
         case events::EventType::RoomKeyRequest: // Not part of the timeline
         case events::EventType::Tag:            // Not part of the timeline
+        case events::EventType::PushRules:      // Not part of the timeline
         case events::EventType::KeyVerificationCancel:
         case events::EventType::KeyVerificationRequest:
         case events::EventType::KeyVerificationStart:

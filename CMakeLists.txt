@@ -161,6 +161,7 @@ target_sources(matrix_client
 	lib/structs/errors.cpp
 	lib/structs/events.cpp
 	lib/structs/identifiers.cpp
+	lib/structs/pushrules.cpp
 	lib/structs/requests.cpp
 	lib/structs/events/aliases.cpp
 	lib/structs/events/avatar.cpp
@@ -358,6 +359,13 @@ if(BUILD_LIB_TESTS)
 		GTest::Main)
 	target_include_directories(utils PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 
+	add_executable(pushrules tests/pushrules.cpp)
+	target_link_libraries(pushrules
+		MatrixClient::MatrixClient
+		GTest::GTest
+		GTest::Main)
+	target_include_directories(pushrules PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+
 	add_executable(connection tests/connection.cpp)
 	target_link_libraries(connection
 		MatrixClient::MatrixClient
@@ -413,6 +421,7 @@ if(BUILD_LIB_TESTS)
 	add_test(MediaAPI media_api)
 	add_test(Encryption e2ee)
 	add_test(Utilities utils)
+	add_test(Pushrules pushrules)
 	add_test(Identifiers identifiers)
 	add_test(Errors errors)
 	add_test(CryptoStructs crypto)

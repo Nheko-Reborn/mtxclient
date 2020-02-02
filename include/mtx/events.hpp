@@ -64,6 +64,8 @@ enum class EventType
         Sticker,
         // m.tag
         Tag,
+        // m.push_rules
+        PushRules,
         // Unsupported event
         Unsupported,
 };
@@ -174,6 +176,9 @@ to_json(json &obj, const Event<Content> &event)
                 break;
         case EventType::Tag:
                 obj["type"] = "m.tag";
+                break;
+        case EventType::PushRules:
+                obj["type"] = "m.push_rules";
                 break;
         case EventType::Unsupported:
         default:
