@@ -439,7 +439,7 @@ TEST(Pushrules, RoomRuleMentions)
                             rule.actions = {mtx::pushrules::actions::dont_notify{}};
 
                             client->put_pushrules("global",
-                                                  "override",
+                                                  "room",
                                                   res.room_id.to_string(),
                                                   rule,
                                                   [](mtx::http::RequestErr &err) {

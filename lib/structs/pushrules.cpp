@@ -91,7 +91,6 @@ to_json(nlohmann::json &obj, const PushRule &rule)
         if (!rule.pattern.empty())
                 obj["pattern"] = rule.pattern;
 
-        obj["conditions"] = nlohmann::json::array();
         for (const auto condition : rule.conditions)
                 obj["conditions"].push_back(condition);
 }
