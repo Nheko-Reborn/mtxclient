@@ -76,15 +76,22 @@ from_json(const nlohmann::json &obj, Actions &action)
 void
 to_json(nlohmann::json &obj, const PushRule &rule)
 {
-        obj["default"] = rule.default_;
-        obj["enabled"] = rule.enabled;
+        if (rule.default_)
+                obj["default"] = rule.default_;
+
+        if (!rule.enabled)
+                obj["enabled"] = rule.enabled;
+
         for (const auto &action : rule.actions)
                 obj["actions"].push_back(action);
-        obj["rule_id"] = rule.rule_id;
+
+        if (!rule.rule_id.empty())
+                obj["rule_id"] = rule.rule_id;
 
         if (!rule.pattern.empty())
                 obj["pattern"] = rule.pattern;
 
+        obj["conditions"] = nlohmann::json::array();
         for (const auto condition : rule.conditions)
                 obj["conditions"].push_back(condition);
 }
@@ -92,10 +99,12 @@ to_json(nlohmann::json &obj, const PushRule &rule)
 void
 from_json(const nlohmann::json &obj, PushRule &rule)
 {
-        rule.default_ = obj["default"];
-        rule.enabled  = obj["enabled"];
-        for (auto action : obj["actions"])
-                rule.actions.push_back(action);
+        rule.default_ = obj.value("default", false);
+        rule.enabled  = obj.value("enabled", true);
+
+        if (obj.contains("actions"))
+                for (auto action : obj["actions"])
+                        rule.actions.push_back(action);
 
         rule.pattern = obj.value("pattern", "");
 
@@ -117,16 +126,21 @@ to_json(nlohmann::json &obj, const Ruleset &set)
 void
 from_json(const nlohmann::json &obj, Ruleset &set)
 {
-        for (const auto e : obj["override"])
-                set.override_.push_back(e.get<PushRule>());
-        for (const auto e : obj["content"])
-                set.content.push_back(e.get<PushRule>());
-        for (const auto e : obj["room"])
-                set.room.push_back(e.get<PushRule>());
-        for (const auto e : obj["sender"])
-                set.sender.push_back(e.get<PushRule>());
-        for (const auto e : obj["underride"])
-                set.underride.push_back(e.get<PushRule>());
+        if (obj.contains("override"))
+                for (const auto e : obj["override"])
+                        set.override_.push_back(e.get<PushRule>());
+        if (obj.contains("content"))
+                for (const auto e : obj["content"])
+                        set.content.push_back(e.get<PushRule>());
+        if (obj.contains("room"))
+                for (const auto e : obj["room"])
+                        set.room.push_back(e.get<PushRule>());
+        if (obj.contains("sender"))
+                for (const auto e : obj["sender"])
+                        set.sender.push_back(e.get<PushRule>());
+        if (obj.contains("underride"))
+                for (const auto e : obj["underride"])
+                        set.underride.push_back(e.get<PushRule>());
 }
 void
 to_json(nlohmann::json &obj, const GlobalRuleset &set)
