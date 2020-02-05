@@ -38,13 +38,18 @@ from_json(const nlohmann::json &obj, ExportedSession &s)
 void
 to_json(nlohmann::json &obj, const ExportedSessionKeys &keys)
 {
-        obj["sessions"] = keys.sessions;
+        obj = keys.sessions;
 }
 
 void
 from_json(const nlohmann::json &obj, ExportedSessionKeys &keys)
 {
-        keys.sessions = obj.at("sessions").get<std::vector<ExportedSession>>();
+        try {
+                keys.sessions = obj.get<std::vector<ExportedSession>>();
+                // might be the old format.
+        } catch (const nlohmann::json::exception &) {
+                keys.sessions = obj.at("sessions").get<std::vector<ExportedSession>>();
+        }
 }
 
 void
