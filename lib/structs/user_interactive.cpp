@@ -118,7 +118,7 @@ to_json(nlohmann::json &obj, const Auth &auth)
                      [&obj](const auth::OAuth2 &) { obj["type"] = auth_types::oauth2; },
                      [&obj](const auth::Terms &) { obj["type"] = auth_types::terms; },
                      [&obj](const auth::Dummy &) { obj["type"] = auth_types::dummy; },
-                     [&obj](const auth::Fallback &) {},
+                     [](const auth::Fallback &) {},
                    },
                    auth.content);
 }
