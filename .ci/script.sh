@@ -36,16 +36,13 @@ fi
 
 if [ $TRAVIS_OS_NAME == osx ]; then
     # Build the library.
-    export OPENSSL_ROOT_DIR=/usr/local/opt/openssl
     cmake -H. -Bbuild -DCMAKE_BUILD_TYPE=Release \
-	-DOPENSSL_ROOT_DIR=/usr/local/opt/openssl \
-	-DOPENSSL_INCLUDE_DIR=/usr/local/opt/openssl/include \
         -DBUILD_LIB_TESTS=OFF \
+        -DBUILD_LIB_EXAMPLES=OFF \
         -DBUILD_SHARED_LIBS=ON \
 	-DHUNTER_ENABLED=ON \
 	-DHUNTER_CONFIGURATION_TYPES=Release \
 	-DHUNTER_ROOT=.deps \
-	-DUSE_BUNDLED_OPENSSL=OFF \
         -DUSE_BUNDLED_GTEST=OFF || true
     cmake --build build
 

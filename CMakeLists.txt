@@ -36,8 +36,7 @@ option(USE_BUNDLED_ZLIB "Use the bundled version of zlib."
 project(matrix_client
 	VERSION 0.3.0
 	DESCRIPTION "Client API library for Matrix, built on top of Boost.Asio"
-	HOMEPAGE_URL https://github.com/Nheko-Reborn/mtxclient
-	LANGUAGES CXX C)
+	HOMEPAGE_URL https://github.com/Nheko-Reborn/mtxclient)
 
 option(ASAN "Compile with address sanitizers" OFF)
 option(BUILD_LIB_TESTS "Build tests" ON)

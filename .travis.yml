@@ -14,7 +14,7 @@ notifications:
 matrix:
   include:
     - os: osx
-      osx_image: xcode10.2 # for c++17
+      osx_image: xcode11.3 # for c++17
       compiler: clang
       addons:
         homebrew:
