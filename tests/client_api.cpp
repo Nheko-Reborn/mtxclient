@@ -33,21 +33,18 @@ TEST(ClientAPI, Register)
         // Synapse converts the username to lowercase.
         boost::algorithm::to_lower(username);
 
-        user->flow_register(
-          username,
-          "secret",
-          [user, username](const mtx::responses::RegistrationFlows &res, RequestErr) {
-                  if (res.flows.size() == 0)
+        user->registration(
+          username, "secret", [user, username](const mtx::responses::Register &, RequestErr err) {
+                  if (!err || err->matrix_error.unauthorized.flows.size() == 0)
                           return;
 
-                  EXPECT_EQ(res.flows.size(), 1);
-                  EXPECT_EQ(res.flows[0].stages[0], "m.login.dummy");
+                  EXPECT_EQ(err->matrix_error.unauthorized.flows.size(), 1);
+                  EXPECT_EQ(err->matrix_error.unauthorized.flows[0].stages[0], "m.login.dummy");
 
-                  user->flow_response(
+                  user->registration(
                     username,
                     "secret",
-                    res.session,
-                    "m.login.dummy",
+                    {err->matrix_error.unauthorized.session, mtx::user_interactive::auth::Dummy{}},
                     [username](const mtx::responses::Register &res, RequestErr err) {
                             const auto user_id = "@" + username + ":localhost";
 

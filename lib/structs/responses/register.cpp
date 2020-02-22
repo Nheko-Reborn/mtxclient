@@ -15,18 +15,5 @@ from_json(const json &obj, Register &response)
         response.access_token = obj.at("access_token").get<std::string>();
         response.device_id    = obj.at("device_id").get<std::string>();
 }
-
-void
-from_json(const json &obj, Flow &response)
-{
-        response.stages = obj.at("stages").get<std::vector<std::string>>();
-}
-
-void
-from_json(const json &obj, RegistrationFlows &response)
-{
-        response.flows   = obj.at("flows").get<std::vector<Flow>>();
-        response.session = obj.at("session").get<std::string>();
-}
 }
 }

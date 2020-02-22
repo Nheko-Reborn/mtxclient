@@ -56,7 +56,6 @@ struct Notifications;
 struct Profile;
 struct QueryKeys;
 struct Register;
-struct RegistrationFlows;
 struct Sync;
 struct UploadKeys;
 struct Versions;
@@ -198,22 +197,18 @@ public:
         //! Call set_server with the returned homeserver url after this
         void well_known(Callback<mtx::responses::WellKnown> cb);
 
-        //! Register by not expecting a registration flow.
+        //! Register
+        //! If this fails with 401, continue with the flows returned in the error struct
         void registration(const std::string &user,
                           const std::string &pass,
                           Callback<mtx::responses::Register> cb);
 
-        //! Register through a registration flow.
-        void flow_register(const std::string &user,
-                           const std::string &pass,
-                           Callback<mtx::responses::RegistrationFlows> cb);
-
-        //! Complete the flow registration.
-        void flow_response(const std::string &user,
-                           const std::string &pass,
-                           const std::string &session,
-                           const std::string &flow_type,
-                           Callback<mtx::responses::Register> cb);
+        //! Register and additionally provide an auth dict. This needs to be called, if the initial
+        //! register failed with 401
+        void registration(const std::string &user,
+                          const std::string &pass,
+                          const user_interactive::Auth &auth,
+                          Callback<mtx::responses::Register> cb);
 
         //! Paginate through the list of events that the user has been,
         //! or would have been notified about.

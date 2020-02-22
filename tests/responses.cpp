@@ -759,43 +759,6 @@ TEST(Responses, Media)
         EXPECT_EQ(res.content_uri, "mxc://example.com/AQwafuaFswefuhsfAFAgsw");
 }
 
-TEST(Responses, Register)
-{
-        json data = R"({
-          "flows": [{
-              "stages": [
-                  "m.login.recaptcha"
-              ]
-          }, {
-              "stages": [
-                  "m.login.email.identity",
-                  "m.login.recaptcha"
-              ]
-          }
-         ],
-         "params": {
-             "m.login.recaptcha": {
-                 "public_key": "6Le31_kSAAAAAK-54VKccKamtr-MFA_3WS1d_fGV"
-             }
-         },
-         "session": "kLmDGyIaqzgCeLgzVEebtNig"
-        })"_json;
-
-        RegistrationFlows res = data;
-
-        EXPECT_EQ(res.session, "kLmDGyIaqzgCeLgzVEebtNig");
-        EXPECT_EQ(res.flows.size(), 2);
-
-        auto s1 = res.flows.at(0);
-        EXPECT_EQ(s1.stages.size(), 1);
-        EXPECT_EQ(s1.stages.at(0), "m.login.recaptcha");
-
-        auto s2 = res.flows.at(1);
-        EXPECT_EQ(s2.stages.size(), 2);
-        EXPECT_EQ(s2.stages.at(0), "m.login.email.identity");
-        EXPECT_EQ(s2.stages.at(1), "m.login.recaptcha");
-}
-
 TEST(Responses, UploadKeys)
 {
         json data = R"({

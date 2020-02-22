@@ -26,24 +26,7 @@ struct Register
         std::string device_id;
 };
 
-struct Flow
-{
-        std::vector<std::string> stages;
-};
-
-struct RegistrationFlows
-{
-        std::vector<Flow> flows;
-        std::string session;
-};
-
 void
 from_json(const nlohmann::json &obj, Register &response);
-
-void
-from_json(const nlohmann::json &obj, Flow &response);
-
-void
-from_json(const nlohmann::json &obj, RegistrationFlows &response);
 }
 }

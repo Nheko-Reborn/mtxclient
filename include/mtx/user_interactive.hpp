@@ -78,4 +78,87 @@ struct Unauthorized
 };
 void
 from_json(const nlohmann::json &obj, Unauthorized &unauthorized);
+
+namespace auth {
+struct Password
+{
+        std::string password;
+
+        enum IdType
+        {
+                UserId,
+                ThirdPartyId
+        };
+        IdType identifier_type;
+
+        //! for user
+        std::string identifier_user;
+
+        //! for third party
+        std::string identifier_medium;
+        std::string identifier_address;
+};
+
+struct ReCaptcha
+{
+        //! The recaptcha response
+        std::string response;
+};
+
+struct Token
+{
+        //! the obtained token
+        std::string token;
+        //! Client generated nonce
+        std::string txn_id;
+};
+
+struct ThreePIDCred
+{
+        //! identity server session id
+        std::string sid;
+        //! identity server client secret
+        std::string client_secret;
+        //! url of identity server authed with, e.g. 'matrix.org:8090'
+        std::string id_server;
+        //! access token previously registered with the identity server
+        std::string id_access_token;
+};
+struct EmailIdentity
+{
+        // The 3rd party ids
+        std::vector<ThreePIDCred> threepidCreds;
+};
+struct MSISDN
+{
+        // The 3rd party ids
+        std::vector<ThreePIDCred> threepidCreds;
+};
+
+//! OAuth2, client retries with the session only, so I'm guessing this is empty?
+struct OAuth2
+{};
+struct Terms
+{};
+struct Dummy
+{};
+}
+struct Auth
+{
+        //! the session id
+        std::string session;
+
+        //! the content, depends on type
+        std::variant<auth::Password,
+                     auth::ReCaptcha,
+                     auth::Token,
+                     auth::EmailIdentity,
+                     auth::MSISDN,
+                     auth::OAuth2,
+                     auth::Terms,
+                     auth::Dummy>
+          content;
+};
+void
+to_json(nlohmann::json &obj, const Auth &auth);
 }

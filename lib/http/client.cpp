@@ -803,26 +803,12 @@ Client::registration(const std::string &user,
 }
 
 void
-Client::flow_register(const std::string &user,
-                      const std::string &pass,
-                      Callback<mtx::responses::RegistrationFlows> callback)
+Client::registration(const std::string &user,
+                     const std::string &pass,
+                     const user_interactive::Auth &auth,
+                     Callback<mtx::responses::Register> callback)
 {
-        nlohmann::json req = {{"username", user}, {"password", pass}};
-
-        post<nlohmann::json, mtx::responses::RegistrationFlows>(
-          "/client/r0/register", req, callback, false);
-}
-
-void
-Client::flow_response(const std::string &user,
-                      const std::string &pass,
-                      const std::string &session,
-                      const std::string &flow_type,
-                      Callback<mtx::responses::Register> callback)
-{
-        nlohmann::json req = {{"username", user},
-                              {"password", pass},
-                              {"auth", {{"type", flow_type}, {"session", session}}}};
+        nlohmann::json req = {{"username", user}, {"password", pass}, {"auth", auth}};
 
         post<nlohmann::json, mtx::responses::Register>("/client/r0/register", req, callback, false);
 }
