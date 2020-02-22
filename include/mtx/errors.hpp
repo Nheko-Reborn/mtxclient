@@ -7,6 +7,8 @@
 #endif
 #include <string>
 
+#include "user_interactive.hpp"
+
 namespace mtx {
 namespace errors {
 
@@ -62,6 +64,9 @@ struct Error
         ErrorCode errcode = {};
         //! Human readable version of the error.
         std::string error;
+
+        //! Auth flows in case of 401
+        user_interactive::Unauthorized unauthorized;
 };
 
 void

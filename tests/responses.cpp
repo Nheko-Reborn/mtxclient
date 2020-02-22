@@ -959,3 +959,88 @@ TEST(Responses, Notifications)
         EXPECT_EQ(event.content.body, "I am a fish");
         EXPECT_EQ(event.sender, "@alice:example.com");
 }
+
+TEST(Responses, Userinteractive)
+{
+        json data =
+          R"(
+{
+  "completed": [ "example.type.foo" ],
+  "session": "YQVPFRiztSYtmsjLNQmsxTCg",
+  "flows": [
+    {
+      "stages": [
+        "m.login.recaptcha",
+        "m.login.terms",
+        "m.login.dummy"
+      ]
+    },
+    {
+      "stages": [
+        "m.login.recaptcha",
+        "m.login.terms",
+        "m.login.email.identity"
+      ]
+    }
+  ],
+  "params": {
+    "m.login.recaptcha": {
+      "public_key": "6LcgI54UAAAAABGdGmruw    6DdOocFpYVdjYBRe4zb"
+    },
+    "m.login.terms": {
+      "policies": {
+        "privacy_policy": {
+          "version": "1.0",
+          "en": {
+            "name": "Terms and Conditions",
+            "url": "https://matrix-client.matrix.org/_matrix/consent?v=1.0"
+          }
+        }
+      }
+    }
+  }
+})"_json;
+        mtx::user_interactive::Unauthorized unauthorized = data;
+
+        EXPECT_EQ(unauthorized.completed[0], "example.type.foo");
+        EXPECT_EQ(unauthorized.session, "YQVPFRiztSYtmsjLNQmsxTCg");
+        EXPECT_EQ(unauthorized.flows.size(), 2);
+        EXPECT_EQ(unauthorized.flows[0].stages[0], "m.login.recaptcha");
+        EXPECT_EQ(unauthorized.flows[0].stages[1], "m.login.terms");
+        EXPECT_EQ(unauthorized.flows[0].stages[2], "m.login.dummy");
+        EXPECT_EQ(unauthorized.flows[1].stages[0], "m.login.recaptcha");
+        EXPECT_EQ(unauthorized.flows[1].stages[1], "m.login.terms");
+        EXPECT_EQ(unauthorized.flows[1].stages[2], "m.login.email.identity");
+
+        EXPECT_EQ(std::get<mtx::user_interactive::TermsParams>(
+                    unauthorized.params[std::string{mtx::user_interactive::auth_types::terms}])
+                    .policies.size(),
+                  1);
+        EXPECT_EQ(std::get<mtx::user_interactive::TermsParams>(
+                    unauthorized.params[std::string{mtx::user_interactive::auth_types::terms}])
+                    .policies["privacy_policy"]
+                    .version,
+                  "1.0");
+        EXPECT_EQ(std::get<mtx::user_interactive::TermsParams>(
+                    unauthorized.params[std::string{mtx::user_interactive::auth_types::terms}])
+                    .policies["privacy_policy"]
+                    .langToPolicy["en"]
+                    .name,
+                  "Terms and Conditions");
+
+        json data2 = R"(
+{
+  "session": "CFNYzCbLYyGTpURjdmkIXMHc",
+  "flows": [
+    {
+      "stages": [
+        "m.login.password"
+      ]
+    }
+  ],
+  "params": {}
+})"_json;
+
+        unauthorized = data2;
+        EXPECT_EQ(unauthorized.flows[0].stages[0], mtx::user_interactive::auth_types::password);
+}
