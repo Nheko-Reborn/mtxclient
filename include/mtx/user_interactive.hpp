@@ -142,6 +142,8 @@ struct Terms
 {};
 struct Dummy
 {};
+struct Fallback
+{};
 }
 struct Auth
 {
@@ -156,7 +158,8 @@ struct Auth
                      auth::MSISDN,
                      auth::OAuth2,
                      auth::Terms,
-                     auth::Dummy>
+                     auth::Dummy,
+                     auth::Fallback>
           content;
 };
 void

@@ -223,6 +223,10 @@ TEST(Requests, UserInteractiveAuth)
   "type": "m.login.dummy",
   "session": "<session ID>"
 })"_json);
+        a.content = auth::Fallback{};
+        EXPECT_EQ(nlohmann::json(a), R"({
+  "session": "<session ID>"
+})"_json);
 
         a.content = auth::EmailIdentity{{
           {"<identity server session id>",
