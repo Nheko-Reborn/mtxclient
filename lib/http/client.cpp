@@ -805,7 +805,7 @@ Client::registration(const std::string &user,
 void
 Client::registration(const std::string &user,
                      const std::string &pass,
-                     const user_interactive::Auth &auth,
+                     const mtx::user_interactive::Auth &auth,
                      Callback<mtx::responses::Register> callback)
 {
         nlohmann::json req = {{"username", user}, {"password", pass}, {"auth", auth}};
