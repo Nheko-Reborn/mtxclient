@@ -1,10 +1,13 @@
 #pragma once
 
+#if __has_include(<nlohmann/json_fwd.hpp>)
+#include <nlohmann/json_fwd.hpp>
+#else
 #include <nlohmann/json.hpp>
+#endif
 
 #include "mtx/events.hpp"
-
-using json = nlohmann::json;
+#include "mtx/events/common.hpp"
 
 namespace mtx {
 namespace events {
@@ -17,10 +20,10 @@ struct OlmCipherContent
 };
 
 void
-from_json(const json &obj, OlmCipherContent &event);
+from_json(const nlohmann::json &obj, OlmCipherContent &event);
 
 void
-to_json(json &obj, const OlmCipherContent &event);
+to_json(nlohmann::json &obj, const OlmCipherContent &event);
 
 //! Content of the `m.room.encrypted` Olm event.
 struct OlmEncrypted
@@ -33,10 +36,10 @@ struct OlmEncrypted
 };
 
 void
-from_json(const json &obj, OlmEncrypted &event);
+from_json(const nlohmann::json &obj, OlmEncrypted &event);
 
 void
-to_json(json &obj, const OlmEncrypted &event);
+to_json(nlohmann::json &obj, const OlmEncrypted &event);
 
 //! Content of the `m.room.encrypted` event.
 struct Encrypted
@@ -51,13 +54,15 @@ struct Encrypted
         std::string sender_key;
         //! Outbound group session id.
         std::string session_id;
+        //! Relates to for rich replies
+        common::RelatesTo relates_to;
 };
 
 void
-from_json(const json &obj, Encrypted &event);
+from_json(const nlohmann::json &obj, Encrypted &event);
 
 void
-to_json(json &obj, const Encrypted &event);
+to_json(nlohmann::json &obj, const Encrypted &event);
 
 //! Content of the `m.room_key` event.
 struct RoomKey
@@ -69,10 +74,10 @@ struct RoomKey
 };
 
 void
-from_json(const json &obj, RoomKey &event);
+from_json(const nlohmann::json &obj, RoomKey &event);
 
 void
-to_json(json &obj, const RoomKey &event);
+to_json(nlohmann::json &obj, const RoomKey &event);
 
 enum class RequestAction
 {
@@ -111,10 +116,36 @@ struct KeyRequest
 };
 
 void
-from_json(const json &obj, KeyRequest &event);
+from_json(const nlohmann::json &obj, KeyRequest &event);
 
 void
-to_json(json &obj, const KeyRequest &event);
+to_json(nlohmann::json &obj, const KeyRequest &event);
+
+//! Content of the `m.key.verification.request` event
+struct KeyVerificationRequest
+{
+        //! The device ID which is initiating the request.
+        std::string from_device;
+        //! An opaque identifier for the verification request. Must be unique with respect to the
+        //! devices involved.
+        std::string transaction_id;
+        //! The verification methods supported by the sender.
+        std::vector<std::string> methods;
+        //! The POSIX timestamp in milliseconds for when the request was made. If the request is in
+        //! the future by more than 5 minutes or more than 10 minutes in the past, the message
+        //! should be ignored by the receiver.
+        uint64_t timestamp;
+        //! The type of the event.
+        mtx::events::EventType type;
+};
+
+// TODO: KeyVerificationStart, KeyVerificationAccept, and KeyVerificationCancel
+
+void
+from_json(const nlohmann::json &obj, KeyVerificationRequest &event);
+
+void
+to_json(nlohmann::json &obj, const KeyVerificationRequest &event);
 
 } // namespace msg
 } // namespace events

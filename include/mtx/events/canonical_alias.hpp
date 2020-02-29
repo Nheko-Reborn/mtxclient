@@ -1,8 +1,12 @@
 #pragma once
 
-#include <nlohmann/json.hpp>
+#include <string>
 
-using json = nlohmann::json;
+#if __has_include(<nlohmann/json_fwd.hpp>)
+#include <nlohmann/json_fwd.hpp>
+#else
+#include <nlohmann/json.hpp>
+#endif
 
 namespace mtx {
 namespace events {
@@ -22,11 +26,11 @@ struct CanonicalAlias
 
 //! Deserialization method needed by @p nlohmann::json.
 void
-from_json(const json &obj, CanonicalAlias &canonical_alias);
+from_json(const nlohmann::json &obj, CanonicalAlias &canonical_alias);
 
 //! Serialization method needed by @p nlohmann::json.
 void
-to_json(json &obj, const CanonicalAlias &canonical_alias);
+to_json(nlohmann::json &obj, const CanonicalAlias &canonical_alias);
 
 } // namespace state
 } // namespace events

@@ -2,6 +2,7 @@
 
 #include <cctype>
 #include <iomanip>
+#include <random>
 #include <sstream>
 #include <string>
 #include <utility>
@@ -14,8 +15,6 @@
 #include <boost/iostreams/filter/zlib.hpp>
 #include <boost/iostreams/filtering_stream.hpp>
 #include <boost/iostreams/traits.hpp>
-#include <boost/random/random_device.hpp>
-#include <boost/random/uniform_int_distribution.hpp>
 
 mtx::client::utils::MxcUrl
 mtx::client::utils::parse_mxc_url(const std::string &url)
@@ -59,8 +58,8 @@ mtx::client::utils::random_token(uint8_t len, bool with_symbols) noexcept
 
         const auto chars = with_symbols ? alphanumberic + symbols : alphanumberic;
 
-        boost::random::random_device rng;
-        boost::random::uniform_int_distribution<> index_dist(0, chars.size() - 1);
+        std::random_device rng;
+        std::uniform_int_distribution<> index_dist(0, chars.size() - 1);
 
         std::string token;
         token.reserve(len);

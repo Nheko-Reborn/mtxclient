@@ -1,7 +1,6 @@
 #include <atomic>
 
 #include <boost/algorithm/string.hpp>
-#include <boost/variant.hpp>
 
 #include <gtest/gtest.h>
 
@@ -23,6 +22,8 @@ using namespace mtx::events::collections;
 using namespace mtx::responses;
 
 using namespace std;
+
+using namespace nlohmann;
 
 struct OlmCipherContent
 {
@@ -594,7 +595,7 @@ TEST(Encryption, EnableEncryption)
 
                 int has_encryption = 0;
                 for (const auto &e : events) {
-                        if (boost::get<StateEvent<state::Encryption>>(&e) != nullptr)
+                        if (std::holds_alternative<StateEvent<state::Encryption>>(e))
                                 has_encryption = 1;
                 }
 
@@ -1065,9 +1066,8 @@ TEST(ExportSessions, EncryptDecrypt)
         EXPECT_TRUE(ciphertext.size() > 0);
 
         auto encoded = bin2base64(ciphertext);
-        auto decoded = base642bin(encoded);
 
-        auto restored_keys = mtx::crypto::decrypt_exported_sessions(decoded, PASS);
+        auto restored_keys = mtx::crypto::decrypt_exported_sessions(encoded, PASS);
         EXPECT_EQ(json(keys).dump(), json(restored_keys).dump());
 }
 
@@ -1128,6 +1128,72 @@ TEST(ExportSessions, InboundMegolmSessions)
         auto restored_output_str =
           std::string((char *)restored_plaintext.data.data(), restored_plaintext.data.size());
         ASSERT_EQ(restored_output_str, secret_message);
+}
+
+TEST(Encryption, EncryptedFile)
+{
+        {
+                auto buffer = mtx::crypto::create_buffer(16);
+                ASSERT_EQ(buffer.size(), 16);
+                auto buf_str = mtx::crypto::to_string(buffer);
+                ASSERT_EQ(buf_str.size(), 16);
+        }
+
+        std::string plaintext = "This is some plain text payload";
+        auto encryption_data  = mtx::crypto::encrypt_file(plaintext);
+        ASSERT_NE(plaintext, mtx::crypto::to_string(encryption_data.first));
+        ASSERT_EQ(plaintext,
+                  mtx::crypto::to_string(mtx::crypto::decrypt_file(
+                    mtx::crypto::to_string(encryption_data.first), encryption_data.second)));
+        // key needs to be 32 bytes/256 bits
+        ASSERT_EQ(32,
+                  mtx::crypto::base642bin_urlsafe_unpadded(encryption_data.second.key.k).size());
+        // IV needs to be 16 bytes/128 bits
+        ASSERT_EQ(16, mtx::crypto::base642bin_unpadded(encryption_data.second.iv).size());
+
+        json j                                            = R"({
+  "type": "m.room.message",
+  "content": {
+    "body": "test.txt",
+    "info": {
+      "size": 8,
+      "mimetype": "text/plain"
+    },
+    "msgtype": "m.file",
+    "file": {
+      "v": "v2",
+      "key": {
+        "alg": "A256CTR",
+        "ext": true,
+        "k": "6osKLzUKV1YZ06WEX0b77D784Te8oAj5eNU-gAgkjs4",
+        "key_ops": [
+          "encrypt",
+          "decrypt"
+        ],
+        "kty": "oct"
+      },
+      "iv": "7zRP/t89YWcAAAAAAAAAAA",
+      "hashes": {
+        "sha256": "5g41hn7n10sCw3+2j7CQ9SJl6R/v5EBT4MshdFgHhzo"
+      },
+      "url": "mxc://neko.dev/WPKoOAPfPlcHiZZTEoaIoZhN",
+      "mimetype": "text/plain"
+    }
+ },
+ "event_id": "$1575320135447DEPky:neko.dev",
+  "origin_server_ts": 1575320135324,
+  "sender": "@test:neko.dev",
+  "unsigned": {
+    "age": 1081,
+    "transaction_id": "m1575320142400.8"
+  },
+  "room_id": "!YnUlhwgbBaGcAFsJOJ:neko.dev"
+})"_json;
+        mtx::events::RoomEvent<mtx::events::msg::File> ev = j;
+
+        ASSERT_EQ("abcdefg\n",
+                  mtx::crypto::to_string(mtx::crypto::decrypt_file("=\xFDX\xAB\xCA\xEB\x8F\xFF",
+                                                                   ev.content.file.value())));
 }
 
 TEST(Encryption, DISABLED_HandleRoomKeyEvent) {}

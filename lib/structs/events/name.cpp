@@ -12,7 +12,7 @@ namespace state {
 void
 from_json(const json &obj, Name &event)
 {
-        if (!obj.at("name").is_null())
+        if (obj.find("name") != obj.end() && !obj.at("name").is_null())
                 event.name = obj.at("name").get<std::string>();
 }
 

@@ -62,3 +62,34 @@ TEST(Crypto, DeviceKeys)
 
         EXPECT_EQ(device2.unsigned_info.device_display_name, "Alice's mobile phone");
 }
+
+TEST(Crypto, EncryptedFile)
+{
+        json j = R"({
+      "url": "mxc://example.org/FHyPlCeYUSFFxlgbQYZmoEoe",
+      "v": "v2",
+      "key": {
+        "alg": "A256CTR",
+        "ext": true,
+        "k": "aWF6-32KGYaC3A_FEUCk1Bt0JA37zP0wrStgmdCaW-0",
+        "key_ops": ["encrypt","decrypt"],
+        "kty": "oct"
+      },
+      "iv": "w+sE15fzSc0AAAAAAAAAAA",
+      "hashes": {
+        "sha256": "fdSLu/YkRx3Wyh3KQabP3rd6+SFiKg5lsJZQHtkSAYA"
+      }})"_json;
+
+        EncryptedFile file = j;
+        // json j2            = file;
+
+        // EXPECT_EQ(j, j2);
+        EXPECT_EQ(file.v, "v2");
+        EXPECT_EQ(file.iv, "w+sE15fzSc0AAAAAAAAAAA");
+        EXPECT_EQ(file.hashes.at("sha256"), "fdSLu/YkRx3Wyh3KQabP3rd6+SFiKg5lsJZQHtkSAYA");
+        EXPECT_EQ(file.key.alg, "A256CTR");
+        EXPECT_EQ(file.key.ext, true);
+        EXPECT_EQ(file.key.k, "aWF6-32KGYaC3A_FEUCk1Bt0JA37zP0wrStgmdCaW-0");
+        EXPECT_EQ(file.key.key_ops.size(), 2);
+        EXPECT_EQ(file.key.kty, "oct");
+}

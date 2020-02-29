@@ -1,6 +1,6 @@
-#include <string>
-
 #include "mtx/events/topic.hpp"
+
+#include <nlohmann/json.hpp>
 
 using json = nlohmann::json;
 
@@ -11,7 +11,7 @@ namespace state {
 void
 from_json(const json &obj, Topic &event)
 {
-        if (!obj.at("topic").is_null())
+        if (obj.find("topic") != obj.end() && !obj.at("topic").is_null())
                 event.topic = obj.at("topic").get<std::string>();
 }
 

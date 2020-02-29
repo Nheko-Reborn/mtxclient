@@ -1,12 +1,14 @@
 #pragma once
 
+#if __has_include(<nlohmann/json_fwd.hpp>)
+#include <nlohmann/json_fwd.hpp>
+#else
 #include <nlohmann/json.hpp>
+#endif
 
 #include <map>
 #include <string>
 #include <vector>
-
-using json = nlohmann::json;
 
 //! Common types used by the crypto related endpoints.
 
@@ -22,10 +24,10 @@ struct UnsignedDeviceInfo
 };
 
 void
-from_json(const json &obj, UnsignedDeviceInfo &res);
+from_json(const nlohmann::json &obj, UnsignedDeviceInfo &res);
 
 void
-to_json(json &obj, const UnsignedDeviceInfo &res);
+to_json(nlohmann::json &obj, const UnsignedDeviceInfo &res);
 
 struct DeviceKeys
 {
@@ -49,10 +51,51 @@ struct DeviceKeys
 };
 
 void
-from_json(const json &obj, DeviceKeys &res);
+from_json(const nlohmann::json &obj, DeviceKeys &res);
 
 void
-to_json(json &obj, const DeviceKeys &res);
+to_json(nlohmann::json &obj, const DeviceKeys &res);
+
+struct JWK
+{
+        //! Required. Key type. Must be oct.
+        std::string kty;
+        //! Required. Key operations. Must at least contain encrypt and decrypt.
+        std::vector<std::string> key_ops;
+        //! Required. Algorithm. Must be A256CTR.
+        std::string alg;
+        //! Required. The key, encoded as urlsafe unpadded base64.
+        std::string k;
+        //! Required. Extractable. Must be true. This is a W3C extension.
+        bool ext;
+};
+
+void
+from_json(const nlohmann::json &obj, JWK &res);
+
+void
+to_json(nlohmann::json &obj, const JWK &res);
+
+struct EncryptedFile
+{
+        //! Required. The URL to the file.
+        std::string url;
+        //! Required. A JSON Web Key object. (The encryption key)
+        JWK key;
+        //! Required. The Initialisation Vector used by AES-CTR, encoded as unpadded base64.
+        std::string iv;
+        //! Required. A map from an algorithm name to a hash of the ciphertext, encoded as unpadded
+        //! base64. Clients should support the SHA-256 hash, which uses the key sha256.
+        std::map<std::string, std::string> hashes;
+        //! Required. Version of the encrypted attachments protocol. Must be v2.
+        std::string v;
+};
+
+void
+from_json(const nlohmann::json &obj, EncryptedFile &res);
+
+void
+to_json(nlohmann::json &obj, const EncryptedFile &res);
 
 } // namespace crypto
 } // namespace mtx

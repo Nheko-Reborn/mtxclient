@@ -1,8 +1,8 @@
 #include <gtest/gtest.h>
 
 #include <fstream>
+#include <variant>
 
-#include <boost/variant.hpp>
 #include <nlohmann/json.hpp>
 
 #include <mtx.hpp>
@@ -56,14 +56,14 @@ TEST(Responses, State)
 
         EXPECT_EQ(state.events.size(), 2);
 
-        auto aliases = boost::get<StateEvent<state::Aliases>>(state.events[0]);
+        auto aliases = std::get<StateEvent<state::Aliases>>(state.events[0]);
         EXPECT_EQ(aliases.event_id, "$WLGTSEFSEF:localhost");
         EXPECT_EQ(aliases.type, EventType::RoomAliases);
         EXPECT_EQ(aliases.sender, "@example:localhost");
         EXPECT_EQ(aliases.content.aliases.size(), 2);
         EXPECT_EQ(aliases.content.aliases[0], "#somewhere:localhost");
 
-        auto name = boost::get<StateEvent<state::Name>>(state.events[1]);
+        auto name = std::get<StateEvent<state::Name>>(state.events[1]);
         EXPECT_EQ(name.event_id, "$WLGTSEFSEF2:localhost");
         EXPECT_EQ(name.type, EventType::RoomName);
         EXPECT_EQ(name.sender, "@example2:localhost");
@@ -113,7 +113,7 @@ TEST(Responses, State)
 
         EXPECT_EQ(malformed_state.events.size(), 1);
 
-        name = boost::get<StateEvent<state::Name>>(malformed_state.events[0]);
+        name = std::get<StateEvent<state::Name>>(malformed_state.events[0]);
         EXPECT_EQ(name.event_id, "$WLGTSEFSEF2:localhost");
         EXPECT_EQ(name.type, EventType::RoomName);
         EXPECT_EQ(name.sender, "@example2:localhost");
@@ -312,11 +312,11 @@ TEST(Responses, InvitedRoom)
 
         EXPECT_EQ(room.invite_state.size(), 6);
 
-        auto name = boost::get<StrippedEvent<state::Name>>(room.invite_state[0]);
+        auto name = std::get<StrippedEvent<state::Name>>(room.invite_state[0]);
         EXPECT_EQ(name.type, EventType::RoomName);
         EXPECT_EQ(name.content.name, "Testing room");
 
-        auto avatar = boost::get<StrippedEvent<state::Avatar>>(room.invite_state[1]);
+        auto avatar = std::get<StrippedEvent<state::Avatar>>(room.invite_state[1]);
         EXPECT_EQ(avatar.type, EventType::RoomAvatar);
         EXPECT_EQ(avatar.content.url, "mxc://matrix.org/wdjzHdrThpqWyVArfyWmRbBx");
 }
@@ -384,10 +384,10 @@ TEST(Responses, SyncWithEncryption)
         std::string algorithm_found;
         std::string event_id;
         for (const auto &e : timeline_events) {
-                if (boost::get<StateEvent<mtx::events::state::Encryption>>(&e) != nullptr) {
-                        auto enc_event  = boost::get<StateEvent<mtx::events::state::Encryption>>(e);
-                        algorithm_found = enc_event.content.algorithm;
-                        event_id        = enc_event.event_id;
+                if (auto enc_event = std::get_if<StateEvent<mtx::events::state::Encryption>>(&e);
+                    enc_event != nullptr) {
+                        algorithm_found = enc_event->content.algorithm;
+                        event_id        = enc_event->event_id;
                 }
         }
 
@@ -457,6 +457,25 @@ TEST(Responses, Versions)
         ASSERT_THROW(Versions versions = error_data, std::invalid_argument);
 }
 
+TEST(Responses, WellKnown)
+{
+        json data = R"({
+          "m.homeserver": {
+            "base_url": "https://matrix.example.com"
+          },
+          "m.identity_server": {
+            "base_url": "https://identity.example.com"
+          },
+          "org.example.custom.property": {
+            "app_url": "https://custom.app.example.org"
+          }
+        })"_json;
+
+        WellKnown wellknown = data;
+        EXPECT_EQ(wellknown.homeserver.base_url, "https://matrix.example.com");
+        EXPECT_EQ(wellknown.identity_server->base_url, "https://identity.example.com");
+}
+
 TEST(Responses, CreateRoom)
 {
         json data = R"({"room_id" : "!sefiuhWgwghwWgh:example.com"})"_json;
@@ -475,14 +494,23 @@ TEST(Responses, Login)
           "user_id": "@cheeky_monkey:matrix.org",
           "access_token": "abc123", 
 	  "home_server": "matrix.org",
-          "device_id": "GHTYAJCE"
+          "device_id": "GHTYAJCE",
+	  "well_known": {
+	     "m.homeserver": {
+	       "base_url": "https://example.org"
+	     },
+	     "m.identity_server": {
+	       "base_url": "https://id.example.org"
+	     }
+	  }
         })"_json;
 
         Login login = data;
         EXPECT_EQ(login.user_id.to_string(), "@cheeky_monkey:matrix.org");
         EXPECT_EQ(login.access_token, "abc123");
-        EXPECT_EQ(login.home_server, "matrix.org");
         EXPECT_EQ(login.device_id, "GHTYAJCE");
+        EXPECT_EQ(login.well_known->homeserver.base_url, "https://example.org");
+        EXPECT_EQ(login.well_known->identity_server->base_url, "https://id.example.org");
 
         json data2 = R"({
           "user_id": "@cheeky_monkey:matrix.org",
@@ -493,8 +521,16 @@ TEST(Responses, Login)
         Login login2 = data2;
         EXPECT_EQ(login2.user_id.to_string(), "@cheeky_monkey:matrix.org");
         EXPECT_EQ(login2.access_token, "abc123");
-        EXPECT_EQ(login2.home_server, "matrix.org");
         EXPECT_EQ(login2.device_id, "");
+
+        json data3   = R"({
+          "user_id": "@cheeky_monkey:matrix.org",
+          "access_token": "abc123"
+        })"_json;
+        Login login3 = data3;
+        EXPECT_EQ(login3.user_id.to_string(), "@cheeky_monkey:matrix.org");
+        EXPECT_EQ(login3.access_token, "abc123");
+        EXPECT_EQ(login3.device_id, "");
 }
 
 TEST(Responses, Messages)
@@ -551,19 +587,19 @@ TEST(Responses, Messages)
         using mtx::events::msg::Text;
         using mtx::events::state::Name;
 
-        auto first_event = boost::get<RoomEvent<Text>>(messages.chunk[0]);
+        auto first_event = std::get<RoomEvent<Text>>(messages.chunk[0]);
         EXPECT_EQ(first_event.content.body, "hello world");
         EXPECT_EQ(first_event.content.msgtype, "m.text");
         EXPECT_EQ(first_event.type, mtx::events::EventType::RoomMessage);
         EXPECT_EQ(first_event.event_id, "$1444812213350496Caaaa:example.com");
 
-        auto second_event = boost::get<RoomEvent<Text>>(messages.chunk[1]);
+        auto second_event = std::get<RoomEvent<Text>>(messages.chunk[1]);
         EXPECT_EQ(second_event.content.body, "the world is big");
         EXPECT_EQ(second_event.content.msgtype, "m.text");
         EXPECT_EQ(second_event.type, mtx::events::EventType::RoomMessage);
         EXPECT_EQ(second_event.event_id, "$1444812213350496Cbbbb:example.com");
 
-        auto third_event = boost::get<StateEvent<Name>>(messages.chunk[2]);
+        auto third_event = std::get<StateEvent<Name>>(messages.chunk[2]);
         EXPECT_EQ(third_event.content.name, "New room name");
         EXPECT_EQ(third_event.type, mtx::events::EventType::RoomName);
         EXPECT_EQ(third_event.event_id, "$1444812213350496Ccccc:example.com");
@@ -615,7 +651,7 @@ TEST(Responses, Messages)
         EXPECT_EQ(messages.end, "t47409-4357353_219380_26003_2265");
         EXPECT_EQ(messages.chunk.size(), 1);
 
-        third_event = boost::get<StateEvent<Name>>(messages.chunk[0]);
+        third_event = std::get<StateEvent<Name>>(messages.chunk[0]);
         EXPECT_EQ(third_event.content.name, "New room name");
         EXPECT_EQ(third_event.type, mtx::events::EventType::RoomName);
         EXPECT_EQ(third_event.event_id, "$1444812213350496Ccccc:example.com");
@@ -721,43 +757,6 @@ TEST(Responses, Media)
 
         ContentURI res = data;
         EXPECT_EQ(res.content_uri, "mxc://example.com/AQwafuaFswefuhsfAFAgsw");
-}
-
-TEST(Responses, Register)
-{
-        json data = R"({
-          "flows": [{
-              "stages": [
-                  "m.login.recaptcha"
-              ]
-          }, {
-              "stages": [
-                  "m.login.email.identity",
-                  "m.login.recaptcha"
-              ]
-          }
-         ],
-         "params": {
-             "m.login.recaptcha": {
-                 "public_key": "6Le31_kSAAAAAK-54VKccKamtr-MFA_3WS1d_fGV"
-             }
-         },
-         "session": "kLmDGyIaqzgCeLgzVEebtNig"
-        })"_json;
-
-        RegistrationFlows res = data;
-
-        EXPECT_EQ(res.session, "kLmDGyIaqzgCeLgzVEebtNig");
-        EXPECT_EQ(res.flows.size(), 2);
-
-        auto s1 = res.flows.at(0);
-        EXPECT_EQ(s1.stages.size(), 1);
-        EXPECT_EQ(s1.stages.at(0), "m.login.recaptcha");
-
-        auto s2 = res.flows.at(1);
-        EXPECT_EQ(s2.stages.size(), 2);
-        EXPECT_EQ(s2.stages.at(0), "m.login.email.identity");
-        EXPECT_EQ(s2.stages.at(1), "m.login.recaptcha");
 }
 
 TEST(Responses, UploadKeys)
@@ -918,8 +917,93 @@ TEST(Responses, Notifications)
         EXPECT_EQ(notif.notifications.at(0).room_id, "!abcdefg:example.com");
 
         using TextEvent = mtx::events::RoomEvent<msg::Text>;
-        auto event      = boost::get<TextEvent>(notif.notifications.at(0).event);
+        auto event      = std::get<TextEvent>(notif.notifications.at(0).event);
 
         EXPECT_EQ(event.content.body, "I am a fish");
         EXPECT_EQ(event.sender, "@alice:example.com");
+}
+
+TEST(Responses, Userinteractive)
+{
+        json data =
+          R"(
+{
+  "completed": [ "example.type.foo" ],
+  "session": "YQVPFRiztSYtmsjLNQmsxTCg",
+  "flows": [
+    {
+      "stages": [
+        "m.login.recaptcha",
+        "m.login.terms",
+        "m.login.dummy"
+      ]
+    },
+    {
+      "stages": [
+        "m.login.recaptcha",
+        "m.login.terms",
+        "m.login.email.identity"
+      ]
+    }
+  ],
+  "params": {
+    "m.login.recaptcha": {
+      "public_key": "6LcgI54UAAAAABGdGmruw    6DdOocFpYVdjYBRe4zb"
+    },
+    "m.login.terms": {
+      "policies": {
+        "privacy_policy": {
+          "version": "1.0",
+          "en": {
+            "name": "Terms and Conditions",
+            "url": "https://matrix-client.matrix.org/_matrix/consent?v=1.0"
+          }
+        }
+      }
+    }
+  }
+})"_json;
+        mtx::user_interactive::Unauthorized unauthorized = data;
+
+        EXPECT_EQ(unauthorized.completed[0], "example.type.foo");
+        EXPECT_EQ(unauthorized.session, "YQVPFRiztSYtmsjLNQmsxTCg");
+        EXPECT_EQ(unauthorized.flows.size(), 2);
+        EXPECT_EQ(unauthorized.flows[0].stages[0], "m.login.recaptcha");
+        EXPECT_EQ(unauthorized.flows[0].stages[1], "m.login.terms");
+        EXPECT_EQ(unauthorized.flows[0].stages[2], "m.login.dummy");
+        EXPECT_EQ(unauthorized.flows[1].stages[0], "m.login.recaptcha");
+        EXPECT_EQ(unauthorized.flows[1].stages[1], "m.login.terms");
+        EXPECT_EQ(unauthorized.flows[1].stages[2], "m.login.email.identity");
+
+        EXPECT_EQ(std::get<mtx::user_interactive::TermsParams>(
+                    unauthorized.params[std::string{mtx::user_interactive::auth_types::terms}])
+                    .policies.size(),
+                  1);
+        EXPECT_EQ(std::get<mtx::user_interactive::TermsParams>(
+                    unauthorized.params[std::string{mtx::user_interactive::auth_types::terms}])
+                    .policies["privacy_policy"]
+                    .version,
+                  "1.0");
+        EXPECT_EQ(std::get<mtx::user_interactive::TermsParams>(
+                    unauthorized.params[std::string{mtx::user_interactive::auth_types::terms}])
+                    .policies["privacy_policy"]
+                    .langToPolicy["en"]
+                    .name,
+                  "Terms and Conditions");
+
+        json data2 = R"(
+{
+  "session": "CFNYzCbLYyGTpURjdmkIXMHc",
+  "flows": [
+    {
+      "stages": [
+        "m.login.password"
+      ]
+    }
+  ],
+  "params": {}
+})"_json;
+
+        unauthorized = data2;
+        EXPECT_EQ(unauthorized.flows[0].stages[0], mtx::user_interactive::auth_types::password);
 }

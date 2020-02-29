@@ -10,6 +10,7 @@ lcov --directory . --capture --output-file coverage.info
 # Filter out external code.
 lcov --remove coverage.info \
     '/usr/*' \
+    '*/.deps/*' \
     '*tests*' \
     --output-file coverage.info 
 

@@ -1,9 +1,14 @@
 #pragma once
 
+#if __has_include(<nlohmann/json_fwd.hpp>)
+#include <nlohmann/json_fwd.hpp>
+#else
 #include <nlohmann/json.hpp>
+#endif
+
 #include <string>
 
-using json = nlohmann::json;
+#include <mtx/events/common.hpp>
 
 namespace mtx {
 namespace events {
@@ -19,13 +24,15 @@ struct Emote
         std::string format;
         //! HTML formatted message.
         std::string formatted_body;
+        //! Relates to for rich replies
+        mtx::common::RelatesTo relates_to;
 };
 
 void
-from_json(const json &obj, Emote &content);
+from_json(const nlohmann::json &obj, Emote &content);
 
 void
-to_json(json &obj, const Emote &content);
+to_json(nlohmann::json &obj, const Emote &content);
 
 } // namespace msg
 } // namespace events

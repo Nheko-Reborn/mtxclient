@@ -5,7 +5,6 @@
 #include <new>
 
 #include <nlohmann/json.hpp>
-#include <sodium.h>
 
 #include <mtx/identifiers.hpp>
 #include <mtx/requests.hpp>
@@ -14,6 +13,7 @@
 
 #include "mtxclient/crypto/objects.hpp"
 #include "mtxclient/crypto/types.hpp"
+#include "mtxclient/crypto/utils.hpp"
 
 namespace mtx {
 namespace crypto {
@@ -54,29 +54,6 @@ private:
         std::string msg_;
 };
 
-class sodium_exception : public std::exception
-{
-public:
-        sodium_exception(std::string func, const char *msg)
-          : msg_(func + ": " + std::string(msg))
-        {}
-
-        virtual const char *what() const throw() { return msg_.c_str(); }
-
-private:
-        std::string msg_;
-};
-
-//! Create a uint8_t buffer which is initialized with random bytes.
-inline BinaryBuf
-create_buffer(std::size_t nbytes)
-{
-        auto buf = BinaryBuf(nbytes);
-        randombytes_buf(buf.data(), buf.size());
-
-        return buf;
-}
-
 template<class T>
 std::string
 pickle(typename T::olm_type *object, const std::string &key)
@@ -102,7 +79,7 @@ unpickle(const std::string &pickled, const std::string &key)
         if (ret == -1)
                 throw olm_exception("unpickle", object.get());
 
-        return std::move(object);
+        return object;
 }
 
 using OlmSessionPtr           = std::unique_ptr<OlmSession, OlmDeleter>;
@@ -252,12 +229,6 @@ encrypt_exported_sessions(const mtx::crypto::ExportedSessionKeys &keys, std::str
 
 mtx::crypto::ExportedSessionKeys
 decrypt_exported_sessions(const std::string &data, std::string pass);
-
-std::string
-base642bin(const std::string &b64);
-
-std::string
-bin2base64(const std::string &b64);
 
 BinaryBuf
 derive_key(const std::string &pass, const BinaryBuf &salt);

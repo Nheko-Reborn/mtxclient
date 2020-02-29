@@ -8,7 +8,19 @@ namespace events {
 EventType
 getEventType(const std::string &type)
 {
-        if (type == "m.room_key_request")
+        if (type == "m.key.verification.request")
+                return EventType::KeyVerificationRequest;
+        else if (type == "m.key.verification.start")
+                return EventType::KeyVerificationStart;
+        else if (type == "m.key.verification.accept")
+                return EventType::KeyVerificationAccept;
+        else if (type == "m.key.verification.key")
+                return EventType::KeyVerificationKey;
+        else if (type == "m.key.verification.key")
+                return EventType::KeyVerificationKey;
+        else if (type == "m.key.verification.cancel")
+                return EventType::KeyVerificationCancel;
+        else if (type == "m.room_key_request")
                 return EventType::RoomKeyRequest;
         else if (type == "m.room.aliases")
                 return EventType::RoomAliases;
@@ -42,10 +54,14 @@ getEventType(const std::string &type)
                 return EventType::RoomRedaction;
         else if (type == "m.room.pinned_events")
                 return EventType::RoomPinnedEvents;
+        else if (type == "m.room.tombstone")
+                return EventType::RoomTombstone;
         else if (type == "m.sticker")
                 return EventType::Sticker;
         else if (type == "m.tag")
                 return EventType::Tag;
+        else if (type == "m.push_rules")
+                return EventType::PushRules;
 
         return EventType::Unsupported;
 }
@@ -54,6 +70,18 @@ std::string
 to_string(EventType type)
 {
         switch (type) {
+        case EventType::KeyVerificationCancel:
+                return "m.key.verification.cancel";
+        case EventType::KeyVerificationRequest:
+                return "m.key.verification.request";
+        case EventType::KeyVerificationStart:
+                return "m.key.verification.start";
+        case EventType::KeyVerificationAccept:
+                return "m.key.verification.accept";
+        case EventType::KeyVerificationKey:
+                return "m.key.verification.key";
+        case EventType::KeyVerificationMac:
+                return "m.key.verification.mac";
         case EventType::RoomKeyRequest:
                 return "m.room_key_request";
         case EventType::RoomAliases:
@@ -88,10 +116,14 @@ to_string(EventType type)
                 return "m.room.redaction";
         case EventType::RoomPinnedEvents:
                 return "m.room.pinned_events";
+        case EventType::RoomTombstone:
+                return "m.room.tombstone";
         case EventType::Sticker:
                 return "m.sticker";
         case EventType::Tag:
                 return "m.tag";
+        case EventType::PushRules:
+                return "m.push_rules";
         case EventType::Unsupported:
                 return "";
         }

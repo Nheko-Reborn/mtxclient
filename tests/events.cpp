@@ -51,6 +51,7 @@ TEST(Events, Conversions)
         EXPECT_EQ("m.room.name", ns::to_string(ns::EventType::RoomName));
         EXPECT_EQ("m.room.power_levels", ns::to_string(ns::EventType::RoomPowerLevels));
         EXPECT_EQ("m.room.topic", ns::to_string(ns::EventType::RoomTopic));
+        EXPECT_EQ("m.room.tombstone", ns::to_string(ns::EventType::RoomTombstone));
         EXPECT_EQ("m.room.redaction", ns::to_string(ns::EventType::RoomRedaction));
         EXPECT_EQ("m.room.pinned_events", ns::to_string(ns::EventType::RoomPinnedEvents));
         EXPECT_EQ("m.tag", ns::to_string(ns::EventType::Tag));
@@ -179,6 +180,41 @@ TEST(StateEvents, Create)
         EXPECT_EQ(event.origin_server_ts, 1506761923948L);
         EXPECT_EQ(event.state_key, "");
         EXPECT_EQ(event.content.creator, "@mujx:matrix.org");
+
+        json example_from_spec = R"({
+            "content": {
+                "creator": "@example:example.org",
+                "m.federate": true,
+                "predecessor": {
+                    "event_id": "$something:example.org",
+                    "room_id": "!oldroom:example.org"
+                },
+                "room_version": "1"
+            },
+            "event_id": "$143273582443PhrSn:example.org",
+            "origin_server_ts": 1432735824653,
+            "room_id": "!jEsUZKDJdhlrceRyVU:example.org",
+            "sender": "@example:example.org",
+            "state_key": "",
+            "type": "m.room.create",
+            "unsigned": {
+                "age": 1234
+            }
+        })"_json;
+
+        event = example_from_spec;
+
+        EXPECT_EQ(event.type, ns::EventType::RoomCreate);
+        EXPECT_EQ(event.event_id, "$143273582443PhrSn:example.org");
+        EXPECT_EQ(event.sender, "@example:example.org");
+        EXPECT_EQ(event.unsigned_data.age, 1234);
+        EXPECT_EQ(event.origin_server_ts, 1432735824653L);
+        EXPECT_EQ(event.state_key, "");
+        EXPECT_EQ(event.content.creator, "@example:example.org");
+        EXPECT_EQ(event.content.federate, true);
+        EXPECT_EQ(event.content.room_version, "1");
+        EXPECT_EQ(event.content.predecessor->room_id, "!oldroom:example.org");
+        EXPECT_EQ(event.content.predecessor->event_id, "$something:example.org");
 }
 
 TEST(StateEvents, GuestAccess)
@@ -294,6 +330,56 @@ TEST(StateEvents, JoinRules)
         EXPECT_EQ(event.origin_server_ts, 1506761924018L);
         EXPECT_EQ(event.state_key, "");
         EXPECT_EQ(event.content.join_rule, ns::state::JoinRule::Invite);
+
+        EXPECT_EQ(data, json(event));
+
+        data = R"({
+          "origin_server_ts": 1506761924018,
+          "sender": "@mujx:matrix.org",
+          "event_id": "$15067619241414401ASocy:matrix.org",
+          "unsigned": {
+            "age": 3715756273
+	  },
+          "state_key": "",
+          "content": {
+            "join_rule": "public"
+	  },
+          "type": "m.room.join_rules"
+        })"_json;
+
+        EXPECT_EQ(data, json(ns::StateEvent<ns::state::JoinRules>(data)));
+
+        data = R"({
+          "origin_server_ts": 1506761924018,
+          "sender": "@mujx:matrix.org",
+          "event_id": "$15067619241414401ASocy:matrix.org",
+          "unsigned": {
+            "age": 3715756273
+	  },
+          "state_key": "",
+          "content": {
+            "join_rule": "knock"
+	  },
+          "type": "m.room.join_rules"
+        })"_json;
+
+        EXPECT_EQ(data, json(ns::StateEvent<ns::state::JoinRules>(data)));
+
+        data = R"({
+          "origin_server_ts": 1506761924018,
+          "sender": "@mujx:matrix.org",
+          "event_id": "$15067619241414401ASocy:matrix.org",
+          "unsigned": {
+            "age": 3715756273
+	  },
+          "state_key": "",
+          "content": {
+            "join_rule": "private"
+	  },
+          "type": "m.room.join_rules"
+        })"_json;
+
+        EXPECT_EQ(data, json(ns::StateEvent<ns::state::JoinRules>(data)));
 }
 
 TEST(StateEvents, Member)
@@ -512,6 +598,37 @@ TEST(StateEvents, PowerLevels)
         EXPECT_EQ(event.content.user_level("@not:matrix.org"), event.content.users_default);
 }
 
+TEST(StateEvents, Tombstone)
+{
+        json data = R"({
+            "content": {
+                "body": "This room has been replaced",
+                "replacement_room": "!newroom:example.org"
+            },
+            "event_id": "$143273582443PhrSn:example.org",
+            "origin_server_ts": 1432735824653,
+            "room_id": "!jEsUZKDJdhlrceRyVU:example.org",
+            "sender": "@example:example.org",
+            "state_key": "",
+            "type": "m.room.tombstone",
+            "unsigned": {
+                "age": 1234
+            }
+        })"_json;
+
+        ns::StateEvent<ns::state::Tombstone> event = data;
+
+        EXPECT_EQ(event.type, ns::EventType::RoomTombstone);
+        EXPECT_EQ(event.event_id, "$143273582443PhrSn:example.org");
+        EXPECT_EQ(event.room_id, "!jEsUZKDJdhlrceRyVU:example.org");
+        EXPECT_EQ(event.sender, "@example:example.org");
+        EXPECT_EQ(event.origin_server_ts, 1432735824653);
+        EXPECT_EQ(event.unsigned_data.age, 1234);
+        EXPECT_EQ(event.state_key, "");
+        EXPECT_EQ(event.content.body, "This room has been replaced");
+        EXPECT_EQ(event.content.replacement_room, "!newroom:example.org");
+}
+
 TEST(StateEvents, Topic)
 {
         json data = R"({
@@ -659,6 +776,31 @@ TEST(RoomEvents, Encrypted)
           "\"session_id\":\"/bHcdWPHsJLFd8dkyvG0n7q/RTDmfBIc+gC4laHJCQQ\"}");
 }
 
+TEST(ToDevice, KeyVerificationRequest)
+{
+        json request_data = R"({
+    "content": {
+        "from_device": "AliceDevice2",
+        "methods": [
+            "m.sas.v1"
+        ],
+        "timestamp": 1559598944869,
+        "transaction_id": "S0meUniqueAndOpaqueString"
+    },
+    "type": "m.key.verification.request"
+})"_json;
+
+        ns::msg::KeyVerificationRequest event = request_data;
+        EXPECT_EQ(event.from_device, "AliceDevice2");
+        EXPECT_EQ(event.type, mtx::events::EventType::KeyVerificationRequest);
+        EXPECT_EQ(event.transaction_id, "S0meUniqueAndOpaqueString");
+        EXPECT_EQ(event.methods[0], "m.sas.v1");
+        EXPECT_EQ(event.timestamp, 1559598944869);
+        EXPECT_EQ(request_data.dump(), json(event).dump());
+}
+
+// TODO: KeyVerificationStart, KeyVerificationAccept, and KeyVerificationCancel
+
 TEST(ToDevice, KeyRequest)
 {
         json request_data = R"({
@@ -736,7 +878,7 @@ TEST(Collection, Events)
 
         mtx::events::collections::TimelineEvent event = data;
 
-        ASSERT_TRUE(boost::get<ns::StateEvent<ns::state::Aliases>>(&event.data) != nullptr);
+        ASSERT_TRUE(std::get_if<ns::StateEvent<ns::state::Aliases>>(&event.data) != nullptr);
 }
 
 TEST(RoomAccountData, Tag)

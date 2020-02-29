@@ -2,11 +2,13 @@
 
 #include <mtx/errors.hpp>
 
+#include <nlohmann/json.hpp>
+
 using namespace mtx::errors;
 
 TEST(MatrixErrors, BasicError)
 {
-        json data = R"({
+        nlohmann::json data = R"({
 	  "errcode": "M_UNRECOGNIZED",
 	  "error": "Unrecognized request"
 	})"_json;
@@ -16,7 +18,7 @@ TEST(MatrixErrors, BasicError)
         EXPECT_EQ(err.errcode, ErrorCode::M_UNRECOGNIZED);
         EXPECT_EQ(err.error, "Unrecognized request");
 
-        json data2 = R"({
+        nlohmann::json data2 = R"({
 	  "errcode": "M_MISSING_TOKEN",
 	  "error": "Missing access token"
 	})"_json;

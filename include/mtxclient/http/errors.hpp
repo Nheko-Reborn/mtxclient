@@ -1,7 +1,8 @@
 #pragma once
 
 #include "mtx/errors.hpp"
-#include <boost/beast.hpp>
+#include <boost/beast/http/status.hpp>
+#include <boost/system/error_code.hpp>
 
 namespace mtx {
 namespace http {

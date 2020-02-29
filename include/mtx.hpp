@@ -26,5 +26,7 @@
 #include "mtx/events/messages/text.hpp"
 #include "mtx/events/messages/video.hpp"
 
+#include "mtx/user_interactive.hpp"
+
 #include "mtx/requests.hpp"
 #include "mtx/responses.hpp"

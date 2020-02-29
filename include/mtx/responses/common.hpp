@@ -1,13 +1,15 @@
 #pragma once
 
+#if __has_include(<nlohmann/json_fwd.hpp>)
+#include <nlohmann/json_fwd.hpp>
+#else
 #include <nlohmann/json.hpp>
+#endif
 
 #include <string>
 #include <vector>
 
 #include "mtx/events/collections.hpp"
-
-using json = nlohmann::json;
 
 namespace mtx {
 namespace responses {
@@ -43,23 +45,29 @@ using TimelineEvents        = std::vector<mtx::events::collections::TimelineEven
 using StateEvents           = std::vector<mtx::events::collections::StateEvents>;
 using StrippedEvents        = std::vector<mtx::events::collections::StrippedEvents>;
 
-void
-log_error(json::exception &err, const json &event);
+namespace states = mtx::events::state;
+namespace msgs   = mtx::events::msg;
 
 void
-log_error(std::string err, const json &event);
+log_error(nlohmann::json::exception &err, const nlohmann::json &event);
 
 void
-parse_room_account_data_events(const json &events, RoomAccountDataEvents &container);
+log_error(std::string err, const nlohmann::json &event);
 
 void
-parse_timeline_events(const json &events, TimelineEvents &container);
+parse_room_account_data_events(const nlohmann::json &events, RoomAccountDataEvents &container);
 
 void
-parse_state_events(const json &events, StateEvents &container);
+compose_timeline_events(nlohmann::json &events, const TimelineEvents &container);
 
 void
-parse_stripped_events(const json &events, StrippedEvents &container);
+parse_timeline_events(const nlohmann::json &events, TimelineEvents &container);
+
+void
+parse_state_events(const nlohmann::json &events, StateEvents &container);
+
+void
+parse_stripped_events(const nlohmann::json &events, StrippedEvents &container);
 }
 }
 }

@@ -47,7 +47,12 @@ TEST(RoomEvents, AudioMessage)
                   "size": 1563685
               },
               "msgtype": "m.audio",
-              "url": "mxc://localhost/ffed755USFFxlgbQYZGtryd"
+              "url": "mxc://localhost/ffed755USFFxlgbQYZGtryd",
+	      "m.relates_to": {
+		  "m.in_reply_to": {
+                       "event_id": "$6GKhAfJOcwNd69lgSizdcTob8z2pWQgBOZPrnsWMA1E"
+                  }
+              }
           },
           "event_id": "$143273582443PhrSn:localhost",
           "origin_server_ts": 1432735824653,
@@ -71,6 +76,8 @@ TEST(RoomEvents, AudioMessage)
         EXPECT_EQ(event.content.info.mimetype, "audio/mpeg");
         EXPECT_EQ(event.content.info.size, 1563685);
         EXPECT_EQ(event.content.info.duration, 2140786);
+        EXPECT_EQ(event.content.relates_to.in_reply_to.event_id,
+                  "$6GKhAfJOcwNd69lgSizdcTob8z2pWQgBOZPrnsWMA1E");
 }
 
 TEST(RoomEvents, EmoteMessage)
@@ -84,7 +91,12 @@ TEST(RoomEvents, EmoteMessage)
           },
           "content": {
             "body": "tests",
-            "msgtype": "m.emote"
+            "msgtype": "m.emote",
+	      "m.relates_to": {
+		  "m.in_reply_to": {
+                       "event_id": "$6GKhAfJOcwNd69lgSizdcTob8z2pWQgBOZPrnsWMA1E"
+                  }
+              }
           },
           "type": "m.room.message",
           "room_id": "!VaMCVKSVcyPtXbcMXh:matrix.org"
@@ -100,6 +112,8 @@ TEST(RoomEvents, EmoteMessage)
         EXPECT_EQ(event.unsigned_data.age, 626351821);
         EXPECT_EQ(event.content.body, "tests");
         EXPECT_EQ(event.content.msgtype, "m.emote");
+        EXPECT_EQ(event.content.relates_to.in_reply_to.event_id,
+                  "$6GKhAfJOcwNd69lgSizdcTob8z2pWQgBOZPrnsWMA1E");
 }
 
 TEST(RoomEvents, FileMessage)
@@ -119,7 +133,12 @@ TEST(RoomEvents, FileMessage)
               "size": 40565
             },
             "msgtype": "m.file",
-            "url": "mxc://matrix.org/XpxykZBESCSQnYkLKbbIKnVn"
+            "url": "mxc://matrix.org/XpxykZBESCSQnYkLKbbIKnVn",
+	      "m.relates_to": {
+		  "m.in_reply_to": {
+                       "event_id": "$6GKhAfJOcwNd69lgSizdcTob8z2pWQgBOZPrnsWMA1E"
+                  }
+              }
           },
           "type": "m.room.message",
           "room_id": "!lfoDRlNFWlvOnvkBwQ:matrix.org"
@@ -140,6 +159,88 @@ TEST(RoomEvents, FileMessage)
         EXPECT_EQ(event.content.url, "mxc://matrix.org/XpxykZBESCSQnYkLKbbIKnVn");
         EXPECT_EQ(event.content.info.mimetype, "application/pdf");
         EXPECT_EQ(event.content.info.size, 40565);
+        EXPECT_EQ(event.content.relates_to.in_reply_to.event_id,
+                  "$6GKhAfJOcwNd69lgSizdcTob8z2pWQgBOZPrnsWMA1E");
+}
+
+TEST(RoomEvents, EncryptedImageMessage)
+{
+        json data                   = R"(
+{
+  "content": {
+    "body": "something-important.jpg",
+    "file": {
+      "url": "mxc://example.org/FHyPlCeYUSFFxlgbQYZmoEoe",
+      "mimetype": "image/jpeg",
+      "v": "v2",
+      "key": {
+        "alg": "A256CTR",
+        "ext": true,
+        "k": "aWF6-32KGYaC3A_FEUCk1Bt0JA37zP0wrStgmdCaW-0",
+        "key_ops": ["encrypt","decrypt"],
+        "kty": "oct"
+      },
+      "iv": "w+sE15fzSc0AAAAAAAAAAA",
+      "hashes": {
+        "sha256": "fdSLu/YkRx3Wyh3KQabP3rd6+SFiKg5lsJZQHtkSAYA"
+      }
+    },
+    "info": {
+      "mimetype": "image/jpeg",
+      "h": 1536,
+      "size": 422018,
+      "thumbnail_file": {
+        "hashes": {
+          "sha256": "/NogKqW5bz/m8xHgFiH5haFGjCNVmUIPLzfvOhHdrxY"
+        },
+        "iv": "U+k7PfwLr6UAAAAAAAAAAA",
+        "key": {
+          "alg": "A256CTR",
+          "ext": true,
+          "k": "RMyd6zhlbifsACM1DXkCbioZ2u0SywGljTH8JmGcylg",
+          "key_ops": ["encrypt", "decrypt"],
+          "kty": "oct"
+        },
+        "mimetype": "image/jpeg",
+        "url": "mxc://example.org/pmVJxyxGlmxHposwVSlOaEOv",
+        "v": "v2"
+      },
+      "thumbnail_info": {
+        "h": 768,
+        "mimetype": "image/jpeg",
+        "size": 211009,
+        "w": 432
+      },
+      "w": 864
+    },
+    "msgtype": "m.image"
+  },
+  "event_id": "$143273582443PhrSn:example.org",
+  "origin_server_ts": 1432735824653,
+  "room_id": "!jEsUZKDJdhlrceRyVU:example.org",
+  "sender": "@example:example.org",
+  "type": "m.room.message",
+  "unsigned": {
+      "age": 1234
+  }
+})"_json;
+        RoomEvent<msg::Image> event = data;
+
+        EXPECT_EQ(event.type, EventType::RoomMessage);
+        EXPECT_EQ(event.event_id, "$143273582443PhrSn:example.org");
+        EXPECT_EQ(event.room_id, "!jEsUZKDJdhlrceRyVU:example.org");
+        EXPECT_EQ(event.sender, "@example:example.org");
+        EXPECT_EQ(event.origin_server_ts, 1432735824653L);
+        EXPECT_EQ(event.unsigned_data.age, 1234);
+
+        EXPECT_EQ(event.content.body, "something-important.jpg");
+        EXPECT_EQ(event.content.msgtype, "m.image");
+        EXPECT_EQ(event.content.url, "");
+        EXPECT_EQ(event.content.info.mimetype, "image/jpeg");
+        EXPECT_EQ(event.content.info.size, 422018);
+        EXPECT_EQ(event.content.file.value().url, "mxc://example.org/FHyPlCeYUSFFxlgbQYZmoEoe");
+        EXPECT_EQ(event.content.info.thumbnail_file.value().url,
+                  "mxc://example.org/pmVJxyxGlmxHposwVSlOaEOv");
 }
 
 TEST(RoomEvents, ImageMessage)
@@ -167,7 +268,12 @@ TEST(RoomEvents, ImageMessage)
               "size": 32573
             },
             "msgtype": "m.image",
-            "url": "mxc://kamax.io/ewDDLHYnysbHYCPViZwAEIjT"
+            "url": "mxc://kamax.io/ewDDLHYnysbHYCPViZwAEIjT",
+	      "m.relates_to": {
+		  "m.in_reply_to": {
+                       "event_id": "$6GKhAfJOcwNd69lgSizdcTob8z2pWQgBOZPrnsWMA1E"
+                  }
+              }
           },
           "type": "m.room.message",
           "room_id": "!cURbafjkfsMDVwdRDQ:matrix.org"
@@ -192,6 +298,8 @@ TEST(RoomEvents, ImageMessage)
         EXPECT_EQ(event.content.info.thumbnail_info.w, 474);
         EXPECT_EQ(event.content.info.thumbnail_info.h, 302);
         EXPECT_EQ(event.content.info.thumbnail_info.size, 33504);
+        EXPECT_EQ(event.content.relates_to.in_reply_to.event_id,
+                  "$6GKhAfJOcwNd69lgSizdcTob8z2pWQgBOZPrnsWMA1E");
 }
 
 TEST(RoomEvents, LocationMessage) {}
@@ -207,7 +315,12 @@ TEST(RoomEvents, NoticeMessage)
           },
           "content": {
             "body": "https://github.com/postmarketOS/pmbootstrap/issues/900 : Package nheko",
-            "msgtype": "m.notice"
+            "msgtype": "m.notice",
+	      "m.relates_to": {
+		  "m.in_reply_to": {
+                       "event_id": "$6GKhAfJOcwNd69lgSizdcTob8z2pWQgBOZPrnsWMA1E"
+                  }
+              }
           },
           "type": "m.room.message",
           "room_id": "!BPvgRcBVHzyFSlYkrg:matrix.org"
@@ -224,6 +337,8 @@ TEST(RoomEvents, NoticeMessage)
         EXPECT_EQ(event.content.body,
                   "https://github.com/postmarketOS/pmbootstrap/issues/900 : Package nheko");
         EXPECT_EQ(event.content.msgtype, "m.notice");
+        EXPECT_EQ(event.content.relates_to.in_reply_to.event_id,
+                  "$6GKhAfJOcwNd69lgSizdcTob8z2pWQgBOZPrnsWMA1E");
 }
 
 TEST(RoomEvents, TextMessage)
@@ -238,7 +353,12 @@ TEST(RoomEvents, TextMessage)
           },
           "content": {
             "body": "hey there",
-            "msgtype": "m.text"
+            "msgtype": "m.text",
+	      "m.relates_to": {
+		  "m.in_reply_to": {
+                       "event_id": "$6GKhAfJOcwNd69lgSizdcTob8z2pWQgBOZPrnsWMA1E"
+                  }
+              }
           },
           "type": "m.room.message",
           "room_id": "!lfoDRlNFWlvOnvkBwQ:matrix.org"
@@ -256,6 +376,8 @@ TEST(RoomEvents, TextMessage)
 
         EXPECT_EQ(event.content.body, "hey there");
         EXPECT_EQ(event.content.msgtype, "m.text");
+        EXPECT_EQ(event.content.relates_to.in_reply_to.event_id,
+                  "$6GKhAfJOcwNd69lgSizdcTob8z2pWQgBOZPrnsWMA1E");
 }
 
 TEST(RoomEvents, VideoMessage)
@@ -281,7 +403,12 @@ TEST(RoomEvents, VideoMessage)
 		  }
               },
               "msgtype": "m.video",
-              "url": "mxc://localhost/ffed755USFFxlgbQYZGtryd"
+              "url": "mxc://localhost/ffed755USFFxlgbQYZGtryd",
+	      "m.relates_to": {
+		  "m.in_reply_to": {
+                       "event_id": "$6GKhAfJOcwNd69lgSizdcTob8z2pWQgBOZPrnsWMA1E"
+                  }
+              }
           },
           "event_id": "$143273582443PhrSn:localhost",
           "origin_server_ts": 1432735824653,
@@ -310,6 +437,8 @@ TEST(RoomEvents, VideoMessage)
         EXPECT_EQ(event.content.info.thumbnail_info.h, 300);
         EXPECT_EQ(event.content.info.thumbnail_info.w, 310);
         EXPECT_EQ(event.content.info.thumbnail_info.size, 46144);
+        EXPECT_EQ(event.content.relates_to.in_reply_to.event_id,
+                  "$6GKhAfJOcwNd69lgSizdcTob8z2pWQgBOZPrnsWMA1E");
 }
 
 TEST(RoomEvents, Sticker)
@@ -331,7 +460,12 @@ TEST(RoomEvents, Sticker)
               "thumbnail_url": "mxc://matrix.org/sHhqkFCvSkFwtmvtETOtKnLP",
               "w": 140
             },
-            "url": "mxc://matrix.org/sHhqkFCvSkFwtmvtETOtKnLP"
+            "url": "mxc://matrix.org/sHhqkFCvSkFwtmvtETOtKnLP",
+	      "m.relates_to": {
+		  "m.in_reply_to": {
+                       "event_id": "$6GKhAfJOcwNd69lgSizdcTob8z2pWQgBOZPrnsWMA1E"
+                  }
+              }
           },
           "event_id": "$WLGTSEFSEF:localhost",
           "origin_server_ts": 1431961217939,
@@ -349,6 +483,8 @@ TEST(RoomEvents, Sticker)
         EXPECT_EQ(event.content.info.w, 140);
         EXPECT_EQ(event.content.info.h, 200);
         EXPECT_EQ(event.content.info.size, 73602);
+        EXPECT_EQ(event.content.relates_to.in_reply_to.event_id,
+                  "$6GKhAfJOcwNd69lgSizdcTob8z2pWQgBOZPrnsWMA1E");
 }
 
 TEST(FormattedMessages, Deserialization)
@@ -413,4 +549,48 @@ TEST(FormattedMessages, Deserialization)
         EXPECT_EQ(emote.content.msgtype, "m.emote");
         EXPECT_EQ(emote.content.format, "org.matrix.custom.html");
         EXPECT_EQ(emote.content.formatted_body, "<h1> Hello World! </h1>");
+}
+
+TEST(RoomEvents, Encrypted)
+{
+        json data = R"({
+	    "content": {
+		"algorithm": "m.megolm.v1.aes-sha2",
+		"ciphertext": "AwgAEnACgAkLmt6qF84IK++J7UDH2Za1YVchHyprqTqsg...",
+		"device_id": "RJYKSTBOIE",
+		"sender_key": "IlRMeOPX2e0MurIyfWEucYBRVOEEUMrOHqn/8mLqMjA",
+		"session_id": "X3lUlvLELLYxeTx4yOVu6UDpasGEVO0Jbu+QFnm0cKQ",
+	        "m.relates_to": {
+		    "m.in_reply_to": {
+                         "event_id": "$6GKhAfJOcwNd69lgSizdcTob8z2pWQgBOZPrnsWMA1E"
+                    }
+                }
+	    },
+	    "event_id": "$143273582443PhrSn:example.org",
+	    "origin_server_ts": 1432735824653,
+	    "room_id": "!jEsUZKDJdhlrceRyVU:example.org",
+	    "sender": "@example:example.org",
+	    "type": "m.room.encrypted",
+	    "unsigned": {
+		"age": 1234
+	    }
+	})"_json;
+
+        RoomEvent<msg::Encrypted> event = data;
+
+        EXPECT_EQ(event.type, EventType::RoomEncrypted);
+        EXPECT_EQ(event.event_id, "$143273582443PhrSn:example.org");
+        EXPECT_EQ(event.room_id, "!jEsUZKDJdhlrceRyVU:example.org");
+        EXPECT_EQ(event.sender, "@example:example.org");
+        EXPECT_EQ(event.origin_server_ts, 1432735824653L);
+        EXPECT_EQ(event.unsigned_data.age, 1234);
+        EXPECT_EQ(event.content.algorithm, "m.megolm.v1.aes-sha2");
+        EXPECT_EQ(event.content.ciphertext, "AwgAEnACgAkLmt6qF84IK++J7UDH2Za1YVchHyprqTqsg...");
+        EXPECT_EQ(event.content.device_id, "RJYKSTBOIE");
+        EXPECT_EQ(event.content.sender_key, "IlRMeOPX2e0MurIyfWEucYBRVOEEUMrOHqn/8mLqMjA");
+        EXPECT_EQ(event.content.session_id, "X3lUlvLELLYxeTx4yOVu6UDpasGEVO0Jbu+QFnm0cKQ");
+        EXPECT_EQ(event.content.relates_to.in_reply_to.event_id,
+                  "$6GKhAfJOcwNd69lgSizdcTob8z2pWQgBOZPrnsWMA1E");
+
+        EXPECT_EQ(data, json(event));
 }

@@ -1,18 +1,15 @@
-#include <string>
+#include <nlohmann/json.hpp>
 
 #include "mtx/identifiers.hpp"
 #include "mtx/responses/create_room.hpp"
-
-using json = nlohmann::json;
 
 namespace mtx {
 namespace responses {
 
 void
-from_json(const json &obj, CreateRoom &response)
+from_json(const nlohmann::json &obj, CreateRoom &response)
 {
-        using namespace mtx::identifiers;
-        response.room_id = obj.at("room_id").get<Room>();
+        response.room_id = obj.at("room_id").get<identifiers::Room>();
 }
 }
 }

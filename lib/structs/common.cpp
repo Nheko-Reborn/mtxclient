@@ -1,8 +1,11 @@
 #include "mtx/common.hpp"
 
+#include <nlohmann/json.hpp>
+
+using json = nlohmann::json;
+
 namespace mtx {
 namespace crypto {
-
 void
 from_json(const json &obj, UnsignedDeviceInfo &res)
 {
@@ -43,6 +46,46 @@ to_json(json &obj, const DeviceKeys &res)
 
         if (!res.unsigned_info.device_display_name.empty())
                 obj["unsigned"] = res.unsigned_info;
+}
+
+void
+from_json(const json &obj, JWK &res)
+{
+        res.kty     = obj.at("kty").get<std::string>();
+        res.key_ops = obj.at("key_ops").get<std::vector<std::string>>();
+        res.alg     = obj.at("alg").get<std::string>();
+        res.k       = obj.at("k").get<std::string>();
+        res.ext     = obj.at("ext").get<bool>();
+}
+
+void
+to_json(json &obj, const JWK &res)
+{
+        obj["kty"]     = res.kty;
+        obj["key_ops"] = res.key_ops;
+        obj["alg"]     = res.alg;
+        obj["k"]       = res.k;
+        obj["ext"]     = res.ext;
+}
+
+void
+from_json(const json &obj, EncryptedFile &res)
+{
+        res.url    = obj.at("url").get<std::string>();
+        res.key    = obj.at("key").get<JWK>();
+        res.iv     = obj.at("iv").get<std::string>();
+        res.hashes = obj.at("hashes").get<std::map<std::string, std::string>>();
+        res.v      = obj.at("v").get<std::string>();
+}
+
+void
+to_json(json &obj, const EncryptedFile &res)
+{
+        obj["url"]    = res.url;
+        obj["key"]    = res.key;
+        obj["iv"]     = res.iv;
+        obj["hashes"] = res.hashes;
+        obj["v"]      = res.v;
 }
 }
 }

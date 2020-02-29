@@ -2,8 +2,6 @@
 
 #include <nlohmann/json.hpp>
 
-#include <iostream>
-
 #include "mtx/events/messages/image.hpp"
 #include "mtx/identifiers.hpp"
 
@@ -14,6 +12,18 @@ namespace events {
 
 enum class EventType
 {
+        /// m.key.verification.cancel
+        KeyVerificationCancel,
+        /// m.key.verification.request
+        KeyVerificationRequest,
+        /// m.key.verification.start
+        KeyVerificationStart,
+        /// m.key.verification.accept
+        KeyVerificationAccept,
+        /// m.key.verification.key
+        KeyVerificationKey,
+        /// m.key.verification.mac
+        KeyVerificationMac,
         /// m.room_key_request
         RoomKeyRequest,
         /// m.room.aliases
@@ -48,10 +58,14 @@ enum class EventType
         RoomRedaction,
         /// m.room.pinned_events
         RoomPinnedEvents,
+        /// m.room.tombstone
+        RoomTombstone,
         // m.sticker
         Sticker,
         // m.tag
         Tag,
+        // m.push_rules
+        PushRules,
         // Unsupported event
         Unsupported,
 };
@@ -85,6 +99,24 @@ to_json(json &obj, const Event<Content> &event)
         obj["content"] = event.content;
 
         switch (event.type) {
+        case EventType::KeyVerificationStart:
+                obj["type"] = "m.key.verification.start";
+                break;
+        case EventType::KeyVerificationAccept:
+                obj["type"] = "m.key.verification.accept";
+                break;
+        case EventType::KeyVerificationMac:
+                obj["type"] = "m.key.verification.mac";
+                break;
+        case EventType::KeyVerificationKey:
+                obj["type"] = "m.key.verification.accept";
+                break;
+        case EventType::KeyVerificationCancel:
+                obj["type"] = "m.key.verification.cancel";
+                break;
+        case EventType::KeyVerificationRequest:
+                obj["type"] = "m.key.verification.request";
+                break;
         case EventType::RoomKeyRequest:
                 obj["type"] = "m.room_key_request";
                 break;
@@ -136,14 +168,20 @@ to_json(json &obj, const Event<Content> &event)
         case EventType::RoomPinnedEvents:
                 obj["type"] = "m.room.pinned_events";
                 break;
+        case EventType::RoomTombstone:
+                obj["type"] = "m.room.tombstone";
+                break;
         case EventType::Sticker:
                 obj["type"] = "m.sticker";
                 break;
         case EventType::Tag:
                 obj["type"] = "m.tag";
                 break;
+        case EventType::PushRules:
+                obj["type"] = "m.push_rules";
+                break;
         case EventType::Unsupported:
-                std::cout << "Unsupported type to serialize" << std::endl;
+        default:
                 break;
         }
 }

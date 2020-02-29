@@ -1,6 +1,10 @@
 #pragma once
 
+#if __has_include(<nlohmann/json_fwd.hpp>)
+#include <nlohmann/json_fwd.hpp>
+#else
 #include <nlohmann/json.hpp>
+#endif
 
 #include "mtx/events/collections.hpp"
 
@@ -26,6 +30,8 @@ struct Notification
 
 void
 from_json(const nlohmann::json &obj, Notification &res);
+void
+to_json(nlohmann::json &obj, const Notification &res);
 
 //! Response from the `GET /_matrix/client/r0/notifications` endpoint.
 //
@@ -44,5 +50,7 @@ struct Notifications
 
 void
 from_json(const nlohmann::json &obj, Notifications &res);
+void
+to_json(nlohmann::json &obj, const Notifications &res);
 }
 }

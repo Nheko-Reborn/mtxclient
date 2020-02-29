@@ -2,7 +2,7 @@
 
 language: cpp
 sudo: required
-dist: trusty
+dist: xenial
 
 services:
   - docker
@@ -10,30 +10,74 @@ services:
 notifications:
   email: false
 
+
 matrix:
   include:
     - os: osx
-      osx_image: xcode9
+      osx_image: xcode11.3 # for c++17
       compiler: clang
+      addons:
+        homebrew:
+          packages:
+            - clang-format
+            - ninja
+            - openssl
+          update: true
     - os: linux
       compiler: gcc
       env:
         - CXX_VERSION=g++-8
         - CC_VERSION=gcc-8
+        - CMAKE_GENERATOR=Ninja
+        - COVERAGE=ON
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - software-properties-common
+            - curl
+            - ninja-build
+            - pkg-config
+            - make
+            - g++-8
+            - unzip
+            - git
+            - libssl-dev
+            - openssl
     - os: linux
       compiler: clang
       env:
         - CXX_VERSION=clang++-6.0
         - CC_VERSION=clang-6.0
-        - COVERAGE=ON
+        - CMAKE_GENERATOR=Ninja
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-xenial-6.0
+            - sourceline: 'deb http://apt.llvm.org/xenial/ llvm-toolchain-xenial-6.0 main'
+              key_url: 'https://apt.llvm.org/llvm-snapshot.gpg.key'
+          packages:
+            - clang++-6.0
+            - clang-6.0
+            - software-properties-common
+            - curl
+            - ninja-build
+            - pkg-config
+            - make
+            - g++-8
+            - unzip
+            - git
+            - libssl-dev
+            - openssl
 
-install:
-  - |
-    if [ "$TRAVIS_OS_NAME" = "linux" ]; then 
-        docker build -t nheko-reborn/mtxclient -f Dockerfile .
-    fi
+cache:
+  directories:
+    - .deps
+    - build/_deps
 
-  - ./.ci/install.sh
+install: ./.ci/install.sh
 
 script:
   - $CXX --version
@@ -42,30 +86,13 @@ script:
   # Start the synapse server to run the tests.
   - if [ $TRAVIS_OS_NAME == linux ]; then make synapse; fi
 
-  # Build the lib and run the test suite against synapse.
-  - |
-    if [ $TRAVIS_OS_NAME == linux ]; then
-      docker run -v `pwd`:/build --net=host \
-        -e CXX_VERSION=${CXX_VERSION} \
-        -e CC_VERSION=${CC_VERSION} \
-        -e COVERAGE=${COVERAGE} \
-        -e TRAVIS_OS_NAME=${TRAVIS_OS_NAME} \
-        nheko-reborn/mtxclient \
-        /bin/bash -c "./.ci/script.sh"
-    fi
-
-  # Build the lib and run the linter.
-  - |
-    if [ $TRAVIS_OS_NAME == osx ]; then
-      ./.ci/script.sh
-    fi
+  # Build the lib and run the linter & tests.
+  - ./.ci/script.sh
 
 after_success:
   # Generate coverage report and upload report to CodeCov.
   - |
-    if [ $COVERAGE == ON ]; then
-      docker run -v `pwd`:/build \
-        --net=host nheko-reborn/mtxclient \
-        /bin/bash -c "make -C build -j1 test_coverage && ./.ci/coverage.sh" && \
-      bash <(curl -s https://codecov.io/bash) -f "!*tests*" || echo "Codecov failed"
+    if [ "$COVERAGE" == ON ]; then
+      ./.ci/coverage.sh && \
+      bash <(curl -s https://codecov.io/bash) -f build/coverage.info || echo "Codecov failed"
     fi

@@ -1,7 +1,8 @@
 #include "mtx/errors.hpp"
 
-namespace mtx {
-namespace errors {
+#include <nlohmann/json.hpp>
+
+namespace mtx::errors {
 std::string
 to_string(ErrorCode code)
 {
@@ -81,10 +82,12 @@ from_string(const std::string &code)
 }
 
 void
-from_json(const json &obj, Error &error)
+from_json(const nlohmann::json &obj, Error &error)
 {
-        error.errcode = from_string(obj.at("errcode").get<std::string>());
-        error.error   = obj.at("error").get<std::string>();
-}
+        error.errcode = from_string(obj.value("errcode", ""));
+        error.error   = obj.value("error", "");
+
+        if (obj.contains("session"))
+                error.unauthorized = obj.get<user_interactive::Unauthorized>();
 }
 }

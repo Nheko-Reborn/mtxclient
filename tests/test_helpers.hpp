@@ -3,10 +3,12 @@
 #include "gtest/gtest.h"
 #include <iostream>
 #include <limits>
+#include <random>
 #include <string>
 #include <thread>
 #include <vector>
 
+#include <mtx/responses/login.hpp>
 #include <mtxclient/http/client.hpp>
 
 inline int
@@ -58,7 +60,6 @@ inline void
 validate_login(const std::string &user, const mtx::responses::Login &res)
 {
         EXPECT_EQ(res.user_id.to_string(), user);
-        EXPECT_EQ(res.home_server, "localhost");
         ASSERT_TRUE(res.access_token.size() > 100);
         ASSERT_TRUE(res.device_id.size() > 5);
 }
@@ -70,7 +71,7 @@ get_event_ids(const std::vector<Collection> &events)
         std::vector<std::string> ids;
 
         for (const auto &e : events)
-                ids.push_back(boost::apply_visitor([](auto msg) { return msg.event_id; }, e));
+                ids.push_back(std::visit([](auto msg) { return msg.event_id; }, e));
 
         return ids;
 }

@@ -1,8 +1,21 @@
+#include "mtxclient/http/client.hpp"
+
+#include <mutex>
+#include <thread>
+
 #include <boost/algorithm/string.hpp>
 #include <boost/bind.hpp>
 #include <boost/utility/typed_in_place_factory.hpp>
 
-#include "mtxclient/http/client.hpp"
+#include <boost/asio.hpp>
+#include <boost/asio/ssl.hpp>
+#include <boost/beast.hpp>
+#include <boost/iostreams/stream.hpp>
+#include <boost/signals2.hpp>
+#include <boost/signals2/signal_type.hpp>
+#include <boost/thread/thread.hpp>
+
+#include "mtxclient/http/session.hpp"
 #include "mtxclient/utils.hpp"
 
 #include "mtx/requests.hpp"
@@ -11,29 +24,195 @@
 using namespace mtx::http;
 using namespace boost::beast;
 
+namespace mtx::http {
+struct ClientPrivate
+{
+        boost::asio::io_service ios_;
+        //! Used to prevent the event loop from shutting down.
+        std::optional<boost::asio::io_context::work> work_{ios_};
+        //! Worker threads for the requests.
+        boost::thread_group thread_group_;
+        //! SSL context for requests.
+        boost::asio::ssl::context ssl_ctx_{boost::asio::ssl::context::sslv23_client};
+        //! All the active sessions will shutdown the connection.
+        boost::signals2::signal<void()> shutdown_signal;
+};
+}
+
 Client::Client(const std::string &server, uint16_t port)
   : server_{server}
   , port_{port}
+  , p{new ClientPrivate}
 {
         using namespace boost::asio;
         const auto threads_num = std::max(1U, std::thread::hardware_concurrency());
 
         for (unsigned int i = 0; i < threads_num; ++i)
-                thread_group_.add_thread(new boost::thread([this]() { ios_.run(); }));
+                p->thread_group_.add_thread(new boost::thread([this]() { p->ios_.run(); }));
+}
+
+// call destuctor of work queue and ios first!
+Client::~Client() { p.reset(); }
+
+std::shared_ptr<Session>
+Client::create_session(TypeErasedCallback type_erased_cb)
+{
+        auto session = std::make_shared<Session>(
+          std::ref(p->ios_),
+          std::ref(p->ssl_ctx_),
+          server_,
+          port_,
+          client::utils::random_token(),
+          [type_erased_cb](
+            RequestID,
+            const boost::beast::http::response<boost::beast::http::string_body> &response,
+            const boost::system::error_code &err_code) {
+                  const auto header = response.base();
+
+                  if (err_code) {
+                          return type_erased_cb(header, "", err_code, {});
+                  }
+
+                  // Decompress the response.
+                  const auto body = client::utils::decompress(
+                    boost::iostreams::array_source{response.body().data(), response.body().size()},
+                    header["Content-Encoding"].to_string());
+
+                  type_erased_cb(header, body, err_code, response.result());
+          },
+          [type_erased_cb](RequestID, const boost::system::error_code ec) {
+                  type_erased_cb(std::nullopt, "", ec, {});
+          });
+        if (session)
+                p->shutdown_signal.connect(
+                  boost::signals2::signal<void()>::slot_type(&Session::terminate, session.get())
+                    .track_foreign(session));
+
+        return session;
+}
+
+void
+Client::shutdown()
+{
+        p->shutdown_signal();
+}
+
+void
+mtx::http::Client::post(const std::string &endpoint,
+                        const nlohmann::json &req,
+                        mtx::http::TypeErasedCallback cb,
+                        bool requires_auth,
+                        const std::string &content_type)
+{
+        auto session = create_session(cb);
+
+        if (!session)
+                return;
+
+        setup_auth(session.get(), requires_auth);
+        setup_headers<boost::beast::http::verb::post>(session.get(), req, endpoint, content_type);
+
+        session->run();
+}
+
+void
+mtx::http::Client::delete_(const std::string &endpoint, ErrCallback cb, bool requires_auth)
+{
+        auto type_erased_cb = [cb](HeaderFields,
+                                   const std::string &body,
+                                   const boost::system::error_code &err_code,
+                                   boost::beast::http::status status_code) {
+                mtx::http::ClientError client_error;
+
+                if (err_code) {
+                        client_error.error_code = err_code;
+                        return cb(client_error);
+                }
+
+                client_error.status_code = status_code;
+
+                // We only count 2xx status codes as success.
+                if (static_cast<int>(status_code) < 200 || static_cast<int>(status_code) >= 300) {
+                        // The homeserver should return an error struct.
+                        try {
+                                nlohmann::json json_error       = json::parse(body);
+                                mtx::errors::Error matrix_error = json_error;
+
+                                client_error.matrix_error = matrix_error;
+                        } catch (const nlohmann::json::exception &e) {
+                                client_error.parse_error = std::string(e.what()) + ": " + body;
+                        }
+                        return cb(client_error);
+                }
+                return cb({});
+        };
+
+        auto session = create_session(type_erased_cb);
+
+        if (!session)
+                return;
+
+        setup_auth(session.get(), requires_auth);
+        setup_headers<boost::beast::http::verb::delete_>(session.get(), "", endpoint, "");
+
+        session->run();
+}
+
+void
+mtx::http::Client::put(const std::string &endpoint,
+                       const nlohmann::json &req,
+                       mtx::http::TypeErasedCallback cb,
+                       bool requires_auth)
+{
+        auto session = create_session(cb);
+
+        if (!session)
+                return;
+
+        setup_auth(session.get(), requires_auth);
+        setup_headers<boost::beast::http::verb::put>(
+          session.get(), req, endpoint, "application/json");
+
+        session->run();
+}
+
+void
+mtx::http::Client::get(const std::string &endpoint,
+                       mtx::http::TypeErasedCallback cb,
+                       bool requires_auth,
+                       const std::string &endpoint_namespace)
+{
+        auto session = create_session(cb);
+
+        if (!session)
+                return;
+
+        setup_auth(session.get(), requires_auth);
+        setup_headers<boost::beast::http::verb::get>(
+          session.get(), client::utils::serialize(std::string{}), endpoint, "", endpoint_namespace);
+
+        session->run();
 }
 
 void
 Client::set_server(const std::string &server)
 {
+        std::string server_name = server;
+        // Remove https prefix, if it exists
+        if (boost::algorithm::starts_with(server_name, "https://"))
+                boost::algorithm::erase_first(server_name, "https://");
+        if (server_name.size() > 0 && server_name.back() == '/')
+                server_name.erase(server_name.end() - 1);
+
         // Check if the input also contains the port.
         std::vector<std::string> parts;
-        boost::split(parts, server, [](char c) { return c == ':'; });
+        boost::split(parts, server_name, [](char c) { return c == ':'; });
 
         if (parts.size() == 2 && mtx::client::utils::is_number(parts.at(1))) {
                 server_ = parts.at(0);
                 port_   = std::stoi(parts.at(1));
         } else {
-                server_ = server;
+                server_ = server_name;
         }
 }
 
@@ -43,16 +222,16 @@ Client::close(bool force)
         // We close all open connections.
         if (force) {
                 shutdown();
-                ios_.stop();
+                p->ios_.stop();
         }
 
         // Destroy work object. This allows the I/O thread to
         // exit the event loop when there are no more pending
         // asynchronous operations.
-        work_.reset();
+        p->work_.reset();
 
         // Wait for the worker threads to exit.
-        thread_group_.join_all();
+        p->thread_group_.join_all();
 }
 
 void
@@ -111,6 +290,19 @@ Client::login(const mtx::requests::Login &req, Callback<mtx::responses::Login> c
           },
           false);
 }
+
+void
+Client::well_known(Callback<mtx::responses::WellKnown> callback)
+{
+        get<mtx::responses::WellKnown>(
+          "/matrix/client",
+          [callback](const mtx::responses::WellKnown &res, HeaderFields, RequestErr err) {
+                  callback(res, err);
+          },
+          false,
+          "/.well-known");
+}
+
 void
 Client::logout(Callback<mtx::responses::Logout> callback)
 {
@@ -131,16 +323,126 @@ Client::logout(Callback<mtx::responses::Logout> callback)
 }
 
 void
-Client::notifications(uint64_t limit, Callback<mtx::responses::Notifications> cb)
+Client::notifications(uint64_t limit,
+                      const std::string &from,
+                      const std::string &only,
+                      Callback<mtx::responses::Notifications> cb)
 {
         std::map<std::string, std::string> params;
         params.emplace("limit", std::to_string(limit));
+
+        if (!from.empty()) {
+                params.emplace("from", from);
+        }
+
+        if (!only.empty()) {
+                params.emplace("only", only);
+        }
 
         get<mtx::responses::Notifications>(
           "/client/r0/notifications?" + mtx::client::utils::query_params(params),
           [cb](const mtx::responses::Notifications &res, HeaderFields, RequestErr err) {
                   cb(res, err);
           });
+}
+
+void
+Client::get_pushrules(Callback<mtx::pushrules::GlobalRuleset> cb)
+{
+        get<mtx::pushrules::GlobalRuleset>("/client/r0/pushrules/",
+                                           [cb](const mtx::pushrules::GlobalRuleset &res,
+                                                HeaderFields,
+                                                RequestErr err) { cb(res, err); });
+}
+
+void
+Client::get_pushrules(const std::string &scope,
+                      const std::string &kind,
+                      const std::string &ruleId,
+                      Callback<mtx::pushrules::PushRule> cb)
+{
+        get<mtx::pushrules::PushRule>("/client/r0/pushrules/" + scope + "/" + kind + "/" + ruleId,
+                                      [cb](const mtx::pushrules::PushRule &res,
+                                           HeaderFields,
+                                           RequestErr err) { cb(res, err); });
+}
+
+void
+Client::delete_pushrules(const std::string &scope,
+                         const std::string &kind,
+                         const std::string &ruleId,
+                         ErrCallback cb)
+{
+        delete_("/client/r0/pushrules/" + scope + "/" + kind + "/" + ruleId, cb);
+}
+
+void
+Client::put_pushrules(const std::string &scope,
+                      const std::string &kind,
+                      const std::string &ruleId,
+                      const mtx::pushrules::PushRule &rule,
+                      ErrCallback cb,
+                      const std::string &before,
+                      const std::string &after)
+{
+        std::map<std::string, std::string> params;
+
+        if (!before.empty())
+                params.emplace("before", before);
+
+        if (!after.empty())
+                params.emplace("after", after);
+
+        put<mtx::pushrules::PushRule>("/client/r0/pushrules/" + scope + "/" + kind + "/" + ruleId +
+                                        "?" + mtx::client::utils::query_params(params),
+                                      rule,
+                                      cb);
+}
+
+void
+Client::get_pushrules_enabled(const std::string &scope,
+                              const std::string &kind,
+                              const std::string &ruleId,
+                              Callback<mtx::pushrules::Enabled> cb)
+{
+        get<mtx::pushrules::Enabled>(
+          "/client/r0/pushrules/" + scope + "/" + kind + "/" + ruleId + "/enabled",
+          [cb](const mtx::pushrules::Enabled &res, HeaderFields, RequestErr err) { cb(res, err); });
+}
+
+void
+Client::put_pushrules_enabled(const std::string &scope,
+                              const std::string &kind,
+                              const std::string &ruleId,
+                              bool enabled,
+                              ErrCallback cb)
+{
+        put<mtx::pushrules::Enabled>(
+          "/client/r0/pushrules/" + scope + "/" + kind + "/" + ruleId + "/enabled", {enabled}, cb);
+}
+
+void
+Client::get_pushrules_actions(const std::string &scope,
+                              const std::string &kind,
+                              const std::string &ruleId,
+                              Callback<mtx::pushrules::actions::Actions> cb)
+{
+        get<mtx::pushrules::actions::Actions>(
+          "/client/r0/pushrules/" + scope + "/" + kind + "/" + ruleId + "/actions",
+          [cb](const mtx::pushrules::actions::Actions &res, HeaderFields, RequestErr err) {
+                  cb(res, err);
+          });
+}
+
+void
+Client::put_pushrules_actions(const std::string &scope,
+                              const std::string &kind,
+                              const std::string &ruleId,
+                              const mtx::pushrules::actions::Actions &actions,
+                              ErrCallback cb)
+{
+        put<mtx::pushrules::actions::Actions>(
+          "/client/r0/pushrules/" + scope + "/" + kind + "/" + ruleId + "/actions", actions, cb);
 }
 
 void
@@ -214,14 +516,62 @@ Client::leave_room(const std::string &room_id, Callback<nlohmann::json> callback
 void
 Client::invite_user(const std::string &room_id,
                     const std::string &user_id,
-                    Callback<mtx::responses::RoomInvite> callback)
+                    Callback<mtx::responses::RoomInvite> callback,
+                    const std::string &reason)
 {
-        mtx::requests::RoomInvite req;
+        mtx::requests::RoomMembershipChange req;
         req.user_id = user_id;
+        req.reason  = reason;
 
         auto api_path = "/client/r0/rooms/" + room_id + "/invite";
 
-        post<mtx::requests::RoomInvite, mtx::responses::RoomInvite>(api_path, req, callback);
+        post<mtx::requests::RoomMembershipChange, mtx::responses::RoomInvite>(
+          api_path, req, callback);
+}
+
+void
+Client::kick_user(const std::string &room_id,
+                  const std::string &user_id,
+                  Callback<mtx::responses::Empty> callback,
+                  const std::string &reason)
+{
+        mtx::requests::RoomMembershipChange req;
+        req.user_id = user_id;
+        req.reason  = reason;
+
+        auto api_path = "/client/r0/rooms/" + room_id + "/kick";
+
+        post<mtx::requests::RoomMembershipChange, mtx::responses::Empty>(api_path, req, callback);
+}
+
+void
+Client::ban_user(const std::string &room_id,
+                 const std::string &user_id,
+                 Callback<mtx::responses::Empty> callback,
+                 const std::string &reason)
+{
+        mtx::requests::RoomMembershipChange req;
+        req.user_id = user_id;
+        req.reason  = reason;
+
+        auto api_path = "/client/r0/rooms/" + room_id + "/ban";
+
+        post<mtx::requests::RoomMembershipChange, mtx::responses::Empty>(api_path, req, callback);
+}
+
+void
+Client::unban_user(const std::string &room_id,
+                   const std::string &user_id,
+                   Callback<mtx::responses::Empty> callback,
+                   const std::string &reason)
+{
+        mtx::requests::RoomMembershipChange req;
+        req.user_id = user_id;
+        req.reason  = reason;
+
+        auto api_path = "/client/r0/rooms/" + room_id + "/unban";
+
+        post<mtx::requests::RoomMembershipChange, mtx::responses::Empty>(api_path, req, callback);
 }
 
 void
@@ -453,26 +803,12 @@ Client::registration(const std::string &user,
 }
 
 void
-Client::flow_register(const std::string &user,
-                      const std::string &pass,
-                      Callback<mtx::responses::RegistrationFlows> callback)
+Client::registration(const std::string &user,
+                     const std::string &pass,
+                     const mtx::user_interactive::Auth &auth,
+                     Callback<mtx::responses::Register> callback)
 {
-        nlohmann::json req = {{"username", user}, {"password", pass}};
-
-        post<nlohmann::json, mtx::responses::RegistrationFlows>(
-          "/client/r0/register", req, callback, false);
-}
-
-void
-Client::flow_response(const std::string &user,
-                      const std::string &pass,
-                      const std::string &session,
-                      const std::string &flow_type,
-                      Callback<mtx::responses::Register> callback)
-{
-        nlohmann::json req = {{"username", user},
-                              {"password", pass},
-                              {"auth", {{"type", flow_type}, {"session", session}}}};
+        nlohmann::json req = {{"username", user}, {"password", pass}, {"auth", auth}};
 
         post<nlohmann::json, mtx::responses::Register>("/client/r0/register", req, callback, false);
 }

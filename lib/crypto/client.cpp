@@ -1,9 +1,13 @@
 #include <iostream>
 
+#include <openssl/aes.h>
+#include <openssl/sha.h>
+
 #include "mtxclient/crypto/client.hpp"
 #include "mtxclient/crypto/types.hpp"
+#include "mtxclient/crypto/utils.hpp"
 
-#include "sodium.h"
+#include <sodium.h>
 
 using json = nlohmann::json;
 using namespace mtx::crypto;
@@ -535,104 +539,137 @@ std::string
 mtx::crypto::encrypt_exported_sessions(const mtx::crypto::ExportedSessionKeys &keys,
                                        std::string pass)
 {
-        const auto plaintext      = json(keys).dump();
-        const auto msg_len        = plaintext.size();
-        const auto ciphertext_len = crypto_secretbox_MACBYTES + msg_len;
+        const auto plaintext = json(keys).dump();
 
-        auto nonce      = create_buffer(crypto_secretbox_NONCEBYTES);
-        auto ciphertext = create_buffer(ciphertext_len);
+        auto nonce = create_buffer(AES_BLOCK_SIZE);
 
         auto salt = create_buffer(crypto_pwhash_SALTBYTES);
-        auto key  = derive_key(pass, salt);
 
-        crypto_secretbox_easy(reinterpret_cast<unsigned char *>(ciphertext.data()),
-                              reinterpret_cast<const unsigned char *>(plaintext.data()),
-                              msg_len,
-                              nonce.data(),
-                              reinterpret_cast<const unsigned char *>(key.data()));
+        // auto key  = derive_key(pass, salt);
+        auto buf = create_buffer(64U);
 
-        // Format of the output buffer: (nonce + salt + ciphertext)
-        BinaryBuf output{nonce};
+        // crypto_secretbox_easy(reinterpret_cast<unsigned char *>(ciphertext.data()),
+        //                      reinterpret_cast<const unsigned char *>(plaintext.data()),
+        //                      msg_len,
+        //                      nonce.data(),
+        //                      reinterpret_cast<const unsigned char *>(key.data()));
+        uint32_t iterations = 100000;
+        buf                 = mtx::crypto::PBKDF2_HMAC_SHA_512(pass, salt, iterations);
+
+        BinaryBuf aes256 = BinaryBuf(buf.begin(), buf.begin() + 32);
+
+        BinaryBuf hmac256 = BinaryBuf(buf.begin() + 32, buf.begin() + (2 * 32));
+
+        auto ciphertext = mtx::crypto::AES_CTR_256_Encrypt(plaintext, aes256, nonce);
+
+        uint8_t iterationsArr[4];
+        mtx::crypto::uint32_to_uint8(iterationsArr, iterations);
+
+        // Format of the output buffer: (0x01 + salt + IV + number of rounds + ciphertext +
+        // hmac-sha-256)
+        BinaryBuf output{0x01};
         output.insert(
           output.end(), std::make_move_iterator(salt.begin()), std::make_move_iterator(salt.end()));
+        output.insert(output.end(),
+                      std::make_move_iterator(nonce.begin()),
+                      std::make_move_iterator(nonce.end()));
+        output.insert(output.end(), &iterationsArr[0], &iterationsArr[4]);
         output.insert(output.end(),
                       std::make_move_iterator(ciphertext.begin()),
                       std::make_move_iterator(ciphertext.end()));
 
-        return std::string(output.begin(), output.end());
+        // Need to hmac-sha256 our string so far, and then use that to finish making the output.
+        auto hmacSha256 = mtx::crypto::HMAC_SHA256(hmac256, output);
+
+        output.insert(output.end(),
+                      std::make_move_iterator(hmacSha256.begin()),
+                      std::make_move_iterator(hmacSha256.end()));
+        auto encrypted = std::string(output.begin(), output.end());
+
+        return encrypted;
 }
 
 mtx::crypto::ExportedSessionKeys
 mtx::crypto::decrypt_exported_sessions(const std::string &data, std::string pass)
 {
-        if (data.size() <
-            crypto_secretbox_MACBYTES + crypto_secretbox_NONCEBYTES + crypto_pwhash_SALTBYTES)
-                throw sodium_exception{"decrypt_exported_sessions", "ciphertext too small"};
+        // Parse the data into a base64 string without the header and footer
+        std::string unpacked = mtx::crypto::unpack_key_file(data);
 
-        const auto nonce_start = data.begin();
-        const auto nonce_end   = nonce_start + crypto_secretbox_NONCEBYTES;
-        auto nonce             = BinaryBuf(nonce_start, nonce_end);
+        std::string binary_str = base642bin(unpacked);
 
-        const auto salt_end = nonce_end + crypto_pwhash_SALTBYTES;
-        auto salt           = BinaryBuf(nonce_end, salt_end);
+        const auto binary_start = binary_str.begin();
+        const auto binary_end   = binary_str.end();
 
-        auto ciphertext = BinaryBuf(salt_end, data.end());
-        auto decrypted  = create_buffer(ciphertext.size() - crypto_secretbox_MACBYTES);
+        // Format version 0x01, 1 byte
+        const auto format_end = binary_start + 1;
+        auto format           = BinaryBuf(binary_start, format_end);
 
-        auto key = derive_key(pass, salt);
+        // Salt, 16 bytes
+        const auto salt_end = format_end + crypto_pwhash_SALTBYTES;
+        auto salt           = BinaryBuf(format_end, salt_end);
 
-        if (crypto_secretbox_open_easy(decrypted.data(),
-                                       reinterpret_cast<const unsigned char *>(ciphertext.data()),
-                                       ciphertext.size(),
-                                       nonce.data(),
-                                       reinterpret_cast<const unsigned char *>(key.data())) != 0)
-                throw sodium_exception{"crypto_secretbox_open_easy", "failed to decrypt"};
+        // IV, 16 bytes
+        const auto iv_end = salt_end + AES_BLOCK_SIZE;
+        auto iv           = BinaryBuf(salt_end, iv_end);
 
-        return json::parse(std::string(decrypted.begin(), decrypted.end()));
-}
+        // Number of rounds, 4 bytes
+        const auto rounds_end = iv_end + sizeof(uint32_t);
+        auto rounds_buff      = BinaryBuf(iv_end, rounds_end);
+        uint8_t rounds_arr[4];
+        std::copy(rounds_buff.begin(), rounds_buff.end(), rounds_arr);
+        uint32_t rounds;
+        mtx::crypto::uint8_to_uint32(rounds_arr, rounds);
 
-std::string
-mtx::crypto::base642bin(const std::string &b64)
-{
-        std::size_t bin_maxlen = b64.size();
-        std::size_t bin_len;
+        // Variable-length JSON object...
+        const auto json_end = binary_end - SHA256_DIGEST_LENGTH;
+        auto json           = BinaryBuf(rounds_end, json_end);
 
-        const char *max_end;
+        // HMAC of the above, 32 bytes
+        auto hmac = BinaryBuf(json_end, binary_end);
 
-        auto ciphertext = create_buffer(bin_maxlen);
+        // derive the keys
+        auto buf = mtx::crypto::PBKDF2_HMAC_SHA_512(pass, salt, rounds);
 
-        const int rc = sodium_base642bin(reinterpret_cast<unsigned char *>(ciphertext.data()),
-                                         ciphertext.size(),
-                                         b64.data(),
-                                         b64.size(),
-                                         nullptr,
-                                         &bin_len,
-                                         &max_end,
-                                         sodium_base64_VARIANT_ORIGINAL);
-        if (rc != 0)
-                throw sodium_exception{"sodium_base642bin", "encoding failed"};
+        BinaryBuf aes256 = BinaryBuf(buf.begin(), buf.begin() + 32);
 
-        if (bin_len != bin_maxlen)
-                ciphertext.resize(bin_len);
+        BinaryBuf hmac256 = BinaryBuf(buf.begin() + 32, buf.begin() + (2 * 32));
 
-        return std::string(std::make_move_iterator(ciphertext.begin()),
-                           std::make_move_iterator(ciphertext.end()));
-}
+        // get hmac and verify they match
+        auto hmacSha256 = mtx::crypto::HMAC_SHA256(hmac256, BinaryBuf(binary_start, json_end));
 
-std::string
-mtx::crypto::bin2base64(const std::string &bin)
-{
-        auto base64buf =
-          create_buffer(sodium_base64_encoded_len(bin.size(), sodium_base64_VARIANT_ORIGINAL));
+        if (hmacSha256 != hmac) {
+                throw sodium_exception{"decrypt_exported_sessions", "HMAC doesn't match"};
+        }
 
-        sodium_bin2base64(reinterpret_cast<char *>(base64buf.data()),
-                          base64buf.size(),
-                          reinterpret_cast<const unsigned char *>(bin.data()),
-                          bin.size(),
-                          sodium_base64_VARIANT_ORIGINAL);
+        const std::string ciphertext(json.begin(), json.end());
+        auto decrypted = mtx::crypto::AES_CTR_256_Decrypt(ciphertext, aes256, iv);
 
-        // Removing the null byte.
-        return std::string(base64buf.begin(), base64buf.end() - 1);
+        // TODO: Move this to a helper function for the 'old' format that
+        // nheko enabled pre-e2e key spec.
+        // std::cout << "decrypt_exported_sessions data: " << data << std::endl;
+        // if (data.size() <
+        //     crypto_secretbox_MACBYTES + crypto_secretbox_NONCEBYTES + crypto_pwhash_SALTBYTES)
+        //         throw sodium_exception{"decrypt_exported_sessions", "ciphertext too small"};
+
+        // const auto nonce_start = data.begin();
+        // const auto nonce_end   = nonce_start + crypto_secretbox_NONCEBYTES;
+        // auto nonce             = BinaryBuf(nonce_start, nonce_end);
+
+        // const auto salt_end = nonce_end + crypto_pwhash_SALTBYTES;
+        // auto salt           = BinaryBuf(nonce_end, salt_end);
+
+        // auto ciphertext = BinaryBuf(salt_end, data.end());
+        // auto decrypted  = create_buffer(ciphertext.size() - crypto_secretbox_MACBYTES);
+
+        // auto key = derive_key(pass, salt);
+
+        // if (crypto_secretbox_open_easy(decrypted.data(),
+        //                                reinterpret_cast<const unsigned char
+        //                                *>(ciphertext.data()), ciphertext.size(), nonce.data(),
+        //                                reinterpret_cast<const unsigned char *>(key.data())) != 0)
+        //         throw sodium_exception{"crypto_secretbox_open_easy", "failed to decrypt"};
+        std::string plaintext(decrypted.begin(), decrypted.end());
+        return json::parse(plaintext);
 }
 
 BinaryBuf

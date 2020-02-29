@@ -1,9 +1,12 @@
 #pragma once
 
+#if __has_include(<nlohmann/json_fwd.hpp>)
+#include <nlohmann/json_fwd.hpp>
+#else
 #include <nlohmann/json.hpp>
-#include <string>
+#endif
 
-using json = nlohmann::json;
+#include <string>
 
 namespace mtx {
 namespace events {
@@ -17,21 +20,21 @@ struct Redaction
 };
 
 void
-from_json(const json &obj, Redaction &event);
+from_json(const nlohmann::json &obj, Redaction &event);
 
 void
-to_json(json &obj, const Redaction &event);
+to_json(nlohmann::json &obj, const Redaction &event);
 
 //! Stripped out contente for redacted events.
 struct Redacted
 {};
 
 inline void
-from_json(const json &, Redacted &)
+from_json(const nlohmann::json &, Redacted &)
 {}
 
 inline void
-to_json(json &, const Redacted &)
+to_json(nlohmann::json &, const Redacted &)
 {}
 
 } // namespace msg

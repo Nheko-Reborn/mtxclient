@@ -91,9 +91,12 @@ to_json(json &obj, const DisplayName &request)
 }
 
 void
-to_json(json &obj, const RoomInvite &request)
+to_json(json &obj, const RoomMembershipChange &request)
 {
         obj["user_id"] = request.user_id;
+
+        if (!request.reason.empty())
+                obj["reason"] = request.reason;
 }
 
 void

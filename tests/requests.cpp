@@ -3,6 +3,7 @@
 #include <nlohmann/json.hpp>
 
 #include <mtx/requests.hpp>
+#include <mtx/user_interactive.hpp>
 
 using json = nlohmann::json;
 using namespace mtx::requests;
@@ -145,4 +146,140 @@ TEST(Requests, ClaimKeys)
         ASSERT_EQ(j.dump(),
                   "{\"one_time_keys\":{\"@alice:localhost\":{\"JLAFKJWSCS\":\"curve25519\"}},"
                   "\"timeout\":10000}");
+}
+
+TEST(Requests, UserInteractiveAuth)
+{
+        using namespace mtx::user_interactive;
+        // Auth pw{
+        //  .session = "<session ID>",
+        //  .content = auth::Password{.password        = "<password>",
+        //                            .identifier_type = auth::Password::IdType::UserId,
+        //                            .identifier_user = "<user_id or user localpart>"},
+        //};
+        Auth a;
+        a.session = "<session ID>";
+        auth::Password pw_content;
+        pw_content.password        = "<password>";
+        pw_content.identifier_type = auth::Password::IdType::UserId;
+        pw_content.identifier_user = "<user_id or user localpart>";
+        a.content                  = pw_content;
+
+        EXPECT_EQ(nlohmann::json(a), R"({
+  "type": "m.login.password",
+  "identifier": {
+    "type": "m.id.user",
+    "user": "<user_id or user localpart>"
+  },
+  "password": "<password>",
+  "session": "<session ID>"
+})"_json);
+
+        pw_content.identifier_type    = auth::Password::IdType::ThirdPartyId;
+        pw_content.identifier_user    = "";
+        pw_content.identifier_medium  = "<The medium of the third party identifier.>";
+        pw_content.identifier_address = "<The third party address of the user>";
+        a.content                     = pw_content;
+
+        EXPECT_EQ(nlohmann::json(a), R"({
+  "type": "m.login.password",
+  "identifier": {
+    "type": "m.id.thirdparty",
+    "medium": "<The medium of the third party identifier.>",
+    "address": "<The third party address of the user>"
+  },
+  "password": "<password>",
+  "session": "<session ID>"
+})"_json);
+
+        a.content = auth::ReCaptcha{"<captcha response>"};
+
+        EXPECT_EQ(nlohmann::json(a), R"({
+  "type": "m.login.recaptcha",
+  "response": "<captcha response>",
+  "session": "<session ID>"
+})"_json);
+
+        a.content = auth::Token{"<token>", "<client generated nonce>"};
+        EXPECT_EQ(nlohmann::json(a), R"({
+  "type": "m.login.token",
+  "token": "<token>",
+  "txn_id": "<client generated nonce>",
+  "session": "<session ID>"
+})"_json);
+
+        a.content = auth::OAuth2{};
+        EXPECT_EQ(nlohmann::json(a), R"({
+  "type": "m.login.oauth2",
+  "session": "<session ID>"
+})"_json);
+        a.content = auth::Terms{};
+        EXPECT_EQ(nlohmann::json(a), R"({
+  "type": "m.login.terms",
+  "session": "<session ID>"
+})"_json);
+        a.content = auth::Dummy{};
+        EXPECT_EQ(nlohmann::json(a), R"({
+  "type": "m.login.dummy",
+  "session": "<session ID>"
+})"_json);
+        a.content = auth::Fallback{};
+        EXPECT_EQ(nlohmann::json(a), R"({
+  "session": "<session ID>"
+})"_json);
+
+        a.content = auth::EmailIdentity{{
+          {"<identity server session id>",
+           "<identity server client secret>",
+           "<url of identity server authed with, e.g. 'matrix.org:8090'>",
+           "<access token previously registered with the identity server>"},
+        }};
+
+        EXPECT_EQ(nlohmann::json(a), R"({
+  "type": "m.login.email.identity",
+  "threepidCreds": [
+    {
+      "sid": "<identity server session id>",
+      "client_secret": "<identity server client secret>",
+      "id_server": "<url of identity server authed with, e.g. 'matrix.org:8090'>",
+      "id_access_token": "<access token previously registered with the identity server>"
+    }
+  ],
+  "session": "<session ID>"
+})"_json);
+
+        a.content = auth::MSISDN{{
+          {"<identity server session id>",
+           "<identity server client secret>",
+           "<url of identity server authed with, e.g. 'matrix.org:8090'>",
+           "<access token previously registered with the identity server>"},
+        }};
+
+        EXPECT_EQ(nlohmann::json(a), R"({
+  "type": "m.login.msisdn",
+  "threepidCreds": [
+    {
+      "sid": "<identity server session id>",
+      "client_secret": "<identity server client secret>",
+      "id_server": "<url of identity server authed with, e.g. 'matrix.org:8090'>",
+      "id_access_token": "<access token previously registered with the identity server>"
+    }
+  ],
+  "session": "<session ID>"
+})"_json);
+
+        a.content = auth::MSISDN{{
+          {"<identity server session id>", "<identity server client secret>", "", ""},
+        }};
+
+        EXPECT_EQ(nlohmann::json(a), R"({
+  "type": "m.login.msisdn",
+  "threepidCreds": [
+    {
+      "sid": "<identity server session id>",
+      "client_secret": "<identity server client secret>"
+    }
+  ],
+  "session": "<session ID>"
+})"_json);
 }

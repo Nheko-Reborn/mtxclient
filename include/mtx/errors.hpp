@@ -1,9 +1,13 @@
 #pragma once
 
+#if __has_include(<nlohmann/json_fwd.hpp>)
+#include <nlohmann/json_fwd.hpp>
+#else
 #include <nlohmann/json.hpp>
+#endif
 #include <string>
 
-using json = nlohmann::json;
+#include "user_interactive.hpp"
 
 namespace mtx {
 namespace errors {
@@ -57,12 +61,15 @@ from_string(const std::string &code);
 struct Error
 {
         //! Error code.
-        ErrorCode errcode;
+        ErrorCode errcode = {};
         //! Human readable version of the error.
         std::string error;
+
+        //! Auth flows in case of 401
+        user_interactive::Unauthorized unauthorized;
 };
 
 void
-from_json(const json &obj, Error &error);
+from_json(const nlohmann::json &obj, Error &error);
 }
 }

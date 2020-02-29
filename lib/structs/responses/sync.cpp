@@ -1,8 +1,9 @@
 #include "mtx/responses/sync.hpp"
 #include "mtx/events/collections.hpp"
+#include "mtx/log.hpp"
 #include "mtx/responses/common.hpp"
 
-#include <boost/variant.hpp>
+#include <variant>
 
 using json = nlohmann::json;
 
@@ -73,9 +74,9 @@ from_json(const json &obj, Ephemeral &ephemeral)
                                         try {
                                                 ts = uit.value().at("ts");
                                         } catch (json::type_error &) {
-                                                std::cerr
-                                                  << "mtxclient: Workaround synapse bug #4898, "
-                                                     "ignoring timestamp for m.receipt event\n";
+                                                mtx::utils::log::log_warning(
+                                                  "mtxclient: Workaround synapse bug #4898, "
+                                                  "ignoring timestamp for m.receipt event");
                                         }
                                         user_times.emplace(uit.key(), ts);
                                 }
@@ -130,11 +131,11 @@ InvitedRoom::name() const
         std::string member_name;
 
         for (const auto &event : invite_state) {
-                if (boost::get<Name>(&event) != nullptr) {
-                        room_name = boost::get<Name>(event).content.name;
-                } else if (boost::get<Member>(&event) != nullptr) {
+                if (auto e = std::get_if<Name>(&event); e != nullptr) {
+                        room_name = e->content.name;
+                } else if (auto e = std::get_if<Member>(&event); e != nullptr) {
                         if (member_name.empty())
-                                member_name = boost::get<Member>(event).content.display_name;
+                                member_name = e->content.display_name;
                 }
         }
 
@@ -154,15 +155,12 @@ InvitedRoom::avatar() const
         std::string member_avatar;
 
         for (const auto &event : invite_state) {
-                if (boost::get<Avatar>(&event) != nullptr) {
-                        auto msg    = boost::get<Avatar>(event);
-                        room_avatar = msg.content.url;
-                } else if (boost::get<Member>(&event) != nullptr) {
-                        auto msg = boost::get<Member>(event);
-
+                if (auto e = std::get_if<Avatar>(&event); e != nullptr) {
+                        room_avatar = e->content.url;
+                } else if (auto e = std::get_if<Member>(&event); e != nullptr) {
                         // Pick the first avatar.
                         if (member_avatar.empty())
-                                member_avatar = msg.content.avatar_url;
+                                member_avatar = e->content.avatar_url;
                 }
         }
 
