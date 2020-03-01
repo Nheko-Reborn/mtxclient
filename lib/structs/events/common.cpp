@@ -60,12 +60,14 @@ from_json(const json &obj, ImageInfo &info)
 void
 to_json(json &obj, const ImageInfo &info)
 {
-        obj["h"]              = info.h;
-        obj["w"]              = info.w;
-        obj["size"]           = info.size;
-        obj["mimetype"]       = info.mimetype;
-        obj["thumbnail_url"]  = info.thumbnail_url;
-        obj["thumbnail_info"] = info.thumbnail_info;
+        obj["h"]        = info.h;
+        obj["w"]        = info.w;
+        obj["size"]     = info.size;
+        obj["mimetype"] = info.mimetype;
+        if (!info.thumbnail_url.empty()) {
+                obj["thumbnail_url"]  = info.thumbnail_url;
+                obj["thumbnail_info"] = info.thumbnail_info;
+        }
         if (info.thumbnail_file)
                 obj["thumbnail_file"] = info.thumbnail_file.value();
 }
@@ -92,10 +94,12 @@ from_json(const json &obj, FileInfo &info)
 void
 to_json(json &obj, const FileInfo &info)
 {
-        obj["size"]           = info.size;
-        obj["mimetype"]       = info.mimetype;
-        obj["thumbnail_url"]  = info.thumbnail_url;
-        obj["thumbnail_info"] = info.thumbnail_info;
+        obj["size"]     = info.size;
+        obj["mimetype"] = info.mimetype;
+        if (!info.thumbnail_url.empty()) {
+                obj["thumbnail_url"]  = info.thumbnail_url;
+                obj["thumbnail_info"] = info.thumbnail_info;
+        }
         if (info.thumbnail_file)
                 obj["thumbnail_file"] = info.thumbnail_file.value();
 }

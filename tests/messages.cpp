@@ -130,7 +130,14 @@ TEST(RoomEvents, FileMessage)
             "body": "optimize.pdf",
             "info": {
               "mimetype": "application/pdf",
-              "size": 40565
+              "size": 40565,
+	      "thumbnail_info": {
+                "h": 200,
+                "mimetype": "image/png",
+                "size": 73602,
+                "w": 140
+              },
+	      "thumbnail_url": "mxc://matrix.org/XpxykZBESCSQnYkLKbbIKnVn"
             },
             "msgtype": "m.file",
             "url": "mxc://matrix.org/XpxykZBESCSQnYkLKbbIKnVn",
@@ -161,6 +168,15 @@ TEST(RoomEvents, FileMessage)
         EXPECT_EQ(event.content.info.size, 40565);
         EXPECT_EQ(event.content.relates_to.in_reply_to.event_id,
                   "$6GKhAfJOcwNd69lgSizdcTob8z2pWQgBOZPrnsWMA1E");
+
+        json withThumb = event;
+        EXPECT_EQ(withThumb["content"]["info"].count("thumbnail_url"), 1);
+        EXPECT_EQ(withThumb["content"]["info"].count("thumbnail_info"), 1);
+
+        event.content.info.thumbnail_url = "";
+        json withoutThumb                = event;
+        EXPECT_EQ(withoutThumb["content"]["info"].count("thumbnail_url"), 0);
+        EXPECT_EQ(withoutThumb["content"]["info"].count("thumbnail_info"), 0);
 }
 
 TEST(RoomEvents, EncryptedImageMessage)
@@ -300,6 +316,15 @@ TEST(RoomEvents, ImageMessage)
         EXPECT_EQ(event.content.info.thumbnail_info.size, 33504);
         EXPECT_EQ(event.content.relates_to.in_reply_to.event_id,
                   "$6GKhAfJOcwNd69lgSizdcTob8z2pWQgBOZPrnsWMA1E");
+
+        json withThumb = event;
+        EXPECT_EQ(withThumb["content"]["info"].count("thumbnail_url"), 1);
+        EXPECT_EQ(withThumb["content"]["info"].count("thumbnail_info"), 1);
+
+        event.content.info.thumbnail_url = "";
+        json withoutThumb                = event;
+        EXPECT_EQ(withoutThumb["content"]["info"].count("thumbnail_url"), 0);
+        EXPECT_EQ(withoutThumb["content"]["info"].count("thumbnail_info"), 0);
 }
 
 TEST(RoomEvents, LocationMessage) {}
