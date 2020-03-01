@@ -55,6 +55,8 @@ struct ImageInfo
         std::string mimetype;
         //! Encryption members. If present, they replace thumbnail_url.
         std::optional<crypto::EncryptedFile> thumbnail_file;
+        //! experimental blurhash, see MSC2448
+        std::string blurhash;
 };
 
 //! Deserialization method needed by @p nlohmann::json.
@@ -126,6 +128,8 @@ struct VideoInfo
         ThumbnailInfo thumbnail_info;
         //! Encryption members. If present, they replace thumbnail_url.
         std::optional<crypto::EncryptedFile> thumbnail_file;
+        //! experimental blurhash, see MSC2448
+        std::string blurhash;
 };
 
 //! Deserialization method needed by @p nlohmann::json.

@@ -55,6 +55,9 @@ from_json(const json &obj, ImageInfo &info)
 
         if (obj.find("thumbnail_file") != obj.end())
                 info.thumbnail_file = obj.at("thumbnail_file").get<crypto::EncryptedFile>();
+
+        if (obj.find("xyz.amorgan.blurhash") != obj.end())
+                info.blurhash = obj.at("xyz.amorgan.blurhash").get<std::string>();
 }
 
 void
@@ -70,6 +73,8 @@ to_json(json &obj, const ImageInfo &info)
         }
         if (info.thumbnail_file)
                 obj["thumbnail_file"] = info.thumbnail_file.value();
+        if (!info.blurhash.empty())
+                obj["xyz.amorgan.blurhash"] = info.blurhash;
 }
 
 void
@@ -151,20 +156,27 @@ from_json(const json &obj, VideoInfo &info)
 
         if (obj.find("thumbnail_file") != obj.end())
                 info.thumbnail_file = obj.at("thumbnail_file").get<crypto::EncryptedFile>();
+
+        if (obj.find("xyz.amorgan.blurhash") != obj.end())
+                info.blurhash = obj.at("xyz.amorgan.blurhash").get<std::string>();
 }
 
 void
 to_json(json &obj, const VideoInfo &info)
 {
-        obj["size"]           = info.size;
-        obj["h"]              = info.h;
-        obj["w"]              = info.w;
-        obj["duration"]       = info.duration;
-        obj["thumbnail_url"]  = info.thumbnail_url;
-        obj["thumbnail_info"] = info.thumbnail_info;
-        obj["mimetype"]       = info.mimetype;
+        obj["size"]     = info.size;
+        obj["h"]        = info.h;
+        obj["w"]        = info.w;
+        obj["duration"] = info.duration;
+        obj["mimetype"] = info.mimetype;
+        if (!info.thumbnail_url.empty()) {
+                obj["thumbnail_url"]  = info.thumbnail_url;
+                obj["thumbnail_info"] = info.thumbnail_info;
+        }
         if (info.thumbnail_file)
                 obj["thumbnail_file"] = info.thumbnail_file.value();
+        if (!info.blurhash.empty())
+                obj["xyz.amorgan.blurhash"] = info.blurhash;
 }
 
 void
