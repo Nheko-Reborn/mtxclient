@@ -9,6 +9,57 @@ namespace events {
 namespace msg {
 
 void
+to_json(json &obj, const SASMethods &method)
+{
+        switch (method) {
+        case SASMethods::Decimal:
+                obj = "decimal";
+                break;
+        case SASMethods::Emoji:
+                obj = "emoji";
+                break;
+        case SASMethods::Unsupported:
+        default:
+                obj = "unsupported";
+                break;
+        }
+}
+
+void
+from_json(const json &obj, SASMethods &method)
+{
+        if (obj.get<std::string>() == "decimal")
+                method = SASMethods::Decimal;
+        else if (obj.get<std::string>() == "emoji")
+                method = SASMethods::Emoji;
+        else
+                method = SASMethods::Unsupported;
+}
+
+void
+to_json(json &obj, const VerificationMethods &method)
+{
+        switch (method) {
+        case VerificationMethods::SASv1:
+                obj = "m.sas.v1";
+                break;
+        case VerificationMethods::Unsupported:
+        default:
+                obj = "unsupported";
+                break;
+        }
+}
+
+void
+from_json(const json &obj, VerificationMethods &method)
+{
+        if (obj.get<std::string>() == "m.sas.v1")
+                method = VerificationMethods::SASv1;
+        else
+                method = VerificationMethods::Unsupported;
+}
+
+void
 from_json(const json &obj, OlmCipherContent &msg)
 {
         msg.body = obj.at("body").get<std::string>();
@@ -87,7 +138,6 @@ void
 from_json(const json &obj, KeyRequest &event)
 {
         event.sender = obj.at("sender");
-        event.type   = mtx::events::getEventType(obj.at("type").get<std::string>());
 
         event.request_id           = obj.at("content").at("request_id");
         event.requesting_device_id = obj.at("content").at("requesting_device_id");
@@ -110,7 +160,6 @@ to_json(json &obj, const KeyRequest &event)
         obj = json::object();
 
         obj["sender"] = event.sender;
-        obj["type"]   = to_string(event.type);
 
         obj["content"] = json::object();
 
@@ -141,21 +190,123 @@ to_json(json &obj, const KeyRequest &event)
 void
 from_json(const json &obj, KeyVerificationRequest &event)
 {
-        event.from_device    = obj.at("content").at("from_device").get<std::string>();
-        event.methods        = obj.at("content").at("methods").get<std::vector<std::string>>();
-        event.timestamp      = obj.at("content").at("timestamp").get<uint64_t>();
-        event.transaction_id = obj.at("content").at("transaction_id").get<std::string>();
-        event.type           = mtx::events::getEventType(obj.at("type").get<std::string>());
+        event.from_device    = obj.at("from_device").get<std::string>();
+        event.methods        = obj.at("methods").get<std::vector<VerificationMethods>>();
+        event.timestamp      = obj.at("timestamp").get<uint64_t>();
+        event.transaction_id = obj.at("transaction_id").get<std::string>();
 }
 
 void
 to_json(json &obj, const KeyVerificationRequest &event)
 {
-        obj["content"]["from_device"]    = event.from_device;
-        obj["content"]["methods"]        = event.methods;
-        obj["content"]["timestamp"]      = event.timestamp;
-        obj["content"]["transaction_id"] = event.transaction_id;
-        obj["type"]                      = to_string(event.type);
+        obj["from_device"]    = event.from_device;
+        obj["methods"]        = event.methods;
+        obj["timestamp"]      = event.timestamp;
+        obj["transaction_id"] = event.transaction_id;
+}
+
+void
+from_json(const json &obj, KeyVerificationStart &event)
+{
+        event.from_device    = obj.at("from_device").get<std::string>();
+        event.transaction_id = obj.at("transaction_id").get<std::string>();
+        event.method         = obj.at("method").get<VerificationMethods>();
+        if (obj.count("next_method") != 0) {
+                event.next_method = obj.at("next_method").get<std::vector<std::string>>;
+        }
+        event.key_agreement_protocols =
+          obj.at("key_agreement_protocols").get<std::vector<std::string>>();
+        event.hashes = obj.at("hashes").get<std::vector<std::string>>();
+        event.message_authentication_codes =
+          obj.at("message_authentication_codes").get<std::vector<std::string>>();
+        event.short_authentication_string =
+          obj.at("short_authentication_string").get<std::vector<SASMethods>>();
+}
+
+void
+to_json(json &obj, const KeyVerificationStart &event)
+{
+        obj["from_device"]    = event.from_device;
+        obj["method"]         = event.method;
+        obj["transaction_id"] = event.transaction_id;
+        if (!event.next_method.has_value())
+                obj["next_method"] = event.next_method.value();
+        obj["key_agreement_protocols"]      = event.key_agreement_protocols;
+        obj["hashes"]                       = event.hashes;
+        obj["message_authentication_codes"] = event.message_authentication_codes;
+        obj["short_authentication_string"]  = event.short_authentication_string;
+}
+
+void
+from_json(const json &obj, KeyVerificationAccept &event)
+{
+        event.transaction_id         = obj.at("transaction_id").get<std::string>();
+        event.method                 = obj.at("method").get<VerificationMethods>();
+        event.key_agreement_protocol = obj.at("key_agreement_protocol").get<std::string>();
+        event.hash                   = obj.at("hash").get<std::string>();
+        event.message_authentication_code =
+          obj.at("message_authentication_code").get<std::string>();
+        event.short_authentication_string =
+          obj.at("short_authentication_string").get<std::vector<SASMethods>>();
+        event.commitment = obj.at("commitment").get<std::string>();
+}
+
+void
+to_json(json &obj, const KeyVerificationAccept &event)
+{
+        obj["method"]                      = event.method;
+        obj["transaction_id"]              = event.transaction_id;
+        obj["key_agreement_protocol"]      = event.key_agreement_protocol;
+        obj["hash"]                        = event.hash;
+        obj["message_authentication_code"] = event.message_authentication_code;
+        obj["short_authentication_string"] = event.short_authentication_string;
+        obj["commitment"]                  = event.commitment;
+}
+
+void
+from_json(const json &obj, KeyVerificationCancel &event)
+{
+        event.transaction_id = obj.at("transaction_id").get<std::string>();
+        event.reason         = obj.at("reason").get<std::string>();
+        event.code           = obj.at("code").get<std::string>();
+}
+
+void
+to_json(json &obj, const KeyVerificationCancel &event)
+{
+        obj["transaction_id"] = event.transaction_id;
+        obj["reason"]         = event.reason;
+        obj["code"]           = event.code;
+}
+
+void
+from_json(const json &obj, KeyVerificationKey &event)
+{
+        event.transaction_id = obj.at("transaction_id").get<std::string>();
+        event.key            = obj.at("key").get<std::string>();
+}
+
+void
+to_json(json &obj, const KeyVerificationKey &event)
+{
+        obj["transaction_id"] = event.transaction_id;
+        obj["key"]            = event.key;
+}
+
+void
+from_json(const json &obj, KeyVerificationMac &event)
+{
+        event.transaction_id = obj.at("transaction_id").get<std::string>();
+        event.mac            = obj.at("mac").get<std::map<std::string, std::string>>();
+        event.keys           = obj.at("keys").get<std::string>();
+}
+
+void
+to_json(json &obj, const KeyVerificationMac &event)
+{
+        obj["transaction_id"] = event.transaction_id;
+        obj["mac"]            = event.mac;
+        obj["keys"]           = event.keys;
 }
 
 } // namespace msg
