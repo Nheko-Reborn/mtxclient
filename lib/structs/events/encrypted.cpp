@@ -212,7 +212,7 @@ from_json(const json &obj, KeyVerificationStart &event)
         event.transaction_id = obj.at("transaction_id").get<std::string>();
         event.method         = obj.at("method").get<VerificationMethods>();
         if (obj.count("next_method") != 0) {
-                event.next_method = obj.at("next_method").get<std::vector<std::string>>;
+                event.next_method = obj.at("next_method").get<std::string>();
         }
         event.key_agreement_protocols =
           obj.at("key_agreement_protocols").get<std::vector<std::string>>();
