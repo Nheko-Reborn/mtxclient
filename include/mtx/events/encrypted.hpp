@@ -144,6 +144,8 @@ struct KeyRequest
 
         //! The user that send this event.
         std::string sender;
+        //! The type of the event.
+        mtx::events::EventType type;
 };
 
 void

@@ -962,7 +962,7 @@ TEST(ToDevice, KeyRequest)
 
         ns::msg::KeyRequest event = request_data;
         EXPECT_EQ(event.sender, "@mujx:matrix.org");
-        // EXPECT_EQ(event.type, mtx::events::EventType::RoomKeyRequest);
+        EXPECT_EQ(event.type, mtx::events::EventType::RoomKeyRequest);
         EXPECT_EQ(event.action, ns::msg::RequestAction::Request);
         EXPECT_EQ(event.algorithm, "m.megolm.v1.aes-sha2");
         EXPECT_EQ(event.room_id, "!iapLxlpZgOzqGnWkXR:matrix.org");
@@ -988,7 +988,7 @@ TEST(ToDevice, KeyCancellation)
 
         ns::msg::KeyRequest event = cancellation_data;
         EXPECT_EQ(event.sender, "@mujx:matrix.org");
-        // EXPECT_EQ(event.type, mtx::events::EventType::RoomKeyRequest);
+        EXPECT_EQ(event.type, mtx::events::EventType::RoomKeyRequest);
         EXPECT_EQ(event.action, ns::msg::RequestAction::Cancellation);
         EXPECT_EQ(event.request_id, "m1529936829480.0");
         EXPECT_EQ(event.requesting_device_id, "GGUBYESVPI");
