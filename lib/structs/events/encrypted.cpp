@@ -229,7 +229,7 @@ to_json(json &obj, const KeyVerificationStart &event)
         obj["from_device"]    = event.from_device;
         obj["method"]         = event.method;
         obj["transaction_id"] = event.transaction_id;
-        if (!event.next_method.has_value())
+        if (event.next_method.has_value())
                 obj["next_method"] = event.next_method.value();
         obj["key_agreement_protocols"]      = event.key_agreement_protocols;
         obj["hashes"]                       = event.hashes;

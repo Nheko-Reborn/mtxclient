@@ -16,8 +16,8 @@ getEventType(const std::string &type)
                 return EventType::KeyVerificationAccept;
         else if (type == "m.key.verification.key")
                 return EventType::KeyVerificationKey;
-        else if (type == "m.key.verification.key")
-                return EventType::KeyVerificationKey;
+        else if (type == "m.key.verification.mac")
+                return EventType::KeyVerificationMac;
         else if (type == "m.key.verification.cancel")
                 return EventType::KeyVerificationCancel;
         else if (type == "m.room_key_request")

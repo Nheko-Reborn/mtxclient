@@ -109,7 +109,7 @@ to_json(json &obj, const Event<Content> &event)
                 obj["type"] = "m.key.verification.mac";
                 break;
         case EventType::KeyVerificationKey:
-                obj["type"] = "m.key.verification.accept";
+                obj["type"] = "m.key.verification.key";
                 break;
         case EventType::KeyVerificationCancel:
                 obj["type"] = "m.key.verification.cancel";

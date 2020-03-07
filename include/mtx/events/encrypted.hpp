@@ -209,7 +209,7 @@ void
 from_json(const nlohmann::json &obj, KeyVerificationStart &event);
 
 void
-to_json(const KeyVerificationStart &event, nlohmann::json &obj);
+to_json(nlohmann::json &obj, const KeyVerificationStart &event);
 
 //! Implements the `m.key.verification.accept` event
 struct KeyVerificationAccept
