@@ -24,6 +24,8 @@ enum class EventType
         KeyVerificationKey,
         /// m.key.verification.mac
         KeyVerificationMac,
+        /// m.room_key
+        RoomKey,
         /// m.room_key_request
         RoomKeyRequest,
         /// m.room.aliases
@@ -117,6 +119,9 @@ to_json(json &obj, const Event<Content> &event)
         case EventType::KeyVerificationRequest:
                 obj["type"] = "m.key.verification.request";
                 break;
+        case EventType::RoomKey:
+                obj["type"] = "m.room_key";
+                break;
         case EventType::RoomKeyRequest:
                 obj["type"] = "m.room_key_request";
                 break;
@@ -192,6 +197,32 @@ from_json(const json &obj, Event<Content> &event)
 {
         event.content = obj.at("content").get<Content>();
         event.type    = getEventType(obj.at("type").get<std::string>());
+}
+
+//! Extension of the Event type for device events.
+template<class Content>
+struct DeviceEvent : public Event<Content>
+{
+        std::string sender;
+};
+
+template<class Content>
+void
+from_json(const json &obj, DeviceEvent<Content> &event)
+{
+        event.content = obj.at("content").get<Content>();
+        event.type    = getEventType(obj.at("type").get<std::string>());
+        event.sender  = obj.at("sender");
+}
+
+template<class Content>
+void
+to_json(json &obj, const DeviceEvent<Content> &event)
+{
+        Event<Content> base_event = event;
+        to_json(obj, base_event);
+
+        obj["sender"] = event.sender;
 }
 
 struct UnsignedData

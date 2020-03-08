@@ -151,6 +151,16 @@ struct DeviceLists
 void
 from_json(const nlohmann::json &obj, DeviceLists &device_lists);
 
+//! Information on to_device events in sync.
+struct ToDevice
+{
+        //!  Information on the send-to-device messages for the client device.
+        std::vector<events::collections::DeviceEvents> events;
+};
+
+void
+from_json(const nlohmann::json &obj, ToDevice &to_device);
+
 //! Response from the `GET /_matrix/client/r0/sync` endpoint.
 struct Sync
 {
@@ -159,7 +169,7 @@ struct Sync
         //! Updates to rooms.
         Rooms rooms;
         //! Information on the send-to-device messages for the client device.
-        std::vector<nlohmann::json> to_device;
+        ToDevice to_device;
         /* Presence presence; */
         /* Groups groups; */
         //! Information on end-to-end device updates,

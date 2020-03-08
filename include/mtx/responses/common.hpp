@@ -44,6 +44,7 @@ using RoomAccountDataEvents = std::vector<mtx::events::collections::RoomAccountD
 using TimelineEvents        = std::vector<mtx::events::collections::TimelineEvents>;
 using StateEvents           = std::vector<mtx::events::collections::StateEvents>;
 using StrippedEvents        = std::vector<mtx::events::collections::StrippedEvents>;
+using DeviceEvents          = std::vector<mtx::events::collections::DeviceEvents>;
 
 namespace states = mtx::events::state;
 namespace msgs   = mtx::events::msg;
@@ -68,6 +69,9 @@ parse_state_events(const nlohmann::json &events, StateEvents &container);
 
 void
 parse_stripped_events(const nlohmann::json &events, StrippedEvents &container);
+
+void
+parse_device_events(const nlohmann::json &events, DeviceEvents &container);
 }
 }
 }

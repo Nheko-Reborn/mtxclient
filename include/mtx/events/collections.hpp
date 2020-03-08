@@ -40,6 +40,18 @@ namespace account_data = mtx::events::account_data;
 namespace states       = mtx::events::state;
 namespace msgs         = mtx::events::msg;
 
+//! Collection of key verification events
+using DeviceEvents = std::variant<events::DeviceEvent<msgs::RoomKey>,
+                                  events::DeviceEvent<msgs::KeyRequest>,
+                                  events::DeviceEvent<msgs::OlmEncrypted>,
+                                  events::DeviceEvent<msgs::Encrypted>,
+                                  events::DeviceEvent<msgs::KeyVerificationRequest>,
+                                  events::DeviceEvent<msgs::KeyVerificationStart>,
+                                  events::DeviceEvent<msgs::KeyVerificationAccept>,
+                                  events::DeviceEvent<msgs::KeyVerificationCancel>,
+                                  events::DeviceEvent<msgs::KeyVerificationKey>,
+                                  events::DeviceEvent<msgs::KeyVerificationMac>>;
+
 //! Collection of room specific account data
 using RoomAccountDataEvents =
   std::variant<events::Event<account_data::Tag>, events::Event<pushrules::GlobalRuleset>>;

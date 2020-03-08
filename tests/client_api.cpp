@@ -1120,10 +1120,10 @@ TEST(ClientAPI, SendToDevice)
                 bob->sync(opts, [](const mtx::responses::Sync &res, RequestErr err) {
                         check_error(err);
 
-                        EXPECT_EQ(res.to_device.size(), 1);
+                        EXPECT_EQ(res.to_device.events.size(), 1);
 
-                        auto msg = res.to_device.at(0);
-                        EXPECT_EQ(msg.at("content").at("example_content_key"), "test");
+                        auto msg = json(res.to_device.events);
+                        EXPECT_EQ(msg.content.example_content_key, "test");
                         EXPECT_EQ(msg.at("type"), "m.test");
                         EXPECT_EQ(msg.at("sender"), "@alice:localhost");
                 });
