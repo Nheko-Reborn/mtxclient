@@ -6,6 +6,7 @@
 
 #include <gtest/gtest.h>
 
+#include "mtx/events/collections.hpp"
 #include "mtx/requests.hpp"
 #include "mtx/responses.hpp"
 #include "mtxclient/http/client.hpp"
@@ -1109,10 +1110,9 @@ TEST(ClientAPI, SendToDevice)
                 sleep();
 
         json body{{"messages",
-                   {{bob->user_id().to_string(),
-                     {{bob->device_id(), {{"example_content_key", "test"}}}}}}}};
+                   {{bob->user_id().to_string(), {{bob->device_id(), {{"sender_key", "test"}}}}}}}};
 
-        alice->send_to_device("m.test", body, [bob](RequestErr err) {
+        alice->send_to_device("m.room_key_request", body, [bob](RequestErr err) {
                 check_error(err);
 
                 SyncOpts opts;
@@ -1122,10 +1122,11 @@ TEST(ClientAPI, SendToDevice)
 
                         EXPECT_EQ(res.to_device.events.size(), 1);
 
-                        auto msg = json(res.to_device.events);
-                        EXPECT_EQ(msg.content.example_content_key, "test");
-                        EXPECT_EQ(msg.at("type"), "m.test");
-                        EXPECT_EQ(msg.at("sender"), "@alice:localhost");
+                        auto event = std::get<mtx::events::DeviceEvent<msgs::KeyRequest>>(
+                          res.to_device.events[0]);
+                        EXPECT_EQ(event.content.sender_key, "test");
+                        EXPECT_EQ(event.type, mtx::events::EventType::RoomKeyRequest);
+                        EXPECT_EQ(event.sender, "@alice:localhost");
                 });
         });
 

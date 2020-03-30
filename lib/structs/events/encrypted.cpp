@@ -137,8 +137,6 @@ to_json(json &obj, const RoomKey &event)
 void
 from_json(const json &obj, KeyRequest &event)
 {
-        event.sender               = obj.at("sender");
-        event.type                 = mtx::events::getEventType(obj.at("type").get<std::string>());
         event.request_id           = obj.at("content").at("request_id");
         event.requesting_device_id = obj.at("content").at("requesting_device_id");
 
@@ -159,8 +157,6 @@ to_json(json &obj, const KeyRequest &event)
 {
         obj = json::object();
 
-        obj["sender"]  = event.sender;
-        obj["type"]    = to_string(event.type);
         obj["content"] = json::object();
 
         obj["content"]["request_id"]           = event.request_id;

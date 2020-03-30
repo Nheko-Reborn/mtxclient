@@ -142,10 +142,10 @@ struct KeyRequest
         //! The device requesting the keys.
         std::string requesting_device_id;
 
-        //! The user that send this event.
-        std::string sender;
-        //! The type of the event.
-        mtx::events::EventType type;
+        // //! The user that send this event.
+        // std::string sender;
+        // //! The type of the event.
+        // mtx::events::EventType type;
 };
 
 void

@@ -210,8 +210,8 @@ template<class Content>
 void
 from_json(const json &obj, DeviceEvent<Content> &event)
 {
-        event.content = obj.at("content").get<Content>();
-        event.type    = getEventType(obj.at("type").get<std::string>());
+        Event<Content> base_event = event;
+        from_json(obj, base_event);
         event.sender  = obj.at("sender");
 }
 
