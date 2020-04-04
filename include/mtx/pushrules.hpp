@@ -10,7 +10,8 @@
 #include <variant>
 #include <vector>
 
-namespace mtx::pushrules {
+namespace mtx {
+namespace pushrules {
 struct PushCondition
 {
         //! Required. The kind of condition to apply. See conditions for more information on the
@@ -146,4 +147,5 @@ to_json(nlohmann::json &obj, const Enabled &enabled);
 
 void
 from_json(const nlohmann::json &obj, Enabled &enabled);
+}
 }

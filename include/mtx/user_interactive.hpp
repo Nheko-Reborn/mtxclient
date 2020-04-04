@@ -8,7 +8,8 @@
 
 #include <nlohmann/json.hpp>
 
-namespace mtx::user_interactive {
+namespace mtx {
+namespace user_interactive {
 using AuthType = std::string;
 namespace auth_types {
 constexpr std::string_view password       = "m.login.password";
@@ -164,4 +165,5 @@ struct Auth
 };
 void
 to_json(nlohmann::json &obj, const Auth &auth);
+}
 }
