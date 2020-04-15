@@ -25,8 +25,8 @@ from_json(const json &obj, State &state)
 void
 from_json(const json &obj, Timeline &timeline)
 {
-        timeline.prev_batch = obj.at("prev_batch");
-        timeline.limited    = obj.at("limited");
+        timeline.prev_batch = obj.value("prev_batch", std::string{});
+        timeline.limited    = obj.value("limited", false);
 
         utils::parse_timeline_events(obj.at("events"), timeline.events);
 }
