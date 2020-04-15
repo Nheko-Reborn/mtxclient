@@ -695,8 +695,9 @@ Client::download(const std::string &server,
 void
 Client::start_typing(const std::string &room_id, uint64_t timeout, ErrCallback callback)
 {
-        const auto api_path = "/client/r0/rooms/" + room_id + "/typing/" +
-                              mtx::client::utils::url_encode(user_id_.to_string());
+        using mtx::client::utils::url_encode;
+        const auto api_path =
+          "/client/r0/rooms/" + url_encode(room_id) + "/typing/" + url_encode(user_id_.to_string());
 
         mtx::requests::TypingNotification req;
         req.typing  = true;
@@ -708,8 +709,9 @@ Client::start_typing(const std::string &room_id, uint64_t timeout, ErrCallback c
 void
 Client::stop_typing(const std::string &room_id, ErrCallback callback)
 {
-        const auto api_path = "/client/r0/rooms/" + room_id + "/typing/" +
-                              mtx::client::utils::url_encode(user_id_.to_string());
+        using mtx::client::utils::url_encode;
+        const auto api_path =
+          "/client/r0/rooms/" + url_encode(room_id) + "/typing/" + url_encode(user_id_.to_string());
 
         mtx::requests::TypingNotification req;
         req.typing = false;
