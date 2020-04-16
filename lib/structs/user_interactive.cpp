@@ -40,7 +40,7 @@ from_json(const nlohmann::json &obj, Unauthorized &u)
         if (obj.contains("completed"))
                 u.completed = obj.at("completed").get<Stages>();
 
-        u.session = obj.at("session");
+        u.session = obj.value("session", "");
         u.flows   = obj.at("flows").get<std::vector<Flow>>();
 
         if (obj.contains("params")) {
