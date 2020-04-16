@@ -751,8 +751,8 @@ Client::messages(const MessagesOpts &opts, Callback<mtx::responses::Messages> ca
         if (!opts.filter.empty())
                 params.emplace("filter", opts.filter);
 
-        const auto api_path =
-          "/client/r0/rooms/" + opts.room_id + "/messages?" + client::utils::query_params(params);
+        const auto api_path = "/client/r0/rooms/" + mtx::client::utils::url_encode(opts.room_id) +
+                              "/messages?" + client::utils::query_params(params);
 
         get<mtx::responses::Messages>(
           api_path, [callback](const mtx::responses::Messages &res, HeaderFields, RequestErr err) {
