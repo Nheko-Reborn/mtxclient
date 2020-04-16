@@ -14,11 +14,10 @@ namespace msg {
 void
 from_json(const json &obj, Image &content)
 {
-        content.body    = obj.at("body").get<std::string>();
-        content.msgtype = obj.at("msgtype").get<std::string>();
+        content.body    = obj.value("body", "");
+        content.msgtype = obj.at("msgtype");
 
-        if (obj.find("url") != obj.end())
-                content.url = obj.at("url").get<std::string>();
+        content.url = obj.value("url", "");
 
         if (obj.find("info") != obj.end())
                 content.info = obj.at("info").get<common::ImageInfo>();
@@ -48,10 +47,9 @@ to_json(json &obj, const Image &content)
 void
 from_json(const json &obj, StickerImage &content)
 {
-        content.body = obj.at("body").get<std::string>();
+        content.body = obj.value("body", "");
 
-        if (obj.find("url") != obj.end())
-                content.url = obj.at("url").get<std::string>();
+        content.url = obj.value("url", "");
 
         if (obj.find("info") != obj.end())
                 content.info = obj.at("info").get<common::ImageInfo>();

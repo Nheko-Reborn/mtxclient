@@ -325,6 +325,62 @@ TEST(RoomEvents, ImageMessage)
         json withoutThumb                = event;
         EXPECT_EQ(withoutThumb["content"]["info"].count("thumbnail_url"), 0);
         EXPECT_EQ(withoutThumb["content"]["info"].count("thumbnail_info"), 0);
+
+        data = R"({
+          "origin_server_ts": 1510504294993,
+          "sender": "@max:kamax.io",
+          "event_id": "$15105042942524OGmZm:kamax.io",
+          "unsigned": {
+            "age": 738977
+          },
+          "content": {
+            "body": "image.png",
+            "info": {
+              "mimetype": "image/png",
+              "thumbnail_info": {
+                "mimetype": "image/png",
+                "h": null,
+                "w": null,
+                "size": null
+              },
+              "h": null,
+              "thumbnail_url": "mxc://kamax.io/IlTRDmpGMPkiwlyYUpHXSqjH",
+              "w": null,
+              "size": null
+            },
+            "msgtype": "m.image",
+            "url": "mxc://kamax.io/ewDDLHYnysbHYCPViZwAEIjT",
+	      "m.relates_to": {
+		  "m.in_reply_to": {
+                       "event_id": "$6GKhAfJOcwNd69lgSizdcTob8z2pWQgBOZPrnsWMA1E"
+                  }
+              }
+          },
+          "type": "m.room.message",
+          "room_id": "!cURbafjkfsMDVwdRDQ:matrix.org"
+        })"_json;
+
+        event = data;
+
+        EXPECT_EQ(event.type, EventType::RoomMessage);
+        EXPECT_EQ(event.event_id, "$15105042942524OGmZm:kamax.io");
+        EXPECT_EQ(event.room_id, "!cURbafjkfsMDVwdRDQ:matrix.org");
+        EXPECT_EQ(event.sender, "@max:kamax.io");
+        EXPECT_EQ(event.origin_server_ts, 1510504294993L);
+        EXPECT_EQ(event.unsigned_data.age, 738977);
+
+        EXPECT_EQ(event.content.body, "image.png");
+        EXPECT_EQ(event.content.info.mimetype, "image/png");
+        EXPECT_EQ(event.content.info.h, 0);
+        EXPECT_EQ(event.content.info.w, 0);
+        EXPECT_EQ(event.content.info.size, 0);
+        EXPECT_EQ(event.content.info.thumbnail_url, "mxc://kamax.io/IlTRDmpGMPkiwlyYUpHXSqjH");
+        EXPECT_EQ(event.content.info.thumbnail_info.mimetype, "image/png");
+        EXPECT_EQ(event.content.info.thumbnail_info.w, 0);
+        EXPECT_EQ(event.content.info.thumbnail_info.h, 0);
+        EXPECT_EQ(event.content.info.thumbnail_info.size, 0);
+        EXPECT_EQ(event.content.relates_to.in_reply_to.event_id,
+                  "$6GKhAfJOcwNd69lgSizdcTob8z2pWQgBOZPrnsWMA1E");
 }
 
 TEST(RoomEvents, LocationMessage) {}
@@ -510,6 +566,34 @@ TEST(RoomEvents, Sticker)
         EXPECT_EQ(event.content.info.size, 73602);
         EXPECT_EQ(event.content.relates_to.in_reply_to.event_id,
                   "$6GKhAfJOcwNd69lgSizdcTob8z2pWQgBOZPrnsWMA1E");
+
+        json data2     = R"({
+	  "type": "m.sticker",
+	  "sender": "masked",
+	  "content": {
+	    "msgtype": "m.sticker",
+	    "url": "mxc://devture.com/OCPxxxxxxxxxxxxxxxx",
+	    "info": {
+	      "mimetype": "image/png",
+	      "size": 16901,
+	      "h": 240,
+	      "w": 240
+	    }
+	  },
+	  "origin_server_ts": 1586985031228,
+	  "unsigned": {
+	    "age": 38
+	  },
+	  "event_id": "masked",
+	  "room_id": "!masked:devture.com"
+	})"_json;
+        Sticker event2 = data2;
+        EXPECT_EQ(event2.type, EventType::Sticker);
+        EXPECT_EQ(event2.content.body, "");
+        EXPECT_EQ(event2.content.url, "mxc://devture.com/OCPxxxxxxxxxxxxxxxx");
+        EXPECT_EQ(event2.content.info.w, 240);
+        EXPECT_EQ(event2.content.info.h, 240);
+        EXPECT_EQ(event2.content.info.size, 16901);
 }
 
 TEST(FormattedMessages, Deserialization)
