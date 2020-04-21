@@ -39,6 +39,69 @@ using TimelineEvent = mtx::events::collections::TimelineEvents;
 constexpr auto OLM_ALGO    = "m.olm.v1.curve25519-aes-sha2";
 constexpr auto STORAGE_KEY = "secret";
 
+struct DeviceEventVisitor{
+        nlohmann::json operator()(const mtx::events::DeviceEvent<mtx::events::msg::RoomKey> &roomKey)
+        {
+                json j;
+                mtx::events::to_json(j,roomKey);
+                return j;
+        }
+        nlohmann::json operator()(const mtx::events::DeviceEvent<mtx::events::msg::KeyRequest> &keyReq)
+        {
+                json j;
+                mtx::events::to_json(j,keyReq);
+                return j;
+        }
+        nlohmann::json operator()(const mtx::events::DeviceEvent<mtx::events::msg::OlmEncrypted> &olmEnc)
+        {
+                json j;
+                mtx::events::to_json(j,olmEnc);
+                return j;
+        }
+        nlohmann::json operator()(const mtx::events::DeviceEvent<mtx::events::msg::Encrypted> &enc)
+        {
+                json j;
+                mtx::events::to_json(j,enc);
+                return j;
+        }
+        nlohmann::json operator()(const mtx::events::DeviceEvent<mtx::events::msg::KeyVerificationRequest> &keyVerificationRequest)
+        {
+                json j;
+                mtx::events::to_json(j,keyVerificationRequest);
+                return j;
+        }
+        nlohmann::json operator()(const mtx::events::DeviceEvent<mtx::events::msg::KeyVerificationAccept> &keyVerificationAccept)
+        {
+                json j;
+                mtx::events::to_json(j,keyVerificationAccept);
+                return j;
+        }
+        nlohmann::json operator()(const mtx::events::DeviceEvent<mtx::events::msg::KeyVerificationStart> &keyVerificationStart)
+        {
+                json j;
+                mtx::events::to_json(j,keyVerificationStart);
+                return j;
+        }
+        nlohmann::json operator()(const mtx::events::DeviceEvent<mtx::events::msg::KeyVerificationCancel> &KeyVerificationCancel)
+        {
+                json j;
+                mtx::events::to_json(j,KeyVerificationCancel);
+                return j;
+        }
+        nlohmann::json operator()(const mtx::events::DeviceEvent<mtx::events::msg::KeyVerificationKey> &keyVerificationKey)
+        {
+                json j;
+                mtx::events::to_json(j,keyVerificationKey);
+                return j;
+        }
+        nlohmann::json operator()(const mtx::events::DeviceEvent<mtx::events::msg::KeyVerificationMac> &keyVerificationMac)
+        {
+                json j;
+                mtx::events::to_json(j,keyVerificationMac);
+                return j;
+        }
+};
+
 struct OlmCipherContent
 {
         std::string body;
@@ -94,7 +157,7 @@ void
 mark_encrypted_room(const RoomId &id);
 
 void
-handle_to_device_msgs(const std::vector<nlohmann::json> &to_device);
+handle_to_device_msgs(const mtx::responses::ToDevice &to_device);
 
 struct OutboundSessionData
 {
@@ -895,16 +958,16 @@ get_device_keys(const UserId &user)
 }
 
 void
-handle_to_device_msgs(const std::vector<nlohmann::json> &msgs)
+handle_to_device_msgs(const mtx::responses::ToDevice &msgs)
 {
-        if (!msgs.empty())
-                console->info("inspecting {} to_device messages", msgs.size());
+        if (!msgs.events.empty())
+                console->info("inspecting {} to_device messages", msgs.events.size());
 
-        for (const auto &msg : msgs) {
-                console->info(msg.dump(2));
+        for (const auto &msg : msgs.events) {
+                console->info(std::visit(DeviceEventVisitor{},msg).dump(2));
 
                 try {
-                        OlmMessage olm_msg = msg;
+                        OlmMessage olm_msg = std::visit(DeviceEventVisitor{},msg);
                         decrypt_olm_message(std::move(olm_msg));
                 } catch (const nlohmann::json::exception &e) {
                         console->warn("parsing error for olm message: {}", e.what());

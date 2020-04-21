@@ -174,5 +174,6 @@ getMessageType(const json &obj)
 
         return getMessageType(obj.at("msgtype").get<std::string>());
 }
+
 }
 }

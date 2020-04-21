@@ -6,7 +6,6 @@
 #include "mtx/identifiers.hpp"
 
 using json = nlohmann::json;
-
 namespace mtx {
 namespace events {
 
