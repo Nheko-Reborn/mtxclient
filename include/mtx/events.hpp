@@ -211,7 +211,7 @@ from_json(const json &obj, DeviceEvent<Content> &event)
 {
         Event<Content> base_event = event;
         from_json(obj, base_event);
-        event.sender  = obj.at("sender");
+        event.sender = obj.at("sender");
 }
 
 template<class Content>

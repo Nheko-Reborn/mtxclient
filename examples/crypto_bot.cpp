@@ -39,65 +39,79 @@ using TimelineEvent = mtx::events::collections::TimelineEvents;
 constexpr auto OLM_ALGO    = "m.olm.v1.curve25519-aes-sha2";
 constexpr auto STORAGE_KEY = "secret";
 
-struct DeviceEventVisitor{
-        nlohmann::json operator()(const mtx::events::DeviceEvent<mtx::events::msg::RoomKey> &roomKey)
+struct DeviceEventVisitor
+{
+        nlohmann::json operator()(
+          const mtx::events::DeviceEvent<mtx::events::msg::RoomKey> &roomKey)
         {
                 json j;
-                mtx::events::to_json(j,roomKey);
+                mtx::events::to_json(j, roomKey);
                 return j;
         }
-        nlohmann::json operator()(const mtx::events::DeviceEvent<mtx::events::msg::KeyRequest> &keyReq)
+        nlohmann::json operator()(
+          const mtx::events::DeviceEvent<mtx::events::msg::KeyRequest> &keyReq)
         {
                 json j;
-                mtx::events::to_json(j,keyReq);
+                mtx::events::to_json(j, keyReq);
                 return j;
         }
-        nlohmann::json operator()(const mtx::events::DeviceEvent<mtx::events::msg::OlmEncrypted> &olmEnc)
+        nlohmann::json operator()(
+          const mtx::events::DeviceEvent<mtx::events::msg::OlmEncrypted> &olmEnc)
         {
                 json j;
-                mtx::events::to_json(j,olmEnc);
+                mtx::events::to_json(j, olmEnc);
                 return j;
         }
         nlohmann::json operator()(const mtx::events::DeviceEvent<mtx::events::msg::Encrypted> &enc)
         {
                 json j;
-                mtx::events::to_json(j,enc);
+                mtx::events::to_json(j, enc);
                 return j;
         }
-        nlohmann::json operator()(const mtx::events::DeviceEvent<mtx::events::msg::KeyVerificationRequest> &keyVerificationRequest)
+        nlohmann::json operator()(
+          const mtx::events::DeviceEvent<mtx::events::msg::KeyVerificationRequest>
+            &keyVerificationRequest)
         {
                 json j;
-                mtx::events::to_json(j,keyVerificationRequest);
+                mtx::events::to_json(j, keyVerificationRequest);
                 return j;
         }
-        nlohmann::json operator()(const mtx::events::DeviceEvent<mtx::events::msg::KeyVerificationAccept> &keyVerificationAccept)
+        nlohmann::json operator()(
+          const mtx::events::DeviceEvent<mtx::events::msg::KeyVerificationAccept>
+            &keyVerificationAccept)
         {
                 json j;
-                mtx::events::to_json(j,keyVerificationAccept);
+                mtx::events::to_json(j, keyVerificationAccept);
                 return j;
         }
-        nlohmann::json operator()(const mtx::events::DeviceEvent<mtx::events::msg::KeyVerificationStart> &keyVerificationStart)
+        nlohmann::json operator()(
+          const mtx::events::DeviceEvent<mtx::events::msg::KeyVerificationStart>
+            &keyVerificationStart)
         {
                 json j;
-                mtx::events::to_json(j,keyVerificationStart);
+                mtx::events::to_json(j, keyVerificationStart);
                 return j;
         }
-        nlohmann::json operator()(const mtx::events::DeviceEvent<mtx::events::msg::KeyVerificationCancel> &KeyVerificationCancel)
+        nlohmann::json operator()(
+          const mtx::events::DeviceEvent<mtx::events::msg::KeyVerificationCancel>
+            &KeyVerificationCancel)
         {
                 json j;
-                mtx::events::to_json(j,KeyVerificationCancel);
+                mtx::events::to_json(j, KeyVerificationCancel);
                 return j;
         }
-        nlohmann::json operator()(const mtx::events::DeviceEvent<mtx::events::msg::KeyVerificationKey> &keyVerificationKey)
+        nlohmann::json operator()(
+          const mtx::events::DeviceEvent<mtx::events::msg::KeyVerificationKey> &keyVerificationKey)
         {
                 json j;
-                mtx::events::to_json(j,keyVerificationKey);
+                mtx::events::to_json(j, keyVerificationKey);
                 return j;
         }
-        nlohmann::json operator()(const mtx::events::DeviceEvent<mtx::events::msg::KeyVerificationMac> &keyVerificationMac)
+        nlohmann::json operator()(
+          const mtx::events::DeviceEvent<mtx::events::msg::KeyVerificationMac> &keyVerificationMac)
         {
                 json j;
-                mtx::events::to_json(j,keyVerificationMac);
+                mtx::events::to_json(j, keyVerificationMac);
                 return j;
         }
 };
@@ -964,10 +978,10 @@ handle_to_device_msgs(const mtx::responses::ToDevice &msgs)
                 console->info("inspecting {} to_device messages", msgs.events.size());
 
         for (const auto &msg : msgs.events) {
-                console->info(std::visit(DeviceEventVisitor{},msg).dump(2));
+                console->info(std::visit(DeviceEventVisitor{}, msg).dump(2));
 
                 try {
-                        OlmMessage olm_msg = std::visit(DeviceEventVisitor{},msg);
+                        OlmMessage olm_msg = std::visit(DeviceEventVisitor{}, msg);
                         decrypt_olm_message(std::move(olm_msg));
                 } catch (const nlohmann::json::exception &e) {
                         console->warn("parsing error for olm message: {}", e.what());
