@@ -10,6 +10,7 @@
 #include "mtx/requests.hpp"
 #include "mtx/responses.hpp"
 #include "mtxclient/http/client.hpp"
+#include "mtx/events/encrypted.hpp"
 
 #include "test_helpers.hpp"
 
@@ -1110,12 +1111,27 @@ TEST(ClientAPI, SendToDevice)
                 sleep();
 
         json body{{"messages",
-                   {{bob->user_id().to_string(), {{bob->device_id(), {{"sender_key", "test"}}}}}}}};
+                   {{bob->user_id().to_string(), 
+                        {{bob->device_id(), 
+                                {       
+                                        {"action","request"},
+                                        {"body",{
+                                                {"sender_key", "test"},
+                                                {"algorithm","test_algo"},
+                                                {"room_id","test_room_id"},
+                                                {"session_id","test_session_id"}
+                                        }},
+                                        {"request_id","test_request_id"},
+                                        {"requesting_device_id","test_req_id"},
+                                }
+                        }}
+                    }}
+                }};
 
         alice->send_to_device("m.room_key_request", body, [bob](RequestErr err) {
                 check_error(err);
 
-                SyncOpts opts;
+                SyncOpts opts;  
                 opts.timeout = 0;
                 bob->sync(opts, [](const mtx::responses::Sync &res, RequestErr err) {
                         check_error(err);
@@ -1124,7 +1140,13 @@ TEST(ClientAPI, SendToDevice)
 
                         auto event = std::get<mtx::events::DeviceEvent<msgs::KeyRequest>>(
                           res.to_device.events[0]);
+                        EXPECT_EQ(event.content.action,mtx::events::msg::RequestAction::Request);
                         EXPECT_EQ(event.content.sender_key, "test");
+                        EXPECT_EQ(event.content.algorithm, "test_algo");
+                        EXPECT_EQ(event.content.room_id, "test_room_id");
+                        EXPECT_EQ(event.content.session_id, "test_session_id");
+                        EXPECT_EQ(event.content.request_id, "test_request_id");
+                        EXPECT_EQ(event.content.requesting_device_id, "test_req_id");
                         EXPECT_EQ(event.type, mtx::events::EventType::RoomKeyRequest);
                         EXPECT_EQ(event.sender, "@alice:localhost");
                 });

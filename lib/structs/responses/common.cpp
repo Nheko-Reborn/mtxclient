@@ -566,7 +566,6 @@ void
 parse_device_events(const json &events,
                     std::vector<mtx::events::collections::DeviceEvents> &container)
 {
-        std::cout << events.dump() << std::endl;
         container.clear();
         container.reserve(events.size());
         for (const auto &e : events) {
