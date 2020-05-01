@@ -136,7 +136,7 @@ to_json(json &obj, const RoomKey &event)
 
 void
 from_json(const json &obj, KeyRequest &event)
-{        
+{
         event.request_id           = obj.at("request_id");
         event.requesting_device_id = obj.at("requesting_device_id");
 
