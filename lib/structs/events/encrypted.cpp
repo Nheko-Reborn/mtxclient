@@ -157,25 +157,25 @@ to_json(json &obj, const KeyRequest &event)
 {
         obj = json::object();
 
-        obj["content"] = json::object();
+        obj = json::object();
 
-        obj["content"]["request_id"]           = event.request_id;
-        obj["content"]["requesting_device_id"] = event.requesting_device_id;
+        obj["request_id"]           = event.request_id;
+        obj["requesting_device_id"] = event.requesting_device_id;
 
         switch (event.action) {
         case RequestAction::Request: {
-                obj["content"]["body"] = json::object();
+                obj["body"] = json::object();
 
-                obj["content"]["body"]["room_id"]    = event.room_id;
-                obj["content"]["body"]["sender_key"] = event.sender_key;
-                obj["content"]["body"]["session_id"] = event.session_id;
-                obj["content"]["body"]["algorithm"]  = "m.megolm.v1.aes-sha2";
+                obj["body"]["room_id"]    = event.room_id;
+                obj["body"]["sender_key"] = event.sender_key;
+                obj["body"]["session_id"] = event.session_id;
+                obj["body"]["algorithm"]  = "m.megolm.v1.aes-sha2";
 
-                obj["content"]["action"] = "request";
+                obj["action"] = "request";
                 break;
         }
         case RequestAction::Cancellation: {
-                obj["content"]["action"] = "request_cancellation";
+                obj["action"] = "request_cancellation";
                 break;
         }
         default:

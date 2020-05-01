@@ -959,18 +959,16 @@ TEST(ToDevice, KeyRequest)
         "sender": "@mujx:matrix.org",
         "type": "m.room_key_request"
 	})"_json;
-
-        ns::msg::KeyRequest event = request_data;
+        mtx::events::DeviceEvent<ns::msg::KeyRequest> event(request_data);
         EXPECT_EQ(event.sender, "@mujx:matrix.org");
         EXPECT_EQ(event.type, mtx::events::EventType::RoomKeyRequest);
-        EXPECT_EQ(event.action, ns::msg::RequestAction::Request);
-        EXPECT_EQ(event.algorithm, "m.megolm.v1.aes-sha2");
-        EXPECT_EQ(event.room_id, "!iapLxlpZgOzqGnWkXR:matrix.org");
-        EXPECT_EQ(event.sender_key, "9im1n0bSYQpnF700sXJqAAYiqGgkyRqMZRdobj0kymY");
-        EXPECT_EQ(event.session_id, "oGj6sEDraRDf+NdmvZTI7urDJk/Z+i7TX2KFLbfMGlE");
-        EXPECT_EQ(event.request_id, "m1529936829480.0");
-        EXPECT_EQ(event.requesting_device_id, "GGUBYESVPI");
-
+        EXPECT_EQ(event.content.action, ns::msg::RequestAction::Request);
+        EXPECT_EQ(event.content.algorithm, "m.megolm.v1.aes-sha2");
+        EXPECT_EQ(event.content.room_id, "!iapLxlpZgOzqGnWkXR:matrix.org");
+        EXPECT_EQ(event.content.sender_key, "9im1n0bSYQpnF700sXJqAAYiqGgkyRqMZRdobj0kymY");
+        EXPECT_EQ(event.content.session_id, "oGj6sEDraRDf+NdmvZTI7urDJk/Z+i7TX2KFLbfMGlE");
+        EXPECT_EQ(event.content.request_id, "m1529936829480.0");
+        EXPECT_EQ(event.content.requesting_device_id, "GGUBYESVPI");
         EXPECT_EQ(request_data.dump(), json(event).dump());
 }
 
@@ -986,12 +984,12 @@ TEST(ToDevice, KeyCancellation)
           "type": "m.room_key_request"
 	})"_json;
 
-        ns::msg::KeyRequest event = cancellation_data;
+        mtx::events::DeviceEvent<ns::msg::KeyRequest> event(cancellation_data);
         EXPECT_EQ(event.sender, "@mujx:matrix.org");
         EXPECT_EQ(event.type, mtx::events::EventType::RoomKeyRequest);
-        EXPECT_EQ(event.action, ns::msg::RequestAction::Cancellation);
-        EXPECT_EQ(event.request_id, "m1529936829480.0");
-        EXPECT_EQ(event.requesting_device_id, "GGUBYESVPI");
+        EXPECT_EQ(event.content.action, ns::msg::RequestAction::Cancellation);
+        EXPECT_EQ(event.content.request_id, "m1529936829480.0");
+        EXPECT_EQ(event.content.requesting_device_id, "GGUBYESVPI");
 
         EXPECT_EQ(cancellation_data.dump(), json(event).dump());
 }
