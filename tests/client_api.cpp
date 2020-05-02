@@ -1110,19 +1110,26 @@ TEST(ClientAPI, SendToDevice)
         while (alice->access_token().empty() || bob->access_token().empty())
                 sleep();
 
-        json body{{"messages",
-                   {{bob->user_id().to_string(),
-                     {{bob->device_id(),
-                       {
-                         {"action", "request"},
-                         {"body",
-                          {{"sender_key", "test"},
-                           {"algorithm", "test_algo"},
-                           {"room_id", "test_room_id"},
-                           {"session_id", "test_session_id"}}},
-                         {"request_id", "test_request_id"},
-                         {"requesting_device_id", "test_req_id"},
-                       }}}}}}};
+        mtx::requests::ToDeviceMessages request;
+        mtx::events::DeviceEvent<msgs::KeyRequest> event1;
+
+        event1.content.action               = mtx::events::msg::RequestAction::Request;
+        event1.content.sender_key           = "test";
+        event1.content.algorithm            = "m.megolm.v1.aes-sha2";
+        event1.content.room_id              = "test_room_id";
+        event1.content.session_id           = "test_session_id";
+        event1.content.request_id           = "test_request_id";
+        event1.content.requesting_device_id = "test_req_id";
+        event1.type                         = mtx::events::EventType::RoomKeyRequest;
+        event1.sender                       = "@alice:localhost";
+
+        request.events.emplace_back(event1);
+
+        request.user_id   = bob->user_id().to_string();
+        request.device_id = bob->device_id();
+
+        json body;
+        to_json(body, std::move(request));
 
         alice->send_to_device("m.room_key_request", body, [bob](RequestErr err) {
                 check_error(err);
@@ -1138,7 +1145,7 @@ TEST(ClientAPI, SendToDevice)
                           res.to_device.events[0]);
                         EXPECT_EQ(event.content.action, mtx::events::msg::RequestAction::Request);
                         EXPECT_EQ(event.content.sender_key, "test");
-                        EXPECT_EQ(event.content.algorithm, "test_algo");
+                        EXPECT_EQ(event.content.algorithm, "m.megolm.v1.aes-sha2");
                         EXPECT_EQ(event.content.room_id, "test_room_id");
                         EXPECT_EQ(event.content.session_id, "test_session_id");
                         EXPECT_EQ(event.content.request_id, "test_request_id");
