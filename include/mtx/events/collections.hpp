@@ -52,6 +52,18 @@ using DeviceEvents = std::variant<events::DeviceEvent<msgs::RoomKey>,
                                   events::DeviceEvent<msgs::KeyVerificationKey>,
                                   events::DeviceEvent<msgs::KeyVerificationMac>>;
 
+//! Collection of device event's content
+using EventContents = std::variant<msgs::RoomKey,
+                                   msgs::KeyRequest,
+                                   msgs::OlmEncrypted,
+                                   msgs::Encrypted,
+                                   msgs::KeyVerificationRequest,
+                                   msgs::KeyVerificationStart,
+                                   msgs::KeyVerificationAccept,
+                                   msgs::KeyVerificationCancel,
+                                   msgs::KeyVerificationKey,
+                                   msgs::KeyVerificationMac>;
+
 //! Collection of room specific account data
 using RoomAccountDataEvents =
   std::variant<events::Event<account_data::Tag>, events::Event<pushrules::GlobalRuleset>>;

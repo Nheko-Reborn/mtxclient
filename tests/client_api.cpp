@@ -18,6 +18,7 @@ using namespace mtx::client;
 using namespace mtx::http;
 using namespace mtx::identifiers;
 using namespace mtx::events::collections;
+using namespace mtx::requests;
 
 using namespace std;
 
@@ -1110,26 +1111,19 @@ TEST(ClientAPI, SendToDevice)
         while (alice->access_token().empty() || bob->access_token().empty())
                 sleep();
 
-        mtx::requests::ToDeviceMessages request;
-        mtx::events::DeviceEvent<msgs::KeyRequest> event1;
-
-        event1.content.action               = mtx::events::msg::RequestAction::Request;
-        event1.content.sender_key           = "test";
-        event1.content.algorithm            = "m.megolm.v1.aes-sha2";
-        event1.content.room_id              = "test_room_id";
-        event1.content.session_id           = "test_session_id";
-        event1.content.request_id           = "test_request_id";
-        event1.content.requesting_device_id = "test_req_id";
-        event1.type                         = mtx::events::EventType::RoomKeyRequest;
-        event1.sender                       = "@alice:localhost";
-
-        request.events.emplace_back(event1);
-
-        request.user_id   = bob->user_id().to_string();
-        request.device_id = bob->device_id();
-
-        json body;
-        to_json(body, std::move(request));
+        json body{{"messages",
+                   {{bob->user_id().to_string(),
+                     {{bob->device_id(),
+                       {
+                         {"action", "request"},
+                         {"body",
+                          {{"sender_key", "test"},
+                           {"algorithm", "test_algo"},
+                           {"room_id", "test_room_id"},
+                           {"session_id", "test_session_id"}}},
+                         {"request_id", "test_request_id"},
+                         {"requesting_device_id", "test_req_id"},
+                       }}}}}}};
 
         alice->send_to_device("m.room_key_request", body, [bob](RequestErr err) {
                 check_error(err);
@@ -1157,6 +1151,53 @@ TEST(ClientAPI, SendToDevice)
 
         alice->close();
         bob->close();
+}
+
+TEST(ClientAPI, NewSendToDevice)
+{
+        auto alice = std::make_shared<Client>("localhost");
+        auto bob   = std::make_shared<Client>("localhost");
+        auto carl  = std::make_shared<Client>("localhost");
+
+        alice->login("alice", "secret", &check_login);
+        bob->login("bob", "secret", &check_login);
+        carl->login("carl", "secret", &check_login);
+
+        while (alice->access_token().empty() || bob->access_token().empty())
+                sleep();
+
+        ToDeviceMessages body1;
+        ToDeviceMessages body2;
+
+        msgs::KeyRequest request1;
+
+        request1.action               = mtx::events::msg::RequestAction::Request;
+        request1.sender_key           = "test";
+        request1.algorithm            = "m.megolm.v1.aes-sha2";
+        request1.room_id              = "test_room_id";
+        request1.session_id           = "test_session_id";
+        request1.request_id           = "test_request_id";
+        request1.requesting_device_id = "test_req_id";
+
+        (body1.messages)[bob->user_id()][bob->device_id()] = request1;
+
+        msgs::KeyRequest request2;
+
+        request2.action               = mtx::events::msg::RequestAction::Cancellation;
+        request2.request_id           = "test_request_id_1";
+        request2.requesting_device_id = "test_req_id_1";
+
+        (body2.messages)[bob->user_id()][bob->device_id()] = request2;
+
+        carl->new_send_to_device(
+          "m.room.key_request", body1, [bob](RequestErr err) { check_error(err); });
+
+        alice->new_send_to_device(
+          "m.room_key_request", body2, [bob](RequestErr err) { check_error(err); });
+
+        alice->close();
+        bob->close();
+        carl->close();
 }
 
 TEST(ClientAPI, RetrieveSingleEvent)

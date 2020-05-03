@@ -57,6 +57,7 @@ class User : public ID
 public:
         template<typename Identifier>
         friend Identifier parse(const std::string &id);
+        friend bool operator<(const User &a, const User &b) { return a.id_ < b.id_; }
 
 private:
         std::string sigil = "@";

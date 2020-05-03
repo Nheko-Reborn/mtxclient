@@ -1,7 +1,10 @@
 #include "mtx/requests.hpp"
+#include "mtx/events/collections.hpp"
 #include "mtx/events/encrypted.hpp"
+#include <iostream>
 
 using json = nlohmann::json;
+using namespace mtx::events::collections;
 
 namespace mtx {
 namespace requests {
@@ -82,12 +85,17 @@ to_json(json &obj, const Login &request)
 void
 to_json(json &obj, const ToDeviceMessages &request)
 {
-        std::multimap<std::string, json> device_events;
-        for (auto event : request.events) {
-                json j_event = std::visit(mtx::events::DeviceEventVisitor{}, event);
-                device_events.insert(make_pair(request.device_id, j_event.at("content")));
+        std::map<std::string, std::map<std::string, EventContents>> j_request;
+        for (auto it = request.messages.begin(); it != request.messages.end(); it++) {
+                std::cout << it->first.to_string() << std::endl;
+                for (auto it1 = it->second.begin(); it1 != it->second.begin(); it1++) {
+                        std::cout << it1->first << std::endl;
+                        std::cout << std::visit([](auto e) { return json(e); }, it1->second).dump(2)
+                                  << std::endl;
+                        obj["messages"][it->first.to_string()][it1->first] =
+                          std::visit([](auto e) { return json(e); }, it1->second);
+                }
         }
-        obj["messages"][request.user_id] = json(device_events);
 }
 
 void
