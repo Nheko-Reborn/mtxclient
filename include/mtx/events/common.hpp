@@ -155,11 +155,30 @@ from_json(const nlohmann::json &obj, InReplyTo &in_reply_to);
 void
 to_json(nlohmann::json &obj, const InReplyTo &in_reply_to);
 
+//! Definition of rel_type for relations.
+enum class RelationType
+{
+        // m.annotation rel_type
+        Annotation,
+        // m.reference rel_type
+        Reference,
+        // m.replace rel_type
+        Replace,
+        // not one of the supported types
+        Unsupported
+};
+
+void
+from_json(const nlohmann::json &obj, RelationType &type);
+
+void
+to_json(nlohmann::json &obj, const RelationType &type);
+
 //! Relates to for reactions
 struct ReactionRelatesTo
 {
         // Type of relation
-        std::string rel_type;
+        RelationType rel_type;
         // event id being reacted to
         std::string event_id;
         // key is the reaction itself

@@ -38,7 +38,7 @@ TEST(RoomEvents, Reaction)
         EXPECT_EQ(event.content.relates_to.event_id,
                   "$oGKg0tfsnDamWPsGxUptGLWR5b8Xq6QNFFsysQNSnake");
         EXPECT_EQ(event.content.relates_to.key, "👀");
-        EXPECT_EQ(event.content.relates_to.rel_type, "m.annotation");
+        EXPECT_EQ(event.content.relates_to.rel_type, mtx::common::RelationType::Annotation);
 
         EXPECT_EQ(data.dump(), json(event).dump());
 };
