@@ -100,7 +100,7 @@ from_json(const json &obj, Encrypted &content)
         content.session_id = obj.at("session_id").get<std::string>();
 
         if (obj.count("m.relates_to") != 0)
-                content.relates_to = obj.at("m.relates_to").get<common::RelatesTo>();
+                content.relates_to = obj.at("m.relates_to").get<common::ReplyRelatesTo>();
 }
 
 void

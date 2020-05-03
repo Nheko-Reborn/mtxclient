@@ -31,7 +31,7 @@ struct Image
         // Encryption members. If present, they replace url.
         std::optional<crypto::EncryptedFile> file;
         //! Relates to for rich replies
-        mtx::common::RelatesTo relates_to;
+        mtx::common::ReplyRelatesTo relates_to;
 };
 
 struct StickerImage
@@ -47,7 +47,7 @@ struct StickerImage
         // Encryption members. If present, they replace url.
         std::optional<crypto::EncryptedFile> file;
         //! Relates to for rich replies
-        mtx::common::RelatesTo relates_to;
+        mtx::common::ReplyRelatesTo relates_to;
 };
 
 void

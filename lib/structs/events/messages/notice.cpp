@@ -23,7 +23,7 @@ from_json(const json &obj, Notice &content)
                 content.formatted_body = obj.at("formatted_body").get<std::string>();
 
         if (obj.count("m.relates_to") != 0)
-                content.relates_to = obj.at("m.relates_to").get<common::RelatesTo>();
+                content.relates_to = obj.at("m.relates_to").get<common::ReplyRelatesTo>();
 }
 
 void

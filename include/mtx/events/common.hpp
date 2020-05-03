@@ -155,8 +155,27 @@ from_json(const nlohmann::json &obj, InReplyTo &in_reply_to);
 void
 to_json(nlohmann::json &obj, const InReplyTo &in_reply_to);
 
+//! Relates to for reactions
+struct ReactionRelatesTo
+{
+        // Type of relation
+        std::string rel_type;
+        // event id being reacted to
+        std::string event_id;
+        // key is the reaction itself
+        std::string key;
+};
+
+//! Deserialization method needed by @p nlohmann::json.
+void
+from_json(const nlohmann::json &obj, ReactionRelatesTo &relates_to);
+
+//! Serialization method needed by @p nlohmann::json.
+void
+to_json(nlohmann::json &obj, const ReactionRelatesTo &relates_to);
+
 //! Relates to data for rich replies (notice and text events)
-struct RelatesTo
+struct ReplyRelatesTo
 {
         //! What the message is in reply to
         InReplyTo in_reply_to;
@@ -164,11 +183,11 @@ struct RelatesTo
 
 //! Deserialization method needed by @p nlohmann::json.
 void
-from_json(const nlohmann::json &obj, RelatesTo &relates_to);
+from_json(const nlohmann::json &obj, ReplyRelatesTo &relates_to);
 
 //! Serialization method needed by @p nlohmann::json.
 void
-to_json(nlohmann::json &obj, const RelatesTo &relates_to);
+to_json(nlohmann::json &obj, const ReplyRelatesTo &relates_to);
 
 } // namespace common
 } // namespace mtx

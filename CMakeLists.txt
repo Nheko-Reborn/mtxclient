@@ -185,6 +185,7 @@ target_sources(matrix_client
 	lib/structs/events/name.cpp
 	lib/structs/events/pinned_events.cpp
 	lib/structs/events/power_levels.cpp
+	lib/structs/events/reaction.cpp
 	lib/structs/events/redaction.cpp
 	lib/structs/events/tag.cpp
 	lib/structs/events/tombstone.cpp
