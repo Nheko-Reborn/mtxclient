@@ -83,22 +83,6 @@ to_json(json &obj, const Login &request)
 }
 
 void
-to_json(json &obj, const ToDeviceMessages &request)
-{
-        std::map<std::string, std::map<std::string, EventContents>> j_request;
-        for (auto it = request.messages.begin(); it != request.messages.end(); it++) {
-                std::cout << it->first.to_string() << std::endl;
-                for (auto it1 = it->second.begin(); it1 != it->second.begin(); it1++) {
-                        std::cout << it1->first << std::endl;
-                        std::cout << std::visit([](auto e) { return json(e); }, it1->second).dump(2)
-                                  << std::endl;
-                        obj["messages"][it->first.to_string()][it1->first] =
-                          std::visit([](auto e) { return json(e); }, it1->second);
-                }
-        }
-}
-
-void
 to_json(json &obj, const AvatarUrl &request)
 {
         obj["avatar_url"] = request.avatar_url;

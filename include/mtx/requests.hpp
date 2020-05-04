@@ -86,15 +86,8 @@ void
 to_json(json &obj, const Login &request);
 
 //! Request payload for the `PUT /_matrix/client/r0/sendToDevice/{eventType}/{transcationID}`
-struct ToDeviceMessages
-{
-        //! Outer map contains the userID and inner map of deviceID and eventContent
-        std::map<mtx::identifiers::User, std::map<std::string, events::collections::EventContents>>
-          messages;
-};
-
-void
-to_json(json &obj, const ToDeviceMessages &request);
+template<typename EventContent>
+using ToDeviceMessages = std::map<mtx::identifiers::User, std::map<std::string, EventContent>>;
 
 //! Request payload for the `POST /_matrix/client/r0/profile/{userId}/avatar_url` endpoint.
 struct AvatarUrl

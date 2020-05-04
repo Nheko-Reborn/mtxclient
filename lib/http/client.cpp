@@ -826,18 +826,6 @@ Client::send_to_device(const std::string &event_type,
         put<nlohmann::json>(api_path, body, callback);
 }
 
-void
-Client::new_send_to_device(const std::string &event_type,
-                           const std::string &txn_id,
-                           const requests::ToDeviceMessages &body,
-                           ErrCallback callback)
-{
-        const auto api_path =
-          "/client/r0/sendToDevice/" + event_type + "/" + mtx::client::utils::url_encode(txn_id);
-        std::cout << json(body) << std::endl;
-        put<nlohmann::json>(api_path, json(std::move(body)), callback);
-}
-
 //
 // Group related endpoints.
 //

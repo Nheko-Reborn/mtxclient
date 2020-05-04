@@ -1139,7 +1139,7 @@ TEST(ClientAPI, SendToDevice)
                           res.to_device.events[0]);
                         EXPECT_EQ(event.content.action, mtx::events::msg::RequestAction::Request);
                         EXPECT_EQ(event.content.sender_key, "test");
-                        EXPECT_EQ(event.content.algorithm, "m.megolm.v1.aes-sha2");
+                        EXPECT_EQ(event.content.algorithm, "test_algo");
                         EXPECT_EQ(event.content.room_id, "test_room_id");
                         EXPECT_EQ(event.content.session_id, "test_session_id");
                         EXPECT_EQ(event.content.request_id, "test_request_id");
@@ -1166,8 +1166,8 @@ TEST(ClientAPI, NewSendToDevice)
         while (alice->access_token().empty() || bob->access_token().empty())
                 sleep();
 
-        ToDeviceMessages body1;
-        ToDeviceMessages body2;
+        ToDeviceMessages<msgs::KeyRequest> body1;
+        ToDeviceMessages<msgs::KeyRequest> body2;
 
         msgs::KeyRequest request1;
 
@@ -1179,7 +1179,7 @@ TEST(ClientAPI, NewSendToDevice)
         request1.request_id           = "test_request_id";
         request1.requesting_device_id = "test_req_id";
 
-        (body1.messages)[bob->user_id()][bob->device_id()] = request1;
+        body1[bob->user_id()][bob->device_id()] = request1;
 
         msgs::KeyRequest request2;
 
@@ -1187,13 +1187,25 @@ TEST(ClientAPI, NewSendToDevice)
         request2.request_id           = "test_request_id_1";
         request2.requesting_device_id = "test_req_id_1";
 
-        (body2.messages)[bob->user_id()][bob->device_id()] = request2;
+        body2[bob->user_id()][bob->device_id()] = request2;
 
-        carl->new_send_to_device(
+        carl->send_to_device<msgs::KeyRequest, mtx::events::EventType::RoomKeyRequest>(
           "m.room.key_request", body1, [bob](RequestErr err) { check_error(err); });
 
-        alice->new_send_to_device(
-          "m.room_key_request", body2, [bob](RequestErr err) { check_error(err); });
+        alice->send_to_device<msgs::KeyRequest, mtx::events::EventType::RoomKeyRequest>(
+          "m.room_key_request", body2, [bob](RequestErr err) {
+                  check_error(err);
+
+                  SyncOpts opts;
+                  opts.timeout = 0;
+                  bob->sync(opts, [](const mtx::responses::Sync &res, RequestErr err) {
+                          check_error(err);
+
+                          EXPECT_EQ(res.to_device.events.size(), 2);
+                          auto event = std::get<mtx::events::DeviceEvent<msgs::KeyRequest>>(
+                            res.to_device.events[0]);
+                  });
+          });
 
         alice->close();
         bob->close();
