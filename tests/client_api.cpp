@@ -1163,7 +1163,8 @@ TEST(ClientAPI, NewSendToDevice)
         bob->login("bob", "secret", &check_login);
         carl->login("carl", "secret", &check_login);
 
-        while (alice->access_token().empty() || bob->access_token().empty())
+        while (alice->access_token().empty() || bob->access_token().empty() ||
+               carl->access_token().empty())
                 sleep();
 
         ToDeviceMessages<msgs::KeyRequest> body1;
