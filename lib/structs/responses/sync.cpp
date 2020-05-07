@@ -131,11 +131,11 @@ InvitedRoom::name() const
         std::string member_name;
 
         for (const auto &event : invite_state) {
-                if (auto e = std::get_if<Name>(&event); e != nullptr) {
-                        room_name = e->content.name;
-                } else if (auto e = std::get_if<Member>(&event); e != nullptr) {
+                if (auto name = std::get_if<Name>(&event); name != nullptr) {
+                        room_name = name->content.name;
+                } else if (auto avatar = std::get_if<Member>(&event); avatar != nullptr) {
                         if (member_name.empty())
-                                member_name = e->content.display_name;
+                                member_name = avatar->content.display_name;
                 }
         }
 
@@ -155,12 +155,12 @@ InvitedRoom::avatar() const
         std::string member_avatar;
 
         for (const auto &event : invite_state) {
-                if (auto e = std::get_if<Avatar>(&event); e != nullptr) {
-                        room_avatar = e->content.url;
-                } else if (auto e = std::get_if<Member>(&event); e != nullptr) {
+                if (auto avatar = std::get_if<Avatar>(&event); avatar != nullptr) {
+                        room_avatar = avatar->content.url;
+                } else if (auto member = std::get_if<Member>(&event); member != nullptr) {
                         // Pick the first avatar.
                         if (member_avatar.empty())
-                                member_avatar = e->content.avatar_url;
+                                member_avatar = member->content.avatar_url;
                 }
         }
 
