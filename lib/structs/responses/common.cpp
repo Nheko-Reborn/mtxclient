@@ -12,6 +12,7 @@
 #include "mtx/events/name.hpp"
 #include "mtx/events/pinned_events.hpp"
 #include "mtx/events/power_levels.hpp"
+#include "mtx/events/reaction.hpp"
 #include "mtx/events/redaction.hpp"
 #include "mtx/events/tag.hpp"
 #include "mtx/events/topic.hpp"
@@ -148,6 +149,12 @@ struct TimelineEventVisitor
                 mtx::events::to_json(j, stickEv);
                 return j;
         };
+        json operator()(const events::RoomEvent<msgs::Reaction> &reactEv) const
+        {
+                json j;
+                mtx::events::to_json(j, reactEv);
+                return j;
+        };
         json operator()(const events::RoomEvent<msgs::Redacted> &redEv) const
         {
                 json j;
@@ -249,6 +256,7 @@ parse_room_account_data_events(
                 case events::EventType::KeyVerificationAccept:
                 case events::EventType::KeyVerificationKey:
                 case events::EventType::KeyVerificationMac:
+                case events::EventType::Reaction:
                 case events::EventType::RoomKeyRequest:
                 case events::EventType::RoomAliases:
                 case events::EventType::RoomAvatar:
@@ -293,6 +301,15 @@ parse_timeline_events(const json &events,
                 const auto type = mtx::events::getEventType(e);
 
                 switch (type) {
+                case events::EventType::Reaction: {
+                        try {
+                                container.emplace_back(events::RoomEvent<events::msg::Reaction>(e));
+                        } catch (json::exception &err) {
+                                log_error(err, e);
+                        }
+
+                        break;
+                }
                 case events::EventType::RoomAliases: {
                         try {
                                 container.emplace_back(events::StateEvent<Aliases>(e));
@@ -688,6 +705,7 @@ parse_state_events(const json &events,
                         break;
                 }
                 case events::EventType::Sticker:
+                case events::EventType::Reaction:
                 case events::EventType::RoomEncrypted:  /* Does this need to be here? */
                 case events::EventType::RoomKeyRequest: // Not part of the timeline or state
                 case events::EventType::RoomMessage:
@@ -827,6 +845,7 @@ parse_stripped_events(const json &events,
                         break;
                 }
                 case events::EventType::Sticker:
+                case events::EventType::Reaction:
                 case events::EventType::RoomEncrypted:
                 case events::EventType::RoomEncryption:
                 case events::EventType::RoomMessage:

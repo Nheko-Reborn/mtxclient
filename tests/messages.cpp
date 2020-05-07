@@ -7,6 +7,42 @@ using json = nlohmann::json;
 
 using namespace mtx::events;
 
+TEST(RoomEvents, Reaction)
+{
+        json data = R"({
+  "type": "m.reaction",
+  "room_id": "!CYvyeleADEeDAsndMom:localhost",
+  "sender": "@example:localhost",
+  "content": {
+    "m.relates_to": {
+      "rel_type": "m.annotation",
+      "event_id": "$oGKg0tfsnDamWPsGxUptGLWR5b8Xq6QNFFsysQNSnake",
+      "key": "👀"
+    }
+  },
+  "origin_server_ts": 1588536414112,
+  "unsigned": {
+    "age": 1905609
+  },
+  "event_id": "$ujXAq1WXebS-vcpA4yBIZPvCeqGvnrMFP1c1qn8_wJump"
+  })"_json;
+
+        RoomEvent<msg::Reaction> event = data;
+
+        EXPECT_EQ(event.type, EventType::Reaction);
+        EXPECT_EQ(event.event_id, "$ujXAq1WXebS-vcpA4yBIZPvCeqGvnrMFP1c1qn8_wJump");
+        EXPECT_EQ(event.room_id, "!CYvyeleADEeDAsndMom:localhost");
+        EXPECT_EQ(event.sender, "@example:localhost");
+        EXPECT_EQ(event.origin_server_ts, 1588536414112L);
+        EXPECT_EQ(event.unsigned_data.age, 1905609L);
+        EXPECT_EQ(event.content.relates_to.event_id,
+                  "$oGKg0tfsnDamWPsGxUptGLWR5b8Xq6QNFFsysQNSnake");
+        EXPECT_EQ(event.content.relates_to.key, "👀");
+        EXPECT_EQ(event.content.relates_to.rel_type, mtx::common::RelationType::Annotation);
+
+        EXPECT_EQ(data.dump(), json(event).dump());
+};
+
 TEST(RoomEvents, Redacted)
 {
         json data = R"({
@@ -459,6 +495,8 @@ TEST(RoomEvents, TextMessage)
         EXPECT_EQ(event.content.msgtype, "m.text");
         EXPECT_EQ(event.content.relates_to.in_reply_to.event_id,
                   "$6GKhAfJOcwNd69lgSizdcTob8z2pWQgBOZPrnsWMA1E");
+
+        EXPECT_EQ(data.dump(), json(event).dump());
 }
 
 TEST(RoomEvents, VideoMessage)

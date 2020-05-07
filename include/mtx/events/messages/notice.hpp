@@ -25,7 +25,7 @@ struct Notice
         //! HTML formatted message.
         std::string formatted_body;
         // Relates to for rich replies
-        mtx::common::RelatesTo relates_to;
+        mtx::common::ReplyRelatesTo relates_to;
 };
 
 void

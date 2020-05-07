@@ -16,6 +16,7 @@
 #include "mtx/events/name.hpp"
 #include "mtx/events/pinned_events.hpp"
 #include "mtx/events/power_levels.hpp"
+#include "mtx/events/reaction.hpp"
 #include "mtx/events/redaction.hpp"
 #include "mtx/events/tag.hpp"
 #include "mtx/events/tombstone.hpp"
@@ -95,6 +96,7 @@ using TimelineEvents = std::variant<events::StateEvent<states::Aliases>,
                                     events::EncryptedEvent<msgs::Encrypted>,
                                     events::RedactionEvent<msgs::Redaction>,
                                     events::Sticker,
+                                    events::RoomEvent<msgs::Reaction>,
                                     events::RoomEvent<msgs::Redacted>,
                                     events::RoomEvent<msgs::Audio>,
                                     events::RoomEvent<msgs::Emote>,

@@ -26,7 +26,7 @@ from_json(const json &obj, Image &content)
                 content.file = obj.at("file").get<crypto::EncryptedFile>();
 
         if (obj.count("m.relates_to") != 0)
-                content.relates_to = obj.at("m.relates_to").get<common::RelatesTo>();
+                content.relates_to = obj.at("m.relates_to").get<common::ReplyRelatesTo>();
 }
 
 void
@@ -58,7 +58,7 @@ from_json(const json &obj, StickerImage &content)
                 content.file = obj.at("file").get<crypto::EncryptedFile>();
 
         if (obj.count("m.relates_to") != 0)
-                content.relates_to = obj.at("m.relates_to").get<common::RelatesTo>();
+                content.relates_to = obj.at("m.relates_to").get<common::ReplyRelatesTo>();
 }
 
 void

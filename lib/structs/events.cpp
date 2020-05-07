@@ -20,6 +20,8 @@ getEventType(const std::string &type)
                 return EventType::KeyVerificationMac;
         else if (type == "m.key.verification.cancel")
                 return EventType::KeyVerificationCancel;
+        else if (type == "m.reaction")
+                return EventType::Reaction;
         else if (type == "m.room_key_request")
                 return EventType::RoomKeyRequest;
         else if (type == "m.room.aliases")
@@ -82,6 +84,8 @@ to_string(EventType type)
                 return "m.key.verification.key";
         case EventType::KeyVerificationMac:
                 return "m.key.verification.mac";
+        case EventType::Reaction:
+                return "m.reaction";
         case EventType::RoomKeyRequest:
                 return "m.room_key_request";
         case EventType::RoomAliases:
