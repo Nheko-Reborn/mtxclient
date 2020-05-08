@@ -41,7 +41,7 @@ TEST(RoomEvents, Reaction)
         EXPECT_EQ(event.content.relates_to.rel_type, mtx::common::RelationType::Annotation);
 
         EXPECT_EQ(data.dump(), json(event).dump());
-};
+}
 
 TEST(RoomEvents, Redacted)
 {
