@@ -132,6 +132,7 @@ TEST(ClientAPI, SSORedirect)
         EXPECT_EQ(mtx_client->login_sso_redirect("http://aaa:555/sso"),
                   "https://localhost:443/_matrix/client/r0/login/sso/"
                   "redirect?redirectUrl=http%3A%2F%2Faaa%3A555%2Fsso");
+        mtx_client->close();
 }
 
 TEST(ClientAPI, EmptyUserAvatar)

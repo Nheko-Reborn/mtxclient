@@ -357,7 +357,7 @@ Client::well_known(Callback<mtx::responses::WellKnown> callback)
         } func;
         func.numRedirects = 0;
         func.callback     = std::move(callback);
-        func.client = this;
+        func.client       = this;
 
         get<mtx::responses::WellKnown>("/matrix/client", std::move(func), false, "/.well-known");
 }
