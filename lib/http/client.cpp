@@ -197,12 +197,19 @@ mtx::http::Client::get(const std::string &endpoint,
 void
 Client::set_server(const std::string &server)
 {
-        std::string server_name = server;
+        std::string_view server_name = server;
+        int port                     = 443;
         // Remove https prefix, if it exists
-        if (boost::algorithm::starts_with(server_name, "https://"))
-                boost::algorithm::erase_first(server_name, "https://");
+        if (server_name.substr(0, 8) == "https://") {
+                server_name.remove_prefix(8);
+                port = 443;
+        }
+        if (server_name.substr(0, 7) == "http://") {
+                server_name.remove_prefix(7);
+                port = 80;
+        }
         if (server_name.size() > 0 && server_name.back() == '/')
-                server_name.erase(server_name.end() - 1);
+                server_name.remove_suffix(1);
 
         // Check if the input also contains the port.
         std::vector<std::string> parts;
@@ -213,6 +220,7 @@ Client::set_server(const std::string &server)
                 port_   = std::stoi(parts.at(1));
         } else {
                 server_ = server_name;
+                port_   = port;
         }
 }
 
@@ -313,13 +321,45 @@ Client::login_sso_redirect(std::string redirectUrl)
 void
 Client::well_known(Callback<mtx::responses::WellKnown> callback)
 {
-        get<mtx::responses::WellKnown>(
-          "/matrix/client",
-          [callback](const mtx::responses::WellKnown &res, HeaderFields, RequestErr err) {
-                  callback(res, err);
-          },
-          false,
-          "/.well-known");
+        struct DoLookup
+        {
+                void operator()(const mtx::responses::WellKnown &res,
+                                HeaderFields headers,
+                                RequestErr err)
+                {
+                        if (err &&
+                            (err->status_code == boost::beast::http::status::found ||
+                             err->status_code == boost::beast::http::status::moved_permanently) &&
+                            numRedirects < 30 && headers &&
+                            headers->count(boost::beast::http::field::location)) {
+                                numRedirects++;
+                                auto server = headers.value()[boost::beast::http::field::location];
+                                size_t start_search = 0;
+                                if (server.starts_with("https://"))
+                                        start_search = 8;
+                                else if (server.starts_with("http://"))
+                                        start_search = 7;
+
+                                client->set_server(std::string(
+                                  server.substr(0, server.find_first_of('/', start_search))));
+
+                                client->get<mtx::responses::WellKnown>(
+                                  "/matrix/client", std::move(*this), false, "/.well-known");
+                                return;
+                        }
+
+                        callback(res, err);
+                }
+
+                Callback<mtx::responses::WellKnown> callback;
+                int numRedirects = 0;
+                Client *client   = nullptr;
+        } func;
+        func.numRedirects = 0;
+        func.callback     = std::move(callback);
+        func.client = this;
+
+        get<mtx::responses::WellKnown>("/matrix/client", std::move(func), false, "/.well-known");
 }
 
 void
