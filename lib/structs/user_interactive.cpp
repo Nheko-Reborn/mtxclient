@@ -116,6 +116,7 @@ to_json(nlohmann::json &obj, const Auth &auth)
                              obj["threepidCreds"] = id.threepidCreds;
                      },
                      [&obj](const auth::OAuth2 &) { obj["type"] = auth_types::oauth2; },
+                     [&obj](const auth::SSO &) { obj["type"] = auth_types::sso; },
                      [&obj](const auth::Terms &) { obj["type"] = auth_types::terms; },
                      [&obj](const auth::Dummy &) { obj["type"] = auth_types::dummy; },
                      [](const auth::Fallback &) {},

@@ -19,5 +19,16 @@ from_json(const nlohmann::json &obj, Login &response)
         if (obj.count("well_known") != 0)
                 response.well_known = obj.at("well_known").get<WellKnown>();
 }
+
+void
+from_json(const nlohmann::json &obj, LoginFlow &response)
+{
+        response.type = obj.at("type").get<std::string>();
+}
+void
+from_json(const nlohmann::json &obj, LoginFlows &response)
+{
+        response.flows = obj.at("flows").get<std::vector<LoginFlow>>();
+}
 }
 }

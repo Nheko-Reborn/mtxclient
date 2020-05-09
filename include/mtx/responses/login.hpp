@@ -10,6 +10,7 @@
 #endif
 
 #include "mtx/identifiers.hpp"
+#include "mtx/user_interactive.hpp"
 #include "well-known.hpp"
 
 namespace mtx {
@@ -35,5 +36,21 @@ struct Login
 
 void
 from_json(const nlohmann::json &obj, Login &response);
+
+struct LoginFlow
+{
+        mtx::user_interactive::AuthType type;
+};
+void
+from_json(const nlohmann::json &obj, LoginFlow &response);
+
+//! Response from the `GET /_matrix/client/r0/login` endpoint.
+struct LoginFlows
+{
+        std::vector<LoginFlow> flows;
+};
+
+void
+from_json(const nlohmann::json &obj, LoginFlows &response);
 }
 }

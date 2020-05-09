@@ -113,6 +113,19 @@ TEST(ClientAPI, LoginWrongUsername)
         mtx_client->close();
 }
 
+TEST(ClientAPI, LoginFlows)
+{
+        std::shared_ptr<Client> mtx_client = std::make_shared<Client>("localhost");
+
+        mtx_client->get_login([](const mtx::responses::LoginFlows &res, RequestErr err) {
+                ASSERT_FALSE(err);
+
+                EXPECT_EQ(res.flows[0].type, mtx::user_interactive::auth_types::password);
+        });
+
+        mtx_client->close();
+}
+
 TEST(ClientAPI, EmptyUserAvatar)
 {
         auto alice = std::make_shared<Client>("localhost");

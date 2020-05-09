@@ -292,6 +292,25 @@ Client::login(const mtx::requests::Login &req, Callback<mtx::responses::Login> c
 }
 
 void
+Client::get_login(Callback<mtx::responses::LoginFlows> cb)
+{
+        get<mtx::responses::LoginFlows>(
+          "/client/r0/login",
+          [cb](const mtx::responses::LoginFlows &res, HeaderFields, RequestErr err) {
+                  cb(res, err);
+          },
+          false);
+}
+
+std::string
+Client::login_sso_redirect(std::string redirectUrl)
+{
+        return "https://" + server() + ":" + std::to_string(port()) +
+               "/_matrix/client/r0/login/sso/redirect?" +
+               mtx::client::utils::query_params({{"redirectUrl", redirectUrl}});
+}
+
+void
 Client::well_known(Callback<mtx::responses::WellKnown> callback)
 {
         get<mtx::responses::WellKnown>(
