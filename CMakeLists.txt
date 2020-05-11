@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.13)
+cmake_minimum_required(VERSION 3.11...3.13)
 
 
 set(
@@ -33,10 +33,17 @@ option(USE_BUNDLED_SODIUM "Use the bundled version of libsodium."
 option(USE_BUNDLED_ZLIB "Use the bundled version of zlib."
 	${HUNTER_ENABLED})
 
+if (CMAKE_VERSION VERSION_GREATER_EQUAL 3.12)
 project(matrix_client
 	VERSION 0.3.0
 	DESCRIPTION "Client API library for Matrix, built on top of Boost.Asio"
 	HOMEPAGE_URL https://github.com/Nheko-Reborn/mtxclient)
+else()
+project(matrix_client
+	VERSION 0.3.0
+	DESCRIPTION "Client API library for Matrix, built on top of Boost.Asio")
+endif()
+
 
 option(ASAN "Compile with address sanitizers" OFF)
 option(BUILD_LIB_TESTS "Build tests" ON)
@@ -178,6 +185,7 @@ target_sources(matrix_client
 	lib/structs/events/name.cpp
 	lib/structs/events/pinned_events.cpp
 	lib/structs/events/power_levels.cpp
+	lib/structs/events/reaction.cpp
 	lib/structs/events/redaction.cpp
 	lib/structs/events/tag.cpp
 	lib/structs/events/tombstone.cpp
@@ -204,6 +212,8 @@ target_sources(matrix_client
 	lib/structs/responses/version.cpp
 	lib/structs/responses/well-known.cpp)
 add_library(MatrixClient::MatrixClient ALIAS matrix_client)
+set_property(TARGET matrix_client  PROPERTY CXX_STANDARD 17)
+set_property(TARGET matrix_client  PROPERTY CXX_EXTENSIONS OFF)
 target_include_directories(
 	matrix_client
 	PUBLIC

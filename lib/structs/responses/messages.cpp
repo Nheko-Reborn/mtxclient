@@ -9,10 +9,11 @@ namespace responses {
 void
 from_json(const json &obj, Messages &messages)
 {
-        messages.start = obj.at("start").get<std::string>();
-        messages.end   = obj.at("end").get<std::string>();
+        messages.start = obj.value("start", "");
+        messages.end   = obj.value("end", "");
 
-        utils::parse_timeline_events(obj.at("chunk"), messages.chunk);
+        if (obj.contains("chunk"))
+                utils::parse_timeline_events(obj.at("chunk"), messages.chunk);
 }
 }
 }

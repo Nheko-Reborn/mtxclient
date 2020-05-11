@@ -82,7 +82,7 @@ struct Encrypted
         //! Outbound group session id.
         std::string session_id;
         //! Relates to for rich replies
-        common::RelatesTo relates_to;
+        common::ReplyRelatesTo relates_to;
 };
 
 void

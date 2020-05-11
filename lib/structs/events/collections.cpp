@@ -10,6 +10,10 @@ from_json(const json &obj, TimelineEvent &e)
         using namespace mtx::events::msg;
 
         switch (type) {
+        case events::EventType::Reaction: {
+                e.data = events::RoomEvent<Reaction>(obj);
+                break;
+        }
         case events::EventType::RoomAliases: {
                 e.data = events::StateEvent<Aliases>(obj);
                 break;

@@ -116,6 +116,28 @@ TEST(ClientAPI, LoginWrongUsername)
         mtx_client->close();
 }
 
+TEST(ClientAPI, LoginFlows)
+{
+        std::shared_ptr<Client> mtx_client = std::make_shared<Client>("localhost");
+
+        mtx_client->get_login([](const mtx::responses::LoginFlows &res, RequestErr err) {
+                ASSERT_FALSE(err);
+
+                EXPECT_EQ(res.flows[0].type, mtx::user_interactive::auth_types::password);
+        });
+
+        mtx_client->close();
+}
+
+TEST(ClientAPI, SSORedirect)
+{
+        std::shared_ptr<Client> mtx_client = std::make_shared<Client>("localhost");
+        EXPECT_EQ(mtx_client->login_sso_redirect("http://aaa:555/sso"),
+                  "https://localhost:443/_matrix/client/r0/login/sso/"
+                  "redirect?redirectUrl=http%3A%2F%2Faaa%3A555%2Fsso");
+        mtx_client->close();
+}
+
 TEST(ClientAPI, EmptyUserAvatar)
 {
         auto alice = std::make_shared<Client>("localhost");

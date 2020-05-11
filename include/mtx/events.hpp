@@ -23,6 +23,8 @@ enum class EventType
         KeyVerificationKey,
         /// m.key.verification.mac
         KeyVerificationMac,
+        /// m.reaction,
+        Reaction,
         /// m.room_key
         RoomKey,
         /// m.room_key_request
@@ -117,6 +119,9 @@ to_json(json &obj, const Event<Content> &event)
                 break;
         case EventType::KeyVerificationRequest:
                 obj["type"] = "m.key.verification.request";
+                break;
+        case EventType::Reaction:
+                obj["type"] = "m.reaction";
                 break;
         case EventType::RoomKey:
                 obj["type"] = "m.room_key";

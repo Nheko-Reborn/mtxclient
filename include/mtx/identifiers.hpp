@@ -6,6 +6,8 @@
 #include <nlohmann/json.hpp>
 #endif
 
+#include <stdexcept>
+
 namespace mtx {
 namespace identifiers {
 

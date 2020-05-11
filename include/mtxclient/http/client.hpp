@@ -53,6 +53,7 @@ struct GroupProfile;
 struct JoinedGroups;
 struct KeyChanges;
 struct Login;
+struct LoginFlows;
 struct Messages;
 struct Notifications;
 struct Profile;
@@ -195,6 +196,12 @@ public:
                    const std::string &device_name,
                    Callback<mtx::responses::Login> cb);
         void login(const mtx::requests::Login &req, Callback<mtx::responses::Login> cb);
+
+        //! Get the supported login flows
+        void get_login(Callback<mtx::responses::LoginFlows> cb);
+        //! Get url to navigate to for sso login flow
+        //! Open this in a browser
+        std::string login_sso_redirect(std::string redirectUrl);
         //! Lookup real server to connect to.
         //! Call set_server with the returned homeserver url after this
         void well_known(Callback<mtx::responses::WellKnown> cb);

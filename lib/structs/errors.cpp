@@ -87,7 +87,7 @@ from_json(const nlohmann::json &obj, Error &error)
         error.errcode = from_string(obj.value("errcode", ""));
         error.error   = obj.value("error", "");
 
-        if (obj.contains("session"))
+        if (obj.contains("flows"))
                 error.unauthorized = obj.get<user_interactive::Unauthorized>();
 }
 }

@@ -8,7 +8,8 @@
 
 #include <nlohmann/json.hpp>
 
-namespace mtx::user_interactive {
+namespace mtx {
+namespace user_interactive {
 using AuthType = std::string;
 namespace auth_types {
 constexpr std::string_view password       = "m.login.password";
@@ -17,6 +18,7 @@ constexpr std::string_view oauth2         = "m.login.oauth2";
 constexpr std::string_view email_identity = "m.login.email.identity";
 constexpr std::string_view msisdn         = "m.login.msisdn";
 constexpr std::string_view token          = "m.login.token";
+constexpr std::string_view sso            = "m.login.sso"; // needed for /login at least
 constexpr std::string_view dummy          = "m.login.dummy";
 constexpr std::string_view terms          = "m.login.terms"; // see MSC1692
 }
@@ -140,6 +142,8 @@ struct OAuth2
 {};
 struct Terms
 {};
+struct SSO
+{};
 struct Dummy
 {};
 struct Fallback
@@ -158,10 +162,12 @@ struct Auth
                      auth::MSISDN,
                      auth::OAuth2,
                      auth::Terms,
+                     auth::SSO,
                      auth::Dummy,
                      auth::Fallback>
           content;
 };
 void
 to_json(nlohmann::json &obj, const Auth &auth);
+}
 }

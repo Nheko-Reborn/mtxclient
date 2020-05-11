@@ -4,20 +4,26 @@
 
 using json = nlohmann::json;
 
+namespace {
+template<class T>
+T
+safe_get(const json &obj, const std::string &name, T default_val = {})
+try {
+        return obj.value(name, default_val);
+} catch (const nlohmann::json::type_error &) {
+        return default_val;
+}
+}
+
 namespace mtx {
 namespace common {
 
 void
 from_json(const json &obj, ThumbnailInfo &info)
 {
-        if (obj.find("h") != obj.end())
-                info.h = obj.at("h").get<uint64_t>();
-
-        if (obj.find("w") != obj.end())
-                info.w = obj.at("w").get<uint64_t>();
-
-        if (obj.find("size") != obj.end())
-                info.size = obj.at("size").get<uint64_t>();
+        info.h    = safe_get<uint64_t>(obj, "h");
+        info.w    = safe_get<uint64_t>(obj, "w");
+        info.size = safe_get<uint64_t>(obj, "size");
 
         if (obj.find("mimetype") != obj.end())
                 info.mimetype = obj.at("mimetype").get<std::string>();
@@ -35,14 +41,9 @@ to_json(json &obj, const ThumbnailInfo &info)
 void
 from_json(const json &obj, ImageInfo &info)
 {
-        if (obj.find("h") != obj.end())
-                info.h = obj.at("h").get<uint64_t>();
-
-        if (obj.find("w") != obj.end())
-                info.w = obj.at("w").get<uint64_t>();
-
-        if (obj.find("size") != obj.end())
-                info.size = obj.at("size").get<uint64_t>();
+        info.h    = safe_get<uint64_t>(obj, "h");
+        info.w    = safe_get<uint64_t>(obj, "w");
+        info.size = safe_get<uint64_t>(obj, "size");
 
         if (obj.find("mimetype") != obj.end())
                 info.mimetype = obj.at("mimetype").get<std::string>();
@@ -80,8 +81,7 @@ to_json(json &obj, const ImageInfo &info)
 void
 from_json(const json &obj, FileInfo &info)
 {
-        if (obj.find("size") != obj.end())
-                info.size = obj.at("size").get<uint64_t>();
+        info.size = safe_get<uint64_t>(obj, "size");
 
         if (obj.find("mimetype") != obj.end())
                 info.mimetype = obj.at("mimetype").get<std::string>();
@@ -112,11 +112,8 @@ to_json(json &obj, const FileInfo &info)
 void
 from_json(const json &obj, AudioInfo &info)
 {
-        if (obj.find("duration") != obj.end())
-                info.duration = obj.at("duration").get<uint64_t>();
-
-        if (obj.find("size") != obj.end())
-                info.size = obj.at("size").get<uint64_t>();
+        info.duration = safe_get<uint64_t>(obj, "duration");
+        info.size     = safe_get<uint64_t>(obj, "size");
 
         if (obj.find("mimetype") != obj.end())
                 info.mimetype = obj.at("mimetype").get<std::string>();
@@ -133,17 +130,10 @@ to_json(json &obj, const AudioInfo &info)
 void
 from_json(const json &obj, VideoInfo &info)
 {
-        if (obj.find("w") != obj.end())
-                info.w = obj.at("w").get<uint64_t>();
-
-        if (obj.find("h") != obj.end())
-                info.h = obj.at("h").get<uint64_t>();
-
-        if (obj.find("size") != obj.end())
-                info.size = obj.at("size").get<uint64_t>();
-
-        if (obj.find("duration") != obj.end())
-                info.duration = obj.at("duration").get<uint64_t>();
+        info.h        = safe_get<uint64_t>(obj, "h");
+        info.w        = safe_get<uint64_t>(obj, "w");
+        info.size     = safe_get<uint64_t>(obj, "size");
+        info.duration = safe_get<uint64_t>(obj, "duration");
 
         if (obj.find("mimetype") != obj.end())
                 info.mimetype = obj.at("mimetype").get<std::string>();
@@ -193,14 +183,66 @@ to_json(json &obj, const InReplyTo &in_reply_to)
 }
 
 void
-from_json(const json &obj, RelatesTo &relates_to)
+to_json(json &obj, const RelationType &type)
+{
+        switch (type) {
+        case RelationType::Annotation:
+                obj = "m.annotation";
+                break;
+        case RelationType::Reference:
+                obj = "m.reference";
+                break;
+        case RelationType::Replace:
+                obj = "m.replace";
+                break;
+        case RelationType::Unsupported:
+        default:
+                obj = "unsupported";
+                break;
+        }
+}
+
+void
+from_json(const json &obj, RelationType &type)
+{
+        if (obj.get<std::string>() == "m.annotation")
+                type = RelationType::Annotation;
+        else if (obj.get<std::string>() == "m.reference")
+                type = RelationType::Reference;
+        else if (obj.get<std::string>() == "m.replace")
+                type = RelationType::Replace;
+        else
+                type = RelationType::Unsupported;
+}
+
+void
+from_json(const json &obj, ReactionRelatesTo &relates_to)
+{
+        if (obj.find("rel_type") != obj.end())
+                relates_to.rel_type = obj.at("rel_type").get<RelationType>();
+        if (obj.find("event_id") != obj.end())
+                relates_to.event_id = obj.at("event_id").get<std::string>();
+        if (obj.find("key") != obj.end())
+                relates_to.key = obj.at("key").get<std::string>();
+}
+
+void
+to_json(json &obj, const ReactionRelatesTo &relates_to)
+{
+        obj["rel_type"] = relates_to.rel_type;
+        obj["event_id"] = relates_to.event_id;
+        obj["key"]      = relates_to.key;
+}
+
+void
+from_json(const json &obj, ReplyRelatesTo &relates_to)
 {
         if (obj.find("m.in_reply_to") != obj.end())
                 relates_to.in_reply_to = obj.at("m.in_reply_to").get<InReplyTo>();
 }
 
 void
-to_json(json &obj, const RelatesTo &relates_to)
+to_json(json &obj, const ReplyRelatesTo &relates_to)
 {
         obj["m.in_reply_to"] = relates_to.in_reply_to;
 }

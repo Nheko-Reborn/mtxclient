@@ -28,7 +28,7 @@ from_json(const json &obj, Video &content)
                 content.file = obj.at("file").get<crypto::EncryptedFile>();
 
         if (obj.count("m.relates_to") != 0)
-                content.relates_to = obj.at("m.relates_to").get<common::RelatesTo>();
+                content.relates_to = obj.at("m.relates_to").get<common::ReplyRelatesTo>();
 }
 
 void
