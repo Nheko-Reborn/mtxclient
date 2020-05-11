@@ -6,7 +6,6 @@
 #include "mtx/identifiers.hpp"
 
 using json = nlohmann::json;
-
 namespace mtx {
 namespace events {
 
@@ -212,6 +211,8 @@ from_json(const json &obj, DeviceEvent<Content> &event)
 {
         Event<Content> base_event = event;
         from_json(obj, base_event);
+        event.content = base_event.content;
+        event.type    = base_event.type;
         event.sender  = obj.at("sender");
 }
 

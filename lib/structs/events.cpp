@@ -82,6 +82,8 @@ to_string(EventType type)
                 return "m.key.verification.key";
         case EventType::KeyVerificationMac:
                 return "m.key.verification.mac";
+        case EventType::RoomKey:
+                return "m.room_key";
         case EventType::RoomKeyRequest:
                 return "m.room_key_request";
         case EventType::RoomAliases:
@@ -174,5 +176,6 @@ getMessageType(const json &obj)
 
         return getMessageType(obj.at("msgtype").get<std::string>());
 }
+
 }
 }

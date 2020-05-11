@@ -566,7 +566,6 @@ void
 parse_device_events(const json &events,
                     std::vector<mtx::events::collections::DeviceEvents> &container)
 {
-        std::cout << events.dump() << std::endl;
         container.clear();
         container.reserve(events.size());
         for (const auto &e : events) {
@@ -575,7 +574,8 @@ parse_device_events(const json &events,
                 switch (type) {
                 case events::EventType::RoomEncrypted: {
                         try {
-                                const auto algo = e.at("algorithm").get<std::string>();
+                                const auto algo =
+                                  e.at("content").at("algorithm").get<std::string>();
                                 // Algorithm determines whether it's an olm or megolm event
                                 if (algo == "m.olm.v1.curve25519-aes-sha2") {
                                         container.emplace_back(
