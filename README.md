@@ -36,7 +36,7 @@ Below is an example which will build the library along with the tests & examples
 #### Linux 
 
 ```bash
-cmake -H. -Bbuild -DCMAKE_BUILD_TYPE=Debug
+cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Debug
 cmake --build build
 ```
 
@@ -45,7 +45,7 @@ cmake --build build
 You will need to pass as argument (`-DOPENSSL_ROOT_DIR`) the installation root of openssl. 
 
 ```bash
-cmake -H. -Bbuild -DCMAKE_BUILD_TYPE=Debug -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl
+cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Debug -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl
 cmake --build build
 ```
 
