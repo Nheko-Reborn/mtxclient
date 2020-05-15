@@ -22,6 +22,7 @@
 using json = nlohmann::json;
 using namespace mtx::events::account_data;
 using namespace mtx::events::state;
+using namespace mtx::events::msg;
 
 namespace mtx {
 namespace responses {
@@ -257,6 +258,7 @@ parse_room_account_data_events(
                 case events::EventType::KeyVerificationKey:
                 case events::EventType::KeyVerificationMac:
                 case events::EventType::Reaction:
+                case events::EventType::RoomKey: // Not part of timeline or state
                 case events::EventType::RoomKeyRequest:
                 case events::EventType::RoomAliases:
                 case events::EventType::RoomAvatar:
@@ -561,6 +563,7 @@ parse_timeline_events(const json &events,
                         break;
                 }
                 case events::EventType::RoomPinnedEvents:
+                case events::EventType::RoomKey:        // Not part of timeline or state
                 case events::EventType::RoomKeyRequest: // Not part of the timeline
                 case events::EventType::Tag:            // Not part of the timeline or state
                 case events::EventType::PushRules:      // Not part of the timeline or state
@@ -571,6 +574,113 @@ parse_timeline_events(const json &events,
                 case events::EventType::KeyVerificationAccept:
                 case events::EventType::KeyVerificationKey:
                 case events::EventType::KeyVerificationMac:
+                        continue;
+                }
+        }
+}
+
+void
+parse_device_events(const json &events,
+                    std::vector<mtx::events::collections::DeviceEvents> &container)
+{
+        container.clear();
+        container.reserve(events.size());
+        for (const auto &e : events) {
+                const auto type = mtx::events::getEventType(e);
+
+                switch (type) {
+                case events::EventType::RoomEncrypted: {
+                        try {
+                                const auto algo =
+                                  e.at("content").at("algorithm").get<std::string>();
+                                // Algorithm determines whether it's an olm or megolm event
+                                if (algo == "m.olm.v1.curve25519-aes-sha2") {
+                                        container.emplace_back(
+                                          events::DeviceEvent<OlmEncrypted>(e));
+                                } else if (algo == "m.megolm.v1.aes-sha2") {
+                                        container.emplace_back(events::DeviceEvent<Encrypted>(e));
+                                } else {
+                                        log_error("Invalid m.room.encrypted algorithm", e);
+                                        continue;
+                                }
+                        } catch (json::exception &err) {
+                                log_error(err, e);
+                        }
+
+                        break;
+                }
+                case events::EventType::RoomKey: {
+                        try {
+                                container.emplace_back(events::DeviceEvent<RoomKey>(e));
+                        } catch (json::exception &err) {
+                                log_error(err, e);
+                        }
+
+                        break;
+                }
+                case events::EventType::RoomKeyRequest: {
+                        try {
+                                container.emplace_back(events::DeviceEvent<KeyRequest>(e));
+                        } catch (json::exception &err) {
+                                log_error(err, e);
+                        }
+
+                        break;
+                }
+                case events::EventType::KeyVerificationCancel: {
+                        try {
+                                container.emplace_back(
+                                  events::DeviceEvent<KeyVerificationCancel>(e));
+                        } catch (json::exception &err) {
+                                log_error(err, e);
+                        }
+
+                        break;
+                }
+                case events::EventType::KeyVerificationRequest:
+                        try {
+                                container.emplace_back(
+                                  events::DeviceEvent<KeyVerificationRequest>(e));
+                        } catch (json::exception &err) {
+                                log_error(err, e);
+                        }
+
+                        break;
+                case events::EventType::KeyVerificationStart:
+                        try {
+                                container.emplace_back(
+                                  events::DeviceEvent<KeyVerificationStart>(e));
+                        } catch (json::exception &err) {
+                                log_error(err, e);
+                        }
+
+                        break;
+                case events::EventType::KeyVerificationAccept:
+                        try {
+                                container.emplace_back(
+                                  events::DeviceEvent<KeyVerificationAccept>(e));
+                        } catch (json::exception &err) {
+                                log_error(err, e);
+                        }
+
+                        break;
+                case events::EventType::KeyVerificationKey:
+                        try {
+                                container.emplace_back(events::DeviceEvent<KeyVerificationKey>(e));
+                        } catch (json::exception &err) {
+                                log_error(err, e);
+                        }
+
+                        break;
+                case events::EventType::KeyVerificationMac:
+                        try {
+                                container.emplace_back(events::DeviceEvent<KeyVerificationMac>(e));
+                        } catch (json::exception &err) {
+                                log_error(err, e);
+                        }
+
+                        break;
+                default:
                         continue;
                 }
         }
@@ -707,6 +817,7 @@ parse_state_events(const json &events,
                 case events::EventType::Sticker:
                 case events::EventType::Reaction:
                 case events::EventType::RoomEncrypted:  /* Does this need to be here? */
+                case events::EventType::RoomKey:        // Not part of timeline or state
                 case events::EventType::RoomKeyRequest: // Not part of the timeline or state
                 case events::EventType::RoomMessage:
                 case events::EventType::RoomPinnedEvents:
@@ -850,6 +961,7 @@ parse_stripped_events(const json &events,
                 case events::EventType::RoomEncryption:
                 case events::EventType::RoomMessage:
                 case events::EventType::RoomRedaction:
+                case events::EventType::RoomKey:        // Not part of timeline or state
                 case events::EventType::RoomKeyRequest: // Not part of the timeline or state
                 case events::EventType::RoomPinnedEvents:
                 case events::EventType::Tag:       // Not part of the timeline or state

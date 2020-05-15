@@ -18,25 +18,14 @@ using namespace mtx::http;
 using namespace mtx::crypto;
 
 using namespace mtx::identifiers;
+using namespace mtx::events;
+using namespace mtx::events::msg;
 using namespace mtx::events::collections;
 using namespace mtx::responses;
 
 using namespace std;
 
 using namespace nlohmann;
-
-struct OlmCipherContent
-{
-        std::string body;
-        uint8_t type;
-};
-
-inline void
-from_json(const nlohmann::json &obj, OlmCipherContent &msg)
-{
-        msg.body = obj.at("body");
-        msg.type = obj.at("type");
-}
 
 struct OlmMessage
 {
@@ -875,11 +864,11 @@ TEST(Encryption, OlmRoomKeyEncryption)
           opts, [bob = bob_olm, SECRET_TEXT](const mtx::responses::Sync &res, RequestErr err) {
                   check_error(err);
 
-                  assert(!res.to_device.empty());
-                  assert(res.to_device.size() == 1);
+                  EXPECT_EQ(res.to_device.events.size(), 1);
 
-                  OlmMessage olm_msg = res.to_device[0];
-                  auto cipher        = olm_msg.ciphertext.begin();
+                  auto olm_msg =
+                    std::get<DeviceEvent<msgs::OlmEncrypted>>(res.to_device.events[0]).content;
+                  auto cipher = olm_msg.ciphertext.begin();
 
                   EXPECT_EQ(cipher->first, bob->identity_keys().curve25519);
 

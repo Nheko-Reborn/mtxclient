@@ -18,8 +18,10 @@
 #include "mtxclient/http/session.hpp"
 #include "mtxclient/utils.hpp"
 
+#include "mtx/identifiers.hpp"
 #include "mtx/requests.hpp"
 #include "mtx/responses.hpp"
+#include <iostream>
 
 using namespace mtx::http;
 using namespace boost::beast;

@@ -212,6 +212,13 @@ from_json(const json &obj, DeviceLists &device_lists)
 }
 
 void
+from_json(const json &obj, ToDevice &to_device)
+{
+        if (obj.count("events") != 0)
+                utils::parse_device_events(obj.at("events"), to_device.events);
+}
+
+void
 from_json(const json &obj, Sync &response)
 {
         if (obj.count("rooms") != 0)
@@ -221,9 +228,7 @@ from_json(const json &obj, Sync &response)
                 response.device_lists = obj.at("device_lists").get<DeviceLists>();
 
         if (obj.count("to_device") != 0) {
-                if (obj.at("to_device").count("events") != 0)
-                        response.to_device =
-                          obj.at("to_device").at("events").get<std::vector<json>>();
+                response.to_device = obj.at("to_device").get<ToDevice>();
         }
 
         if (obj.count("device_one_time_keys_count") != 0)

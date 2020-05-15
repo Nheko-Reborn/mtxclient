@@ -94,7 +94,7 @@ void
 mark_encrypted_room(const RoomId &id);
 
 void
-handle_to_device_msgs(const std::vector<nlohmann::json> &to_device);
+handle_to_device_msgs(const mtx::responses::ToDevice &to_device);
 
 struct OutboundSessionData
 {
@@ -895,16 +895,16 @@ get_device_keys(const UserId &user)
 }
 
 void
-handle_to_device_msgs(const std::vector<nlohmann::json> &msgs)
+handle_to_device_msgs(const mtx::responses::ToDevice &msgs)
 {
-        if (!msgs.empty())
-                console->info("inspecting {} to_device messages", msgs.size());
+        if (!msgs.events.empty())
+                console->info("inspecting {} to_device messages", msgs.events.size());
 
-        for (const auto &msg : msgs) {
-                console->info(msg.dump(2));
+        for (const auto &msg : msgs.events) {
+                console->info(std::visit(mtx::events::DeviceEventVisitor{}, msg).dump(2));
 
                 try {
-                        OlmMessage olm_msg = msg;
+                        OlmMessage olm_msg = std::visit(DeviceEventVisitor{}, msg);
                         decrypt_olm_message(std::move(olm_msg));
                 } catch (const nlohmann::json::exception &e) {
                         console->warn("parsing error for olm message: {}", e.what());

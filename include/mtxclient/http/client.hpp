@@ -10,7 +10,9 @@
 #include "mtx/events.hpp"             // for EventType, to_string, json
 #include "mtx/events/collections.hpp" // for TimelineEvents
 #include "mtx/identifiers.hpp"        // for User
+#include "mtx/identifiers.hpp"        // for Class user
 #include "mtx/pushrules.hpp"
+#include "mtx/requests.hpp"
 #include "mtx/responses/empty.hpp"   // for Empty, Logout, RoomInvite
 #include "mtxclient/http/errors.hpp" // for ClientError
 #include "mtxclient/utils.hpp"       // for random_token, url_encode, des...
@@ -402,6 +404,20 @@ public:
                             ErrCallback cb)
         {
                 send_to_device(event_type, generate_txn_id(), body, cb);
+        }
+        //! Send send-to-device events to a set of client devices with a specified transaction id.
+        template<typename EventContent, mtx::events::EventType Event>
+        void send_to_device(
+          const std::string &txid,
+          const std::map<mtx::identifiers::User, std::map<std::string, EventContent>> &messages,
+          ErrCallback callback)
+        {
+                json j;
+                for (const auto &[user, deviceToMessage] : messages)
+                        for (const auto &[deviceid, message] : deviceToMessage)
+                                j["messages"][user.to_string()][deviceid] = message;
+
+                send_to_device(mtx::events::to_string(Event), txid, j, callback);
         }
 
         //

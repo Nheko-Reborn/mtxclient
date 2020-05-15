@@ -3,6 +3,7 @@
 #include <string>
 
 #include <mtx/common.hpp>
+#include <mtx/events/collections.hpp>
 #include <nlohmann/json.hpp>
 
 using json = nlohmann::json;
@@ -83,6 +84,10 @@ struct Login
 
 void
 to_json(json &obj, const Login &request);
+
+//! Request payload for the `PUT /_matrix/client/r0/sendToDevice/{eventType}/{transcationID}`
+template<typename EventContent>
+using ToDeviceMessages = std::map<mtx::identifiers::User, std::map<std::string, EventContent>>;
 
 //! Request payload for the `POST /_matrix/client/r0/profile/{userId}/avatar_url` endpoint.
 struct AvatarUrl

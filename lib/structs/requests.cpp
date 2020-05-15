@@ -1,6 +1,10 @@
 #include "mtx/requests.hpp"
+#include "mtx/events/collections.hpp"
+#include "mtx/events/encrypted.hpp"
+#include <iostream>
 
 using json = nlohmann::json;
+using namespace mtx::events::collections;
 
 namespace mtx {
 namespace requests {
