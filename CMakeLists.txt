@@ -30,8 +30,6 @@ option(USE_BUNDLED_OPENSSL "Use the bundled version of OpenSSL."
 	${HUNTER_ENABLED})
 option(USE_BUNDLED_SODIUM "Use the bundled version of libsodium."
 	${HUNTER_ENABLED})
-option(USE_BUNDLED_ZLIB "Use the bundled version of zlib."
-	${HUNTER_ENABLED})
 
 if (CMAKE_VERSION VERSION_GREATER_EQUAL 3.12)
 project(matrix_client
@@ -90,16 +88,6 @@ find_package(OpenSSL REQUIRED)
 set_package_properties(OpenSSL PROPERTIES
 	DESCRIPTION "Open source SSL and TLS implementation and cryptographic library"
 	URL "https://www.openssl.org/"
-	TYPE REQUIRED
-	)
-
-if(USE_BUNDLED_ZLIB)
-	hunter_add_package(ZLIB)
-endif()
-find_package(ZLIB)
-set_package_properties(ZLIB PROPERTIES
-	DESCRIPTION "A free compression library unencumbered by patents"
-	URL "https://www.zlib.net/"
 	TYPE REQUIRED
 	)
 
@@ -227,7 +215,6 @@ target_link_libraries(matrix_client
 	OpenSSL::Crypto
 	OpenSSL::SSL
 	Olm::Olm
-	ZLIB::ZLIB
 	nlohmann_json::nlohmann_json)
 
 # NOTE(Nico): I can't figure out for the life of me, how to export that target
