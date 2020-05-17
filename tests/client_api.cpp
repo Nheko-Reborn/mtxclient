@@ -273,6 +273,60 @@ TEST(ClientAPI, CreateRoom)
         mtx_client->close();
 }
 
+TEST(ClientAPI, TagRoom)
+{
+        std::shared_ptr<Client> mtx_client = std::make_shared<Client>("localhost");
+
+        mtx_client->login(
+          "alice", "secret", [mtx_client](const mtx::responses::Login &, RequestErr err) {
+                  check_error(err);
+          });
+
+        while (mtx_client->access_token().empty())
+                sleep();
+
+        mtx::requests::CreateRoom req;
+        req.name  = "Name";
+        req.topic = "Topic";
+        mtx_client->create_room(
+          req, [mtx_client](const mtx::responses::CreateRoom &res, RequestErr err) {
+                  auto room_id = res.room_id;
+                  check_error(err);
+
+                  mtx_client->put_tag(
+                    room_id.to_string(), "u.Test", {0.5}, [mtx_client, room_id](RequestErr err) {
+                            check_error(err);
+
+                            mtx_client->get_tags(
+                              room_id.to_string(),
+                              [mtx_client, room_id](mtx::events::account_data::Tags tags,
+                                                    RequestErr err) {
+                                      check_error(err);
+
+                                      EXPECT_EQ(tags.tags.at("u.Test").order, 0.5);
+
+                                      mtx_client->delete_tag(
+                                        room_id.to_string(),
+                                        "u.Test",
+                                        [mtx_client, room_id](RequestErr err) {
+                                                check_error(err);
+
+                                                mtx_client->get_tags(
+                                                  room_id.to_string(),
+                                                  [mtx_client,
+                                                   room_id](mtx::events::account_data::Tags tags,
+                                                            RequestErr err) {
+                                                          check_error(err);
+                                                          EXPECT_EQ(tags.tags.count("u.Test"), 0);
+                                                  });
+                                        });
+                              });
+                    });
+          });
+
+        mtx_client->close();
+}
+
 TEST(ClientAPI, LogoutSuccess)
 {
         std::shared_ptr<Client> mtx_client = std::make_shared<Client>("localhost");

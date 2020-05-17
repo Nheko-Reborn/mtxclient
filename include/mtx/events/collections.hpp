@@ -55,7 +55,7 @@ using DeviceEvents = std::variant<events::DeviceEvent<msgs::RoomKey>,
 
 //! Collection of room specific account data
 using RoomAccountDataEvents =
-  std::variant<events::Event<account_data::Tag>, events::Event<pushrules::GlobalRuleset>>;
+  std::variant<events::Event<account_data::Tags>, events::Event<pushrules::GlobalRuleset>>;
 
 //! Collection of @p StateEvent only.
 using StateEvents = std::variant<events::StateEvent<states::Aliases>,

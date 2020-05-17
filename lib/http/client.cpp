@@ -18,10 +18,8 @@
 #include "mtxclient/http/session.hpp"
 #include "mtxclient/utils.hpp"
 
-#include "mtx/identifiers.hpp"
 #include "mtx/requests.hpp"
 #include "mtx/responses.hpp"
-#include <iostream>
 
 using namespace mtx::http;
 using namespace boost::beast;
@@ -558,6 +556,38 @@ Client::get_avatar_url(const std::string &user_id, Callback<mtx::responses::Avat
           [callback](const mtx::responses::AvatarUrl &res, HeaderFields, RequestErr err) {
                   callback(res, err);
           });
+}
+
+void
+Client::get_tags(const std::string &room_id, Callback<mtx::events::account_data::Tags> cb)
+{
+        get<mtx::events::account_data::Tags>(
+          "/client/r0/user/" + mtx::client::utils::url_encode(user_id_.to_string()) + "/rooms/" +
+            mtx::client::utils::url_encode(room_id) + "/tags",
+          [cb](const mtx::events::account_data::Tags &res, HeaderFields, RequestErr err) {
+                  cb(res, err);
+          });
+}
+void
+Client::put_tag(const std::string &room_id,
+                const std::string &tag_name,
+                const mtx::events::account_data::Tag &tag,
+                ErrCallback cb)
+{
+        put<mtx::events::account_data::Tag>("/client/r0/user/" +
+                                              mtx::client::utils::url_encode(user_id_.to_string()) +
+                                              "/rooms/" + mtx::client::utils::url_encode(room_id) +
+                                              "/tags/" + mtx::client::utils::url_encode(tag_name),
+                                            tag,
+                                            cb);
+}
+void
+Client::delete_tag(const std::string &room_id, const std::string &tag_name, ErrCallback cb)
+{
+        delete_("/client/r0/user/" + mtx::client::utils::url_encode(user_id_.to_string()) +
+                  "/rooms/" + mtx::client::utils::url_encode(room_id) + "/tags/" +
+                  mtx::client::utils::url_encode(tag_name),
+                cb);
 }
 
 void

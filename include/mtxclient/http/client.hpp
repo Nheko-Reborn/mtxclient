@@ -288,6 +288,17 @@ public:
         void get_profile(const std::string &user_id, Callback<mtx::responses::Profile> cb);
         //! Get user avatar URL.
         void get_avatar_url(const std::string &user_id, Callback<mtx::responses::AvatarUrl> cb);
+
+        //! List the tags set by a user on a room.
+        void get_tags(const std::string &room_id, Callback<mtx::events::account_data::Tags> cb);
+        //! Add a tag to the room.
+        void put_tag(const std::string &room_id,
+                     const std::string &tag_name,
+                     const mtx::events::account_data::Tag &tag,
+                     ErrCallback cb);
+        //! Remove a tag from the room.
+        void delete_tag(const std::string &room_id, const std::string &tag_name, ErrCallback cb);
+
         //! Create a room with the given options.
         void create_room(const mtx::requests::CreateRoom &room_options,
                          Callback<mtx::responses::CreateRoom> cb);

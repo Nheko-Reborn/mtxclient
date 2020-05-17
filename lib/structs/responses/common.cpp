@@ -237,7 +237,7 @@ parse_room_account_data_events(
                 switch (type) {
                 case events::EventType::Tag: {
                         try {
-                                container.emplace_back(events::Event<Tag>(e));
+                                container.emplace_back(events::Event<Tags>(e));
                         } catch (json::exception &err) {
                                 log_error(err, e);
                         }

@@ -1020,7 +1020,7 @@ TEST(Collection, Events)
         ASSERT_TRUE(std::get_if<ns::StateEvent<ns::state::Aliases>>(&event.data) != nullptr);
 }
 
-TEST(RoomAccountData, Tag)
+TEST(RoomAccountData, Tags)
 {
         json data = R"({
           "content": {
@@ -1039,11 +1039,12 @@ TEST(RoomAccountData, Tag)
           "type": "m.tag"
         })"_json;
 
-        ns::Event<ns::account_data::Tag> event = data;
+        ns::Event<ns::account_data::Tags> event = data;
 
         EXPECT_EQ(event.type, ns::EventType::Tag);
         EXPECT_EQ(event.content.tags.size(), 3);
-        EXPECT_EQ(event.content.tags.at("m.favourite").at("order"), 1);
-        EXPECT_EQ(event.content.tags.at("u.Project1").at("order"), 0);
-        EXPECT_EQ(event.content.tags.at("com.example.nheko.text").at("associated_data").size(), 3);
+        EXPECT_EQ(event.content.tags.at("m.favourite").order, 1);
+        EXPECT_EQ(event.content.tags.at("u.Project1").order, 0);
+        // NOTE(Nico): We are currently not parsing arbitrary attached json data (anymore).
+        EXPECT_EQ(event.content.tags.at("com.example.nheko.text").order, std::nullopt);
 }
