@@ -687,8 +687,9 @@ mtx::http::Client::send_state_event(const std::string &room_id,
                                     const Payload &payload,
                                     Callback<mtx::responses::EventId> callback)
 {
-        const auto api_path = "/client/r0/rooms/" + room_id + "/state/" +
-                              mtx::events::to_string(Event) + "/" + state_key;
+        const auto api_path = "/client/r0/rooms/" + mtx::client::utils::url_encode(room_id) +
+                              "/state/" + mtx::events::to_string(Event) + "/" +
+                              mtx::client::utils::url_encode(state_key);
 
         put<Payload, mtx::responses::EventId>(api_path, payload, callback);
 }
