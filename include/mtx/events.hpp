@@ -93,6 +93,8 @@ struct Event
         //! This *should* be namespaced similar to Java package
         //! naming conventions e.g. 'com.example.subdomain.event.type'
         EventType type;
+        //! Contains the fully-qualified ID of the user who sent this event.
+        std::string sender;
 };
 
 template<class Content>
@@ -100,6 +102,7 @@ void
 to_json(json &obj, const Event<Content> &event)
 {
         obj["content"] = event.content;
+        obj["sender"]  = event.sender;
 
         switch (event.type) {
         case EventType::KeyVerificationStart:
@@ -201,6 +204,7 @@ from_json(const json &obj, Event<Content> &event)
 {
         event.content = obj.at("content").get<Content>();
         event.type    = getEventType(obj.at("type").get<std::string>());
+        event.sender  = obj.value("sender", "");
 }
 
 //! Extension of the Event type for device events.
@@ -286,7 +290,6 @@ to_json(json &obj, const UnsignedData &event)
 template<class Content>
 struct StrippedEvent : public Event<Content>
 {
-        std::string sender;
         std::string state_key;
 };
 
@@ -294,9 +297,9 @@ template<class Content>
 void
 from_json(const json &obj, StrippedEvent<Content> &event)
 {
-        event.content   = obj.at("content").get<Content>();
-        event.type      = getEventType(obj.at("type").get<std::string>());
-        event.sender    = obj.at("sender");
+        Event<Content> &base = event;
+        from_json(obj, base);
+
         event.state_key = obj.at("state_key");
 }
 
@@ -307,7 +310,6 @@ to_json(json &obj, const StrippedEvent<Content> &event)
         Event<Content> base_event = event;
         to_json(obj, base_event);
 
-        obj["sender"]    = event.sender;
         obj["state_key"] = event.state_key;
 }
 
@@ -319,8 +321,6 @@ struct RoomEvent : public Event<Content>
         std::string event_id;
         //! The ID of the room associated with this event.
         std::string room_id;
-        //! Contains the fully-qualified ID of the user who sent this event.
-        std::string sender;
         //! Timestamp in milliseconds on originating homeserver
         //! when this event was sent.
         uint64_t origin_server_ts;
@@ -333,11 +333,10 @@ template<class Content>
 void
 from_json(const json &obj, RoomEvent<Content> &event)
 {
-        event.content = obj.at("content").get<Content>();
-        event.type    = getEventType(obj.at("type").get<std::string>());
+        Event<Content> &base = event;
+        from_json(obj, base);
 
         event.event_id         = obj.at("event_id");
-        event.sender           = obj.at("sender");
         event.origin_server_ts = obj.at("origin_server_ts");
 
         // SPEC_BUG: Not present in the state array returned by /sync.
@@ -359,7 +358,6 @@ to_json(json &obj, const RoomEvent<Content> &event)
                 obj["room_id"] = event.room_id;
 
         obj["event_id"]         = event.event_id;
-        obj["sender"]           = event.sender;
         obj["unsigned"]         = event.unsigned_data;
         obj["origin_server_ts"] = event.origin_server_ts;
 }
@@ -387,17 +385,8 @@ template<class Content>
 void
 from_json(const json &obj, StateEvent<Content> &event)
 {
-        event.content          = obj.at("content").get<Content>();
-        event.event_id         = obj.at("event_id");
-        event.origin_server_ts = obj.at("origin_server_ts");
-        event.sender           = obj.at("sender");
-        event.type             = getEventType(obj.at("type").get<std::string>());
-
-        if (obj.find("room_id") != obj.end())
-                event.room_id = obj.at("room_id");
-
-        if (obj.find("unsigned") != obj.end())
-                event.unsigned_data = obj.at("unsigned");
+        RoomEvent<Content> &base = event;
+        from_json(obj, base);
 
         event.state_key = obj.at("state_key").get<std::string>();
 }
@@ -424,17 +413,8 @@ template<class Content>
 void
 from_json(const json &obj, RedactionEvent<Content> &event)
 {
-        event.content          = obj.at("content").get<Content>();
-        event.event_id         = obj.at("event_id");
-        event.origin_server_ts = obj.at("origin_server_ts");
-        event.sender           = obj.at("sender");
-        event.type             = getEventType(obj.at("type").get<std::string>());
-
-        if (obj.find("unsigned") != obj.end())
-                event.unsigned_data = obj.at("unsigned");
-
-        if (obj.find("room_id") != obj.end())
-                event.room_id = obj.at("room_id");
+        RoomEvent<Content> &base = event;
+        from_json(obj, base);
 
         event.redacts = obj.at("redacts").get<std::string>();
 }
@@ -456,17 +436,8 @@ template<class Content>
 void
 from_json(const json &obj, EncryptedEvent<Content> &event)
 {
-        event.content          = obj.at("content").get<Content>();
-        event.event_id         = obj.at("event_id");
-        event.origin_server_ts = obj.at("origin_server_ts");
-        event.sender           = obj.at("sender");
-        event.type             = getEventType(obj.at("type").get<std::string>());
-
-        if (obj.find("unsigned") != obj.end())
-                event.unsigned_data = obj.at("unsigned");
-
-        if (obj.find("room_id") != obj.end())
-                event.room_id = obj.at("room_id");
+        RoomEvent<Content> &base = event;
+        from_json(obj, base);
 }
 
 enum class MessageType
