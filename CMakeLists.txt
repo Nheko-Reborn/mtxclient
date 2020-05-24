@@ -413,6 +413,13 @@ if(BUILD_LIB_TESTS)
 		GTest::GTest
 		GTest::Main)
 
+	foreach(mytarget IN ITEMS
+		client_api media_api e2ee utils pushrules connection identifiers events
+		messages responses requests errors crypto)
+		set_property(TARGET ${mytarget} PROPERTY CXX_STANDARD 17)
+		set_property(TARGET ${mytarget} PROPERTY CXX_EXTENSIONS OFF)
+	endforeach()
+
 	add_test(BasicConnectivity connection)
 	add_test(ClientAPI client_api)
 	add_test(MediaAPI media_api)
