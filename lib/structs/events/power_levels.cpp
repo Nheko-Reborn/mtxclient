@@ -14,28 +14,28 @@ from_json(const json &obj, PowerLevels &power_levels)
 {
         // SPEC_BUG: Not always present.
         if (obj.count("ban") != 0)
-                power_levels.ban = obj.at("ban").get<uint16_t>();
+                power_levels.ban = obj.at("ban").get<power_level_t>();
 
         if (obj.count("invite") != 0)
-                power_levels.invite = obj.at("invite").get<uint16_t>();
+                power_levels.invite = obj.at("invite").get<power_level_t>();
 
         if (obj.count("kick") != 0)
-                power_levels.kick = obj.at("kick").get<uint16_t>();
+                power_levels.kick = obj.at("kick").get<power_level_t>();
 
         if (obj.count("redact") != 0)
-                power_levels.redact = obj.at("redact").get<uint16_t>();
+                power_levels.redact = obj.at("redact").get<power_level_t>();
 
         if (obj.count("events") != 0)
-                power_levels.events = obj.at("events").get<std::map<std::string, uint16_t>>();
+                power_levels.events = obj.at("events").get<std::map<std::string, power_level_t>>();
         if (obj.count("users") != 0)
-                power_levels.users = obj.at("users").get<std::map<std::string, uint16_t>>();
+                power_levels.users = obj.at("users").get<std::map<std::string, power_level_t>>();
 
         if (obj.count("events_default") != 0)
-                power_levels.events_default = obj.at("events_default").get<uint16_t>();
+                power_levels.events_default = obj.at("events_default").get<power_level_t>();
         if (obj.count("users_default") != 0)
-                power_levels.users_default = obj.at("users_default").get<uint16_t>();
+                power_levels.users_default = obj.at("users_default").get<power_level_t>();
         if (obj.count("state_default") != 0)
-                power_levels.state_default = obj.at("state_default").get<uint16_t>();
+                power_levels.state_default = obj.at("state_default").get<power_level_t>();
 }
 
 void
