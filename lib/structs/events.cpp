@@ -64,6 +64,14 @@ getEventType(const std::string &type)
                 return EventType::Tag;
         else if (type == "m.push_rules")
                 return EventType::PushRules;
+        else if (type == "m.call.invite")
+                return EventType::CallInvite;
+        else if (type == "m.call.candidates")
+                return EventType::CallCandidates;
+        else if (type == "m.call.answer")
+                return EventType::CallAnswer;
+        else if (type == "m.call.hangup")
+                return EventType::CallHangUp;
 
         return EventType::Unsupported;
 }
@@ -130,6 +138,14 @@ to_string(EventType type)
                 return "m.tag";
         case EventType::PushRules:
                 return "m.push_rules";
+        case EventType::CallInvite:
+                return "m.call.invite";
+        case EventType::CallCandidates:
+                return "m.call.candidates";
+        case EventType::CallAnswer:
+                return "m.call.answer";
+        case EventType::CallHangUp:
+                return "m.call.hangup";
         case EventType::Unsupported:
                 return "";
         }
