@@ -815,7 +815,8 @@ TEST(RoomEvents, CallCandidates)
         EXPECT_EQ(event.content.call_id, "c1591052749788");
         EXPECT_EQ(event.content.candidates[0].sdpMid, "audio");
         EXPECT_EQ(event.content.candidates[0].sdpMLineIndex, 0);
-        EXPECT_EQ(event.content.candidates[0].candidate, "candidate:863018703 1 udp 2122260223 10.9.64.156 43670 typ host generation 0");
+        EXPECT_EQ(event.content.candidates[0].candidate,
+                  "candidate:863018703 1 udp 2122260223 10.9.64.156 43670 typ host generation 0");
         EXPECT_EQ(event.content.version, 0);
 
         EXPECT_EQ(data, json(event));

@@ -18,7 +18,7 @@ struct CallInvite
         std::string call_id;
         //! The SDP text of the session description.
         std::string sdp;
-        //! The version of the VoIP specification this message adheres to. 
+        //! The version of the VoIP specification this message adheres to.
         uint16_t version;
         //! The time in milliseconds that the invite is valid for.
         uint32_t lifetime;
@@ -47,7 +47,7 @@ struct CallCandidates
         std::string call_id;
         //! Array of objects describing the candidates.
         std::vector<Candidate> candidates;
-        //! The version of the VoIP specification this message adheres to. 
+        //! The version of the VoIP specification this message adheres to.
         uint16_t version;
 };
 
@@ -64,7 +64,7 @@ struct CallAnswer
         std::string call_id;
         //! The SDP text of the session description.
         std::string sdp;
-        //! The version of the VoIP specification this message adheres to. 
+        //! The version of the VoIP specification this message adheres to.
         uint16_t version;
 };
 
@@ -73,7 +73,6 @@ from_json(const nlohmann::json &obj, CallAnswer &content);
 
 void
 to_json(nlohmann::json &obj, const CallAnswer &content);
-
 
 //! Content for the `m.call.hangup` event
 struct CallHangUp
@@ -87,7 +86,7 @@ struct CallHangUp
 
         //! The ID of the call this event relates to.
         std::string call_id;
-        //! The version of the VoIP specification this message adheres to. 
+        //! The version of the VoIP specification this message adheres to.
         uint16_t version;
         //! The reason for the call hang up.
         Reason reason = Reason::User;

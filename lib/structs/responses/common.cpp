@@ -594,7 +594,7 @@ parse_timeline_events(const json &events,
                 case events::EventType::CallInvite: {
                         try {
                                 container.emplace_back(
-                                    events::RoomEvent<events::msg::CallInvite>(e));
+                                  events::RoomEvent<events::msg::CallInvite>(e));
                         } catch (json::exception &err) {
                                 log_error(err, e);
                         }
@@ -604,7 +604,7 @@ parse_timeline_events(const json &events,
                 case events::EventType::CallCandidates: {
                         try {
                                 container.emplace_back(
-                                    events::RoomEvent<events::msg::CallCandidates>(e));
+                                  events::RoomEvent<events::msg::CallCandidates>(e));
                         } catch (json::exception &err) {
                                 log_error(err, e);
                         }
@@ -614,7 +614,7 @@ parse_timeline_events(const json &events,
                 case events::EventType::CallAnswer: {
                         try {
                                 container.emplace_back(
-                                    events::RoomEvent<events::msg::CallAnswer>(e));
+                                  events::RoomEvent<events::msg::CallAnswer>(e));
                         } catch (json::exception &err) {
                                 log_error(err, e);
                         }
@@ -624,7 +624,7 @@ parse_timeline_events(const json &events,
                 case events::EventType::CallHangUp: {
                         try {
                                 container.emplace_back(
-                                    events::RoomEvent<events::msg::CallHangUp>(e));
+                                  events::RoomEvent<events::msg::CallHangUp>(e));
                         } catch (json::exception &err) {
                                 log_error(err, e);
                         }
