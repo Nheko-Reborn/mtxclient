@@ -741,3 +741,151 @@ TEST(RoomEvents, Encrypted)
 
         EXPECT_EQ(data, json(event));
 }
+
+TEST(RoomEvents, CallInvite)
+{
+        nlohmann::json data = R"({
+          "content": {
+            "call_id": "c1591052749788",
+            "offer": {
+              "sdp": "v=0\r\no=- 6584580628695956864 2 IN IP4 127.0.0.1[...]",
+              "type": "offer"
+            },
+            "version": 0,
+            "lifetime": 120000
+          },
+          "event_id": "$143273582443PhrSn:example.org",
+          "origin_server_ts": 1432735824653,
+          "room_id": "!jEsUZKDJdhlrceRyVU:example.org",
+          "sender": "@example:example.org",
+          "type": "m.call.invite",
+          "unsigned": {
+            "age": 1234
+          }
+        })"_json;
+
+        RoomEvent<msg::CallInvite> event = data;
+
+        EXPECT_EQ(event.event_id, "$143273582443PhrSn:example.org");
+        EXPECT_EQ(event.origin_server_ts, 1432735824653L);
+        EXPECT_EQ(event.room_id, "!jEsUZKDJdhlrceRyVU:example.org");
+        EXPECT_EQ(event.sender, "@example:example.org");
+        EXPECT_EQ(event.type, EventType::CallInvite);
+        EXPECT_EQ(event.unsigned_data.age, 1234);
+        EXPECT_EQ(event.content.call_id, "c1591052749788");
+        EXPECT_EQ(event.content.sdp, "v=0\r\no=- 6584580628695956864 2 IN IP4 127.0.0.1[...]");
+        EXPECT_EQ(event.content.version, 0);
+        EXPECT_EQ(event.content.lifetime, 120000);
+
+        EXPECT_EQ(data, json(event));
+}
+
+TEST(RoomEvents, CallCandidates)
+{
+        nlohmann::json data = R"({
+          "content": {
+            "call_id": "c1591052749788",
+            "candidates": [
+              {
+                "sdpMid": "audio",
+                "sdpMLineIndex": 0,
+                "candidate": "candidate:863018703 1 udp 2122260223 10.9.64.156 43670 typ host generation 0"
+              }
+            ],
+            "version": 0
+          },
+          "event_id": "$143273582443PhrSn:example.org",
+          "origin_server_ts": 1432735824653,
+          "room_id": "!jEsUZKDJdhlrceRyVU:example.org",
+          "sender": "@example:example.org",
+          "type": "m.call.candidates",
+          "unsigned": {
+            "age": 1234
+          }
+        })"_json;
+
+        RoomEvent<msg::CallCandidates> event = data;
+
+        EXPECT_EQ(event.event_id, "$143273582443PhrSn:example.org");
+        EXPECT_EQ(event.origin_server_ts, 1432735824653L);
+        EXPECT_EQ(event.room_id, "!jEsUZKDJdhlrceRyVU:example.org");
+        EXPECT_EQ(event.sender, "@example:example.org");
+        EXPECT_EQ(event.type, EventType::CallCandidates);
+        EXPECT_EQ(event.unsigned_data.age, 1234);
+        EXPECT_EQ(event.content.call_id, "c1591052749788");
+        EXPECT_EQ(event.content.candidates[0].sdpMid, "audio");
+        EXPECT_EQ(event.content.candidates[0].sdpMLineIndex, 0);
+        EXPECT_EQ(event.content.candidates[0].candidate, "candidate:863018703 1 udp 2122260223 10.9.64.156 43670 typ host generation 0");
+        EXPECT_EQ(event.content.version, 0);
+
+        EXPECT_EQ(data, json(event));
+}
+
+TEST(RoomEvents, CallAnswer)
+{
+        nlohmann::json data = R"({
+          "content": {
+            "call_id": "c1591052749788",
+            "answer": {
+              "sdp": "v=0\r\no=- 6584580628695956864 2 IN IP4 127.0.0.1[...]",
+              "type": "answer"
+            },
+            "version": 0
+          },
+          "event_id": "$143273582443PhrSn:example.org",
+          "origin_server_ts": 1432735824653,
+          "room_id": "!jEsUZKDJdhlrceRyVU:example.org",
+          "sender": "@example:example.org",
+          "type": "m.call.invite",
+          "unsigned": {
+            "age": 1234
+          }
+        })"_json;
+
+        RoomEvent<msg::CallAnswer> event = data;
+
+        EXPECT_EQ(event.event_id, "$143273582443PhrSn:example.org");
+        EXPECT_EQ(event.origin_server_ts, 1432735824653L);
+        EXPECT_EQ(event.room_id, "!jEsUZKDJdhlrceRyVU:example.org");
+        EXPECT_EQ(event.sender, "@example:example.org");
+        EXPECT_EQ(event.type, EventType::CallAnswer);
+        EXPECT_EQ(event.unsigned_data.age, 1234);
+        EXPECT_EQ(event.content.call_id, "c1591052749788");
+        EXPECT_EQ(event.content.sdp, "v=0\r\no=- 6584580628695956864 2 IN IP4 127.0.0.1[...]");
+        EXPECT_EQ(event.content.version, 0);
+
+        EXPECT_EQ(data, json(event));
+}
+
+TEST(RoomEvents, CallHangUp)
+{
+        nlohmann::json data = R"({
+          "content": {
+            "call_id": "c1591052749788",
+            "version": 0,
+            "reason": "invite_timeout"
+          },
+          "event_id": "$143273582443PhrSn:example.org",
+          "origin_server_ts": 1432735824653,
+          "room_id": "!jEsUZKDJdhlrceRyVU:example.org",
+          "sender": "@example:example.org",
+          "type": "m.call.hangup",
+          "unsigned": {
+            "age": 1234
+          }
+        })"_json;
+
+        RoomEvent<msg::CallHangUp> event = data;
+
+        EXPECT_EQ(event.event_id, "$143273582443PhrSn:example.org");
+        EXPECT_EQ(event.origin_server_ts, 1432735824653L);
+        EXPECT_EQ(event.room_id, "!jEsUZKDJdhlrceRyVU:example.org");
+        EXPECT_EQ(event.sender, "@example:example.org");
+        EXPECT_EQ(event.type, EventType::CallHangUp);
+        EXPECT_EQ(event.unsigned_data.age, 1234);
+        EXPECT_EQ(event.content.call_id, "c1591052749788");
+        EXPECT_EQ(event.content.version, 0);
+        EXPECT_EQ(event.content.reason, CallHangUp::InviteTimeOut);
+
+        EXPECT_EQ(data, json(event));
+}
