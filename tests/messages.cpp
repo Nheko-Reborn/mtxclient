@@ -836,7 +836,7 @@ TEST(RoomEvents, CallAnswer)
           "origin_server_ts": 1432735824653,
           "room_id": "!jEsUZKDJdhlrceRyVU:example.org",
           "sender": "@example:example.org",
-          "type": "m.call.invite",
+          "type": "m.call.answer",
           "unsigned": {
             "age": 1234
           }
@@ -885,7 +885,7 @@ TEST(RoomEvents, CallHangUp)
         EXPECT_EQ(event.unsigned_data.age, 1234);
         EXPECT_EQ(event.content.call_id, "c1591052749788");
         EXPECT_EQ(event.content.version, 0);
-        EXPECT_EQ(event.content.reason, CallHangUp::InviteTimeOut);
+        EXPECT_EQ(event.content.reason, msg::CallHangUp::Reason::InviteTimeOut);
 
         EXPECT_EQ(data, json(event));
 }
