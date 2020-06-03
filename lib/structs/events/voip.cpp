@@ -12,8 +12,8 @@ from_json(const json &obj, CallInvite &content)
 {
         content.call_id = obj.at("call_id").get<std::string>();
         content.sdp = obj.at("offer").at("sdp").get<std::string>();
-        content.version = obj.at("version").get<uint64_t>();
-        content.lifetime = obj.at("lifetime").get<uint64_t>();
+        content.version = obj.at("version").get<uint16_t>();
+        content.lifetime = obj.at("lifetime").get<uint32_t>();
 }
 
 void
@@ -30,7 +30,7 @@ void
 from_json(const json &obj, CallCandidates::Candidate &content)
 {
         content.sdpMid = obj.at("sdpMid").get<std::string>();
-        content.sdpMLineIndex = obj.at("sdpMLineIndex").get<uint64_t>();
+        content.sdpMLineIndex = obj.at("sdpMLineIndex").get<uint16_t>();
         content.candidate = obj.at("candidate").get<std::string>();
 }
 
@@ -47,7 +47,7 @@ from_json(const json &obj, CallCandidates &content)
 {
         content.call_id = obj.at("call_id").get<std::string>();
         content.candidates = obj.at("candidates").get<std::vector<CallCandidates::Candidate>>();
-        content.version = obj.at("version").get<uint64_t>();
+        content.version = obj.at("version").get<uint16_t>();
 }
 
 void
@@ -64,7 +64,7 @@ from_json(const json &obj, CallAnswer &content)
 {
         content.call_id = obj.at("call_id").get<std::string>();
         content.sdp = obj.at("answer").at("sdp").get<std::string>();
-        content.version = obj.at("version").get<uint64_t>();
+        content.version = obj.at("version").get<uint16_t>();
 }
 
 void
@@ -80,7 +80,7 @@ void
 from_json(const json &obj, CallHangUp &content)
 {
         content.call_id = obj.at("call_id").get<std::string>();
-        content.version = obj.at("version").get<uint64_t>();
+        content.version = obj.at("version").get<uint16_t>();
         if (obj.count("reason") == 0) {
                 content.reason = CallHangUp::Reason::User;
         }

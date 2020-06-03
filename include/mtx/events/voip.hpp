@@ -21,7 +21,7 @@ struct CallInvite
         //! The version of the VoIP specification this message adheres to. 
         uint16_t version;
         //! The time in milliseconds that the invite is valid for.
-        uint64_t lifetime;
+        uint32_t lifetime;
 };
 
 void
