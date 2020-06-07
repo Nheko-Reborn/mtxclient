@@ -235,6 +235,13 @@ from_json(const json &obj, Sync &response)
                 response.device_one_time_keys_count =
                   obj.at("device_one_time_keys_count").get<std::map<std::string, uint16_t>>();
 
+        if (obj.count("presence") != 0) {
+                response.presence =
+                  obj.at("presence")
+                    .at("events")
+                    .get<std::vector<mtx::events::Event<mtx::events::presence::Presence>>>();
+        }
+
         response.next_batch = obj.at("next_batch").get<std::string>();
 }
 }

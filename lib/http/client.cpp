@@ -689,6 +689,9 @@ Client::sync(const SyncOpts &opts, Callback<mtx::responses::Sync> callback)
         if (opts.full_state)
                 params.emplace("full_state", "true");
 
+        if (opts.set_presence)
+                params.emplace("set_presence", mtx::presence::to_string(opts.set_presence.value()));
+
         params.emplace("timeout", std::to_string(opts.timeout));
 
         get<mtx::responses::Sync>("/client/r0/sync?" + mtx::client::utils::query_params(params),
@@ -818,6 +821,33 @@ Client::stop_typing(const std::string &room_id, ErrCallback callback)
         req.typing = false;
 
         put<mtx::requests::TypingNotification>(api_path, req, callback);
+}
+
+void
+Client::presence_status(const std::string &user_id,
+                        Callback<mtx::events::presence::Presence> callback)
+{
+        using mtx::client::utils::url_encode;
+        const auto api_path = "/client/r0/presence/" + url_encode(user_id) + "/status";
+        get<mtx::events::presence::Presence>(api_path,
+                                             [callback](const mtx::events::presence::Presence &res,
+                                                        HeaderFields,
+                                                        RequestErr err) { callback(res, err); });
+}
+void
+Client::put_presence_status(mtx::presence::PresenceState state,
+                            std::optional<std::string> status_msg,
+                            ErrCallback cb)
+{
+        using mtx::client::utils::url_encode;
+        const auto api_path = "/client/r0/presence/" + url_encode(user_id_.to_string()) + "/status";
+
+        nlohmann::json body;
+        body["presence"] = mtx::presence::to_string(state);
+        if (status_msg)
+                body["status_msg"] = *status_msg;
+
+        put<nlohmann::json>(api_path, body, cb);
 }
 
 void

@@ -109,6 +109,8 @@ struct SyncOpts
         uint16_t timeout = 30'000;
         //! Wheter to include the full state of each room.
         bool full_state = false;
+        //! Explicitly set the presence of the user
+        std::optional<mtx::presence::PresenceState> set_presence;
 };
 
 //! Configuration for the /messages endpoint.
@@ -376,6 +378,15 @@ public:
         void start_typing(const std::string &room_id, uint64_t timeout, ErrCallback cb);
         //! Remove typing notifications from the room.
         void stop_typing(const std::string &room_id, ErrCallback cb);
+
+        //! Get presence of a user
+        void presence_status(const std::string &user_id,
+                             Callback<mtx::events::presence::Presence> cb);
+        //! Set presence of the user
+        void put_presence_status(mtx::presence::PresenceState state,
+                                 std::optional<std::string> status_msg,
+                                 ErrCallback cb);
+
         //! Get a single event.
         void get_event(const std::string &room_id,
                        const std::string &event_id,

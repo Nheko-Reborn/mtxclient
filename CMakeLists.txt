@@ -163,8 +163,8 @@ target_sources(matrix_client
 	lib/structs/events/aliases.cpp
 	lib/structs/events/avatar.cpp
 	lib/structs/events/canonical_alias.cpp
-	lib/structs/events/common.cpp
 	lib/structs/events/collections.cpp
+	lib/structs/events/common.cpp
 	lib/structs/events/create.cpp
 	lib/structs/events/encrypted.cpp
 	lib/structs/events/encryption.cpp
@@ -175,6 +175,7 @@ target_sources(matrix_client
 	lib/structs/events/name.cpp
 	lib/structs/events/pinned_events.cpp
 	lib/structs/events/power_levels.cpp
+	lib/structs/events/presence.cpp
 	lib/structs/events/reaction.cpp
 	lib/structs/events/redaction.cpp
 	lib/structs/events/tag.cpp

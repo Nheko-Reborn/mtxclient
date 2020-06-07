@@ -67,6 +67,8 @@ enum class EventType
         Sticker,
         // m.tag
         Tag,
+        // m.presence
+        Presence,
         // m.push_rules
         PushRules,
         // Unsupported event

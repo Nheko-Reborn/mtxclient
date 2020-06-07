@@ -1,5 +1,4 @@
 #include <atomic>
-#include <iostream>
 
 #include <boost/algorithm/string.hpp>
 #include <boost/variant.hpp>
@@ -843,6 +842,120 @@ TEST(ClientAPI, Typing)
                           });
                 });
         });
+
+        alice->close();
+}
+
+TEST(ClientAPI, Presence)
+{
+        auto alice = std::make_shared<Client>("localhost");
+
+        alice->login("alice", "secret", [](const mtx::responses::Login &, RequestErr err) {
+                check_error(err);
+        });
+
+        while (alice->access_token().empty())
+                sleep();
+
+        alice->put_presence_status(
+          mtx::presence::unavailable, "Is this thing on?", [alice](RequestErr err) {
+                  check_error(err);
+
+                  alice->presence_status(
+                    alice->user_id().to_string(),
+                    [alice](const mtx::events::presence::Presence &presence, RequestErr err) {
+                            check_error(err);
+
+                            EXPECT_EQ(presence.presence, mtx::presence::unavailable);
+                            EXPECT_EQ(presence.status_msg, "Is this thing on?");
+
+                            alice->put_presence_status(
+                              mtx::presence::offline, std::nullopt, [alice](RequestErr err) {
+                                      check_error(err);
+
+                                      alice->presence_status(
+                                        alice->user_id().to_string(),
+                                        [alice](const mtx::events::presence::Presence &presence,
+                                                RequestErr err) {
+                                                check_error(err);
+
+                                                EXPECT_EQ(presence.presence,
+                                                          mtx::presence::offline);
+                                                EXPECT_TRUE(presence.status_msg.empty());
+                                        });
+                              });
+                    });
+          });
+
+        alice->close();
+}
+
+TEST(ClientAPI, PresenceOverSync)
+{
+        auto alice = std::make_shared<Client>("localhost");
+        auto bob   = std::make_shared<Client>("localhost");
+
+        alice->login("alice", "secret", [](const mtx::responses::Login &, RequestErr err) {
+                check_error(err);
+        });
+        bob->login(
+          "bob", "secret", [](const mtx::responses::Login &, RequestErr err) { check_error(err); });
+
+        while (alice->access_token().empty() && bob->access_token().empty())
+                sleep();
+
+        mtx::requests::CreateRoom req;
+        req.invite = {"@bob:localhost"};
+        alice->create_room(
+          req, [alice, bob](const mtx::responses::CreateRoom &res, RequestErr err) {
+                  check_error(err);
+                  auto room_id = res.room_id.to_string();
+
+                  bob->join_room(
+                    room_id, [alice, bob, room_id](const nlohmann::json &, RequestErr err) {
+                            check_error(err);
+                            alice->put_presence_status(
+                              mtx::presence::unavailable,
+                              "Is this thing on?",
+                              [alice, bob](RequestErr err) {
+                                      check_error(err);
+
+                                      SyncOpts opts;
+                                      opts.timeout      = 10;
+                                      opts.set_presence = mtx::presence::online;
+                                      alice->sync(
+                                        opts,
+                                        [bob, opts](const mtx::responses::Sync &, RequestErr err) {
+                                                check_error(err);
+
+                                                bob->sync(
+                                                  opts,
+                                                  [bob](const mtx::responses::Sync &s,
+                                                        RequestErr err) {
+                                                          check_error(err);
+
+                                                          ASSERT_GE(s.presence.size(), 1);
+
+                                                          bool found = false;
+                                                          for (const auto &p : s.presence) {
+                                                                  if (p.sender ==
+                                                                      "@alice:localhost") {
+                                                                          found = true;
+                                                                          EXPECT_EQ(
+                                                                            p.content.presence,
+                                                                            mtx::presence::online);
+                                                                          EXPECT_EQ(
+                                                                            p.content.status_msg,
+                                                                            "Is this thing "
+                                                                            "on?");
+                                                                  }
+                                                                  EXPECT_TRUE(found);
+                                                          }
+                                                  });
+                                        });
+                              });
+                    });
+          });
 
         alice->close();
 }
