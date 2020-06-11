@@ -60,6 +60,7 @@ struct Profile;
 struct QueryKeys;
 struct Register;
 struct Sync;
+struct TurnServer;
 struct UploadKeys;
 struct Versions;
 struct WellKnown;
@@ -471,6 +472,9 @@ public:
 
         //! Enable encryption in a room by sending a `m.room.encryption` state event.
         void enable_encryption(const std::string &room, Callback<mtx::responses::EventId> cb);
+
+        //! Gets any TURN server URIs and authentication credentials
+        void get_turn_server(Callback<mtx::responses::TurnServer> cb);
 
 private:
         template<class Request, class Response>

@@ -13,5 +13,6 @@
 #include "responses/profile.hpp"
 #include "responses/register.hpp"
 #include "responses/sync.hpp"
+#include "responses/turn_server.hpp"
 #include "responses/version.hpp"
 #include "responses/well-known.hpp"

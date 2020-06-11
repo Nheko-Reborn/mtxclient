@@ -1050,3 +1050,13 @@ Client::enable_encryption(const std::string &room, Callback<mtx::responses::Even
 
         send_state_event<state::Encryption, EventType::RoomEncryption>(room, "", event, callback);
 }
+
+void
+Client::get_turn_server(Callback<mtx::responses::TurnServer> cb)
+{
+  get<mtx::responses::TurnServer>(
+    "/client/r0/voip/turnServer",
+    [cb](const mtx::responses::TurnServer &res, HeaderFields, RequestErr err) {
+            cb(res, err);
+    });
+}

@@ -200,6 +200,7 @@ target_sources(matrix_client
 	lib/structs/responses/profile.cpp
 	lib/structs/responses/register.cpp
 	lib/structs/responses/sync.cpp
+	lib/structs/responses/turn_server.cpp
 	lib/structs/responses/version.cpp
 	lib/structs/responses/well-known.cpp)
 add_library(MatrixClient::MatrixClient ALIAS matrix_client)
