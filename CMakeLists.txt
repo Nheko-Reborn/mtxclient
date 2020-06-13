@@ -35,12 +35,12 @@ option(USE_BUNDLED_SODIUM "Use the bundled version of libsodium."
 
 if (CMAKE_VERSION VERSION_GREATER_EQUAL 3.12)
 project(matrix_client
-	VERSION 0.3.0
+	VERSION 0.3.1
 	DESCRIPTION "Client API library for Matrix, built on top of Boost.Asio"
 	HOMEPAGE_URL https://github.com/Nheko-Reborn/mtxclient)
 else()
 project(matrix_client
-	VERSION 0.3.0
+	VERSION 0.3.1
 	DESCRIPTION "Client API library for Matrix, built on top of Boost.Asio")
 endif()
 
