@@ -58,7 +58,7 @@ mtx::client::utils::random_token(uint8_t len, bool with_symbols) noexcept
 
         const auto chars = with_symbols ? alphanumberic + symbols : alphanumberic;
 
-        std::random_device rng;
+        thread_local std::random_device rng;
         std::uniform_int_distribution<> index_dist(0, chars.size() - 1);
 
         std::string token;
