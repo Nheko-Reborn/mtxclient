@@ -10,6 +10,7 @@
 #include <mtx/requests.hpp>
 
 #include <olm/olm.h>
+#include <olm/sas.h>
 
 #include "mtxclient/crypto/objects.hpp"
 #include "mtxclient/crypto/types.hpp"
@@ -42,6 +43,10 @@ public:
 
         olm_exception(std::string func, OlmInboundGroupSession *s)
           : msg_(func + ": " + std::string(olm_inbound_group_session_last_error(s)))
+        {}
+
+        olm_exception(std::string func, OlmSAS *s)
+          : msg_(func + ":" + std::string(olm_sas_last_error(s)))
         {}
 
         olm_exception(std::string msg)
@@ -85,6 +90,7 @@ unpickle(const std::string &pickled, const std::string &key)
 using OlmSessionPtr           = std::unique_ptr<OlmSession, OlmDeleter>;
 using OutboundGroupSessionPtr = std::unique_ptr<OlmOutboundGroupSession, OlmDeleter>;
 using InboundGroupSessionPtr  = std::unique_ptr<OlmInboundGroupSession, OlmDeleter>;
+using SASPtr                  = std::unique_ptr<OlmSAS, OlmDeleter>;
 
 struct GroupPlaintext
 {
@@ -187,6 +193,15 @@ public:
 
         OlmAccount *account() { return account_.get(); }
         OlmUtility *utility() { return utility_.get(); }
+
+        //! SAS related stuff
+        //! this creates a unique pointer of class OlmSAS
+        SASPtr sas_init();
+        std::string sas_get_pub_key(OlmSAS *sas);
+        void set_their_key(OlmSAS *sas, std::string their_public_key);
+        std::vector<int> generate_bytes(OlmSAS *sas,
+                                        std::string info,
+                                        mtx::events::msg::SASMethods method);
 
 private:
         std::string user_id_;

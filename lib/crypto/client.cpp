@@ -378,6 +378,94 @@ OlmClient::create_outbound_session(const std::string &identity_key, const std::s
         return session;
 }
 
+SASPtr
+OlmClient::sas_init()
+{
+        auto sas        = create_olm_object<SASObject>();
+        auto random_buf = create_buffer(olm_create_sas_random_length(sas.get()));
+
+        const int ret = olm_create_sas(sas.get(), random_buf.data(), random_buf.size());
+
+        if (ret == -1)
+                throw olm_exception("create_sas_instance", sas.get());
+
+        return sas;
+}
+
+std::string
+OlmClient::sas_get_pub_key(OlmSAS *sas)
+{
+        auto pub_key_buffer = create_buffer(olm_sas_pubkey_length(sas));
+
+        const int ret = olm_sas_get_pubkey(sas, pub_key_buffer.data(), pub_key_buffer.size());
+
+        if (ret == -1)
+                throw olm_exception("get_public_key", sas);
+
+        return to_string(pub_key_buffer);
+}
+
+void
+OlmClient::set_their_key(OlmSAS *sas, std::string their_public_key)
+{
+        auto pub_key_buffer = to_binary_buf(their_public_key);
+
+        const int ret = olm_sas_set_their_key(sas, pub_key_buffer.data(), pub_key_buffer.size());
+
+        if (ret == -1)
+                throw olm_exception("get_public_key", sas);
+}
+
+std::vector<int>
+OlmClient::generate_bytes(OlmSAS *sas, std::string info, mtx::events::msg::SASMethods method)
+{
+        auto input_info_buffer = to_binary_buf(info);
+        std::vector<int> output_list;
+        if (method == mtx::events::msg::SASMethods::Decimal) {
+                auto output_buffer = create_buffer(5);
+                output_list.resize(3);
+
+                const int ret = olm_sas_generate_bytes(sas,
+                                                       input_info_buffer.data(),
+                                                       input_info_buffer.size(),
+                                                       output_buffer.data(),
+                                                       output_buffer.size());
+
+                if (ret == -1)
+                        throw olm_exception("get_bytes_decimal", sas);
+
+                output_list.push_back(((output_buffer[0] << 5) | (output_buffer[1] >> 3)) + 1000);
+                output_list.push_back((((output_buffer[1] & 0x07) << 10) | (output_buffer[2] << 2) |
+                                       (output_buffer[3] >> 6)) +
+                                      1000);
+                output_list.push_back((((output_buffer[3] << 7)) | ((output_buffer[4] >> 1))) +
+                                      1000);
+
+        } else if (method == mtx::events::msg::SASMethods::Emoji) {
+                auto output_buffer = create_buffer(6);
+                output_list.resize(7);
+
+                const int ret = olm_sas_generate_bytes(sas,
+                                                       input_info_buffer.data(),
+                                                       input_info_buffer.size(),
+                                                       output_buffer.data(),
+                                                       output_buffer.size());
+
+                if (ret == -1)
+                        throw olm_exception("get_bytes_emoji", sas);
+
+                output_list.push_back(output_buffer[0] >> 2);
+                output_list.push_back(((output_buffer[0] << 4) & 0x3f) | (output_buffer[1] >> 4));
+                output_list.push_back(((output_buffer[1] << 2) & 0x3f) | (output_buffer[2] >> 6));
+                output_list.push_back(output_buffer[2] & 0x3f);
+                output_list.push_back(output_buffer[3] >> 2);
+                output_list.push_back(((output_buffer[3] << 4) & 0x3f) | (output_buffer[4] >> 4));
+                output_list.push_back(((output_buffer[4] << 2) & 0x3f) | (output_buffer[5] >> 6));
+        }
+
+        return output_list;
+}
+
 nlohmann::json
 OlmClient::create_room_key_event(const UserId &recipient,
                                  const std::string &ed25519_recipient_key,
