@@ -1195,16 +1195,16 @@ TEST(Encryption, SAS)
         auto alice_sas = alice->sas_init();
         auto bob_sas   = bob->sas_init();
 
-        ASSERT_EQ(alice->sas_get_pub_key(alice_sas.get()).length(), 43);
-        ASSERT_EQ(bob->sas_get_pub_key(bob_sas.get()).length(), 43);
+        ASSERT_EQ(alice_sas->public_key().length(), 43);
+        ASSERT_EQ(bob_sas->public_key().length(), 43);
 
-        alice->set_their_key(alice_sas.get(), bob->sas_get_pub_key(bob_sas.get()));
-        bob->set_their_key(bob_sas.get(), alice->sas_get_pub_key(alice_sas.get()));
+        alice_sas->set_their_key(bob_sas->public_key());
+        bob_sas->set_their_key(alice_sas->public_key());
 
         std::string info = "test_info";
 
-        std::vector<int> alice_decimal = alice->generate_bytes_decimal(alice_sas.get(), info);
-        std::vector<int> bob_decimal   = bob->generate_bytes_decimal(bob_sas.get(), info);
+        std::vector<int> alice_decimal = alice_sas->generate_bytes_decimal(info);
+        std::vector<int> bob_decimal   = bob_sas->generate_bytes_decimal(info);
 
         ASSERT_EQ(alice_decimal.size(), 3);
         ASSERT_EQ(bob_decimal.size(), 3);
@@ -1215,8 +1215,8 @@ TEST(Encryption, SAS)
                 ASSERT_EQ(alice_decimal[i], bob_decimal[i]);
         }
 
-        std::vector<int> alice_emoji = alice->generate_bytes_emoji(alice_sas.get(), info);
-        std::vector<int> bob_emoji   = bob->generate_bytes_emoji(bob_sas.get(), info);
+        std::vector<int> alice_emoji = alice_sas->generate_bytes_emoji(info);
+        std::vector<int> bob_emoji   = bob_sas->generate_bytes_emoji(info);
 
         ASSERT_EQ(alice_emoji.size(), 7);
         ASSERT_EQ(bob_emoji.size(), 7);

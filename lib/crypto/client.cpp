@@ -378,46 +378,51 @@ OlmClient::create_outbound_session(const std::string &identity_key, const std::s
         return session;
 }
 
-SASPtr
+std::unique_ptr<SAS>
 OlmClient::sas_init()
 {
-        auto sas        = create_olm_object<SASObject>();
+        return std::make_unique<SAS>();
+}
+
+SAS::SAS()
+{
+        this->sas       = create_olm_object<SASObject>();
         auto random_buf = create_buffer(olm_create_sas_random_length(sas.get()));
 
-        const int ret = olm_create_sas(sas.get(), random_buf.data(), random_buf.size());
+        const int ret = olm_create_sas(this->sas.get(), random_buf.data(), random_buf.size());
 
         if (ret == -1)
-                throw olm_exception("create_sas_instance", sas.get());
-
-        return sas;
+                throw olm_exception("create_sas_instance", this->sas.get());
 }
 
 std::string
-OlmClient::sas_get_pub_key(OlmSAS *sas)
+SAS::public_key()
 {
-        auto pub_key_buffer = create_buffer(olm_sas_pubkey_length(sas));
+        auto pub_key_buffer = create_buffer(olm_sas_pubkey_length(this->sas.get()));
 
-        const int ret = olm_sas_get_pubkey(sas, pub_key_buffer.data(), pub_key_buffer.size());
+        const int ret =
+          olm_sas_get_pubkey(this->sas.get(), pub_key_buffer.data(), pub_key_buffer.size());
 
         if (ret == -1)
-                throw olm_exception("get_public_key", sas);
+                throw olm_exception("get_public_key", this->sas.get());
 
         return to_string(pub_key_buffer);
 }
 
 void
-OlmClient::set_their_key(OlmSAS *sas, std::string their_public_key)
+SAS::set_their_key(std::string their_public_key)
 {
         auto pub_key_buffer = to_binary_buf(their_public_key);
 
-        const int ret = olm_sas_set_their_key(sas, pub_key_buffer.data(), pub_key_buffer.size());
+        const int ret =
+          olm_sas_set_their_key(this->sas.get(), pub_key_buffer.data(), pub_key_buffer.size());
 
         if (ret == -1)
-                throw olm_exception("get_public_key", sas);
+                throw olm_exception("get_public_key", this->sas.get());
 }
 
 std::vector<int>
-OlmClient::generate_bytes_decimal(OlmSAS *sas, std::string info)
+SAS::generate_bytes_decimal(std::string info)
 {
         auto input_info_buffer = to_binary_buf(info);
         auto output_buffer     = create_buffer(5);
@@ -425,14 +430,14 @@ OlmClient::generate_bytes_decimal(OlmSAS *sas, std::string info)
         std::vector<int> output_list;
         output_list.resize(3);
 
-        const int ret = olm_sas_generate_bytes(sas,
+        const int ret = olm_sas_generate_bytes(this->sas.get(),
                                                input_info_buffer.data(),
                                                input_info_buffer.size(),
                                                output_buffer.data(),
                                                output_buffer.size());
 
         if (ret == -1)
-                throw olm_exception("get_bytes_decimal", sas);
+                throw olm_exception("get_bytes_decimal", this->sas.get());
 
         output_list[0] = (((output_buffer[0] << 5) | (output_buffer[1] >> 3)) + 1000);
         output_list[1] =
@@ -444,7 +449,7 @@ OlmClient::generate_bytes_decimal(OlmSAS *sas, std::string info)
 }
 
 std::vector<int>
-OlmClient::generate_bytes_emoji(OlmSAS *sas, std::string info)
+SAS::generate_bytes_emoji(std::string info)
 {
         auto input_info_buffer = to_binary_buf(info);
         auto output_buffer     = create_buffer(6);
@@ -452,14 +457,14 @@ OlmClient::generate_bytes_emoji(OlmSAS *sas, std::string info)
         std::vector<int> output_list;
         output_list.resize(7);
 
-        const int ret = olm_sas_generate_bytes(sas,
+        const int ret = olm_sas_generate_bytes(this->sas.get(),
                                                input_info_buffer.data(),
                                                input_info_buffer.size(),
                                                output_buffer.data(),
                                                output_buffer.size());
 
         if (ret == -1)
-                throw olm_exception("get_bytes_emoji", sas);
+                throw olm_exception("get_bytes_emoji", this->sas.get());
 
         output_list[0] = (output_buffer[0] >> 2);
         output_list[1] = (((output_buffer[0] << 4) & 0x3f) | (output_buffer[1] >> 4));

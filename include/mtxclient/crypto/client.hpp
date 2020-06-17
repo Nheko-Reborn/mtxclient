@@ -98,6 +98,18 @@ struct GroupPlaintext
         uint32_t message_index;
 };
 
+struct SAS
+{
+        SAS();
+        std::string public_key();
+        void set_their_key(std::string their_public_key);
+        std::vector<int> generate_bytes_decimal(std::string info);
+        std::vector<int> generate_bytes_emoji(std::string info);
+
+private:
+        SASPtr sas;
+};
+
 class OlmClient : public std::enable_shared_from_this<OlmClient>
 {
 public:
@@ -195,12 +207,8 @@ public:
         OlmUtility *utility() { return utility_.get(); }
 
         //! SAS related stuff
-        //! this creates a unique pointer of class OlmSAS
-        SASPtr sas_init();
-        std::string sas_get_pub_key(OlmSAS *sas);
-        void set_their_key(OlmSAS *sas, std::string their_public_key);
-        std::vector<int> generate_bytes_decimal(OlmSAS *sas, std::string info);
-        std::vector<int> generate_bytes_emoji(OlmSAS *sas, std::string info);
+        //! this creates a unique pointer of struct SAS
+        std::unique_ptr<SAS> sas_init();
 
 private:
         std::string user_id_;
