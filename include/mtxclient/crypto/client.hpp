@@ -199,9 +199,8 @@ public:
         SASPtr sas_init();
         std::string sas_get_pub_key(OlmSAS *sas);
         void set_their_key(OlmSAS *sas, std::string their_public_key);
-        std::vector<int> generate_bytes(OlmSAS *sas,
-                                        std::string info,
-                                        mtx::events::msg::SASMethods method);
+        void generate_bytes_decimal(OlmSAS *sas, std::string info, std::vector<int> &output_list);
+        void generate_bytes_emoji(OlmSAS *sas, std::string info, std::vector<int> &output_list);
 
 private:
         std::string user_id_;

@@ -416,54 +416,52 @@ OlmClient::set_their_key(OlmSAS *sas, std::string their_public_key)
                 throw olm_exception("get_public_key", sas);
 }
 
-std::vector<int>
-OlmClient::generate_bytes(OlmSAS *sas, std::string info, mtx::events::msg::SASMethods method)
+void
+OlmClient::generate_bytes_decimal(OlmSAS *sas, std::string info, std::vector<int> &output_list)
 {
         auto input_info_buffer = to_binary_buf(info);
-        std::vector<int> output_list;
-        if (method == mtx::events::msg::SASMethods::Decimal) {
-                auto output_buffer = create_buffer(5);
-                output_list.resize(3);
+        auto output_buffer     = create_buffer(5);
+        output_list.resize(3);
 
-                const int ret = olm_sas_generate_bytes(sas,
-                                                       input_info_buffer.data(),
-                                                       input_info_buffer.size(),
-                                                       output_buffer.data(),
-                                                       output_buffer.size());
+        const int ret = olm_sas_generate_bytes(sas,
+                                               input_info_buffer.data(),
+                                               input_info_buffer.size(),
+                                               output_buffer.data(),
+                                               output_buffer.size());
 
-                if (ret == -1)
-                        throw olm_exception("get_bytes_decimal", sas);
+        if (ret == -1)
+                throw olm_exception("get_bytes_decimal", sas);
 
-                output_list.push_back(((output_buffer[0] << 5) | (output_buffer[1] >> 3)) + 1000);
-                output_list.push_back((((output_buffer[1] & 0x07) << 10) | (output_buffer[2] << 2) |
-                                       (output_buffer[3] >> 6)) +
-                                      1000);
-                output_list.push_back((((output_buffer[3] << 7)) | ((output_buffer[4] >> 1))) +
-                                      1000);
+        output_list[0] = (((output_buffer[0] << 5) | (output_buffer[1] >> 3)) + 1000);
+        output_list[1] =
+          ((((output_buffer[1] & 0x07) << 10) | (output_buffer[2] << 2) | (output_buffer[3] >> 6)) +
+           1000);
+        output_list[2] = (((((output_buffer[3] & 0x3F) << 7)) | ((output_buffer[4] >> 1))) + 1000);
+}
 
-        } else if (method == mtx::events::msg::SASMethods::Emoji) {
-                auto output_buffer = create_buffer(6);
-                output_list.resize(7);
+void
+OlmClient::generate_bytes_emoji(OlmSAS *sas, std::string info, std::vector<int> &output_list)
+{
+        auto input_info_buffer = to_binary_buf(info);
+        auto output_buffer     = create_buffer(6);
+        output_list.resize(7);
 
-                const int ret = olm_sas_generate_bytes(sas,
-                                                       input_info_buffer.data(),
-                                                       input_info_buffer.size(),
-                                                       output_buffer.data(),
-                                                       output_buffer.size());
+        const int ret = olm_sas_generate_bytes(sas,
+                                               input_info_buffer.data(),
+                                               input_info_buffer.size(),
+                                               output_buffer.data(),
+                                               output_buffer.size());
 
-                if (ret == -1)
-                        throw olm_exception("get_bytes_emoji", sas);
+        if (ret == -1)
+                throw olm_exception("get_bytes_emoji", sas);
 
-                output_list.push_back(output_buffer[0] >> 2);
-                output_list.push_back(((output_buffer[0] << 4) & 0x3f) | (output_buffer[1] >> 4));
-                output_list.push_back(((output_buffer[1] << 2) & 0x3f) | (output_buffer[2] >> 6));
-                output_list.push_back(output_buffer[2] & 0x3f);
-                output_list.push_back(output_buffer[3] >> 2);
-                output_list.push_back(((output_buffer[3] << 4) & 0x3f) | (output_buffer[4] >> 4));
-                output_list.push_back(((output_buffer[4] << 2) & 0x3f) | (output_buffer[5] >> 6));
-        }
-
-        return output_list;
+        output_list[0] = (output_buffer[0] >> 2);
+        output_list[1] = (((output_buffer[0] << 4) & 0x3f) | (output_buffer[1] >> 4));
+        output_list[2] = (((output_buffer[1] << 2) & 0x3f) | (output_buffer[2] >> 6));
+        output_list[3] = (output_buffer[2] & 0x3f);
+        output_list[4] = (output_buffer[3] >> 2);
+        output_list[5] = (((output_buffer[3] << 4) & 0x3f) | (output_buffer[4] >> 4));
+        output_list[6] = (((output_buffer[4] << 2) & 0x3f) | (output_buffer[5] >> 6));
 }
 
 nlohmann::json
