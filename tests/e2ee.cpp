@@ -1203,10 +1203,8 @@ TEST(Encryption, SAS)
 
         std::string info = "test_info";
 
-        std::vector<int> alice_decimal;
-        alice->generate_bytes_decimal(alice_sas.get(), info, alice_decimal);
-        std::vector<int> bob_decimal;
-        bob->generate_bytes_decimal(bob_sas.get(), info, bob_decimal);
+        std::vector<int> alice_decimal = alice->generate_bytes_decimal(alice_sas.get(), info);
+        std::vector<int> bob_decimal   = bob->generate_bytes_decimal(bob_sas.get(), info);
 
         ASSERT_EQ(alice_decimal.size(), 3);
         ASSERT_EQ(bob_decimal.size(), 3);
@@ -1217,10 +1215,8 @@ TEST(Encryption, SAS)
                 ASSERT_EQ(alice_decimal[i], bob_decimal[i]);
         }
 
-        std::vector<int> alice_emoji;
-        alice->generate_bytes_emoji(alice_sas.get(), info, alice_emoji);
-        std::vector<int> bob_emoji;
-        bob->generate_bytes_emoji(bob_sas.get(), info, bob_emoji);
+        std::vector<int> alice_emoji = alice->generate_bytes_emoji(alice_sas.get(), info);
+        std::vector<int> bob_emoji   = bob->generate_bytes_emoji(bob_sas.get(), info);
 
         ASSERT_EQ(alice_emoji.size(), 7);
         ASSERT_EQ(bob_emoji.size(), 7);
