@@ -149,8 +149,9 @@ target_sources(matrix_client
 	lib/http/client.cpp
 	lib/http/session.cpp
 	lib/crypto/client.cpp
-	lib/crypto/utils.cpp
+	lib/crypto/encoding.cpp
 	lib/crypto/types.cpp
+	lib/crypto/utils.cpp
 	lib/utils.cpp
 	lib/log.cpp
 	lib/structs/common.cpp

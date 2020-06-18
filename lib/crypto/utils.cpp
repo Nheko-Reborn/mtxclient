@@ -313,21 +313,6 @@ base642bin(const std::string &b64)
 }
 
 std::string
-bin2base64(const std::string &bin)
-{
-        auto base64buf =
-          create_buffer(sodium_base64_encoded_len(bin.size(), sodium_base64_VARIANT_ORIGINAL));
-
-        sodium_bin2base64(reinterpret_cast<char *>(base64buf.data()),
-                          base64buf.size(),
-                          reinterpret_cast<const unsigned char *>(bin.data()),
-                          bin.size(),
-                          sodium_base64_VARIANT_ORIGINAL);
-
-        // Removing the null byte.
-        return std::string(base64buf.begin(), base64buf.end() - 1);
-}
-std::string
 base642bin_unpadded(const std::string &b64)
 {
         std::size_t bin_maxlen = b64.size();
@@ -356,21 +341,6 @@ base642bin_unpadded(const std::string &b64)
 }
 
 std::string
-bin2base64_unpadded(const std::string &bin)
-{
-        auto base64buf = create_buffer(
-          sodium_base64_encoded_len(bin.size(), sodium_base64_VARIANT_ORIGINAL_NO_PADDING));
-
-        sodium_bin2base64(reinterpret_cast<char *>(base64buf.data()),
-                          base64buf.size(),
-                          reinterpret_cast<const unsigned char *>(bin.data()),
-                          bin.size(),
-                          sodium_base64_VARIANT_ORIGINAL_NO_PADDING);
-
-        // Removing the null byte.
-        return std::string(base64buf.begin(), base64buf.end() - 1);
-}
-std::string
 base642bin_urlsafe_unpadded(const std::string &b64)
 {
         std::size_t bin_maxlen = b64.size();
@@ -396,22 +366,6 @@ base642bin_urlsafe_unpadded(const std::string &b64)
 
         return std::string(std::make_move_iterator(ciphertext.begin()),
                            std::make_move_iterator(ciphertext.end()));
-}
-
-std::string
-bin2base64_urlsafe_unpadded(const std::string &bin)
-{
-        auto base64buf = create_buffer(
-          sodium_base64_encoded_len(bin.size(), sodium_base64_VARIANT_URLSAFE_NO_PADDING));
-
-        sodium_bin2base64(reinterpret_cast<char *>(base64buf.data()),
-                          base64buf.size(),
-                          reinterpret_cast<const unsigned char *>(bin.data()),
-                          bin.size(),
-                          sodium_base64_VARIANT_URLSAFE_NO_PADDING);
-
-        // Removing the null byte.
-        return std::string(base64buf.begin(), base64buf.end() - 1);
 }
 
 } // namespace crypto

@@ -1,11 +1,26 @@
 #include <gtest/gtest.h>
 #include <nlohmann/json.hpp>
 
-#include <mtx/common.hpp>
+#include "mtxclient/crypto/client.hpp"
+#include "mtxclient/crypto/types.hpp"
+#include "mtxclient/http/client.hpp"
 
-using json = nlohmann::json;
+#include "mtx/requests.hpp"
+#include "mtx/responses.hpp"
 
+using namespace mtx::client;
+using namespace mtx::http;
 using namespace mtx::crypto;
+
+using namespace mtx::identifiers;
+using namespace mtx::events;
+using namespace mtx::events::msg;
+using namespace mtx::events::collections;
+using namespace mtx::responses;
+
+using namespace std;
+
+using namespace nlohmann;
 
 TEST(Crypto, DeviceKeys)
 {
@@ -92,4 +107,144 @@ TEST(Crypto, EncryptedFile)
         EXPECT_EQ(file.key.k, "aWF6-32KGYaC3A_FEUCk1Bt0JA37zP0wrStgmdCaW-0");
         EXPECT_EQ(file.key.key_ops.size(), 2);
         EXPECT_EQ(file.key.kty, "oct");
+}
+
+TEST(Base64, EncodingDecoding)
+{
+        std::string random_str =
+          "+7TE+9qmFWHPnrBLd03MtoXsRlhYaQt2tLBg4kZJI+NFcXVxqNUI1S3c97eV8aVgSj1/"
+          "eo8PsnRNO29c2TgPLXvah2GDl90ehHjzH/"
+          "vMBJKPdqyE31ch7NYBgvLBVoesrRyDoIYDlbRhHiRDTmLKMC55WN1YvDJu2Pvg3WxZiANobk"
+          "0EPzHABqOYLaYiVxFrdko7mm8pDZXlatys+dvLv9Zf6lxfd/5MPK1C52m/UhnrZ3shS/"
+          "XBzxRfBikZQjl7C9IMo7l170ffipN8QHb5LmZlj4V41DUJHCU=";
+
+        EXPECT_EQ(base642bin(bin2base64(random_str)), random_str);
+        EXPECT_EQ(bin2base64(base642bin(random_str)), random_str);
+        EXPECT_EQ(base642bin_unpadded(bin2base64_unpadded(random_str)), random_str);
+        // EXPECT_EQ(bin2base64_unpadded(base642bin_unpadded(random_str)), random_str);
+        EXPECT_EQ(base642bin_urlsafe_unpadded(bin2base64_urlsafe_unpadded(random_str)), random_str);
+        // EXPECT_EQ(bin2base64_urlsafe_unpadded(base642bin_urlsafe_unpadded(random_str)),
+        // random_str);
+
+        EXPECT_EQ(bin2base64(""), "");
+        EXPECT_EQ(bin2base64("f"), "Zg==");
+        EXPECT_EQ(bin2base64("fo"), "Zm8=");
+        EXPECT_EQ(bin2base64("foo"), "Zm9v");
+        EXPECT_EQ(bin2base64("foob"), "Zm9vYg==");
+        EXPECT_EQ(bin2base64("fooba"), "Zm9vYmE=");
+        EXPECT_EQ(bin2base64("foobar"), "Zm9vYmFy");
+
+        EXPECT_EQ(bin2base64_unpadded(""), "");
+        EXPECT_EQ(bin2base64_unpadded("f"), "Zg");
+        EXPECT_EQ(bin2base64_unpadded("fo"), "Zm8");
+        EXPECT_EQ(bin2base64_unpadded("foo"), "Zm9v");
+        EXPECT_EQ(bin2base64_unpadded("foob"), "Zm9vYg");
+        EXPECT_EQ(bin2base64_unpadded("fooba"), "Zm9vYmE");
+        EXPECT_EQ(bin2base64_unpadded("foobar"), "Zm9vYmFy");
+
+        EXPECT_EQ(bin2base64_urlsafe_unpadded(""), "");
+        EXPECT_EQ(bin2base64_urlsafe_unpadded("f"), "Zg");
+        EXPECT_EQ(bin2base64_urlsafe_unpadded("fo"), "Zm8");
+        EXPECT_EQ(bin2base64_urlsafe_unpadded("foo"), "Zm9v");
+        EXPECT_EQ(bin2base64_urlsafe_unpadded("foob"), "Zm9vYg");
+        EXPECT_EQ(bin2base64_urlsafe_unpadded("fooba"), "Zm9vYmE");
+        EXPECT_EQ(bin2base64_urlsafe_unpadded("foobar"), "Zm9vYmFy");
+}
+
+TEST(Base58, EncodingDecoding)
+{
+        EXPECT_EQ(bin2base58(""), "");
+        EXPECT_EQ(bin2base58("f"), "2m");
+        EXPECT_EQ(bin2base58("fo"), "8o8");
+        EXPECT_EQ(bin2base58("foo"), "bQbp");
+        EXPECT_EQ(bin2base58("foob"), "3csAg9");
+        EXPECT_EQ(bin2base58("fooba"), "CZJRhmz");
+        EXPECT_EQ(bin2base58("foobar"), "t1Zv2yaZ");
+}
+
+TEST(ExportSessions, EncryptDecrypt)
+{
+        constexpr auto PASS = "secret_passphrase";
+
+        ExportedSession s1;
+        s1.room_id     = "!room_id:example.org";
+        s1.session_id  = "sid";
+        s1.session_key = "skey";
+
+        ExportedSessionKeys keys;
+        keys.sessions = {s1, s1, s1};
+
+        std::string ciphertext = mtx::crypto::encrypt_exported_sessions(keys, PASS);
+        EXPECT_TRUE(ciphertext.size() > 0);
+
+        auto encoded = bin2base64(ciphertext);
+
+        auto restored_keys = mtx::crypto::decrypt_exported_sessions(encoded, PASS);
+        EXPECT_EQ(json(keys).dump(), json(restored_keys).dump());
+}
+
+TEST(Encryption, EncryptedFile)
+{
+        {
+                auto buffer = mtx::crypto::create_buffer(16);
+                ASSERT_EQ(buffer.size(), 16);
+                auto buf_str = mtx::crypto::to_string(buffer);
+                ASSERT_EQ(buf_str.size(), 16);
+        }
+
+        std::string plaintext = "This is some plain text payload";
+        auto encryption_data  = mtx::crypto::encrypt_file(plaintext);
+        ASSERT_NE(plaintext, mtx::crypto::to_string(encryption_data.first));
+        ASSERT_EQ(plaintext,
+                  mtx::crypto::to_string(mtx::crypto::decrypt_file(
+                    mtx::crypto::to_string(encryption_data.first), encryption_data.second)));
+        // key needs to be 32 bytes/256 bits
+        ASSERT_EQ(32,
+                  mtx::crypto::base642bin_urlsafe_unpadded(encryption_data.second.key.k).size());
+        // IV needs to be 16 bytes/128 bits
+        ASSERT_EQ(16, mtx::crypto::base642bin_unpadded(encryption_data.second.iv).size());
+
+        json j                                            = R"({
+  "type": "m.room.message",
+  "content": {
+    "body": "test.txt",
+    "info": {
+      "size": 8,
+      "mimetype": "text/plain"
+    },
+    "msgtype": "m.file",
+    "file": {
+      "v": "v2",
+      "key": {
+        "alg": "A256CTR",
+        "ext": true,
+        "k": "6osKLzUKV1YZ06WEX0b77D784Te8oAj5eNU-gAgkjs4",
+        "key_ops": [
+          "encrypt",
+          "decrypt"
+        ],
+        "kty": "oct"
+      },
+      "iv": "7zRP/t89YWcAAAAAAAAAAA",
+      "hashes": {
+        "sha256": "5g41hn7n10sCw3+2j7CQ9SJl6R/v5EBT4MshdFgHhzo"
+      },
+      "url": "mxc://neko.dev/WPKoOAPfPlcHiZZTEoaIoZhN",
+      "mimetype": "text/plain"
+    }
+ },
+ "event_id": "$1575320135447DEPky:neko.dev",
+  "origin_server_ts": 1575320135324,
+  "sender": "@test:neko.dev",
+  "unsigned": {
+    "age": 1081,
+    "transaction_id": "m1575320142400.8"
+  },
+  "room_id": "!YnUlhwgbBaGcAFsJOJ:neko.dev"
+})"_json;
+        mtx::events::RoomEvent<mtx::events::msg::File> ev = j;
+
+        ASSERT_EQ("abcdefg\n",
+                  mtx::crypto::to_string(mtx::crypto::decrypt_file("=\xFDX\xAB\xCA\xEB\x8F\xFF",
+                                                                   ev.content.file.value())));
 }
