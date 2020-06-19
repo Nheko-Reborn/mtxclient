@@ -1,6 +1,8 @@
 #include <array>
+#include <string>
 #include <vector>
 
+namespace {
 template<std::size_t N, std::size_t... Is>
 constexpr std::array<char, N - 1>
 to_array(const char (&a)[N], std::index_sequence<Is...>)
@@ -162,6 +164,7 @@ decode_base64(const std::array<uint8_t, 256> &reverse_alphabet, const std::strin
                 decoded.pop_back();
 
         return decoded;
+}
 }
 
 namespace mtx {
