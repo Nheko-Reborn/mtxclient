@@ -1,5 +1,5 @@
-#include <algorithm>
 #include <array>
+#include <vector>
 
 template<std::size_t N, std::size_t... Is>
 constexpr std::array<char, N - 1>
