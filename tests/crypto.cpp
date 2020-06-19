@@ -134,6 +134,14 @@ TEST(Base64, EncodingDecoding)
         EXPECT_EQ(bin2base64("fooba"), "Zm9vYmE=");
         EXPECT_EQ(bin2base64("foobar"), "Zm9vYmFy");
 
+        EXPECT_EQ("", base642bin(""));
+        EXPECT_EQ("f", base642bin("Zg=="));
+        EXPECT_EQ("fo", base642bin("Zm8="));
+        EXPECT_EQ("foo", base642bin("Zm9v"));
+        EXPECT_EQ("foob", base642bin("Zm9vYg=="));
+        EXPECT_EQ("fooba", base642bin("Zm9vYmE="));
+        EXPECT_EQ("foobar", base642bin("Zm9vYmFy"));
+
         EXPECT_EQ(bin2base64_unpadded(""), "");
         EXPECT_EQ(bin2base64_unpadded("f"), "Zg");
         EXPECT_EQ(bin2base64_unpadded("fo"), "Zm8");
@@ -142,6 +150,14 @@ TEST(Base64, EncodingDecoding)
         EXPECT_EQ(bin2base64_unpadded("fooba"), "Zm9vYmE");
         EXPECT_EQ(bin2base64_unpadded("foobar"), "Zm9vYmFy");
 
+        EXPECT_EQ("", base642bin_unpadded(""));
+        EXPECT_EQ("f", base642bin_unpadded("Zg=="));
+        EXPECT_EQ("fo", base642bin_unpadded("Zm8="));
+        EXPECT_EQ("foo", base642bin_unpadded("Zm9v"));
+        EXPECT_EQ("foob", base642bin_unpadded("Zm9vYg=="));
+        EXPECT_EQ("fooba", base642bin_unpadded("Zm9vYmE="));
+        EXPECT_EQ("foobar", base642bin_unpadded("Zm9vYmFy"));
+
         EXPECT_EQ(bin2base64_urlsafe_unpadded(""), "");
         EXPECT_EQ(bin2base64_urlsafe_unpadded("f"), "Zg");
         EXPECT_EQ(bin2base64_urlsafe_unpadded("fo"), "Zm8");
@@ -149,6 +165,14 @@ TEST(Base64, EncodingDecoding)
         EXPECT_EQ(bin2base64_urlsafe_unpadded("foob"), "Zm9vYg");
         EXPECT_EQ(bin2base64_urlsafe_unpadded("fooba"), "Zm9vYmE");
         EXPECT_EQ(bin2base64_urlsafe_unpadded("foobar"), "Zm9vYmFy");
+
+        EXPECT_EQ("", base642bin_urlsafe_unpadded(""));
+        EXPECT_EQ("f", base642bin_urlsafe_unpadded("Zg=="));
+        EXPECT_EQ("fo", base642bin_urlsafe_unpadded("Zm8="));
+        EXPECT_EQ("foo", base642bin_urlsafe_unpadded("Zm9v"));
+        EXPECT_EQ("foob", base642bin_urlsafe_unpadded("Zm9vYg=="));
+        EXPECT_EQ("fooba", base642bin_urlsafe_unpadded("Zm9vYmE="));
+        EXPECT_EQ("foobar", base642bin_urlsafe_unpadded("Zm9vYmFy"));
 }
 
 TEST(Base58, EncodingDecoding)

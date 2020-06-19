@@ -3,8 +3,6 @@
 #include <string>
 #include <vector>
 
-#include <sodium.h>
-
 #include "mtx/common.hpp"
 
 namespace mtx {
@@ -29,14 +27,8 @@ const std::string HEADER_LINE("-----BEGIN MEGOLM SESSION DATA-----");
 const std::string TRAILER_LINE("-----END MEGOLM SESSION DATA-----");
 
 //! Create a uint8_t buffer which is initialized with random bytes.
-inline BinaryBuf
-create_buffer(std::size_t nbytes)
-{
-        auto buf = BinaryBuf(nbytes);
-        randombytes_buf(buf.data(), buf.size());
-
-        return buf;
-}
+BinaryBuf
+create_buffer(std::size_t nbytes);
 
 inline BinaryBuf
 to_binary_buf(const std::string &str)

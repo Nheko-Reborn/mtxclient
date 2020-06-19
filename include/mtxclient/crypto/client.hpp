@@ -230,9 +230,6 @@ encrypt_exported_sessions(const mtx::crypto::ExportedSessionKeys &keys, std::str
 mtx::crypto::ExportedSessionKeys
 decrypt_exported_sessions(const std::string &data, std::string pass);
 
-BinaryBuf
-derive_key(const std::string &pass, const BinaryBuf &salt);
-
 //! Verify a signature object as obtained from the response of /keys/query endpoint
 bool
 verify_identity_signature(nlohmann::json obj, const DeviceId &device_id, const UserId &user_id);

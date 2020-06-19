@@ -3,6 +3,7 @@
 #include <openssl/aes.h>
 #include <openssl/evp.h>
 #include <openssl/hmac.h>
+#include <openssl/rand.h>
 #include <openssl/sha.h>
 
 #include <algorithm>
@@ -11,6 +12,14 @@
 
 namespace mtx {
 namespace crypto {
+BinaryBuf
+create_buffer(std::size_t nbytes)
+{
+        auto buf = BinaryBuf(nbytes);
+        RAND_bytes(buf.data(), buf.size());
+
+        return buf;
+}
 
 BinaryBuf
 PBKDF2_HMAC_SHA_512(const std::string pass, const BinaryBuf salt, uint32_t iterations)
@@ -283,90 +292,5 @@ uint32_to_uint8(uint8_t b[4], uint32_t u32)
         b[1] = (uint8_t)(u32 >>= 8);
         b[0] = (uint8_t)(u32 >>= 8);
 }
-
-std::string
-base642bin(const std::string &b64)
-{
-        std::size_t bin_maxlen = b64.size();
-        std::size_t bin_len;
-
-        const char *max_end;
-
-        auto ciphertext = create_buffer(bin_maxlen);
-
-        const int rc = sodium_base642bin(reinterpret_cast<unsigned char *>(ciphertext.data()),
-                                         ciphertext.size(),
-                                         b64.data(),
-                                         b64.size(),
-                                         nullptr,
-                                         &bin_len,
-                                         &max_end,
-                                         sodium_base64_VARIANT_ORIGINAL);
-        if (rc != 0)
-                throw sodium_exception{"sodium_base642bin", "encoding failed"};
-
-        if (bin_len != bin_maxlen)
-                ciphertext.resize(bin_len);
-
-        return std::string(std::make_move_iterator(ciphertext.begin()),
-                           std::make_move_iterator(ciphertext.end()));
-}
-
-std::string
-base642bin_unpadded(const std::string &b64)
-{
-        std::size_t bin_maxlen = b64.size();
-        std::size_t bin_len;
-
-        const char *max_end;
-
-        auto ciphertext = create_buffer(bin_maxlen);
-
-        const int rc = sodium_base642bin(reinterpret_cast<unsigned char *>(ciphertext.data()),
-                                         ciphertext.size(),
-                                         b64.data(),
-                                         b64.size(),
-                                         nullptr,
-                                         &bin_len,
-                                         &max_end,
-                                         sodium_base64_VARIANT_ORIGINAL_NO_PADDING);
-        if (rc != 0)
-                throw sodium_exception{"sodium_base642bin", "encoding failed"};
-
-        if (bin_len != bin_maxlen)
-                ciphertext.resize(bin_len);
-
-        return std::string(std::make_move_iterator(ciphertext.begin()),
-                           std::make_move_iterator(ciphertext.end()));
-}
-
-std::string
-base642bin_urlsafe_unpadded(const std::string &b64)
-{
-        std::size_t bin_maxlen = b64.size();
-        std::size_t bin_len;
-
-        const char *max_end;
-
-        auto ciphertext = create_buffer(bin_maxlen);
-
-        const int rc = sodium_base642bin(reinterpret_cast<unsigned char *>(ciphertext.data()),
-                                         ciphertext.size(),
-                                         b64.data(),
-                                         b64.size(),
-                                         nullptr,
-                                         &bin_len,
-                                         &max_end,
-                                         sodium_base64_VARIANT_URLSAFE_NO_PADDING);
-        if (rc != 0)
-                throw sodium_exception{"sodium_base642bin", "encoding failed"};
-
-        if (bin_len != bin_maxlen)
-                ciphertext.resize(bin_len);
-
-        return std::string(std::make_move_iterator(ciphertext.begin()),
-                           std::make_move_iterator(ciphertext.end()));
-}
-
 } // namespace crypto
 } // namespace mtx

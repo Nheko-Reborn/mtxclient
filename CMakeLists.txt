@@ -30,8 +30,6 @@ option(USE_BUNDLED_JSON "Use the bundled version of nlohmann json."
 	${HUNTER_ENABLED})
 option(USE_BUNDLED_OPENSSL "Use the bundled version of OpenSSL."
 	${HUNTER_ENABLED})
-option(USE_BUNDLED_SODIUM "Use the bundled version of libsodium."
-	${HUNTER_ENABLED})
 
 if (CMAKE_VERSION VERSION_GREATER_EQUAL 3.12)
 project(matrix_client
@@ -106,18 +104,6 @@ else()
 	set_package_properties(Olm PROPERTIES
 		DESCRIPTION "An implementation of the Double Ratchet cryptographic ratchet"
 		URL "https://git.matrix.org/git/olm/about/"
-		TYPE REQUIRED
-		)
-endif()
-
-if(USE_BUNDLED_SODIUM)
-	hunter_add_package(libsodium)
-	find_package(libsodium 1.0.14 REQUIRED)
-else()
-	find_package(sodium 1.0.14 REQUIRED)
-	set_package_properties(sodium PROPERTIES
-		DESCRIPTION "A modern, portable, easy to use crypto library"
-		URL "https://github.com/jedisct1/libsodium"
 		TYPE REQUIRED
 		)
 endif()
@@ -220,20 +206,6 @@ target_link_libraries(matrix_client
 	OpenSSL::SSL
 	Olm::Olm
 	nlohmann_json::nlohmann_json)
-
-# NOTE(Nico): I can't figure out for the life of me, how to export that target
-# correctly, so that it actually works downstream without including Findsodium
-# in every project, so I just link the library and not the target, when not
-# using the bundled dep...
-if (USE_BUNDLED_SODIUM)
-	target_link_libraries(matrix_client PUBLIC
-		libsodium::libsodium)
-else()
-	target_include_directories(matrix_client PUBLIC
-		${libsodium_INCLUDE_DIR})
-	target_link_libraries(matrix_client PUBLIC
-		${libsodium_LIBRARY_RELEASE})
-endif()
 
 if(NOT MSVC AND NOT APPLE)
 	target_link_libraries(matrix_client PUBLIC Threads::Threads)
