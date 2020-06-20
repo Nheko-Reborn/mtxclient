@@ -29,3 +29,6 @@ target_link_libraries(crypto_bot
                       spdlog::spdlog
                       MatrixClient::MatrixClient
                       Olm::Olm)
+
+  add_executable(online_backup_exporter online_backup_exporter.cpp)
+  target_link_libraries(online_backup_exporter MatrixClient::MatrixClient)

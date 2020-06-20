@@ -63,6 +63,12 @@ struct Sync;
 struct UploadKeys;
 struct Versions;
 struct WellKnown;
+namespace backup {
+struct SessionBackup;
+struct RoomKeysBackup;
+struct KeysBackup;
+struct BackupVersion;
+}
 }
 }
 
@@ -479,6 +485,21 @@ public:
         void key_changes(const std::string &from,
                          const std::string &to,
                          Callback<mtx::responses::KeyChanges> cb);
+
+        //
+        // Key backup endpoints
+        //
+        void backup_version(Callback<mtx::responses::backup::BackupVersion> cb);
+        void backup_version(const std::string &version,
+                            Callback<mtx::responses::backup::BackupVersion> cb);
+        void room_keys(std::string version, Callback<mtx::responses::backup::KeysBackup> cb);
+        void room_keys(std::string version,
+                       const std::string room_id,
+                       Callback<mtx::responses::backup::RoomKeysBackup> cb);
+        void room_keys(std::string version,
+                       const std::string room_id,
+                       const std::string session_id,
+                       Callback<mtx::responses::backup::SessionBackup> cb);
 
         //! Enable encryption in a room by sending a `m.room.encryption` state event.
         void enable_encryption(const std::string &room, Callback<mtx::responses::EventId> cb);

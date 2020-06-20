@@ -1,10 +1,6 @@
 #pragma once
 
-#if __has_include(<nlohmann/json_fwd.hpp>)
-#include <nlohmann/json_fwd.hpp>
-#else
 #include <nlohmann/json.hpp>
-#endif
 
 #include "mtx/common.hpp"
 
@@ -71,5 +67,93 @@ struct KeyChanges
 void
 from_json(const nlohmann::json &obj, KeyChanges &response);
 
+namespace backup {
+//! Encrypted session data using the m.megolm_backup.v1.curve25519-aes-sha2 algorithm
+struct EncryptedSessionData
+{
+        //! Generate an ephemeral curve25519 key, and perform an ECDH with the ephemeral key and the
+        //! backup's public key to generate a shared secret. The public half of the ephemeral key,
+        //! encoded using unpadded base64, becomes the ephemeral property
+        std::string ephemeral;
+        //! Stringify the JSON object, and encrypt it using AES-CBC-256 with PKCS#7 padding. This
+        //! encrypted data, encoded using unpadded base64, becomes the ciphertext property of the
+        //! session_data.
+        std::string ciphertext;
+        //! Pass the raw encrypted data (prior to base64 encoding) through HMAC-SHA-256 using the
+        //! MAC key generated above. The first 8 bytes of the resulting MAC are base64-encoded, and
+        //! become the mac property of the session_data.
+        std::string mac;
+};
+void
+from_json(const nlohmann::json &obj, EncryptedSessionData &response);
+void
+to_json(nlohmann::json &obj, const EncryptedSessionData &response);
+
+//! Responses from the `GET /_matrix/client/r0/room_keys/keys/{room_id}/{session_id}` endpoint
+struct SessionBackup
+{
+        //! Required. The index of the first message in the session that the key can decrypt.
+        int64_t first_message_index;
+        //! Required. The number of times this key has been forwarded via key-sharing between
+        //! devices.
+        int64_t forwarded_count;
+        //! Required. Whether the device backing up the key verified the device that the key is
+        //! from.
+        bool is_verified;
+        //! Required. Algorithm-dependent data. See the documentation for the backup algorithms in
+        //! Server-side key backups for more information on the expected format of the data.
+        EncryptedSessionData session_data;
+};
+void
+from_json(const nlohmann::json &obj, SessionBackup &response);
+void
+to_json(nlohmann::json &obj, const SessionBackup &response);
+
+//! Responses from the `GET /_matrix/client/r0/room_keys/keys/{room_id}` endpoint
+struct RoomKeysBackup
+{
+        //! map of session id to the individual sessions
+        std::map<std::string, SessionBackup> sessions;
+};
+void
+from_json(const nlohmann::json &obj, RoomKeysBackup &response);
+void
+to_json(nlohmann::json &obj, const RoomKeysBackup &response);
+
+//! Responses from the `GET /_matrix/client/r0/room_keys/keys` endpoint
+struct KeysBackup
+{
+        //! map of room id to map of session ids to backups of individual sessions
+        std::map<std::string, RoomKeysBackup> rooms;
+};
+void
+from_json(const nlohmann::json &obj, KeysBackup &response);
+void
+to_json(nlohmann::json &obj, const KeysBackup &response);
+
+constexpr const char *megolm_backup_v1 = "m.megolm_backup.v1.curve25519-aes-sha2";
+//! Responses from the `GET /_matrix/client/r0/room_keys/version` endpoint
+struct BackupVersion
+{
+        //! Required. The algorithm used for storing backups. Must be
+        //! 'm.megolm_backup.v1.curve25519-aes-sha2'.
+        std::string algorithm;
+        //! Required. Algorithm-dependent data. See the documentation for the backup algorithms in
+        //! Server-side key backups for more information on the expected format of the data.
+        nlohmann::json auth_data;
+        //! Required. The number of keys stored in the backup.
+        int64_t count;
+        //! Required. An opaque string representing stored keys in the backup. Clients can
+        //! compare it with the etag value they received in the request of their last key storage
+        //! request. If not equal, another client has modified the backup
+        std::string etag;
+        //! Required. The backup version
+        std::string version;
+};
+void
+from_json(const nlohmann::json &obj, BackupVersion &response);
+void
+to_json(nlohmann::json &obj, const BackupVersion &response);
+}
 } // namespace responses
 } // namespace mtx
