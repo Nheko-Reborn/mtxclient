@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <array>
 #include <string>
 #include <vector>
@@ -84,6 +85,43 @@ encode_base58(const std::array<char, 58> &alphabet, const std::string &input)
                 result[resultlen + i] = alphabet[digits[digitslen - 1 - i]];
         result.resize(digitslen + resultlen);
 
+        return result;
+}
+
+inline std::string
+decode_base58(const std::array<uint8_t, 256> &reverse_alphabet, const std::string &input)
+{
+        std::string result;
+        if (input.empty())
+                return result;
+
+        result.reserve(input.size() * 733 / 1000 + 1);
+
+        // result.push_back(0);
+
+        for (uint8_t b : input) {
+                if (b == ' ')
+                        continue;
+
+                if (b == 0xff)
+                        return "";
+
+                uint32_t carry = reverse_alphabet[b];
+                for (std::size_t j = 0; j < result.size(); j++) {
+                        carry += static_cast<uint8_t>(result[j]) * 58;
+                        result[j] = static_cast<uint8_t>(carry % 0x100);
+                        carry /= 0x100;
+                }
+                while (carry > 0) {
+                        result.push_back(static_cast<uint8_t>(carry % 0x100));
+                        carry /= 0x100;
+                }
+        }
+
+        for (size_t i = 0; i < input.length() && input[i] == '1'; i++)
+                result.push_back(0);
+
+        std::reverse(result.begin(), result.end());
         return result;
 }
 
@@ -209,6 +247,12 @@ std::string
 bin2base58(const std::string &bin)
 {
         return encode_base58(base58_alphabet, bin);
+}
+
+std::string
+base582bin(const std::string &bin)
+{
+        return decode_base58(base58_to_int, bin);
 }
 }
 }

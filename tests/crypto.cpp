@@ -184,6 +184,14 @@ TEST(Base58, EncodingDecoding)
         EXPECT_EQ(bin2base58("foob"), "3csAg9");
         EXPECT_EQ(bin2base58("fooba"), "CZJRhmz");
         EXPECT_EQ(bin2base58("foobar"), "t1Zv2yaZ");
+
+        EXPECT_EQ("", base582bin(""));
+        EXPECT_EQ("f", base582bin("2m"));
+        EXPECT_EQ("fo", base582bin("8o8"));
+        EXPECT_EQ("foo", base582bin("bQbp"));
+        EXPECT_EQ("foob", base582bin("3csAg9"));
+        EXPECT_EQ("fooba", base582bin("CZJRhmz"));
+        EXPECT_EQ("foobar", base582bin("t1Zv2yaZ"));
 }
 
 TEST(ExportSessions, EncryptDecrypt)

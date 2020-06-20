@@ -106,5 +106,8 @@ bin2base64_urlsafe_unpadded(const std::string &bin);
 
 std::string
 bin2base58(const std::string &bin);
+
+std::string
+base582bin(const std::string &bin);
 } // namespace crypto
 } // namespace mtx

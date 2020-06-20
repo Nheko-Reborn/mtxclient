@@ -641,4 +641,3 @@ mtx::crypto::decrypt_exported_sessions(const std::string &data, std::string pass
         std::string plaintext(decrypted.begin(), decrypted.end());
         return json::parse(plaintext);
 }
-
