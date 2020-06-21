@@ -170,7 +170,8 @@ struct Sync
         Rooms rooms;
         //! Information on the send-to-device messages for the client device.
         ToDevice to_device;
-        /* Presence presence; */
+        //! Information about presence of other users
+        std::vector<mtx::events::Event<mtx::events::presence::Presence>> presence;
         /* Groups groups; */
         //! Information on end-to-end device updates,
         DeviceLists device_lists;

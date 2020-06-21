@@ -86,7 +86,7 @@ setup_headers(mtx::http::Session *session,
               const std::string &content_type       = "",
               const std::string &endpoint_namespace = "/_matrix")
 {
-        session->request.set(boost::beast::http::field::user_agent, "mtxclient v0.3.0");
+        session->request.set(boost::beast::http::field::user_agent, "mtxclient v0.3.1");
         session->request.set(boost::beast::http::field::accept_encoding, "gzip,deflate");
         session->request.set(boost::beast::http::field::host, session->host);
 

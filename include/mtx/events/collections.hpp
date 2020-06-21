@@ -16,6 +16,7 @@
 #include "mtx/events/name.hpp"
 #include "mtx/events/pinned_events.hpp"
 #include "mtx/events/power_levels.hpp"
+#include "mtx/events/presence.hpp"
 #include "mtx/events/reaction.hpp"
 #include "mtx/events/redaction.hpp"
 #include "mtx/events/tag.hpp"

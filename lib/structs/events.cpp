@@ -62,6 +62,8 @@ getEventType(const std::string &type)
                 return EventType::Sticker;
         else if (type == "m.tag")
                 return EventType::Tag;
+        else if (type == "m.presence")
+                return EventType::Presence;
         else if (type == "m.push_rules")
                 return EventType::PushRules;
         else if (type == "m.call.invite")
@@ -136,6 +138,8 @@ to_string(EventType type)
                 return "m.sticker";
         case EventType::Tag:
                 return "m.tag";
+        case EventType::Presence:
+                return "m.presence";
         case EventType::PushRules:
                 return "m.push_rules";
         case EventType::CallInvite:

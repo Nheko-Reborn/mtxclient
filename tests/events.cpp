@@ -1054,3 +1054,29 @@ TEST(RoomAccountData, Tags)
         // NOTE(Nico): We are currently not parsing arbitrary attached json data (anymore).
         EXPECT_EQ(event.content.tags.at("com.example.nheko.text").order, std::nullopt);
 }
+
+TEST(Presence, Presence)
+{
+        json data = R"({
+	    "content": {
+		"avatar_url": "mxc://localhost:wefuiwegh8742w",
+		"currently_active": true,
+		"last_active_ago": 2478593,
+		"presence": "online",
+		"status_msg": "Making cupcakes"
+	    },
+	    "sender": "@example:localhost",
+	    "type": "m.presence"
+	})"_json;
+
+        ns::Event<ns::presence::Presence> event = data;
+
+        EXPECT_EQ(event.type, ns::EventType::Presence);
+        EXPECT_EQ(event.sender, "@example:localhost");
+        EXPECT_EQ(event.content.avatar_url, "mxc://localhost:wefuiwegh8742w");
+        EXPECT_EQ(event.content.currently_active, true);
+        EXPECT_EQ(event.content.last_active_ago, 2478593);
+        EXPECT_EQ(event.content.presence, mtx::presence::online);
+        EXPECT_EQ(event.content.status_msg, "Making cupcakes");
+        EXPECT_EQ(data, json(event));
+}
