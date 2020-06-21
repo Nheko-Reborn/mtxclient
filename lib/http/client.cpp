@@ -1130,6 +1130,31 @@ Client::room_keys(std::string version,
           });
 }
 
+//! Retrieve a specific secret
+void
+Client::secret_storage_secret(const std::string &secret_id,
+                              Callback<mtx::secret_storage::Secret> cb)
+{
+        get<mtx::secret_storage::Secret>(
+          "/client/r0/user/" + mtx::client::utils::url_encode(user_id_.to_string()) +
+            "/account_data/" + mtx::client::utils::url_encode(secret_id),
+          [cb](const mtx::secret_storage::Secret &res, HeaderFields, RequestErr err) {
+                  cb(res, err);
+          });
+}
+//! Retrieve information about a key
+void
+Client::secret_storage_key(const std::string &key_id,
+                           Callback<mtx::secret_storage::AesHmacSha2KeyDescription> cb)
+{
+        get<mtx::secret_storage::AesHmacSha2KeyDescription>(
+          "/client/r0/user/" + mtx::client::utils::url_encode(user_id_.to_string()) +
+            "/account_data/m.secret_storage.key." + mtx::client::utils::url_encode(key_id),
+          [cb](const mtx::secret_storage::AesHmacSha2KeyDescription &res,
+               HeaderFields,
+               RequestErr err) { cb(res, err); });
+}
+
 void
 Client::enable_encryption(const std::string &room, Callback<mtx::responses::EventId> callback)
 {

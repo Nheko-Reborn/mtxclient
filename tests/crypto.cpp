@@ -7,6 +7,7 @@
 
 #include "mtx/requests.hpp"
 #include "mtx/responses.hpp"
+#include "mtx/secret_storage.hpp"
 
 using namespace mtx::client;
 using namespace mtx::http;
@@ -279,4 +280,76 @@ TEST(Encryption, EncryptedFile)
         ASSERT_EQ("abcdefg\n",
                   mtx::crypto::to_string(mtx::crypto::decrypt_file("=\xFDX\xAB\xCA\xEB\x8F\xFF",
                                                                    ev.content.file.value())));
+}
+
+TEST(SecretStorage, Secret)
+{
+        json j = R"({
+	  "encrypted": {
+	      "key_id": {
+		"iv": "16+bytes+base64",
+		"ciphertext": "base64+encoded+encrypted+data",
+		"mac": "base64+encoded+mac"
+	      }
+	  }
+	})"_json;
+
+        mtx::secret_storage::Secret secret = j;
+
+        ASSERT_EQ(json(secret), j);
+        ASSERT_EQ(secret.encrypted.size(), 1);
+        ASSERT_EQ(secret.encrypted["key_id"].iv, "16+bytes+base64");
+        ASSERT_EQ(secret.encrypted["key_id"].ciphertext, "base64+encoded+encrypted+data");
+        ASSERT_EQ(secret.encrypted["key_id"].mac, "base64+encoded+mac");
+}
+
+TEST(SecretStorage, SecretKey)
+{
+        json j = R"({
+	  "name": "m.default",
+	  "algorithm": "m.secret_storage.v1.aes-hmac-sha2",
+	  "iv": "random+data",
+	  "mac": "mac+of+encrypted+zeros"
+	})"_json;
+
+        mtx::secret_storage::AesHmacSha2KeyDescription desc = j;
+
+        ASSERT_EQ(json(desc), j);
+        ASSERT_EQ(desc.name, "m.default");
+        ASSERT_EQ(desc.algorithm, "m.secret_storage.v1.aes-hmac-sha2");
+        ASSERT_EQ(desc.iv, "random+data");
+        ASSERT_EQ(desc.mac, "mac+of+encrypted+zeros");
+
+        j = R"({
+	  "name": "m.default",
+	  "algorithm": "m.secret_storage.v1.aes-hmac-sha2",
+	  "passphrase": {
+	      "algorithm": "m.pbkdf2",
+	      "salt": "MmMsAlty",
+	      "iterations": 100000,
+	      "bits": 512
+	  },
+	  "iv": "random+data",
+	  "mac": "mac+of+encrypted+zeros",
+	  "signatures" : {
+	    "@alice:localhost" : {
+              "ed25519:adkfajfgaefkdahfzguerhtgduifghes": "ksfjvkrfbnrtnwublrjkgnorthgnrdtjbiortbjdlbiutr"
+            }
+	  }
+	})"_json;
+
+        desc = j;
+
+        ASSERT_EQ(json(desc), j);
+        ASSERT_EQ(desc.name, "m.default");
+        ASSERT_EQ(desc.algorithm, "m.secret_storage.v1.aes-hmac-sha2");
+        ASSERT_EQ(desc.iv, "random+data");
+        ASSERT_EQ(desc.mac, "mac+of+encrypted+zeros");
+        ASSERT_EQ(desc.passphrase.has_value(), true);
+        ASSERT_EQ(desc.passphrase->algorithm, "m.pbkdf2");
+        ASSERT_EQ(desc.passphrase->salt, "MmMsAlty");
+        ASSERT_EQ(desc.passphrase->iterations, 100000);
+        ASSERT_EQ(desc.passphrase->bits, 512);
+        ASSERT_EQ(desc.signatures["@alice:localhost"]["ed25519:adkfajfgaefkdahfzguerhtgduifghes"],
+                  "ksfjvkrfbnrtnwublrjkgnorthgnrdtjbiortbjdlbiutr");
 }

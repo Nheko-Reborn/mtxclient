@@ -3,6 +3,7 @@
 #include <openssl/aes.h>
 #include <openssl/evp.h>
 #include <openssl/hmac.h>
+#include <openssl/kdf.h>
 #include <openssl/rand.h>
 #include <openssl/sha.h>
 
@@ -22,21 +23,75 @@ create_buffer(std::size_t nbytes)
 }
 
 BinaryBuf
-PBKDF2_HMAC_SHA_512(const std::string pass, const BinaryBuf salt, uint32_t iterations)
+PBKDF2_HMAC_SHA_512(const std::string pass,
+                    const BinaryBuf salt,
+                    uint32_t iterations,
+                    uint32_t keylen)
 {
-        uint8_t out[SHA512_DIGEST_LENGTH];
+        BinaryBuf out(keylen);
         PKCS5_PBKDF2_HMAC(&pass[0],
                           pass.size(),
                           salt.data(),
                           salt.size(),
                           iterations,
                           EVP_sha512(),
-                          SHA512_DIGEST_LENGTH,
-                          out);
+                          keylen,
+                          out.data());
 
-        BinaryBuf output(out, out + SHA512_DIGEST_LENGTH);
+        return out;
+}
 
-        return output;
+BinaryBuf
+derive_key(const std::string &password, const mtx::secret_storage::PBKDF2 &parameters)
+{
+        if (parameters.algorithm != "m.pbkdf2")
+                throw std::invalid_argument("invalid pbkdf algorithm");
+        return PBKDF2_HMAC_SHA_512(
+          password, to_binary_buf(parameters.salt), parameters.iterations, parameters.bits / 8);
+}
+
+HkdfKeys
+HKDF_SHA256(const BinaryBuf &key, const BinaryBuf &salt, const BinaryBuf &info)
+{
+        BinaryBuf buf(64);
+        EVP_PKEY_CTX *pctx = EVP_PKEY_CTX_new_id(EVP_PKEY_HKDF, NULL);
+
+        if (EVP_PKEY_derive_init(pctx) <= 0) {
+                EVP_PKEY_CTX_free(pctx);
+                throw std::runtime_error("HKDF: failed derive init");
+        }
+        if (EVP_PKEY_CTX_set_hkdf_md(pctx, EVP_sha256()) <= 0) {
+                EVP_PKEY_CTX_free(pctx);
+                throw std::runtime_error("HKDF: failed to set digest");
+        }
+        if (EVP_PKEY_CTX_set1_hkdf_salt(pctx, salt.data(), salt.size()) <= 0) {
+                EVP_PKEY_CTX_free(pctx);
+                throw std::runtime_error("HKDF: failed to set salt");
+        }
+        if (EVP_PKEY_CTX_set1_hkdf_key(pctx, key.data(), key.size()) <= 0) {
+                EVP_PKEY_CTX_free(pctx);
+                throw std::runtime_error("HKDF: failed to set key");
+        }
+        if (EVP_PKEY_CTX_add1_hkdf_info(pctx, info.data(), info.size()) <= 0) {
+                EVP_PKEY_CTX_free(pctx);
+                throw std::runtime_error("HKDF: failed to set info");
+        }
+
+        std::size_t outlen = buf.size();
+        if (EVP_PKEY_derive(pctx, buf.data(), &outlen) <= 0) {
+                EVP_PKEY_CTX_free(pctx);
+                throw std::runtime_error("HKDF: failed derive");
+        }
+
+        EVP_PKEY_CTX_free(pctx);
+
+        if (outlen != 64)
+                throw std::runtime_error("Invalid HKDF size!");
+
+        BinaryBuf macKey(buf.begin() + 32, buf.end());
+        buf.resize(32);
+
+        return {std::move(buf), std::move(macKey)};
 }
 
 BinaryBuf

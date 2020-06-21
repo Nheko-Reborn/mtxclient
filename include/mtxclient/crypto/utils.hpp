@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "mtx/common.hpp"
+#include "mtx/secret_storage.hpp"
 
 namespace mtx {
 namespace crypto {
@@ -45,7 +46,21 @@ to_string(const BinaryBuf &buf)
 
 //! Simple wrapper around the OpenSSL PKCS5_PBKDF2_HMAC function
 BinaryBuf
-PBKDF2_HMAC_SHA_512(const std::string pass, const BinaryBuf salt, uint32_t iterations);
+PBKDF2_HMAC_SHA_512(const std::string pass,
+                    const BinaryBuf salt,
+                    uint32_t iterations,
+                    uint32_t keylen = 64);
+
+BinaryBuf
+derive_key(const std::string &password, const mtx::secret_storage::PBKDF2 &parameters);
+
+//! HKDF key derivation with SHA256 digest
+struct HkdfKeys
+{
+        BinaryBuf aes, mac;
+};
+HkdfKeys
+HKDF_SHA256(const BinaryBuf &key, const BinaryBuf &salt, const BinaryBuf &info);
 
 BinaryBuf
 AES_CTR_256_Encrypt(const std::string plaintext, const BinaryBuf aes256Key, BinaryBuf iv);

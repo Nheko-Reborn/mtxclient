@@ -146,6 +146,7 @@ target_sources(matrix_client
 	lib/structs/identifiers.cpp
 	lib/structs/pushrules.cpp
 	lib/structs/requests.cpp
+	lib/structs/secret_storage.cpp
 	lib/structs/user_interactive.cpp
 	lib/structs/events/aliases.cpp
 	lib/structs/events/avatar.cpp

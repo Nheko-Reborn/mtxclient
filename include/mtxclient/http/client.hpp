@@ -13,7 +13,8 @@
 #include "mtx/identifiers.hpp"        // for Class user
 #include "mtx/pushrules.hpp"
 #include "mtx/requests.hpp"
-#include "mtx/responses/empty.hpp"   // for Empty, Logout, RoomInvite
+#include "mtx/responses/empty.hpp" // for Empty, Logout, RoomInvite
+#include "mtx/secret_storage.hpp"
 #include "mtxclient/http/errors.hpp" // for ClientError
 #include "mtxclient/utils.hpp"       // for random_token, url_encode, des...
 
@@ -467,6 +468,9 @@ public:
         // Encryption related endpoints.
         //
 
+        //! Enable encryption in a room by sending a `m.room.encryption` state event.
+        void enable_encryption(const std::string &room, Callback<mtx::responses::EventId> cb);
+
         //! Upload identity keys & one time keys.
         void upload_keys(const mtx::requests::UploadKeys &req,
                          Callback<mtx::responses::UploadKeys> cb);
@@ -501,8 +505,16 @@ public:
                        const std::string session_id,
                        Callback<mtx::responses::backup::SessionBackup> cb);
 
-        //! Enable encryption in a room by sending a `m.room.encryption` state event.
-        void enable_encryption(const std::string &room, Callback<mtx::responses::EventId> cb);
+        //
+        // Secret storage endpoints
+        //
+
+        //! Retrieve a specific secret
+        void secret_storage_secret(const std::string &secret_id,
+                                   Callback<mtx::secret_storage::Secret> cb);
+        //! Retrieve information about a key
+        void secret_storage_key(const std::string &key_id,
+                                Callback<mtx::secret_storage::AesHmacSha2KeyDescription> cb);
 
 private:
         template<class Request, class Response>
