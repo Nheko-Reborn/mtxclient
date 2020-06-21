@@ -147,6 +147,8 @@ from_json(const json &obj, TimelineEvent &e)
         case events::EventType::KeyVerificationCancel:
         case events::EventType::KeyVerificationRequest:
         case events::EventType::KeyVerificationStart:
+        case events::EventType::KeyVerificationReady:
+        case events::EventType::KeyVerificationDone:
         case events::EventType::KeyVerificationAccept:
         case events::EventType::KeyVerificationKey:
         case events::EventType::KeyVerificationMac:

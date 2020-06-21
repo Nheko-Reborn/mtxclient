@@ -851,7 +851,6 @@ TEST(ToDevice, KeyVerificationAccept)
         "hash": "sha256",
         "key_agreement_protocol": "curve25519",
         "message_authentication_code": "hkdf-hmac-sha256",
-        "method": "m.sas.v1",
         "short_authentication_string": [
             "decimal",
             "emoji"
@@ -871,11 +870,40 @@ TEST(ToDevice, KeyVerificationAccept)
         EXPECT_EQ(keyEvent.hash, "sha256");
         EXPECT_EQ(keyEvent.key_agreement_protocol, "curve25519");
         EXPECT_EQ(keyEvent.message_authentication_code, "hkdf-hmac-sha256");
-        EXPECT_EQ(keyEvent.method, ns::msg::VerificationMethods::SASv1);
         EXPECT_EQ(keyEvent.short_authentication_string[0], ns::msg::SASMethods::Decimal);
         EXPECT_EQ(keyEvent.short_authentication_string[1], ns::msg::SASMethods::Emoji);
         EXPECT_EQ(keyEvent.transaction_id, "S0meUniqueAndOpaqueString");
         EXPECT_EQ(request_data.dump(), json(event).dump());
+}
+
+TEST(ToDevice, KeyVerificationReady)
+{
+        json request_data = R"({
+    "content": {
+      "methods":["m.sas.v1"]
+    },
+    "sender": "test_user",
+    "type": "m.key.verification.ready"
+})"_json;
+
+        ns::Event<ns::msg::KeyVerificationReady> event = request_data;
+        auto keyEvent                                  = event.content;
+        EXPECT_EQ(event.sender, "test_user");
+        EXPECT_EQ(event.type, mtx::events::EventType::KeyVerificationReady);
+        EXPECT_EQ(event.content.methods[0], ns::msg::VerificationMethods::SASv1);
+}
+
+TEST(ToDevice, KeyVerificationDone)
+{
+        json request_data = R"({
+    "content": {},
+    "sender": "test_user",
+    "type": "m.key.verification.done"
+})"_json;
+
+        ns::Event<ns::msg::KeyVerificationDone> event = request_data;
+        EXPECT_EQ(event.sender, "test_user");
+        EXPECT_EQ(event.type, mtx::events::EventType::KeyVerificationDone);
 }
 
 TEST(ToDevice, KeyVerificationCancel)
