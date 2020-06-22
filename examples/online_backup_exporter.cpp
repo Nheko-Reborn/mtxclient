@@ -144,9 +144,11 @@ login_handler(const mtx::responses::Login &res, RequestErr err)
                                                       return;
                                               }
 
-                                              auto keys   = HKDF_SHA256(decryptionKey,
-                                                                      BinaryBuf(32, 0),
-                                                                      to_binary_buf(keyDesc.name));
+                                              auto keys = HKDF_SHA256(
+                                                decryptionKey,
+                                                BinaryBuf(32, 0),
+                                                to_binary_buf(
+                                                  mtx::secret_storage::secrets::megolm_backup_v1));
                                               auto keyMac = HMAC_SHA256(
                                                 keys.mac,
                                                 to_binary_buf(base642bin(secretData.ciphertext)));
@@ -158,6 +160,13 @@ login_handler(const mtx::responses::Login &res, RequestErr err)
                                                         << " don't match, can't decrypt ecdh key!";
                                                       return;
                                               }
+
+                                              auto decryptedSecret = to_string(AES_CTR_256_Decrypt(
+                                                secretData.ciphertext,
+                                                keys.aes,
+                                                to_binary_buf(base642bin(secretData.iv))));
+
+                                              cout << decryptedSecret << "\n";
 
                                               // struct ExportedSession
                                               //{
