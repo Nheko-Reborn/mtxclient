@@ -477,6 +477,27 @@ SAS::generate_bytes_emoji(std::string info)
         return output_list;
 }
 
+std::string
+SAS::calculate_mac(std::string input_data, std::string info)
+{
+        auto input_data_buffer = to_binary_buf(input_data);
+        auto info_buffer       = to_binary_buf(info);
+        auto output_buffer     = create_buffer(olm_sas_mac_length(this->sas.get()));
+
+        const int ret = olm_sas_calculate_mac(this->sas.get(),
+                                              input_data_buffer.data(),
+                                              input_data_buffer.size(),
+                                              info_buffer.data(),
+                                              info_buffer.size(),
+                                              output_buffer.data(),
+                                              output_buffer.size());
+
+        if (ret == -1)
+                throw olm_exception("calculate_mac", this->sas.get());
+
+        return to_string(output_buffer);
+}
+
 nlohmann::json
 OlmClient::create_room_key_event(const UserId &recipient,
                                  const std::string &ed25519_recipient_key,

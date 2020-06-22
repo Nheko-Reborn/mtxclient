@@ -105,6 +105,7 @@ struct SAS
         void set_their_key(std::string their_public_key);
         std::vector<int> generate_bytes_decimal(std::string info);
         std::vector<int> generate_bytes_emoji(std::string info);
+        std::string calculate_mac(std::string input_data, std::string info);
 
 private:
         SASPtr sas;

@@ -880,7 +880,9 @@ TEST(ToDevice, KeyVerificationReady)
 {
         json request_data = R"({
     "content": {
-      "methods":["m.sas.v1"]
+      "from_device":"@alice:localhost",
+      "methods":["m.sas.v1"],
+      "transaction_id":"S0meUniqueAndOpaqueString"
     },
     "sender": "test_user",
     "type": "m.key.verification.ready"
@@ -890,20 +892,26 @@ TEST(ToDevice, KeyVerificationReady)
         auto keyEvent                                  = event.content;
         EXPECT_EQ(event.sender, "test_user");
         EXPECT_EQ(event.type, mtx::events::EventType::KeyVerificationReady);
-        EXPECT_EQ(event.content.methods[0], ns::msg::VerificationMethods::SASv1);
+        EXPECT_EQ(keyEvent.from_device, "@alice:localhost");
+        EXPECT_EQ(keyEvent.transaction_id, "S0meUniqueAndOpaqueString");
+        EXPECT_EQ(keyEvent.methods[0], ns::msg::VerificationMethods::SASv1);
 }
 
 TEST(ToDevice, KeyVerificationDone)
 {
         json request_data = R"({
-    "content": {},
+    "content": {
+      "transaction_id": "S0meUniqueAndOpaqueString"
+    },
     "sender": "test_user",
     "type": "m.key.verification.done"
 })"_json;
 
         ns::Event<ns::msg::KeyVerificationDone> event = request_data;
+        auto keyEvent                                 = event.content;
         EXPECT_EQ(event.sender, "test_user");
         EXPECT_EQ(event.type, mtx::events::EventType::KeyVerificationDone);
+        EXPECT_EQ(keyEvent.transaction_id, "S0meUniqueAndOpaqueString");
 }
 
 TEST(ToDevice, KeyVerificationCancel)

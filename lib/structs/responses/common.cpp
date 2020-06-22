@@ -697,8 +697,7 @@ parse_device_events(const json &events,
                         break;
                 case events::EventType::KeyVerificationDone:
                         try {
-                                events::DeviceEvent<KeyVerificationDone> newDoneEvent;
-                                container.emplace_back(std::move(newDoneEvent));
+                                container.emplace_back(events::DeviceEvent<KeyVerificationDone>(e));
                         } catch (json::exception &err) {
                                 log_error(err, e);
                         }

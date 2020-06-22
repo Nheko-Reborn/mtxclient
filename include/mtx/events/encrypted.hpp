@@ -208,9 +208,13 @@ from_json(const nlohmann::json &obj, KeyVerificationStart &event);
 void
 to_json(nlohmann::json &obj, const KeyVerificationStart &event);
 
-//! Implements the `m.key.verification.request` event
+//! Implements the `m.key.verification.ready` event
 struct KeyVerificationReady
 {
+        //! the deviceId of the device which send the `m.key.verification.request`
+        std::string from_device;
+        //! transactionId of the current flow
+        std::string transaction_id;
         //! Sends the user the supported methods
         std::vector<VerificationMethods> methods;
 };
@@ -223,13 +227,16 @@ to_json(nlohmann::json &obj, const KeyVerificationReady &event);
 
 // ! Implements the `m.key.verification.done` event
 struct KeyVerificationDone
-{};
+{
+        //! transactionId of the current flow
+        std::string transaction_id;
+};
 
 void
-from_json(const nlohmann::json &, KeyVerificationDone &);
+from_json(const nlohmann::json &obj, KeyVerificationDone &event);
 
 void
-to_json(nlohmann::json &, const KeyVerificationDone &);
+to_json(nlohmann::json &obj, const KeyVerificationDone &event);
 
 //! Implements the `m.key.verification.accept` event
 struct KeyVerificationAccept

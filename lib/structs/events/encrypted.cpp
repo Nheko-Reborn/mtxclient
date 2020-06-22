@@ -236,25 +236,29 @@ to_json(json &obj, const KeyVerificationStart &event)
 void
 from_json(const json &obj, KeyVerificationReady &event)
 {
-        event.methods = obj.at("methods").get<std::vector<VerificationMethods>>();
+        event.transaction_id = obj.at("transaction_id").get<std::string>();
+        event.methods        = obj.at("methods").get<std::vector<VerificationMethods>>();
+        event.from_device    = obj.at("from_device").get<std::string>();
 }
 
 void
 to_json(json &obj, const KeyVerificationReady &event)
 {
-        obj["methods"] = event.methods;
+        obj["methods"]        = event.methods;
+        obj["transaction_id"] = event.transaction_id;
+        obj["from_device"]    = event.from_device;
 }
 
 void
-from_json(const nlohmann::json &, KeyVerificationDone &)
+from_json(const nlohmann::json &obj, KeyVerificationDone &event)
 {
-        return;
+        event.transaction_id = obj.at("transaction_id").get<std::string>();
 }
 
 void
-to_json(nlohmann::json &, const KeyVerificationDone &)
+to_json(nlohmann::json &obj, const KeyVerificationDone &event)
 {
-        return;
+        obj["transaction_id"] = event.transaction_id;
 }
 
 void
