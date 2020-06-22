@@ -99,15 +99,15 @@ login_handler(const mtx::responses::Login &res, RequestErr err)
 
                                     client->secret_storage_key(
                                       secret.encrypted.begin()->first,
-                                      [backup, secret](
+                                      [backup, secretData = secret.encrypted.begin()->second](
                                         mtx::secret_storage::AesHmacSha2KeyDescription keyDesc,
                                         RequestErr err) {
+                                              client->logout(
+                                                [](mtx::responses::Logout, RequestErr) {});
                                               if (err) {
                                                       cerr << "Error fetching the backup key "
                                                               "description: ";
                                                       print_errors(err);
-                                                      client->logout(
-                                                        [](mtx::responses::Logout, RequestErr) {});
                                                       return;
                                               }
 
@@ -129,20 +129,50 @@ login_handler(const mtx::responses::Login &res, RequestErr err)
 
                                               // verify key
                                               using namespace mtx::crypto;
-                                              auto keys = HKDF_SHA256(
+                                              auto testKeys = HKDF_SHA256(
                                                 decryptionKey, BinaryBuf(32, 0), BinaryBuf{});
 
-                                              auto encrypted =
-                                                AES_CTR_256_Encrypt(std::string(32, '\0'),
-                                                                    keys.aes,
-                                                                    to_binary_buf(keyDesc.iv));
+                                              auto encrypted = AES_CTR_256_Encrypt(
+                                                std::string(32, '\0'),
+                                                testKeys.aes,
+                                                to_binary_buf(base642bin(keyDesc.iv)));
 
-                                              auto mac = HMAC_SHA256(keys.mac, encrypted);
-                                              cout << "Our mac: \'" << bin2base64(to_string(mac))
-                                                   << "\', their mac \'" << keyDesc.mac << "\'\n";
+                                              auto mac = HMAC_SHA256(testKeys.mac, encrypted);
+                                              if (bin2base64(to_string(mac)) != keyDesc.mac) {
+                                                      cerr
+                                                        << "mac failed, key or password wrong!\n";
+                                                      return;
+                                              }
 
-                                              client->logout(
-                                                [](mtx::responses::Logout, RequestErr) {});
+                                              auto keys   = HKDF_SHA256(decryptionKey,
+                                                                      BinaryBuf(32, 0),
+                                                                      to_binary_buf(keyDesc.name));
+                                              auto keyMac = HMAC_SHA256(
+                                                keys.mac,
+                                                to_binary_buf(base642bin(secretData.ciphertext)));
+
+                                              if (bin2base64(to_string(keyMac)) != secretData.mac) {
+                                                      cerr
+                                                        << bin2base64(to_string(keyMac)) << " and "
+                                                        << secretData.mac
+                                                        << " don't match, can't decrypt ecdh key!";
+                                                      return;
+                                              }
+
+                                              // struct ExportedSession
+                                              //{
+                                              //        std::map<std::string, std::string>
+                                              //        sender_claimed_keys;   // currently unused.
+                                              //        std::vector<std::string>
+                                              //        forwarding_curve25519_key_chain; //
+                                              //        currently unused.
+                                              //
+                                              //        std::string algorithm = MEGOLM_ALGO;
+                                              //        std::string room_id;
+                                              //        std::string sender_key;
+                                              //        std::string session_id;
+                                              //        std::string session_key;
+                                              //};
                                       });
                             });
                   });
