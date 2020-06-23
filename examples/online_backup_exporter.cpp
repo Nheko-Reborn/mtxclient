@@ -3,6 +3,8 @@
 #include <variant>
 
 #include "mtx.hpp"
+#include "mtxclient/crypto/client.hpp"
+#include "mtxclient/crypto/types.hpp"
 #include "mtxclient/crypto/utils.hpp"
 #include "mtxclient/http/client.hpp"
 #include "mtxclient/http/errors.hpp"
@@ -161,12 +163,35 @@ login_handler(const mtx::responses::Login &res, RequestErr err)
                                                       return;
                                               }
 
-                                              auto decryptedSecret = to_string(AES_CTR_256_Decrypt(
+                                              auto decryptedSecret = AES_CTR_256_Decrypt(
                                                 secretData.ciphertext,
                                                 keys.aes,
-                                                to_binary_buf(base642bin(secretData.iv))));
+                                                to_binary_buf(base642bin(secretData.iv)));
 
-                                              cout << decryptedSecret << "\n";
+                                              for (const auto &[room_id, backup_sessions] :
+                                                   backup.rooms) {
+                                                      for (const auto &[session_id, s] :
+                                                           backup_sessions.sessions) {
+                                                              // mtx::crypto::ExportedSession
+                                                              // session;
+                                                              // s.session_data;
+
+                                                              try {
+                                                                      cout
+                                                                        << CURVE25519_AES_SHA2_Decrypt(
+                                                                             s.session_data
+                                                                               .ciphertext,
+                                                                             decryptedSecret,
+                                                                             s.session_data
+                                                                               .ephemeral,
+                                                                             s.session_data.mac)
+                                                                        << std::endl;
+                                                              } catch (
+                                                                mtx::crypto::olm_exception &e) {
+                                                                      cerr << e.what() << "\n";
+                                                              }
+                                                      }
+                                              }
 
                                               // struct ExportedSession
                                               //{

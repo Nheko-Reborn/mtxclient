@@ -36,6 +36,10 @@ public:
           : msg_(func + ": " + std::string(olm_utility_last_error(util)))
         {}
 
+        olm_exception(std::string func, OlmPkDecryption *s)
+          : msg_(func + ": " + std::string(olm_pk_decryption_last_error(s)))
+        {}
+
         olm_exception(std::string func, OlmOutboundGroupSession *s)
           : msg_(func + ": " + std::string(olm_outbound_group_session_last_error(s)))
         {}

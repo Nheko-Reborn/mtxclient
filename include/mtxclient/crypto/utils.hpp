@@ -68,6 +68,12 @@ AES_CTR_256_Encrypt(const std::string plaintext, const BinaryBuf aes256Key, Bina
 BinaryBuf
 AES_CTR_256_Decrypt(const std::string ciphertext, const BinaryBuf aes256Key, BinaryBuf iv);
 
+std::string
+CURVE25519_AES_SHA2_Decrypt(std::string base64_ciphertext,
+                            const BinaryBuf &privateKey,
+                            const std::string &ephemeral,
+                            const std::string &mac);
+
 BinaryBuf
 HMAC_SHA256(const BinaryBuf hmacKey, const BinaryBuf data);
 

@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <olm/olm.h>
+#include <olm/pk.h>
 
 namespace mtx {
 namespace crypto {
@@ -10,6 +11,8 @@ struct OlmDeleter
 {
         void operator()(OlmAccount *ptr) { delete[](reinterpret_cast<uint8_t *>(ptr)); }
         void operator()(OlmUtility *ptr) { delete[](reinterpret_cast<uint8_t *>(ptr)); }
+
+        void operator()(OlmPkDecryption *ptr) { delete[](reinterpret_cast<uint8_t *>(ptr)); }
 
         void operator()(OlmSession *ptr) { delete[](reinterpret_cast<uint8_t *>(ptr)); }
         void operator()(OlmOutboundGroupSession *ptr)
@@ -24,6 +27,16 @@ struct UtilityObject
         using olm_type = OlmUtility;
 
         static olm_type *allocate() { return olm_utility(new uint8_t[olm_utility_size()]); }
+};
+
+struct PkDecryptionObject
+{
+        using olm_type = OlmPkDecryption;
+
+        static olm_type *allocate()
+        {
+                return olm_pk_decryption(new uint8_t[olm_pk_decryption_size()]);
+        }
 };
 
 struct AccountObject

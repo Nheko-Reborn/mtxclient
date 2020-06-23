@@ -11,6 +11,8 @@
 #include <iomanip>
 #include <iostream>
 
+#include "mtxclient/crypto/client.hpp"
+
 namespace mtx {
 namespace crypto {
 BinaryBuf
@@ -197,6 +199,37 @@ AES_CTR_256_Decrypt(const std::string ciphertext, const BinaryBuf aes256Key, Bin
         EVP_CIPHER_CTX_free(ctx);
 
         return decrypted;
+}
+
+std::string
+CURVE25519_AES_SHA2_Decrypt(std::string base64_ciphertext,
+                            const BinaryBuf &privateKey,
+                            const std::string &ephemeral,
+                            const std::string &mac)
+{
+        auto ctx = create_olm_object<PkDecryptionObject>();
+
+        BinaryBuf pubkey(::olm_pk_key_length());
+
+        ::olm_pk_key_from_private(
+          ctx.get(), pubkey.data(), pubkey.size(), privateKey.data(), privateKey.size());
+
+        std::string plaintext(base64_ciphertext.size(), '\0');
+        std::size_t decrypted_size = ::olm_pk_decrypt(ctx.get(),
+                                                      ephemeral.data(),
+                                                      ephemeral.size(),
+                                                      mac.data(),
+                                                      mac.size(),
+                                                      base64_ciphertext.data(),
+                                                      base64_ciphertext.size(),
+                                                      plaintext.data(),
+                                                      plaintext.size());
+
+        if (decrypted_size != olm_error()) {
+                plaintext.resize(decrypted_size);
+                return plaintext;
+        } else
+                throw olm_exception(__func__, ctx.get());
 }
 
 std::string
