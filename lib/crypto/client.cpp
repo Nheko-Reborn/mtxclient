@@ -384,10 +384,11 @@ OlmClient::sas_init()
         return std::make_unique<SAS>();
 }
 
+//! constructor which create a new Curve25519 key pair which is stored in SASObject
 SAS::SAS()
 {
         this->sas       = create_olm_object<SASObject>();
-        auto random_buf = create_buffer(olm_create_sas_random_length(sas.get()));
+        auto random_buf = BinaryBuf(olm_create_sas_random_length(sas.get()));
 
         const int ret = olm_create_sas(this->sas.get(), random_buf.data(), random_buf.size());
 
@@ -395,6 +396,7 @@ SAS::SAS()
                 throw olm_exception("create_sas_instance", this->sas.get());
 }
 
+//! returns the public key of the key-pair created
 std::string
 SAS::public_key()
 {
@@ -409,6 +411,7 @@ SAS::public_key()
         return to_string(pub_key_buffer);
 }
 
+//! this is for setting the public key of the other user
 void
 SAS::set_their_key(std::string their_public_key)
 {
@@ -421,11 +424,12 @@ SAS::set_their_key(std::string their_public_key)
                 throw olm_exception("get_public_key", this->sas.get());
 }
 
+//! generates and returns a vector of numbers(int) ranging from 0 to 8191, to be used only after using `set_their_key`
 std::vector<int>
 SAS::generate_bytes_decimal(std::string info)
 {
         auto input_info_buffer = to_binary_buf(info);
-        auto output_buffer     = create_buffer(5);
+        auto output_buffer     = BinaryBuf(5);
 
         std::vector<int> output_list;
         output_list.resize(3);
@@ -448,11 +452,12 @@ SAS::generate_bytes_decimal(std::string info)
         return output_list;
 }
 
+//! generates and returns a vector of number(int) ranging from 0 to 63, to be used only after using `set_their_key`
 std::vector<int>
 SAS::generate_bytes_emoji(std::string info)
 {
         auto input_info_buffer = to_binary_buf(info);
-        auto output_buffer     = create_buffer(6);
+        auto output_buffer     = BinaryBuf(6);
 
         std::vector<int> output_list;
         output_list.resize(7);
@@ -477,12 +482,13 @@ SAS::generate_bytes_emoji(std::string info)
         return output_list;
 }
 
+//! calculates the mac based on the given input and info using the shared secret produced after `set_their_key`
 std::string
 SAS::calculate_mac(std::string input_data, std::string info)
 {
         auto input_data_buffer = to_binary_buf(input_data);
         auto info_buffer       = to_binary_buf(info);
-        auto output_buffer     = create_buffer(olm_sas_mac_length(this->sas.get()));
+        auto output_buffer     = BinaryBuf(olm_sas_mac_length(this->sas.get()));
 
         const int ret = olm_sas_calculate_mac(this->sas.get(),
                                               input_data_buffer.data(),
