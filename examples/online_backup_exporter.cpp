@@ -115,58 +115,42 @@ login_handler(const mtx::responses::Login &res, RequestErr err)
 
                                               mtx::crypto::BinaryBuf decryptionKey;
                                               if (keyDesc.passphrase) {
-                                                      auto password =
-                                                        getpass("Enter Key Backup Password: ");
-                                                      decryptionKey = mtx::crypto::derive_key(
-                                                        password, keyDesc.passphrase.value());
+                                                      std::optional<mtx::crypto::BinaryBuf> temp;
+                                                      do {
+                                                              auto password = getpass(
+                                                                "Enter Key Backup Password: ");
+                                                              temp =
+                                                                mtx::crypto::key_from_passphrase(
+                                                                  password, keyDesc);
+                                                      } while (!temp);
+                                                      decryptionKey = temp.value();
                                               } else {
-                                                      auto recoveryKey =
-                                                        getpass("Enter Key Backup Recovery Key: ");
-                                                      decryptionKey =
-                                                        mtx::crypto::to_binary_buf(recoveryKey);
+                                                      std::optional<mtx::crypto::BinaryBuf> temp;
+                                                      do {
+                                                              auto recoveryKey = getpass(
+                                                                "Enter Key Backup Recovery Key: ");
+                                                              temp =
+                                                                mtx::crypto::key_from_recoverykey(
+                                                                  recoveryKey, keyDesc);
+                                                      } while (!temp);
+                                                      decryptionKey = temp.value();
                                               }
-                                              // BinaryBuf
-                                              // AES_CTR_256_Encrypt(const std::string plaintext,
-                                              // const BinaryBuf aes256Key, BinaryBuf iv);
 
                                               // verify key
                                               using namespace mtx::crypto;
-                                              auto testKeys = HKDF_SHA256(
-                                                decryptionKey, BinaryBuf(32, 0), BinaryBuf{});
 
-                                              auto encrypted = AES_CTR_256_Encrypt(
-                                                std::string(32, '\0'),
-                                                testKeys.aes,
-                                                to_binary_buf(base642bin(keyDesc.iv)));
-
-                                              auto mac = HMAC_SHA256(testKeys.mac, encrypted);
-                                              if (bin2base64(to_string(mac)) != keyDesc.mac) {
-                                                      cerr
-                                                        << "mac failed, key or password wrong!\n";
-                                                      return;
-                                              }
-
-                                              auto keys = HKDF_SHA256(
+                                              auto decryptedSecret = decrypt(
+                                                secretData,
                                                 decryptionKey,
-                                                BinaryBuf(32, 0),
-                                                to_binary_buf(
-                                                  mtx::secret_storage::secrets::megolm_backup_v1));
-                                              auto keyMac = HMAC_SHA256(
-                                                keys.mac,
-                                                to_binary_buf(base642bin(secretData.ciphertext)));
+                                                mtx::secret_storage::secrets::megolm_backup_v1);
 
-                                              if (bin2base64(to_string(keyMac)) != secretData.mac) {
+                                              if (decryptedSecret.empty()) {
                                                       cerr
-                                                        << bin2base64(to_string(keyMac)) << " and "
-                                                        << secretData.mac
-                                                        << " don't match, can't decrypt ecdh key!";
+                                                        << "Failed to get backup key from secret";
                                                       return;
                                               }
-
-                                              auto decryptedSecret = AES_CTR_256_Decrypt(
-                                                secretData.ciphertext,
-                                                keys.aes,
-                                                to_binary_buf(base642bin(secretData.iv)));
+                                              auto sessionDecryptionKey =
+                                                to_binary_buf(base642bin(decryptedSecret));
 
                                               for (const auto &[room_id, backup_sessions] :
                                                    backup.rooms) {
@@ -181,7 +165,7 @@ login_handler(const mtx::responses::Login &res, RequestErr err)
                                                                         << CURVE25519_AES_SHA2_Decrypt(
                                                                              s.session_data
                                                                                .ciphertext,
-                                                                             decryptedSecret,
+                                                                             sessionDecryptionKey,
                                                                              s.session_data
                                                                                .ephemeral,
                                                                              s.session_data.mac)
@@ -189,6 +173,7 @@ login_handler(const mtx::responses::Login &res, RequestErr err)
                                                               } catch (
                                                                 mtx::crypto::olm_exception &e) {
                                                                       cerr << e.what() << "\n";
+                                                                      return;
                                                               }
                                                       }
                                               }

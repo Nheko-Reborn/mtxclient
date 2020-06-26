@@ -43,13 +43,83 @@ PBKDF2_HMAC_SHA_512(const std::string pass,
         return out;
 }
 
-BinaryBuf
-derive_key(const std::string &password, const mtx::secret_storage::PBKDF2 &parameters)
+std::optional<BinaryBuf>
+key_from_passphrase(const std::string &password,
+                    const mtx::secret_storage::AesHmacSha2KeyDescription &parameters)
 {
-        if (parameters.algorithm != "m.pbkdf2")
+        if (!parameters.passphrase)
+                throw std::invalid_argument("no passphrase to derive key from");
+        if (parameters.passphrase->algorithm != "m.pbkdf2")
                 throw std::invalid_argument("invalid pbkdf algorithm");
-        return PBKDF2_HMAC_SHA_512(
-          password, to_binary_buf(parameters.salt), parameters.iterations, parameters.bits / 8);
+        auto decryptionKey = PBKDF2_HMAC_SHA_512(password,
+                                                 to_binary_buf(parameters.passphrase->salt),
+                                                 parameters.passphrase->iterations,
+                                                 parameters.passphrase->bits / 8);
+
+        // verify key
+        using namespace mtx::crypto;
+        auto testKeys = HKDF_SHA256(decryptionKey, BinaryBuf(32, 0), BinaryBuf{});
+
+        auto encrypted = AES_CTR_256_Encrypt(
+          std::string(32, '\0'), testKeys.aes, to_binary_buf(base642bin(parameters.iv)));
+
+        auto mac = HMAC_SHA256(testKeys.mac, encrypted);
+        if (bin2base64(to_string(mac)) != parameters.mac) {
+                return std::nullopt;
+        }
+
+        return decryptionKey;
+}
+
+std::optional<BinaryBuf>
+key_from_recoverykey(const std::string &recoverykey,
+                     const mtx::secret_storage::AesHmacSha2KeyDescription &parameters)
+{
+        auto tempKey = to_binary_buf(base582bin(recoverykey));
+
+        if (tempKey.size() < 3 || tempKey[0] != 0x8b || tempKey[1] != 0x01)
+                return std::nullopt;
+
+        uint8_t parity = 0;
+        for (auto byte = tempKey.begin(); byte != tempKey.end() - 1; ++byte)
+                parity ^= *byte;
+
+        if (parity != tempKey.back())
+                return std::nullopt;
+
+        auto decryptionKey = BinaryBuf(tempKey.begin() + 2, tempKey.end() - 1);
+
+        // verify key
+        using namespace mtx::crypto;
+        auto testKeys = HKDF_SHA256(decryptionKey, BinaryBuf(32, 0), BinaryBuf{});
+
+        auto encrypted = AES_CTR_256_Encrypt(
+          std::string(32, '\0'), testKeys.aes, to_binary_buf(base642bin(parameters.iv)));
+
+        auto mac = HMAC_SHA256(testKeys.mac, encrypted);
+        if (bin2base64(to_string(mac)) != parameters.mac) {
+                return std::nullopt;
+        }
+
+        return decryptionKey;
+}
+
+std::string
+decrypt(const mtx::secret_storage::AesHmacSha2EncryptedData &data,
+        BinaryBuf decryptionKey,
+        const std::string key_name)
+{
+        auto keys   = HKDF_SHA256(decryptionKey, BinaryBuf(32, 0), to_binary_buf(key_name));
+        auto keyMac = HMAC_SHA256(keys.mac, to_binary_buf(base642bin(data.ciphertext)));
+
+        if (bin2base64(to_string(keyMac)) != data.mac) {
+                return "";
+        }
+
+        auto decryptedSecret = AES_CTR_256_Decrypt(
+          base642bin(data.ciphertext), keys.aes, to_binary_buf(base642bin(data.iv)));
+
+        return to_string(decryptedSecret);
 }
 
 HkdfKeys
@@ -214,7 +284,8 @@ CURVE25519_AES_SHA2_Decrypt(std::string base64_ciphertext,
         ::olm_pk_key_from_private(
           ctx.get(), pubkey.data(), pubkey.size(), privateKey.data(), privateKey.size());
 
-        std::string plaintext(base64_ciphertext.size(), '\0');
+        std::string plaintext(olm_pk_max_plaintext_length(ctx.get(), base64_ciphertext.size()),
+                              '\0');
         std::size_t decrypted_size = ::olm_pk_decrypt(ctx.get(),
                                                       ephemeral.data(),
                                                       ephemeral.size(),

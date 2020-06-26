@@ -51,8 +51,18 @@ PBKDF2_HMAC_SHA_512(const std::string pass,
                     uint32_t iterations,
                     uint32_t keylen = 64);
 
-BinaryBuf
-derive_key(const std::string &password, const mtx::secret_storage::PBKDF2 &parameters);
+std::optional<BinaryBuf>
+key_from_passphrase(const std::string &password,
+                    const mtx::secret_storage::AesHmacSha2KeyDescription &parameters);
+
+std::optional<BinaryBuf>
+key_from_recoverykey(const std::string &recoverkey,
+                     const mtx::secret_storage::AesHmacSha2KeyDescription &parameters);
+
+std::string
+decrypt(const mtx::secret_storage::AesHmacSha2EncryptedData &data,
+        BinaryBuf decryptionKey,
+        const std::string key_name);
 
 //! HKDF key derivation with SHA256 digest
 struct HkdfKeys
