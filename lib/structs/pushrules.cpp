@@ -91,7 +91,7 @@ to_json(nlohmann::json &obj, const PushRule &rule)
         if (!rule.pattern.empty())
                 obj["pattern"] = rule.pattern;
 
-        for (const auto condition : rule.conditions)
+        for (const auto &condition : rule.conditions)
                 obj["conditions"].push_back(condition);
 }
 
@@ -108,7 +108,7 @@ from_json(const nlohmann::json &obj, PushRule &rule)
         rule.pattern = obj.value("pattern", "");
 
         if (obj.contains("conditions"))
-                for (auto condition : obj["conditions"])
+                for (const auto &condition : obj["conditions"])
                         rule.conditions.push_back(condition);
 }
 
@@ -126,19 +126,19 @@ void
 from_json(const nlohmann::json &obj, Ruleset &set)
 {
         if (obj.contains("override"))
-                for (const auto e : obj["override"])
+                for (const auto &e : obj["override"])
                         set.override_.push_back(e.get<PushRule>());
         if (obj.contains("content"))
-                for (const auto e : obj["content"])
+                for (const auto &e : obj["content"])
                         set.content.push_back(e.get<PushRule>());
         if (obj.contains("room"))
-                for (const auto e : obj["room"])
+                for (const auto &e : obj["room"])
                         set.room.push_back(e.get<PushRule>());
         if (obj.contains("sender"))
-                for (const auto e : obj["sender"])
+                for (const auto &e : obj["sender"])
                         set.sender.push_back(e.get<PushRule>());
         if (obj.contains("underride"))
-                for (const auto e : obj["underride"])
+                for (const auto &e : obj["underride"])
                         set.underride.push_back(e.get<PushRule>());
 }
 void
