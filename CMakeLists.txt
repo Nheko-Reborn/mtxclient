@@ -15,10 +15,9 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON CACHE BOOL "compile as PIC by default")
 option(HUNTER_ENABLED "Enable Hunter package manager" OFF)
 include("cmake/HunterGate.cmake")
 HunterGate(
-	URL "https://github.com/cpp-pm/hunter/archive/v0.23.244.tar.gz"
-	SHA1 "2c0f491fd0b80f7b09e3d21adb97237161ef9835"
-	LOCAL
-	)
+    URL "https://github.com/cpp-pm/hunter/archive/v0.23.260.tar.gz"
+    SHA1 "13775235910a3fa85644568d1c5be8271de72e1c"
+)
 
 option(USE_BUNDLED_BOOST "Use the bundled version of Boost." ${HUNTER_ENABLED})
 option(USE_BUNDLED_SPDLOG "Use the bundled version of spdlog."
@@ -111,7 +110,7 @@ endif()
 if(USE_BUNDLED_JSON)
 	hunter_add_package(nlohmann_json)
 endif()
-find_package(nlohmann_json 3.2.0)
+find_package(nlohmann_json 3.2.0 CONFIG REQUIRED)
 set_package_properties(nlohmann_json PROPERTIES
 	DESCRIPTION "JSON for Modern C++, a C++11 header-only JSON class"
 	URL "https://nlohmann.github.io/json/"
