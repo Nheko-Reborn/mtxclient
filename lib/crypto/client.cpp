@@ -7,10 +7,10 @@
 #include "mtxclient/crypto/types.hpp"
 #include "mtxclient/crypto/utils.hpp"
 
-#include <sodium.h>
-
 using json = nlohmann::json;
 using namespace mtx::crypto;
+
+static constexpr auto pwhash_SALTBYTES = 16u;
 
 void
 OlmClient::create_new_account()
@@ -543,7 +543,7 @@ mtx::crypto::encrypt_exported_sessions(const mtx::crypto::ExportedSessionKeys &k
 
         auto nonce = create_buffer(AES_BLOCK_SIZE);
 
-        auto salt = create_buffer(crypto_pwhash_SALTBYTES);
+        auto salt = create_buffer(pwhash_SALTBYTES);
 
         auto buf = create_buffer(64U);
 
@@ -599,7 +599,7 @@ mtx::crypto::decrypt_exported_sessions(const std::string &data, std::string pass
         auto format           = BinaryBuf(binary_start, format_end);
 
         // Salt, 16 bytes
-        const auto salt_end = format_end + crypto_pwhash_SALTBYTES;
+        const auto salt_end = format_end + pwhash_SALTBYTES;
         auto salt           = BinaryBuf(format_end, salt_end);
 
         // IV, 16 bytes
