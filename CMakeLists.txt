@@ -83,7 +83,7 @@ include(FeatureSummary)
 if(USE_BUNDLED_OPENSSL)
 	hunter_add_package(OpenSSL)
 endif()
-find_package(OpenSSL REQUIRED)
+find_package(OpenSSL 1.1.0 REQUIRED)
 set_package_properties(OpenSSL PROPERTIES
 	DESCRIPTION "Open source SSL and TLS implementation and cryptographic library"
 	URL "https://www.openssl.org/"
