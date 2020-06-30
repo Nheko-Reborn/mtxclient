@@ -154,6 +154,29 @@ void
 from_json(const nlohmann::json &obj, BackupVersion &response);
 void
 to_json(nlohmann::json &obj, const BackupVersion &response);
+
+struct SessionData
+{
+        //! Required. The end-to-end message encryption algorithm that the key is
+        // for. Must be m.megolm.v1.aes-sha2.
+        std::string algorithm;
+        // Required. Chain of Curve25519 keys through which this
+        // session was forwarded, via m.forwarded_room_key events.
+        std::vector<std::string> forwarding_curve25519_key_chain;
+        // Required. Unpadded base64-encoded device curve25519 key.
+        std::string sender_key;
+        // Required. A map from algorithm name (ed25519) to the identity
+        // key for the sending device.
+        std::map<std::string, std::string> sender_claimed_keys;
+        // Required. Unpadded base64-encoded session key in session-sharing format.
+        std::string session_key;
+};
+
+void
+to_json(nlohmann::json &obj, const SessionData &desc);
+
+void
+from_json(const nlohmann::json &obj, SessionData &desc);
 }
 } // namespace responses
 } // namespace mtx

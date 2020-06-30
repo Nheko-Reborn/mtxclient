@@ -109,6 +109,29 @@ to_json(nlohmann::json &obj, const BackupVersion &response)
         obj["etag"]      = response.etag;
         obj["version"]   = response.version;
 }
+
+void
+to_json(nlohmann::json &obj, const SessionData &data)
+{
+        obj["algorithm"]                       = data.algorithm;
+        obj["forwarding_curve25519_key_chain"] = data.forwarding_curve25519_key_chain;
+        obj["sender_key"]                      = data.sender_key;
+        obj["sender_claimed_keys"]             = data.sender_claimed_keys;
+        obj["session_key"]                     = data.session_key;
+}
+
+void
+from_json(const nlohmann::json &obj, SessionData &data)
+{
+        data.algorithm = obj.at("algorithm");
+        data.forwarding_curve25519_key_chain =
+          obj.at("forwarding_curve25519_key_chain")
+            .get<decltype(data.forwarding_curve25519_key_chain)>();
+        data.sender_key = obj.at("sender_key");
+        data.sender_claimed_keys =
+          obj.at("sender_claimed_keys").get<decltype(data.sender_claimed_keys)>();
+        data.session_key = obj.at("session_key");
+}
 }
 }
 }

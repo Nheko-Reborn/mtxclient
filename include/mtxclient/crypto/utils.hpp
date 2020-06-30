@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "mtx/common.hpp"
+#include "mtx/responses/crypto.hpp"
 #include "mtx/secret_storage.hpp"
 
 namespace mtx {
@@ -78,11 +79,16 @@ AES_CTR_256_Encrypt(const std::string plaintext, const BinaryBuf aes256Key, Bina
 BinaryBuf
 AES_CTR_256_Decrypt(const std::string ciphertext, const BinaryBuf aes256Key, BinaryBuf iv);
 
+// copies ciphertext, as decryption modifies it.
 std::string
 CURVE25519_AES_SHA2_Decrypt(std::string base64_ciphertext,
                             const BinaryBuf &privateKey,
                             const std::string &ephemeral,
                             const std::string &mac);
+
+mtx::responses::backup::SessionData
+decrypt_session(const mtx::responses::backup::EncryptedSessionData &data,
+                const BinaryBuf &privateKey);
 
 BinaryBuf
 HMAC_SHA256(const BinaryBuf hmacKey, const BinaryBuf data);

@@ -303,6 +303,15 @@ CURVE25519_AES_SHA2_Decrypt(std::string base64_ciphertext,
                 throw olm_exception(__func__, ctx.get());
 }
 
+mtx::responses::backup::SessionData
+decrypt_session(const mtx::responses::backup::EncryptedSessionData &data,
+                const BinaryBuf &privateKey)
+{
+        mtx::responses::backup::SessionData decrypted = json::parse(
+          CURVE25519_AES_SHA2_Decrypt(data.ciphertext, privateKey, data.ephemeral, data.mac));
+        return decrypted;
+}
+
 std::string
 sha256(const std::string &data)
 {

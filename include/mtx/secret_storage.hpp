@@ -80,5 +80,6 @@ to_json(nlohmann::json &obj, const AesHmacSha2KeyDescription &desc);
 
 void
 from_json(const nlohmann::json &obj, AesHmacSha2KeyDescription &desc);
+
 }
 }
