@@ -36,6 +36,10 @@ public:
           : msg_(func + ": " + std::string(olm_utility_last_error(util)))
         {}
 
+        olm_exception(std::string func, OlmPkDecryption *s)
+          : msg_(func + ": " + std::string(olm_pk_decryption_last_error(s)))
+        {}
+
         olm_exception(std::string func, OlmOutboundGroupSession *s)
           : msg_(func + ": " + std::string(olm_outbound_group_session_last_error(s)))
         {}
@@ -229,9 +233,6 @@ encrypt_exported_sessions(const mtx::crypto::ExportedSessionKeys &keys, std::str
 
 mtx::crypto::ExportedSessionKeys
 decrypt_exported_sessions(const std::string &data, std::string pass);
-
-BinaryBuf
-derive_key(const std::string &pass, const BinaryBuf &salt);
 
 //! Verify a signature object as obtained from the response of /keys/query endpoint
 bool
