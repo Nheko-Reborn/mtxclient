@@ -378,6 +378,132 @@ OlmClient::create_outbound_session(const std::string &identity_key, const std::s
         return session;
 }
 
+std::unique_ptr<SAS>
+OlmClient::sas_init()
+{
+        return std::make_unique<SAS>();
+}
+
+//! constructor which create a new Curve25519 key pair which is stored in SASObject
+SAS::SAS()
+{
+        this->sas       = create_olm_object<SASObject>();
+        auto random_buf = BinaryBuf(olm_create_sas_random_length(sas.get()));
+
+        const int ret = olm_create_sas(this->sas.get(), random_buf.data(), random_buf.size());
+
+        if (ret == -1)
+                throw olm_exception("create_sas_instance", this->sas.get());
+}
+
+//! returns the public key of the key-pair created
+std::string
+SAS::public_key()
+{
+        auto pub_key_buffer = create_buffer(olm_sas_pubkey_length(this->sas.get()));
+
+        const int ret =
+          olm_sas_get_pubkey(this->sas.get(), pub_key_buffer.data(), pub_key_buffer.size());
+
+        if (ret == -1)
+                throw olm_exception("get_public_key", this->sas.get());
+
+        return to_string(pub_key_buffer);
+}
+
+//! this is for setting the public key of the other user
+void
+SAS::set_their_key(std::string their_public_key)
+{
+        auto pub_key_buffer = to_binary_buf(their_public_key);
+
+        const int ret =
+          olm_sas_set_their_key(this->sas.get(), pub_key_buffer.data(), pub_key_buffer.size());
+
+        if (ret == -1)
+                throw olm_exception("get_public_key", this->sas.get());
+}
+
+//! generates and returns a vector of numbers(int) ranging from 0 to 8191, to be used only after using `set_their_key`
+std::vector<int>
+SAS::generate_bytes_decimal(std::string info)
+{
+        auto input_info_buffer = to_binary_buf(info);
+        auto output_buffer     = BinaryBuf(5);
+
+        std::vector<int> output_list;
+        output_list.resize(3);
+
+        const int ret = olm_sas_generate_bytes(this->sas.get(),
+                                               input_info_buffer.data(),
+                                               input_info_buffer.size(),
+                                               output_buffer.data(),
+                                               output_buffer.size());
+
+        if (ret == -1)
+                throw olm_exception("get_bytes_decimal", this->sas.get());
+
+        output_list[0] = (((output_buffer[0] << 5) | (output_buffer[1] >> 3)) + 1000);
+        output_list[1] =
+          ((((output_buffer[1] & 0x07) << 10) | (output_buffer[2] << 2) | (output_buffer[3] >> 6)) +
+           1000);
+        output_list[2] = (((((output_buffer[3] & 0x3F) << 7)) | ((output_buffer[4] >> 1))) + 1000);
+
+        return output_list;
+}
+
+//! generates and returns a vector of number(int) ranging from 0 to 63, to be used only after using `set_their_key`
+std::vector<int>
+SAS::generate_bytes_emoji(std::string info)
+{
+        auto input_info_buffer = to_binary_buf(info);
+        auto output_buffer     = BinaryBuf(6);
+
+        std::vector<int> output_list;
+        output_list.resize(7);
+
+        const int ret = olm_sas_generate_bytes(this->sas.get(),
+                                               input_info_buffer.data(),
+                                               input_info_buffer.size(),
+                                               output_buffer.data(),
+                                               output_buffer.size());
+
+        if (ret == -1)
+                throw olm_exception("get_bytes_emoji", this->sas.get());
+
+        output_list[0] = (output_buffer[0] >> 2);
+        output_list[1] = (((output_buffer[0] << 4) & 0x3f) | (output_buffer[1] >> 4));
+        output_list[2] = (((output_buffer[1] << 2) & 0x3f) | (output_buffer[2] >> 6));
+        output_list[3] = (output_buffer[2] & 0x3f);
+        output_list[4] = (output_buffer[3] >> 2);
+        output_list[5] = (((output_buffer[3] << 4) & 0x3f) | (output_buffer[4] >> 4));
+        output_list[6] = (((output_buffer[4] << 2) & 0x3f) | (output_buffer[5] >> 6));
+
+        return output_list;
+}
+
+//! calculates the mac based on the given input and info using the shared secret produced after `set_their_key`
+std::string
+SAS::calculate_mac(std::string input_data, std::string info)
+{
+        auto input_data_buffer = to_binary_buf(input_data);
+        auto info_buffer       = to_binary_buf(info);
+        auto output_buffer     = BinaryBuf(olm_sas_mac_length(this->sas.get()));
+
+        const int ret = olm_sas_calculate_mac(this->sas.get(),
+                                              input_data_buffer.data(),
+                                              input_data_buffer.size(),
+                                              info_buffer.data(),
+                                              info_buffer.size(),
+                                              output_buffer.data(),
+                                              output_buffer.size());
+
+        if (ret == -1)
+                throw olm_exception("calculate_mac", this->sas.get());
+
+        return to_string(output_buffer);
+}
+
 nlohmann::json
 OlmClient::create_room_key_event(const UserId &recipient,
                                  const std::string &ed25519_recipient_key,

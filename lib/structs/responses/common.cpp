@@ -254,6 +254,8 @@ parse_room_account_data_events(
                 case events::EventType::KeyVerificationCancel:
                 case events::EventType::KeyVerificationRequest:
                 case events::EventType::KeyVerificationStart:
+                case events::EventType::KeyVerificationReady:
+                case events::EventType::KeyVerificationDone:
                 case events::EventType::KeyVerificationAccept:
                 case events::EventType::KeyVerificationKey:
                 case events::EventType::KeyVerificationMac:
@@ -573,6 +575,8 @@ parse_timeline_events(const json &events,
                 case events::EventType::KeyVerificationCancel:
                 case events::EventType::KeyVerificationRequest:
                 case events::EventType::KeyVerificationStart:
+                case events::EventType::KeyVerificationReady:
+                case events::EventType::KeyVerificationDone:
                 case events::EventType::KeyVerificationAccept:
                 case events::EventType::KeyVerificationKey:
                 case events::EventType::KeyVerificationMac:
@@ -677,6 +681,23 @@ parse_device_events(const json &events,
                 case events::EventType::KeyVerificationMac:
                         try {
                                 container.emplace_back(events::DeviceEvent<KeyVerificationMac>(e));
+                        } catch (json::exception &err) {
+                                log_error(err, e);
+                        }
+
+                        break;
+                case events::EventType::KeyVerificationReady:
+                        try {
+                                container.emplace_back(
+                                  events::DeviceEvent<KeyVerificationReady>(e));
+                        } catch (json::exception &err) {
+                                log_error(err, e);
+                        }
+
+                        break;
+                case events::EventType::KeyVerificationDone:
+                        try {
+                                container.emplace_back(events::DeviceEvent<KeyVerificationDone>(e));
                         } catch (json::exception &err) {
                                 log_error(err, e);
                         }
@@ -831,6 +852,8 @@ parse_state_events(const json &events,
                 case events::EventType::KeyVerificationCancel:
                 case events::EventType::KeyVerificationRequest:
                 case events::EventType::KeyVerificationStart:
+                case events::EventType::KeyVerificationReady:
+                case events::EventType::KeyVerificationDone:
                 case events::EventType::KeyVerificationAccept:
                 case events::EventType::KeyVerificationKey:
                 case events::EventType::KeyVerificationMac:
@@ -974,6 +997,8 @@ parse_stripped_events(const json &events,
                 case events::EventType::KeyVerificationCancel:
                 case events::EventType::KeyVerificationRequest:
                 case events::EventType::KeyVerificationStart:
+                case events::EventType::KeyVerificationReady:
+                case events::EventType::KeyVerificationDone:
                 case events::EventType::KeyVerificationAccept:
                 case events::EventType::KeyVerificationKey:
                 case events::EventType::KeyVerificationMac:

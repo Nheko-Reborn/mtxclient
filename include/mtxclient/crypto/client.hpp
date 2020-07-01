@@ -10,6 +10,7 @@
 #include <mtx/requests.hpp>
 
 #include <olm/olm.h>
+#include <olm/sas.h>
 
 #include "mtxclient/crypto/objects.hpp"
 #include "mtxclient/crypto/types.hpp"
@@ -46,6 +47,10 @@ public:
 
         olm_exception(std::string func, OlmInboundGroupSession *s)
           : msg_(func + ": " + std::string(olm_inbound_group_session_last_error(s)))
+        {}
+
+        olm_exception(std::string func, OlmSAS *s)
+          : msg_(func + ":" + std::string(olm_sas_last_error(s)))
         {}
 
         olm_exception(std::string msg)
@@ -89,11 +94,25 @@ unpickle(const std::string &pickled, const std::string &key)
 using OlmSessionPtr           = std::unique_ptr<OlmSession, OlmDeleter>;
 using OutboundGroupSessionPtr = std::unique_ptr<OlmOutboundGroupSession, OlmDeleter>;
 using InboundGroupSessionPtr  = std::unique_ptr<OlmInboundGroupSession, OlmDeleter>;
+using SASPtr                  = std::unique_ptr<OlmSAS, OlmDeleter>;
 
 struct GroupPlaintext
 {
         BinaryBuf data;
         uint32_t message_index;
+};
+
+struct SAS
+{
+        SAS();
+        std::string public_key();
+        void set_their_key(std::string their_public_key);
+        std::vector<int> generate_bytes_decimal(std::string info);
+        std::vector<int> generate_bytes_emoji(std::string info);
+        std::string calculate_mac(std::string input_data, std::string info);
+
+private:
+        SASPtr sas;
 };
 
 class OlmClient : public std::enable_shared_from_this<OlmClient>
@@ -191,6 +210,10 @@ public:
 
         OlmAccount *account() { return account_.get(); }
         OlmUtility *utility() { return utility_.get(); }
+
+        //! SAS related stuff
+        //! this creates a unique pointer of struct SAS
+        std::unique_ptr<SAS> sas_init();
 
 private:
         std::string user_id_;

@@ -23,6 +23,10 @@ enum class EventType
         KeyVerificationKey,
         /// m.key.verification.mac
         KeyVerificationMac,
+        /// m.key.verification.ready,
+        KeyVerificationReady,
+        /// m.key.verification.done,
+        KeyVerificationDone,
         /// m.reaction,
         Reaction,
         /// m.room_key

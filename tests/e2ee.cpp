@@ -1151,6 +1151,49 @@ TEST(Encryption, EncryptedFile)
                                                                    ev.content.file.value())));
 }
 
+TEST(Encryption, SAS)
+{
+        auto alice = std::make_shared<OlmClient>();
+        alice->create_new_account();
+        auto bob = std::make_shared<OlmClient>();
+        bob->create_new_account();
+
+        auto alice_sas = alice->sas_init();
+        auto bob_sas   = bob->sas_init();
+
+        ASSERT_EQ(alice_sas->public_key().length(), 43);
+        ASSERT_EQ(bob_sas->public_key().length(), 43);
+
+        alice_sas->set_their_key(bob_sas->public_key());
+        bob_sas->set_their_key(alice_sas->public_key());
+
+        std::string info = "test_info";
+
+        std::vector<int> alice_decimal = alice_sas->generate_bytes_decimal(info);
+        std::vector<int> bob_decimal   = bob_sas->generate_bytes_decimal(info);
+
+        ASSERT_EQ(alice_decimal.size(), 3);
+        ASSERT_EQ(bob_decimal.size(), 3);
+
+        for (int i = 0; i < 3; ++i) {
+                ASSERT_TRUE((alice_decimal[i] >= 0) && (alice_decimal[i] <= 8191));
+                ASSERT_TRUE((bob_decimal[i] >= 0) && (bob_decimal[i] <= 8191));
+                ASSERT_EQ(alice_decimal[i], bob_decimal[i]);
+        }
+
+        std::vector<int> alice_emoji = alice_sas->generate_bytes_emoji(info);
+        std::vector<int> bob_emoji   = bob_sas->generate_bytes_emoji(info);
+
+        ASSERT_EQ(alice_emoji.size(), 7);
+        ASSERT_EQ(bob_emoji.size(), 7);
+
+        for (int i = 0; i < 7; ++i) {
+                ASSERT_TRUE((alice_emoji[i] >= 0) && (alice_emoji[i] <= 8191));
+                ASSERT_TRUE((bob_emoji[i] >= 0) && (bob_emoji[i] <= 8191));
+                ASSERT_EQ(alice_emoji[i], bob_emoji[i]);
+        }
+}
+
 TEST(Encryption, DISABLED_HandleRoomKeyEvent) {}
 TEST(Encryption, DISABLED_HandleRoomKeyRequestEvent) {}
 TEST(Encryption, DISABLED_HandleNewDevices) {}

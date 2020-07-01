@@ -3,6 +3,7 @@
 #include <memory>
 #include <olm/olm.h>
 #include <olm/pk.h>
+#include <olm/sas.h>
 
 namespace mtx {
 namespace crypto {
@@ -20,6 +21,14 @@ struct OlmDeleter
                 delete[](reinterpret_cast<uint8_t *>(ptr));
         }
         void operator()(OlmInboundGroupSession *ptr) { delete[](reinterpret_cast<uint8_t *>(ptr)); }
+        void operator()(OlmSAS *ptr) { delete[](reinterpret_cast<uint8_t *>(ptr)); }
+};
+
+struct SASObject
+{
+        using olm_type = OlmSAS;
+
+        static olm_type *allocate() { return olm_sas(new uint8_t[olm_sas_size()]); }
 };
 
 struct UtilityObject
