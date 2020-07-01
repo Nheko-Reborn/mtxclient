@@ -37,6 +37,9 @@ struct QueryKeys
 };
 
 void
+to_json(nlohmann::json &obj, const QueryKeys &response);
+
+void
 from_json(const nlohmann::json &obj, QueryKeys &response);
 
 //! Response from the `POST /_matrix/client/r0/keys/claim` endpoint.
