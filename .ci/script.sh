@@ -25,7 +25,6 @@ if [ $TRAVIS_OS_NAME == linux ]; then
         -DBUILD_SHARED_LIBS=ON \
 	-DHUNTER_ENABLED=ON \
 	-DHUNTER_ROOT=.deps \
-	-DUSE_BUNDLED_OPENSSL=OFF \
         -DCOVERAGE=${COVERAGE} || true
 	#-DHUNTER_CONFIGURATION_TYPES=Debug \ << needs gtest release for some reason
     cmake --build build

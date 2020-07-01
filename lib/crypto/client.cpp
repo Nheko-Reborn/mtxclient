@@ -7,10 +7,10 @@
 #include "mtxclient/crypto/types.hpp"
 #include "mtxclient/crypto/utils.hpp"
 
-#include <sodium.h>
-
 using json = nlohmann::json;
 using namespace mtx::crypto;
+
+static constexpr auto pwhash_SALTBYTES = 16u;
 
 void
 OlmClient::create_new_account()
@@ -669,16 +669,10 @@ mtx::crypto::encrypt_exported_sessions(const mtx::crypto::ExportedSessionKeys &k
 
         auto nonce = create_buffer(AES_BLOCK_SIZE);
 
-        auto salt = create_buffer(crypto_pwhash_SALTBYTES);
+        auto salt = create_buffer(pwhash_SALTBYTES);
 
-        // auto key  = derive_key(pass, salt);
         auto buf = create_buffer(64U);
 
-        // crypto_secretbox_easy(reinterpret_cast<unsigned char *>(ciphertext.data()),
-        //                      reinterpret_cast<const unsigned char *>(plaintext.data()),
-        //                      msg_len,
-        //                      nonce.data(),
-        //                      reinterpret_cast<const unsigned char *>(key.data()));
         uint32_t iterations = 100000;
         buf                 = mtx::crypto::PBKDF2_HMAC_SHA_512(pass, salt, iterations);
 
@@ -731,7 +725,7 @@ mtx::crypto::decrypt_exported_sessions(const std::string &data, std::string pass
         auto format           = BinaryBuf(binary_start, format_end);
 
         // Salt, 16 bytes
-        const auto salt_end = format_end + crypto_pwhash_SALTBYTES;
+        const auto salt_end = format_end + pwhash_SALTBYTES;
         auto salt           = BinaryBuf(format_end, salt_end);
 
         // IV, 16 bytes
@@ -770,53 +764,6 @@ mtx::crypto::decrypt_exported_sessions(const std::string &data, std::string pass
         const std::string ciphertext(json.begin(), json.end());
         auto decrypted = mtx::crypto::AES_CTR_256_Decrypt(ciphertext, aes256, iv);
 
-        // TODO: Move this to a helper function for the 'old' format that
-        // nheko enabled pre-e2e key spec.
-        // std::cout << "decrypt_exported_sessions data: " << data << std::endl;
-        // if (data.size() <
-        //     crypto_secretbox_MACBYTES + crypto_secretbox_NONCEBYTES + crypto_pwhash_SALTBYTES)
-        //         throw sodium_exception{"decrypt_exported_sessions", "ciphertext too small"};
-
-        // const auto nonce_start = data.begin();
-        // const auto nonce_end   = nonce_start + crypto_secretbox_NONCEBYTES;
-        // auto nonce             = BinaryBuf(nonce_start, nonce_end);
-
-        // const auto salt_end = nonce_end + crypto_pwhash_SALTBYTES;
-        // auto salt           = BinaryBuf(nonce_end, salt_end);
-
-        // auto ciphertext = BinaryBuf(salt_end, data.end());
-        // auto decrypted  = create_buffer(ciphertext.size() - crypto_secretbox_MACBYTES);
-
-        // auto key = derive_key(pass, salt);
-
-        // if (crypto_secretbox_open_easy(decrypted.data(),
-        //                                reinterpret_cast<const unsigned char
-        //                                *>(ciphertext.data()), ciphertext.size(), nonce.data(),
-        //                                reinterpret_cast<const unsigned char *>(key.data())) != 0)
-        //         throw sodium_exception{"crypto_secretbox_open_easy", "failed to decrypt"};
         std::string plaintext(decrypted.begin(), decrypted.end());
         return json::parse(plaintext);
-}
-
-BinaryBuf
-mtx::crypto::derive_key(const std::string &pass, const BinaryBuf &salt)
-{
-        if (salt.size() != crypto_pwhash_SALTBYTES)
-                throw sodium_exception{"derive_key", "invalid buffer size for salt"};
-
-        auto key = create_buffer(crypto_secretbox_KEYBYTES);
-
-        // Derive a key from the user provided password.
-        if (crypto_pwhash(key.data(),
-                          key.size(),
-                          pass.data(),
-                          pass.size(),
-                          salt.data(),
-                          crypto_pwhash_OPSLIMIT_INTERACTIVE,
-                          crypto_pwhash_MEMLIMIT_INTERACTIVE,
-                          crypto_pwhash_ALG_DEFAULT) != 0) {
-                throw sodium_exception{"crypto_pwhash", "out of memory"};
-        }
-
-        return key;
 }
