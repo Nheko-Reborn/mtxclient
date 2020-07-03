@@ -95,15 +95,29 @@ std::string
 mtx::client::utils::decompress(const boost::iostreams::array_source &src,
                                const std::string &type) noexcept
 {
+        try {
+                boost::iostreams::filtering_istream is;
+                is.set_auto_close(true);
+
+                std::stringstream decompressed;
+
+                if (type == "deflate")
+                        is.push(boost::iostreams::zlib_decompressor{});
+                else if (type == "gzip")
+                        is.push(boost::iostreams::gzip_decompressor{});
+
+                is.push(src);
+                boost::iostreams::copy(is, decompressed);
+
+                return decompressed.str();
+        } catch (boost::iostreams::gzip_error &) {
+        } catch (boost::iostreams::zlib_error &) {
+        }
+
         boost::iostreams::filtering_istream is;
         is.set_auto_close(true);
 
         std::stringstream decompressed;
-
-        if (type == "deflate")
-                is.push(boost::iostreams::zlib_decompressor{});
-        else if (type == "gzip")
-                is.push(boost::iostreams::gzip_decompressor{});
 
         is.push(src);
         boost::iostreams::copy(is, decompressed);
