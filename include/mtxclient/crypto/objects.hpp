@@ -2,6 +2,8 @@
 
 #include <memory>
 #include <olm/olm.h>
+#include <olm/pk.h>
+#include <olm/sas.h>
 
 namespace mtx {
 namespace crypto {
@@ -11,12 +13,22 @@ struct OlmDeleter
         void operator()(OlmAccount *ptr) { delete[](reinterpret_cast<uint8_t *>(ptr)); }
         void operator()(OlmUtility *ptr) { delete[](reinterpret_cast<uint8_t *>(ptr)); }
 
+        void operator()(OlmPkDecryption *ptr) { delete[](reinterpret_cast<uint8_t *>(ptr)); }
+
         void operator()(OlmSession *ptr) { delete[](reinterpret_cast<uint8_t *>(ptr)); }
         void operator()(OlmOutboundGroupSession *ptr)
         {
                 delete[](reinterpret_cast<uint8_t *>(ptr));
         }
         void operator()(OlmInboundGroupSession *ptr) { delete[](reinterpret_cast<uint8_t *>(ptr)); }
+        void operator()(OlmSAS *ptr) { delete[](reinterpret_cast<uint8_t *>(ptr)); }
+};
+
+struct SASObject
+{
+        using olm_type = OlmSAS;
+
+        static olm_type *allocate() { return olm_sas(new uint8_t[olm_sas_size()]); }
 };
 
 struct UtilityObject
@@ -24,6 +36,16 @@ struct UtilityObject
         using olm_type = OlmUtility;
 
         static olm_type *allocate() { return olm_utility(new uint8_t[olm_utility_size()]); }
+};
+
+struct PkDecryptionObject
+{
+        using olm_type = OlmPkDecryption;
+
+        static olm_type *allocate()
+        {
+                return olm_pk_decryption(new uint8_t[olm_pk_decryption_size()]);
+        }
 };
 
 struct AccountObject

@@ -1026,40 +1026,6 @@ TEST(Encryption, PickleMegolmSessions)
         EXPECT_EQ(std::string((char *)plaintext.data.data(), plaintext.data.size()), SECRET);
 }
 
-TEST(Base64, EncodingDecoding)
-{
-        std::string random_str =
-          "+7TE+9qmFWHPnrBLd03MtoXsRlhYaQt2tLBg4kZJI+NFcXVxqNUI1S3c97eV8aVgSj1/"
-          "eo8PsnRNO29c2TgPLXvah2GDl90ehHjzH/"
-          "vMBJKPdqyE31ch7NYBgvLBVoesrRyDoIYDlbRhHiRDTmLKMC55WN1YvDJu2Pvg3WxZiANobk"
-          "0EPzHABqOYLaYiVxFrdko7mm8pDZXlatys+dvLv9Zf6lxfd/5MPK1C52m/UhnrZ3shS/"
-          "XBzxRfBikZQjl7C9IMo7l170ffipN8QHb5LmZlj4V41DUJHCU=";
-
-        EXPECT_EQ(base642bin(bin2base64(random_str)), random_str);
-        EXPECT_EQ(bin2base64(base642bin(random_str)), random_str);
-}
-
-TEST(ExportSessions, EncryptDecrypt)
-{
-        constexpr auto PASS = "secret_passphrase";
-
-        ExportedSession s1;
-        s1.room_id     = "!room_id:example.org";
-        s1.session_id  = "sid";
-        s1.session_key = "skey";
-
-        ExportedSessionKeys keys;
-        keys.sessions = {s1, s1, s1};
-
-        std::string ciphertext = mtx::crypto::encrypt_exported_sessions(keys, PASS);
-        EXPECT_TRUE(ciphertext.size() > 0);
-
-        auto encoded = bin2base64(ciphertext);
-
-        auto restored_keys = mtx::crypto::decrypt_exported_sessions(encoded, PASS);
-        EXPECT_EQ(json(keys).dump(), json(restored_keys).dump());
-}
-
 TEST(ExportSessions, InboundMegolmSessions)
 {
         auto alice = std::make_shared<OlmClient>();
@@ -1183,6 +1149,49 @@ TEST(Encryption, EncryptedFile)
         ASSERT_EQ("abcdefg\n",
                   mtx::crypto::to_string(mtx::crypto::decrypt_file("=\xFDX\xAB\xCA\xEB\x8F\xFF",
                                                                    ev.content.file.value())));
+}
+
+TEST(Encryption, SAS)
+{
+        auto alice = std::make_shared<OlmClient>();
+        alice->create_new_account();
+        auto bob = std::make_shared<OlmClient>();
+        bob->create_new_account();
+
+        auto alice_sas = alice->sas_init();
+        auto bob_sas   = bob->sas_init();
+
+        ASSERT_EQ(alice_sas->public_key().length(), 43);
+        ASSERT_EQ(bob_sas->public_key().length(), 43);
+
+        alice_sas->set_their_key(bob_sas->public_key());
+        bob_sas->set_their_key(alice_sas->public_key());
+
+        std::string info = "test_info";
+
+        std::vector<int> alice_decimal = alice_sas->generate_bytes_decimal(info);
+        std::vector<int> bob_decimal   = bob_sas->generate_bytes_decimal(info);
+
+        ASSERT_EQ(alice_decimal.size(), 3);
+        ASSERT_EQ(bob_decimal.size(), 3);
+
+        for (int i = 0; i < 3; ++i) {
+                ASSERT_TRUE((alice_decimal[i] >= 0) && (alice_decimal[i] <= 8191));
+                ASSERT_TRUE((bob_decimal[i] >= 0) && (bob_decimal[i] <= 8191));
+                ASSERT_EQ(alice_decimal[i], bob_decimal[i]);
+        }
+
+        std::vector<int> alice_emoji = alice_sas->generate_bytes_emoji(info);
+        std::vector<int> bob_emoji   = bob_sas->generate_bytes_emoji(info);
+
+        ASSERT_EQ(alice_emoji.size(), 7);
+        ASSERT_EQ(bob_emoji.size(), 7);
+
+        for (int i = 0; i < 7; ++i) {
+                ASSERT_TRUE((alice_emoji[i] >= 0) && (alice_emoji[i] <= 8191));
+                ASSERT_TRUE((bob_emoji[i] >= 0) && (bob_emoji[i] <= 8191));
+                ASSERT_EQ(alice_emoji[i], bob_emoji[i]);
+        }
 }
 
 TEST(Encryption, DISABLED_HandleRoomKeyEvent) {}

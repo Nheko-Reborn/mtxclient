@@ -234,10 +234,37 @@ to_json(json &obj, const KeyVerificationStart &event)
 }
 
 void
+from_json(const json &obj, KeyVerificationReady &event)
+{
+        event.transaction_id = obj.at("transaction_id").get<std::string>();
+        event.methods        = obj.at("methods").get<std::vector<VerificationMethods>>();
+        event.from_device    = obj.at("from_device").get<std::string>();
+}
+
+void
+to_json(json &obj, const KeyVerificationReady &event)
+{
+        obj["methods"]        = event.methods;
+        obj["transaction_id"] = event.transaction_id;
+        obj["from_device"]    = event.from_device;
+}
+
+void
+from_json(const nlohmann::json &obj, KeyVerificationDone &event)
+{
+        event.transaction_id = obj.at("transaction_id").get<std::string>();
+}
+
+void
+to_json(nlohmann::json &obj, const KeyVerificationDone &event)
+{
+        obj["transaction_id"] = event.transaction_id;
+}
+
+void
 from_json(const json &obj, KeyVerificationAccept &event)
 {
         event.transaction_id         = obj.at("transaction_id").get<std::string>();
-        event.method                 = obj.at("method").get<VerificationMethods>();
         event.key_agreement_protocol = obj.at("key_agreement_protocol").get<std::string>();
         event.hash                   = obj.at("hash").get<std::string>();
         event.message_authentication_code =
@@ -250,7 +277,6 @@ from_json(const json &obj, KeyVerificationAccept &event)
 void
 to_json(json &obj, const KeyVerificationAccept &event)
 {
-        obj["method"]                      = event.method;
         obj["transaction_id"]              = event.transaction_id;
         obj["key_agreement_protocol"]      = event.key_agreement_protocol;
         obj["hash"]                        = event.hash;

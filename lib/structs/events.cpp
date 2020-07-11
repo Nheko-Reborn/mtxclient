@@ -14,6 +14,10 @@ getEventType(const std::string &type)
                 return EventType::KeyVerificationStart;
         else if (type == "m.key.verification.accept")
                 return EventType::KeyVerificationAccept;
+        else if (type == "m.key.verification.ready")
+                return EventType::KeyVerificationReady;
+        else if (type == "m.key.verification.done")
+                return EventType::KeyVerificationDone;
         else if (type == "m.key.verification.key")
                 return EventType::KeyVerificationKey;
         else if (type == "m.key.verification.mac")
@@ -92,6 +96,10 @@ to_string(EventType type)
                 return "m.key.verification.accept";
         case EventType::KeyVerificationKey:
                 return "m.key.verification.key";
+        case EventType::KeyVerificationReady:
+                return "m.key.verification.ready";
+        case EventType::KeyVerificationDone:
+                return "m.key.verification.done";
         case EventType::KeyVerificationMac:
                 return "m.key.verification.mac";
         case EventType::Reaction:
@@ -200,6 +208,5 @@ getMessageType(const json &obj)
 
         return getMessageType(obj.at("msgtype").get<std::string>());
 }
-
 }
 }

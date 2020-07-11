@@ -15,10 +15,9 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON CACHE BOOL "compile as PIC by default")
 option(HUNTER_ENABLED "Enable Hunter package manager" OFF)
 include("cmake/HunterGate.cmake")
 HunterGate(
-	URL "https://github.com/cpp-pm/hunter/archive/v0.23.244.tar.gz"
-	SHA1 "2c0f491fd0b80f7b09e3d21adb97237161ef9835"
-	LOCAL
-	)
+    URL "https://github.com/cpp-pm/hunter/archive/v0.23.260.tar.gz"
+    SHA1 "13775235910a3fa85644568d1c5be8271de72e1c"
+)
 
 option(USE_BUNDLED_BOOST "Use the bundled version of Boost." ${HUNTER_ENABLED})
 option(USE_BUNDLED_SPDLOG "Use the bundled version of spdlog."
@@ -29,8 +28,6 @@ option(USE_BUNDLED_GTEST "Use the bundled version of Google Test."
 option(USE_BUNDLED_JSON "Use the bundled version of nlohmann json."
 	${HUNTER_ENABLED})
 option(USE_BUNDLED_OPENSSL "Use the bundled version of OpenSSL."
-	${HUNTER_ENABLED})
-option(USE_BUNDLED_SODIUM "Use the bundled version of libsodium."
 	${HUNTER_ENABLED})
 
 if (CMAKE_VERSION VERSION_GREATER_EQUAL 3.12)
@@ -86,7 +83,7 @@ include(FeatureSummary)
 if(USE_BUNDLED_OPENSSL)
 	hunter_add_package(OpenSSL)
 endif()
-find_package(OpenSSL REQUIRED)
+find_package(OpenSSL 1.1.0 REQUIRED)
 set_package_properties(OpenSSL PROPERTIES
 	DESCRIPTION "Open source SSL and TLS implementation and cryptographic library"
 	URL "https://www.openssl.org/"
@@ -110,22 +107,10 @@ else()
 		)
 endif()
 
-if(USE_BUNDLED_SODIUM)
-	hunter_add_package(libsodium)
-	find_package(libsodium 1.0.14 REQUIRED)
-else()
-	find_package(sodium 1.0.14 REQUIRED)
-	set_package_properties(sodium PROPERTIES
-		DESCRIPTION "A modern, portable, easy to use crypto library"
-		URL "https://github.com/jedisct1/libsodium"
-		TYPE REQUIRED
-		)
-endif()
-
 if(USE_BUNDLED_JSON)
 	hunter_add_package(nlohmann_json)
 endif()
-find_package(nlohmann_json 3.2.0)
+find_package(nlohmann_json 3.2.0 CONFIG REQUIRED)
 set_package_properties(nlohmann_json PROPERTIES
 	DESCRIPTION "JSON for Modern C++, a C++11 header-only JSON class"
 	URL "https://nlohmann.github.io/json/"
@@ -149,8 +134,9 @@ target_sources(matrix_client
 	lib/http/client.cpp
 	lib/http/session.cpp
 	lib/crypto/client.cpp
-	lib/crypto/utils.cpp
+	lib/crypto/encoding.cpp
 	lib/crypto/types.cpp
+	lib/crypto/utils.cpp
 	lib/utils.cpp
 	lib/log.cpp
 	lib/structs/common.cpp
@@ -159,6 +145,7 @@ target_sources(matrix_client
 	lib/structs/identifiers.cpp
 	lib/structs/pushrules.cpp
 	lib/structs/requests.cpp
+	lib/structs/secret_storage.cpp
 	lib/structs/user_interactive.cpp
 	lib/structs/events/aliases.cpp
 	lib/structs/events/avatar.cpp
@@ -221,20 +208,6 @@ target_link_libraries(matrix_client
 	OpenSSL::SSL
 	Olm::Olm
 	nlohmann_json::nlohmann_json)
-
-# NOTE(Nico): I can't figure out for the life of me, how to export that target
-# correctly, so that it actually works downstream without including Findsodium
-# in every project, so I just link the library and not the target, when not
-# using the bundled dep...
-if (USE_BUNDLED_SODIUM)
-	target_link_libraries(matrix_client PUBLIC
-		libsodium::libsodium)
-else()
-	target_include_directories(matrix_client PUBLIC
-		${libsodium_INCLUDE_DIR})
-	target_link_libraries(matrix_client PUBLIC
-		${libsodium_LIBRARY_RELEASE})
-endif()
 
 if(NOT MSVC AND NOT APPLE)
 	target_link_libraries(matrix_client PUBLIC Threads::Threads)

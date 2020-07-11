@@ -1,10 +1,6 @@
 #pragma once
 
-#if __has_include(<nlohmann/json_fwd.hpp>)
-#include <nlohmann/json_fwd.hpp>
-#else
 #include <nlohmann/json.hpp>
-#endif
 
 #include "mtx/errors.hpp"             // for Error
 #include "mtx/events.hpp"             // for EventType, to_string, json
@@ -13,7 +9,8 @@
 #include "mtx/identifiers.hpp"        // for Class user
 #include "mtx/pushrules.hpp"
 #include "mtx/requests.hpp"
-#include "mtx/responses/empty.hpp"   // for Empty, Logout, RoomInvite
+#include "mtx/responses/empty.hpp" // for Empty, Logout, RoomInvite
+#include "mtx/secret_storage.hpp"
 #include "mtxclient/http/errors.hpp" // for ClientError
 #include "mtxclient/utils.hpp"       // for random_token, url_encode, des...
 
@@ -64,6 +61,12 @@ struct TurnServer;
 struct UploadKeys;
 struct Versions;
 struct WellKnown;
+namespace backup {
+struct SessionBackup;
+struct RoomKeysBackup;
+struct KeysBackup;
+struct BackupVersion;
+}
 }
 }
 
@@ -462,6 +465,9 @@ public:
         // Encryption related endpoints.
         //
 
+        //! Enable encryption in a room by sending a `m.room.encryption` state event.
+        void enable_encryption(const std::string &room, Callback<mtx::responses::EventId> cb);
+
         //! Upload identity keys & one time keys.
         void upload_keys(const mtx::requests::UploadKeys &req,
                          Callback<mtx::responses::UploadKeys> cb);
@@ -481,8 +487,31 @@ public:
                          const std::string &to,
                          Callback<mtx::responses::KeyChanges> cb);
 
-        //! Enable encryption in a room by sending a `m.room.encryption` state event.
-        void enable_encryption(const std::string &room, Callback<mtx::responses::EventId> cb);
+        //
+        // Key backup endpoints
+        //
+        void backup_version(Callback<mtx::responses::backup::BackupVersion> cb);
+        void backup_version(const std::string &version,
+                            Callback<mtx::responses::backup::BackupVersion> cb);
+        void room_keys(std::string version, Callback<mtx::responses::backup::KeysBackup> cb);
+        void room_keys(std::string version,
+                       const std::string room_id,
+                       Callback<mtx::responses::backup::RoomKeysBackup> cb);
+        void room_keys(std::string version,
+                       const std::string room_id,
+                       const std::string session_id,
+                       Callback<mtx::responses::backup::SessionBackup> cb);
+
+        //
+        // Secret storage endpoints
+        //
+
+        //! Retrieve a specific secret
+        void secret_storage_secret(const std::string &secret_id,
+                                   Callback<mtx::secret_storage::Secret> cb);
+        //! Retrieve information about a key
+        void secret_storage_key(const std::string &key_id,
+                                Callback<mtx::secret_storage::AesHmacSha2KeyDescription> cb);
 
         //! Gets any TURN server URIs and authentication credentials
         void get_turn_server(Callback<mtx::responses::TurnServer> cb);

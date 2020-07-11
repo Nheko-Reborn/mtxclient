@@ -7,10 +7,10 @@
 #include "mtxclient/crypto/types.hpp"
 #include "mtxclient/crypto/utils.hpp"
 
-#include <sodium.h>
-
 using json = nlohmann::json;
 using namespace mtx::crypto;
+
+static constexpr auto pwhash_SALTBYTES = 16u;
 
 void
 OlmClient::create_new_account()
@@ -378,6 +378,132 @@ OlmClient::create_outbound_session(const std::string &identity_key, const std::s
         return session;
 }
 
+std::unique_ptr<SAS>
+OlmClient::sas_init()
+{
+        return std::make_unique<SAS>();
+}
+
+//! constructor which create a new Curve25519 key pair which is stored in SASObject
+SAS::SAS()
+{
+        this->sas       = create_olm_object<SASObject>();
+        auto random_buf = BinaryBuf(olm_create_sas_random_length(sas.get()));
+
+        const int ret = olm_create_sas(this->sas.get(), random_buf.data(), random_buf.size());
+
+        if (ret == -1)
+                throw olm_exception("create_sas_instance", this->sas.get());
+}
+
+//! returns the public key of the key-pair created
+std::string
+SAS::public_key()
+{
+        auto pub_key_buffer = create_buffer(olm_sas_pubkey_length(this->sas.get()));
+
+        const int ret =
+          olm_sas_get_pubkey(this->sas.get(), pub_key_buffer.data(), pub_key_buffer.size());
+
+        if (ret == -1)
+                throw olm_exception("get_public_key", this->sas.get());
+
+        return to_string(pub_key_buffer);
+}
+
+//! this is for setting the public key of the other user
+void
+SAS::set_their_key(std::string their_public_key)
+{
+        auto pub_key_buffer = to_binary_buf(their_public_key);
+
+        const int ret =
+          olm_sas_set_their_key(this->sas.get(), pub_key_buffer.data(), pub_key_buffer.size());
+
+        if (ret == -1)
+                throw olm_exception("get_public_key", this->sas.get());
+}
+
+//! generates and returns a vector of numbers(int) ranging from 0 to 8191, to be used only after using `set_their_key`
+std::vector<int>
+SAS::generate_bytes_decimal(std::string info)
+{
+        auto input_info_buffer = to_binary_buf(info);
+        auto output_buffer     = BinaryBuf(5);
+
+        std::vector<int> output_list;
+        output_list.resize(3);
+
+        const int ret = olm_sas_generate_bytes(this->sas.get(),
+                                               input_info_buffer.data(),
+                                               input_info_buffer.size(),
+                                               output_buffer.data(),
+                                               output_buffer.size());
+
+        if (ret == -1)
+                throw olm_exception("get_bytes_decimal", this->sas.get());
+
+        output_list[0] = (((output_buffer[0] << 5) | (output_buffer[1] >> 3)) + 1000);
+        output_list[1] =
+          ((((output_buffer[1] & 0x07) << 10) | (output_buffer[2] << 2) | (output_buffer[3] >> 6)) +
+           1000);
+        output_list[2] = (((((output_buffer[3] & 0x3F) << 7)) | ((output_buffer[4] >> 1))) + 1000);
+
+        return output_list;
+}
+
+//! generates and returns a vector of number(int) ranging from 0 to 63, to be used only after using `set_their_key`
+std::vector<int>
+SAS::generate_bytes_emoji(std::string info)
+{
+        auto input_info_buffer = to_binary_buf(info);
+        auto output_buffer     = BinaryBuf(6);
+
+        std::vector<int> output_list;
+        output_list.resize(7);
+
+        const int ret = olm_sas_generate_bytes(this->sas.get(),
+                                               input_info_buffer.data(),
+                                               input_info_buffer.size(),
+                                               output_buffer.data(),
+                                               output_buffer.size());
+
+        if (ret == -1)
+                throw olm_exception("get_bytes_emoji", this->sas.get());
+
+        output_list[0] = (output_buffer[0] >> 2);
+        output_list[1] = (((output_buffer[0] << 4) & 0x3f) | (output_buffer[1] >> 4));
+        output_list[2] = (((output_buffer[1] << 2) & 0x3f) | (output_buffer[2] >> 6));
+        output_list[3] = (output_buffer[2] & 0x3f);
+        output_list[4] = (output_buffer[3] >> 2);
+        output_list[5] = (((output_buffer[3] << 4) & 0x3f) | (output_buffer[4] >> 4));
+        output_list[6] = (((output_buffer[4] << 2) & 0x3f) | (output_buffer[5] >> 6));
+
+        return output_list;
+}
+
+//! calculates the mac based on the given input and info using the shared secret produced after `set_their_key`
+std::string
+SAS::calculate_mac(std::string input_data, std::string info)
+{
+        auto input_data_buffer = to_binary_buf(input_data);
+        auto info_buffer       = to_binary_buf(info);
+        auto output_buffer     = BinaryBuf(olm_sas_mac_length(this->sas.get()));
+
+        const int ret = olm_sas_calculate_mac(this->sas.get(),
+                                              input_data_buffer.data(),
+                                              input_data_buffer.size(),
+                                              info_buffer.data(),
+                                              info_buffer.size(),
+                                              output_buffer.data(),
+                                              output_buffer.size());
+
+        if (ret == -1)
+                throw olm_exception("calculate_mac", this->sas.get());
+
+        return to_string(output_buffer);
+}
+
 nlohmann::json
 OlmClient::create_room_key_event(const UserId &recipient,
                                  const std::string &ed25519_recipient_key,
@@ -543,16 +669,10 @@ mtx::crypto::encrypt_exported_sessions(const mtx::crypto::ExportedSessionKeys &k
 
         auto nonce = create_buffer(AES_BLOCK_SIZE);
 
-        auto salt = create_buffer(crypto_pwhash_SALTBYTES);
+        auto salt = create_buffer(pwhash_SALTBYTES);
 
-        // auto key  = derive_key(pass, salt);
         auto buf = create_buffer(64U);
 
-        // crypto_secretbox_easy(reinterpret_cast<unsigned char *>(ciphertext.data()),
-        //                      reinterpret_cast<const unsigned char *>(plaintext.data()),
-        //                      msg_len,
-        //                      nonce.data(),
-        //                      reinterpret_cast<const unsigned char *>(key.data()));
         uint32_t iterations = 100000;
         buf                 = mtx::crypto::PBKDF2_HMAC_SHA_512(pass, salt, iterations);
 
@@ -605,7 +725,7 @@ mtx::crypto::decrypt_exported_sessions(const std::string &data, std::string pass
         auto format           = BinaryBuf(binary_start, format_end);
 
         // Salt, 16 bytes
-        const auto salt_end = format_end + crypto_pwhash_SALTBYTES;
+        const auto salt_end = format_end + pwhash_SALTBYTES;
         auto salt           = BinaryBuf(format_end, salt_end);
 
         // IV, 16 bytes
@@ -644,53 +764,6 @@ mtx::crypto::decrypt_exported_sessions(const std::string &data, std::string pass
         const std::string ciphertext(json.begin(), json.end());
         auto decrypted = mtx::crypto::AES_CTR_256_Decrypt(ciphertext, aes256, iv);
 
-        // TODO: Move this to a helper function for the 'old' format that
-        // nheko enabled pre-e2e key spec.
-        // std::cout << "decrypt_exported_sessions data: " << data << std::endl;
-        // if (data.size() <
-        //     crypto_secretbox_MACBYTES + crypto_secretbox_NONCEBYTES + crypto_pwhash_SALTBYTES)
-        //         throw sodium_exception{"decrypt_exported_sessions", "ciphertext too small"};
-
-        // const auto nonce_start = data.begin();
-        // const auto nonce_end   = nonce_start + crypto_secretbox_NONCEBYTES;
-        // auto nonce             = BinaryBuf(nonce_start, nonce_end);
-
-        // const auto salt_end = nonce_end + crypto_pwhash_SALTBYTES;
-        // auto salt           = BinaryBuf(nonce_end, salt_end);
-
-        // auto ciphertext = BinaryBuf(salt_end, data.end());
-        // auto decrypted  = create_buffer(ciphertext.size() - crypto_secretbox_MACBYTES);
-
-        // auto key = derive_key(pass, salt);
-
-        // if (crypto_secretbox_open_easy(decrypted.data(),
-        //                                reinterpret_cast<const unsigned char
-        //                                *>(ciphertext.data()), ciphertext.size(), nonce.data(),
-        //                                reinterpret_cast<const unsigned char *>(key.data())) != 0)
-        //         throw sodium_exception{"crypto_secretbox_open_easy", "failed to decrypt"};
         std::string plaintext(decrypted.begin(), decrypted.end());
         return json::parse(plaintext);
-}
-
-BinaryBuf
-mtx::crypto::derive_key(const std::string &pass, const BinaryBuf &salt)
-{
-        if (salt.size() != crypto_pwhash_SALTBYTES)
-                throw sodium_exception{"derive_key", "invalid buffer size for salt"};
-
-        auto key = create_buffer(crypto_secretbox_KEYBYTES);
-
-        // Derive a key from the user provided password.
-        if (crypto_pwhash(key.data(),
-                          key.size(),
-                          pass.data(),
-                          pass.size(),
-                          salt.data(),
-                          crypto_pwhash_OPSLIMIT_INTERACTIVE,
-                          crypto_pwhash_MEMLIMIT_INTERACTIVE,
-                          crypto_pwhash_ALG_DEFAULT) != 0) {
-                throw sodium_exception{"crypto_pwhash", "out of memory"};
-        }
-
-        return key;
 }

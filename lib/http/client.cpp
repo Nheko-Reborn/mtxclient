@@ -302,12 +302,11 @@ Client::login(const mtx::requests::Login &req, Callback<mtx::responses::Login> c
 void
 Client::get_login(Callback<mtx::responses::LoginFlows> cb)
 {
-        get<mtx::responses::LoginFlows>(
-          "/client/r0/login",
-          [cb](const mtx::responses::LoginFlows &res, HeaderFields, RequestErr err) {
-                  cb(res, err);
-          },
-          false);
+        get<mtx::responses::LoginFlows>("/client/r0/login",
+                                        [cb](const mtx::responses::LoginFlows &res,
+                                             HeaderFields,
+                                             RequestErr err) { cb(res, err); },
+                                        false);
 }
 
 std::string
@@ -1070,6 +1069,89 @@ Client::key_changes(const std::string &from,
           [callback](const mtx::responses::KeyChanges &res, HeaderFields, RequestErr err) {
                   callback(res, err);
           });
+}
+
+//
+// Key backup endpoints
+//
+void
+Client::backup_version(Callback<mtx::responses::backup::BackupVersion> cb)
+{
+        get<mtx::responses::backup::BackupVersion>(
+          "/client/r0/room_keys/version",
+          [cb](const mtx::responses::backup::BackupVersion &res, HeaderFields, RequestErr err) {
+                  cb(res, err);
+          });
+}
+void
+Client::backup_version(const std::string &version,
+                       Callback<mtx::responses::backup::BackupVersion> cb)
+{
+        get<mtx::responses::backup::BackupVersion>(
+          "/client/r0/room_keys/version/" + mtx::client::utils::url_encode(version),
+          [cb](const mtx::responses::backup::BackupVersion &res, HeaderFields, RequestErr err) {
+                  cb(res, err);
+          });
+}
+void
+Client::room_keys(std::string version, Callback<mtx::responses::backup::KeysBackup> cb)
+{
+        get<mtx::responses::backup::KeysBackup>(
+          "/client/r0/room_keys/keys?" + mtx::client::utils::query_params({{"version", version}}),
+          [cb](const mtx::responses::backup::KeysBackup &res, HeaderFields, RequestErr err) {
+                  cb(res, err);
+          });
+}
+void
+Client::room_keys(std::string version,
+                  const std::string room_id,
+                  Callback<mtx::responses::backup::RoomKeysBackup> cb)
+{
+        get<mtx::responses::backup::RoomKeysBackup>(
+          "/client/r0/room_keys/keys/" + mtx::client::utils::url_encode(room_id) + "?" +
+            mtx::client::utils::query_params({{"version", version}}),
+          [cb](const mtx::responses::backup::RoomKeysBackup &res, HeaderFields, RequestErr err) {
+                  cb(res, err);
+          });
+}
+void
+Client::room_keys(std::string version,
+                  const std::string room_id,
+                  const std::string session_id,
+                  Callback<mtx::responses::backup::SessionBackup> cb)
+{
+        get<mtx::responses::backup::SessionBackup>(
+          "/client/r0/room_keys/keys/" + mtx::client::utils::url_encode(room_id) + "/" +
+            mtx::client::utils::url_encode(session_id) + "?" +
+            mtx::client::utils::query_params({{"version", version}}),
+          [cb](const mtx::responses::backup::SessionBackup &res, HeaderFields, RequestErr err) {
+                  cb(res, err);
+          });
+}
+
+//! Retrieve a specific secret
+void
+Client::secret_storage_secret(const std::string &secret_id,
+                              Callback<mtx::secret_storage::Secret> cb)
+{
+        get<mtx::secret_storage::Secret>(
+          "/client/r0/user/" + mtx::client::utils::url_encode(user_id_.to_string()) +
+            "/account_data/" + mtx::client::utils::url_encode(secret_id),
+          [cb](const mtx::secret_storage::Secret &res, HeaderFields, RequestErr err) {
+                  cb(res, err);
+          });
+}
+//! Retrieve information about a key
+void
+Client::secret_storage_key(const std::string &key_id,
+                           Callback<mtx::secret_storage::AesHmacSha2KeyDescription> cb)
+{
+        get<mtx::secret_storage::AesHmacSha2KeyDescription>(
+          "/client/r0/user/" + mtx::client::utils::url_encode(user_id_.to_string()) +
+            "/account_data/m.secret_storage.key." + mtx::client::utils::url_encode(key_id),
+          [cb](const mtx::secret_storage::AesHmacSha2KeyDescription &res,
+               HeaderFields,
+               RequestErr err) { cb(res, err); });
 }
 
 void

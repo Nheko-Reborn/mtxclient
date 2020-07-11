@@ -1,10 +1,6 @@
 #pragma once
 
-#if __has_include(<nlohmann/json_fwd.hpp>)
-#include <nlohmann/json_fwd.hpp>
-#else
 #include <nlohmann/json.hpp>
-#endif
 
 #include "mtx/events.hpp"
 #include "mtx/events/common.hpp"
@@ -208,6 +204,36 @@ from_json(const nlohmann::json &obj, KeyVerificationStart &event);
 void
 to_json(nlohmann::json &obj, const KeyVerificationStart &event);
 
+//! Implements the `m.key.verification.ready` event
+struct KeyVerificationReady
+{
+        //! the deviceId of the device which send the `m.key.verification.request`
+        std::string from_device;
+        //! transactionId of the current flow
+        std::string transaction_id;
+        //! Sends the user the supported methods
+        std::vector<VerificationMethods> methods;
+};
+
+void
+from_json(const nlohmann::json &obj, KeyVerificationReady &event);
+
+void
+to_json(nlohmann::json &obj, const KeyVerificationReady &event);
+
+// ! Implements the `m.key.verification.done` event
+struct KeyVerificationDone
+{
+        //! transactionId of the current flow
+        std::string transaction_id;
+};
+
+void
+from_json(const nlohmann::json &obj, KeyVerificationDone &event);
+
+void
+to_json(nlohmann::json &obj, const KeyVerificationDone &event);
+
 //! Implements the `m.key.verification.accept` event
 struct KeyVerificationAccept
 {
@@ -384,6 +410,20 @@ struct DeviceEventVisitor
         {
                 json j;
                 mtx::events::to_json(j, keyVerificationMac);
+                return j;
+        }
+        nlohmann::json operator()(
+          const DeviceEvent<mtx::events::msg::KeyVerificationReady> &keyVerificationReady)
+        {
+                json j;
+                mtx::events::to_json(j, keyVerificationReady);
+                return j;
+        }
+        nlohmann::json operator()(
+          const DeviceEvent<mtx::events::msg::KeyVerificationDone> &keyVerificationDone)
+        {
+                json j;
+                mtx::events::to_json(j, keyVerificationDone);
                 return j;
         }
 };
