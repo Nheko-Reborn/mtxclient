@@ -424,7 +424,8 @@ SAS::set_their_key(std::string their_public_key)
                 throw olm_exception("get_public_key", this->sas.get());
 }
 
-//! generates and returns a vector of numbers(int) ranging from 0 to 8191, to be used only after using `set_their_key`
+//! generates and returns a vector of numbers(int) ranging from 0 to 8191, to be used only after
+//! using `set_their_key`
 std::vector<int>
 SAS::generate_bytes_decimal(std::string info)
 {
@@ -452,7 +453,8 @@ SAS::generate_bytes_decimal(std::string info)
         return output_list;
 }
 
-//! generates and returns a vector of number(int) ranging from 0 to 63, to be used only after using `set_their_key`
+//! generates and returns a vector of number(int) ranging from 0 to 63, to be used only after using
+//! `set_their_key`
 std::vector<int>
 SAS::generate_bytes_emoji(std::string info)
 {
@@ -482,7 +484,8 @@ SAS::generate_bytes_emoji(std::string info)
         return output_list;
 }
 
-//! calculates the mac based on the given input and info using the shared secret produced after `set_their_key`
+//! calculates the mac based on the given input and info using the shared secret produced after
+//! `set_their_key`
 std::string
 SAS::calculate_mac(std::string input_data, std::string info)
 {

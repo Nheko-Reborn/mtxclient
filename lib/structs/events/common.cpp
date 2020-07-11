@@ -7,7 +7,8 @@ using json = nlohmann::json;
 namespace {
 template<class T>
 T
-safe_get(const json &obj, const std::string &name, T default_val = {}) try {
+safe_get(const json &obj, const std::string &name, T default_val = {})
+try {
         return obj.value(name, default_val);
 } catch (const nlohmann::json::type_error &) {
         return default_val;
