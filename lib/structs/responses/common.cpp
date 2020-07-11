@@ -16,6 +16,7 @@
 #include "mtx/events/redaction.hpp"
 #include "mtx/events/tag.hpp"
 #include "mtx/events/topic.hpp"
+#include "mtx/events/voip.hpp"
 
 #include <iostream>
 
@@ -206,6 +207,30 @@ struct TimelineEventVisitor
                 mtx::events::to_json(j, videoEv);
                 return j;
         }
+        json operator()(const events::RoomEvent<msgs::CallInvite> &callInviteEv) const
+        {
+                json j;
+                mtx::events::to_json(j, callInviteEv);
+                return j;
+        }
+        json operator()(const events::RoomEvent<msgs::CallCandidates> &callCandidatesEv) const
+        {
+                json j;
+                mtx::events::to_json(j, callCandidatesEv);
+                return j;
+        }
+        json operator()(const events::RoomEvent<msgs::CallAnswer> &callAnswerEv) const
+        {
+                json j;
+                mtx::events::to_json(j, callAnswerEv);
+                return j;
+        }
+        json operator()(const events::RoomEvent<msgs::CallHangUp> &callHangUpEv) const
+        {
+                json j;
+                mtx::events::to_json(j, callHangUpEv);
+                return j;
+        }
 };
 }
 
@@ -281,6 +306,10 @@ parse_room_account_data_events(
                 case events::EventType::RoomTombstone:
                 case events::EventType::RoomTopic:
                 case events::EventType::Sticker:
+                case events::EventType::CallInvite:
+                case events::EventType::CallCandidates:
+                case events::EventType::CallAnswer:
+                case events::EventType::CallHangUp:
                 case events::EventType::Unsupported:
                         continue;
                 }
@@ -559,6 +588,46 @@ parse_timeline_events(const json &events,
                 case events::EventType::Sticker: {
                         try {
                                 container.emplace_back(events::Sticker(e));
+                        } catch (json::exception &err) {
+                                log_error(err, e);
+                        }
+
+                        break;
+                }
+                case events::EventType::CallInvite: {
+                        try {
+                                container.emplace_back(
+                                  events::RoomEvent<events::msg::CallInvite>(e));
+                        } catch (json::exception &err) {
+                                log_error(err, e);
+                        }
+
+                        break;
+                }
+                case events::EventType::CallCandidates: {
+                        try {
+                                container.emplace_back(
+                                  events::RoomEvent<events::msg::CallCandidates>(e));
+                        } catch (json::exception &err) {
+                                log_error(err, e);
+                        }
+
+                        break;
+                }
+                case events::EventType::CallAnswer: {
+                        try {
+                                container.emplace_back(
+                                  events::RoomEvent<events::msg::CallAnswer>(e));
+                        } catch (json::exception &err) {
+                                log_error(err, e);
+                        }
+
+                        break;
+                }
+                case events::EventType::CallHangUp: {
+                        try {
+                                container.emplace_back(
+                                  events::RoomEvent<events::msg::CallHangUp>(e));
                         } catch (json::exception &err) {
                                 log_error(err, e);
                         }
@@ -857,6 +926,10 @@ parse_state_events(const json &events,
                 case events::EventType::KeyVerificationAccept:
                 case events::EventType::KeyVerificationKey:
                 case events::EventType::KeyVerificationMac:
+                case events::EventType::CallInvite:
+                case events::EventType::CallCandidates:
+                case events::EventType::CallAnswer:
+                case events::EventType::CallHangUp:
                         continue;
                 }
         }
@@ -1002,6 +1075,10 @@ parse_stripped_events(const json &events,
                 case events::EventType::KeyVerificationAccept:
                 case events::EventType::KeyVerificationKey:
                 case events::EventType::KeyVerificationMac:
+                case events::EventType::CallInvite:
+                case events::EventType::CallCandidates:
+                case events::EventType::CallAnswer:
+                case events::EventType::CallHangUp:
                         continue;
                 }
         }

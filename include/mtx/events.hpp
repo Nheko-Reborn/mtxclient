@@ -75,6 +75,14 @@ enum class EventType
         Presence,
         // m.push_rules
         PushRules,
+        // m.call.invite
+        CallInvite,
+        // m.call.candidates
+        CallCandidates,
+        // m.call.answer
+        CallAnswer,
+        // m.call.hangup
+        CallHangUp,
         // Unsupported event
         Unsupported,
 };
