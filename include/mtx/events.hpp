@@ -372,6 +372,8 @@ enum class MessageType
         Text,
         // m.video
         Video,
+        /// m.key.verification.request
+        KeyVerificationRequest,
         // Unrecognized message type
         Unknown,
 };

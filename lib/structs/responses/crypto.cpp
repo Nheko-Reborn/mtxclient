@@ -20,9 +20,9 @@ from_json(const nlohmann::json &obj, QueryKeys &response)
 }
 
 void
-to_json(nlohmann::json &obj,const QueryKeys &response)
+to_json(nlohmann::json &obj, const QueryKeys &response)
 {
-        obj["failures"] = response.failures;
+        obj["failures"]    = response.failures;
         obj["device_keys"] = response.device_keys;
 }
 
