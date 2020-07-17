@@ -120,7 +120,15 @@ using TimelineEvents = std::variant<events::StateEvent<states::Aliases>,
                                     // TODO: events::RoomEvent<msgs::Location>,
                                     events::RoomEvent<msgs::Notice>,
                                     events::RoomEvent<msgs::Text>,
-                                    events::RoomEvent<msgs::Video>>;
+                                    events::RoomEvent<msgs::Video>,
+                                    events::RoomEvent<msgs::KeyVerificationRequest>,
+                                    events::RoomEvent<msgs::KeyVerificationStart>,
+                                    events::RoomEvent<msgs::KeyVerificationReady>,
+                                    events::RoomEvent<msgs::KeyVerificationDone>,
+                                    events::RoomEvent<msgs::KeyVerificationAccept>,
+                                    events::RoomEvent<msgs::KeyVerificationCancel>,
+                                    events::RoomEvent<msgs::KeyVerificationKey>,
+                                    events::RoomEvent<msgs::KeyVerificationMac>>;
 
 struct TimelineEvent
 {

@@ -82,6 +82,38 @@ from_json(const json &obj, TimelineEvent &e)
                 e.data = events::StateEvent<Topic>(obj);
                 break;
         }
+        case events::EventType::KeyVerificationCancel: {
+                e.data = events::RoomEvent<events::msg::KeyVerificationCancel>(obj);
+                break;
+        }
+        case events::EventType::KeyVerificationRequest: {
+                e.data = events::RoomEvent<events::msg::KeyVerificationRequest>(obj);
+                break;
+        }
+        case events::EventType::KeyVerificationReady: {
+                e.data = events::RoomEvent<events::msg::KeyVerificationReady>(obj);
+                break;
+        }
+        case events::EventType::KeyVerificationStart: {
+                e.data = events::RoomEvent<events::msg::KeyVerificationStart>(obj);
+                break;
+        }
+        case events::EventType::KeyVerificationDone: {
+                e.data = events::RoomEvent<events::msg::KeyVerificationDone>(obj);
+                break;
+        }
+        case events::EventType::KeyVerificationKey: {
+                e.data = events::RoomEvent<events::msg::KeyVerificationKey>(obj);
+                break;
+        }
+        case events::EventType::KeyVerificationMac: {
+                e.data = events::RoomEvent<events::msg::KeyVerificationMac>(obj);
+                break;
+        }
+        case events::EventType::KeyVerificationAccept: {
+                e.data = events::RoomEvent<events::msg::KeyVerificationAccept>(obj);
+                break;
+        }
         case events::EventType::RoomMessage: {
                 using MsgType       = mtx::events::MessageType;
                 const auto msg_type = mtx::events::getMessageType(obj.at("content"));
@@ -137,6 +169,10 @@ from_json(const json &obj, TimelineEvent &e)
                         e.data = events::RoomEvent<events::msg::Video>(obj);
                         break;
                 }
+                case MsgType::KeyVerificationRequest: {
+                        e.data = events::RoomEvent<events::msg::KeyVerificationRequest>(obj);
+                        break;
+                }
                 case MsgType::Unknown:
                         return;
                 }
@@ -152,14 +188,6 @@ from_json(const json &obj, TimelineEvent &e)
         case events::EventType::Tag:            // Not part of the timeline
         case events::EventType::Presence:       // Not part of the timeline
         case events::EventType::PushRules:      // Not part of the timeline
-        case events::EventType::KeyVerificationCancel:
-        case events::EventType::KeyVerificationRequest:
-        case events::EventType::KeyVerificationStart:
-        case events::EventType::KeyVerificationReady:
-        case events::EventType::KeyVerificationDone:
-        case events::EventType::KeyVerificationAccept:
-        case events::EventType::KeyVerificationKey:
-        case events::EventType::KeyVerificationMac:
         case events::EventType::Unsupported:
                 return;
         }
