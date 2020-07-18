@@ -131,5 +131,105 @@ void
 from_json(const json &obj, TimelineEvent &e);
 
 } // namespace collections
+
+template<typename Content>
+constexpr EventType message_content_to_type = EventType::Unsupported;
+
+template<>
+constexpr EventType message_content_to_type<mtx::events::msg::Encrypted> = EventType::RoomEncrypted;
+template<>
+constexpr EventType message_content_to_type<mtx::events::msg::Reaction> = EventType::Reaction;
+template<>
+constexpr EventType message_content_to_type<mtx::events::msg::Audio> = EventType::RoomMessage;
+template<>
+constexpr EventType message_content_to_type<mtx::events::msg::Emote> = EventType::RoomMessage;
+template<>
+constexpr EventType message_content_to_type<mtx::events::msg::File> = EventType::RoomMessage;
+template<>
+constexpr EventType message_content_to_type<mtx::events::msg::Image> = EventType::RoomMessage;
+template<>
+constexpr EventType message_content_to_type<mtx::events::msg::Notice> = EventType::RoomMessage;
+template<>
+constexpr EventType message_content_to_type<mtx::events::msg::Text> = EventType::RoomMessage;
+template<>
+constexpr EventType message_content_to_type<mtx::events::msg::Video> = EventType::RoomMessage;
+template<>
+constexpr EventType message_content_to_type<mtx::events::msg::StickerImage> = EventType::Sticker;
+
+template<typename Content>
+constexpr EventType state_content_to_type = EventType::Unsupported;
+
+template<>
+constexpr EventType state_content_to_type<mtx::events::state::Aliases> = EventType::RoomAliases;
+template<>
+constexpr EventType state_content_to_type<mtx::events::state::Avatar> = EventType::RoomAvatar;
+template<>
+constexpr EventType state_content_to_type<mtx::events::state::CanonicalAlias> =
+  EventType::RoomCanonicalAlias;
+template<>
+constexpr EventType state_content_to_type<mtx::events::state::Create> = EventType::RoomCreate;
+template<>
+constexpr EventType state_content_to_type<mtx::events::state::Encryption> =
+  EventType::RoomEncryption;
+template<>
+constexpr EventType state_content_to_type<mtx::events::state::GuestAccess> =
+  EventType::RoomGuestAccess;
+template<>
+constexpr EventType state_content_to_type<mtx::events::state::HistoryVisibility> =
+  EventType::RoomHistoryVisibility;
+template<>
+constexpr EventType state_content_to_type<mtx::events::state::JoinRules> = EventType::RoomJoinRules;
+template<>
+constexpr EventType state_content_to_type<mtx::events::state::Member> = EventType::RoomMember;
+template<>
+constexpr EventType state_content_to_type<mtx::events::state::Name> = EventType::RoomName;
+template<>
+constexpr EventType state_content_to_type<mtx::events::state::PinnedEvents> =
+  EventType::RoomPinnedEvents;
+template<>
+constexpr EventType state_content_to_type<mtx::events::state::PowerLevels> =
+  EventType::RoomPowerLevels;
+template<>
+constexpr EventType state_content_to_type<mtx::events::state::Tombstone> = EventType::RoomTombstone;
+template<>
+constexpr EventType state_content_to_type<mtx::events::state::Topic> = EventType::RoomTopic;
+
+template<typename Content>
+constexpr EventType to_device_content_to_type = EventType::Unsupported;
+
+template<>
+constexpr EventType to_device_content_to_type<mtx::events::msg::RoomKey> = EventType::RoomKey;
+template<>
+constexpr EventType to_device_content_to_type<mtx::events::msg::KeyRequest> =
+  EventType::RoomKeyRequest;
+// template<>
+// constexpr EventType to_device_content_to_type<mtx::events::msg::OlmEncrypted> = EventType::;Olm;
+template<>
+constexpr EventType to_device_content_to_type<mtx::events::msg::Encrypted> =
+  EventType::RoomEncrypted;
+template<>
+constexpr EventType to_device_content_to_type<mtx::events::msg::KeyVerificationRequest> =
+  EventType::KeyVerificationRequest;
+template<>
+constexpr EventType to_device_content_to_type<mtx::events::msg::KeyVerificationStart> =
+  EventType::KeyVerificationStart;
+template<>
+constexpr EventType to_device_content_to_type<mtx::events::msg::KeyVerificationReady> =
+  EventType::KeyVerificationReady;
+template<>
+constexpr EventType to_device_content_to_type<mtx::events::msg::KeyVerificationDone> =
+  EventType::KeyVerificationDone;
+template<>
+constexpr EventType to_device_content_to_type<mtx::events::msg::KeyVerificationAccept> =
+  EventType::KeyVerificationAccept;
+template<>
+constexpr EventType to_device_content_to_type<mtx::events::msg::KeyVerificationCancel> =
+  EventType::KeyVerificationCancel;
+template<>
+constexpr EventType to_device_content_to_type<mtx::events::msg::KeyVerificationKey> =
+  EventType::KeyVerificationKey;
+template<>
+constexpr EventType to_device_content_to_type<mtx::events::msg::KeyVerificationMac> =
+  EventType::KeyVerificationMac;
 } // namespace events
 } // namespace mtx

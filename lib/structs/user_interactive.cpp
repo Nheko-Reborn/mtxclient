@@ -84,44 +84,43 @@ to_json(nlohmann::json &obj, const Auth &auth)
 {
         obj["session"] = auth.session;
 
-        std::visit(
-          overloaded{
-            [&obj](const auth::Password &password) {
-                    obj["type"]     = auth_types::password;
-                    obj["password"] = password.password;
+        std::visit(overloaded{
+                     [&obj](const auth::Password &password) {
+                             obj["type"]     = auth_types::password;
+                             obj["password"] = password.password;
 
-                    if (password.identifier_type == auth::Password::IdType::UserId) {
-                            obj["identifier"]["type"] = "m.id.user";
-                            obj["identifier"]["user"] = password.identifier_user;
-                    } else {
-                            obj["identifier"]["type"]    = "m.id.thirdparty";
-                            obj["identifier"]["medium"]  = password.identifier_medium;
-                            obj["identifier"]["address"] = password.identifier_address;
-                    }
-            },
-            [&obj](const auth::ReCaptcha &captcha) {
-                    obj["type"]     = auth_types::recaptcha;
-                    obj["response"] = captcha.response;
-            },
-            [&obj](const auth::Token &token) {
-                    obj["type"]   = auth_types::token;
-                    obj["token"]  = token.token;
-                    obj["txn_id"] = token.txn_id;
-            },
-            [&obj](const auth::EmailIdentity &id) {
-                    obj["type"]          = auth_types::email_identity;
-                    obj["threepidCreds"] = id.threepidCreds;
-            },
-            [&obj](const auth::MSISDN &id) {
-                    obj["type"]          = auth_types::msisdn;
-                    obj["threepidCreds"] = id.threepidCreds;
-            },
-            [&obj](const auth::OAuth2 &) { obj["type"] = auth_types::oauth2; },
-            [&obj](const auth::SSO &) { obj["type"] = auth_types::sso; },
-            [&obj](const auth::Terms &) { obj["type"] = auth_types::terms; },
-            [&obj](const auth::Dummy &) { obj["type"] = auth_types::dummy; },
-            [](const auth::Fallback &) {},
-          },
-          auth.content);
+                             if (password.identifier_type == auth::Password::IdType::UserId) {
+                                     obj["identifier"]["type"] = "m.id.user";
+                                     obj["identifier"]["user"] = password.identifier_user;
+                             } else {
+                                     obj["identifier"]["type"]    = "m.id.thirdparty";
+                                     obj["identifier"]["medium"]  = password.identifier_medium;
+                                     obj["identifier"]["address"] = password.identifier_address;
+                             }
+                     },
+                     [&obj](const auth::ReCaptcha &captcha) {
+                             obj["type"]     = auth_types::recaptcha;
+                             obj["response"] = captcha.response;
+                     },
+                     [&obj](const auth::Token &token) {
+                             obj["type"]   = auth_types::token;
+                             obj["token"]  = token.token;
+                             obj["txn_id"] = token.txn_id;
+                     },
+                     [&obj](const auth::EmailIdentity &id) {
+                             obj["type"]          = auth_types::email_identity;
+                             obj["threepidCreds"] = id.threepidCreds;
+                     },
+                     [&obj](const auth::MSISDN &id) {
+                             obj["type"]          = auth_types::msisdn;
+                             obj["threepidCreds"] = id.threepidCreds;
+                     },
+                     [&obj](const auth::OAuth2 &) { obj["type"] = auth_types::oauth2; },
+                     [&obj](const auth::SSO &) { obj["type"] = auth_types::sso; },
+                     [&obj](const auth::Terms &) { obj["type"] = auth_types::terms; },
+                     [&obj](const auth::Dummy &) { obj["type"] = auth_types::dummy; },
+                     [](const auth::Fallback &) {},
+                   },
+                   auth.content);
 }
 }

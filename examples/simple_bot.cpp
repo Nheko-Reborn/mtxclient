@@ -99,8 +99,7 @@ parse_messages(const mtx::responses::Sync &res, bool parse_repeat_cmd = false)
                         mtx::events::msg::Text text;
                         text.body = "Thanks for the invitation!";
 
-                        client->send_room_message<mtx::events::msg::Text,
-                                                  mtx::events::EventType::RoomMessage>(
+                        client->send_room_message<mtx::events::msg::Text>(
                           room_id, text, [room_id](const mtx::responses::EventId &, RequestErr e) {
                                   if (e) {
                                           print_errors(e);
@@ -133,8 +132,7 @@ parse_messages(const mtx::responses::Sync &res, bool parse_repeat_cmd = false)
                         mtx::events::msg::Text text;
                         text.body = user + ": " + word;
 
-                        client->send_room_message<mtx::events::msg::Text,
-                                                  mtx::events::EventType::RoomMessage>(
+                        client->send_room_message<mtx::events::msg::Text>(
                           room_id, text, [room_id](const mtx::responses::EventId &, RequestErr e) {
                                   if (e) {
                                           print_errors(e);

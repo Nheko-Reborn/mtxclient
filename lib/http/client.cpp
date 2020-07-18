@@ -302,11 +302,12 @@ Client::login(const mtx::requests::Login &req, Callback<mtx::responses::Login> c
 void
 Client::get_login(Callback<mtx::responses::LoginFlows> cb)
 {
-        get<mtx::responses::LoginFlows>("/client/r0/login",
-                                        [cb](const mtx::responses::LoginFlows &res,
-                                             HeaderFields,
-                                             RequestErr err) { cb(res, err); },
-                                        false);
+        get<mtx::responses::LoginFlows>(
+          "/client/r0/login",
+          [cb](const mtx::responses::LoginFlows &res, HeaderFields, RequestErr err) {
+                  cb(res, err);
+          },
+          false);
 }
 
 std::string
@@ -1160,5 +1161,5 @@ Client::enable_encryption(const std::string &room, Callback<mtx::responses::Even
         using namespace mtx::events;
         state::Encryption event;
 
-        send_state_event<state::Encryption, EventType::RoomEncryption>(room, "", event, callback);
+        send_state_event<state::Encryption>(room, "", event, callback);
 }
