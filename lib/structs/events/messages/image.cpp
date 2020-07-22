@@ -34,11 +34,12 @@ to_json(json &obj, const Image &content)
 {
         obj["msgtype"] = "m.image";
         obj["body"]    = content.body;
-        obj["url"]     = content.url;
         obj["info"]    = content.info;
 
         if (content.file)
                 obj["file"] = content.file.value();
+        else
+                obj["url"] = content.url;
 
         if (!content.relates_to.in_reply_to.event_id.empty())
                 obj["m.relates_to"] = content.relates_to;
@@ -65,11 +66,12 @@ void
 to_json(json &obj, const StickerImage &content)
 {
         obj["body"] = content.body;
-        obj["url"]  = content.url;
         obj["info"] = content.info;
 
         if (content.file)
                 obj["file"] = content.file.value();
+        else
+                obj["url"] = content.url;
 
         if (!content.relates_to.in_reply_to.event_id.empty())
                 obj["m.relates_to"] = content.relates_to;
