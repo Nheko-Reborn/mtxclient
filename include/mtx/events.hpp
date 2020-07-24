@@ -3,6 +3,7 @@
 #include <nlohmann/json.hpp>
 
 #include "mtx/events/messages/image.hpp"
+#include "mtx/events/redaction.hpp"
 #include "mtx/identifiers.hpp"
 
 using json = nlohmann::json;
@@ -164,6 +165,8 @@ struct UnsignedData
         std::string replaces_state;
         //! The event ID that redacted this event.
         std::string redacted_by;
+        //! The event that redacted this event.
+        std::optional<Event<mtx::events::msg::Redaction>> redacted_because;
 };
 
 inline void
@@ -183,6 +186,10 @@ from_json(const json &obj, UnsignedData &data)
 
         if (obj.find("redacted_by") != obj.end())
                 data.redacted_by = obj.at("redacted_by").get<std::string>();
+
+        if (obj.find("redacted_because") != obj.end())
+                data.redacted_because =
+                  obj.at("redacted_because").get<Event<mtx::events::msg::Redaction>>();
 }
 
 inline void
@@ -199,6 +206,12 @@ to_json(json &obj, const UnsignedData &event)
 
         if (event.age != 0)
                 obj["age"] = event.age;
+
+        if (!event.redacted_by.empty())
+                obj["redacted_by"] = event.redacted_by;
+
+        if (event.redacted_because)
+                obj["redacted_because"] = *event.redacted_because;
 }
 
 template<class Content>
