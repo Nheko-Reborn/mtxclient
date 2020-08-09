@@ -194,6 +194,9 @@ from_json(const json &obj, KeyVerificationRequest &event)
         if (obj.count("timestamp") != 0) {
                 event.timestamp = obj.at("timestamp").get<uint64_t>();
         }
+        if (obj.count("msgtype") != 0) {
+                event.msgtype = obj.at("msgtype").get<std::string>();
+        }
         if (obj.count("to") != 0) {
                 event.to = obj.at("to").get<std::string>();
         }
@@ -209,6 +212,8 @@ to_json(json &obj, const KeyVerificationRequest &event)
                 obj["body"] = event.body.value();
         obj["from_device"] = event.from_device;
         obj["methods"]     = event.methods;
+        if (event.msgtype.has_value())
+                obj["msgtype"] = "m.key.verification.request";
         if (event.timestamp.has_value())
                 obj["timestamp"] = event.timestamp.value();
         if (event.to.has_value())

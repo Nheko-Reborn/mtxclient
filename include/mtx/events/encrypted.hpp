@@ -156,7 +156,8 @@ struct KeyVerificationRequest
         //! An opaque identifier for the verification request. Must be unique with respect to the
         //! devices involved.
         std::optional<std::string> transaction_id;
-
+        //! must be `key.verification.request`
+        std::optional<std::string> msgtype;
         //! The verification methods supported by the sender.
         std::vector<VerificationMethods> methods;
         //! The POSIX timestamp in milliseconds for when the request was made. If the request is in

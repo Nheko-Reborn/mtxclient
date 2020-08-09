@@ -291,7 +291,6 @@ parse_timeline_events(const json &events,
                 }
                 case events::EventType::KeyVerificationStart: {
                         std::cout<<"Recieved Start"<<std::endl;
-                        std::cout<<json(e).dump(2)<<std::endl;
                         try {
                                 container.emplace_back(
                                   events::RoomEvent<events::msg::KeyVerificationStart>(e));
@@ -303,7 +302,6 @@ parse_timeline_events(const json &events,
                 }
                 case events::EventType::KeyVerificationAccept: {
                         std::cout<<"Recieved Accept"<<std::endl;
-                        std::cout<<json(e).dump(2)<<std::endl;
                         try {
                                 container.emplace_back(
                                   events::RoomEvent<events::msg::KeyVerificationAccept>(e));
@@ -315,7 +313,6 @@ parse_timeline_events(const json &events,
                 }
                 case events::EventType::KeyVerificationDone: {
                         std::cout<<"Recieved Done"<<std::endl;
-                        std::cout<<json(e).dump(2)<<std::endl;
                         try {
                                 container.emplace_back(
                                   events::RoomEvent<events::msg::KeyVerificationDone>(e));
@@ -327,7 +324,6 @@ parse_timeline_events(const json &events,
                 }
                 case events::EventType::KeyVerificationReady: {
                         std::cout<<"Recieved Ready"<<std::endl;
-                        std::cout<<json(e).dump(2)<<std::endl;
                         try {
                                 container.emplace_back(
                                   events::RoomEvent<events::msg::KeyVerificationReady>(e));
@@ -339,7 +335,6 @@ parse_timeline_events(const json &events,
                 }
                 case events::EventType::KeyVerificationKey: {
                         std::cout<<"Recieved Key"<<std::endl;
-                        std::cout<<json(e).dump(2)<<std::endl;
                         try {
                                 container.emplace_back(
                                   events::RoomEvent<events::msg::KeyVerificationKey>(e));
@@ -351,7 +346,6 @@ parse_timeline_events(const json &events,
                 }
                 case events::EventType::KeyVerificationMac: {
                         std::cout<<"Recieved Mac"<<std::endl;
-                        std::cout<<json(e).dump(2)<<std::endl;
                         try {
                                 container.emplace_back(
                                   events::RoomEvent<events::msg::KeyVerificationMac>(e));
@@ -363,7 +357,6 @@ parse_timeline_events(const json &events,
                 }
                 case events::EventType::KeyVerificationCancel: {
                         std::cout<<"Recieved Cancel"<<std::endl;
-                        std::cout<<json(e).dump(2)<<std::endl;
                         try {
                                 container.emplace_back(
                                   events::RoomEvent<events::msg::KeyVerificationCancel>(e));
@@ -474,7 +467,7 @@ parse_timeline_events(const json &events,
                         }
                         case MsgType::KeyVerificationRequest: {
                                 std::cout<<"Recieved Request"<<std::endl;
-                                std::cout<<json(e).dump(2)<<std::endl;
+
                                 try {
                                         container.emplace_back(
                                           events::RoomEvent<events::msg::KeyVerificationRequest>(
