@@ -146,6 +146,22 @@ from_json(const json &obj, TimelineEvent &e)
                 e.data = events::Sticker(obj);
                 break;
         }
+        case events::EventType::CallInvite: {
+                e.data = events::RoomEvent<events::msg::CallInvite>(obj);
+                break;
+        }
+        case events::EventType::CallCandidates: {
+                e.data = events::RoomEvent<events::msg::CallCandidates>(obj);
+                break;
+        }
+        case events::EventType::CallAnswer: {
+                e.data = events::RoomEvent<events::msg::CallAnswer>(obj);
+                break;
+        }
+        case events::EventType::CallHangUp: {
+                e.data = events::RoomEvent<events::msg::CallHangUp>(obj);
+                break;
+        }
         case events::EventType::RoomPinnedEvents:
         case events::EventType::RoomKey:        // not part of the timeline
         case events::EventType::RoomKeyRequest: // Not part of the timeline
