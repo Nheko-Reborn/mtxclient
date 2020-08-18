@@ -178,7 +178,7 @@ struct ReactionRelatesTo
         // event id being reacted to
         std::string event_id;
         // key is the reaction itself
-        std::string key;
+        std::optional<std::string> key;
 };
 
 //! Deserialization method needed by @p nlohmann::json.

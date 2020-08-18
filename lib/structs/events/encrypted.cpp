@@ -99,8 +99,13 @@ from_json(const json &obj, Encrypted &content)
         content.sender_key = obj.at("sender_key").get<std::string>();
         content.session_id = obj.at("session_id").get<std::string>();
 
-        if (obj.count("m.relates_to") != 0)
-                content.relates_to = obj.at("m.relates_to").get<common::ReplyRelatesTo>();
+        if (obj.count("m.relates_to") != 0) {
+                if (obj.at("m.relates_to").contains("in_reply_to"))
+                        content.relates_to = obj.at("m.relates_to").get<common::ReplyRelatesTo>();
+                else
+                        content.r_relates_to =
+                          obj.at("m.relates_to").get<common::ReactionRelatesTo>();
+        }
 }
 
 void
@@ -114,6 +119,8 @@ to_json(json &obj, const Encrypted &content)
 
         if (!content.relates_to.in_reply_to.event_id.empty())
                 obj["m.relates_to"] = content.relates_to;
+        if (!content.r_relates_to.event_id.empty())
+                obj["m.relates_to"] = content.r_relates_to;
 }
 
 void
@@ -241,7 +248,7 @@ from_json(const json &obj, KeyVerificationStart &event)
         event.short_authentication_string =
           obj.at("short_authentication_string").get<std::vector<SASMethods>>();
         if (obj.count("m.relates_to") != 0)
-                event.relates_to = obj.at("m.relates_to").get<common::ReplyRelatesTo>();
+                event.relates_to = obj.at("m.relates_to").get<common::ReactionRelatesTo>();
 }
 
 void
@@ -270,7 +277,7 @@ from_json(const json &obj, KeyVerificationReady &event)
         event.methods     = obj.at("methods").get<std::vector<VerificationMethods>>();
         event.from_device = obj.at("from_device").get<std::string>();
         if (obj.count("m.relates_to") != 0)
-                event.relates_to = obj.at("m.relates_to").get<common::ReplyRelatesTo>();
+                event.relates_to = obj.at("m.relates_to").get<common::ReactionRelatesTo>();
 }
 
 void
@@ -291,7 +298,7 @@ from_json(const nlohmann::json &obj, KeyVerificationDone &event)
                 event.transaction_id = obj.at("transaction_id").get<std::string>();
         }
         if (obj.count("m.relates_to") != 0)
-                event.relates_to = obj.at("m.relates_to").get<common::ReplyRelatesTo>();
+                event.relates_to = obj.at("m.relates_to").get<common::ReactionRelatesTo>();
 }
 
 void
@@ -317,7 +324,7 @@ from_json(const json &obj, KeyVerificationAccept &event)
           obj.at("short_authentication_string").get<std::vector<SASMethods>>();
         event.commitment = obj.at("commitment").get<std::string>();
         if (obj.count("m.relates_to") != 0)
-                event.relates_to = obj.at("m.relates_to").get<common::ReplyRelatesTo>();
+                event.relates_to = obj.at("m.relates_to").get<common::ReactionRelatesTo>();
 }
 
 void
@@ -343,7 +350,7 @@ from_json(const json &obj, KeyVerificationCancel &event)
         event.reason = obj.at("reason").get<std::string>();
         event.code   = obj.at("code").get<std::string>();
         if (obj.count("m.relates_to") != 0)
-                event.relates_to = obj.at("m.relates_to").get<common::ReplyRelatesTo>();
+                event.relates_to = obj.at("m.relates_to").get<common::ReactionRelatesTo>();
 }
 
 void
@@ -365,7 +372,7 @@ from_json(const json &obj, KeyVerificationKey &event)
         }
         event.key = obj.at("key").get<std::string>();
         if (obj.count("m.relates_to") != 0)
-                event.relates_to = obj.at("m.relates_to").get<common::ReplyRelatesTo>();
+                event.relates_to = obj.at("m.relates_to").get<common::ReactionRelatesTo>();
 }
 
 void
@@ -387,7 +394,7 @@ from_json(const json &obj, KeyVerificationMac &event)
         event.mac  = obj.at("mac").get<std::map<std::string, std::string>>();
         event.keys = obj.at("keys").get<std::string>();
         if (obj.count("m.relates_to") != 0)
-                event.relates_to = obj.at("m.relates_to").get<common::ReplyRelatesTo>();
+                event.relates_to = obj.at("m.relates_to").get<common::ReactionRelatesTo>();
 }
 
 void

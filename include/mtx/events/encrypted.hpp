@@ -4,6 +4,7 @@
 
 #include "mtx/events.hpp"
 #include "mtx/events/common.hpp"
+#include "variant"
 
 namespace mtx {
 namespace events {
@@ -64,6 +65,7 @@ from_json(const nlohmann::json &obj, OlmEncrypted &event);
 void
 to_json(nlohmann::json &obj, const OlmEncrypted &event);
 
+// !TODO Chnage the ReactionRelatesTo to handle ReplyRelatesTo type of event
 //! Content of the `m.room.encrypted` event.
 struct Encrypted
 {
@@ -79,6 +81,8 @@ struct Encrypted
         std::string session_id;
         //! Relates to for rich replies
         common::ReplyRelatesTo relates_to;
+        //! Relates to used for verification messages
+        common::ReactionRelatesTo r_relates_to;
 };
 
 void
@@ -201,7 +205,7 @@ struct KeyVerificationStart
         //! One of: ["decimal", "emoji"]
         std::vector<SASMethods> short_authentication_string;
         //! Relates to for rich replies
-        std::optional<common::ReplyRelatesTo> relates_to;
+        std::optional<mtx::common::ReactionRelatesTo> relates_to;
 };
 
 void
@@ -220,7 +224,7 @@ struct KeyVerificationReady
         //! Sends the user the supported methods
         std::vector<VerificationMethods> methods;
         //! Relates to for rich replies
-        std::optional<common::ReplyRelatesTo> relates_to;
+        std::optional<mtx::common::ReactionRelatesTo> relates_to;
 };
 
 void
@@ -235,7 +239,7 @@ struct KeyVerificationDone
         //! transactionId of the current flow
         std::optional<std::string> transaction_id;
         //! Relates to for rich replies
-        std::optional<common::ReplyRelatesTo> relates_to;
+        std::optional<mtx::common::ReactionRelatesTo> relates_to;
 };
 
 void
@@ -270,7 +274,7 @@ struct KeyVerificationAccept
         //! m.key.verification.start message.
         std::string commitment;
         //! Relates to for rich replies
-        std::optional<common::ReplyRelatesTo> relates_to;
+        std::optional<mtx::common::ReactionRelatesTo> relates_to;
 };
 
 void
@@ -314,7 +318,7 @@ struct KeyVerificationCancel
         //! another error response.
         std::string code;
         //! Relates to for rich replies
-        std::optional<common::ReplyRelatesTo> relates_to;
+        std::optional<mtx::common::ReactionRelatesTo> relates_to;
 };
 
 void
@@ -331,7 +335,7 @@ struct KeyVerificationKey
         //! The device's ephemeral public key, encoded as unpadded base64.
         std::string key;
         //! Relates to for rich replies
-        std::optional<common::ReplyRelatesTo> relates_to;
+        std::optional<mtx::common::ReactionRelatesTo> relates_to;
 };
 
 void
@@ -352,7 +356,7 @@ struct KeyVerificationMac
         //! property, encoded as unpadded base64.
         std::string keys;
         //! Relates to for rich replies
-        std::optional<common::ReplyRelatesTo> relates_to;
+        std::optional<mtx::common::ReactionRelatesTo> relates_to;
 };
 
 void
