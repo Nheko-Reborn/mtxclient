@@ -459,8 +459,6 @@ parse_timeline_events(const json &events,
                                 break;
                         }
                         case MsgType::KeyVerificationRequest: {
-
-
                                 try {
                                         container.emplace_back(
                                           events::RoomEvent<events::msg::KeyVerificationRequest>(

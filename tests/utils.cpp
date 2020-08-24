@@ -137,6 +137,26 @@ TEST(Utilities, VerifySignedIdentityKeys)
         EXPECT_EQ(res, 0);
 }
 
+TEST(Utilities, VerifySignature)
+{
+        auto alice = make_shared<OlmClient>();
+        alice->create_new_account();
+        alice->create_new_utility();
+
+        json keys = alice->identity_keys();
+
+        auto msg = json({{"algorithms", {"m.olm.v1.curve25519-aes-sha2", "m.megolm.v1.aes-sha2"}},
+                         {"device_id", "some_device"},
+                         {"user_id", "@alice:localhost"},
+                         {"keys",
+                          {{"curve25519:some_device", keys["curve25519"]},
+                           {"ed25519:some_device", keys["ed25519"]}}}});
+
+        auto sig = alice->sign_message(msg.dump());
+
+        EXPECT_EQ(alice->ed25519_verify_sig(alice->identity_keys().ed25519, msg, sig), true);
+}
+
 TEST(Utilities, VerifyIdentityKeyJson)
 {
         //! JSON extracted from an account created through Riot.

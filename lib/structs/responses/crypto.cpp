@@ -17,13 +17,22 @@ from_json(const nlohmann::json &obj, QueryKeys &response)
 {
         response.failures    = obj.at("failures").get<std::map<std::string, nlohmann::json>>();
         response.device_keys = obj.at("device_keys").get<std::map<std::string, DeviceToKeysMap>>();
+        response.master_keys =
+          obj.at("master_keys").get<std::map<std::string, mtx::crypto::CrossSigningKeys>>();
+        response.user_signing_keys =
+          obj.at("user_signing_keys").get<std::map<std::string, mtx::crypto::CrossSigningKeys>>();
+        response.self_signing_keys =
+          obj.at("self_signing_keys").get<std::map<std::string, mtx::crypto::CrossSigningKeys>>();
 }
 
 void
 to_json(nlohmann::json &obj, const QueryKeys &response)
 {
-        obj["failures"]    = response.failures;
-        obj["device_keys"] = response.device_keys;
+        obj["failures"]          = response.failures;
+        obj["device_keys"]       = response.device_keys;
+        obj["master_keys"]       = response.master_keys;
+        obj["user_signing_keys"] = response.user_signing_keys;
+        obj["self_signing_keys"] = response.self_signing_keys;
 }
 
 void

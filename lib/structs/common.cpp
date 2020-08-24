@@ -49,6 +49,25 @@ to_json(json &obj, const DeviceKeys &res)
 }
 
 void
+from_json(const json &obj, CrossSigningKeys &res)
+{
+        res.user_id = obj.at("user_id").get<std::string>();
+        res.usage   = obj.at("usage").get<std::vector<std::string>>();
+        res.keys    = obj.at("keys").get<std::map<std::string, std::string>>();
+        res.signatures =
+          obj.at("signatures").get<std::map<std::string, std::map<std::string, std::string>>>();
+}
+
+void
+to_json(json &obj, const CrossSigningKeys &res)
+{
+        obj["user_id"]    = res.user_id;
+        obj["usage"]      = res.usage;
+        obj["keys"]       = res.keys;
+        obj["signatures"] = res.signatures;
+}
+
+void
 from_json(const json &obj, JWK &res)
 {
         res.kty     = obj.at("kty").get<std::string>();

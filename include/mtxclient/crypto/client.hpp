@@ -190,6 +190,8 @@ public:
         OlmSessionPtr create_inbound_session_from(const std::string &their_curve25519,
                                                   const std::string &one_time_key_message);
 
+        //! this function is for verifying the signatures
+        bool ed25519_verify_sig(std::string signing_key, nlohmann::json obj, std::string signature);
         //! The `m.room_key` event is used to share the session_id & session_key
         //! of an outbound megolm session.
         nlohmann::json create_room_key_event(const UserId &user_id,
