@@ -17,6 +17,7 @@
 #include "mtx/events/redaction.hpp"
 #include "mtx/events/tag.hpp"
 #include "mtx/events/topic.hpp"
+#include "mtx/events/voip.hpp"
 
 #include "mtx/events/messages/audio.hpp"
 #include "mtx/events/messages/emote.hpp"

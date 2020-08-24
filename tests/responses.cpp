@@ -1007,3 +1007,25 @@ TEST(Responses, Userinteractive)
         unauthorized = data2;
         EXPECT_EQ(unauthorized.flows[0].stages[0], mtx::user_interactive::auth_types::password);
 }
+
+TEST(Responses, TurnServer)
+{
+        json data = R"({
+          "username": "1443779631:@user:example.com",
+          "password": "JlKfBy1QwLrO20385QyAtEyIv0=",
+          "uris": [
+            "turn:turn.example.com:3478?transport=udp",
+            "turn:10.20.30.40:3478?transport=tcp",
+            "turns:10.20.30.40:443?transport=tcp"
+          ],
+          "ttl": 86400
+        })"_json;
+
+        TurnServer turnServer = data;
+        EXPECT_EQ(turnServer.username, "1443779631:@user:example.com");
+        EXPECT_EQ(turnServer.password, "JlKfBy1QwLrO20385QyAtEyIv0=");
+        EXPECT_EQ(turnServer.uris[0], "turn:turn.example.com:3478?transport=udp");
+        EXPECT_EQ(turnServer.uris[1], "turn:10.20.30.40:3478?transport=tcp");
+        EXPECT_EQ(turnServer.uris[2], "turns:10.20.30.40:443?transport=tcp");
+        EXPECT_EQ(turnServer.ttl, 86400);
+}

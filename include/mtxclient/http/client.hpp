@@ -57,6 +57,7 @@ struct Profile;
 struct QueryKeys;
 struct Register;
 struct Sync;
+struct TurnServer;
 struct UploadKeys;
 struct Versions;
 struct WellKnown;
@@ -514,6 +515,9 @@ public:
         //! Retrieve information about a key
         void secret_storage_key(const std::string &key_id,
                                 Callback<mtx::secret_storage::AesHmacSha2KeyDescription> cb);
+
+        //! Gets any TURN server URIs and authentication credentials
+        void get_turn_server(Callback<mtx::responses::TurnServer> cb);
 
 private:
         template<class Request, class Response>

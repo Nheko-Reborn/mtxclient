@@ -22,6 +22,7 @@
 #include "mtx/events/tag.hpp"
 #include "mtx/events/tombstone.hpp"
 #include "mtx/events/topic.hpp"
+#include "mtx/events/voip.hpp"
 #include "mtx/pushrules.hpp"
 
 #include "mtx/events/messages/audio.hpp"
@@ -128,7 +129,11 @@ using TimelineEvents = std::variant<events::StateEvent<states::Aliases>,
                                     events::RoomEvent<msgs::KeyVerificationAccept>,
                                     events::RoomEvent<msgs::KeyVerificationCancel>,
                                     events::RoomEvent<msgs::KeyVerificationKey>,
-                                    events::RoomEvent<msgs::KeyVerificationMac>>;
+                                    events::RoomEvent<msgs::KeyVerificationMac>,
+                                    events::RoomEvent<msgs::CallInvite>,
+                                    events::RoomEvent<msgs::CallCandidates>,
+                                    events::RoomEvent<msgs::CallAnswer>,
+                                    events::RoomEvent<msgs::CallHangUp>>;
 
 struct TimelineEvent
 {

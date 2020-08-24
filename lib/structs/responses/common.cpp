@@ -16,6 +16,7 @@
 #include "mtx/events/redaction.hpp"
 #include "mtx/events/tag.hpp"
 #include "mtx/events/topic.hpp"
+#include "mtx/events/voip.hpp"
 
 #include <iostream>
 
@@ -45,6 +46,193 @@ from_json(const nlohmann::json &obj, FilterId &response)
 }
 
 namespace utils {
+namespace {
+struct TimelineEventVisitor
+{
+        json operator()(const events::StateEvent<states::Aliases> &aliasEv) const
+        {
+                json j;
+                mtx::events::to_json(j, aliasEv);
+                return j;
+        }
+        json operator()(const events::StateEvent<states::Avatar> &avatarEv) const
+        {
+                json j;
+                mtx::events::to_json(j, avatarEv);
+                return j;
+        }
+        json operator()(const events::StateEvent<states::CanonicalAlias> &aliasEv) const
+        {
+                json j;
+                mtx::events::to_json(j, aliasEv);
+                return j;
+        }
+        json operator()(const events::StateEvent<states::Create> &createEv) const
+        {
+                json j;
+                mtx::events::to_json(j, createEv);
+                return j;
+        }
+        json operator()(const events::StateEvent<states::Encryption> &encEv) const
+        {
+                json j;
+                mtx::events::to_json(j, encEv);
+                return j;
+        }
+        json operator()(const events::StateEvent<states::GuestAccess> &guestEv) const
+        {
+                json j;
+                mtx::events::to_json(j, guestEv);
+                return j;
+        }
+        json operator()(const events::StateEvent<states::HistoryVisibility> &histEv) const
+        {
+                json j;
+                mtx::events::to_json(j, histEv);
+                return j;
+        }
+        json operator()(const events::StateEvent<states::JoinRules> &joinEv) const
+        {
+                json j;
+                mtx::events::to_json(j, joinEv);
+                return j;
+        }
+        json operator()(const events::StateEvent<states::Member> &membEv) const
+        {
+                json j;
+                mtx::events::to_json(j, membEv);
+                return j;
+        }
+        json operator()(const events::StateEvent<states::Name> &nameEv) const
+        {
+                json j;
+                mtx::events::to_json(j, nameEv);
+                return j;
+        }
+        json operator()(const events::StateEvent<states::PinnedEvents> &pinEv) const
+        {
+                json j;
+                mtx::events::to_json(j, pinEv);
+                return j;
+        }
+        json operator()(const events::StateEvent<states::PowerLevels> &powEv) const
+        {
+                json j;
+                mtx::events::to_json(j, powEv);
+                return j;
+        }
+        json operator()(const events::StateEvent<states::Tombstone> &tombEv) const
+        {
+                json j;
+                mtx::events::to_json(j, tombEv);
+                return j;
+        }
+        json operator()(const events::StateEvent<states::Topic> &topicEv) const
+        {
+                json j;
+                mtx::events::to_json(j, topicEv);
+                return j;
+        }
+        json operator()(const events::EncryptedEvent<msgs::Encrypted> &encEv) const
+        {
+                json j;
+                mtx::events::to_json(j, encEv);
+                return j;
+        }
+        json operator()(const events::RedactionEvent<msgs::Redaction> &redEv) const
+        {
+                json j;
+                mtx::events::to_json(j, redEv);
+                return j;
+        }
+        json operator()(const events::Sticker &stickEv) const
+        {
+                json j;
+                mtx::events::to_json(j, stickEv);
+                return j;
+        }
+        json operator()(const events::RoomEvent<msgs::Reaction> &reactEv) const
+        {
+                json j;
+                mtx::events::to_json(j, reactEv);
+                return j;
+        }
+        json operator()(const events::RoomEvent<msgs::Redacted> &redEv) const
+        {
+                json j;
+                mtx::events::to_json(j, redEv);
+                return j;
+        }
+        json operator()(const events::RoomEvent<msgs::Audio> &audioEv) const
+        {
+                json j;
+                mtx::events::to_json(j, audioEv);
+                return j;
+        }
+        json operator()(const events::RoomEvent<msgs::Emote> &emoteEv) const
+        {
+                json j;
+                mtx::events::to_json(j, emoteEv);
+                return j;
+        }
+        json operator()(const events::RoomEvent<msgs::File> &fileEv) const
+        {
+                json j;
+                mtx::events::to_json(j, fileEv);
+                return j;
+        }
+        json operator()(const events::RoomEvent<msgs::Image> &imageEv) const
+        {
+                json j;
+                mtx::events::to_json(j, imageEv);
+                return j;
+        }
+        // TODO: json operator()(const events::RoomEvent<msgs::Location> &locEv) const { json j;
+        // mtx::events::to_json(j, locEv); return j;}
+        json operator()(const events::RoomEvent<msgs::Notice> &noticeEv) const
+        {
+                json j;
+                mtx::events::to_json(j, noticeEv);
+                return j;
+        }
+        json operator()(const events::RoomEvent<msgs::Text> &textEv) const
+        {
+                json j;
+                mtx::events::to_json(j, textEv);
+                return j;
+        }
+        json operator()(const events::RoomEvent<msgs::Video> &videoEv) const
+        {
+                json j;
+                mtx::events::to_json(j, videoEv);
+                return j;
+        }
+        json operator()(const events::RoomEvent<msgs::CallInvite> &callInviteEv) const
+        {
+                json j;
+                mtx::events::to_json(j, callInviteEv);
+                return j;
+        }
+        json operator()(const events::RoomEvent<msgs::CallCandidates> &callCandidatesEv) const
+        {
+                json j;
+                mtx::events::to_json(j, callCandidatesEv);
+                return j;
+        }
+        json operator()(const events::RoomEvent<msgs::CallAnswer> &callAnswerEv) const
+        {
+                json j;
+                mtx::events::to_json(j, callAnswerEv);
+                return j;
+        }
+        json operator()(const events::RoomEvent<msgs::CallHangUp> &callHangUpEv) const
+        {
+                json j;
+                mtx::events::to_json(j, callHangUpEv);
+                return j;
+        }
+};
+}
 
 void
 log_error(json::exception &err, const json &event)
@@ -118,6 +306,10 @@ parse_room_account_data_events(
                 case events::EventType::RoomTombstone:
                 case events::EventType::RoomTopic:
                 case events::EventType::Sticker:
+                case events::EventType::CallInvite:
+                case events::EventType::CallCandidates:
+                case events::EventType::CallAnswer:
+                case events::EventType::CallHangUp:
                 case events::EventType::Unsupported:
                         continue;
                 }
@@ -483,6 +675,46 @@ parse_timeline_events(const json &events,
 
                         break;
                 }
+                case events::EventType::CallInvite: {
+                        try {
+                                container.emplace_back(
+                                  events::RoomEvent<events::msg::CallInvite>(e));
+                        } catch (json::exception &err) {
+                                log_error(err, e);
+                        }
+
+                        break;
+                }
+                case events::EventType::CallCandidates: {
+                        try {
+                                container.emplace_back(
+                                  events::RoomEvent<events::msg::CallCandidates>(e));
+                        } catch (json::exception &err) {
+                                log_error(err, e);
+                        }
+
+                        break;
+                }
+                case events::EventType::CallAnswer: {
+                        try {
+                                container.emplace_back(
+                                  events::RoomEvent<events::msg::CallAnswer>(e));
+                        } catch (json::exception &err) {
+                                log_error(err, e);
+                        }
+
+                        break;
+                }
+                case events::EventType::CallHangUp: {
+                        try {
+                                container.emplace_back(
+                                  events::RoomEvent<events::msg::CallHangUp>(e));
+                        } catch (json::exception &err) {
+                                log_error(err, e);
+                        }
+
+                        break;
+                }
                 case events::EventType::KeyVerificationRequest:
                 case events::EventType::RoomPinnedEvents:
                 case events::EventType::RoomKey:        // Not part of timeline or state
@@ -768,6 +1000,10 @@ parse_state_events(const json &events,
                 case events::EventType::KeyVerificationAccept:
                 case events::EventType::KeyVerificationKey:
                 case events::EventType::KeyVerificationMac:
+                case events::EventType::CallInvite:
+                case events::EventType::CallCandidates:
+                case events::EventType::CallAnswer:
+                case events::EventType::CallHangUp:
                         continue;
                 }
         }
@@ -913,6 +1149,10 @@ parse_stripped_events(const json &events,
                 case events::EventType::KeyVerificationAccept:
                 case events::EventType::KeyVerificationKey:
                 case events::EventType::KeyVerificationMac:
+                case events::EventType::CallInvite:
+                case events::EventType::CallCandidates:
+                case events::EventType::CallAnswer:
+                case events::EventType::CallHangUp:
                         continue;
                 }
         }
