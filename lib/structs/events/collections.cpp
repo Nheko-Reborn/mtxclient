@@ -9,6 +9,14 @@ from_json(const json &obj, TimelineEvent &e)
         using namespace mtx::events::state;
         using namespace mtx::events::msg;
 
+        if (!obj.contains("content") || obj["content"].empty()) {
+                if (obj.contains("state_key"))
+                        e.data = events::StateEvent<msg::Redacted>(obj);
+                else
+                        e.data = events::RoomEvent<msg::Redacted>(obj);
+                return;
+        }
+
         switch (type) {
         case events::EventType::Reaction: {
                 e.data = events::RoomEvent<Reaction>(obj);

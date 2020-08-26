@@ -994,8 +994,7 @@ TEST(ClientAPI, SendMessages)
                             mtx::events::msg::Text text;
                             text.body = "hello alice!";
 
-                            bob->send_room_message<mtx::events::msg::Text,
-                                                   mtx::events::EventType::RoomMessage>(
+                            bob->send_room_message<mtx::events::msg::Text>(
                               room_id,
                               text,
                               [&event_ids](const mtx::responses::EventId &res, RequestErr err) {
@@ -1006,8 +1005,7 @@ TEST(ClientAPI, SendMessages)
                             mtx::events::msg::Emote emote;
                             emote.body = "*bob tests";
 
-                            bob->send_room_message<mtx::events::msg::Emote,
-                                                   mtx::events::EventType::RoomMessage>(
+                            bob->send_room_message<mtx::events::msg::Emote>(
                               room_id,
                               emote,
                               [&event_ids](const mtx::responses::EventId &res, RequestErr err) {
@@ -1059,21 +1057,20 @@ TEST(ClientAPI, RedactEvent)
                 mtx::events::msg::Text text;
                 text.body = "hello alice!";
 
-                alice
-                  ->send_room_message<mtx::events::msg::Text, mtx::events::EventType::RoomMessage>(
-                    room_id,
-                    text,
-                    [room_id, alice](const mtx::responses::EventId &res, RequestErr err) {
-                            check_error(err);
+                alice->send_room_message<mtx::events::msg::Text>(
+                  room_id,
+                  text,
+                  [room_id, alice](const mtx::responses::EventId &res, RequestErr err) {
+                          check_error(err);
 
-                            alice->redact_event(
-                              room_id,
-                              res.event_id.to_string(),
-                              [](const mtx::responses::EventId &res, RequestErr err) {
-                                      check_error(err);
-                                      ASSERT_FALSE(res.event_id.to_string().empty());
-                              });
-                    });
+                          alice->redact_event(
+                            room_id,
+                            res.event_id.to_string(),
+                            [](const mtx::responses::EventId &res, RequestErr err) {
+                                    check_error(err);
+                                    ASSERT_FALSE(res.event_id.to_string().empty());
+                            });
+                  });
         });
 
         alice->close();
@@ -1109,7 +1106,7 @@ TEST(ClientAPI, SendStateEvents)
                   mtx::events::state::Name event;
                   event.name = "Bob's room";
 
-                  bob->send_state_event<mtx::events::state::Name, mtx::events::EventType::RoomName>(
+                  bob->send_state_event<mtx::events::state::Name>(
                     room_id.to_string(),
                     event,
                     [](const mtx::responses::EventId &, RequestErr err) {
@@ -1120,19 +1117,17 @@ TEST(ClientAPI, SendStateEvents)
 
                   mtx::events::state::Name name_event;
                   name_event.name = "Alice's room";
-                  alice
-                    ->send_state_event<mtx::events::state::Name, mtx::events::EventType::RoomName>(
-                      room_id.to_string(),
-                      name_event,
-                      [&event_ids](const mtx::responses::EventId &res, RequestErr err) {
-                              check_error(err);
-                              event_ids.push_back(res.event_id.to_string());
-                      });
+                  alice->send_state_event<mtx::events::state::Name>(
+                    room_id.to_string(),
+                    name_event,
+                    [&event_ids](const mtx::responses::EventId &res, RequestErr err) {
+                            check_error(err);
+                            event_ids.push_back(res.event_id.to_string());
+                    });
 
                   mtx::events::state::Avatar avatar;
                   avatar.url = "mxc://localhost/random";
-                  alice->send_state_event<mtx::events::state::Avatar,
-                                          mtx::events::EventType::RoomAvatar>(
+                  alice->send_state_event<mtx::events::state::Avatar>(
                     room_id.to_string(),
                     avatar,
                     [&event_ids](const mtx::responses::EventId &res, RequestErr err) {
@@ -1252,21 +1247,19 @@ TEST(ClientAPI, ReadMarkers)
 
                 const auto room_id = res.room_id;
 
-                alice
-                  ->send_room_message<mtx::events::msg::Text, mtx::events::EventType::RoomMessage>(
-                    room_id.to_string(),
-                    text,
-                    [alice, &event_id, room_id](const mtx::responses::EventId &res,
-                                                RequestErr err) {
-                            check_error(err);
+                alice->send_room_message<mtx::events::msg::Text>(
+                  room_id.to_string(),
+                  text,
+                  [alice, &event_id, room_id](const mtx::responses::EventId &res, RequestErr err) {
+                          check_error(err);
 
-                            alice->read_event(room_id.to_string(),
-                                              res.event_id.to_string(),
-                                              [&event_id, res](RequestErr err) {
-                                                      check_error(err);
-                                                      event_id = res.event_id.to_string();
-                                              });
-                    });
+                          alice->read_event(room_id.to_string(),
+                                            res.event_id.to_string(),
+                                            [&event_id, res](RequestErr err) {
+                                                    check_error(err);
+                                                    event_id = res.event_id.to_string();
+                                            });
+                  });
 
                 while (event_id.size() == 0)
                         sleep();
@@ -1379,23 +1372,22 @@ TEST(ClientAPI, NewSendToDevice)
 
         body2[bob->user_id()][bob->device_id()] = request2;
 
-        carl->send_to_device<msgs::KeyRequest, mtx::events::EventType::RoomKeyRequest>(
+        carl->send_to_device(
           "m.room.key_request", body1, [bob](RequestErr err) { check_error(err); });
 
-        alice->send_to_device<msgs::KeyRequest, mtx::events::EventType::RoomKeyRequest>(
-          "m.room_key_request", body2, [bob](RequestErr err) {
-                  check_error(err);
+        alice->send_to_device("m.room_key_request", body2, [bob](RequestErr err) {
+                check_error(err);
 
-                  SyncOpts opts;
-                  opts.timeout = 0;
-                  bob->sync(opts, [](const mtx::responses::Sync &res, RequestErr err) {
-                          check_error(err);
+                SyncOpts opts;
+                opts.timeout = 0;
+                bob->sync(opts, [](const mtx::responses::Sync &res, RequestErr err) {
+                        check_error(err);
 
-                          EXPECT_EQ(res.to_device.events.size(), 2);
-                          auto event = std::get<mtx::events::DeviceEvent<msgs::KeyRequest>>(
-                            res.to_device.events[0]);
-                  });
-          });
+                        EXPECT_EQ(res.to_device.events.size(), 2);
+                        auto event = std::get<mtx::events::DeviceEvent<msgs::KeyRequest>>(
+                          res.to_device.events[0]);
+                });
+        });
 
         alice->close();
         bob->close();
@@ -1418,7 +1410,7 @@ TEST(ClientAPI, RetrieveSingleEvent)
                 mtx::events::msg::Text text;
                 text.body = "Hello Alice!";
 
-                bob->send_room_message<mtx::events::msg::Text, mtx::events::EventType::RoomMessage>(
+                bob->send_room_message<mtx::events::msg::Text>(
                   room_id,
                   text,
                   [room_id, bob](const mtx::responses::EventId &res, RequestErr err) {

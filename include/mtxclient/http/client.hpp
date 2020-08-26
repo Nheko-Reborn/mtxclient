@@ -396,24 +396,24 @@ public:
                        const std::string &event_id,
                        Callback<mtx::events::collections::TimelineEvents> cb);
         //! Send a room message with auto-generated transaction id.
-        template<class Payload, mtx::events::EventType Event>
+        template<class Payload>
         void send_room_message(const std::string &room_id,
                                const Payload &payload,
                                Callback<mtx::responses::EventId> cb);
         //! Send a room message by providing transaction id.
-        template<class Payload, mtx::events::EventType Event>
+        template<class Payload>
         void send_room_message(const std::string &room_id,
                                const std::string &txn_id,
                                const Payload &payload,
                                Callback<mtx::responses::EventId> cb);
         //! Send a state event by providing the state key.
-        template<class Payload, mtx::events::EventType Event>
+        template<class Payload>
         void send_state_event(const std::string &room_id,
                               const std::string &state_key,
                               const Payload &payload,
                               Callback<mtx::responses::EventId> cb);
         //! Send a state event with an empty state key.
-        template<class Payload, mtx::events::EventType Event>
+        template<class Payload>
         void send_state_event(const std::string &room_id,
                               const Payload &payload,
                               Callback<mtx::responses::EventId> cb);
@@ -432,18 +432,21 @@ public:
                 send_to_device(event_type, generate_txn_id(), body, cb);
         }
         //! Send send-to-device events to a set of client devices with a specified transaction id.
-        template<typename EventContent, mtx::events::EventType Event>
+        template<typename EventContent>
         void send_to_device(
           const std::string &txid,
           const std::map<mtx::identifiers::User, std::map<std::string, EventContent>> &messages,
           ErrCallback callback)
         {
+                constexpr auto event_type = mtx::events::to_device_content_to_type<EventContent>;
+                static_assert(event_type != mtx::events::EventType::Unsupported);
+
                 json j;
                 for (const auto &[user, deviceToMessage] : messages)
                         for (const auto &[deviceid, message] : deviceToMessage)
                                 j["messages"][user.to_string()][deviceid] = message;
 
-                send_to_device(mtx::events::to_string(Event), txid, j, callback);
+                send_to_device(mtx::events::to_string(event_type), txid, j, callback);
         }
 
         //
@@ -701,48 +704,54 @@ mtx::http::Client::prepare_callback(HeadersCallback<Response> callback)
         return type_erased_cb;
 }
 
-template<class Payload, mtx::events::EventType Event>
+template<class Payload>
 void
 mtx::http::Client::send_room_message(const std::string &room_id,
                                      const Payload &payload,
                                      Callback<mtx::responses::EventId> callback)
 {
-        send_room_message<Payload, Event>(room_id, generate_txn_id(), payload, callback);
+        send_room_message<Payload>(room_id, generate_txn_id(), payload, callback);
 }
 
-template<class Payload, mtx::events::EventType Event>
+template<class Payload>
 void
 mtx::http::Client::send_room_message(const std::string &room_id,
                                      const std::string &txn_id,
                                      const Payload &payload,
                                      Callback<mtx::responses::EventId> callback)
 {
+        constexpr auto event_type = mtx::events::message_content_to_type<Payload>;
+        static_assert(event_type != mtx::events::EventType::Unsupported);
+
         const auto api_path = "/client/r0/rooms/" + room_id + "/send/" +
-                              mtx::events::to_string(Event) + "/" +
+                              mtx::events::to_string(event_type) + "/" +
                               mtx::client::utils::url_encode(txn_id);
 
         put<Payload, mtx::responses::EventId>(api_path, payload, callback);
 }
 
-template<class Payload, mtx::events::EventType Event>
+template<class Payload>
 void
 mtx::http::Client::send_state_event(const std::string &room_id,
                                     const std::string &state_key,
                                     const Payload &payload,
                                     Callback<mtx::responses::EventId> callback)
 {
+        constexpr auto event_type = mtx::events::state_content_to_type<Payload>;
+        static_assert(event_type != mtx::events::EventType::Unsupported);
+
         const auto api_path = "/client/r0/rooms/" + mtx::client::utils::url_encode(room_id) +
-                              "/state/" + mtx::events::to_string(Event) + "/" +
+                              "/state/" + mtx::events::to_string(event_type) + "/" +
                               mtx::client::utils::url_encode(state_key);
 
         put<Payload, mtx::responses::EventId>(api_path, payload, callback);
 }
 
-template<class Payload, mtx::events::EventType Event>
+template<class Payload>
 void
 mtx::http::Client::send_state_event(const std::string &room_id,
                                     const Payload &payload,
                                     Callback<mtx::responses::EventId> callback)
 {
-        send_state_event<Payload, Event>(room_id, "", payload, callback);
+        send_state_event<Payload>(room_id, "", payload, callback);
 }

@@ -37,6 +37,60 @@ TEST(Events, Redaction)
         EXPECT_EQ(event.content.reason, "No reason");
 }
 
+TEST(Events, Redacted)
+{
+        json data = R"({
+	  "unsigned": {
+            "age": 146
+	  },
+          "content": {
+          },
+          "event_id": "$143273582443PhrSn:localhost",
+          "origin_server_ts": 1432735824653,
+          "room_id": "!jEsUZKDJdhlrceRyVU:localhost",
+          "redacts": "$1521361675759563UDexf:matrix.org",
+          "sender": "@example:localhost",
+          "type": "m.room.redaction"
+        })"_json;
+
+        mtx::events::collections::TimelineEvent event = data;
+
+        ASSERT_TRUE(std::holds_alternative<ns::RoomEvent<ns::msg::Redacted>>(event.data));
+
+        json data2 = R"({
+		"content": {
+			"membership": "join"
+		},
+		"origin_server_ts": 1595256121167,
+		"sender": "@redacted_user_1:example.com",
+		"state_key": "@redacted_user_1:example.com",
+		"type": "m.room.member",
+		"unsigned": {
+			"redacted_by": "$redacted_id_1",
+			"redacted_because": {
+				"content": {},
+				"origin_server_ts": 1595261803914,
+				"redacts": "$redacted_id_2",
+				"sender": "@redacted_user_2:example.com",
+				"type": "m.room.redaction",
+				"unsigned": {
+					"age": 23764322
+				},
+				"event_id": "$redacted_id_1"
+			}
+		},
+		"event_id": "$redacted_id_2"
+	})"_json;
+
+        event = data2;
+        ASSERT_TRUE(std::holds_alternative<ns::StateEvent<ns::state::Member>>(event.data));
+        ASSERT_TRUE(std::get<ns::StateEvent<ns::state::Member>>(event.data)
+                      .unsigned_data.redacted_because.has_value());
+        ASSERT_EQ(std::get<ns::StateEvent<ns::state::Member>>(event.data)
+                    .unsigned_data.redacted_because->sender,
+                  "@redacted_user_2:example.com");
+}
+
 TEST(Events, Conversions)
 {
         EXPECT_EQ("m.room.aliases", ns::to_string(ns::EventType::RoomAliases));

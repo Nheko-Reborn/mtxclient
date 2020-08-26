@@ -365,7 +365,7 @@ send_group_message(OlmOutboundGroupSession *session,
         data.session_id = session_id;
         data.device_id  = client->device_id();
 
-        client->send_room_message<msg::Encrypted, EventType::RoomEncrypted>(
+        client->send_room_message<msg::Encrypted>(
           room_id, data, [](const mtx::responses::EventId &res, RequestErr err) {
                   if (err) {
                           print_errors(err);

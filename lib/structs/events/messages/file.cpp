@@ -39,11 +39,12 @@ to_json(json &obj, const File &content)
         obj["msgtype"]  = "m.file";
         obj["body"]     = content.body;
         obj["filename"] = content.filename;
-        obj["url"]      = content.url;
         obj["info"]     = content.info;
 
         if (content.file)
                 obj["file"] = content.file.value();
+        else
+                obj["url"] = content.url;
 
         if (!content.relates_to.in_reply_to.event_id.empty())
                 obj["m.relates_to"] = content.relates_to;

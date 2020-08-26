@@ -603,7 +603,7 @@ Client::join_room(const std::string &room, Callback<nlohmann::json> callback)
 {
         auto api_path = "/client/r0/join/" + mtx::client::utils::url_encode(room);
 
-        post<std::string, nlohmann::json>(api_path, "", callback);
+        post<std::string, nlohmann::json>(api_path, "{}", callback);
 }
 
 void
@@ -611,7 +611,7 @@ Client::leave_room(const std::string &room_id, Callback<nlohmann::json> callback
 {
         auto api_path = "/client/r0/rooms/" + mtx::client::utils::url_encode(room_id) + "/leave";
 
-        post<std::string, nlohmann::json>(api_path, "", callback);
+        post<std::string, nlohmann::json>(api_path, "{}", callback);
 }
 
 void
@@ -1161,7 +1161,7 @@ Client::enable_encryption(const std::string &room, Callback<mtx::responses::Even
         using namespace mtx::events;
         state::Encryption event;
 
-        send_state_event<state::Encryption, EventType::RoomEncryption>(room, "", event, callback);
+        send_state_event<state::Encryption>(room, "", event, callback);
 }
 
 void

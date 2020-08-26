@@ -36,11 +36,12 @@ to_json(json &obj, const Video &content)
 {
         obj["msgtype"] = "m.video";
         obj["body"]    = content.body;
-        obj["url"]     = content.url;
         obj["info"]    = content.info;
 
         if (content.file)
                 obj["file"] = content.file.value();
+        else
+                obj["url"] = content.url;
 
         if (!content.relates_to.in_reply_to.event_id.empty())
                 obj["m.relates_to"] = content.relates_to;
