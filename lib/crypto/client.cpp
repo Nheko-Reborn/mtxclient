@@ -520,10 +520,6 @@ OlmClient::ed25519_verify_sig(std::string signing_key, nlohmann::json obj, std::
                 obj.erase("unsigned");
                 obj.erase("signatures");
 
-                std::cout << signing_key << " " << signing_key.length() << std::endl;
-                std::cout << obj.dump(2) << std::endl;
-                std::cout << signature << " " << signature.length() << std::endl;
-
                 auto utility = create_olm_object<UtilityObject>();
                 auto ret     = olm_ed25519_verify(utility.get(),
                                               signing_key.data(),

@@ -98,9 +98,8 @@ from_json(const json &obj, Encrypted &content)
         content.device_id  = obj.at("device_id").get<std::string>();
         content.sender_key = obj.at("sender_key").get<std::string>();
         content.session_id = obj.at("session_id").get<std::string>();
-
         if (obj.count("m.relates_to") != 0) {
-                if (obj.at("m.relates_to").contains("in_reply_to"))
+                if (obj.at("m.relates_to").contains("m.in_reply_to"))
                         content.relates_to = obj.at("m.relates_to").get<common::ReplyRelatesTo>();
                 else
                         content.r_relates_to =
