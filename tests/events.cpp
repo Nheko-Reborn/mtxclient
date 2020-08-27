@@ -1145,6 +1145,26 @@ TEST(RoomAccountData, Tags)
         EXPECT_EQ(event.content.tags.at("com.example.nheko.text").order, std::nullopt);
 }
 
+TEST(RoomAccountData, NhekoHiddenEvents)
+{
+        json data = R"({
+          "content": {
+              "hidden_event_types": [
+	          "m.reaction",
+		  "m.room.member"
+	      ]
+          },
+          "type": "im.nheko.hidden_events"
+        })"_json;
+
+        ns::Event<ns::account_data::nheko_extensions::HiddenEvents> event = data;
+
+        EXPECT_EQ(event.type, ns::EventType::NhekoHiddenEvents);
+        EXPECT_EQ(event.content.hidden_event_types.size(), 2);
+        EXPECT_EQ(event.content.hidden_event_types[0], ns::EventType::Reaction);
+        EXPECT_EQ(event.content.hidden_event_types[1], ns::EventType::RoomMember);
+}
+
 TEST(Presence, Presence)
 {
         json data = R"({

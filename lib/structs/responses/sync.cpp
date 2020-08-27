@@ -11,7 +11,7 @@ namespace mtx {
 namespace responses {
 
 void
-from_json(const json &obj, RoomAccountData &account_data)
+from_json(const json &obj, AccountData &account_data)
 {
         utils::parse_room_account_data_events(obj.at("events"), account_data.events);
 }
@@ -107,7 +107,7 @@ from_json(const json &obj, JoinedRoom &room)
 
         if (obj.count("account_data") != 0) {
                 if (obj.at("account_data").count("events") != 0)
-                        room.account_data = obj.at("account_data").get<RoomAccountData>();
+                        room.account_data = obj.at("account_data").get<AccountData>();
         }
 }
 
@@ -240,6 +240,11 @@ from_json(const json &obj, Sync &response)
                   obj.at("presence")
                     .at("events")
                     .get<std::vector<mtx::events::Event<mtx::events::presence::Presence>>>();
+        }
+
+        if (obj.count("account_data") != 0) {
+                if (obj.at("account_data").count("events") != 0)
+                        response.account_data = obj.at("account_data").get<AccountData>();
         }
 
         response.next_batch = obj.at("next_batch").get<std::string>();

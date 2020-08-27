@@ -12,14 +12,14 @@ namespace mtx {
 namespace responses {
 
 //! Room specific Account Data events.
-struct RoomAccountData
+struct AccountData
 {
         //! List of events.
         std::vector<events::collections::RoomAccountDataEvents> events;
 };
 
 void
-from_json(const nlohmann::json &obj, RoomAccountData &account_data);
+from_json(const nlohmann::json &obj, AccountData &account_data);
 
 //! State events.
 struct State
@@ -88,7 +88,7 @@ struct JoinedRoom
         //! timeline or state of the room. e.g. typing.
         Ephemeral ephemeral;
         //! The account_data events associated with this room.
-        RoomAccountData account_data;
+        AccountData account_data;
 };
 
 void
@@ -178,7 +178,8 @@ struct Sync
         //! A mapping from algorithm to the number of one time keys
         //! the server has for the current device.
         std::map<std::string, uint16_t> device_one_time_keys_count;
-        /* AccountData account_data; */
+        //! global account data
+        AccountData account_data;
 };
 
 void

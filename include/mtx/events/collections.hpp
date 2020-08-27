@@ -14,6 +14,7 @@
 #include "mtx/events/join_rules.hpp"
 #include "mtx/events/member.hpp"
 #include "mtx/events/name.hpp"
+#include "mtx/events/nheko_extensions/hidden_events.hpp"
 #include "mtx/events/pinned_events.hpp"
 #include "mtx/events/power_levels.hpp"
 #include "mtx/events/presence.hpp"
@@ -59,7 +60,9 @@ using DeviceEvents = std::variant<events::DeviceEvent<msgs::RoomKey>,
 
 //! Collection of room specific account data
 using RoomAccountDataEvents =
-  std::variant<events::Event<account_data::Tags>, events::Event<pushrules::GlobalRuleset>>;
+  std::variant<events::Event<account_data::Tags>,
+               events::Event<pushrules::GlobalRuleset>,
+               events::Event<account_data::nheko_extensions::HiddenEvents>>;
 
 //! Collection of @p StateEvent only.
 using StateEvents = std::variant<events::StateEvent<states::Aliases>,

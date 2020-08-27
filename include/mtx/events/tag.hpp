@@ -5,8 +5,6 @@
 
 #include <nlohmann/json.hpp>
 
-using json = nlohmann::json;
-
 namespace mtx {
 namespace events {
 namespace account_data {
@@ -17,10 +15,10 @@ struct Tag
         std::optional<double> order;
 };
 void
-from_json(const json &obj, Tag &content);
+from_json(const nlohmann::json &obj, Tag &content);
 
 void
-to_json(json &obj, const Tag &content);
+to_json(nlohmann::json &obj, const Tag &content);
 
 //! Content for the `m.tag` room account_data event.
 //! A tag is a short string a client can attach to a room for sorting or advanced functionality.
@@ -31,10 +29,10 @@ struct Tags
 };
 
 void
-from_json(const json &obj, Tags &content);
+from_json(const nlohmann::json &obj, Tags &content);
 
 void
-to_json(json &obj, const Tags &content);
+to_json(nlohmann::json &obj, const Tags &content);
 
 } // namespace account_data
 } // namespace events

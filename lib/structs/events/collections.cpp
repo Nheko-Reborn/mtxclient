@@ -176,6 +176,7 @@ from_json(const json &obj, TimelineEvent &e)
         case events::EventType::KeyVerificationAccept:
         case events::EventType::KeyVerificationKey:
         case events::EventType::KeyVerificationMac:
+        case events::EventType::NhekoHiddenEvents:
         case events::EventType::Unsupported:
                 return;
         }
