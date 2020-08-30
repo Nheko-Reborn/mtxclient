@@ -27,5 +27,4 @@ struct TurnServer
 
 void
 from_json(const nlohmann::json &obj, TurnServer &turnServer);
-
 }

@@ -507,6 +507,42 @@ SAS::calculate_mac(std::string input_data, std::string info)
         return to_string(output_buffer);
 }
 
+//! checks if the signature is signed by the signing_key
+bool
+OlmClient::ed25519_verify_sig(std::string signing_key, nlohmann::json obj, std::string signature)
+{
+        using namespace client::utils;
+
+        try {
+                if (signature.empty())
+                        return false;
+
+                obj.erase("unsigned");
+                obj.erase("signatures");
+
+                std::string canonical_json = obj.dump();
+
+                auto utility = create_olm_object<UtilityObject>();
+                auto ret     = olm_ed25519_verify(utility.get(),
+                                              signing_key.data(),
+                                              signing_key.size(),
+                                              canonical_json.data(),
+                                              canonical_json.size(),
+                                              (void *)signature.data(),
+                                              signature.size());
+
+                // the signature is wrong
+                if (ret != 0)
+                        return false;
+
+                return true;
+        } catch (const nlohmann::json::exception &e) {
+                std::cerr << "verify_signature: " << e.what();
+        }
+
+        return false;
+}
+
 nlohmann::json
 OlmClient::create_room_key_event(const UserId &recipient,
                                  const std::string &ed25519_recipient_key,

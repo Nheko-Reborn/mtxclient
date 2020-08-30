@@ -778,10 +778,52 @@ TEST(Responses, UploadKeys)
 TEST(Responses, QueryKeys)
 {
         json data = R"({
-          "failures": {
-	    "noidea": { "what": 0 },
-	    "toput": { "here": 1 }
-	  },
+      "failures": {
+	      "noidea": { "what": 0 },
+	      "toput": { "here": 1 }
+	    },
+      "master_keys": {
+          "@alice:example.org": {
+            "user_id": "@alice:example.org",
+            "usage": ["master_keys"],
+            "keys": {
+              "ed25519:base64+self+signing+public+key": "base64+self+signing+public+key"
+            },
+            "signatures": {
+              "@alice:example.org": {
+                "ed25519:base64+device+id": "signature+of+master+key"
+              }
+            }
+          }
+        },
+        "user_signing_keys": {
+            "@alice:example.org": {
+              "user_id": "@alice:example.org",
+              "usage": ["user_signing"],
+              "keys": {
+                "ed25519:base64+user+signing+public+key": "base64+user+signing+public+key"
+              },
+              "signatures": {
+                "@alice:example.org": {
+                  "ed25519:base64+master+public+key": "signature+of+user+signing+key"
+                }
+              }
+            }
+          },
+        "self_signing_keys": {
+            "@alice:example.org": {
+              "user_id": "@alice:example.org",
+              "usage": ["self_signing"],
+              "keys": {
+                "ed25519:base64+self+signing+public+key": "base64+self+signing+public+key"
+              },
+              "signatures": {
+                "@alice:example.org": {
+                  "ed25519:base64+master+public+key": "signature+of+self+signing+key"
+                }
+              }
+            }
+          },
           "device_keys": {
             "@alice:example.com": {
               "JLAFKJWSCS": {
@@ -825,6 +867,17 @@ TEST(Responses, QueryKeys)
           device_keys.signatures["@alice:example.com"]["ed25519:JLAFKJWSCS"],
           "dSO80A01XiigH3uBiDVx/EjzaoycHcjq9lfQX0uWsqxl2giMIiSPR8a4d291W1ihKJL/a+myXS367WT6NAIcBA");
         EXPECT_EQ(device_keys.unsigned_info.device_display_name, "Alice's mobile phone");
+
+        auto master_keys       = res.master_keys["@alice:example.org"];
+        auto self_signing_keys = res.self_signing_keys["@alice:example.org"];
+        auto user_signing_keys = res.user_signing_keys["@alice:example.org"];
+
+        EXPECT_EQ(master_keys.keys.size(), 1);
+        EXPECT_EQ(self_signing_keys.keys.size(), 1);
+        EXPECT_EQ(user_signing_keys.keys.size(), 1);
+        EXPECT_EQ(master_keys.signatures["@alice:example.org"].size(), 1);
+        EXPECT_EQ(self_signing_keys.signatures["@alice:example.org"].size(), 1);
+        EXPECT_EQ(user_signing_keys.signatures["@alice:example.org"].size(), 1);
 }
 
 TEST(Crypto, KeyChanges)
