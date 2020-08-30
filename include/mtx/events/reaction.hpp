@@ -14,7 +14,7 @@ namespace msg {
 struct Reaction
 {
         //! The event being reacted to
-        mtx::common::ReactionRelatesTo relates_to;
+        mtx::common::RelatesTo relates_to;
 };
 
 void

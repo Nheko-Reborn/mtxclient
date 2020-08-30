@@ -65,7 +65,7 @@ from_json(const nlohmann::json &obj, OlmEncrypted &event);
 void
 to_json(nlohmann::json &obj, const OlmEncrypted &event);
 
-// !TODO Chnage the ReactionRelatesTo to handle ReplyRelatesTo type of event
+// !TODO Change the RelatesTo to handle ReplyRelatesTo type of event
 //! Content of the `m.room.encrypted` event.
 struct Encrypted
 {
@@ -82,7 +82,7 @@ struct Encrypted
         //! Relates to for rich replies
         common::ReplyRelatesTo relates_to;
         //! Relates to used for verification messages
-        common::ReactionRelatesTo r_relates_to;
+        common::RelatesTo r_relates_to;
 };
 
 void
@@ -155,12 +155,13 @@ struct KeyVerificationRequest
         std::optional<std::string> body;
         //! The device ID which is initiating the request.
         std::string from_device;
-        //! The device ID to which the key verification request is meant
+        //! The device ID to which the key verification request is meant,used only for to-device
+        //! verification
         std::optional<std::string> to;
         //! An opaque identifier for the verification request. Must be unique with respect to the
         //! devices involved.
         std::optional<std::string> transaction_id;
-        //! must be `key.verification.request`
+        //! must be `key.verification.request`, this field will be needed only in room verification
         std::optional<std::string> msgtype;
         //! The verification methods supported by the sender.
         std::vector<VerificationMethods> methods;
@@ -204,8 +205,9 @@ struct KeyVerificationStart
         //! Must include at least decimal. Optionally can include emoji.
         //! One of: ["decimal", "emoji"]
         std::vector<SASMethods> short_authentication_string;
-        //! Relates to for rich replies
-        std::optional<mtx::common::ReactionRelatesTo> relates_to;
+        //! this is used for relating this message with previously sent key.verification.request
+        //! will be used only for room-verification msgs where this is used in place of txnid
+        std::optional<mtx::common::RelatesTo> relates_to;
 };
 
 void
@@ -223,8 +225,9 @@ struct KeyVerificationReady
         std::optional<std::string> transaction_id;
         //! Sends the user the supported methods
         std::vector<VerificationMethods> methods;
-        //! Relates to for rich replies
-        std::optional<mtx::common::ReactionRelatesTo> relates_to;
+        //! this is used for relating this message with previously sent key.verification.request
+        //! will be used only for room-verification msgs where this is used in place of txnid
+        std::optional<mtx::common::RelatesTo> relates_to;
 };
 
 void
@@ -238,8 +241,9 @@ struct KeyVerificationDone
 {
         //! transactionId of the current flow
         std::optional<std::string> transaction_id;
-        //! Relates to for rich replies
-        std::optional<mtx::common::ReactionRelatesTo> relates_to;
+        //! this is used for relating this message with previously sent key.verification.request
+        //! will be used only for room-verification msgs where this is used in place of txnid
+        std::optional<mtx::common::RelatesTo> relates_to;
 };
 
 void
@@ -273,8 +277,9 @@ struct KeyVerificationAccept
         //! public key (encoded as unpadded base64) and the canonical JSON representation of the
         //! m.key.verification.start message.
         std::string commitment;
-        //! Relates to for rich replies
-        std::optional<mtx::common::ReactionRelatesTo> relates_to;
+        //! this is used for relating this message with previously sent key.verification.request
+        //! will be used only for room-verification msgs where this is used in place of txnid
+        std::optional<mtx::common::RelatesTo> relates_to;
 };
 
 void
@@ -317,8 +322,9 @@ struct KeyVerificationCancel
         //! again with m.unexpected_message to avoid the other device potentially sending
         //! another error response.
         std::string code;
-        //! Relates to for rich replies
-        std::optional<mtx::common::ReactionRelatesTo> relates_to;
+        //! this is used for relating this message with previously sent key.verification.request
+        //! will be used only for room-verification msgs where this is used in place of txnid
+        std::optional<mtx::common::RelatesTo> relates_to;
 };
 
 void
@@ -334,8 +340,9 @@ struct KeyVerificationKey
         std::optional<std::string> transaction_id;
         //! The device's ephemeral public key, encoded as unpadded base64.
         std::string key;
-        //! Relates to for rich replies
-        std::optional<mtx::common::ReactionRelatesTo> relates_to;
+        //! this is used for relating this message with previously sent key.verification.request
+        //! will be used only for room-verification msgs where this is used in place of txnid
+        std::optional<mtx::common::RelatesTo> relates_to;
 };
 
 void
@@ -355,8 +362,9 @@ struct KeyVerificationMac
         //! The MAC of the comma-separated, sorted, list of key IDs given in the mac
         //! property, encoded as unpadded base64.
         std::string keys;
-        //! Relates to for rich replies
-        std::optional<mtx::common::ReactionRelatesTo> relates_to;
+        //! this is used for relating this message with previously sent key.verification.request
+        //! will be used only for room-verification msgs where this is used in place of txnid
+        std::optional<mtx::common::RelatesTo> relates_to;
 };
 
 void

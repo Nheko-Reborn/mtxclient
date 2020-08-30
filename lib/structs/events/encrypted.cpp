@@ -102,8 +102,7 @@ from_json(const json &obj, Encrypted &content)
                 if (obj.at("m.relates_to").contains("m.in_reply_to"))
                         content.relates_to = obj.at("m.relates_to").get<common::ReplyRelatesTo>();
                 else
-                        content.r_relates_to =
-                          obj.at("m.relates_to").get<common::ReactionRelatesTo>();
+                        content.r_relates_to = obj.at("m.relates_to").get<common::RelatesTo>();
         }
 }
 
@@ -247,7 +246,7 @@ from_json(const json &obj, KeyVerificationStart &event)
         event.short_authentication_string =
           obj.at("short_authentication_string").get<std::vector<SASMethods>>();
         if (obj.count("m.relates_to") != 0)
-                event.relates_to = obj.at("m.relates_to").get<common::ReactionRelatesTo>();
+                event.relates_to = obj.at("m.relates_to").get<common::RelatesTo>();
 }
 
 void
@@ -276,7 +275,7 @@ from_json(const json &obj, KeyVerificationReady &event)
         event.methods     = obj.at("methods").get<std::vector<VerificationMethods>>();
         event.from_device = obj.at("from_device").get<std::string>();
         if (obj.count("m.relates_to") != 0)
-                event.relates_to = obj.at("m.relates_to").get<common::ReactionRelatesTo>();
+                event.relates_to = obj.at("m.relates_to").get<common::RelatesTo>();
 }
 
 void
@@ -297,7 +296,7 @@ from_json(const nlohmann::json &obj, KeyVerificationDone &event)
                 event.transaction_id = obj.at("transaction_id").get<std::string>();
         }
         if (obj.count("m.relates_to") != 0)
-                event.relates_to = obj.at("m.relates_to").get<common::ReactionRelatesTo>();
+                event.relates_to = obj.at("m.relates_to").get<common::RelatesTo>();
 }
 
 void
@@ -323,7 +322,7 @@ from_json(const json &obj, KeyVerificationAccept &event)
           obj.at("short_authentication_string").get<std::vector<SASMethods>>();
         event.commitment = obj.at("commitment").get<std::string>();
         if (obj.count("m.relates_to") != 0)
-                event.relates_to = obj.at("m.relates_to").get<common::ReactionRelatesTo>();
+                event.relates_to = obj.at("m.relates_to").get<common::RelatesTo>();
 }
 
 void
@@ -349,7 +348,7 @@ from_json(const json &obj, KeyVerificationCancel &event)
         event.reason = obj.at("reason").get<std::string>();
         event.code   = obj.at("code").get<std::string>();
         if (obj.count("m.relates_to") != 0)
-                event.relates_to = obj.at("m.relates_to").get<common::ReactionRelatesTo>();
+                event.relates_to = obj.at("m.relates_to").get<common::RelatesTo>();
 }
 
 void
@@ -371,7 +370,7 @@ from_json(const json &obj, KeyVerificationKey &event)
         }
         event.key = obj.at("key").get<std::string>();
         if (obj.count("m.relates_to") != 0)
-                event.relates_to = obj.at("m.relates_to").get<common::ReactionRelatesTo>();
+                event.relates_to = obj.at("m.relates_to").get<common::RelatesTo>();
 }
 
 void
@@ -393,7 +392,7 @@ from_json(const json &obj, KeyVerificationMac &event)
         event.mac  = obj.at("mac").get<std::map<std::string, std::string>>();
         event.keys = obj.at("keys").get<std::string>();
         if (obj.count("m.relates_to") != 0)
-                event.relates_to = obj.at("m.relates_to").get<common::ReactionRelatesTo>();
+                event.relates_to = obj.at("m.relates_to").get<common::RelatesTo>();
 }
 
 void
