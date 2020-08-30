@@ -7,8 +7,7 @@ using json = nlohmann::json;
 namespace {
 template<class T>
 T
-safe_get(const json &obj, const std::string &name, T default_val = {})
-try {
+safe_get(const json &obj, const std::string &name, T default_val = {}) try {
         return obj.value(name, default_val);
 } catch (const nlohmann::json::type_error &) {
         return default_val;
@@ -216,7 +215,7 @@ from_json(const json &obj, RelationType &type)
 }
 
 void
-from_json(const json &obj, ReactionRelatesTo &relates_to)
+from_json(const json &obj, RelatesTo &relates_to)
 {
         if (obj.find("rel_type") != obj.end())
                 relates_to.rel_type = obj.at("rel_type").get<RelationType>();
@@ -227,11 +226,12 @@ from_json(const json &obj, ReactionRelatesTo &relates_to)
 }
 
 void
-to_json(json &obj, const ReactionRelatesTo &relates_to)
+to_json(json &obj, const RelatesTo &relates_to)
 {
         obj["rel_type"] = relates_to.rel_type;
         obj["event_id"] = relates_to.event_id;
-        obj["key"]      = relates_to.key;
+        if (relates_to.key.has_value())
+                obj["key"] = relates_to.key.value();
 }
 
 void

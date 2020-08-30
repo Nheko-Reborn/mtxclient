@@ -707,7 +707,7 @@ TEST(RoomEvents, Encrypted)
 		"device_id": "RJYKSTBOIE",
 		"sender_key": "IlRMeOPX2e0MurIyfWEucYBRVOEEUMrOHqn/8mLqMjA",
 		"session_id": "X3lUlvLELLYxeTx4yOVu6UDpasGEVO0Jbu+QFnm0cKQ",
-	        "m.relates_to": {
+	   "m.relates_to": {
 		    "m.in_reply_to": {
                          "event_id": "$6GKhAfJOcwNd69lgSizdcTob8z2pWQgBOZPrnsWMA1E"
                     }
@@ -724,6 +724,12 @@ TEST(RoomEvents, Encrypted)
 	})"_json;
 
         RoomEvent<msg::Encrypted> event = data;
+
+        std::cout << "*****" << std::endl;
+        std::cout << data.dump(2) << std::endl;
+        std::cout << "*****" << std::endl;
+        std::cout << json(event).dump(2) << std::endl;
+        std::cout << "*****" << std::endl;
 
         EXPECT_EQ(event.type, EventType::RoomEncrypted);
         EXPECT_EQ(event.event_id, "$143273582443PhrSn:example.org");
