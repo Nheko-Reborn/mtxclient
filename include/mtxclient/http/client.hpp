@@ -723,8 +723,8 @@ mtx::http::Client::send_room_message(const std::string &room_id,
         constexpr auto event_type = mtx::events::message_content_to_type<Payload>;
         static_assert(event_type != mtx::events::EventType::Unsupported);
 
-        const auto api_path = "/client/r0/rooms/" + room_id + "/send/" +
-                              mtx::events::to_string(event_type) + "/" +
+        const auto api_path = "/client/r0/rooms/" + mtx::client::utils::url_encode(room_id) +
+                              "/send/" + mtx::events::to_string(event_type) + "/" +
                               mtx::client::utils::url_encode(txn_id);
 
         put<Payload, mtx::responses::EventId>(api_path, payload, callback);
