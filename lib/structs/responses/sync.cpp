@@ -180,24 +180,15 @@ void
 from_json(const json &obj, Rooms &rooms)
 {
         if (obj.count("join") != 0) {
-                auto joined = obj.at("join");
-
-                for (auto it = joined.begin(); it != joined.end(); ++it)
-                        rooms.join.emplace(it.key(), it.value());
+                rooms.join = obj.at("join").get<std::map<std::string, JoinedRoom>>();
         }
 
         if (obj.count("leave") != 0) {
-                auto leave = obj.at("leave");
-
-                for (auto it = leave.begin(); it != leave.end(); ++it)
-                        rooms.leave.emplace(it.key(), it.value());
+		rooms.leave = obj.at("leave").get<std::map<std::string, LeftRoom>>();
         }
 
         if (obj.count("invite") != 0) {
-                auto invite = obj.at("invite");
-
-                for (auto it = invite.begin(); it != invite.end(); ++it)
-                        rooms.invite.emplace(it.key(), it.value());
+		rooms.invite = obj.at("invite").get<std::map<std::string, InvitedRoom>>();
         }
 }
 
