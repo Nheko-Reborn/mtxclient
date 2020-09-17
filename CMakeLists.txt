@@ -169,6 +169,7 @@ target_sources(matrix_client
 	lib/structs/events/tombstone.cpp
 	lib/structs/events/topic.cpp
 	lib/structs/events/voip.cpp
+	lib/structs/events/nheko_extensions/hidden_events.cpp
 	lib/structs/events/messages/audio.cpp
 	lib/structs/events/messages/emote.cpp
 	lib/structs/events/messages/file.cpp

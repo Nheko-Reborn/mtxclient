@@ -78,6 +78,8 @@ getEventType(const std::string &type)
                 return EventType::CallAnswer;
         else if (type == "m.call.hangup")
                 return EventType::CallHangUp;
+        else if (type == "im.nheko.hidden_events")
+                return EventType::NhekoHiddenEvents;
 
         return EventType::Unsupported;
 }
@@ -158,6 +160,8 @@ to_string(EventType type)
                 return "m.call.answer";
         case EventType::CallHangUp:
                 return "m.call.hangup";
+        case EventType::NhekoHiddenEvents:
+                return "im.nheko.hidden_events";
         case EventType::Unsupported:
                 return "";
         }

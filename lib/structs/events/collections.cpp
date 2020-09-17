@@ -204,6 +204,7 @@ from_json(const json &obj, TimelineEvent &e)
         case events::EventType::Tag:            // Not part of the timeline
         case events::EventType::Presence:       // Not part of the timeline
         case events::EventType::PushRules:      // Not part of the timeline
+        case events::EventType::NhekoHiddenEvents:
         case events::EventType::Unsupported:
                 return;
         }

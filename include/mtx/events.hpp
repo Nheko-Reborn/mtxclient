@@ -84,6 +84,11 @@ enum class EventType
         CallAnswer,
         // m.call.hangup
         CallHangUp,
+
+        // custom events
+        // im.nheko.hidden_events
+        NhekoHiddenEvents,
+
         // Unsupported event
         Unsupported,
 };

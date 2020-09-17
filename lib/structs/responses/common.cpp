@@ -89,6 +89,15 @@ parse_room_account_data_events(
                         }
                         break;
                 }
+                case events::EventType::NhekoHiddenEvents: {
+                        try {
+                                container.emplace_back(
+                                  events::Event<nheko_extensions::HiddenEvents>(e));
+                        } catch (json::exception &err) {
+                                log_error(err, e);
+                        }
+                        break;
+                }
                 case events::EventType::KeyVerificationCancel:
                 case events::EventType::KeyVerificationRequest:
                 case events::EventType::KeyVerificationStart:
@@ -536,6 +545,7 @@ parse_timeline_events(const json &events,
                 case events::EventType::Presence:       // Not part of the timeline or state
                 case events::EventType::PushRules:      // Not part of the timeline or state
                 case events::EventType::Unsupported:
+                case events::EventType::NhekoHiddenEvents:
                         continue;
                 }
         }
@@ -817,6 +827,7 @@ parse_state_events(const json &events,
                 case events::EventType::CallCandidates:
                 case events::EventType::CallAnswer:
                 case events::EventType::CallHangUp:
+                case events::EventType::NhekoHiddenEvents:
                         continue;
                 }
         }
@@ -966,6 +977,7 @@ parse_stripped_events(const json &events,
                 case events::EventType::CallCandidates:
                 case events::EventType::CallAnswer:
                 case events::EventType::CallHangUp:
+                case events::EventType::NhekoHiddenEvents:
                         continue;
                 }
         }
