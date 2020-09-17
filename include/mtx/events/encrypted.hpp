@@ -4,6 +4,7 @@
 
 #include "mtx/events.hpp"
 #include "mtx/events/common.hpp"
+#include "variant"
 
 namespace mtx {
 namespace events {
@@ -64,6 +65,7 @@ from_json(const nlohmann::json &obj, OlmEncrypted &event);
 void
 to_json(nlohmann::json &obj, const OlmEncrypted &event);
 
+// !TODO Change the RelatesTo to handle ReplyRelatesTo type of event
 //! Content of the `m.room.encrypted` event.
 struct Encrypted
 {
@@ -79,6 +81,8 @@ struct Encrypted
         std::string session_id;
         //! Relates to for rich replies
         common::ReplyRelatesTo relates_to;
+        //! Relates to used for verification messages
+        common::RelatesTo r_relates_to;
 };
 
 void
@@ -148,18 +152,23 @@ to_json(nlohmann::json &obj, const KeyRequest &event);
 //! Content of the `m.key.verification.request` event
 struct KeyVerificationRequest
 {
+        std::optional<std::string> body;
         //! The device ID which is initiating the request.
         std::string from_device;
+        //! The device ID to which the key verification request is meant,used only for to-device
+        //! verification
+        std::optional<std::string> to;
         //! An opaque identifier for the verification request. Must be unique with respect to the
         //! devices involved.
-        std::string transaction_id;
-
+        std::optional<std::string> transaction_id;
+        //! must be `key.verification.request`, this field will be needed only in room verification
+        std::optional<std::string> msgtype;
         //! The verification methods supported by the sender.
         std::vector<VerificationMethods> methods;
         //! The POSIX timestamp in milliseconds for when the request was made. If the request is in
         //! the future by more than 5 minutes or more than 10 minutes in the past, the message
         //! should be ignored by the receiver.
-        uint64_t timestamp;
+        std::optional<uint64_t> timestamp;
 };
 
 void
@@ -176,7 +185,7 @@ struct KeyVerificationStart
         //! An opaque identifier for the verification process. Must be unique with respect to the
         //! devices involved. Must be the same as the transaction_id given in the
         //! m.key.verification.request if this process is originating from a request.
-        std::string transaction_id;
+        std::optional<std::string> transaction_id;
         //! The verification method to use. Must be 'm.sas.v1'
         VerificationMethods method = VerificationMethods::SASv1;
         //! Optional method to use to verify the other user's key with. Applicable when the method
@@ -196,6 +205,9 @@ struct KeyVerificationStart
         //! Must include at least decimal. Optionally can include emoji.
         //! One of: ["decimal", "emoji"]
         std::vector<SASMethods> short_authentication_string;
+        //! this is used for relating this message with previously sent key.verification.request
+        //! will be used only for room-verification msgs where this is used in place of txnid
+        std::optional<mtx::common::RelatesTo> relates_to;
 };
 
 void
@@ -210,9 +222,12 @@ struct KeyVerificationReady
         //! the deviceId of the device which send the `m.key.verification.request`
         std::string from_device;
         //! transactionId of the current flow
-        std::string transaction_id;
+        std::optional<std::string> transaction_id;
         //! Sends the user the supported methods
         std::vector<VerificationMethods> methods;
+        //! this is used for relating this message with previously sent key.verification.request
+        //! will be used only for room-verification msgs where this is used in place of txnid
+        std::optional<mtx::common::RelatesTo> relates_to;
 };
 
 void
@@ -225,7 +240,10 @@ to_json(nlohmann::json &obj, const KeyVerificationReady &event);
 struct KeyVerificationDone
 {
         //! transactionId of the current flow
-        std::string transaction_id;
+        std::optional<std::string> transaction_id;
+        //! this is used for relating this message with previously sent key.verification.request
+        //! will be used only for room-verification msgs where this is used in place of txnid
+        std::optional<mtx::common::RelatesTo> relates_to;
 };
 
 void
@@ -239,7 +257,7 @@ struct KeyVerificationAccept
 {
         //! when the method chosen only verifies one user's key. This field will never be present
         //! if the method verifies keys both ways.
-        std::string transaction_id;
+        std::optional<std::string> transaction_id;
         //! The verification method to use. Must be 'm.sas.v1'
         VerificationMethods method = VerificationMethods::SASv1;
         //! The key agreement protocol the device is choosing to use, out of the options in the
@@ -259,6 +277,9 @@ struct KeyVerificationAccept
         //! public key (encoded as unpadded base64) and the canonical JSON representation of the
         //! m.key.verification.start message.
         std::string commitment;
+        //! this is used for relating this message with previously sent key.verification.request
+        //! will be used only for room-verification msgs where this is used in place of txnid
+        std::optional<mtx::common::RelatesTo> relates_to;
 };
 
 void
@@ -271,7 +292,7 @@ to_json(nlohmann::json &obj, const KeyVerificationAccept &event);
 struct KeyVerificationCancel
 {
         //! The opaque identifier for the verification process/request.
-        std::string transaction_id;
+        std::optional<std::string> transaction_id;
         //! A human readable description of the code. The client should only rely on this string
         //! if it does not understand the code.
         std::string reason;
@@ -301,6 +322,9 @@ struct KeyVerificationCancel
         //! again with m.unexpected_message to avoid the other device potentially sending
         //! another error response.
         std::string code;
+        //! this is used for relating this message with previously sent key.verification.request
+        //! will be used only for room-verification msgs where this is used in place of txnid
+        std::optional<mtx::common::RelatesTo> relates_to;
 };
 
 void
@@ -313,9 +337,12 @@ struct KeyVerificationKey
 {
         //! An opaque identifier for the verification process. Must be the same as the one
         //! used for the m.key.verification.start message.
-        std::string transaction_id;
+        std::optional<std::string> transaction_id;
         //! The device's ephemeral public key, encoded as unpadded base64.
         std::string key;
+        //! this is used for relating this message with previously sent key.verification.request
+        //! will be used only for room-verification msgs where this is used in place of txnid
+        std::optional<mtx::common::RelatesTo> relates_to;
 };
 
 void
@@ -328,13 +355,16 @@ struct KeyVerificationMac
 {
         //! An opaque identifier for the verification process. Must be the same as the one
         //! used for the m.key.verification.start message.
-        std::string transaction_id;
+        std::optional<std::string> transaction_id;
         //! A map of the key ID to the MAC of the key, using the algorithm in the
         //! verification process. The MAC is encoded as unpadded base64.
         std::map<std::string, std::string> mac;
         //! The MAC of the comma-separated, sorted, list of key IDs given in the mac
         //! property, encoded as unpadded base64.
         std::string keys;
+        //! this is used for relating this message with previously sent key.verification.request
+        //! will be used only for room-verification msgs where this is used in place of txnid
+        std::optional<mtx::common::RelatesTo> relates_to;
 };
 
 void

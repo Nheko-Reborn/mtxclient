@@ -171,23 +171,23 @@ void
 to_json(nlohmann::json &obj, const RelationType &type);
 
 //! Relates to for reactions
-struct ReactionRelatesTo
+struct RelatesTo
 {
         // Type of relation
         RelationType rel_type;
         // event id being reacted to
         std::string event_id;
         // key is the reaction itself
-        std::string key;
+        std::optional<std::string> key;
 };
 
 //! Deserialization method needed by @p nlohmann::json.
 void
-from_json(const nlohmann::json &obj, ReactionRelatesTo &relates_to);
+from_json(const nlohmann::json &obj, RelatesTo &relates_to);
 
 //! Serialization method needed by @p nlohmann::json.
 void
-to_json(nlohmann::json &obj, const ReactionRelatesTo &relates_to);
+to_json(nlohmann::json &obj, const RelatesTo &relates_to);
 
 //! Relates to data for rich replies (notice and text events)
 struct ReplyRelatesTo

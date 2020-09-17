@@ -34,7 +34,16 @@ struct QueryKeys
         //! For each device, the information returned will be the same
         //! as uploaded via /keys/upload, with the addition of an unsigned property
         std::map<std::string, DeviceToKeysMap> device_keys;
+        //! A map from user ID, to information about master_keys.
+        std::map<std::string, mtx::crypto::CrossSigningKeys> master_keys;
+        //! A map from user ID, to information about user_signing_keys.
+        std::map<std::string, mtx::crypto::CrossSigningKeys> user_signing_keys;
+        //! A map from user ID, to information about self_signing_keys.
+        std::map<std::string, mtx::crypto::CrossSigningKeys> self_signing_keys;
 };
+
+void
+to_json(nlohmann::json &obj, const QueryKeys &response);
 
 void
 from_json(const nlohmann::json &obj, QueryKeys &response);

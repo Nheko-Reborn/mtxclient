@@ -197,6 +197,8 @@ getMessageType(const std::string &type)
                 return MessageType::Text;
         else if (type == "m.video")
                 return MessageType::Video;
+        else if (type == "m.key.verification.request")
+                return MessageType::KeyVerificationRequest;
 
         return MessageType::Unknown;
 }
