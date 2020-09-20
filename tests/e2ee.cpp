@@ -369,8 +369,11 @@ TEST(Encryption, ClaimKeys)
                                                         DeviceId(bob->device_id()),
                                                         UserId(bob->user_id().to_string())));
 
-                  alice->claim_keys(bob->user_id().to_string(),
-                                    devices,
+                  mtx::requests::ClaimKeys claim_keys;
+                  for (const auto &d : devices)
+                          claim_keys.one_time_keys[bob->user_id().to_string()][d] =
+                            SIGNED_CURVE25519;
+                  alice->claim_keys(claim_keys,
                                     [alice_olm, bob, bob_ed25519](
                                       const mtx::responses::ClaimKeys &res, RequestErr err) {
                                             check_error(err);
@@ -454,8 +457,11 @@ TEST(Encryption, ClaimMultipleDeviceKeys)
         devices_.push_back(alice2->device_id());
         devices_.push_back(alice3->device_id());
 
-        bob->claim_keys(alice1->user_id().to_string(),
-                        devices_,
+        mtx::requests::ClaimKeys claim_keys;
+        for (const auto &d : devices_)
+                claim_keys.one_time_keys[alice1->user_id().to_string()][d] = SIGNED_CURVE25519;
+
+        bob->claim_keys(claim_keys,
                         [user_id = alice1->user_id().to_string()](
                           const mtx::responses::ClaimKeys &res, RequestErr err) {
                                 check_error(err);
@@ -809,8 +815,12 @@ TEST(Encryption, OlmRoomKeyEncryption)
 
         // Alice needs one of Bob's one time keys.
         request_finished = false;
-        alice_http->claim_keys(bob_http->user_id().to_string(),
-                               {bob_http->device_id()},
+
+        mtx::requests::ClaimKeys claim_keys;
+        claim_keys.one_time_keys[bob_http->user_id().to_string()][bob_http->device_id()] =
+          SIGNED_CURVE25519;
+
+        alice_http->claim_keys(claim_keys,
                                [&bob_otk, bob = bob_http, &request_finished](
                                  const mtx::responses::ClaimKeys &res, RequestErr err) {
                                        check_error(err);

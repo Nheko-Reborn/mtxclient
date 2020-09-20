@@ -10,9 +10,10 @@ STRONG_TYPE(RoomId, std::string)
 namespace mtx {
 namespace crypto {
 
-constexpr auto ED25519     = "ed25519";
-constexpr auto CURVE25519  = "curve25519";
-constexpr auto MEGOLM_ALGO = "m.megolm.v1.aes-sha2";
+constexpr auto ED25519           = "ed25519";
+constexpr auto CURVE25519        = "curve25519";
+constexpr auto SIGNED_CURVE25519 = "signed_curve25519";
+constexpr auto MEGOLM_ALGO       = "m.megolm.v1.aes-sha2";
 
 struct ExportedSession
 {

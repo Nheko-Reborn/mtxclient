@@ -184,11 +184,11 @@ from_json(const json &obj, Rooms &rooms)
         }
 
         if (obj.count("leave") != 0) {
-		rooms.leave = obj.at("leave").get<std::map<std::string, LeftRoom>>();
+                rooms.leave = obj.at("leave").get<std::map<std::string, LeftRoom>>();
         }
 
         if (obj.count("invite") != 0) {
-		rooms.invite = obj.at("invite").get<std::map<std::string, InvitedRoom>>();
+                rooms.invite = obj.at("invite").get<std::map<std::string, InvitedRoom>>();
         }
 }
 
