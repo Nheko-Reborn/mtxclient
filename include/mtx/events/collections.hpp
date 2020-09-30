@@ -164,14 +164,14 @@ constexpr EventType message_content_to_type<mtx::events::msg::Video> = EventType
 template<>
 constexpr EventType message_content_to_type<mtx::events::msg::StickerImage> = EventType::Sticker;
 template<>
-constexpr EventType message_content_to_type<mtx::events::msg::CallInvite> = EventType::CallInvite;
+constexpr inline EventType message_content_to_type<mtx::events::msg::CallInvite> = EventType::CallInvite;
 template<>
-constexpr EventType message_content_to_type<mtx::events::msg::CallCandidates> =
+constexpr inline EventType message_content_to_type<mtx::events::msg::CallCandidates> =
   EventType::CallCandidates;
 template<>
-constexpr EventType message_content_to_type<mtx::events::msg::CallAnswer> = EventType::CallAnswer;
+constexpr inline EventType message_content_to_type<mtx::events::msg::CallAnswer> = EventType::CallAnswer;
 template<>
-constexpr EventType message_content_to_type<mtx::events::msg::CallHangUp> = EventType::CallHangUp;
+constexpr inline EventType message_content_to_type<mtx::events::msg::CallHangUp> = EventType::CallHangUp;
 
 template<typename Content>
 constexpr EventType state_content_to_type = EventType::Unsupported;
