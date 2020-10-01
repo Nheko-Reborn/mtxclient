@@ -176,6 +176,7 @@ constexpr inline EventType message_content_to_type<mtx::events::msg::Text> = Eve
 template<>
 constexpr inline EventType message_content_to_type<mtx::events::msg::Video> =
   EventType::RoomMessage;
+template<>
 constexpr inline EventType message_content_to_type<mtx::events::msg::StickerImage> =
   EventType::Sticker;
 template<>
