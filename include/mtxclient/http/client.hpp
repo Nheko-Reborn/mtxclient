@@ -36,6 +36,7 @@ namespace requests {
 struct CreateRoom;
 struct Login;
 struct QueryKeys;
+struct ClaimKeys;
 struct UploadKeys;
 }
 namespace responses {
@@ -479,9 +480,9 @@ public:
         void query_keys(const mtx::requests::QueryKeys &req,
                         Callback<mtx::responses::QueryKeys> cb);
 
-        //! Claims one-time keys for use in pre-key messages.
-        void claim_keys(const std::string &user,
-                        const std::vector<std::string> &devices,
+        //! Claims one-time keys for use in pre-key messages. Pass in a map from userid to
+        //! device_keys
+        void claim_keys(const mtx::requests::ClaimKeys &req,
                         Callback<mtx::responses::ClaimKeys> cb);
 
         //! Gets a list of users who have updated their device identity keys
@@ -723,8 +724,8 @@ mtx::http::Client::send_room_message(const std::string &room_id,
         constexpr auto event_type = mtx::events::message_content_to_type<Payload>;
         static_assert(event_type != mtx::events::EventType::Unsupported);
 
-        const auto api_path = "/client/r0/rooms/" + room_id + "/send/" +
-                              mtx::events::to_string(event_type) + "/" +
+        const auto api_path = "/client/r0/rooms/" + mtx::client::utils::url_encode(room_id) +
+                              "/send/" + mtx::events::to_string(event_type) + "/" +
                               mtx::client::utils::url_encode(txn_id);
 
         put<Payload, mtx::responses::EventId>(api_path, payload, callback);

@@ -1036,20 +1036,10 @@ Client::query_keys(const mtx::requests::QueryKeys &req,
 
 //! Claims one-time keys for use in pre-key messages.
 void
-Client::claim_keys(const std::string &user,
-                   const std::vector<std::string> &devices,
-                   Callback<mtx::responses::ClaimKeys> cb)
+Client::claim_keys(const mtx::requests::ClaimKeys &req, Callback<mtx::responses::ClaimKeys> cb)
 {
-        mtx::requests::ClaimKeys req;
-
-        std::map<std::string, std::string> dev_to_algorithm;
-        for (const auto &d : devices)
-                dev_to_algorithm.emplace(d, "signed_curve25519");
-
-        req.one_time_keys[user] = dev_to_algorithm;
-
         post<mtx::requests::ClaimKeys, mtx::responses::ClaimKeys>(
-          "/client/r0/keys/claim", std::move(req), std::move(cb));
+          "/client/r0/keys/claim", req, std::move(cb));
 }
 
 void

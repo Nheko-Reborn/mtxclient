@@ -396,6 +396,7 @@ create_outbound_megolm_session(const std::string &room_id, const std::string &re
         }
 
         const auto members = storage.members[room_id];
+
         for (const auto &member : members) {
                 const auto devices = storage.devices[member.first];
 
@@ -473,8 +474,11 @@ create_outbound_megolm_session(const std::string &room_id, const std::string &re
                                         }
                                 };
 
+                                mtx::requests::ClaimKeys claim_keys;
+                                claim_keys.one_time_keys[member.first][dev] = SIGNED_CURVE25519;
+
                                 // TODO: we should bulk request device keys here
-                                client->claim_keys(member.first, {dev}, cb);
+                                client->claim_keys(claim_keys, cb);
                         }
                 }
         }

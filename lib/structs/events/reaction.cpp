@@ -13,7 +13,7 @@ void
 from_json(const json &obj, Reaction &event)
 {
         if (obj.count("m.relates_to") != 0)
-                event.relates_to = obj.at("m.relates_to").get<common::ReactionRelatesTo>();
+                event.relates_to = obj.at("m.relates_to").get<common::RelatesTo>();
 }
 
 void

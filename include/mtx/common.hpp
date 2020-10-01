@@ -52,6 +52,26 @@ from_json(const nlohmann::json &obj, DeviceKeys &res);
 void
 to_json(nlohmann::json &obj, const DeviceKeys &res);
 
+struct CrossSigningKeys
+{
+        //! The ID of the user the device belongs to.
+        std::string user_id;
+        //! mentions the purpose of the key like either master,user_signing,self_signing
+        std::vector<std::string> usage;
+        //! Public keys.
+        //! The names of the properties should be in the format <algorithm>:<public_key>.
+        std::map<std::string, std::string> keys;
+        //! Signatures for the cross signing key object.
+        //! A map from user ID, to a map from <algorithm>:<public_key> to the signature.
+        std::map<std::string, std::map<std::string, std::string>> signatures;
+};
+
+void
+from_json(const nlohmann::json &obj, CrossSigningKeys &res);
+
+void
+to_json(nlohmann::json &obj, const CrossSigningKeys &res);
+
 struct JWK
 {
         //! Required. Key type. Must be oct.

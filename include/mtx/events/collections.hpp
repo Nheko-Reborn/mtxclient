@@ -125,6 +125,14 @@ using TimelineEvents = std::variant<events::StateEvent<states::Aliases>,
                                     events::RoomEvent<msgs::Notice>,
                                     events::RoomEvent<msgs::Text>,
                                     events::RoomEvent<msgs::Video>,
+                                    events::RoomEvent<msgs::KeyVerificationRequest>,
+                                    events::RoomEvent<msgs::KeyVerificationStart>,
+                                    events::RoomEvent<msgs::KeyVerificationReady>,
+                                    events::RoomEvent<msgs::KeyVerificationDone>,
+                                    events::RoomEvent<msgs::KeyVerificationAccept>,
+                                    events::RoomEvent<msgs::KeyVerificationCancel>,
+                                    events::RoomEvent<msgs::KeyVerificationKey>,
+                                    events::RoomEvent<msgs::KeyVerificationMac>,
                                     events::RoomEvent<msgs::CallInvite>,
                                     events::RoomEvent<msgs::CallCandidates>,
                                     events::RoomEvent<msgs::CallAnswer>,
@@ -141,28 +149,35 @@ from_json(const json &obj, TimelineEvent &e);
 } // namespace collections
 
 template<typename Content>
-constexpr EventType message_content_to_type = EventType::Unsupported;
+constexpr inline EventType message_content_to_type = EventType::Unsupported;
 
 template<>
-constexpr EventType message_content_to_type<mtx::events::msg::Encrypted> = EventType::RoomEncrypted;
+constexpr inline EventType message_content_to_type<mtx::events::msg::Encrypted> =
+  EventType::RoomEncrypted;
 template<>
-constexpr EventType message_content_to_type<mtx::events::msg::Reaction> = EventType::Reaction;
+constexpr inline EventType message_content_to_type<mtx::events::msg::Reaction> =
+  EventType::Reaction;
 template<>
-constexpr EventType message_content_to_type<mtx::events::msg::Audio> = EventType::RoomMessage;
+constexpr inline EventType message_content_to_type<mtx::events::msg::Audio> =
+  EventType::RoomMessage;
 template<>
-constexpr EventType message_content_to_type<mtx::events::msg::Emote> = EventType::RoomMessage;
+constexpr inline EventType message_content_to_type<mtx::events::msg::Emote> =
+  EventType::RoomMessage;
 template<>
-constexpr EventType message_content_to_type<mtx::events::msg::File> = EventType::RoomMessage;
+constexpr inline EventType message_content_to_type<mtx::events::msg::File> = EventType::RoomMessage;
 template<>
-constexpr EventType message_content_to_type<mtx::events::msg::Image> = EventType::RoomMessage;
+constexpr inline EventType message_content_to_type<mtx::events::msg::Image> =
+  EventType::RoomMessage;
 template<>
-constexpr EventType message_content_to_type<mtx::events::msg::Notice> = EventType::RoomMessage;
+constexpr inline EventType message_content_to_type<mtx::events::msg::Notice> =
+  EventType::RoomMessage;
 template<>
-constexpr EventType message_content_to_type<mtx::events::msg::Text> = EventType::RoomMessage;
+constexpr inline EventType message_content_to_type<mtx::events::msg::Text> = EventType::RoomMessage;
 template<>
-constexpr EventType message_content_to_type<mtx::events::msg::Video> = EventType::RoomMessage;
-template<>
-constexpr EventType message_content_to_type<mtx::events::msg::StickerImage> = EventType::Sticker;
+constexpr inline EventType message_content_to_type<mtx::events::msg::Video> =
+  EventType::RoomMessage;
+constexpr inline EventType message_content_to_type<mtx::events::msg::StickerImage> =
+  EventType::Sticker;
 template<>
 constexpr inline EventType message_content_to_type<mtx::events::msg::CallInvite> =
   EventType::CallInvite;
@@ -177,79 +192,87 @@ constexpr inline EventType message_content_to_type<mtx::events::msg::CallHangUp>
   EventType::CallHangUp;
 
 template<typename Content>
-constexpr EventType state_content_to_type = EventType::Unsupported;
+constexpr inline EventType state_content_to_type = EventType::Unsupported;
 
 template<>
-constexpr EventType state_content_to_type<mtx::events::state::Aliases> = EventType::RoomAliases;
+constexpr inline EventType state_content_to_type<mtx::events::state::Aliases> =
+  EventType::RoomAliases;
 template<>
-constexpr EventType state_content_to_type<mtx::events::state::Avatar> = EventType::RoomAvatar;
+constexpr inline EventType state_content_to_type<mtx::events::state::Avatar> =
+  EventType::RoomAvatar;
 template<>
-constexpr EventType state_content_to_type<mtx::events::state::CanonicalAlias> =
+constexpr inline EventType state_content_to_type<mtx::events::state::CanonicalAlias> =
   EventType::RoomCanonicalAlias;
 template<>
-constexpr EventType state_content_to_type<mtx::events::state::Create> = EventType::RoomCreate;
+constexpr inline EventType state_content_to_type<mtx::events::state::Create> =
+  EventType::RoomCreate;
 template<>
-constexpr EventType state_content_to_type<mtx::events::state::Encryption> =
+constexpr inline EventType state_content_to_type<mtx::events::state::Encryption> =
   EventType::RoomEncryption;
 template<>
-constexpr EventType state_content_to_type<mtx::events::state::GuestAccess> =
+constexpr inline EventType state_content_to_type<mtx::events::state::GuestAccess> =
   EventType::RoomGuestAccess;
 template<>
-constexpr EventType state_content_to_type<mtx::events::state::HistoryVisibility> =
+constexpr inline EventType state_content_to_type<mtx::events::state::HistoryVisibility> =
   EventType::RoomHistoryVisibility;
 template<>
-constexpr EventType state_content_to_type<mtx::events::state::JoinRules> = EventType::RoomJoinRules;
+constexpr inline EventType state_content_to_type<mtx::events::state::JoinRules> =
+  EventType::RoomJoinRules;
 template<>
-constexpr EventType state_content_to_type<mtx::events::state::Member> = EventType::RoomMember;
+constexpr inline EventType state_content_to_type<mtx::events::state::Member> =
+  EventType::RoomMember;
 template<>
-constexpr EventType state_content_to_type<mtx::events::state::Name> = EventType::RoomName;
+constexpr inline EventType state_content_to_type<mtx::events::state::Name> = EventType::RoomName;
 template<>
-constexpr EventType state_content_to_type<mtx::events::state::PinnedEvents> =
+constexpr inline EventType state_content_to_type<mtx::events::state::PinnedEvents> =
   EventType::RoomPinnedEvents;
 template<>
-constexpr EventType state_content_to_type<mtx::events::state::PowerLevels> =
+constexpr inline EventType state_content_to_type<mtx::events::state::PowerLevels> =
   EventType::RoomPowerLevels;
 template<>
-constexpr EventType state_content_to_type<mtx::events::state::Tombstone> = EventType::RoomTombstone;
+constexpr inline EventType state_content_to_type<mtx::events::state::Tombstone> =
+  EventType::RoomTombstone;
 template<>
-constexpr EventType state_content_to_type<mtx::events::state::Topic> = EventType::RoomTopic;
+constexpr inline EventType state_content_to_type<mtx::events::state::Topic> = EventType::RoomTopic;
 
 template<typename Content>
-constexpr EventType to_device_content_to_type = EventType::Unsupported;
+constexpr inline EventType to_device_content_to_type = EventType::Unsupported;
 
 template<>
-constexpr EventType to_device_content_to_type<mtx::events::msg::RoomKey> = EventType::RoomKey;
+constexpr inline EventType to_device_content_to_type<mtx::events::msg::RoomKey> =
+  EventType::RoomKey;
 template<>
-constexpr EventType to_device_content_to_type<mtx::events::msg::KeyRequest> =
+constexpr inline EventType to_device_content_to_type<mtx::events::msg::KeyRequest> =
   EventType::RoomKeyRequest;
 // template<>
-// constexpr EventType to_device_content_to_type<mtx::events::msg::OlmEncrypted> = EventType::;Olm;
+// constexpr inline EventType to_device_content_to_type<mtx::events::msg::OlmEncrypted> =
+// EventType::;Olm;
 template<>
-constexpr EventType to_device_content_to_type<mtx::events::msg::Encrypted> =
+constexpr inline EventType to_device_content_to_type<mtx::events::msg::Encrypted> =
   EventType::RoomEncrypted;
 template<>
-constexpr EventType to_device_content_to_type<mtx::events::msg::KeyVerificationRequest> =
+constexpr inline EventType to_device_content_to_type<mtx::events::msg::KeyVerificationRequest> =
   EventType::KeyVerificationRequest;
 template<>
-constexpr EventType to_device_content_to_type<mtx::events::msg::KeyVerificationStart> =
+constexpr inline EventType to_device_content_to_type<mtx::events::msg::KeyVerificationStart> =
   EventType::KeyVerificationStart;
 template<>
-constexpr EventType to_device_content_to_type<mtx::events::msg::KeyVerificationReady> =
+constexpr inline EventType to_device_content_to_type<mtx::events::msg::KeyVerificationReady> =
   EventType::KeyVerificationReady;
 template<>
-constexpr EventType to_device_content_to_type<mtx::events::msg::KeyVerificationDone> =
+constexpr inline EventType to_device_content_to_type<mtx::events::msg::KeyVerificationDone> =
   EventType::KeyVerificationDone;
 template<>
-constexpr EventType to_device_content_to_type<mtx::events::msg::KeyVerificationAccept> =
+constexpr inline EventType to_device_content_to_type<mtx::events::msg::KeyVerificationAccept> =
   EventType::KeyVerificationAccept;
 template<>
-constexpr EventType to_device_content_to_type<mtx::events::msg::KeyVerificationCancel> =
+constexpr inline EventType to_device_content_to_type<mtx::events::msg::KeyVerificationCancel> =
   EventType::KeyVerificationCancel;
 template<>
-constexpr EventType to_device_content_to_type<mtx::events::msg::KeyVerificationKey> =
+constexpr inline EventType to_device_content_to_type<mtx::events::msg::KeyVerificationKey> =
   EventType::KeyVerificationKey;
 template<>
-constexpr EventType to_device_content_to_type<mtx::events::msg::KeyVerificationMac> =
+constexpr inline EventType to_device_content_to_type<mtx::events::msg::KeyVerificationMac> =
   EventType::KeyVerificationMac;
 } // namespace events
 } // namespace mtx
