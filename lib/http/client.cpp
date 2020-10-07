@@ -374,7 +374,7 @@ Client::logout(Callback<mtx::responses::Logout> callback)
                                                  RequestErr err) {
                   if (!err) {
                           // Clear the now invalid access token when logout is successful
-                          _this->access_token_.clear();
+                          _this->clear();
                   }
                   // Pass up response and error to supplied callback
                   callback(res, err);
@@ -957,6 +957,7 @@ Client::send_to_device(const std::string &event_type,
         const auto api_path = "/client/r0/sendToDevice/" +
                               mtx::client::utils::url_encode(event_type) + "/" +
                               mtx::client::utils::url_encode(txn_id);
+
         put<nlohmann::json>(api_path, body, callback);
 }
 

@@ -180,6 +180,7 @@ public:
         //! Create an outbount megolm session.
         OutboundGroupSessionPtr init_outbound_group_session();
         InboundGroupSessionPtr init_inbound_group_session(const std::string &session_key);
+        InboundGroupSessionPtr import_inbound_group_session(const std::string &session_key);
         OlmSessionPtr create_outbound_session(const std::string &identity_key,
                                               const std::string &one_time_key);
         OlmSessionPtr create_inbound_session(const BinaryBuf &one_time_key_message);

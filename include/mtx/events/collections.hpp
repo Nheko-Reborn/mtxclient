@@ -46,6 +46,7 @@ namespace msgs         = mtx::events::msg;
 
 //! Collection of key verification events
 using DeviceEvents = std::variant<events::DeviceEvent<msgs::RoomKey>,
+                                  events::DeviceEvent<msgs::ForwardedRoomKey>,
                                   events::DeviceEvent<msgs::KeyRequest>,
                                   events::DeviceEvent<msgs::OlmEncrypted>,
                                   events::DeviceEvent<msgs::Encrypted>,
@@ -242,6 +243,9 @@ constexpr inline EventType to_device_content_to_type = EventType::Unsupported;
 template<>
 constexpr inline EventType to_device_content_to_type<mtx::events::msg::RoomKey> =
   EventType::RoomKey;
+template<>
+constexpr inline EventType to_device_content_to_type<mtx::events::msg::ForwardedRoomKey> =
+  EventType::ForwardedRoomKey;
 template<>
 constexpr inline EventType to_device_content_to_type<mtx::events::msg::KeyRequest> =
   EventType::RoomKeyRequest;

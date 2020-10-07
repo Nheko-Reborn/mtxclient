@@ -200,6 +200,7 @@ from_json(const json &obj, TimelineEvent &e)
         }
         case events::EventType::RoomPinnedEvents:
         case events::EventType::RoomKey:        // not part of the timeline
+        case events::EventType::ForwardedRoomKey: // not part of the timeline
         case events::EventType::RoomKeyRequest: // Not part of the timeline
         case events::EventType::Tag:            // Not part of the timeline
         case events::EventType::Presence:       // Not part of the timeline

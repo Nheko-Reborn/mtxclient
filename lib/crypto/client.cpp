@@ -184,8 +184,24 @@ OlmClient::init_inbound_group_session(const std::string &session_key)
 {
         auto session = create_olm_object<InboundSessionObject>();
 
+        auto temp     = session_key;
         const int ret = olm_init_inbound_group_session(
-          session.get(), reinterpret_cast<const uint8_t *>(session_key.data()), session_key.size());
+          session.get(), reinterpret_cast<const uint8_t *>(temp.data()), temp.size());
+
+        if (ret == -1)
+                throw olm_exception("init_inbound_group_session", session.get());
+
+        return session;
+}
+
+InboundGroupSessionPtr
+OlmClient::import_inbound_group_session(const std::string &session_key)
+{
+        auto session = create_olm_object<InboundSessionObject>();
+
+        auto temp     = session_key;
+        const int ret = olm_import_inbound_group_session(
+          session.get(), reinterpret_cast<const uint8_t *>(temp.data()), temp.size());
 
         if (ret == -1)
                 throw olm_exception("init_inbound_group_session", session.get());

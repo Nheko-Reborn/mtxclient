@@ -106,6 +106,24 @@ from_json(const nlohmann::json &obj, RoomKey &event);
 void
 to_json(nlohmann::json &obj, const RoomKey &event);
 
+//! Content of the `m.forwarded_room_key` event.
+struct ForwardedRoomKey
+{
+        std::string algorithm;
+        std::string room_id;
+        std::string session_id;
+        std::string session_key;
+        std::string sender_key;
+        std::string sender_claimed_ed25519_key;
+        std::vector<std::string> forwarding_curve25519_key_chain;
+};
+
+void
+from_json(const nlohmann::json &obj, ForwardedRoomKey &event);
+
+void
+to_json(nlohmann::json &obj, const ForwardedRoomKey &event);
+
 enum class RequestAction
 {
         // request
@@ -377,6 +395,12 @@ to_json(nlohmann::json &obj, const KeyVerificationMac &event);
 struct DeviceEventVisitor
 {
         nlohmann::json operator()(const DeviceEvent<mtx::events::msg::RoomKey> &roomKey)
+        {
+                json j;
+                mtx::events::to_json(j, roomKey);
+                return j;
+        }
+        nlohmann::json operator()(const DeviceEvent<mtx::events::msg::ForwardedRoomKey> &roomKey)
         {
                 json j;
                 mtx::events::to_json(j, roomKey);
