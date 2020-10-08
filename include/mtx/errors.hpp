@@ -11,6 +11,8 @@ namespace errors {
 enum class ErrorCode
 {
         M_UNRECOGNIZED,
+        //! unknown user or so
+        M_UNKNOWN,
         //! Forbidden access, e.g. joining a room without permission, failed login.
         M_FORBIDDEN,
         //! The access token specified was not recognised.
