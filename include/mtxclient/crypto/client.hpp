@@ -180,6 +180,7 @@ public:
         //! Create an outbount megolm session.
         OutboundGroupSessionPtr init_outbound_group_session();
         InboundGroupSessionPtr init_inbound_group_session(const std::string &session_key);
+        InboundGroupSessionPtr import_inbound_group_session(const std::string &session_key);
         OlmSessionPtr create_outbound_session(const std::string &identity_key,
                                               const std::string &one_time_key);
         OlmSessionPtr create_inbound_session(const BinaryBuf &one_time_key_message);
@@ -190,8 +191,6 @@ public:
         OlmSessionPtr create_inbound_session_from(const std::string &their_curve25519,
                                                   const std::string &one_time_key_message);
 
-        //! this function is for verifying the signatures
-        bool ed25519_verify_sig(std::string signing_key, nlohmann::json obj, std::string signature);
         //! The `m.room_key` event is used to share the session_id & session_key
         //! of an outbound megolm session.
         nlohmann::json create_room_key_event(const UserId &user_id,
@@ -261,7 +260,12 @@ decrypt_exported_sessions(const std::string &data, std::string pass);
 
 //! Verify a signature object as obtained from the response of /keys/query endpoint
 bool
-verify_identity_signature(nlohmann::json obj, const DeviceId &device_id, const UserId &user_id);
+verify_identity_signature(const DeviceKeys &device_keys,
+                          const DeviceId &device_id,
+                          const UserId &user_id);
+//! this function is for verifying the signatures
+bool
+ed25519_verify_signature(std::string signing_key, nlohmann::json obj, std::string signature);
 
 } // namespace crypto
 } // namespace mtx

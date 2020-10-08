@@ -39,6 +39,10 @@ to_string(ErrorCode code)
                 return "M_SERVER_NOT_TRUSTED";
         case ErrorCode::M_MISSING_TOKEN:
                 return "M_MISSING_TOKEN";
+        case ErrorCode::M_INVALID_SIGNATURE:
+                return "M_INVALID_SIGNATURE";
+        case ErrorCode::M_UNKNOWN:
+                return "M_UNKNOWN";
         }
 
         return "";
@@ -57,6 +61,8 @@ from_string(const std::string &code)
                 return ErrorCode::M_BAD_JSON;
         else if (code == "M_NOT_JSON")
                 return ErrorCode::M_NOT_JSON;
+        else if (code == "M_NOT_FOUND")
+                return ErrorCode::M_NOT_FOUND;
         else if (code == "M_LIMIT_EXCEEDED")
                 return ErrorCode::M_LIMIT_EXCEEDED;
         else if (code == "M_USER_IN_USE")
@@ -77,6 +83,10 @@ from_string(const std::string &code)
                 return ErrorCode::M_SERVER_NOT_TRUSTED;
         else if (code == "M_MISSING_TOKEN")
                 return ErrorCode::M_MISSING_TOKEN;
+        else if (code == "M_INVALID_SIGNATURE")
+                return ErrorCode::M_INVALID_SIGNATURE;
+        else if (code == "M_UNKNOWN")
+                return ErrorCode::M_UNKNOWN;
         else
                 return ErrorCode::M_UNRECOGNIZED;
 }

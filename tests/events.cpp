@@ -905,6 +905,7 @@ TEST(ToDevice, KeyVerificationAccept)
         "hash": "sha256",
         "key_agreement_protocol": "curve25519",
         "message_authentication_code": "hkdf-hmac-sha256",
+        "method": "m.sas.v1",
         "short_authentication_string": [
             "decimal",
             "emoji"

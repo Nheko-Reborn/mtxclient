@@ -363,7 +363,7 @@ TEST(ClientAPI, LogoutSuccess)
         failReq.topic = "LifeUniverseEverything";
         mtx_client->create_room(failReq, [](const mtx::responses::CreateRoom &, RequestErr err) {
                 ASSERT_TRUE(err);
-                EXPECT_EQ(mtx::errors::to_string(err->matrix_error.errcode), "M_MISSING_TOKEN");
+                EXPECT_EQ(mtx::errors::to_string(err->matrix_error.errcode), "M_UNRECOGNIZED");
         });
 
         mtx_client->close();
@@ -408,7 +408,7 @@ TEST(ClientAPI, LogoutInvalidatesTokenOnServer)
         failReq.topic = "LifeUniverseEverything";
         mtx_client->create_room(failReq, [](const mtx::responses::CreateRoom &, RequestErr err) {
                 ASSERT_TRUE(err);
-                EXPECT_EQ(mtx::errors::to_string(err->matrix_error.errcode), "M_UNKNOWN_TOKEN");
+                EXPECT_EQ(mtx::errors::to_string(err->matrix_error.errcode), "M_UNRECOGNIZED");
         });
 
         mtx_client->close();
@@ -494,7 +494,7 @@ TEST(ClientAPI, JoinRoom)
                     "!random_room_id:localhost", [](const nlohmann::json &, RequestErr err) {
                             ASSERT_TRUE(err);
                             EXPECT_EQ(mtx::errors::to_string(err->matrix_error.errcode),
-                                      "M_UNRECOGNIZED");
+                                      "M_UNKNOWN");
                     });
 
                   // Join the room using an alias.
@@ -544,7 +544,7 @@ TEST(ClientAPI, LeaveRoom)
         // Trying to leave a non-existent room should fail.
         bob->leave_room("!random_room_id:localhost", [](const nlohmann::json &, RequestErr err) {
                 ASSERT_TRUE(err);
-                EXPECT_EQ(mtx::errors::to_string(err->matrix_error.errcode), "M_UNRECOGNIZED");
+                EXPECT_EQ(mtx::errors::to_string(err->matrix_error.errcode), "M_UNKNOWN");
                 EXPECT_EQ(err->matrix_error.error, "Not a known room");
         });
 

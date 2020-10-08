@@ -28,8 +28,11 @@ from_json(const json &obj, DeviceKeys &res)
         res.algorithms = obj.at("algorithms").get<std::vector<std::string>>();
 
         res.keys = obj.at("keys").get<std::map<AlgorithmDevice, std::string>>();
-        res.signatures =
-          obj.at("signatures").get<std::map<std::string, std::map<AlgorithmDevice, std::string>>>();
+
+        if (obj.contains("signatures"))
+                res.signatures =
+                  obj.at("signatures")
+                    .get<std::map<std::string, std::map<AlgorithmDevice, std::string>>>();
 
         if (obj.find("unsigned") != obj.end())
                 res.unsigned_info = obj.at("unsigned").get<UnsignedDeviceInfo>();
@@ -54,8 +57,11 @@ from_json(const json &obj, CrossSigningKeys &res)
         res.user_id = obj.at("user_id").get<std::string>();
         res.usage   = obj.at("usage").get<std::vector<std::string>>();
         res.keys    = obj.at("keys").get<std::map<std::string, std::string>>();
-        res.signatures =
-          obj.at("signatures").get<std::map<std::string, std::map<std::string, std::string>>>();
+
+        if (obj.contains("signatures"))
+                res.signatures =
+                  obj.at("signatures")
+                    .get<std::map<std::string, std::map<std::string, std::string>>>();
 }
 
 void

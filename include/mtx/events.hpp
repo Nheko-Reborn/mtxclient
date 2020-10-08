@@ -32,6 +32,8 @@ enum class EventType
         Reaction,
         /// m.room_key
         RoomKey,
+        /// m.forwarded_room_key
+        ForwardedRoomKey,
         /// m.room_key_request
         RoomKeyRequest,
         /// m.room.aliases

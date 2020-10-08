@@ -162,8 +162,11 @@ TEST(Utilities, VerifySignature)
         j1.erase("signatures");
         auto sig1 = alice->sign_message(j1.dump());
 
-        EXPECT_EQ(alice->ed25519_verify_sig(alice->identity_keys().ed25519, j1, sig), true);
-        EXPECT_EQ(alice->ed25519_verify_sig(alice->identity_keys().ed25519, json(msg), sig1), true);
+        EXPECT_EQ(mtx::crypto::ed25519_verify_signature(alice->identity_keys().ed25519, j1, sig),
+                  true);
+        EXPECT_EQ(
+          mtx::crypto::ed25519_verify_signature(alice->identity_keys().ed25519, json(msg), sig1),
+          true);
 }
 
 TEST(Utilities, VerifyIdentityKeyJson)

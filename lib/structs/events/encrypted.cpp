@@ -140,6 +140,31 @@ to_json(json &obj, const RoomKey &event)
 }
 
 void
+from_json(const json &obj, ForwardedRoomKey &event)
+{
+        event.algorithm                  = obj.at("algorithm").get<std::string>();
+        event.room_id                    = obj.at("room_id").get<std::string>();
+        event.session_id                 = obj.at("session_id").get<std::string>();
+        event.session_key                = obj.at("session_key").get<std::string>();
+        event.sender_key                 = obj.at("sender_key").get<std::string>();
+        event.sender_claimed_ed25519_key = obj.at("sender_claimed_ed25519_key").get<std::string>();
+        event.forwarding_curve25519_key_chain =
+          obj.at("forwarding_curve25519_key_chain").get<std::vector<std::string>>();
+}
+
+void
+to_json(json &obj, const ForwardedRoomKey &event)
+{
+        obj["algorithm"]                       = event.algorithm;
+        obj["room_id"]                         = event.room_id;
+        obj["session_id"]                      = event.session_id;
+        obj["session_key"]                     = event.session_key;
+        obj["sender_key"]                      = event.sender_key;
+        obj["sender_claimed_ed25519_key"]      = event.sender_claimed_ed25519_key;
+        obj["forwarding_curve25519_key_chain"] = event.forwarding_curve25519_key_chain;
+}
+
+void
 from_json(const json &obj, KeyRequest &event)
 {
         event.request_id           = obj.at("request_id");
@@ -321,6 +346,7 @@ from_json(const json &obj, KeyVerificationAccept &event)
         event.short_authentication_string =
           obj.at("short_authentication_string").get<std::vector<SASMethods>>();
         event.commitment = obj.at("commitment").get<std::string>();
+        event.method     = obj.value("method", VerificationMethods::SASv1);
         if (obj.count("m.relates_to") != 0)
                 event.relates_to = obj.at("m.relates_to").get<common::RelatesTo>();
 }
@@ -335,6 +361,7 @@ to_json(json &obj, const KeyVerificationAccept &event)
         obj["message_authentication_code"] = event.message_authentication_code;
         obj["short_authentication_string"] = event.short_authentication_string;
         obj["commitment"]                  = event.commitment;
+        obj["method"]                      = event.method;
         if (event.relates_to.has_value())
                 obj["m.relates_to"] = event.relates_to.value();
 }
@@ -345,8 +372,8 @@ from_json(const json &obj, KeyVerificationCancel &event)
         if (obj.count("transaction_id") != 0) {
                 event.transaction_id = obj.at("transaction_id").get<std::string>();
         }
-        event.reason = obj.at("reason").get<std::string>();
-        event.code   = obj.at("code").get<std::string>();
+        event.reason = obj.value("reason", "");
+        event.code   = obj.value("code", "");
         if (obj.count("m.relates_to") != 0)
                 event.relates_to = obj.at("m.relates_to").get<common::RelatesTo>();
 }

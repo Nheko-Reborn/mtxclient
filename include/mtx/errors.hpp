@@ -11,6 +11,8 @@ namespace errors {
 enum class ErrorCode
 {
         M_UNRECOGNIZED,
+        //! unknown user or so
+        M_UNKNOWN,
         //! Forbidden access, e.g. joining a room without permission, failed login.
         M_FORBIDDEN,
         //! The access token specified was not recognised.
@@ -45,6 +47,8 @@ enum class ErrorCode
         M_SERVER_NOT_TRUSTED,
         //! The access token isn't present in the request.
         M_MISSING_TOKEN,
+        //! One of the uploaded signatures was invalid
+        M_INVALID_SIGNATURE,
 };
 
 std::string

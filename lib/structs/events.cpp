@@ -26,6 +26,10 @@ getEventType(const std::string &type)
                 return EventType::KeyVerificationCancel;
         else if (type == "m.reaction")
                 return EventType::Reaction;
+        else if (type == "m.room_key")
+                return EventType::RoomKey;
+        else if (type == "m.forwarded_room_key")
+                return EventType::ForwardedRoomKey;
         else if (type == "m.room_key_request")
                 return EventType::RoomKeyRequest;
         else if (type == "m.room.aliases")
@@ -80,8 +84,8 @@ getEventType(const std::string &type)
                 return EventType::CallHangUp;
         else if (type == "im.nheko.hidden_events")
                 return EventType::NhekoHiddenEvents;
-
-        return EventType::Unsupported;
+        else
+                return EventType::Unsupported;
 }
 
 std::string
@@ -108,6 +112,8 @@ to_string(EventType type)
                 return "m.reaction";
         case EventType::RoomKey:
                 return "m.room_key";
+        case EventType::ForwardedRoomKey:
+                return "m.forwarded_room_key";
         case EventType::RoomKeyRequest:
                 return "m.room_key_request";
         case EventType::RoomAliases:
@@ -212,7 +218,11 @@ getMessageType(const json &obj)
         if (obj.find("msgtype") == obj.end())
                 return MessageType::Unknown;
 
-        return getMessageType(obj.at("msgtype").get<std::string>());
+        try {
+                return getMessageType(obj.at("msgtype").get<std::string>());
+        } catch (...) {
+                return MessageType::Unknown;
+        }
 }
 }
 }

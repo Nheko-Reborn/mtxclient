@@ -36,6 +36,13 @@ to_json(nlohmann::json &obj, const QueryKeys &response)
 }
 
 void
+from_json(const nlohmann::json &obj, KeySignaturesUpload &response)
+{
+        if (!obj.empty())
+                response.errors = obj.get<decltype(response.errors)>();
+}
+
+void
 from_json(const nlohmann::json &obj, ClaimKeys &response)
 {
         response.failures = obj.at("failures").get<std::map<std::string, nlohmann::json>>();

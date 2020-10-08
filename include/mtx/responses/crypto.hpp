@@ -3,6 +3,7 @@
 #include <nlohmann/json.hpp>
 
 #include "mtx/common.hpp"
+#include "mtx/errors.hpp"
 
 #include <map>
 #include <string>
@@ -47,6 +48,14 @@ to_json(nlohmann::json &obj, const QueryKeys &response);
 
 void
 from_json(const nlohmann::json &obj, QueryKeys &response);
+
+struct KeySignaturesUpload
+{
+        std::map<std::string, std::map<std::string, mtx::errors::Error>> errors;
+};
+
+void
+from_json(const nlohmann::json &obj, KeySignaturesUpload &response);
 
 //! Response from the `POST /_matrix/client/r0/keys/claim` endpoint.
 struct ClaimKeys

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <variant>
 
 #include <mtx/common.hpp>
 #include <mtx/events/collections.hpp>
@@ -191,5 +192,17 @@ to_json(json &obj, const ClaimKeys &request)
         obj["one_time_keys"] = request.one_time_keys;
 }
 
+struct KeySignaturesUpload
+{
+        //! map from user_id to either a map of device id to DeviceKey with new signatures or the
+        //! key id to CrossSigningKeys with new signatures
+        std::map<std::string,
+                 std::map<std::string,
+                          std::variant<mtx::crypto::DeviceKeys, mtx::crypto::CrossSigningKeys>>>
+          signatures;
+};
+
+void
+to_json(json &obj, const KeySignaturesUpload &req);
 } // namespace requests
 } // namespace mtx
