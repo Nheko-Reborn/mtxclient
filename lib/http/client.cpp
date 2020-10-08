@@ -1028,6 +1028,14 @@ Client::upload_keys(const mtx::requests::UploadKeys &req,
 }
 
 void
+Client::keys_signatures_upload(const mtx::requests::KeySignaturesUpload &req,
+                               Callback<mtx::responses::KeySignaturesUpload> cb)
+{
+        post<mtx::requests::KeySignaturesUpload, mtx::responses::KeySignaturesUpload>(
+          "/client/unstable/keys/signatures/upload", req, cb);
+}
+
+void
 Client::query_keys(const mtx::requests::QueryKeys &req,
                    Callback<mtx::responses::QueryKeys> callback)
 {

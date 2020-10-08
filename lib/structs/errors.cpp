@@ -39,6 +39,8 @@ to_string(ErrorCode code)
                 return "M_SERVER_NOT_TRUSTED";
         case ErrorCode::M_MISSING_TOKEN:
                 return "M_MISSING_TOKEN";
+        case ErrorCode::M_INVALID_SIGNATURE:
+                return "M_INVALID_SIGNATURE";
         }
 
         return "";
@@ -77,6 +79,8 @@ from_string(const std::string &code)
                 return ErrorCode::M_SERVER_NOT_TRUSTED;
         else if (code == "M_MISSING_TOKEN")
                 return ErrorCode::M_MISSING_TOKEN;
+        else if (code == "M_INVALID_SIGNATURE")
+                return ErrorCode::M_INVALID_SIGNATURE;
         else
                 return ErrorCode::M_UNRECOGNIZED;
 }

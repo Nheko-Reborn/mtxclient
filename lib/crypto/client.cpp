@@ -523,42 +523,6 @@ SAS::calculate_mac(std::string input_data, std::string info)
         return to_string(output_buffer);
 }
 
-//! checks if the signature is signed by the signing_key
-bool
-OlmClient::ed25519_verify_sig(std::string signing_key, nlohmann::json obj, std::string signature)
-{
-        using namespace client::utils;
-
-        try {
-                if (signature.empty())
-                        return false;
-
-                obj.erase("unsigned");
-                obj.erase("signatures");
-
-                std::string canonical_json = obj.dump();
-
-                auto utility = create_olm_object<UtilityObject>();
-                auto ret     = olm_ed25519_verify(utility.get(),
-                                              signing_key.data(),
-                                              signing_key.size(),
-                                              canonical_json.data(),
-                                              canonical_json.size(),
-                                              (void *)signature.data(),
-                                              signature.size());
-
-                // the signature is wrong
-                if (ret != 0)
-                        return false;
-
-                return true;
-        } catch (const nlohmann::json::exception &e) {
-                std::cerr << "verify_signature: " << e.what();
-        }
-
-        return false;
-}
-
 nlohmann::json
 OlmClient::create_room_key_event(const UserId &recipient,
                                  const std::string &ed25519_recipient_key,
@@ -676,7 +640,7 @@ mtx::crypto::matches_inbound_session_from(OlmSession *session,
 }
 
 bool
-mtx::crypto::verify_identity_signature(nlohmann::json obj,
+mtx::crypto::verify_identity_signature(const DeviceKeys &device_keys,
                                        const DeviceId &device_id,
                                        const UserId &user_id)
 {
@@ -684,33 +648,55 @@ mtx::crypto::verify_identity_signature(nlohmann::json obj,
 
         try {
                 const auto sign_key_id = "ed25519:" + device_id.get();
-                const auto signing_key = obj.at("keys").at(sign_key_id).get<std::string>();
-                const auto signature =
-                  obj.at("signatures").at(user_id.get()).at(sign_key_id).get<std::string>();
+                const auto signing_key = device_keys.keys.at(sign_key_id);
+                const auto signature   = device_keys.signatures.at(user_id.get()).at(sign_key_id);
 
+                if (signature.empty())
+                        return false;
+
+                return ed25519_verify_signature(
+                  signing_key, nlohmann::json(device_keys), signature);
+
+        } catch (const nlohmann::json::exception &e) {
+                std::cerr << "verify_identity_signature: " << e.what();
+        }
+
+        return false;
+}
+
+//! checks if the signature is signed by the signing_key
+bool
+mtx::crypto::ed25519_verify_signature(std::string signing_key,
+                                      nlohmann::json obj,
+                                      std::string signature)
+{
+        using namespace client::utils;
+
+        try {
                 if (signature.empty())
                         return false;
 
                 obj.erase("unsigned");
                 obj.erase("signatures");
 
-                const auto msg = obj.dump();
+                std::string canonical_json = obj.dump();
 
                 auto utility = create_olm_object<UtilityObject>();
                 auto ret     = olm_ed25519_verify(utility.get(),
                                               signing_key.data(),
                                               signing_key.size(),
-                                              msg.data(),
-                                              msg.size(),
+                                              canonical_json.data(),
+                                              canonical_json.size(),
                                               (void *)signature.data(),
                                               signature.size());
 
+                // the signature is wrong
                 if (ret != 0)
-                        throw olm_exception("verify_identity_signature", utility.get());
+                        return false;
 
                 return true;
         } catch (const nlohmann::json::exception &e) {
-                std::cerr << "verify_identity_signature: " << e.what();
+                std::cerr << "verify_signature: " << e.what();
         }
 
         return false;

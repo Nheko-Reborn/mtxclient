@@ -34,6 +34,7 @@ struct Session;
 }
 namespace requests {
 struct CreateRoom;
+struct KeySignaturesUpload;
 struct Login;
 struct QueryKeys;
 struct ClaimKeys;
@@ -50,6 +51,7 @@ struct GroupId;
 struct GroupProfile;
 struct JoinedGroups;
 struct KeyChanges;
+struct KeySignaturesUpload;
 struct Login;
 struct LoginFlows;
 struct Messages;
@@ -475,6 +477,10 @@ public:
         //! Upload identity keys & one time keys.
         void upload_keys(const mtx::requests::UploadKeys &req,
                          Callback<mtx::responses::UploadKeys> cb);
+
+        //! Upload signatures for cross-signing keys
+        void keys_signatures_upload(const mtx::requests::KeySignaturesUpload &req,
+                                    Callback<mtx::responses::KeySignaturesUpload> cb);
 
         //! Returns the current devices and identity keys for the given users.
         void query_keys(const mtx::requests::QueryKeys &req,

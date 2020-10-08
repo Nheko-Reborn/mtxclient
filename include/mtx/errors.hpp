@@ -45,6 +45,8 @@ enum class ErrorCode
         M_SERVER_NOT_TRUSTED,
         //! The access token isn't present in the request.
         M_MISSING_TOKEN,
+        //! One of the uploaded signatures was invalid
+        M_INVALID_SIGNATURE,
 };
 
 std::string

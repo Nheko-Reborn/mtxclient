@@ -540,12 +540,12 @@ parse_timeline_events(const json &events,
                 }
                 case events::EventType::KeyVerificationRequest:
                 case events::EventType::RoomPinnedEvents:
-                case events::EventType::RoomKey:        // Not part of timeline or state
+                case events::EventType::RoomKey:          // Not part of timeline or state
                 case events::EventType::ForwardedRoomKey: // Not part of timeline or state
-                case events::EventType::RoomKeyRequest: // Not part of the timeline
-                case events::EventType::Tag:            // Not part of the timeline or state
-                case events::EventType::Presence:       // Not part of the timeline or state
-                case events::EventType::PushRules:      // Not part of the timeline or state
+                case events::EventType::RoomKeyRequest:   // Not part of the timeline
+                case events::EventType::Tag:              // Not part of the timeline or state
+                case events::EventType::Presence:         // Not part of the timeline or state
+                case events::EventType::PushRules:        // Not part of the timeline or state
                 case events::EventType::Unsupported:
                 case events::EventType::NhekoHiddenEvents:
                         continue;
@@ -816,10 +816,10 @@ parse_state_events(const json &events,
                 }
                 case events::EventType::Sticker:
                 case events::EventType::Reaction:
-                case events::EventType::RoomEncrypted:  /* Does this need to be here? */
-                case events::EventType::RoomKey:        // Not part of timeline or state
+                case events::EventType::RoomEncrypted:    /* Does this need to be here? */
+                case events::EventType::RoomKey:          // Not part of timeline or state
                 case events::EventType::ForwardedRoomKey: // Not part of timeline or state
-                case events::EventType::RoomKeyRequest: // Not part of the timeline or state
+                case events::EventType::RoomKeyRequest:   // Not part of the timeline or state
                 case events::EventType::RoomMessage:
                 case events::EventType::RoomPinnedEvents:
                 case events::EventType::RoomRedaction:
@@ -970,9 +970,9 @@ parse_stripped_events(const json &events,
                 case events::EventType::RoomEncryption:
                 case events::EventType::RoomMessage:
                 case events::EventType::RoomRedaction:
-                case events::EventType::RoomKey:        // Not part of timeline or state
+                case events::EventType::RoomKey:          // Not part of timeline or state
                 case events::EventType::ForwardedRoomKey: // Not part of timeline or state
-                case events::EventType::RoomKeyRequest: // Not part of the timeline or state
+                case events::EventType::RoomKeyRequest:   // Not part of the timeline or state
                 case events::EventType::RoomPinnedEvents:
                 case events::EventType::Tag:       // Not part of the timeline or state
                 case events::EventType::Presence:  // Not part of the timeline or state

@@ -130,5 +130,14 @@ to_json(json &obj, const QueryKeys &request)
         obj["token"]       = request.token;
 }
 
+void
+to_json(json &obj, const KeySignaturesUpload &req)
+{
+        for (const auto &[user_id, idToKey] : req.signatures)
+                for (const auto &[key_id, keyVar] : idToKey)
+                        obj[user_id][key_id] =
+                          std::visit([](const auto &e) { return json(e); }, keyVar);
+}
+
 } // namespace requests
 } // namespace mtx
