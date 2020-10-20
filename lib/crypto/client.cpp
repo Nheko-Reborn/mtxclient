@@ -534,7 +534,7 @@ OlmClient::create_olm_encrypted_content(OlmSession *session,
         event["sender"]          = user_id_;
         event["sender_device"]   = device_id_;
 
-        event["recipient"], recipient.get();
+        event["recipient"]                 = recipient.get();
         event["recipient_keys"]["ed25519"] = recipient_ed25519_key;
 
         size_t msg_type    = olm_encrypt_message_type(session);
