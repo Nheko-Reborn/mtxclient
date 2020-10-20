@@ -444,7 +444,7 @@ create_outbound_megolm_session(const std::string &room_id, const std::string &re
                                         }
 
                                         console->info("claimed keys for {} - {}", member, dev);
-                                        console->info("room_key", json(megolm_payload));
+                                        console->info("room_key {}", json(megolm_payload).dump(4));
 
                                         console->warn("signed one time keys");
                                         auto retrieved_devices = res.one_time_keys.at(member);

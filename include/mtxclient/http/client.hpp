@@ -1,6 +1,5 @@
 #pragma once
 
-#include <iostream>
 #include <nlohmann/json.hpp>
 
 #include "mtx/errors.hpp"             // for Error
@@ -449,8 +448,6 @@ public:
                 for (const auto &[user, deviceToMessage] : messages)
                         for (const auto &[deviceid, message] : deviceToMessage)
                                 j["messages"][user.to_string()][deviceid] = message;
-
-                std::cout << j.dump(4) << std::endl;
 
                 send_to_device(mtx::events::to_string(event_type), txid, j, callback);
         }
