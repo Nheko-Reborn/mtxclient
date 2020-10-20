@@ -249,9 +249,9 @@ constexpr inline EventType to_device_content_to_type<mtx::events::msg::Forwarded
 template<>
 constexpr inline EventType to_device_content_to_type<mtx::events::msg::KeyRequest> =
   EventType::RoomKeyRequest;
-// template<>
-// constexpr inline EventType to_device_content_to_type<mtx::events::msg::OlmEncrypted> =
-// EventType::;Olm;
+template<>
+constexpr inline EventType to_device_content_to_type<mtx::events::msg::OlmEncrypted> =
+  EventType::RoomEncrypted;
 template<>
 constexpr inline EventType to_device_content_to_type<mtx::events::msg::Encrypted> =
   EventType::RoomEncrypted;

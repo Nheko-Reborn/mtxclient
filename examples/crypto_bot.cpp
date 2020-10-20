@@ -385,10 +385,12 @@ create_outbound_megolm_session(const std::string &room_id, const std::string &re
         const auto session_id  = mtx::crypto::session_id(outbound_session.get());
         const auto session_key = mtx::crypto::session_key(outbound_session.get());
 
-        auto megolm_payload = json{{"algorithm", "m.megolm.v1.aes-sha2"},
-                                   {"room_id", room_id},
-                                   {"session_id", session_id},
-                                   {"session_key", session_key}};
+        mtx::events::DeviceEvent<mtx::events::msg::RoomKey> megolm_payload;
+        megolm_payload.content.algorithm   = "m.megolm.v1.aes-sha2";
+        megolm_payload.content.room_id     = room_id;
+        megolm_payload.content.session_id  = session_id;
+        megolm_payload.content.session_key = session_key;
+        megolm_payload.type                = mtx::events::EventType::RoomKey;
 
         if (storage.members.find(room_id) == storage.members.end()) {
                 console->error("no members found for room {}", room_id);
@@ -404,11 +406,6 @@ create_outbound_megolm_session(const std::string &room_id, const std::string &re
                 for (const auto &dev : devices) {
                         // TODO: check if we have downloaded the keys
                         const auto device_keys = storage.device_keys[dev];
-                        auto room_key          = olm_client
-                                          ->create_room_key_event(UserId(member.first),
-                                                                  device_keys.ed25519,
-                                                                  megolm_payload)
-                                          .dump();
 
                         auto to_device_cb = [](RequestErr err) {
                                 if (err) {
@@ -423,8 +420,12 @@ create_outbound_megolm_session(const std::string &room_id, const std::string &re
                                 auto olm_session =
                                   storage.olm_outbound_sessions[device_keys.curve25519].get();
 
-                                auto device_msg = olm_client->create_olm_encrypted_content(
-                                  olm_session, room_key, device_keys.curve25519);
+                                auto device_msg =
+                                  olm_client->create_olm_encrypted_content(olm_session,
+                                                                           megolm_payload,
+                                                                           UserId(member.first),
+                                                                           device_keys.ed25519,
+                                                                           device_keys.curve25519);
 
                                 json body{{"messages", {{member, {{dev, device_msg}}}}}};
 
@@ -432,15 +433,18 @@ create_outbound_megolm_session(const std::string &room_id, const std::string &re
                                 // TODO: send message to device
                         } else {
                                 console->info("claiming one time keys for device {}", dev);
-                                auto cb = [member = member.first, dev, room_key, to_device_cb](
-                                            const mtx::responses::ClaimKeys &res, RequestErr err) {
+                                auto cb = [member = member.first,
+                                           dev,
+                                           megolm_payload,
+                                           to_device_cb](const mtx::responses::ClaimKeys &res,
+                                                         RequestErr err) {
                                         if (err) {
                                                 print_errors(err);
                                                 return;
                                         }
 
                                         console->info("claimed keys for {} - {}", member, dev);
-                                        console->info("room_key", room_key);
+                                        console->info("room_key", json(megolm_payload));
 
                                         console->warn("signed one time keys");
                                         auto retrieved_devices = res.one_time_keys.at(member);
@@ -458,7 +462,9 @@ create_outbound_megolm_session(const std::string &room_id, const std::string &re
                                                 auto device_msg =
                                                   olm_client->create_olm_encrypted_content(
                                                     session.get(),
-                                                    room_key,
+                                                    megolm_payload,
+                                                    UserId(member),
+                                                    storage.device_keys[dev].ed25519,
                                                     storage.device_keys[dev].curve25519);
 
                                                 // TODO: saving should happen when the message is

@@ -848,14 +848,16 @@ TEST(Encryption, OlmRoomKeyEncryption)
         constexpr auto SECRET_TEXT = "Hello Bob!";
 
         // Alice create m.room.key request
-        json payload  = json{{"secret", SECRET_TEXT}};
-        auto room_key = alice_olm->create_room_key_event(
-          UserId("@bob:localhost"), bob_olm->identity_keys().ed25519, payload);
+        json payload =
+          json{{"content", {"secret", SECRET_TEXT}}, {"type", "im.nheko.custom_test_event"}};
 
         // Alice creates an outbound session.
         auto out_session = alice_olm->create_outbound_session(bob_curve25519, bob_otk);
-        auto device_msg  = alice_olm->create_olm_encrypted_content(
-          out_session.get(), room_key.dump(), bob_curve25519);
+        auto device_msg  = alice_olm->create_olm_encrypted_content(out_session.get(),
+                                                                  payload,
+                                                                  UserId("@bob:localhost"),
+                                                                  bob_olm->identity_keys().ed25519,
+                                                                  bob_curve25519);
 
         // Finally sends the olm encrypted message to Bob's device.
         atomic_bool is_sent(false);

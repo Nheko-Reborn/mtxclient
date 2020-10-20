@@ -191,17 +191,13 @@ public:
         OlmSessionPtr create_inbound_session_from(const std::string &their_curve25519,
                                                   const std::string &one_time_key_message);
 
-        //! The `m.room_key` event is used to share the session_id & session_key
-        //! of an outbound megolm session.
-        nlohmann::json create_room_key_event(const UserId &user_id,
-                                             const std::string &ed25519_device_key,
-                                             const nlohmann::json &content) const noexcept;
-
         //! Create the content for an m.room.encrypted event.
         //! algorithm: m.olm.v1.curve25519-aes-sha2
         nlohmann::json create_olm_encrypted_content(OlmSession *session,
-                                                    const std::string &room_key_event,
-                                                    const std::string &recipient_key);
+                                                    nlohmann::json event,
+                                                    const UserId &recipient,
+                                                    const std::string &recipient_ed25519_key,
+                                                    const std::string &recipient_curve25519_key);
 
         std::string save(const std::string &key);
         void load(const std::string &data, const std::string &key)

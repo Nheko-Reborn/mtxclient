@@ -524,32 +524,27 @@ SAS::calculate_mac(std::string input_data, std::string info)
 }
 
 nlohmann::json
-OlmClient::create_room_key_event(const UserId &recipient,
-                                 const std::string &ed25519_recipient_key,
-                                 const nlohmann::json &content) const noexcept
-{
-        return json{{"content", content},
-                    {"keys", {{"ed25519", identity_keys().ed25519}}},
-                    {"recipient", recipient.get()},
-                    {"recipient_keys", {{"ed25519", ed25519_recipient_key}}},
-                    {"sender", user_id_},
-                    {"sender_device", device_id_},
-                    {"type", "m.room_key"}};
-}
-
-nlohmann::json
 OlmClient::create_olm_encrypted_content(OlmSession *session,
-                                        const std::string &room_key_event,
-                                        const std::string &recipient_key)
+                                        nlohmann::json event,
+                                        const UserId &recipient,
+                                        const std::string &recipient_ed25519_key,
+                                        const std::string &recipient_curve25519_key)
 {
+        event["keys"]["ed25519"] = identity_keys().ed25519;
+        event["sender"]          = user_id_;
+        event["sender_device"]   = device_id_;
+
+        event["recipient"], recipient.get();
+        event["recipient_keys"]["ed25519"] = recipient_ed25519_key;
+
         size_t msg_type    = olm_encrypt_message_type(session);
-        auto encrypted     = encrypt_message(session, room_key_event);
+        auto encrypted     = encrypt_message(session, json(event).dump());
         auto encrypted_str = std::string((char *)encrypted.data(), encrypted.size());
 
-        return json{
-          {"algorithm", "m.olm.v1.curve25519-aes-sha2"},
-          {"sender_key", identity_keys().curve25519},
-          {"ciphertext", {{recipient_key, {{"body", encrypted_str}, {"type", msg_type}}}}}};
+        return json{{"algorithm", "m.olm.v1.curve25519-aes-sha2"},
+                    {"sender_key", identity_keys().curve25519},
+                    {"ciphertext",
+                     {{recipient_curve25519_key, {{"body", encrypted_str}, {"type", msg_type}}}}}};
 }
 
 std::string
