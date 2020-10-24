@@ -96,7 +96,6 @@ login_handler(const mtx::responses::Login &res, RequestErr err)
                                       if (secret.encrypted.size() != 1) {
                                               cerr << "Only one encryption key for backup "
                                                       "supported. Aborting.\n";
-                                              return;
                                               client->logout(
                                                 [](mtx::responses::Logout, RequestErr) {});
                                               return;

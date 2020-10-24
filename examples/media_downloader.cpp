@@ -150,7 +150,7 @@ message_handler(const mtx::responses::Messages &res, RequestErr err)
                 return;
         }
 
-        for (const auto msg : res.chunk)
+        for (const auto& msg : res.chunk)
                 print_message(msg);
 
         if (res.chunk.empty()) {
