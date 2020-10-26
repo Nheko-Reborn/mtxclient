@@ -82,10 +82,10 @@ unpickle(const std::string &pickled, const std::string &key)
 {
         auto object = create_olm_object<T>();
 
-        const int ret =
+        auto ret =
           T::unpickle(object.get(), key.data(), key.size(), (void *)pickled.data(), pickled.size());
 
-        if (ret == -1)
+        if (ret == olm_error())
                 throw olm_exception("unpickle", object.get());
 
         return object;
