@@ -4,14 +4,12 @@
 #include <thread>
 
 #include <boost/algorithm/string.hpp>
-#include <boost/bind.hpp>
 #include <boost/utility/typed_in_place_factory.hpp>
 
-#include <boost/asio.hpp>
-#include <boost/asio/ssl.hpp>
-#include <boost/beast.hpp>
+#include <boost/asio/ssl/context.hpp>
+#include <boost/beast/http/message.hpp>
 #include <boost/iostreams/stream.hpp>
-#include <boost/signals2.hpp>
+#include <boost/signals2/signal.hpp>
 #include <boost/signals2/signal_type.hpp>
 #include <boost/thread/thread.hpp>
 
@@ -45,7 +43,7 @@ Client::Client(const std::string &server, uint16_t port)
   , p{new ClientPrivate}
 {
         using namespace boost::asio;
-        const auto threads_num = std::max(1U, std::thread::hardware_concurrency());
+        const auto threads_num = std::min(8U, std::max(1U, std::thread::hardware_concurrency()));
 
         for (unsigned int i = 0; i < threads_num; ++i)
                 p->thread_group_.add_thread(new boost::thread([this]() { p->ios_.run(); }));

@@ -83,7 +83,7 @@ get_sender(const TimelineEvent &event)
 void
 parse_messages(const mtx::responses::Sync &res, bool parse_repeat_cmd = false)
 {
-        for (const auto& room : res.rooms.invite) {
+        for (const auto &room : res.rooms.invite) {
                 auto room_id = room.first;
 
                 printf("joining room %s\n", room_id.c_str());
@@ -114,7 +114,7 @@ parse_messages(const mtx::responses::Sync &res, bool parse_repeat_cmd = false)
         if (!parse_repeat_cmd)
                 return;
 
-        for (const auto& room : res.rooms.join) {
+        for (const auto &room : res.rooms.join) {
                 const std::string repeat_cmd = "!repeat";
                 const std::string room_id    = room.first;
 
