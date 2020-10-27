@@ -80,9 +80,10 @@ MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::DeviceEvent, msgs::RoomKey)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::DeviceEvent, msgs::ForwardedRoomKey)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::DeviceEvent, msgs::KeyRequest)
 
-MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::Event, account_data::Tags)
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::Event, mtx::events::account_data::Tags)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::Event, pushrules::GlobalRuleset)
-MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::Event, account_data::nheko_extensions::HiddenEvents)
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::Event,
+                                     mtx::events::account_data::nheko_extensions::HiddenEvents)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::Event, presence::Presence)
 
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::RedactionEvent, msg::Redaction)
