@@ -1,5 +1,7 @@
 #include "mtx/responses/common.hpp"
 
+#include <nlohmann/json.hpp>
+
 #include "mtx/events.hpp"
 #include "mtx/events/aliases.hpp"
 #include "mtx/events/avatar.hpp"
@@ -34,6 +36,12 @@ from_json(const nlohmann::json &obj, GroupId &response)
 }
 
 void
+from_json(const nlohmann::json &obj, RoomId &response)
+{
+        response.room_id = obj.at("room_id");
+}
+
+void
 from_json(const nlohmann::json &obj, EventId &response)
 {
         response.event_id = obj.at("event_id");
@@ -48,7 +56,7 @@ from_json(const nlohmann::json &obj, FilterId &response)
 namespace utils {
 
 void
-log_error(json::exception &err, const json &event)
+log_error(std::exception &err, const json &event)
 {
         std::cout << err.what() << std::endl;
         std::cout << event.dump(2) << std::endl;

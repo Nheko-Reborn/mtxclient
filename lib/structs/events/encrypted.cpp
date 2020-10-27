@@ -1,5 +1,7 @@
 #include <string>
 
+#include <nlohmann/json.hpp>
+
 #include "mtx/events/encrypted.hpp"
 
 static constexpr auto OLM_ALGO = "m.olm.v1.curve25519-aes-sha2";

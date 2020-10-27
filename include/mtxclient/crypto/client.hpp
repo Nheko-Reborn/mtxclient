@@ -4,7 +4,11 @@
 #include <memory>
 #include <new>
 
+#if __has_include(<nlohmann/json_fwd.hpp>)
+#include <nlohmann/json_fwd.hpp>
+#else
 #include <nlohmann/json.hpp>
+#endif
 
 #include <mtx/identifiers.hpp>
 #include <mtx/requests.hpp>
@@ -91,11 +95,6 @@ unpickle(const std::string &pickled, const std::string &key)
         return object;
 }
 
-using OlmSessionPtr           = std::unique_ptr<OlmSession, OlmDeleter>;
-using OutboundGroupSessionPtr = std::unique_ptr<OlmOutboundGroupSession, OlmDeleter>;
-using InboundGroupSessionPtr  = std::unique_ptr<OlmInboundGroupSession, OlmDeleter>;
-using SASPtr                  = std::unique_ptr<OlmSAS, OlmDeleter>;
-
 struct GroupPlaintext
 {
         BinaryBuf data;
@@ -125,7 +124,7 @@ public:
         {}
 
         using Base64String      = std::string;
-        using SignedOneTimeKeys = std::map<std::string, json>;
+        using SignedOneTimeKeys = std::map<std::string, requests::SignedOneTimeKey>;
 
         void set_device_id(std::string device_id) { device_id_ = std::move(device_id); }
         void set_user_id(std::string user_id) { user_id_ = std::move(user_id); }
@@ -154,7 +153,8 @@ public:
         //! Sign one_time_keys and generate the appropriate structure for the /keys/upload request.
         SignedOneTimeKeys sign_one_time_keys(const OneTimeKeys &keys);
         //! Generate the json structure for the signed one time key.
-        json signed_one_time_key_json(const std::string &key, const std::string &signature);
+        requests::SignedOneTimeKey signed_one_time_key(const std::string &key,
+                                                       const std::string &signature);
 
         //! Marks the current set of one time keys as being published.
         void mark_keys_as_published() { olm_account_mark_keys_as_published(account_.get()); }

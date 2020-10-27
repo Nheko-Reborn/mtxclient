@@ -1,6 +1,8 @@
 #include "mtx/responses/messages.hpp"
 #include "mtx/responses/common.hpp"
 
+#include <nlohmann/json.hpp>
+
 using json = nlohmann::json;
 
 namespace mtx {

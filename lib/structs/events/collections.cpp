@@ -1,5 +1,92 @@
 #include "mtx/events/collections.hpp"
+#include "mtx/events_impl.hpp"
 #include "mtx/log.hpp"
+
+#include <nlohmann/json.hpp>
+
+namespace mtx::events {
+using namespace mtx::events::collections;
+
+#define MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(EventType, Content)                                   \
+        template void to_json<Content>(nlohmann::json &, const EventType<Content> &);              \
+        template void from_json<Content>(const nlohmann::json &, EventType<Content> &);
+
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::StateEvent, states::Aliases)
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::StateEvent, states::Avatar)
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::StateEvent, states::CanonicalAlias)
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::StateEvent, states::Create)
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::StateEvent, states::Encryption)
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::StateEvent, states::GuestAccess)
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::StateEvent, states::HistoryVisibility)
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::StateEvent, states::JoinRules)
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::StateEvent, states::Member)
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::StateEvent, states::Name)
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::StateEvent, states::PinnedEvents)
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::StateEvent, states::PowerLevels)
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::StateEvent, states::Tombstone)
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::StateEvent, states::Topic)
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::StateEvent, msgs::Redacted)
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::EncryptedEvent, msgs::Encrypted)
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::EncryptedEvent, msgs::OlmEncrypted)
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::RoomEvent, msgs::StickerImage)
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::RoomEvent, msgs::Reaction)
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::RoomEvent, msgs::Redacted)
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::RoomEvent, msgs::Audio)
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::RoomEvent, msgs::Emote)
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::RoomEvent, msgs::File)
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::RoomEvent, msgs::Image)
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::RoomEvent, msgs::Notice)
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::RoomEvent, msgs::Text)
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::RoomEvent, msgs::Video)
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::RoomEvent, msgs::KeyVerificationRequest)
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::RoomEvent, msgs::KeyVerificationStart)
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::RoomEvent, msgs::KeyVerificationReady)
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::RoomEvent, msgs::KeyVerificationDone)
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::RoomEvent, msgs::KeyVerificationAccept)
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::RoomEvent, msgs::KeyVerificationCancel)
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::RoomEvent, msgs::KeyVerificationKey)
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::RoomEvent, msgs::KeyVerificationMac)
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::RoomEvent, msgs::CallInvite)
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::RoomEvent, msgs::CallCandidates)
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::RoomEvent, msgs::CallAnswer)
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::RoomEvent, msgs::CallHangUp)
+
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::StrippedEvent, states::Aliases)
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::StrippedEvent, states::Avatar)
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::StrippedEvent, states::CanonicalAlias)
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::StrippedEvent, states::Create)
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::StrippedEvent, states::Encryption)
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::StrippedEvent, states::GuestAccess)
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::StrippedEvent, states::HistoryVisibility)
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::StrippedEvent, states::JoinRules)
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::StrippedEvent, states::Member)
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::StrippedEvent, states::Name)
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::StrippedEvent, states::PinnedEvents)
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::StrippedEvent, states::PowerLevels)
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::StrippedEvent, states::Tombstone)
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::StrippedEvent, states::Topic)
+
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::DeviceEvent, msgs::Encrypted)
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::DeviceEvent, msgs::OlmEncrypted)
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::DeviceEvent, msgs::KeyVerificationRequest)
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::DeviceEvent, msgs::KeyVerificationStart)
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::DeviceEvent, msgs::KeyVerificationReady)
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::DeviceEvent, msgs::KeyVerificationDone)
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::DeviceEvent, msgs::KeyVerificationAccept)
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::DeviceEvent, msgs::KeyVerificationCancel)
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::DeviceEvent, msgs::KeyVerificationKey)
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::DeviceEvent, msgs::KeyVerificationMac)
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::DeviceEvent, msgs::RoomKey)
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::DeviceEvent, msgs::ForwardedRoomKey)
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::DeviceEvent, msgs::KeyRequest)
+
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::Event, account_data::Tags)
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::Event, pushrules::GlobalRuleset)
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::Event, account_data::nheko_extensions::HiddenEvents)
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::Event, presence::Presence)
+
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::RedactionEvent, msg::Redaction)
+}
 
 namespace mtx::events::collections {
 void

@@ -4,6 +4,8 @@
 
 #include <gtest/gtest.h>
 
+#include <nlohmann/json.hpp>
+
 #include "mtxclient/crypto/client.hpp"
 #include "mtxclient/crypto/types.hpp"
 #include "mtxclient/http/client.hpp"
@@ -116,18 +118,12 @@ TEST(Encryption, UploadOneTimeKeys)
         auto nkeys = olm_account->generate_one_time_keys(5);
         EXPECT_EQ(nkeys, 5);
 
-        json otks = olm_account->one_time_keys();
+        auto otks = olm_account->one_time_keys();
 
         mtx::requests::UploadKeys req;
 
-        // Create the proper structure for uploading.
-        std::map<std::string, json> unsigned_keys;
-
-        auto obj = otks.at("curve25519");
-        for (auto it = obj.begin(); it != obj.end(); ++it)
-                unsigned_keys["curve25519:" + it.key()] = it.value();
-
-        req.one_time_keys = unsigned_keys;
+        for (auto [key_id, key] : otks.curve25519)
+                req.one_time_keys["curve25519:" + key_id] = key;
 
         alice->upload_keys(req, [](const mtx::responses::UploadKeys &res, RequestErr err) {
                 check_error(err);
@@ -160,7 +156,8 @@ TEST(Encryption, UploadSignedOneTimeKeys)
         auto one_time_keys = olm_account->one_time_keys();
 
         mtx::requests::UploadKeys req;
-        req.one_time_keys = olm_account->sign_one_time_keys(one_time_keys);
+        for (const auto &[key_id, key] : olm_account->sign_one_time_keys(one_time_keys))
+                req.one_time_keys[key_id] = key;
 
         alice->upload_keys(req, [nkeys](const mtx::responses::UploadKeys &res, RequestErr err) {
                 check_error(err);
@@ -570,7 +567,7 @@ TEST(Encryption, EnableEncryption)
                     });
 
                   carl->join_room(res.room_id.to_string(),
-                                  [&responses](const nlohmann::json &, RequestErr err) {
+                                  [&responses](const mtx::responses::RoomId &, RequestErr err) {
                                           check_error(err);
                                           responses += 1;
                                   });

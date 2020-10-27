@@ -1,5 +1,7 @@
 #include <iostream>
 
+#include <nlohmann/json.hpp>
+
 #include <openssl/aes.h>
 #include <openssl/sha.h>
 
@@ -107,11 +109,11 @@ OlmClient::sign_one_time_key(const std::string &key)
         return sign_message(j.dump());
 }
 
-std::map<std::string, json>
+std::map<std::string, mtx::requests::SignedOneTimeKey>
 OlmClient::sign_one_time_keys(const OneTimeKeys &keys)
 {
         // Sign & append the one time keys.
-        std::map<std::string, json> signed_one_time_keys;
+        std::map<std::string, mtx::requests::SignedOneTimeKey> signed_one_time_keys;
         for (const auto &elem : keys.curve25519) {
                 const auto key_id       = elem.first;
                 const auto one_time_key = elem.second;
@@ -119,17 +121,19 @@ OlmClient::sign_one_time_keys(const OneTimeKeys &keys)
                 auto sig = sign_one_time_key(one_time_key);
 
                 signed_one_time_keys["signed_curve25519:" + key_id] =
-                  signed_one_time_key_json(one_time_key, sig);
+                  signed_one_time_key(one_time_key, sig);
         }
 
         return signed_one_time_keys;
 }
 
-json
-OlmClient::signed_one_time_key_json(const std::string &key, const std::string &signature)
+mtx::requests::SignedOneTimeKey
+OlmClient::signed_one_time_key(const std::string &key, const std::string &signature)
 {
-        return json{{"key", key},
-                    {"signatures", {{user_id_, {{"ed25519:" + device_id_, signature}}}}}};
+        mtx::requests::SignedOneTimeKey sign{};
+        sign.key        = key;
+        sign.signatures = {{user_id_, {{"ed25519:" + device_id_, signature}}}};
+        return sign;
 }
 
 mtx::requests::UploadKeys
@@ -159,7 +163,9 @@ OlmClient::create_upload_keys_request(const mtx::crypto::OneTimeKeys &one_time_k
                 return req;
 
         // Sign & append the one time keys.
-        req.one_time_keys = sign_one_time_keys(one_time_keys);
+        auto temp = sign_one_time_keys(one_time_keys);
+        for (const auto &[key_id, key] : temp)
+                req.one_time_keys[key_id] = key;
 
         return req;
 }
@@ -639,8 +645,6 @@ mtx::crypto::verify_identity_signature(const DeviceKeys &device_keys,
                                        const DeviceId &device_id,
                                        const UserId &user_id)
 {
-        using namespace client::utils;
-
         try {
                 const auto sign_key_id = "ed25519:" + device_id.get();
                 const auto signing_key = device_keys.keys.at(sign_key_id);
@@ -665,8 +669,6 @@ mtx::crypto::ed25519_verify_signature(std::string signing_key,
                                       nlohmann::json obj,
                                       std::string signature)
 {
-        using namespace client::utils;
-
         try {
                 if (signature.empty())
                         return false;

@@ -4,6 +4,8 @@
 #include <boost/asio/ssl.hpp>
 #include <boost/beast.hpp>
 
+#include <nlohmann/json.hpp>
+
 #include "mtxclient/http/errors.hpp"
 #include "mtxclient/utils.hpp"
 

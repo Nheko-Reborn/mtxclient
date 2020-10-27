@@ -2,6 +2,7 @@
 #include "mtx/events/collections.hpp"
 #include "mtx/events/encrypted.hpp"
 #include <iostream>
+#include <nlohmann/json.hpp>
 
 using json = nlohmann::json;
 using namespace mtx::events::collections;
@@ -111,6 +112,13 @@ to_json(json &obj, const TypingNotification &request)
 }
 
 void
+to_json(json &obj, const SignedOneTimeKey &request)
+{
+        obj["key"]        = request.key;
+        obj["signatures"] = request.signatures;
+}
+
+void
 to_json(json &obj, const UploadKeys &request)
 {
         obj = json::object();
@@ -118,8 +126,17 @@ to_json(json &obj, const UploadKeys &request)
         if (!request.device_keys.user_id.empty())
                 obj["device_keys"] = request.device_keys;
 
-        if (!request.one_time_keys.empty())
-                obj["one_time_keys"] = request.one_time_keys;
+        for (const auto &[key_id, key] : request.one_time_keys) {
+                obj["one_time_keys"][key_id] =
+                  std::visit([](const auto &e) { return json(e); }, key);
+        }
+}
+
+void
+to_json(json &obj, const ClaimKeys &request)
+{
+        obj["timeout"]       = request.timeout;
+        obj["one_time_keys"] = request.one_time_keys;
 }
 
 void

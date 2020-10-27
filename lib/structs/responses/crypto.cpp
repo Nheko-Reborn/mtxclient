@@ -117,7 +117,7 @@ void
 from_json(const nlohmann::json &obj, BackupVersion &response)
 {
         response.algorithm = obj.at("algorithm");
-        response.auth_data = obj.at("auth_data");
+        response.auth_data = obj.at("auth_data").dump();
         response.count     = obj.at("count");
         response.etag =
           obj.at("etag").dump(); // workaround, since synapse 1.15.1 and older sends this as integer
@@ -127,7 +127,7 @@ void
 to_json(nlohmann::json &obj, const BackupVersion &response)
 {
         obj["algorithm"] = response.algorithm;
-        obj["auth_data"] = response.auth_data;
+        obj["auth_data"] = nlohmann::json::parse(response.auth_data);
         obj["count"]     = response.count;
         obj["etag"]      = response.etag;
         obj["version"]   = response.version;

@@ -1,6 +1,8 @@
 #include "mtx/responses/notifications.hpp"
 #include "mtx/responses/common.hpp"
 
+#include <nlohmann/json.hpp>
+
 using json = nlohmann::json;
 
 namespace mtx {
@@ -9,7 +11,7 @@ namespace responses {
 void
 from_json(const json &obj, Notification &res)
 {
-        res.actions = obj.at("actions");
+        res.actions = obj.at("actions").get<decltype(res.actions)>();
         res.read    = obj.at("read");
         res.room_id = obj.at("room_id");
         res.ts      = obj.at("ts");

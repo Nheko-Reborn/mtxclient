@@ -5,7 +5,11 @@
 #include <optional>
 #include <string>
 
+#if __has_include(<nlohmann/json_fwd.hpp>)
+#include <nlohmann/json_fwd.hpp>
+#else
 #include <nlohmann/json.hpp>
+#endif
 
 namespace mtx {
 namespace secret_storage {

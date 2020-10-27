@@ -1,5 +1,7 @@
 #include "mtx/events.hpp"
 
+#include <nlohmann/json.hpp>
+
 using json = nlohmann::json;
 
 namespace mtx {

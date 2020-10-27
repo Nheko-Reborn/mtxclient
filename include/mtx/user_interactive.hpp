@@ -6,7 +6,11 @@
 #include <variant>
 #include <vector>
 
+#if __has_include(<nlohmann/json_fwd.hpp>)
+#include <nlohmann/json_fwd.hpp>
+#else
 #include <nlohmann/json.hpp>
+#endif
 
 namespace mtx {
 namespace user_interactive {
@@ -62,7 +66,7 @@ struct TermsParams
 void
 from_json(const nlohmann::json &obj, TermsParams &params);
 
-using Params = std::variant<OAuth2Params, TermsParams, nlohmann::json>;
+using Params = std::variant<OAuth2Params, TermsParams, std::string>;
 
 struct Unauthorized
 {

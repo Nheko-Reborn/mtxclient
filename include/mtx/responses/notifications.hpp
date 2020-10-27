@@ -1,8 +1,13 @@
 #pragma once
 
+#if __has_include(<nlohmann/json_fwd.hpp>)
+#include <nlohmann/json_fwd.hpp>
+#else
 #include <nlohmann/json.hpp>
+#endif
 
 #include "mtx/events/collections.hpp"
+#include "mtx/pushrules.hpp"
 
 namespace mtx {
 namespace responses {
@@ -10,7 +15,7 @@ namespace responses {
 struct Notification
 {
         //! The action to perform when the conditions for this rule are met.
-        nlohmann::json actions;
+        std::vector<mtx::pushrules::actions::Action> actions;
         //! The Event object for the event that triggered the notification.
         mtx::events::collections::TimelineEvents event;
         //! Indicates whether the user has sent a read receipt indicating

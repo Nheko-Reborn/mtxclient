@@ -3,6 +3,8 @@
 #include "mtx/log.hpp"
 #include "mtx/responses/common.hpp"
 
+#include <nlohmann/json.hpp>
+
 #include <variant>
 
 using json = nlohmann::json;

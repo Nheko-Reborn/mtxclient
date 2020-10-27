@@ -1,5 +1,7 @@
 #include "mtx/events/nheko_extensions/hidden_events.hpp"
 
+#include <nlohmann/json.hpp>
+
 namespace mtx {
 namespace events {
 namespace account_data {
