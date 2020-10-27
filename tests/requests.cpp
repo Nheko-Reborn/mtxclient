@@ -83,20 +83,17 @@ TEST(Requests, UploadKeys)
           "EjzaoycHcjq9lfQX0uWsqxl2giMIiSPR8a4d291W1ihKJL/"
           "a+myXS367WT6NAIcBA\"}},\"user_id\":\"@alice:example.com\"}}");
 
-        json k1 = {{"key", "zKbLg+NrIjpnagy+pIY6uPL4ZwEG2v+8F9lmgsnlZzs"},
-                   {"signatures",
-                    {{"@alice:example.com",
-                      {{"ed25519:JLAFKJWSCS",
-                        "IQeCEPb9HFk217cU9kw9EOiusC6kMIkoIRnbnfOh5Oc63S1ghgyjShBGpu34blQomoalCyXWyh"
-                        "aaT3MrLZYQ"
-                        "AA"}}}}}};
+        mtx::requests::SignedOneTimeKey k1;
+        k1.key        = "zKbLg+NrIjpnagy+pIY6uPL4ZwEG2v+8F9lmgsnlZzs";
+        k1.signatures = {{"@alice:example.com",
+                          {{"ed25519:JLAFKJWSCS",
+                            "IQeCEPb9HFk217cU9kw9EOiusC6kMIkoIRnbnfOh5Oc63S1ghgyjShBGpu34blQomoalCy"
+                            "XWyhaaT3MrLZYQAA"}}}};
 
-        json k2 = {{"key", "j3fR3HemM16M7CWhoI4Sk5ZsdmdfQHsKL1xuSft6MSw"},
-                   {"signatures",
-                    {{"@alice:example.com",
-                      {{"ed25519:JLAFKJWSCS",
-                        "FLWxXqGbwrb8SM3Y795eB6OA8bwBcoMZFXBqnTn58AYWZSqiD45tlBVcDa2L7RwdKXebW/"
-                        "VzDlnfVJ+9jok1Bw"}}}}}};
+        mtx::requests::SignedOneTimeKey k2;
+        k2.key = "j3fR3HemM16M7CWhoI4Sk5ZsdmdfQHsKL1xuSft6MSw";
+        k2.signatures["@alice:example.com"]["ed25519:JLAFKJWSCS"] =
+          "FLWxXqGbwrb8SM3Y795eB6OA8bwBcoMZFXBqnTn58AYWZSqiD45tlBVcDa2L7RwdKXebW/VzDlnfVJ+9jok1Bw";
 
         r3.one_time_keys.emplace("curve25519:AAAAAQ",
                                  "/qyvZvwjiTxGdGU0RCguDCLeR+nmsb3FfNG3/Ve4vU8");
