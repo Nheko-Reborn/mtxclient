@@ -96,8 +96,8 @@ sync_handler(const mtx::responses::Sync &res, RequestErr err)
                 return;
         }
 
-        for (const auto& room : res.rooms.join) {
-                for (const auto& msg : room.second.timeline.events)
+        for (const auto &room : res.rooms.join) {
+                for (const auto &msg : room.second.timeline.events)
                         print_message(msg);
         }
 

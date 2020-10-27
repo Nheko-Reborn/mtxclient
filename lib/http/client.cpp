@@ -1,17 +1,18 @@
 #include "mtxclient/http/client.hpp"
+#include "mtxclient/http/client_impl.hpp"
 
 #include <mutex>
 #include <thread>
 
+#include <nlohmann/json.hpp>
+
 #include <boost/algorithm/string.hpp>
-#include <boost/bind.hpp>
 #include <boost/utility/typed_in_place_factory.hpp>
 
-#include <boost/asio.hpp>
-#include <boost/asio/ssl.hpp>
-#include <boost/beast.hpp>
+#include <boost/asio/ssl/context.hpp>
+#include <boost/beast/http/message.hpp>
 #include <boost/iostreams/stream.hpp>
-#include <boost/signals2.hpp>
+#include <boost/signals2/signal.hpp>
 #include <boost/signals2/signal_type.hpp>
 #include <boost/thread/thread.hpp>
 
@@ -45,7 +46,7 @@ Client::Client(const std::string &server, uint16_t port)
   , p{new ClientPrivate}
 {
         using namespace boost::asio;
-        const auto threads_num = std::max(1U, std::thread::hardware_concurrency());
+        const auto threads_num = std::min(8U, std::max(1U, std::thread::hardware_concurrency()));
 
         for (unsigned int i = 0; i < threads_num; ++i)
                 p->thread_group_.add_thread(new boost::thread([this]() { p->ios_.run(); }));
@@ -599,19 +600,19 @@ Client::create_room(const mtx::requests::CreateRoom &room_options,
 }
 
 void
-Client::join_room(const std::string &room, Callback<nlohmann::json> callback)
+Client::join_room(const std::string &room, Callback<mtx::responses::RoomId> callback)
 {
         auto api_path = "/client/r0/join/" + mtx::client::utils::url_encode(room);
 
-        post<std::string, nlohmann::json>(api_path, "{}", callback);
+        post<std::string, mtx::responses::RoomId>(api_path, "{}", callback);
 }
 
 void
-Client::leave_room(const std::string &room_id, Callback<nlohmann::json> callback)
+Client::leave_room(const std::string &room_id, Callback<mtx::responses::Empty> callback)
 {
         auto api_path = "/client/r0/rooms/" + mtx::client::utils::url_encode(room_id) + "/leave";
 
-        post<std::string, nlohmann::json>(api_path, "{}", callback);
+        post<std::string, mtx::responses::Empty>(api_path, "{}", callback);
 }
 
 void
@@ -1171,3 +1172,79 @@ Client::get_turn_server(Callback<mtx::responses::TurnServer> cb)
                                              HeaderFields,
                                              RequestErr err) { cb(res, err); });
 }
+
+// Template instantiations for the various send functions
+
+#define MTXCLIENT_SEND_STATE_EVENT(Content)                                                        \
+        template void mtx::http::Client::send_state_event<mtx::events::state::Content>(            \
+          const std::string &,                                                                     \
+          const std::string &state_key,                                                            \
+          const mtx::events::state::Content &,                                                     \
+          Callback<mtx::responses::EventId> cb);
+
+MTXCLIENT_SEND_STATE_EVENT(Aliases)
+MTXCLIENT_SEND_STATE_EVENT(Avatar)
+MTXCLIENT_SEND_STATE_EVENT(CanonicalAlias)
+MTXCLIENT_SEND_STATE_EVENT(Create)
+MTXCLIENT_SEND_STATE_EVENT(Encryption)
+MTXCLIENT_SEND_STATE_EVENT(GuestAccess)
+MTXCLIENT_SEND_STATE_EVENT(HistoryVisibility)
+MTXCLIENT_SEND_STATE_EVENT(JoinRules)
+MTXCLIENT_SEND_STATE_EVENT(Member)
+MTXCLIENT_SEND_STATE_EVENT(Name)
+MTXCLIENT_SEND_STATE_EVENT(PinnedEvents)
+MTXCLIENT_SEND_STATE_EVENT(PowerLevels)
+MTXCLIENT_SEND_STATE_EVENT(Tombstone)
+MTXCLIENT_SEND_STATE_EVENT(Topic)
+
+#define MTXCLIENT_SEND_ROOM_MESSAGE(Content)                                                       \
+        template void mtx::http::Client::send_room_message<Content>(                               \
+          const std::string &,                                                                     \
+          const std::string &,                                                                     \
+          const Content &,                                                                         \
+          Callback<mtx::responses::EventId> cb);                                                   \
+        template void mtx::http::Client::send_room_message<Content>(                               \
+          const std::string &, const Content &, Callback<mtx::responses::EventId> cb);
+
+MTXCLIENT_SEND_ROOM_MESSAGE(mtx::events::msg::Encrypted)
+MTXCLIENT_SEND_ROOM_MESSAGE(mtx::events::msg::StickerImage)
+MTXCLIENT_SEND_ROOM_MESSAGE(mtx::events::msg::Reaction)
+MTXCLIENT_SEND_ROOM_MESSAGE(mtx::events::msg::Audio)
+MTXCLIENT_SEND_ROOM_MESSAGE(mtx::events::msg::Emote)
+MTXCLIENT_SEND_ROOM_MESSAGE(mtx::events::msg::File)
+MTXCLIENT_SEND_ROOM_MESSAGE(mtx::events::msg::Image)
+MTXCLIENT_SEND_ROOM_MESSAGE(mtx::events::msg::Notice)
+MTXCLIENT_SEND_ROOM_MESSAGE(mtx::events::msg::Text)
+MTXCLIENT_SEND_ROOM_MESSAGE(mtx::events::msg::Video)
+// MTXCLIENT_SEND_ROOM_MESSAGE(mtx::events::msg::KeyVerificationRequest)
+// MTXCLIENT_SEND_ROOM_MESSAGE(mtx::events::msg::KeyVerificationStart)
+// MTXCLIENT_SEND_ROOM_MESSAGE(mtx::events::msg::KeyVerificationReady)
+// MTXCLIENT_SEND_ROOM_MESSAGE(mtx::events::msg::KeyVerificationDone)
+// MTXCLIENT_SEND_ROOM_MESSAGE(mtx::events::msg::KeyVerificationAccept)
+// MTXCLIENT_SEND_ROOM_MESSAGE(mtx::events::msg::KeyVerificationCancel)
+// MTXCLIENT_SEND_ROOM_MESSAGE(mtx::events::msg::KeyVerificationKey)
+// MTXCLIENT_SEND_ROOM_MESSAGE(mtx::events::msg::KeyVerificationMac)
+MTXCLIENT_SEND_ROOM_MESSAGE(mtx::events::msg::CallInvite)
+MTXCLIENT_SEND_ROOM_MESSAGE(mtx::events::msg::CallCandidates)
+MTXCLIENT_SEND_ROOM_MESSAGE(mtx::events::msg::CallAnswer)
+MTXCLIENT_SEND_ROOM_MESSAGE(mtx::events::msg::CallHangUp)
+
+#define MTXCLIENT_SEND_TO_DEVICE(Content)                                                          \
+        template void mtx::http::Client::send_to_device<Content>(                                  \
+          const std::string &txid,                                                                 \
+          const std::map<mtx::identifiers::User, std::map<std::string, Content>> &messages,        \
+          ErrCallback callback);
+
+MTXCLIENT_SEND_TO_DEVICE(mtx::events::msg::RoomKey)
+MTXCLIENT_SEND_TO_DEVICE(mtx::events::msg::ForwardedRoomKey)
+MTXCLIENT_SEND_TO_DEVICE(mtx::events::msg::KeyRequest)
+MTXCLIENT_SEND_TO_DEVICE(mtx::events::msg::OlmEncrypted)
+MTXCLIENT_SEND_TO_DEVICE(mtx::events::msg::Encrypted)
+MTXCLIENT_SEND_TO_DEVICE(mtx::events::msg::KeyVerificationRequest)
+MTXCLIENT_SEND_TO_DEVICE(mtx::events::msg::KeyVerificationStart)
+MTXCLIENT_SEND_TO_DEVICE(mtx::events::msg::KeyVerificationReady)
+MTXCLIENT_SEND_TO_DEVICE(mtx::events::msg::KeyVerificationDone)
+MTXCLIENT_SEND_TO_DEVICE(mtx::events::msg::KeyVerificationAccept)
+MTXCLIENT_SEND_TO_DEVICE(mtx::events::msg::KeyVerificationCancel)
+MTXCLIENT_SEND_TO_DEVICE(mtx::events::msg::KeyVerificationKey)
+MTXCLIENT_SEND_TO_DEVICE(mtx::events::msg::KeyVerificationMac)

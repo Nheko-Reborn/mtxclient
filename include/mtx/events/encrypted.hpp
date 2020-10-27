@@ -1,6 +1,10 @@
 #pragma once
 
+#if __has_include(<nlohmann/json_fwd.hpp>)
+#include <nlohmann/json_fwd.hpp>
+#else
 #include <nlohmann/json.hpp>
+#endif
 
 #include "mtx/events.hpp"
 #include "mtx/events/common.hpp"
@@ -392,94 +396,5 @@ void
 to_json(nlohmann::json &obj, const KeyVerificationMac &event);
 
 } // namespace msg
-struct DeviceEventVisitor
-{
-        nlohmann::json operator()(const DeviceEvent<mtx::events::msg::RoomKey> &roomKey)
-        {
-                json j;
-                mtx::events::to_json(j, roomKey);
-                return j;
-        }
-        nlohmann::json operator()(const DeviceEvent<mtx::events::msg::ForwardedRoomKey> &roomKey)
-        {
-                json j;
-                mtx::events::to_json(j, roomKey);
-                return j;
-        }
-        nlohmann::json operator()(const DeviceEvent<mtx::events::msg::KeyRequest> &keyReq)
-        {
-                json j;
-                mtx::events::to_json(j, keyReq);
-                return j;
-        }
-        nlohmann::json operator()(const DeviceEvent<mtx::events::msg::OlmEncrypted> &olmEnc)
-        {
-                json j;
-                mtx::events::to_json(j, olmEnc);
-                return j;
-        }
-        nlohmann::json operator()(const DeviceEvent<mtx::events::msg::Encrypted> &enc)
-        {
-                json j;
-                mtx::events::to_json(j, enc);
-                return j;
-        }
-        nlohmann::json operator()(
-          const DeviceEvent<mtx::events::msg::KeyVerificationRequest> &keyVerificationRequest)
-        {
-                json j;
-                mtx::events::to_json(j, keyVerificationRequest);
-                return j;
-        }
-        nlohmann::json operator()(
-          const DeviceEvent<mtx::events::msg::KeyVerificationAccept> &keyVerificationAccept)
-        {
-                json j;
-                mtx::events::to_json(j, keyVerificationAccept);
-                return j;
-        }
-        nlohmann::json operator()(
-          const DeviceEvent<mtx::events::msg::KeyVerificationStart> &keyVerificationStart)
-        {
-                json j;
-                mtx::events::to_json(j, keyVerificationStart);
-                return j;
-        }
-        nlohmann::json operator()(
-          const DeviceEvent<mtx::events::msg::KeyVerificationCancel> &KeyVerificationCancel)
-        {
-                json j;
-                mtx::events::to_json(j, KeyVerificationCancel);
-                return j;
-        }
-        nlohmann::json operator()(
-          const DeviceEvent<mtx::events::msg::KeyVerificationKey> &keyVerificationKey)
-        {
-                json j;
-                mtx::events::to_json(j, keyVerificationKey);
-                return j;
-        }
-        nlohmann::json operator()(
-          const DeviceEvent<mtx::events::msg::KeyVerificationMac> &keyVerificationMac)
-        {
-                json j;
-                mtx::events::to_json(j, keyVerificationMac);
-                return j;
-        }
-        nlohmann::json operator()(
-          const DeviceEvent<mtx::events::msg::KeyVerificationReady> &keyVerificationReady)
-        {
-                json j;
-                mtx::events::to_json(j, keyVerificationReady);
-                return j;
-        }
-        nlohmann::json operator()(
-          const DeviceEvent<mtx::events::msg::KeyVerificationDone> &keyVerificationDone)
-        {
-                json j;
-                mtx::events::to_json(j, keyVerificationDone);
-                return j;
-        }
-};
 } // namespace events
 } // namespace mtx

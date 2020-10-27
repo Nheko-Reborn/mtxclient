@@ -1,5 +1,7 @@
 #include "mtx/user_interactive.hpp"
 
+#include <nlohmann/json.hpp>
+
 namespace mtx::user_interactive {
 void
 from_json(const nlohmann::json &obj, OAuth2Params &params)
@@ -50,7 +52,7 @@ from_json(const nlohmann::json &obj, Unauthorized &u)
                         else if (e.key() == auth_types::oauth2)
                                 u.params.emplace(e.key(), e.value().get<OAuth2Params>());
                         else
-                                u.params.emplace(e.key(), e.value());
+                                u.params.emplace(e.key(), e.value().dump());
                 }
         }
 }

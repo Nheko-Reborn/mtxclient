@@ -6,7 +6,11 @@
 
 #include "mtx/events/collections.hpp"
 
+#if __has_include(<nlohmann/json_fwd.hpp>)
+#include <nlohmann/json_fwd.hpp>
+#else
 #include <nlohmann/json.hpp>
+#endif
 
 namespace mtx {
 namespace responses {

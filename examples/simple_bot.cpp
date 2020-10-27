@@ -83,38 +83,41 @@ get_sender(const TimelineEvent &event)
 void
 parse_messages(const mtx::responses::Sync &res, bool parse_repeat_cmd = false)
 {
-        for (const auto& room : res.rooms.invite) {
+        for (const auto &room : res.rooms.invite) {
                 auto room_id = room.first;
 
                 printf("joining room %s\n", room_id.c_str());
-                client->join_room(room_id, [room_id](const nlohmann::json &obj, RequestErr e) {
-                        if (e) {
-                                print_errors(e);
-                                printf("failed to join room %s\n", room_id.c_str());
-                                return;
-                        }
+                client->join_room(
+                  room_id, [room_id](const mtx::responses::RoomId &obj, RequestErr e) {
+                          if (e) {
+                                  print_errors(e);
+                                  printf("failed to join room %s\n", room_id.c_str());
+                                  return;
+                          }
 
-                        printf("joined room \n%s\n", obj.dump(2).c_str());
+                          printf("joined room \n%s\n", obj.room_id.c_str());
 
-                        mtx::events::msg::Text text;
-                        text.body = "Thanks for the invitation!";
+                          mtx::events::msg::Text text;
+                          text.body = "Thanks for the invitation!";
 
-                        client->send_room_message<mtx::events::msg::Text>(
-                          room_id, text, [room_id](const mtx::responses::EventId &, RequestErr e) {
-                                  if (e) {
-                                          print_errors(e);
-                                          return;
-                                  }
+                          client->send_room_message<mtx::events::msg::Text>(
+                            room_id,
+                            text,
+                            [room_id](const mtx::responses::EventId &, RequestErr e) {
+                                    if (e) {
+                                            print_errors(e);
+                                            return;
+                                    }
 
-                                  printf("sent message to %s\n", room_id.c_str());
-                          });
-                });
+                                    printf("sent message to %s\n", room_id.c_str());
+                            });
+                  });
         }
 
         if (!parse_repeat_cmd)
                 return;
 
-        for (const auto& room : res.rooms.join) {
+        for (const auto &room : res.rooms.join) {
                 const std::string repeat_cmd = "!repeat";
                 const std::string room_id    = room.first;
 

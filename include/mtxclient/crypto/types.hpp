@@ -1,11 +1,10 @@
 #pragma once
 
-#include "mtxclient/utils.hpp"
+#if __has_include(<nlohmann/json_fwd.hpp>)
+#include <nlohmann/json_fwd.hpp>
+#else
 #include <nlohmann/json.hpp>
-
-STRONG_TYPE(UserId, std::string)
-STRONG_TYPE(DeviceId, std::string)
-STRONG_TYPE(RoomId, std::string)
+#endif
 
 namespace mtx {
 namespace crypto {
@@ -70,5 +69,38 @@ to_json(nlohmann::json &obj, const OneTimeKeys &keys);
 void
 from_json(const nlohmann::json &obj, OneTimeKeys &keys);
 
+template<class T, class Name>
+class strong_type
+{
+public:
+        strong_type() = default;
+        explicit strong_type(const T &value)
+          : value_(value)
+        {}
+        explicit strong_type(T &&value)
+          : value_(std::forward<T>(value))
+        {}
+
+        operator T &() noexcept { return value_; }
+        constexpr operator const T &() const noexcept { return value_; }
+
+        T &get() { return value_; }
+        T const &get() const { return value_; }
+
+private:
+        T value_;
+};
+
+// Macro for concisely defining a strong type
+#define STRONG_TYPE(type_name, value_type)                                                         \
+        struct type_name : mtx::crypto::strong_type<value_type, type_name>                         \
+        {                                                                                          \
+                using strong_type::strong_type;                                                    \
+        };
+
 } // namespace crypto
 } // namespace mtx
+
+STRONG_TYPE(UserId, std::string)
+STRONG_TYPE(DeviceId, std::string)
+STRONG_TYPE(RoomId, std::string)

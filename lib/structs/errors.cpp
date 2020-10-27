@@ -92,6 +92,13 @@ from_string(const std::string &code)
 }
 
 void
+from_json(const nlohmann::json &obj, LightweightError &error)
+{
+        error.errcode = from_string(obj.value("errcode", ""));
+        error.error   = obj.value("error", "");
+}
+
+void
 from_json(const nlohmann::json &obj, Error &error)
 {
         error.errcode = from_string(obj.value("errcode", ""));

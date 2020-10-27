@@ -1,7 +1,12 @@
 #pragma once
 
+#if __has_include(<nlohmann/json_fwd.hpp>)
+#include <nlohmann/json_fwd.hpp>
+#else
 #include <nlohmann/json.hpp>
+#endif
 
+#include "mtx/events/event_type.hpp"
 #include "mtx/events/messages/image.hpp"
 #include "mtx/events/redaction.hpp"
 #include "mtx/identifiers.hpp"
@@ -9,101 +14,6 @@
 using json = nlohmann::json;
 namespace mtx {
 namespace events {
-
-enum class EventType
-{
-        /// m.key.verification.cancel
-        KeyVerificationCancel,
-        /// m.key.verification.request
-        KeyVerificationRequest,
-        /// m.key.verification.start
-        KeyVerificationStart,
-        /// m.key.verification.accept
-        KeyVerificationAccept,
-        /// m.key.verification.key
-        KeyVerificationKey,
-        /// m.key.verification.mac
-        KeyVerificationMac,
-        /// m.key.verification.ready,
-        KeyVerificationReady,
-        /// m.key.verification.done,
-        KeyVerificationDone,
-        /// m.reaction,
-        Reaction,
-        /// m.room_key
-        RoomKey,
-        /// m.forwarded_room_key
-        ForwardedRoomKey,
-        /// m.room_key_request
-        RoomKeyRequest,
-        /// m.room.aliases
-        RoomAliases,
-        /// m.room.avatar
-        RoomAvatar,
-        /// m.room.canonical_alias
-        RoomCanonicalAlias,
-        /// m.room.create
-        RoomCreate,
-        /// m.room.encrypted.
-        RoomEncrypted,
-        /// m.room.encryption.
-        RoomEncryption,
-        /// m.room.guest_access
-        RoomGuestAccess,
-        /// m.room.history_visibility
-        RoomHistoryVisibility,
-        /// m.room.join_rules
-        RoomJoinRules,
-        /// m.room.member
-        RoomMember,
-        /// m.room.message
-        RoomMessage,
-        /// m.room.name
-        RoomName,
-        /// m.room.power_levels
-        RoomPowerLevels,
-        /// m.room.topic
-        RoomTopic,
-        /// m.room.redaction
-        RoomRedaction,
-        /// m.room.pinned_events
-        RoomPinnedEvents,
-        /// m.room.tombstone
-        RoomTombstone,
-        // m.sticker
-        Sticker,
-        // m.tag
-        Tag,
-        // m.presence
-        Presence,
-        // m.push_rules
-        PushRules,
-        // m.call.invite
-        CallInvite,
-        // m.call.candidates
-        CallCandidates,
-        // m.call.answer
-        CallAnswer,
-        // m.call.hangup
-        CallHangUp,
-
-        // custom events
-        // im.nheko.hidden_events
-        NhekoHiddenEvents,
-
-        // Unsupported event
-        Unsupported,
-};
-
-std::string
-to_string(EventType type);
-
-EventType
-getEventType(const std::string &type);
-
-EventType
-getEventType(const json &obj);
-
 //! The basic set of fields all events must have.
 template<class Content>
 struct Event
@@ -121,21 +31,11 @@ struct Event
 
 template<class Content>
 void
-to_json(json &obj, const Event<Content> &event)
-{
-        obj["content"] = event.content;
-        obj["sender"]  = event.sender;
-        obj["type"]    = ::mtx::events::to_string(event.type);
-}
+to_json(json &obj, const Event<Content> &event);
 
 template<class Content>
 void
-from_json(const json &obj, Event<Content> &event)
-{
-        event.content = obj.at("content").get<Content>();
-        event.type    = getEventType(obj.at("type").get<std::string>());
-        event.sender  = obj.value("sender", "");
-}
+from_json(const json &obj, Event<Content> &event);
 
 //! Extension of the Event type for device events.
 template<class Content>
@@ -146,24 +46,11 @@ struct DeviceEvent : public Event<Content>
 
 template<class Content>
 void
-from_json(const json &obj, DeviceEvent<Content> &event)
-{
-        Event<Content> base_event = event;
-        from_json(obj, base_event);
-        event.content = base_event.content;
-        event.type    = base_event.type;
-        event.sender  = obj.at("sender");
-}
+from_json(const json &obj, DeviceEvent<Content> &event);
 
 template<class Content>
 void
-to_json(json &obj, const DeviceEvent<Content> &event)
-{
-        Event<Content> base_event = event;
-        to_json(obj, base_event);
-
-        obj["sender"] = event.sender;
-}
+to_json(json &obj, const DeviceEvent<Content> &event);
 
 struct UnsignedData
 {
@@ -184,50 +71,11 @@ struct UnsignedData
         std::optional<Event<mtx::events::msg::Redaction>> redacted_because;
 };
 
-inline void
-from_json(const json &obj, UnsignedData &data)
-{
-        if (obj.find("age") != obj.end())
-                data.age = obj.at("age").get<uint64_t>();
+void
+from_json(const json &obj, UnsignedData &data);
 
-        if (obj.find("transaction_id") != obj.end())
-                data.transaction_id = obj.at("transaction_id").get<std::string>();
-
-        if (obj.find("prev_sender") != obj.end())
-                data.prev_sender = obj.at("prev_sender").get<std::string>();
-
-        if (obj.find("replaces_state") != obj.end())
-                data.replaces_state = obj.at("replaces_state").get<std::string>();
-
-        if (obj.find("redacted_by") != obj.end())
-                data.redacted_by = obj.at("redacted_by").get<std::string>();
-
-        if (obj.find("redacted_because") != obj.end())
-                data.redacted_because =
-                  obj.at("redacted_because").get<Event<mtx::events::msg::Redaction>>();
-}
-
-inline void
-to_json(json &obj, const UnsignedData &event)
-{
-        if (!event.prev_sender.empty())
-                obj["prev_sender"] = event.prev_sender;
-
-        if (!event.transaction_id.empty())
-                obj["transaction_id"] = event.transaction_id;
-
-        if (!event.replaces_state.empty())
-                obj["replaces_state"] = event.replaces_state;
-
-        if (event.age != 0)
-                obj["age"] = event.age;
-
-        if (!event.redacted_by.empty())
-                obj["redacted_by"] = event.redacted_by;
-
-        if (event.redacted_because)
-                obj["redacted_because"] = *event.redacted_because;
-}
+void
+to_json(json &obj, const UnsignedData &event);
 
 template<class Content>
 struct StrippedEvent : public Event<Content>
@@ -237,23 +85,11 @@ struct StrippedEvent : public Event<Content>
 
 template<class Content>
 void
-from_json(const json &obj, StrippedEvent<Content> &event)
-{
-        Event<Content> &base = event;
-        from_json(obj, base);
-
-        event.state_key = obj.at("state_key");
-}
+from_json(const json &obj, StrippedEvent<Content> &event);
 
 template<class Content>
 void
-to_json(json &obj, const StrippedEvent<Content> &event)
-{
-        Event<Content> base_event = event;
-        to_json(obj, base_event);
-
-        obj["state_key"] = event.state_key;
-}
+to_json(json &obj, const StrippedEvent<Content> &event);
 
 //! RoomEvent.
 template<class Content>
@@ -273,36 +109,11 @@ struct RoomEvent : public Event<Content>
 
 template<class Content>
 void
-from_json(const json &obj, RoomEvent<Content> &event)
-{
-        Event<Content> &base = event;
-        from_json(obj, base);
-
-        event.event_id         = obj.at("event_id");
-        event.origin_server_ts = obj.at("origin_server_ts");
-
-        // SPEC_BUG: Not present in the state array returned by /sync.
-        if (obj.find("room_id") != obj.end())
-                event.room_id = obj.at("room_id");
-
-        if (obj.find("unsigned") != obj.end())
-                event.unsigned_data = obj.at("unsigned");
-}
+from_json(const json &obj, RoomEvent<Content> &event);
 
 template<class Content>
 void
-to_json(json &obj, const RoomEvent<Content> &event)
-{
-        Event<Content> base_event = event;
-        to_json(obj, base_event);
-
-        if (!event.room_id.empty())
-                obj["room_id"] = event.room_id;
-
-        obj["event_id"]         = event.event_id;
-        obj["unsigned"]         = event.unsigned_data;
-        obj["origin_server_ts"] = event.origin_server_ts;
-}
+to_json(json &obj, const RoomEvent<Content> &event);
 
 //! Extension of the RoomEvent.
 template<class Content>
@@ -315,23 +126,11 @@ struct StateEvent : public RoomEvent<Content>
 
 template<class Content>
 void
-to_json(json &obj, const StateEvent<Content> &event)
-{
-        RoomEvent<Content> base_event = event;
-        to_json(obj, base_event);
-
-        obj["state_key"] = event.state_key;
-}
+to_json(json &obj, const StateEvent<Content> &event);
 
 template<class Content>
 void
-from_json(const json &obj, StateEvent<Content> &event)
-{
-        RoomEvent<Content> &base = event;
-        from_json(obj, base);
-
-        event.state_key = obj.at("state_key").get<std::string>();
-}
+from_json(const json &obj, StateEvent<Content> &event);
 
 //! Extension of the RoomEvent.
 template<class Content>
@@ -343,23 +142,11 @@ struct RedactionEvent : public RoomEvent<Content>
 
 template<class Content>
 void
-to_json(json &obj, const RedactionEvent<Content> &event)
-{
-        RoomEvent<Content> base_event = event;
-        to_json(obj, base_event);
-
-        obj["redacts"] = event.redacts;
-}
+to_json(json &obj, const RedactionEvent<Content> &event);
 
 template<class Content>
 void
-from_json(const json &obj, RedactionEvent<Content> &event)
-{
-        RoomEvent<Content> &base = event;
-        from_json(obj, base);
-
-        event.redacts = obj.at("redacts").get<std::string>();
-}
+from_json(const json &obj, RedactionEvent<Content> &event);
 
 //! Extension of the RoomEvent.
 template<class Content>
@@ -368,19 +155,11 @@ struct EncryptedEvent : public RoomEvent<Content>
 
 template<class Content>
 void
-to_json(json &obj, const EncryptedEvent<Content> &event)
-{
-        RoomEvent<Content> base_event = event;
-        to_json(obj, base_event);
-}
+to_json(json &obj, const EncryptedEvent<Content> &event);
 
 template<class Content>
 void
-from_json(const json &obj, EncryptedEvent<Content> &event)
-{
-        RoomEvent<Content> &base = event;
-        from_json(obj, base);
-}
+from_json(const json &obj, EncryptedEvent<Content> &event);
 
 enum class MessageType
 {

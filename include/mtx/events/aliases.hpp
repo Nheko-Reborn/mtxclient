@@ -3,7 +3,11 @@
 #include <string>
 #include <vector>
 
+#if __has_include(<nlohmann/json_fwd.hpp>)
+#include <nlohmann/json_fwd.hpp>
+#else
 #include <nlohmann/json.hpp>
+#endif
 
 namespace mtx {
 namespace events {

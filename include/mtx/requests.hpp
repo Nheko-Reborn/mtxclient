@@ -5,7 +5,11 @@
 
 #include <mtx/common.hpp>
 #include <mtx/events/collections.hpp>
+#if __has_include(<nlohmann/json_fwd.hpp>)
+#include <nlohmann/json_fwd.hpp>
+#else
 #include <nlohmann/json.hpp>
+#endif
 
 using json = nlohmann::json;
 
@@ -142,6 +146,17 @@ to_json(json &, const Empty &)
 
 using Logout = Empty;
 
+struct SignedOneTimeKey
+{
+        //! Required. The unpadded Base64-encoded 32-byte Curve25519 public key.
+        std::string key;
+        //! Required. Signatures of the key object.
+        //! The signature is calculated using the process described at Signing JSON.
+        std::map<std::string, std::map<std::string, std::string>> signatures;
+};
+void
+to_json(json &obj, const SignedOneTimeKey &);
+
 struct UploadKeys
 {
         //! Identity keys for the device.
@@ -150,7 +165,7 @@ struct UploadKeys
         //! One-time public keys for "pre-key" messages.
         //! The names of the properties should be in the format <algorithm>:<key_id>.
         //! The format of the key is determined by the key algorithm.
-        std::map<std::string, json> one_time_keys;
+        std::map<std::string, std::variant<std::string, SignedOneTimeKey>> one_time_keys;
 };
 
 void
@@ -185,12 +200,8 @@ struct ClaimKeys
         std::map<std::string, std::map<std::string, std::string>> one_time_keys;
 };
 
-inline void
-to_json(json &obj, const ClaimKeys &request)
-{
-        obj["timeout"]       = request.timeout;
-        obj["one_time_keys"] = request.one_time_keys;
-}
+void
+to_json(json &obj, const ClaimKeys &request);
 
 struct KeySignaturesUpload
 {

@@ -1,6 +1,10 @@
 #pragma once
 
+#if __has_include(<nlohmann/json_fwd.hpp>)
+#include <nlohmann/json_fwd.hpp>
+#else
 #include <nlohmann/json.hpp>
+#endif
 
 #include <string>
 #include <vector>
@@ -26,6 +30,14 @@ struct GroupId
 void
 from_json(const nlohmann::json &obj, GroupId &response);
 
+struct RoomId
+{
+        std::string room_id;
+};
+
+void
+from_json(const nlohmann::json &obj, RoomId &response);
+
 struct FilterId
 {
         std::string filter_id;
@@ -46,7 +58,7 @@ namespace states = mtx::events::state;
 namespace msgs   = mtx::events::msg;
 
 void
-log_error(nlohmann::json::exception &err, const nlohmann::json &event);
+log_error(std::exception &err, const nlohmann::json &event);
 
 void
 log_error(std::string err, const nlohmann::json &event);

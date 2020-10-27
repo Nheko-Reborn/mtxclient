@@ -184,5 +184,10 @@ create_olm_object()
 {
         return std::unique_ptr<typename T::olm_type, OlmDeleter>(T::allocate());
 }
+
+using OlmSessionPtr           = std::unique_ptr<OlmSession, OlmDeleter>;
+using OutboundGroupSessionPtr = std::unique_ptr<OlmOutboundGroupSession, OlmDeleter>;
+using InboundGroupSessionPtr  = std::unique_ptr<OlmInboundGroupSession, OlmDeleter>;
+using SASPtr                  = std::unique_ptr<OlmSAS, OlmDeleter>;
 }
 }

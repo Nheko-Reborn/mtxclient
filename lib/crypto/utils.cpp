@@ -1,5 +1,7 @@
 #include "mtxclient/crypto/utils.hpp"
 
+#include <nlohmann/json.hpp>
+
 #include <openssl/aes.h>
 #include <openssl/evp.h>
 #include <openssl/hmac.h>

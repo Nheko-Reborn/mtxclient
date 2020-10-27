@@ -677,7 +677,7 @@ parse_messages(const mtx::responses::Sync &res)
                 auto room_id = room.first;
 
                 console->info("joining room {}", room_id);
-                client->join_room(room_id, [room_id](const nlohmann::json &, RequestErr e) {
+                client->join_room(room_id, [room_id](const mtx::responses::RoomId &, RequestErr e) {
                         if (e) {
                                 print_errors(e);
                                 console->error("failed to join room {}", room_id);
@@ -911,10 +911,10 @@ handle_to_device_msgs(const mtx::responses::ToDevice &msgs)
                 console->info("inspecting {} to_device messages", msgs.events.size());
 
         for (const auto &msg : msgs.events) {
-                console->info(std::visit(mtx::events::DeviceEventVisitor{}, msg).dump(2));
+                console->info(std::visit([](const auto &e) { return json(e); }, msg).dump(2));
 
                 try {
-                        OlmMessage olm_msg = std::visit(DeviceEventVisitor{}, msg);
+                        OlmMessage olm_msg = std::visit([](const auto &e) { return json(e); }, msg);
                         decrypt_olm_message(std::move(olm_msg));
                 } catch (const nlohmann::json::exception &e) {
                         console->warn("parsing error for olm message: {}", e.what());
@@ -961,14 +961,12 @@ login_cb(const mtx::responses::Login &, RequestErr err)
 }
 
 void
-join_room_cb(const nlohmann::json &obj, RequestErr err)
+join_room_cb(const mtx::responses::RoomId &, RequestErr err)
 {
         if (err) {
                 print_errors(err);
                 return;
         }
-
-        (void)obj;
 
         // Fetch device list for all users.
 }

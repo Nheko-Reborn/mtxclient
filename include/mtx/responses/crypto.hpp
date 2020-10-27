@@ -1,9 +1,13 @@
 #pragma once
 
+#if __has_include(<nlohmann/json_fwd.hpp>)
+#include <nlohmann/json_fwd.hpp>
+#else
 #include <nlohmann/json.hpp>
+#endif
 
 #include "mtx/common.hpp"
-#include "mtx/errors.hpp"
+#include "mtx/lightweight_error.hpp"
 
 #include <map>
 #include <string>
@@ -51,7 +55,7 @@ from_json(const nlohmann::json &obj, QueryKeys &response);
 
 struct KeySignaturesUpload
 {
-        std::map<std::string, std::map<std::string, mtx::errors::Error>> errors;
+        std::map<std::string, std::map<std::string, mtx::errors::LightweightError>> errors;
 };
 
 void
@@ -158,7 +162,7 @@ struct BackupVersion
         std::string algorithm;
         //! Required. Algorithm-dependent data. See the documentation for the backup algorithms in
         //! Server-side key backups for more information on the expected format of the data.
-        nlohmann::json auth_data;
+        std::string auth_data;
         //! Required. The number of keys stored in the backup.
         int64_t count;
         //! Required. An opaque string representing stored keys in the backup. Clients can

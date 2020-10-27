@@ -1,0 +1,107 @@
+#pragma once
+
+#if __has_include(<nlohmann/json_fwd.hpp>)
+#include <nlohmann/json_fwd.hpp>
+#else
+#include <nlohmann/json.hpp>
+#endif
+
+#include <string>
+namespace mtx {
+namespace events {
+
+enum class EventType
+{
+        /// m.key.verification.cancel
+        KeyVerificationCancel,
+        /// m.key.verification.request
+        KeyVerificationRequest,
+        /// m.key.verification.start
+        KeyVerificationStart,
+        /// m.key.verification.accept
+        KeyVerificationAccept,
+        /// m.key.verification.key
+        KeyVerificationKey,
+        /// m.key.verification.mac
+        KeyVerificationMac,
+        /// m.key.verification.ready,
+        KeyVerificationReady,
+        /// m.key.verification.done,
+        KeyVerificationDone,
+        /// m.reaction,
+        Reaction,
+        /// m.room_key
+        RoomKey,
+        /// m.forwarded_room_key
+        ForwardedRoomKey,
+        /// m.room_key_request
+        RoomKeyRequest,
+        /// m.room.aliases
+        RoomAliases,
+        /// m.room.avatar
+        RoomAvatar,
+        /// m.room.canonical_alias
+        RoomCanonicalAlias,
+        /// m.room.create
+        RoomCreate,
+        /// m.room.encrypted.
+        RoomEncrypted,
+        /// m.room.encryption.
+        RoomEncryption,
+        /// m.room.guest_access
+        RoomGuestAccess,
+        /// m.room.history_visibility
+        RoomHistoryVisibility,
+        /// m.room.join_rules
+        RoomJoinRules,
+        /// m.room.member
+        RoomMember,
+        /// m.room.message
+        RoomMessage,
+        /// m.room.name
+        RoomName,
+        /// m.room.power_levels
+        RoomPowerLevels,
+        /// m.room.topic
+        RoomTopic,
+        /// m.room.redaction
+        RoomRedaction,
+        /// m.room.pinned_events
+        RoomPinnedEvents,
+        /// m.room.tombstone
+        RoomTombstone,
+        // m.sticker
+        Sticker,
+        // m.tag
+        Tag,
+        // m.presence
+        Presence,
+        // m.push_rules
+        PushRules,
+        // m.call.invite
+        CallInvite,
+        // m.call.candidates
+        CallCandidates,
+        // m.call.answer
+        CallAnswer,
+        // m.call.hangup
+        CallHangUp,
+
+        // custom events
+        // im.nheko.hidden_events
+        NhekoHiddenEvents,
+
+        // Unsupported event
+        Unsupported,
+};
+
+std::string
+to_string(EventType type);
+
+EventType
+getEventType(const std::string &type);
+
+EventType
+getEventType(const nlohmann::json &obj);
+}
+}

@@ -5,6 +5,8 @@
 
 #include <gtest/gtest.h>
 
+#include <nlohmann/json.hpp>
+
 #include "mtx/events/collections.hpp"
 #include "mtx/events/encrypted.hpp"
 #include "mtx/requests.hpp"
@@ -444,11 +446,13 @@ TEST(ClientAPI, CreateRoomInvites)
                 check_error(err);
                 auto room_id = res.room_id.to_string();
 
-                bob->join_room(room_id,
-                               [](const nlohmann::json &, RequestErr err) { check_error(err); });
+                bob->join_room(room_id, [](const mtx::responses::RoomId &, RequestErr err) {
+                        check_error(err);
+                });
 
-                carl->join_room(room_id,
-                                [](const nlohmann::json &, RequestErr err) { check_error(err); });
+                carl->join_room(room_id, [](const mtx::responses::RoomId &, RequestErr err) {
+                        check_error(err);
+                });
         });
 
         alice->close();
@@ -486,20 +490,23 @@ TEST(ClientAPI, JoinRoom)
                   check_error(err);
                   auto room_id = res.room_id.to_string();
 
-                  bob->join_room(room_id,
-                                 [](const nlohmann::json &, RequestErr err) { check_error(err); });
+                  bob->join_room(room_id, [](const mtx::responses::RoomId &, RequestErr err) {
+                          check_error(err);
+                  });
 
                   using namespace mtx::identifiers;
-                  bob->join_room(
-                    "!random_room_id:localhost", [](const nlohmann::json &, RequestErr err) {
-                            ASSERT_TRUE(err);
-                            EXPECT_EQ(mtx::errors::to_string(err->matrix_error.errcode),
-                                      "M_UNKNOWN");
-                    });
+                  bob->join_room("!random_room_id:localhost",
+                                 [](const mtx::responses::RoomId &, RequestErr err) {
+                                         ASSERT_TRUE(err);
+                                         EXPECT_EQ(
+                                           mtx::errors::to_string(err->matrix_error.errcode),
+                                           "M_UNKNOWN");
+                                 });
 
                   // Join the room using an alias.
-                  bob->join_room("#" + alias + ":localhost",
-                                 [](const nlohmann::json &, RequestErr err) { check_error(err); });
+                  bob->join_room(
+                    "#" + alias + ":localhost",
+                    [](const mtx::responses::RoomId &, RequestErr err) { check_error(err); });
           });
 
         alice->close();
@@ -531,18 +538,18 @@ TEST(ClientAPI, LeaveRoom)
                 auto room_id = res.room_id;
 
                 bob->join_room(res.room_id.to_string(),
-                               [room_id, bob](const nlohmann::json &, RequestErr err) {
+                               [room_id, bob](const mtx::responses::RoomId &, RequestErr err) {
                                        check_error(err);
 
                                        bob->leave_room(room_id.to_string(),
-                                                       [](const nlohmann::json &, RequestErr err) {
+                                                       [](mtx::responses::Empty, RequestErr err) {
                                                                check_error(err);
                                                        });
                                });
         });
 
         // Trying to leave a non-existent room should fail.
-        bob->leave_room("!random_room_id:localhost", [](const nlohmann::json &, RequestErr err) {
+        bob->leave_room("!random_room_id:localhost", [](mtx::responses::Empty, RequestErr err) {
                 ASSERT_TRUE(err);
                 EXPECT_EQ(mtx::errors::to_string(err->matrix_error.errcode), "M_UNKNOWN");
                 EXPECT_EQ(err->matrix_error.error, "Not a known room");
@@ -583,7 +590,8 @@ TEST(ClientAPI, InviteRoom)
                                              check_error(err);
 
                                              bob->join_room(
-                                               room_id, [](const nlohmann::json &, RequestErr err) {
+                                               room_id,
+                                               [](const mtx::responses::RoomId &, RequestErr err) {
                                                        check_error(err);
                                                });
                                      });
@@ -625,7 +633,8 @@ TEST(ClientAPI, KickRoom)
                             check_error(err);
 
                             bob->join_room(
-                              room_id, [alice, room_id](const nlohmann::json &, RequestErr err) {
+                              room_id,
+                              [alice, room_id](const mtx::responses::RoomId &, RequestErr err) {
                                       check_error(err);
 
                                       alice->kick_user(room_id,
@@ -672,7 +681,8 @@ TEST(ClientAPI, BanRoom)
                             check_error(err);
 
                             bob->join_room(
-                              room_id, [alice, room_id](const nlohmann::json &, RequestErr err) {
+                              room_id,
+                              [alice, room_id](const mtx::responses::RoomId &, RequestErr err) {
                                       check_error(err);
 
                                       alice->ban_user(
@@ -912,7 +922,7 @@ TEST(ClientAPI, PresenceOverSync)
                   auto room_id = res.room_id.to_string();
 
                   bob->join_room(
-                    room_id, [alice, bob, room_id](const nlohmann::json &, RequestErr err) {
+                    room_id, [alice, bob, room_id](const mtx::responses::RoomId &, RequestErr err) {
                             check_error(err);
                             alice->put_presence_status(
                               mtx::presence::unavailable,
@@ -984,7 +994,7 @@ TEST(ClientAPI, SendMessages)
                   auto room_id = res.room_id.to_string();
 
                   bob->join_room(
-                    room_id, [alice, bob, room_id](const nlohmann::json &, RequestErr err) {
+                    room_id, [alice, bob, room_id](const mtx::responses::RoomId &, RequestErr err) {
                             check_error(err);
 
                             // Flag to indicate when those messages would be ready to be read by
