@@ -846,7 +846,7 @@ TEST(Encryption, OlmRoomKeyEncryption)
 
         // Alice create m.room.key request
         json payload =
-          json{{"content", {"secret", SECRET_TEXT}}, {"type", "im.nheko.custom_test_event"}};
+          json{{"content", {{"secret", SECRET_TEXT}}}, {"type", "im.nheko.custom_test_event"}};
 
         // Alice creates an outbound session.
         auto out_session = alice_olm->create_outbound_session(bob_curve25519, bob_otk);
