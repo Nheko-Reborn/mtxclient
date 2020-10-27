@@ -319,7 +319,7 @@ public:
         //! Join a room by an alias or a room_id.
         void join_room(const std::string &room, Callback<mtx::responses::RoomId> cb);
         //! Leave a room by its room_id.
-        void leave_room(const std::string &room_id, Callback<mtx::responses::RoomId> cb);
+        void leave_room(const std::string &room_id, Callback<mtx::responses::Empty> cb);
         //! Invite a user to a room.
         void invite_user(const std::string &room_id,
                          const std::string &user_id,

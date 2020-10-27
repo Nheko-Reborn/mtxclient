@@ -608,11 +608,11 @@ Client::join_room(const std::string &room, Callback<mtx::responses::RoomId> call
 }
 
 void
-Client::leave_room(const std::string &room_id, Callback<mtx::responses::RoomId> callback)
+Client::leave_room(const std::string &room_id, Callback<mtx::responses::Empty> callback)
 {
         auto api_path = "/client/r0/rooms/" + mtx::client::utils::url_encode(room_id) + "/leave";
 
-        post<std::string, mtx::responses::RoomId>(api_path, "{}", callback);
+        post<std::string, mtx::responses::Empty>(api_path, "{}", callback);
 }
 
 void

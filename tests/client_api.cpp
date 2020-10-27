@@ -542,18 +542,18 @@ TEST(ClientAPI, LeaveRoom)
                                        check_error(err);
 
                                        bob->leave_room(room_id.to_string(),
-                                                       [](const mtx::responses::RoomId &,
-                                                          RequestErr err) { check_error(err); });
+                                                       [](mtx::responses::Empty, RequestErr err) {
+                                                               check_error(err);
+                                                       });
                                });
         });
 
         // Trying to leave a non-existent room should fail.
-        bob->leave_room(
-          "!random_room_id:localhost", [](const mtx::responses::RoomId &, RequestErr err) {
-                  ASSERT_TRUE(err);
-                  EXPECT_EQ(mtx::errors::to_string(err->matrix_error.errcode), "M_UNKNOWN");
-                  EXPECT_EQ(err->matrix_error.error, "Not a known room");
-          });
+        bob->leave_room("!random_room_id:localhost", [](mtx::responses::Empty, RequestErr err) {
+                ASSERT_TRUE(err);
+                EXPECT_EQ(mtx::errors::to_string(err->matrix_error.errcode), "M_UNKNOWN");
+                EXPECT_EQ(err->matrix_error.error, "Not a known room");
+        });
 
         alice->close();
         bob->close();
