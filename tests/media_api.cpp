@@ -81,7 +81,7 @@ TEST(MediaAPI, UploadAudio)
     bob->login("bob", "secret", [bob](const mtx::responses::Login &, RequestErr err) {
         ASSERT_FALSE(err);
 
-        const auto audio = read_file("./fixtures/sound.mp3");
+        const auto audio = read_file(fixture_prefix() + "/fixtures/sound.mp3");
 
         bob->upload(audio,
                     "audio/mp3",
@@ -112,7 +112,7 @@ TEST(MediaAPI, UploadImage)
     carl->login("carl", "secret", [carl](const mtx::responses::Login &, RequestErr err) {
         ASSERT_FALSE(err);
 
-        const auto img = read_file("./fixtures/test.jpeg");
+        const auto img = read_file(fixture_prefix() + "/fixtures/test.jpeg");
 
         carl->upload(img,
                      "image/jpeg",
@@ -157,7 +157,7 @@ TEST(MediaAPI, UploadSVG)
     carl->login("carl", "secret", [carl](const mtx::responses::Login &, RequestErr err) {
         ASSERT_FALSE(err);
 
-        const auto img = read_file("./fixtures/kiwi.svg");
+        const auto img = read_file(fixture_prefix() + "/fixtures/kiwi.svg");
 
         carl->upload(img,
                      "image/svg",
