@@ -16,3 +16,4 @@
 #include "responses/turn_server.hpp"
 #include "responses/version.hpp"
 #include "responses/well-known.hpp"
+#include "responses/public_rooms.hpp"

@@ -5,6 +5,7 @@
 
 #include <mtx/common.hpp>
 #include <mtx/events/collections.hpp>
+#include <mtx/filters.hpp>
 #if __has_include(<nlohmann/json_fwd.hpp>)
 #include <nlohmann/json_fwd.hpp>
 #else
@@ -136,6 +137,29 @@ struct TypingNotification
 
 void
 to_json(json &obj, const TypingNotification &request);
+
+//! Request payload for the `POST /_matrix/client/r0/publicRooms` endpoint.
+struct PublicRooms 
+{
+        //! Limit the number of results returned.
+        int limit;
+        //! A pagination token from a previous request, allowing clients
+        //! to get the next (or previous) batch of rooms. The direction of
+        //! pagination is specified solely by which token is supplied,
+        //! rather than via an explicit flag.
+        std::string since;
+        //! Filter to apply to the results.
+        Filter filter;
+        //! Whether or not to include all known networks/protocols from
+        //! application services on the homeserver. Defaults to false.
+        bool include_all_networks = false;
+        //! The specific third party network/protocol to request from
+        //! the homeserver. Can only be used if include_all_networks is false.
+        std::string third_party_instance_id;
+};
+
+void
+to_json(json &obj, const PostPublicRooms &request);
 
 struct Empty
 {};
