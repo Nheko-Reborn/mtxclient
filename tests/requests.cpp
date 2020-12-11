@@ -280,3 +280,44 @@ TEST(Requests, UserInteractiveAuth)
   "session": "<session ID>"
 })"_json);
 }
+
+TEST(Requests, PublicRooms) {
+  // 
+  GetPublicRooms b1, b2, b3;
+  // generic example.
+  b1.limit = 10;
+  b1.filter.generic_search_term = "foo";
+  b1.include_all_networks = false;
+  b1.third_party_instance_id = "irc";
+
+  json j = b1;
+  EXPECT_EQ(j.dump(),
+            "{
+              \"limit\": 10,
+              \"filter\": {
+                \"generic_search_term\": \"foo\"
+              },
+              \"include_all_networks\": false,
+              \"third_party_instance_id\": \"irc\"
+            }");
+            
+  // if third_party_instance_id is set, then the include_all_networks flag should\
+  // default to false
+  b2.limit = 10;
+  b2.third_party_instance_id = "matrix";
+  j = b2;
+  EXPECT_EQ(j.dump(),
+            "{
+              \"limit\": 10,
+              \"include_all_networks\": false,
+              \"third_party_instance_id\": \"matrix\"
+            }");
+
+  // if include_all_networks is true, then third_party_instance_id cannot be used.
+  // if it is somehow set, then we expect an exception to be thrown
+  b3.limit = 2;
+  b3.include_all_networks = true;
+  b3.third_party_instance_id = "irc";
+
+  ASSERT_THROW(j = b3, std::invalid_argument);
+}

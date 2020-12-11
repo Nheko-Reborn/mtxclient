@@ -1561,3 +1561,52 @@ TEST(Groups, Profiles)
 
         alice->close();
 }
+
+TEST(ClientAPI, PublicRooms)  
+{
+        std::shared_ptr<Client> mtx_client = std::make_shared<Client>("localhost");
+        mtx_client->login("alice", "secret", [mtx_client](const mtx::responses::Login &, RequestErr err) {
+                check_error(err);
+        });
+
+        while (mtx_client->access_token().empty()) {
+                sleep();
+        }
+
+        // create a new public room
+        mtx::requests::CreateRoom req;
+        req.name = "Public Room";
+        req.topic = "Test";
+        req.visibility = Visibility::Public;
+
+        mtx_client->create_room(req, [](const mtx::responses::CreateRoom &res, RequestErr err){
+                check_error(err);
+                EXPECT_EQ(res.room_id.hostname(), "localhost");
+        });
+
+        // TODO: should we add in a user so that we can then check that the public room should
+        // have one user in the room?
+
+        // construct a POST request to update the room directory, then GET the listing
+        // of public rooms and verify that the room info stored in the chunk field matches
+        // the room we just created.
+        nlohmann::json j = {
+                {"limit", 1},
+                {"include_all_networks", false},
+                {"third_party_instance_id", "irc"}
+        }; 
+
+        mtx_client->post_public_rooms
+        (j, [mtx_client](const mtx::responses::PublicRooms &, RequestErr err) {
+                check_error(err);
+        });
+
+        mtx_client->get_public_rooms
+        (1, [mtx_client](const mtx::responses::PublicRooms &res, RequestErr err) {
+                check_error(err);
+                EXPECT_EQ(res.chunk[0].name, "Public Room");
+                EXPECT_EQ(res.chunk[0].topic, "Test");
+        });
+
+        mtx_client->close(); 
+}
