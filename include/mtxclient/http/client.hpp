@@ -43,6 +43,7 @@ struct Login;
 struct QueryKeys;
 struct ClaimKeys;
 struct UploadKeys;
+struct PublicRooms;
 }
 namespace responses {
 struct AvatarUrl;
@@ -69,6 +70,7 @@ struct TurnServer;
 struct UploadKeys;
 struct Versions;
 struct WellKnown;
+struct PublicRooms;
 namespace backup {
 struct SessionBackup;
 struct RoomKeysBackup;
@@ -446,6 +448,12 @@ public:
           const std::map<mtx::identifiers::User, std::map<std::string, EventContent>> &messages,
           ErrCallback callback);
 
+        //! POST a new room listing to the public rooms directory.
+        void post_public_rooms(const std::string &server, const nhlomann::json &j, 
+                                Callback<mtx::responses::PublicRooms> cb); 
+        //! GET the public rooms directory listing.
+        void get_public_rooms(int limit, const std::string &since, const std::string &server,
+                                Callback<mtx::responses::PublicRooms> cb);
         //
         // Group related endpoints.
         //
