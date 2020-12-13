@@ -903,6 +903,196 @@ TEST(Encryption, OlmRoomKeyEncryption)
         bob_http->close();
 }
 
+TEST(Encryption, ShareSecret)
+{
+        // Alice wants to use olm to send data to Bob.
+        auto alice_olm  = std::make_shared<OlmClient>();
+        auto alice_http = std::make_shared<Client>("localhost");
+        alice_olm->create_new_account();
+        alice_olm->generate_one_time_keys(10);
+
+        auto bob_olm  = std::make_shared<OlmClient>();
+        auto bob_http = std::make_shared<Client>("localhost");
+        bob_olm->create_new_account();
+        bob_olm->generate_one_time_keys(10);
+
+        alice_http->login("alice", "secret", &check_login);
+        bob_http->login("bob", "secret", &check_login);
+
+        WAIT_UNTIL(!bob_http->access_token().empty() && !alice_http->access_token().empty())
+
+        bob_olm->set_user_id(bob_http->user_id().to_string());
+        bob_olm->set_device_id(bob_http->device_id());
+        alice_olm->set_user_id(alice_http->user_id().to_string());
+        alice_olm->set_device_id(alice_http->device_id());
+
+        // Both users upload their identity & one time keys
+        atomic_int uploads(0);
+        auto upload_cb = [&uploads](const mtx::responses::UploadKeys &res, RequestErr err) {
+                check_error(err);
+                EXPECT_EQ(res.one_time_key_counts.size(), 1);
+                EXPECT_EQ(res.one_time_key_counts.at("signed_curve25519"), 10);
+                uploads += 1;
+        };
+
+        alice_http->upload_keys(alice_olm->create_upload_keys_request(), upload_cb);
+        bob_http->upload_keys(bob_olm->create_upload_keys_request(), upload_cb);
+
+        WAIT_UNTIL(uploads == 2)
+
+        atomic_bool request_finished(false);
+        std::string bob_ed25519, bob_curve25519, bob_otk;
+
+        // Alice needs Bob's ed25519 device key.
+        mtx::requests::QueryKeys query;
+        query.device_keys[bob_http->user_id().to_string()] = {};
+        alice_http->query_keys(query,
+                               [&request_finished, &bob_ed25519, &bob_curve25519, bob = bob_http](
+                                 const mtx::responses::QueryKeys &res, RequestErr err) {
+                                       check_error(err);
+
+                                       const auto device_id = bob->device_id();
+                                       const auto user_id   = bob->user_id().to_string();
+                                       const auto devices   = res.device_keys.at(user_id);
+
+                                       assert(devices.find(device_id) != devices.end());
+
+                                       bob_ed25519 =
+                                         devices.at(device_id).keys.at("ed25519:" + device_id);
+                                       bob_curve25519 =
+                                         devices.at(device_id).keys.at("curve25519:" + device_id);
+
+                                       request_finished = true;
+                               });
+
+        WAIT_UNTIL(request_finished);
+
+        // Alice needs one of Bob's one time keys.
+        request_finished = false;
+
+        mtx::requests::ClaimKeys claim_keys;
+        claim_keys.one_time_keys[bob_http->user_id().to_string()][bob_http->device_id()] =
+          SIGNED_CURVE25519;
+
+        alice_http->claim_keys(claim_keys,
+                               [&bob_otk, bob = bob_http, &request_finished](
+                                 const mtx::responses::ClaimKeys &res, RequestErr err) {
+                                       check_error(err);
+
+                                       const auto user_id   = bob->user_id().to_string();
+                                       const auto device_id = bob->device_id();
+
+                                       auto retrieved_devices = res.one_time_keys.at(user_id);
+                                       for (const auto &device : retrieved_devices) {
+                                               if (device.first == device_id) {
+                                                       bob_otk = device.second.begin()->at("key");
+                                                       break;
+                                               }
+                                       }
+
+                                       request_finished = true;
+                               });
+
+        WAIT_UNTIL(request_finished);
+
+        EXPECT_EQ(bob_ed25519, bob_olm->identity_keys().ed25519);
+        EXPECT_EQ(bob_curve25519, bob_olm->identity_keys().curve25519);
+        EXPECT_EQ(bob_otk, bob_olm->one_time_keys().curve25519.begin()->second);
+
+        constexpr auto SECRET_TEXT = "Hello Bob!";
+        constexpr auto REQUEST_ID  = "askjfdgsdfgfdg";
+
+        // Alice create m.room.key request
+        mtx::events::msg::SecretRequest secretRequest{};
+        secretRequest.request_id           = REQUEST_ID;
+        secretRequest.name                 = "abcdefg";
+        secretRequest.requesting_device_id = bob_http->device_id();
+        secretRequest.action               = RequestAction::Request;
+
+        SyncOpts opts;
+        opts.timeout = 0;
+
+        // Finally sends the olm encrypted message to Bob's device.
+        atomic_bool is_sent(false);
+        bob_http->send_to_device<SecretRequest>(
+          bob_http->generate_txn_id(),
+          {{alice_http->user_id(), {{alice_http->device_id(), secretRequest}}}},
+          [&](RequestErr err) {
+                  check_error(err);
+
+                  alice_http->sync(opts, [&](const mtx::responses::Sync &res, RequestErr err) {
+                          check_error(err);
+
+                          mtx::events::DeviceEvent<mtx::events::msg::SecretSend> secretSend{};
+                          secretSend.content.secret = SECRET_TEXT;
+                          secretSend.content.request_id =
+                            std::get<mtx::events::DeviceEvent<mtx::events::msg::SecretRequest>>(
+                              res.to_device.events.at(0))
+                              .content.request_id;
+                          secretSend.type = mtx::events::EventType::SecretSend;
+
+                          json payload = secretSend;
+
+                          // Alice creates an outbound session.
+                          auto out_session =
+                            alice_olm->create_outbound_session(bob_curve25519, bob_otk);
+                          auto device_msg = alice_olm->create_olm_encrypted_content(
+                            out_session.get(),
+                            payload,
+                            UserId("@bob:localhost"),
+                            bob_olm->identity_keys().ed25519,
+                            bob_curve25519);
+
+                          std::map<mtx::identifiers::User,
+                                   std::map<std::string, mtx::events::msg::OlmEncrypted>>
+                            body{{bob_http->user_id(), {{bob_http->device_id(), device_msg}}}};
+                          alice_http->send_to_device<OlmEncrypted>(
+                            alice_http->generate_txn_id(), body, [&is_sent](RequestErr err) {
+                                    check_error(err);
+                                    is_sent = true;
+                            });
+                  });
+          });
+
+        WAIT_UNTIL(is_sent)
+
+        bob_http->sync(
+          opts,
+          [bob = bob_olm, SECRET_TEXT, REQUEST_ID](const mtx::responses::Sync &res,
+                                                   RequestErr err) {
+                  check_error(err);
+
+                  EXPECT_EQ(res.to_device.events.size(), 1);
+
+                  auto olm_msg =
+                    std::get<DeviceEvent<msgs::OlmEncrypted>>(res.to_device.events[0]).content;
+                  auto cipher = olm_msg.ciphertext.begin();
+
+                  EXPECT_EQ(cipher->first, bob->identity_keys().curve25519);
+
+                  const auto msg_body = cipher->second.body;
+                  const auto msg_type = cipher->second.type;
+
+                  assert(msg_type == 0);
+
+                  auto inbound_session = bob->create_inbound_session(msg_body);
+                  ASSERT_TRUE(matches_inbound_session_from(
+                    inbound_session.get(), olm_msg.sender_key, msg_body));
+
+                  auto output = bob->decrypt_message(inbound_session.get(), msg_type, msg_body);
+
+                  // Parsing the original plaintext json object.
+                  auto ev = json::parse(std::string_view((char *)output.data(), output.size()))
+                              .get<mtx::events::DeviceEvent<mtx::events::msg::SecretSend>>();
+
+                  ASSERT_EQ(ev.content.secret, SECRET_TEXT);
+                  ASSERT_EQ(ev.content.request_id, REQUEST_ID);
+          });
+
+        alice_http->close();
+        bob_http->close();
+}
+
 TEST(Encryption, PickleAccount)
 {
         auto alice = std::make_shared<OlmClient>();

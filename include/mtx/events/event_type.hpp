@@ -87,6 +87,11 @@ enum class EventType
         // m.call.hangup
         CallHangUp,
 
+        // m.secret.request
+        SecretRequest,
+        // m.secret.send
+        SecretSend,
+
         // custom events
         // im.nheko.hidden_events
         NhekoHiddenEvents,

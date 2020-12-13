@@ -114,6 +114,8 @@ parse_room_account_data_events(
                 case events::EventType::KeyVerificationAccept:
                 case events::EventType::KeyVerificationKey:
                 case events::EventType::KeyVerificationMac:
+                case events::EventType::SecretRequest:
+                case events::EventType::SecretSend:
                 case events::EventType::Presence:
                 case events::EventType::Reaction:
                 case events::EventType::RoomAliases:
@@ -554,6 +556,8 @@ parse_timeline_events(const json &events,
                 case events::EventType::Tag:              // Not part of the timeline or state
                 case events::EventType::Presence:         // Not part of the timeline or state
                 case events::EventType::PushRules:        // Not part of the timeline or state
+                case events::EventType::SecretRequest:    // Not part of the timeline or state
+                case events::EventType::SecretSend:       // Not part of the timeline or state
                 case events::EventType::Unsupported:
                 case events::EventType::NhekoHiddenEvents:
                         continue;
@@ -683,6 +687,22 @@ parse_device_events(const json &events,
                 case events::EventType::KeyVerificationDone:
                         try {
                                 container.emplace_back(events::DeviceEvent<KeyVerificationDone>(e));
+                        } catch (json::exception &err) {
+                                log_error(err, e);
+                        }
+
+                        break;
+                case events::EventType::SecretSend:
+                        try {
+                                container.emplace_back(events::DeviceEvent<SecretSend>(e));
+                        } catch (json::exception &err) {
+                                log_error(err, e);
+                        }
+
+                        break;
+                case events::EventType::SecretRequest:
+                        try {
+                                container.emplace_back(events::DeviceEvent<SecretRequest>(e));
                         } catch (json::exception &err) {
                                 log_error(err, e);
                         }
@@ -843,6 +863,8 @@ parse_state_events(const json &events,
                 case events::EventType::KeyVerificationAccept:
                 case events::EventType::KeyVerificationKey:
                 case events::EventType::KeyVerificationMac:
+                case events::EventType::SecretRequest:
+                case events::EventType::SecretSend:
                 case events::EventType::CallInvite:
                 case events::EventType::CallCandidates:
                 case events::EventType::CallAnswer:
@@ -994,6 +1016,8 @@ parse_stripped_events(const json &events,
                 case events::EventType::KeyVerificationAccept:
                 case events::EventType::KeyVerificationKey:
                 case events::EventType::KeyVerificationMac:
+                case events::EventType::SecretRequest:
+                case events::EventType::SecretSend:
                 case events::EventType::CallInvite:
                 case events::EventType::CallCandidates:
                 case events::EventType::CallAnswer:
