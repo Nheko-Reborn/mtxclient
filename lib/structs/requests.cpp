@@ -112,6 +112,29 @@ to_json(json &obj, const TypingNotification &request)
 }
 
 void
+to_json(json &obj, const PublicRoomsFilter &request)
+{
+        obj["generic_search_term"] = request.generic_search_term;
+}
+
+void
+to_json(json &obj, const PublicRooms &request)
+{
+        obj["limit"] = request.limit;
+        obj["since"] = request.since;
+        obj["filter"] = request.filter;
+
+        // Based on the spec, third_party_instance_id can only be used if
+        // include_all_networks is false. A case where the latter is true and
+        // the former is set is invalid.
+        if (request.include_all_networks && !request.third_party_instance_id.empty()) {
+                throw std::invalid_argument("third_party_instance_id id can only be set if include_all_networks is false");
+        }
+        obj["third_party_instance_id"] = request.third_party_instance_id;
+        obj["include_all_networks"] = !request.third_party_instance_id.empty();
+}
+
+void
 to_json(json &obj, const SignedOneTimeKey &request)
 {
         obj["key"]        = request.key;

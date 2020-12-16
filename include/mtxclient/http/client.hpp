@@ -449,11 +449,14 @@ public:
           ErrCallback callback);
 
         //! POST a new room listing to the public rooms directory.
-        void post_public_rooms(const std::string &server, const nhlomann::json &j, 
-                                Callback<mtx::responses::PublicRooms> cb); 
+        void post_public_rooms(const mtx::requests::PublicRooms &req, 
+                                Callback<mtx::responses::PublicRooms> cb, 
+                                const std::string &server = "matrix.org"); 
         //! GET the public rooms directory listing.
-        void get_public_rooms(int limit, const std::string &since, const std::string &server,
-                                Callback<mtx::responses::PublicRooms> cb);
+        void get_public_rooms(Callback<mtx::responses::PublicRooms> cb, 
+                                const std::string &server = "matrix.org", 
+                                int limit = std::numeric_limits<int>::max(), 
+                                const std::string &since = "");
         //
         // Group related endpoints.
         //

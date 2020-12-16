@@ -963,21 +963,27 @@ Client::send_to_device(const std::string &event_type,
 }
 
 void
-Client::post_public_rooms(const std::string &server, const nhlomann::json &j, 
-                                Callback<mtx::responses::PublicRooms> cb)
-{
-        const auto api_path = "/client/r0/publicRooms" + " " + server;
+Client::post_public_rooms(const mtx::requests::PublicRooms &req, 
+                                Callback<mtx::responses::PublicRooms> cb, const std::string &server)
+{       
+        const auto api_path = "/client/r0/publicRooms?" + 
+                                mtx::client::utils::query_params({{"server", server}});
         post<mtx::requests::PublicRooms, mtx::responses::PublicRooms>(
-        api_path, j, cb);    
+        api_path, req, cb);    
 }
 
 void
-Client::get_public_rooms(int limit, const std::string &since, const std::string &server,
-                                Callback<mtx::responses::PublicRooms> cb) 
+Client::get_public_rooms(Callback<mtx::responses::PublicRooms> cb, const std::string &server, 
+                        int limit, const std::string &since) 
 {
         const auto api_path = 
-        "/client/r0/publicRooms" + " " + std::to_string(limit) + " " + since + " " + server;
-        get<mtx::requests::PublicRooms, mtx::responses::PublicRooms>(api_path, cb);
+        "/client/r0/publicRooms" +
+         mtx::client::utils::query_params({{"server", server}, {"limit", std::to_string(limit)}, {"since", since}});
+        
+        get<mtx::responses::PublicRooms>(api_path, 
+                                        [cb](const mtx::responses::PublicRooms &res,
+                                             HeaderFields,
+                                             RequestErr err) { cb(res, err); });
 }
 
 

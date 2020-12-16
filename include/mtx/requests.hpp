@@ -5,7 +5,6 @@
 
 #include <mtx/common.hpp>
 #include <mtx/events/collections.hpp>
-#include <mtx/filters.hpp>
 #if __has_include(<nlohmann/json_fwd.hpp>)
 #include <nlohmann/json_fwd.hpp>
 #else
@@ -138,6 +137,15 @@ struct TypingNotification
 void
 to_json(json &obj, const TypingNotification &request);
 
+struct PublicRoomsFilter {
+    //! A string to search for in the room metadata,
+    //! e.g. name, topic, canonical alias etc. (Optional).
+    std::string generic_search_term;
+};
+
+void
+to_json(nlohmann::json &obj, const PublicRoomsFilter &req);
+
 //! Request payload for the `POST /_matrix/client/r0/publicRooms` endpoint.
 struct PublicRooms 
 {
@@ -149,7 +157,7 @@ struct PublicRooms
         //! rather than via an explicit flag.
         std::string since;
         //! Filter to apply to the results.
-        Filter filter;
+        PublicRoomsFilter filter;
         //! Whether or not to include all known networks/protocols from
         //! application services on the homeserver. Defaults to false.
         bool include_all_networks = false;
@@ -159,7 +167,7 @@ struct PublicRooms
 };
 
 void
-to_json(json &obj, const PostPublicRooms &request);
+to_json(json &obj, const PublicRooms &request);
 
 struct Empty
 {};
