@@ -451,11 +451,11 @@ public:
         //! POST a new room listing to the public rooms directory.
         void post_public_rooms(const mtx::requests::PublicRooms &req, 
                                 Callback<mtx::responses::PublicRooms> cb, 
-                                const std::string &server = "matrix.org"); 
+                                const std::string &server = ""); 
         //! GET the public rooms directory listing.
         void get_public_rooms(Callback<mtx::responses::PublicRooms> cb, 
-                                const std::string &server = "matrix.org", 
-                                int limit = std::numeric_limits<int>::max(), 
+                                const std::string &server = "", 
+                                size_t limit = 0, 
                                 const std::string &since = "");
         //
         // Group related endpoints.

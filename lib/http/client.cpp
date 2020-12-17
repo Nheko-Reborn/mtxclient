@@ -974,7 +974,7 @@ Client::post_public_rooms(const mtx::requests::PublicRooms &req,
 
 void
 Client::get_public_rooms(Callback<mtx::responses::PublicRooms> cb, const std::string &server, 
-                        int limit, const std::string &since) 
+                        size_t limit, const std::string &since) 
 {
         const auto api_path = 
         "/client/r0/publicRooms" +
