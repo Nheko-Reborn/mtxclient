@@ -14,27 +14,35 @@ $CMD perl -pi -w -e \
 (
 cat <<HEREDOC
 rc_message:
-  per_second: 1000
-  burst_count: 10000
+  per_second: 10000
+  burst_count: 100000
 
 rc_registration:
-  per_second: 1000
-  burst_count: 3000
+  per_second: 10000
+  burst_count: 30000
 
 rc_login:
   address:
-    per_second: 1000
-    burst_count: 3000
+    per_second: 10000
+    burst_count: 30000
   account:
-    per_second: 1000
-    burst_count: 3000
+    per_second: 10000
+    burst_count: 30000
   failed_attempts:
-    per_second: 1000
-    burst_count: 3000
+    per_second: 10000
+    burst_count: 30000
 
 rc_admin_redaction:
   per_second: 1000
   burst_count: 5000
+
+rc_joins:
+  local:
+    per_second: 10000
+    burst_count: 100000
+  remote:
+    per_second: 10000
+    burst_count: 100000
 HEREDOC
 ) | $CMD tee -a data/homeserver.yaml
 
