@@ -57,7 +57,9 @@ using DeviceEvents = std::variant<events::DeviceEvent<msgs::RoomKey>,
                                   events::DeviceEvent<msgs::KeyVerificationAccept>,
                                   events::DeviceEvent<msgs::KeyVerificationCancel>,
                                   events::DeviceEvent<msgs::KeyVerificationKey>,
-                                  events::DeviceEvent<msgs::KeyVerificationMac>>;
+                                  events::DeviceEvent<msgs::KeyVerificationMac>,
+                                  events::DeviceEvent<msgs::SecretRequest>,
+                                  events::DeviceEvent<msgs::SecretSend>>;
 
 //! Collection of room specific account data
 using RoomAccountDataEvents =
@@ -279,5 +281,11 @@ constexpr inline EventType to_device_content_to_type<mtx::events::msg::KeyVerifi
 template<>
 constexpr inline EventType to_device_content_to_type<mtx::events::msg::KeyVerificationMac> =
   EventType::KeyVerificationMac;
+template<>
+constexpr inline EventType to_device_content_to_type<mtx::events::msg::SecretSend> =
+  EventType::SecretSend;
+template<>
+constexpr inline EventType to_device_content_to_type<mtx::events::msg::SecretRequest> =
+  EventType::SecretRequest;
 } // namespace events
 } // namespace mtx

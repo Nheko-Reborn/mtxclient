@@ -45,6 +45,10 @@ public:
           : msg_(func + ": " + std::string(olm_pk_decryption_last_error(s)))
         {}
 
+        olm_exception(std::string func, OlmPkSigning *s)
+          : msg_(func + ": " + std::string(olm_pk_signing_last_error(s)))
+        {}
+
         olm_exception(std::string func, OlmOutboundGroupSession *s)
           : msg_(func + ": " + std::string(olm_outbound_group_session_last_error(s)))
         {}
@@ -112,6 +116,21 @@ struct SAS
 
 private:
         SASPtr sas;
+};
+
+struct PkSigning
+{
+        //! Construct from base64 key
+        static PkSigning from_seed(std::string seed);
+        std::string sign(const std::string &message);
+
+        //! base64 public key
+        std::string public_key() const { return public_key_; }
+
+private:
+        PkSigning() {}
+        std::unique_ptr<OlmPkSigning, OlmDeleter> signing;
+        std::string public_key_;
 };
 
 class OlmClient : public std::enable_shared_from_this<OlmClient>

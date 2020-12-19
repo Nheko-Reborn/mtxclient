@@ -14,6 +14,7 @@ struct OlmDeleter
         void operator()(OlmUtility *ptr) { delete[](reinterpret_cast<uint8_t *>(ptr)); }
 
         void operator()(OlmPkDecryption *ptr) { delete[](reinterpret_cast<uint8_t *>(ptr)); }
+        void operator()(OlmPkSigning *ptr) { delete[](reinterpret_cast<uint8_t *>(ptr)); }
 
         void operator()(OlmSession *ptr) { delete[](reinterpret_cast<uint8_t *>(ptr)); }
         void operator()(OlmOutboundGroupSession *ptr)
@@ -46,6 +47,13 @@ struct PkDecryptionObject
         {
                 return olm_pk_decryption(new uint8_t[olm_pk_decryption_size()]);
         }
+};
+
+struct PkSigningObject
+{
+        using olm_type = OlmPkSigning;
+
+        static olm_type *allocate() { return olm_pk_signing(new uint8_t[olm_pk_signing_size()]); }
 };
 
 struct AccountObject

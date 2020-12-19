@@ -529,6 +529,44 @@ SAS::calculate_mac(std::string input_data, std::string info)
         return to_string(output_buffer);
 }
 
+PkSigning
+PkSigning::from_seed(std::string seed)
+{
+        PkSigning s{};
+        s.signing = create_olm_object<PkSigningObject>();
+
+        auto seed_ = base642bin(seed);
+
+        auto pub_key_buffer = BinaryBuf(olm_pk_signing_public_key_length());
+        auto ret            = olm_pk_signing_key_from_seed(s.signing.get(),
+                                                pub_key_buffer.data(),
+                                                pub_key_buffer.size(),
+                                                seed_.data(),
+                                                seed_.size());
+
+        if (ret == olm_error())
+                throw olm_exception("signing_from_seed", s.signing.get());
+
+        s.public_key_ = to_string(pub_key_buffer);
+
+        return s;
+}
+
+std::string
+PkSigning::sign(const std::string &message)
+{
+        auto signature = BinaryBuf(olm_pk_signature_length());
+        auto message_  = to_binary_buf(message);
+
+        auto ret = olm_pk_sign(
+          signing.get(), message_.data(), message_.size(), signature.data(), signature.size());
+
+        if (ret == olm_error())
+                throw olm_exception("olm_pk_sign", signing.get());
+
+        return to_string(signature);
+}
+
 nlohmann::json
 OlmClient::create_olm_encrypted_content(OlmSession *session,
                                         nlohmann::json event,

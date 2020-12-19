@@ -395,6 +395,41 @@ from_json(const nlohmann::json &obj, KeyVerificationMac &event);
 void
 to_json(nlohmann::json &obj, const KeyVerificationMac &event);
 
+struct SecretRequest
+{
+        //! The type of request.
+        RequestAction action;
+
+        //! Required if action is request. The name of the secret that is being requested.
+        std::string name;
+
+        //! A unique identifier for this request.
+        std::string request_id;
+        //! The device requesting the keys.
+        std::string requesting_device_id;
+};
+
+void
+from_json(const nlohmann::json &obj, SecretRequest &event);
+
+void
+to_json(nlohmann::json &obj, const SecretRequest &event);
+
+struct SecretSend
+{
+        //! Required. The contents of the secret.
+        std::string secret;
+
+        //! A unique identifier for this request.
+        std::string request_id;
+};
+
+void
+from_json(const nlohmann::json &obj, SecretSend &event);
+
+void
+to_json(nlohmann::json &obj, const SecretSend &event);
+
 } // namespace msg
 } // namespace events
 } // namespace mtx

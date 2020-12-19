@@ -84,6 +84,10 @@ getEventType(const std::string &type)
                 return EventType::CallAnswer;
         else if (type == "m.call.hangup")
                 return EventType::CallHangUp;
+        else if (type == "m.secret.request")
+                return EventType::SecretRequest;
+        else if (type == "m.secret.send")
+                return EventType::SecretSend;
         else if (type == "im.nheko.hidden_events")
                 return EventType::NhekoHiddenEvents;
         else
@@ -168,6 +172,10 @@ to_string(EventType type)
                 return "m.call.answer";
         case EventType::CallHangUp:
                 return "m.call.hangup";
+        case EventType::SecretRequest:
+                return "m.secret.request";
+        case EventType::SecretSend:
+                return "m.secret.send";
         case EventType::NhekoHiddenEvents:
                 return "im.nheko.hidden_events";
         case EventType::Unsupported:
