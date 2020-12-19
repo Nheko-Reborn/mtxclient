@@ -50,27 +50,26 @@ TEST(MediaAPI, UploadTextFile)
 
                 const auto text = "This is some random text";
 
-                alice->upload(text,
-                              "text/plain",
-                              "doc.txt",
-                              [alice, text](const mtx::responses::ContentURI &res, RequestErr err) {
-                                      validate_upload(res, err);
+                alice->upload(
+                  text,
+                  "text/plain",
+                  "doc.txt",
+                  [alice, text](const mtx::responses::ContentURI &res, RequestErr err) {
+                          validate_upload(res, err);
 
-                                      alice->download(res.content_uri,
-                                                      [text](const string &data,
-                                                             const string &content_type,
-                                                             const string &original_filename,
-                                                             RequestErr err) {
-                                                              ASSERT_FALSE(err);
-                                                              EXPECT_EQ(data, text);
-                                                              EXPECT_EQ(
-                                                                content_type.substr(
-                                                                  0, std::size("text/plain") - 1),
-                                                                "text/plain");
-                                                              EXPECT_EQ(original_filename,
-                                                                        "doc.txt");
-                                                      });
-                              });
+                          alice->download(
+                            res.content_uri,
+                            [text](const string &data,
+                                   const string &content_type,
+                                   const string &original_filename,
+                                   RequestErr err) {
+                                    ASSERT_FALSE(err);
+                                    EXPECT_EQ(data, text);
+                                    EXPECT_EQ(content_type.substr(0, std::size("text/plain") - 1),
+                                              "text/plain");
+                                    EXPECT_EQ(original_filename, "doc.txt");
+                            });
+                  });
         });
 
         alice->close();
