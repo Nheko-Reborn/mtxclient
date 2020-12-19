@@ -13,6 +13,8 @@ $CMD perl -pi -w -e \
 
 (
 cat <<HEREDOC
+
+
 rc_message:
   per_second: 10000
   burst_count: 100000

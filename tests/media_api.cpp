@@ -63,7 +63,10 @@ TEST(MediaAPI, UploadTextFile)
                                                              RequestErr err) {
                                                               ASSERT_FALSE(err);
                                                               EXPECT_EQ(data, text);
-                                                              EXPECT_EQ(content_type, "text/plain");
+                                                              EXPECT_EQ(
+                                                                content_type.substr(
+                                                                  0, std::size("text/plain") - 1),
+                                                                "text/plain");
                                                               EXPECT_EQ(original_filename,
                                                                         "doc.txt");
                                                       });
