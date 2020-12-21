@@ -236,7 +236,7 @@ TEST(Pushrules, GetGlobalRuleset)
         client->login(
           "alice", "secret", [client](const mtx::responses::Login &res, RequestErr err) {
                   check_error(err);
-                  validate_login("@alice:localhost", res);
+                  validate_login("@alice:" + server_name(), res);
 
                   client->get_pushrules([](const mtx::pushrules::GlobalRuleset &, RequestErr err) {
                           EXPECT_TRUE(!err);
@@ -252,7 +252,7 @@ TEST(Pushrules, GetRuleset)
         client->login(
           "alice", "secret", [client](const mtx::responses::Login &res, RequestErr err) {
                   check_error(err);
-                  validate_login("@alice:localhost", res);
+                  validate_login("@alice:" + server_name(), res);
 
                   client->get_pushrules("global",
                                         "content",
@@ -272,7 +272,7 @@ TEST(Pushrules, PutAndDeleteRuleset)
         client->login(
           "alice", "secret", [client](const mtx::responses::Login &res, RequestErr err) {
                   check_error(err);
-                  validate_login("@alice:localhost", res);
+                  validate_login("@alice:" + server_name(), res);
 
                   mtx::pushrules::PushRule rule;
                   rule.pattern = "cake";
@@ -302,7 +302,7 @@ TEST(Pushrules, RulesetEnabled)
         client->login(
           "alice", "secret", [client](const mtx::responses::Login &res, RequestErr err) {
                   check_error(err);
-                  validate_login("@alice:localhost", res);
+                  validate_login("@alice:" + server_name(), res);
 
                   client->get_pushrules_enabled(
                     "global",
@@ -349,7 +349,7 @@ TEST(Pushrules, Actions)
         client->login(
           "alice", "secret", [client](const mtx::responses::Login &res, RequestErr err) {
                   check_error(err);
-                  validate_login("@alice:localhost", res);
+                  validate_login("@alice:" + server_name(), res);
 
                   mtx::pushrules::actions::Actions actions = {
                     {mtx::pushrules::actions::notify{},
@@ -383,7 +383,7 @@ TEST(Pushrules, RoomRuleMute)
         client->login(
           "alice", "secret", [client](const mtx::responses::Login &res, RequestErr err) {
                   check_error(err);
-                  validate_login("@alice:localhost", res);
+                  validate_login("@alice:" + server_name(), res);
 
                   mtx::requests::CreateRoom req;
                   req.name  = "Name";
@@ -393,7 +393,7 @@ TEST(Pushrules, RoomRuleMute)
                     req, [client](const mtx::responses::CreateRoom &res, RequestErr err) {
                             check_error(err);
                             ASSERT_TRUE(res.room_id.localpart().size() > 10);
-                            EXPECT_EQ(res.room_id.hostname(), "localhost");
+                            EXPECT_EQ(res.room_id.hostname(), server_name());
 
                             mtx::pushrules::PushRule rule;
                             rule.actions = {mtx::pushrules::actions::dont_notify{}};
@@ -423,7 +423,7 @@ TEST(Pushrules, RoomRuleMentions)
         client->login(
           "alice", "secret", [client](const mtx::responses::Login &res, RequestErr err) {
                   check_error(err);
-                  validate_login("@alice:localhost", res);
+                  validate_login("@alice:" + server_name(), res);
 
                   mtx::requests::CreateRoom req;
                   req.name  = "Name";
@@ -433,7 +433,7 @@ TEST(Pushrules, RoomRuleMentions)
                     req, [client](const mtx::responses::CreateRoom &res, RequestErr err) {
                             check_error(err);
                             ASSERT_TRUE(res.room_id.localpart().size() > 10);
-                            EXPECT_EQ(res.room_id.hostname(), "localhost");
+                            EXPECT_EQ(res.room_id.hostname(), server_name());
 
                             mtx::pushrules::PushRule rule;
                             rule.actions = {mtx::pushrules::actions::dont_notify{}};

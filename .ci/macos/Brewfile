@@ -1,0 +1,7 @@
+tap "nlohmann/json"
+
+brew "pkg-config"
+brew "cmake"
+brew "ninja"
+brew "openssl"
+brew "nlohmann_json"

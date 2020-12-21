@@ -255,7 +255,8 @@ struct KeySignaturesUpload
 void
 to_json(json &obj, const KeySignaturesUpload &req);
 
-struct PusherData {
+struct PusherData
+{
         //! Required if `kind` is http. The URL to use to send notifications to.
         //! MUST be an HTTPS URL with a path of /_matrix/push/v1/notify.
         std::string url;
@@ -270,7 +271,8 @@ void
 to_json(json &obj, const PusherData &data);
 
 //! Request payload for the `POST /_matrix/client/r0/pushers/set` endpoint.
-struct SetPusher {
+struct SetPusher
+{
         //! Required. Unique identifier for this pusher.
         std::string pushkey;
         //! Required. The kind of pusher to configure. "http" makes a pusher that sends HTTP pokes.
@@ -280,7 +282,8 @@ struct SetPusher {
         //! Required. This is a reverse-DNS style identifier for the application.
         //! If the `kind` is "email", this is "m.email".
         std::string app_id;
-        //! Required. A string that will allow the user to identify what application owns this pusher.
+        //! Required. A string that will allow the user to identify what application owns this
+        //! pusher.
         std::string app_display_name;
         //! Required. A string that will allow the user to identify what device owns this pusher.
         std::string device_display_name;

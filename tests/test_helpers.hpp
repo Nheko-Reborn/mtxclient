@@ -50,11 +50,17 @@ check_error(mtx::http::RequestErr err)
         ASSERT_FALSE(err);
 }
 
+inline std::string
+server_name()
+{
+        const char *server_ = std::getenv("MTXCLIENT_SERVER");
+        return server_ ? server_ : std::string("localhost");
+}
+
 inline auto
 make_test_client()
 {
-        const char *server = std::getenv("MTXCLIENT_SERVER");
-        auto client        = std::make_shared<mtx::http::Client>(server ? server : "localhost");
+        auto client = std::make_shared<mtx::http::Client>(server_name(), 8008);
         client->verify_certificates(false);
         return client;
 }
