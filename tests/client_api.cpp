@@ -1564,49 +1564,73 @@ TEST(Groups, Profiles)
 
 TEST(ClientAPI, PublicRooms)  
 {
-        std::shared_ptr<Client> mtx_client = std::make_shared<Client>("localhost");
-        mtx_client->login("alice", "secret", [mtx_client](const mtx::responses::Login &, RequestErr err) {
+        // Setup : Create a new (public) room with some settings, add a user to the room
+        auto alice = std::make_shared<Client>("localhost");
+        auto bob   = std::make_shared<Client>("localhost");
+
+        alice->login("alice", "secret", [alice](const mtx::responses::Login &, RequestErr err) {
                 check_error(err);
         });
 
-        while (mtx_client->access_token().empty()) {
-                sleep();
-        }
+        bob->login("bob", "secret", [bob](const mtx::responses::Login &, RequestErr err) {
+                check_error(err);
+        });
 
-        // create a new public room
+        while (alice->access_token().empty() || bob->access_token().empty())
+                sleep();
+
         mtx::requests::CreateRoom req;
         req.name = "Public Room";
         req.topic = "Test";
         req.visibility = Visibility::Public;
 
-        mtx_client->create_room(req, [](const mtx::responses::CreateRoom &res, RequestErr err){
+        alice->create_room(
+                req, [alice, bob](const mtx::responses::CreateRoom &res, RequestErr err){
                 check_error(err);
-                EXPECT_EQ(res.room_id.hostname(), "localhost");
+                auto room_id = res.room_id.to_string();
+                // room_id = id;
+                bob->join_room(room_id, [](const mtx::responses::RoomId &, RequestErr err) {
+                        check_error(err);
+                });
+
+                // TEST 1: endpoints to set and get the visibility of the room we just created
+                json body = {{"visibility", "public"}};
+                alice->put_room_visibility(room_id, body, [alice](RequestErr err){
+                        check_error(err);
+                });
+
+                alice->get_room_visibility
+                (room_id, [alice](const mtx::responses::RoomVisibility &res, RequestErr err){
+                        check_error(err);
+                        EXPECT_EQ(visibilityToString(res.visibility), "public");
+                });
+
+                alice->get_room_visibility
+                ("", [alice](const mtx::responses::RoomVisibility &, RequestErr err) {
+                        ASSERT_TRUE(err);
+                        EXPECT_EQ(mtx::errors::to_string(err->matrix_error.errcode),
+                        "M_NOT_FOUND");
+                });
+
+                // TEST 2: endpoints to add and list the public rooms on the server 
+                mtx::requests::PublicRooms room_req;
+                room_req.limit = 1;
+                room_req.include_all_networks = true;
+
+                alice->post_public_rooms
+                (room_req, [alice](const mtx::responses::PublicRooms &, RequestErr err) {
+                        check_error(err);
+                });
+
+                alice->get_public_rooms
+                ([alice](const mtx::responses::PublicRooms &res, RequestErr err) {
+                        check_error(err);
+                        EXPECT_EQ(res.chunk[0].name, "Public Room");
+                        EXPECT_EQ(res.chunk[0].topic, "Test");
+                        EXPECT_EQ(res.chunk[0].num_joined_members, 2);
+                });
         });
 
-        // TODO: should we add in a user so that we can then check that the public room should
-        // have one user in the room?
-
-        // construct a POST request to update the room directory, then GET the listing
-        // of public rooms and verify that the room info stored in the chunk field matches
-        // the room we just created.
-        nlohmann::json j = {
-                {"limit", 1},
-                {"include_all_networks", false},
-                {"third_party_instance_id", "irc"}
-        }; 
-
-        mtx_client->post_public_rooms
-        (j, [mtx_client](const mtx::responses::PublicRooms &, RequestErr err) {
-                check_error(err);
-        });
-
-        mtx_client->get_public_rooms
-        (1, [mtx_client](const mtx::responses::PublicRooms &res, RequestErr err) {
-                check_error(err);
-                EXPECT_EQ(res.chunk[0].name, "Public Room");
-                EXPECT_EQ(res.chunk[0].topic, "Test");
-        });
-
-        mtx_client->close(); 
+        alice->close();
+        bob->close();  
 }

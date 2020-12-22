@@ -1083,7 +1083,19 @@ TEST(Responses, TurnServer)
         EXPECT_EQ(turnServer.ttl, 86400);
 }
 
-TEST(Responses, PublicRooms) {
+TEST(Responses, RoomVisibility)
+{
+        json data = {{"visibility", "public"}};
+        RoomVisibility roomVisibility = data;
+        EXPECT_EQ(roomVisibility.visibility, mtx::responses::Visibility::Public);
+
+        data = {{"visibility", "private"}};
+        roomVisibility = data;
+        EXPECT_EQ(roomVisibility.visibility, mtx::responses::Visibility::Private);
+}
+
+TEST(Responses, PublicRooms) 
+{
         json data = R"({
           "chunk": [
             {
@@ -1102,7 +1114,7 @@ TEST(Responses, PublicRooms) {
           "next_batch": "p190q",
           "prev_batch": "p1902",
           "total_room_count_estimate": 115
-        })" _json;
+        })"_json;
 
         PublicRooms publicRooms = data;
         EXPECT_EQ(publicRooms.chunk.size(), 1);
@@ -1114,7 +1126,7 @@ TEST(Responses, PublicRooms) {
         EXPECT_EQ(chunk.name, "CHEESE");
         EXPECT_EQ(chunk.num_joined_members, 37);
         EXPECT_EQ(chunk.room_id, "!ol19s:bleecker.street");
-        EXPECT_EQ(chunk.topic);
+        EXPECT_EQ(chunk.topic, "Tasty tasty cheese");
         EXPECT_EQ(publicRooms.next_batch, "p190q");
         EXPECT_EQ(publicRooms.prev_batch, "p1902");
         EXPECT_EQ(publicRooms.total_room_count_estimate, 115);
