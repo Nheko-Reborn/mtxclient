@@ -25,6 +25,9 @@ enum class Visibility
         Public,
 };
 
+std::string
+visibilityToString(Visibility visibility);
+
 //! Convenience parameter for setting various default state events based on a preset.
 enum class Preset
 {
@@ -136,6 +139,16 @@ struct TypingNotification
 
 void
 to_json(json &obj, const TypingNotification &request);
+
+//! Request payload for the `PUT /_matrix/client/r0/directory/list/room/{roomId}` endpoint
+struct RoomVisibility
+{
+        //! The new visibility setting for the room. Defaults to 'public'. One of: ["private", "public"]
+        Visibility visibility;
+};
+
+void
+to_json(json &obj, const RoomVisibility &request);
 
 struct PublicRoomsFilter {
     //! A string to search for in the room metadata,

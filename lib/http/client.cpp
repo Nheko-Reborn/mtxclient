@@ -963,6 +963,30 @@ Client::send_to_device(const std::string &event_type,
 }
 
 void
+Client::get_room_visibility(const std::string &room_id,
+                            Callback<mtx::responses::RoomVisibility> cb)
+{
+        const auto api_path = "/client/r0/directory/list/room/" +
+                               mtx::client::utils::url_encode(room_id);
+
+        get<mtx::responses::RoomVisibility>(api_path,
+                                            [cb](const mtx::responses::RoomVisibility &res,
+                                                  HeaderFields,
+                                                  RequestErr err) { cb(res, err); });
+}
+
+void 
+Client::put_room_visibility(const std::string &room_id,
+                                 const nlohmann::json &body,
+                                 ErrCallback cb)
+{
+        const auto api_path = "/client/r0/directory/list/room/"
+                                + mtx::client::utils::url_encode(room_id);
+        
+        put<nlohmann::json>(api_path, body, cb);
+}
+
+void
 Client::post_public_rooms(const mtx::requests::PublicRooms &req, 
                                 Callback<mtx::responses::PublicRooms> cb, const std::string &server)
 {       

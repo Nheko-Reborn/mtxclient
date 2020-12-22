@@ -7,6 +7,12 @@ namespace mtx {
 namespace responses {
 
 void
+from_json(const nlohmann::json &obj, RoomVisibilityResponse &res)
+{
+    res.visibility = stringToVisibility(obj.at("visibility").get<std::string>());
+}
+
+void
 from_json(const nlohmann::json &obj, PublicRoomsChunk &res) 
 {
     res.aliases = obj.at("aliases").get<std::vector<std::string>>();

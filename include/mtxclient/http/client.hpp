@@ -43,6 +43,7 @@ struct Login;
 struct QueryKeys;
 struct ClaimKeys;
 struct UploadKeys;
+struct RoomVisibility;
 struct PublicRooms;
 }
 namespace responses {
@@ -70,6 +71,7 @@ struct TurnServer;
 struct UploadKeys;
 struct Versions;
 struct WellKnown;
+struct RoomVisibility;
 struct PublicRooms;
 namespace backup {
 struct SessionBackup;
@@ -448,15 +450,27 @@ public:
           const std::map<mtx::identifiers::User, std::map<std::string, EventContent>> &messages,
           ErrCallback callback);
 
-        //! POST a new room listing to the public rooms directory.
-        void post_public_rooms(const mtx::requests::PublicRooms &req, 
-                                Callback<mtx::responses::PublicRooms> cb, 
-                                const std::string &server = ""); 
-        //! GET the public rooms directory listing.
+        //! Gets the visibility of a given room on the server's public room directory.
+        void get_room_visibility(const std::string &room_id,
+                                 Callback<mtx::responses::RoomVisibility> cb);
+
+        //! Sets the visibility of a given room in the server's public room directory.
+        void put_room_visibility(const std::string &room_id,
+                                 const nlohmann::json &body,
+                                 ErrCallback cb);
+
+        //! Lists the public rooms on the server. This API returns paginated responses.
+        //! The rooms are ordered by the number of joined members, with the largest rooms first.
         void get_public_rooms(Callback<mtx::responses::PublicRooms> cb, 
                                 const std::string &server = "", 
                                 size_t limit = 0, 
                                 const std::string &since = "");
+        
+        //! Lists the public rooms on the server, with optional filter. POST Request.
+        void post_public_rooms(const mtx::requests::PublicRooms &req, 
+                                Callback<mtx::responses::PublicRooms> cb, 
+                                const std::string &server = ""); 
+
         //
         // Group related endpoints.
         //

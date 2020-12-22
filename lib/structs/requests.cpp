@@ -112,6 +112,12 @@ to_json(json &obj, const TypingNotification &request)
 }
 
 void
+to_json(json &obj, const RoomVisibility &request)
+{
+        obj["visibility"] = visibilityToString(request.visibility);
+}
+
+void
 to_json(json &obj, const PublicRoomsFilter &request)
 {
         obj["generic_search_term"] = request.generic_search_term;
