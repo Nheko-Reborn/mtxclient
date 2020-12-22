@@ -322,7 +322,7 @@ TEST(Requests, PublicRooms)
   b2.limit = 10;
   b2.third_party_instance_id = "matrix";
   j = b2;
-  EXPECT_EQ(j.dump(), R"({
+  EXPECT_EQ(j, R"({
     "limit" : 10,
     "include_all_networks" : false,
     "third_party_instance_id" : "matrix"
