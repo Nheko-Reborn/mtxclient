@@ -120,7 +120,7 @@ mtx::http::Client::prepare_callback(HeadersCallback<Response> callback)
                         // doesn't return an error struct for non 200 requests.
                         try {
                                 response_data = client::utils::deserialize<Response>(body);
-                        } catch (const nlohmann::json::exception &e) {
+                        } catch (const nlohmann::json::exception &) {
                         }
 
                         // The homeserver should return an error struct.
