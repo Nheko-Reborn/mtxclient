@@ -19,8 +19,8 @@ OlmClient::create_new_account()
 {
         account_ = create_olm_object<AccountObject>();
 
-        auto tmp_buf  = create_buffer(olm_create_account_random_length(account_.get()));
-        auto ret = olm_create_account(account_.get(), tmp_buf.data(), tmp_buf.size());
+        auto tmp_buf = create_buffer(olm_create_account_random_length(account_.get()));
+        auto ret     = olm_create_account(account_.get(), tmp_buf.data(), tmp_buf.size());
 
         if (ret == olm_error())
                 throw olm_exception("create_new_account", account_.get());
@@ -190,7 +190,7 @@ OlmClient::init_inbound_group_session(const std::string &session_key)
 {
         auto session = create_olm_object<InboundSessionObject>();
 
-        auto temp     = session_key;
+        auto temp      = session_key;
         const auto ret = olm_init_inbound_group_session(
           session.get(), reinterpret_cast<const uint8_t *>(temp.data()), temp.size());
 
@@ -205,7 +205,7 @@ OlmClient::import_inbound_group_session(const std::string &session_key)
 {
         auto session = create_olm_object<InboundSessionObject>();
 
-        auto temp     = session_key;
+        auto temp      = session_key;
         const auto ret = olm_import_inbound_group_session(
           session.get(), reinterpret_cast<const uint8_t *>(temp.data()), temp.size());
 
@@ -232,11 +232,11 @@ OlmClient::decrypt_group_message(OlmInboundGroupSession *session,
         std::copy(message.begin(), message.end(), tmp_msg.begin());
 
         const std::size_t nbytes = olm_group_decrypt(session,
-                                             tmp_msg.data(),
-                                             tmp_msg.size(),
-                                             plaintext.data(),
-                                             plaintext.size(),
-                                             &message_index);
+                                                     tmp_msg.data(),
+                                                     tmp_msg.size(),
+                                                     plaintext.data(),
+                                                     plaintext.size(),
+                                                     &message_index);
 
         if (nbytes == olm_error())
                 throw olm_exception("olm_group_decrypt", session);
@@ -253,11 +253,12 @@ OlmClient::encrypt_group_message(OlmOutboundGroupSession *session, const std::st
         auto encrypted_len     = olm_group_encrypt_message_length(session, plaintext.size());
         auto encrypted_message = create_buffer(encrypted_len);
 
-        const std::size_t nbytes = olm_group_encrypt(session,
-                                             reinterpret_cast<const uint8_t *>(plaintext.data()),
-                                             plaintext.size(),
-                                             encrypted_message.data(),
-                                             encrypted_message.size());
+        const std::size_t nbytes =
+          olm_group_encrypt(session,
+                            reinterpret_cast<const uint8_t *>(plaintext.data()),
+                            plaintext.size(),
+                            encrypted_message.data(),
+                            encrypted_message.size());
 
         if (nbytes == olm_error())
                 throw olm_exception("olm_group_encrypt", session);
@@ -299,12 +300,12 @@ OlmClient::encrypt_message(OlmSession *session, const std::string &msg)
         auto random_buf = create_buffer(olm_encrypt_random_length(session));
 
         const auto ret = olm_encrypt(session,
-                                    msg.data(),
-                                    msg.size(),
-                                    random_buf.data(),
-                                    random_buf.size(),
-                                    ciphertext.data(),
-                                    ciphertext.size());
+                                     msg.data(),
+                                     msg.size(),
+                                     random_buf.data(),
+                                     random_buf.size(),
+                                     ciphertext.data(),
+                                     ciphertext.size());
         if (ret == olm_error())
                 throw olm_exception("olm_encrypt", session);
 
@@ -331,11 +332,11 @@ OlmClient::create_inbound_session_from(const std::string &their_curve25519,
         std::copy(one_time_key_message.begin(), one_time_key_message.end(), tmp.begin());
 
         std::size_t ret = olm_create_inbound_session_from(session.get(),
-                                                  account(),
-                                                  their_curve25519.data(),
-                                                  their_curve25519.size(),
-                                                  (void *)tmp.data(),
-                                                  tmp.size());
+                                                          account(),
+                                                          their_curve25519.data(),
+                                                          their_curve25519.size(),
+                                                          (void *)tmp.data(),
+                                                          tmp.size());
 
         if (ret == olm_error())
                 throw olm_exception("create_inbound_session_from", session.get());
@@ -386,13 +387,13 @@ OlmClient::create_outbound_session(const std::string &identity_key, const std::s
         auto random_buf = create_buffer(olm_create_outbound_session_random_length(session.get()));
 
         const auto ret = olm_create_outbound_session(session.get(),
-                                                    account(),
-                                                    identity_key.data(),
-                                                    identity_key.size(),
-                                                    one_time_key.data(),
-                                                    one_time_key.size(),
-                                                    random_buf.data(),
-                                                    random_buf.size());
+                                                     account(),
+                                                     identity_key.data(),
+                                                     identity_key.size(),
+                                                     one_time_key.data(),
+                                                     one_time_key.size(),
+                                                     random_buf.data(),
+                                                     random_buf.size());
 
         if (ret == olm_error())
                 throw olm_exception("create_outbound_session", session.get());
@@ -458,10 +459,10 @@ SAS::generate_bytes_decimal(std::string info)
         output_list.resize(3);
 
         const auto ret = olm_sas_generate_bytes(this->sas.get(),
-                                               input_info_buffer.data(),
-                                               input_info_buffer.size(),
-                                               output_buffer.data(),
-                                               output_buffer.size());
+                                                input_info_buffer.data(),
+                                                input_info_buffer.size(),
+                                                output_buffer.data(),
+                                                output_buffer.size());
 
         if (ret == olm_error())
                 throw olm_exception("get_bytes_decimal", this->sas.get());
@@ -487,10 +488,10 @@ SAS::generate_bytes_emoji(std::string info)
         output_list.resize(7);
 
         const auto ret = olm_sas_generate_bytes(this->sas.get(),
-                                               input_info_buffer.data(),
-                                               input_info_buffer.size(),
-                                               output_buffer.data(),
-                                               output_buffer.size());
+                                                input_info_buffer.data(),
+                                                input_info_buffer.size(),
+                                                output_buffer.data(),
+                                                output_buffer.size());
 
         if (ret == olm_error())
                 throw olm_exception("get_bytes_emoji", this->sas.get());
@@ -516,12 +517,12 @@ SAS::calculate_mac(std::string input_data, std::string info)
         auto output_buffer     = BinaryBuf(olm_sas_mac_length(this->sas.get()));
 
         const auto ret = olm_sas_calculate_mac(this->sas.get(),
-                                              input_data_buffer.data(),
-                                              input_data_buffer.size(),
-                                              info_buffer.data(),
-                                              info_buffer.size(),
-                                              output_buffer.data(),
-                                              output_buffer.size());
+                                               input_data_buffer.data(),
+                                               input_data_buffer.size(),
+                                               info_buffer.data(),
+                                               info_buffer.size(),
+                                               output_buffer.data(),
+                                               output_buffer.size());
 
         if (ret == olm_error())
                 throw olm_exception("calculate_mac", this->sas.get());
@@ -744,6 +745,7 @@ mtx::crypto::encrypt_exported_sessions(const mtx::crypto::ExportedSessionKeys &k
         const auto plaintext = json(keys).dump();
 
         auto nonce = create_buffer(AES_BLOCK_SIZE);
+        nonce[63 / 8] &= ~(1UL << (63 % 8));
 
         auto salt = create_buffer(pwhash_SALTBYTES);
 

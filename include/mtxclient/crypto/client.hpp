@@ -75,7 +75,7 @@ template<class T>
 std::string
 pickle(typename T::olm_type *object, const std::string &key)
 {
-        auto tmp      = create_buffer(T::pickle_length(object));
+        auto tmp       = create_buffer(T::pickle_length(object));
         const auto ret = T::pickle(object, key.data(), key.size(), tmp.data(), tmp.size());
 
         if (ret == olm_error())

@@ -182,7 +182,8 @@ AES_CTR_256_Encrypt(const std::string plaintext, const BinaryBuf aes256Key, Bina
 
         uint8_t *iv_data = iv.data();
         // need to set bit 63 to 0
-        iv_data[63%8] &= ~(1UL << (63/8));
+        iv_data[63 % 8] &= ~(1UL << (63 / 8));
+        //*iv_data &= ~(1UL << (63));
 
         /* Create and initialise the context */
         if (!(ctx = EVP_CIPHER_CTX_new())) {
@@ -385,6 +386,7 @@ encrypt_file(const std::string &plaintext)
         // iv has to be 16 bytes, key 32!
         BinaryBuf key = create_buffer(32);
         BinaryBuf iv  = create_buffer(16);
+        iv[63 % 8] &= ~(1UL << (63 / 8));
 
         BinaryBuf cyphertext = AES_CTR_256_Encrypt(plaintext, key, iv);
 
@@ -434,7 +436,13 @@ HMAC_SHA256(const BinaryBuf hmacKey, const BinaryBuf data)
 {
         unsigned int len = SHA256_DIGEST_LENGTH;
         unsigned char digest[SHA256_DIGEST_LENGTH];
-        HMAC(EVP_sha256(), hmacKey.data(), (int)hmacKey.size(), data.data(), data.size(), digest, &len);
+        HMAC(EVP_sha256(),
+             hmacKey.data(),
+             (int)hmacKey.size(),
+             data.data(),
+             data.size(),
+             digest,
+             &len);
         BinaryBuf output(digest, digest + SHA256_DIGEST_LENGTH);
         return output;
 }
