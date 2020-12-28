@@ -76,9 +76,9 @@ std::string
 pickle(typename T::olm_type *object, const std::string &key)
 {
         auto tmp      = create_buffer(T::pickle_length(object));
-        const int ret = T::pickle(object, key.data(), key.size(), tmp.data(), tmp.size());
+        const auto ret = T::pickle(object, key.data(), key.size(), tmp.data(), tmp.size());
 
-        if (ret == -1)
+        if (ret == olm_error())
                 throw olm_exception("pickle", object);
 
         return std::string((char *)tmp.data(), tmp.size());
