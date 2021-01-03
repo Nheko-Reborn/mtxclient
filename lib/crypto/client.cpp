@@ -836,7 +836,7 @@ mtx::crypto::decrypt_exported_sessions(const std::string &data, std::string pass
         auto hmacSha256 = mtx::crypto::HMAC_SHA256(hmac256, BinaryBuf(binary_start, json_end));
 
         if (hmacSha256 != hmac) {
-                throw sodium_exception{"decrypt_exported_sessions", "HMAC doesn't match"};
+                throw crypto_exception{"decrypt_exported_sessions", "HMAC doesn't match"};
         }
 
         const std::string ciphertext(json.begin(), json.end());

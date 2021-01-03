@@ -25,7 +25,7 @@ from_json(const nlohmann::json &obj, Redaction &event);
 void
 to_json(nlohmann::json &obj, const Redaction &event);
 
-//! Stripped out contente for redacted events.
+//! Stripped out content for redacted events.
 struct Redacted
 {};
 

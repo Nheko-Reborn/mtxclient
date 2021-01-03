@@ -16,6 +16,7 @@ namespace mtx {
 namespace events {
 namespace msg {
 
+//! Content of `m.room.message` with msgtype `m.image`.
 struct Image
 {
         // A textual representation of the image. This could be
@@ -34,6 +35,7 @@ struct Image
         mtx::common::ReplyRelatesTo relates_to;
 };
 
+//! Content of `m.sticker`.
 struct StickerImage
 {
         // A textual representation of the image. This could be

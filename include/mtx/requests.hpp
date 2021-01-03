@@ -163,7 +163,7 @@ struct UploadKeys
         //! May be absent if no new identity keys are required.
         mtx::crypto::DeviceKeys device_keys;
         //! One-time public keys for "pre-key" messages.
-        //! The names of the properties should be in the format <algorithm>:<key_id>.
+        //! The names of the properties should be in the format `<algorithm>:<key_id>`.
         //! The format of the key is determined by the key algorithm.
         std::map<std::string, std::variant<std::string, SignedOneTimeKey>> one_time_keys;
 };

@@ -12,8 +12,9 @@ namespace mtx {
 namespace events {
 namespace state {
 
-//! Content for the `m.room.topic` state event.
-//! A topic is a short message detailing what is currently being discussed in the room.
+/// @brief Content for the `m.room.topic` state event.
+//
+/// A topic is a short message detailing what is currently being discussed in the room.
 struct Topic
 {
         //! The topic text.

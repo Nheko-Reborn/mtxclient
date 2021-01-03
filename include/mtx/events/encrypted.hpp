@@ -14,10 +14,11 @@ namespace mtx {
 namespace events {
 namespace msg {
 
+//! Display methods for Short Authentication Strings
 enum class SASMethods
 {
-        Decimal,
-        Emoji,
+        Decimal, //!< Display 3 times 4 digits
+        Emoji,   //! Display 7 emoji
         Unsupported
 };
 
@@ -27,12 +28,11 @@ from_json(const nlohmann::json &obj, SASMethods &method);
 void
 to_json(nlohmann::json &obj, const SASMethods &method);
 
-//! TODO: Implement more if the verification methods ever change in KeyVerificationAccept
-//! or otherwise
+//! The different verification methods
 enum class VerificationMethods
 {
-        SASv1,
-        Unsupported
+        SASv1,      //!< Short Authentication Strings
+        Unsupported //!< Unsupported method
 };
 
 void
@@ -41,9 +41,15 @@ from_json(const nlohmann::json &obj, VerificationMethods &method);
 void
 to_json(nlohmann::json &obj, const VerificationMethods &method);
 
+//! Content of an individual message encrypted for a certain key.
 struct OlmCipherContent
 {
+        //! Ciphertext of the message.
         std::string body;
+        /// @brief Olm message type.
+        ///
+        /// `0` for initial pre-key messages.
+        /// `1` for normal messages after the initial exchange.
         uint8_t type;
 };
 
@@ -56,10 +62,13 @@ to_json(nlohmann::json &obj, const OlmCipherContent &event);
 //! Content of the `m.room.encrypted` Olm event.
 struct OlmEncrypted
 {
+        //! Algorithm used for encrypting this event.
         std::string algorithm;
+        //! curve25519 key of the sender.
         std::string sender_key;
 
         using RecipientKey = std::string;
+        //! Map of recipient curve25519 key to the encrypted message.
         std::map<RecipientKey, OlmCipherContent> ciphertext;
 };
 
@@ -98,10 +107,13 @@ to_json(nlohmann::json &obj, const Encrypted &event);
 //! Content of the `m.room_key` event.
 struct RoomKey
 {
+        /// @brief *Required.* The encryption algorithm the key in this event is to be used with.
+        ///
+        /// Must be 'm.megolm.v1.aes-sha2'.
         std::string algorithm;
-        std::string room_id;
-        std::string session_id;
-        std::string session_key;
+        std::string room_id;     //!< *Required.* The room where the key is used.
+        std::string session_id;  //!< *Required.* The ID of the session that the key is for.
+        std::string session_key; //!< *Required.* The key to be exchanged.
 };
 
 void
@@ -113,12 +125,26 @@ to_json(nlohmann::json &obj, const RoomKey &event);
 //! Content of the `m.forwarded_room_key` event.
 struct ForwardedRoomKey
 {
+        /// @brief *Required.* The encryption algorithm the key in this event is to be used with.
         std::string algorithm;
-        std::string room_id;
-        std::string session_id;
-        std::string session_key;
+        std::string room_id;     //!< *Required.* The room where the key is used.
+        std::string session_id;  //!< *Required.* The ID of the session that the key is for.
+        std::string session_key; //!< *Required.* The key to be exchanged.
+
+        //! *Required.* The Curve25519 key of the device which initiated the session originally.
         std::string sender_key;
+        /// @brief *Required.* The Ed25519 key of the device which initiated the session originally.
+        ///
+        /// It is 'claimed' because the receiving device has no way to tell that the original
+        /// room_key actually came from a device which owns the private part of this key unless they
+        /// have done device verification.
         std::string sender_claimed_ed25519_key;
+        /// @brief *Required.* Chain of Curve25519 keys.
+        ///
+        /// It starts out empty, but each time the key is forwarded to another device, the previous
+        /// sender in the chain is added to the end of the list. For example, if the key is
+        /// forwarded from A to B to C, this field is empty between A and B, and contains A's
+        /// Curve25519 key between B and C.
         std::vector<std::string> forwarding_curve25519_key_chain;
 };
 
@@ -128,14 +154,12 @@ from_json(const nlohmann::json &obj, ForwardedRoomKey &event);
 void
 to_json(nlohmann::json &obj, const ForwardedRoomKey &event);
 
+//! The type of key request.
 enum class RequestAction
 {
-        // request
-        Request,
-        // request_cancellation
-        Cancellation,
-        // not handled
-        Unknown,
+        Request,      //!< request
+        Cancellation, //!< request_cancellation
+        Unknown,      //!< Unknown request action
 };
 
 void
@@ -144,13 +168,15 @@ from_json(const nlohmann::json &obj, RequestAction &action);
 void
 to_json(nlohmann::json &obj, const RequestAction &action);
 
+//! A request to share a session key.
 struct KeyRequest
 {
         //! The type of request.
         RequestAction action;
 
-        //! The encryption algorithm of the session we want keys for.
-        //! Always m.megolm.v1.aes-sha2.
+        /// @brief The encryption algorithm of the session we want keys for.
+        ///
+        /// Always m.megolm.v1.aes-sha2.
         std::string algorithm;
         //! The room in which the session was created.
         std::string room_id;
@@ -204,31 +230,44 @@ struct KeyVerificationStart
 {
         //! The device ID which is initiating the process.
         std::string from_device;
-        //! An opaque identifier for the verification process. Must be unique with respect to the
-        //! devices involved. Must be the same as the transaction_id given in the
-        //! m.key.verification.request if this process is originating from a request.
+        /// @brief An opaque identifier for the verification process.
+        ///
+        /// Must be unique with respect to the devices involved. Must be the same as the
+        /// transaction_id given in the `m.key.verification.request` if this process is originating
+        /// from a request.
+        /// @note Used in verification via to_device messaging
         std::optional<std::string> transaction_id;
         //! The verification method to use. Must be 'm.sas.v1'
         VerificationMethods method = VerificationMethods::SASv1;
-        //! Optional method to use to verify the other user's key with. Applicable when the method
-        //! chosen only verifies one user's key. This field will never be present if the method
-        //! verifies keys both ways.
-        //! NOTE: This appears to be unused in SAS verification
+        /// @brief Optional method to use to verify the other user's key with.
+        //
+        // Applicable when the method chosen only verifies one user's key. This field will never be
+        // present if the method verifies keys both ways.
+        /// @note This appears to be unused in SAS verification
         std::optional<std::string> next_method;
-        //! The key agreement protocols the sending device understands.
-        //! Must include at least curve25519.
+        /// @brief The key agreement protocols the sending device understands.
+        ///
+        /// Must include at least curve25519.
         std::vector<std::string> key_agreement_protocols;
         //! The hash methods the sending device understands. Must include at least sha256.
         std::vector<std::string> hashes;
-        //! The message authentication codes that the sending device understands.
-        //! Must include at least hkdf-hmac-sha256.
+        /// @brief The message authentication codes that the sending device understands.
+        ///
+        /// Must include at least hkdf-hmac-sha256.
         std::vector<std::string> message_authentication_codes;
-        //! The SAS methods the sending device (and the sending device's user) understands.
-        //! Must include at least decimal. Optionally can include emoji.
-        //! One of: ["decimal", "emoji"]
+        /// @brief The SAS methods the sending device (and the sending device's user) understands.
+        ///
+        /// Must include at least decimal. Optionally can include emoji.
+        ///
+        /// One of:
+        /// - `decimal`
+        /// - `emoji`
         std::vector<SASMethods> short_authentication_string;
-        //! this is used for relating this message with previously sent key.verification.request
-        //! will be used only for room-verification msgs where this is used in place of txnid
+        /// @brief This is used for relating this message with previously sent
+        /// `key.verification.request`
+        ///
+        /// @note Will be used only for room-verification msgs where this is used in place of
+        /// transaction_id.
         std::optional<mtx::common::RelatesTo> relates_to;
 };
 
@@ -247,8 +286,9 @@ struct KeyVerificationReady
         std::optional<std::string> transaction_id;
         //! Sends the user the supported methods
         std::vector<VerificationMethods> methods;
-        //! this is used for relating this message with previously sent key.verification.request
-        //! will be used only for room-verification msgs where this is used in place of txnid
+        //! this is used for relating this message with previously sent
+        //! key.verification.request will be used only for room-verification msgs where this
+        //! is used in place of txnid
         std::optional<mtx::common::RelatesTo> relates_to;
 };
 

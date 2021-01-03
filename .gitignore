@@ -28,7 +28,8 @@
 *.app
 
 # Build artifacts
-build*/
+/build*/
+/generated-docs/
 
 # Editor
 tags
@@ -40,7 +41,7 @@ compile_commands.json
 .vscode
 
 # Synapse data
-data/
+/data/
 
 # Deps
 .third-party

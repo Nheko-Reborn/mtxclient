@@ -9,14 +9,17 @@
 
 namespace mtx {
 namespace crypto {
-class sodium_exception : public std::exception
+//! Exception thrown for various encryption related errors (not reported by olm), that generally
+//! should not be ignored.
+class crypto_exception : public std::exception
 {
 public:
-        sodium_exception(std::string func, const char *msg)
+        crypto_exception(std::string func, const char *msg)
           : msg_(func + ": " + std::string(msg))
         {}
 
-        virtual const char *what() const throw() { return msg_.c_str(); }
+        //! Describes the error
+        const char *what() const noexcept override { return msg_.c_str(); }
 
 private:
         std::string msg_;

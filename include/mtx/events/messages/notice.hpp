@@ -14,17 +14,18 @@ namespace mtx {
 namespace events {
 namespace msg {
 
+//! Content of `m.room.message` with msgtype `m.notice`.
 struct Notice
 {
-        // The notice text to send.
+        //! The notice text to send.
         std::string body;
-        // Must be 'm.notice'.
+        //! Must be 'm.notice'.
         std::string msgtype;
         //! We only handle org.matrix.custom.html.
         std::string format;
         //! HTML formatted message.
         std::string formatted_body;
-        // Relates to for rich replies
+        //! Relates to for rich replies
         mtx::common::ReplyRelatesTo relates_to;
 };
 

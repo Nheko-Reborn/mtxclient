@@ -14,6 +14,7 @@ namespace mtx {
 namespace events {
 namespace msg {
 
+//! Content of `m.room.message` with msgtype `m.emote`.
 struct Emote
 {
         // The emote action to perform.

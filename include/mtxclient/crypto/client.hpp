@@ -21,11 +21,13 @@
 #include "mtxclient/crypto/utils.hpp"
 
 namespace mtx {
+//! Cryptography related types
 namespace crypto {
 
 //! Data representation used to interact with libolm.
 using BinaryBuf = std::vector<uint8_t>;
 
+//! Errors returned by the olm library
 class olm_exception : public std::exception
 {
 public:
@@ -65,12 +67,14 @@ public:
           : msg_(msg)
         {}
 
-        virtual const char *what() const throw() { return msg_.c_str(); }
+        //! Returns a description of the olm error.
+        const char *what() const noexcept override { return msg_.c_str(); }
 
 private:
         std::string msg_;
 };
 
+//! Serialize olm objects into strings encrypted using key to persist them on non volatile storage.
 template<class T>
 std::string
 pickle(typename T::olm_type *object, const std::string &key)
@@ -84,6 +88,8 @@ pickle(typename T::olm_type *object, const std::string &key)
         return std::string((char *)tmp.data(), tmp.size());
 }
 
+//! Deserialize olm objects from strings encrypted using key previously persisted on non volatile
+//! storage.
 template<class T>
 std::unique_ptr<typename T::olm_type, OlmDeleter>
 unpickle(const std::string &pickled, const std::string &key)
@@ -105,6 +111,7 @@ struct GroupPlaintext
         uint32_t message_index;
 };
 
+//! Helper to generate Short Authentication Strings (SAS)
 struct SAS
 {
         SAS();
@@ -118,6 +125,7 @@ private:
         SASPtr sas;
 };
 
+//! Helper to sign arbitrary messages using an ed25519 key
 struct PkSigning
 {
         //! Construct from base64 key
@@ -133,6 +141,8 @@ private:
         std::string public_key_;
 };
 
+//! Client for all the cryptography related functionality like olm accounts, session keys
+//! encryption, signing and a few more things.
 class OlmClient : public std::enable_shared_from_this<OlmClient>
 {
 public:
@@ -278,7 +288,7 @@ bool
 verify_identity_signature(const DeviceKeys &device_keys,
                           const DeviceId &device_id,
                           const UserId &user_id);
-//! this function is for verifying the signatures
+//! Verify an ed25519 signature.
 bool
 ed25519_verify_signature(std::string signing_key, nlohmann::json obj, std::string signature);
 
