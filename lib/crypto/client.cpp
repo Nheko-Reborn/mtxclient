@@ -419,7 +419,6 @@ SAS::SAS()
                 throw olm_exception("create_sas_instance", this->sas.get());
 }
 
-//! returns the public key of the key-pair created
 std::string
 SAS::public_key()
 {
@@ -434,7 +433,6 @@ SAS::public_key()
         return to_string(pub_key_buffer);
 }
 
-//! this is for setting the public key of the other user
 void
 SAS::set_their_key(std::string their_public_key)
 {
@@ -447,8 +445,6 @@ SAS::set_their_key(std::string their_public_key)
                 throw olm_exception("get_public_key", this->sas.get());
 }
 
-//! generates and returns a vector of numbers(int) ranging from 0 to 8191, to be used only after
-//! using `set_their_key`
 std::vector<int>
 SAS::generate_bytes_decimal(std::string info)
 {
@@ -836,7 +832,7 @@ mtx::crypto::decrypt_exported_sessions(const std::string &data, std::string pass
         auto hmacSha256 = mtx::crypto::HMAC_SHA256(hmac256, BinaryBuf(binary_start, json_end));
 
         if (hmacSha256 != hmac) {
-                throw sodium_exception{"decrypt_exported_sessions", "HMAC doesn't match"};
+                throw crypto_exception{"decrypt_exported_sessions", "HMAC doesn't match"};
         }
 
         const std::string ciphertext(json.begin(), json.end());

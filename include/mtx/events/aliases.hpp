@@ -1,5 +1,8 @@
 #pragma once
 
+/// @file
+/// @brief Alias events.
+
 #include <string>
 #include <vector>
 

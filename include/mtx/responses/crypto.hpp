@@ -1,5 +1,8 @@
 #pragma once
 
+/// @file
+/// @brief E2EE related endpoints.
+
 #if __has_include(<nlohmann/json_fwd.hpp>)
 #include <nlohmann/json_fwd.hpp>
 #else
@@ -53,8 +56,10 @@ to_json(nlohmann::json &obj, const QueryKeys &response);
 void
 from_json(const nlohmann::json &obj, QueryKeys &response);
 
+//! Request for `POST /_matrix/client/r0/keys/upload`.
 struct KeySignaturesUpload
 {
+        //! Errors returned during upload.
         std::map<std::string, std::map<std::string, mtx::errors::LightweightError>> errors;
 };
 
@@ -89,6 +94,7 @@ struct KeyChanges
 void
 from_json(const nlohmann::json &obj, KeyChanges &response);
 
+//! KeysBackup related responses.
 namespace backup {
 //! Encrypted session data using the m.megolm_backup.v1.curve25519-aes-sha2 algorithm
 struct EncryptedSessionData
@@ -177,6 +183,7 @@ from_json(const nlohmann::json &obj, BackupVersion &response);
 void
 to_json(nlohmann::json &obj, const BackupVersion &response);
 
+//! The SessionData stored in the KeysBackup.
 struct SessionData
 {
         //! Required. The end-to-end message encryption algorithm that the key is

@@ -1,5 +1,8 @@
 #pragma once
 
+/// @file
+/// @brief An event describing, if guest accounts can join a room.
+
 #if __has_include(<nlohmann/json_fwd.hpp>)
 #include <nlohmann/json_fwd.hpp>
 #else
@@ -12,10 +15,11 @@ namespace mtx {
 namespace events {
 namespace state {
 
+//! The different access states for a room.
 enum class AccessState
 {
-        CanJoin,
-        Forbidden,
+        CanJoin,   //! Joining is allowd (for guests)
+        Forbidden, //! Guests can't join.
 };
 
 //! Converts @p AccessState to @p std::string for serialization.

@@ -1,5 +1,8 @@
 #pragma once
 
+/// @file
+/// @brief Audio messages.
+
 #include <optional>
 #include <string>
 
@@ -16,18 +19,19 @@ namespace mtx {
 namespace events {
 namespace msg {
 
+//! Content of `m.room.message` with msgtype `m.audio`.
 struct Audio
 {
-        // A description of the audio or some kind of content description
-        // for accessibility.
+        /// @brief A description of the audio or some kind of content description
+        /// for accessibility.
         std::string body;
-        // Must be 'm.audio'.
+        //! Must be 'm.audio'.
         std::string msgtype;
-        // The matrix URL of the audio clip.
+        //! The matrix URL of the audio clip.
         std::string url;
-        // Metadata for the audio clip referred to in url.
+        //! Metadata for the audio clip referred to in url.
         mtx::common::AudioInfo info;
-        // Encryption members. If present, they replace url.
+        //! Encryption members. If present, they replace url.
         std::optional<crypto::EncryptedFile> file;
         //! Relates to for rich replies
         mtx::common::ReplyRelatesTo relates_to;

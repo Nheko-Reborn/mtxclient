@@ -10,7 +10,8 @@
 #include <string>
 #include <vector>
 
-//! Common types used by the crypto related endpoints.
+/// @file
+/// @brief Common types used by the crypto related endpoints.
 
 namespace mtx {
 namespace crypto {

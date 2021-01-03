@@ -1,5 +1,8 @@
 #pragma once
 
+/// @file
+/// @brief The state event describing the membership status of a specific member.
+
 #if __has_include(<nlohmann/json_fwd.hpp>)
 #include <nlohmann/json_fwd.hpp>
 #else
@@ -11,7 +14,7 @@
 namespace mtx {
 namespace events {
 namespace state {
-
+//! The different Membership states.
 enum class Membership
 {
         //! The user has joined.

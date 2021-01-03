@@ -1,5 +1,8 @@
 #pragma once
 
+/// @file
+/// @brief A text message.
+
 #if __has_include(<nlohmann/json_fwd.hpp>)
 #include <nlohmann/json_fwd.hpp>
 #else
@@ -12,8 +15,10 @@
 
 namespace mtx {
 namespace events {
+//! Non-state events sent in the timeline like messages.
 namespace msg {
 
+//! Content of `m.room.message` with msgtype `m.text`.
 struct Text
 {
         //! The body of the message.

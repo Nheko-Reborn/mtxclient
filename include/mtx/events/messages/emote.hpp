@@ -1,5 +1,8 @@
 #pragma once
 
+/// @file
+/// @brief Events describing an emotion or action.
+
 #if __has_include(<nlohmann/json_fwd.hpp>)
 #include <nlohmann/json_fwd.hpp>
 #else
@@ -14,6 +17,7 @@ namespace mtx {
 namespace events {
 namespace msg {
 
+//! Content of `m.room.message` with msgtype `m.emote`.
 struct Emote
 {
         // The emote action to perform.

@@ -1,5 +1,8 @@
 #pragma once
 
+/// @file
+/// @brief Login related responses.
+
 #include <optional>
 #include <string>
 
@@ -37,8 +40,10 @@ struct Login
 void
 from_json(const nlohmann::json &obj, Login &response);
 
+//! One supported login flow.
 struct LoginFlow
 {
+        //! The authentication used for this flow.
         mtx::user_interactive::AuthType type;
 };
 void
@@ -47,6 +52,7 @@ from_json(const nlohmann::json &obj, LoginFlow &response);
 //! Response from the `GET /_matrix/client/r0/login` endpoint.
 struct LoginFlows
 {
+        //! The list of supported flows.
         std::vector<LoginFlow> flows;
 };
 

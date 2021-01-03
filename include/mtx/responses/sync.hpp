@@ -1,5 +1,8 @@
 #pragma once
 
+/// @file
+/// @brief Response from the /sync API.
+
 #include <map>
 #include <string>
 #include <vector>

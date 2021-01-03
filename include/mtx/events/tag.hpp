@@ -1,5 +1,8 @@
 #pragma once
 
+/// @file
+/// @brief Events describing room tags.
+
 #include <optional>
 #include <string>
 
@@ -11,7 +14,9 @@
 
 namespace mtx {
 namespace events {
+//! Namespace for events in account_data
 namespace account_data {
+//! The content of a tag.
 struct Tag
 {
         //! A number in a range [0,1] describing a relative position of the room under

@@ -1,5 +1,8 @@
 #pragma once
 
+/// @file
+/// @brief Events describing redactions and redacted content.
+
 #if __has_include(<nlohmann/json_fwd.hpp>)
 #include <nlohmann/json_fwd.hpp>
 #else
@@ -25,7 +28,7 @@ from_json(const nlohmann::json &obj, Redaction &event);
 void
 to_json(nlohmann::json &obj, const Redaction &event);
 
-//! Stripped out contente for redacted events.
+//! Stripped out content for redacted events.
 struct Redacted
 {};
 

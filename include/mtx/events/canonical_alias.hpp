@@ -1,5 +1,8 @@
 #pragma once
 
+/// @file
+/// @brief Change the canonical or listed avatars of a room.
+
 #include <string>
 
 #if __has_include(<nlohmann/json_fwd.hpp>)

@@ -1,5 +1,8 @@
 #pragma once
 
+/// @file
+/// @brief Responses from the registration API.
+
 #include <string>
 
 #if __has_include(<nlohmann/json_fwd.hpp>)

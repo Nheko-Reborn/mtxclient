@@ -1,5 +1,10 @@
 #pragma once
 
+/// @file
+/// @brief Wrappers around the various Olm types.
+///
+/// The wrappers implement RAII semantics, so you don't need to free stuff manually.
+
 #include <memory>
 #include <olm/olm.h>
 #include <olm/pk.h>
@@ -8,6 +13,19 @@
 namespace mtx {
 namespace crypto {
 
+/// @brief Deleter type to pass as a template argument to most smart pointers.
+///
+/// Can be used like so:
+///
+/// ```{.cpp}
+/// std::unique_ptr<OlmAccount, OlmDeleter> olmAccount = new uint8_t[olm_account_size()];
+/// ```
+///
+/// In general the coresponding *Object type should be preffered as a wapper, for example:
+///
+/// ```{.cpp}
+/// SASPtr sas = create_olm_object<SASObject>();
+/// ```
 struct OlmDeleter
 {
         void operator()(OlmAccount *ptr) { delete[](reinterpret_cast<uint8_t *>(ptr)); }
@@ -25,6 +43,7 @@ struct OlmDeleter
         void operator()(OlmSAS *ptr) { delete[](reinterpret_cast<uint8_t *>(ptr)); }
 };
 
+//! Olm type for Short Authentication Strings.
 struct SASObject
 {
         using olm_type = OlmSAS;
@@ -32,6 +51,7 @@ struct SASObject
         static olm_type *allocate() { return olm_sas(new uint8_t[olm_sas_size()]); }
 };
 
+//! Wrapper for the Olm utility object.
 struct UtilityObject
 {
         using olm_type = OlmUtility;
@@ -39,6 +59,7 @@ struct UtilityObject
         static olm_type *allocate() { return olm_utility(new uint8_t[olm_utility_size()]); }
 };
 
+//! Wrapper for the olm object to do Private Key Decryption.
 struct PkDecryptionObject
 {
         using olm_type = OlmPkDecryption;
@@ -49,6 +70,7 @@ struct PkDecryptionObject
         }
 };
 
+//! Wrapper for the olm object to do Private Key Signing.
 struct PkSigningObject
 {
         using olm_type = OlmPkSigning;
@@ -56,6 +78,7 @@ struct PkSigningObject
         static olm_type *allocate() { return olm_pk_signing(new uint8_t[olm_pk_signing_size()]); }
 };
 
+//! Wrapper for the olm account object.
 struct AccountObject
 {
         using olm_type = OlmAccount;
@@ -86,6 +109,7 @@ struct AccountObject
         }
 };
 
+//! Wrapper around olm sessions used for to device encryption.
 struct SessionObject
 {
         using olm_type = OlmSession;
@@ -116,6 +140,8 @@ struct SessionObject
         }
 };
 
+//! Wrapper around the olm object for inbound group sessions used to decrypt messages in matrix
+//! rooms.
 struct InboundSessionObject
 {
         using olm_type = OlmInboundGroupSession;
@@ -151,6 +177,8 @@ struct InboundSessionObject
         }
 };
 
+//! Wrapper around the outbound olm session object used to encrypt outbound group messages in matrix
+//! rooms.
 struct OutboundSessionObject
 {
         using olm_type = OlmOutboundGroupSession;
@@ -186,6 +214,7 @@ struct OutboundSessionObject
         }
 };
 
+//! Allocates an olm object using the mtxclient wrapper type.
 template<class T>
 std::unique_ptr<typename T::olm_type, OlmDeleter>
 create_olm_object()

@@ -1,5 +1,10 @@
 #pragma once
 
+/// @file
+/// @brief A single http session, which is the context for a single http request.
+///
+/// You usually don't need to include this as session handling is handled by the library for you.
+
 #include <boost/asio.hpp>
 #include <boost/asio/ssl.hpp>
 #include <boost/beast.hpp>

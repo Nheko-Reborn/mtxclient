@@ -1,5 +1,8 @@
 #pragma once
 
+/// @file
+/// @brief Room avatar events.
+
 #if __has_include(<nlohmann/json_fwd.hpp>)
 #include <nlohmann/json_fwd.hpp>
 #else

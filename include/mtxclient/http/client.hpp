@@ -1,5 +1,8 @@
 #pragma once
 
+/// @file
+/// @brief Primary header to access the http API.
+
 #if __has_include(<nlohmann/json_fwd.hpp>)
 #include <nlohmann/json_fwd.hpp>
 #else
@@ -79,6 +82,7 @@ struct BackupVersion;
 }
 
 namespace mtx {
+//! Types related to invoking the actual HTTP requests
 namespace http {
 
 enum class PaginationDirection
@@ -480,13 +484,14 @@ public:
         void query_keys(const mtx::requests::QueryKeys &req,
                         Callback<mtx::responses::QueryKeys> cb);
 
-        //! Claims one-time keys for use in pre-key messages. Pass in a map from userid to
-        //! device_keys
+        /// @brief Claims one-time keys for use in pre-key messages.
+        ///
+        /// Pass in a map from userid to device_keys
         void claim_keys(const mtx::requests::ClaimKeys &req,
                         Callback<mtx::responses::ClaimKeys> cb);
 
-        //! Gets a list of users who have updated their device identity keys
-        //! since a previous sync token.
+        /// @brief Gets a list of users who have updated their device identity keys since a previous
+        /// sync token.
         void key_changes(const std::string &from,
                          const std::string &to,
                          Callback<mtx::responses::KeyChanges> cb);

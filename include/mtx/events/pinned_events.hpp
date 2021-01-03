@@ -1,5 +1,8 @@
 #pragma once
 
+/// @file
+/// @brief Events pinned in a room.
+
 #if __has_include(<nlohmann/json_fwd.hpp>)
 #include <nlohmann/json_fwd.hpp>
 #else
@@ -12,8 +15,10 @@ namespace mtx {
 namespace events {
 namespace state {
 
+//! `m.room.pinned_events` state event.
 struct PinnedEvents
 {
+        //! The ids of the pinned events.
         std::vector<std::string> pinned;
 };
 
