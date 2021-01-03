@@ -1,5 +1,8 @@
 #pragma once
 
+/// @file
+/// @brief Primary header to access the http API.
+
 #if __has_include(<nlohmann/json_fwd.hpp>)
 #include <nlohmann/json_fwd.hpp>
 #else

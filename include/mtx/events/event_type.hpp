@@ -1,5 +1,8 @@
 #pragma once
 
+/// @file
+/// @brief Enumeration of all event types
+
 #if __has_include(<nlohmann/json_fwd.hpp>)
 #include <nlohmann/json_fwd.hpp>
 #else
@@ -10,6 +13,7 @@
 namespace mtx {
 namespace events {
 
+//! The type of an event.
 enum class EventType
 {
         /// m.key.verification.cancel
@@ -100,12 +104,15 @@ enum class EventType
         Unsupported,
 };
 
+//! Turn an event into a string
 std::string
 to_string(EventType type);
 
+//! Parse a string into an event type.
 EventType
 getEventType(const std::string &type);
 
+//! Get the event type of an event.
 EventType
 getEventType(const nlohmann::json &obj);
 }

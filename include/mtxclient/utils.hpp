@@ -1,5 +1,8 @@
 #pragma once
 
+/// @file
+/// @brief Various utility functions for http requests.
+
 #include <boost/iostreams/device/array.hpp>
 #include <iosfwd>
 #include <map>
@@ -7,6 +10,7 @@
 
 namespace mtx {
 namespace client {
+//! Utility namespace.
 namespace utils {
 
 //! Representation of Matrix Content (MXC) URIs.

@@ -1,5 +1,8 @@
 #pragma once
 
+/// @file
+/// @brief Structs for for requests to the Matrix API.
+
 #include <string>
 #include <variant>
 
@@ -14,6 +17,7 @@
 using json = nlohmann::json;
 
 namespace mtx {
+//! Namespace for request structs
 namespace requests {
 
 //! Whether or not the room will be visible by non members.

@@ -1,5 +1,8 @@
 #pragma once
 
+/// @file
+/// @brief Events describing redactions and redacted content.
+
 #if __has_include(<nlohmann/json_fwd.hpp>)
 #include <nlohmann/json_fwd.hpp>
 #else

@@ -1,5 +1,8 @@
 #pragma once
 
+/// @file
+/// @brief The first event in a room.
+
 #include <optional>
 
 #if __has_include(<nlohmann/json_fwd.hpp>)
@@ -11,7 +14,7 @@
 namespace mtx {
 namespace events {
 namespace state {
-
+//! The predecessor of this room.
 struct PreviousRoom
 {
         //! Required. The ID of the old room.

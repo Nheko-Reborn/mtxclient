@@ -1,5 +1,8 @@
 #pragma once
 
+/// @file
+/// @brief Header with SSSS related types.
+
 #include <cstdint>
 #include <map>
 #include <optional>
@@ -26,6 +29,7 @@ constexpr const char cross_signing_user_signing[] = "m.cross_signing.user_signin
 constexpr const char cross_signing_master[]       = "m.cross_signing.master";
 }
 
+//! A aes-hmac-sha2 encrypted secret.
 struct AesHmacSha2EncryptedData
 {
         std::string iv;         //!< Required. The 16-byte initialization vector, encoded as base64.
@@ -39,6 +43,7 @@ to_json(nlohmann::json &obj, const AesHmacSha2EncryptedData &data);
 void
 from_json(const nlohmann::json &obj, AesHmacSha2EncryptedData &data);
 
+//! A secret, encrypted with one or more algorithms.
 struct Secret
 {
         /// @brief Required. Map from key ID the encrypted data.
@@ -54,6 +59,7 @@ to_json(nlohmann::json &obj, const Secret &secret);
 void
 from_json(const nlohmann::json &obj, Secret &secret);
 
+//! Information about the key derivation from a passphrase.
 struct PBKDF2
 {
         //! Required. Must be m.pbkdf2
@@ -72,6 +78,7 @@ to_json(nlohmann::json &obj, const PBKDF2 &desc);
 void
 from_json(const nlohmann::json &obj, PBKDF2 &desc);
 
+//! Description of the key for a secret.
 struct AesHmacSha2KeyDescription
 {
         std::string name; //!< Required. The name of the key.

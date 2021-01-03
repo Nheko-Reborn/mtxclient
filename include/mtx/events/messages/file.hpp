@@ -1,5 +1,8 @@
 #pragma once
 
+/// @file
+/// @brief A file sent in a room.
+
 #include <optional>
 #include <string>
 

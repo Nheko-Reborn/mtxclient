@@ -1,5 +1,8 @@
 #pragma once
 
+/// @file
+/// @brief Audio messages.
+
 #include <optional>
 #include <string>
 

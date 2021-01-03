@@ -1,5 +1,8 @@
 #pragma once
 
+/// @file
+/// @brief Reponses from the message pagination API.
+
 #include <string>
 
 #if __has_include(<nlohmann/json_fwd.hpp>)

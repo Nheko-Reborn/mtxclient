@@ -1,5 +1,8 @@
 #pragma once
 
+/// @file
+/// @brief The state event describing the topic in a room.
+
 #if __has_include(<nlohmann/json_fwd.hpp>)
 #include <nlohmann/json_fwd.hpp>
 #else

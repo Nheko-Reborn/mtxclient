@@ -1,5 +1,8 @@
 #pragma once
 
+/// @file
+/// @brief Various crypto functions.
+
 #include <string>
 #include <vector>
 
@@ -25,7 +28,7 @@ private:
         std::string msg_;
 };
 
-//! Data representation used to interact with libolm.
+//! Data representation used to interact with libolm. It's a contiguous buffer of bytes.
 using BinaryBuf = std::vector<uint8_t>;
 
 const std::string HEADER_LINE("-----BEGIN MEGOLM SESSION DATA-----");
@@ -35,6 +38,7 @@ const std::string TRAILER_LINE("-----END MEGOLM SESSION DATA-----");
 BinaryBuf
 create_buffer(std::size_t nbytes);
 
+//! Convert a string to a binary buffer.
 inline BinaryBuf
 to_binary_buf(const std::string &str)
 {
@@ -42,6 +46,7 @@ to_binary_buf(const std::string &str)
                          reinterpret_cast<const uint8_t *>(str.data()) + str.size());
 }
 
+//! Convert a binary buffer to a string.
 inline std::string
 to_string(const BinaryBuf &buf)
 {
@@ -55,14 +60,18 @@ PBKDF2_HMAC_SHA_512(const std::string pass,
                     uint32_t iterations,
                     uint32_t keylen = 64);
 
+//! Derive the SSSS decryption key from a passphrase using the parameters stored in account_data.
 std::optional<BinaryBuf>
 key_from_passphrase(const std::string &password,
                     const mtx::secret_storage::AesHmacSha2KeyDescription &parameters);
 
+//! Derive the SSSS decryption key from a base58 encoded recoverykey using the parameters stored in
+//! account_data.
 std::optional<BinaryBuf>
 key_from_recoverykey(const std::string &recoverkey,
                      const mtx::secret_storage::AesHmacSha2KeyDescription &parameters);
 
+//! Decrypt a secret from SSSS
 std::string
 decrypt(const mtx::secret_storage::AesHmacSha2EncryptedData &data,
         BinaryBuf decryptionKey,
@@ -89,6 +98,7 @@ CURVE25519_AES_SHA2_Decrypt(std::string base64_ciphertext,
                             const std::string &ephemeral,
                             const std::string &mac);
 
+//! Decrypt a session retrieved from online key backup.
 mtx::responses::backup::SessionData
 decrypt_session(const mtx::responses::backup::EncryptedSessionData &data,
                 const BinaryBuf &privateKey);
@@ -96,6 +106,7 @@ decrypt_session(const mtx::responses::backup::EncryptedSessionData &data,
 BinaryBuf
 HMAC_SHA256(const BinaryBuf hmacKey, const BinaryBuf data);
 
+//! Sha256 a string.
 std::string
 sha256(const std::string &data);
 
@@ -126,27 +137,35 @@ uint32_to_uint8(uint8_t b[4], uint32_t u32);
 void
 print_binary_buf(const BinaryBuf buf);
 
+//! Convert base64 to binary
 std::string
 base642bin(const std::string &b64);
 
+//! Encode a binary string in base64.
 std::string
 bin2base64(const std::string &bin);
 
+//! Decode unpadded base64 to binary.
 std::string
 base642bin_unpadded(const std::string &b64);
 
+//! Encode binary in unpadded base64.
 std::string
 bin2base64_unpadded(const std::string &bin);
 
+//! Decode urlsafe, unpadded base64 to binary.
 std::string
 base642bin_urlsafe_unpadded(const std::string &b64);
 
+//! Encode binary in urlsafe, unpadded base64.
 std::string
 bin2base64_urlsafe_unpadded(const std::string &bin);
 
+//! Encode binary in base58.
 std::string
 bin2base58(const std::string &bin);
 
+//! Decode base58 to binary.
 std::string
 base582bin(const std::string &bin);
 } // namespace crypto

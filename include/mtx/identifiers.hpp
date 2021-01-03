@@ -1,5 +1,8 @@
 #pragma once
 
+/// @file
+/// @brief Identifiers used in the Matrix API.
+
 #if __has_include(<nlohmann/json_fwd.hpp>)
 #include <nlohmann/json_fwd.hpp>
 #else
@@ -33,6 +36,7 @@ protected:
         std::string id_;
 };
 
+//! An event id.
 class Event : public ID
 {
 public:
@@ -44,6 +48,7 @@ private:
         std::string sigil = "$";
 };
 
+//! A room id.
 class Room : public ID
 {
 public:
@@ -54,6 +59,7 @@ private:
         std::string sigil = "!";
 };
 
+//! A user id.
 class User : public ID
 {
 public:
@@ -110,9 +116,7 @@ void
 to_json(nlohmann::json &obj, const User &user);
 
 void
-from_json(const nlohmann::json &obj, Room &room)
-
-  ;
+from_json(const nlohmann::json &obj, Room &room);
 
 void
 to_json(nlohmann::json &obj, const Room &room);

@@ -1,5 +1,8 @@
 #pragma once
 
+/// @file
+/// @brief Collections to store multiple events of different types
+
 #include <variant>
 
 #include "mtx/events.hpp"
@@ -141,6 +144,7 @@ using TimelineEvents = std::variant<events::StateEvent<states::Aliases>,
                                     events::RoomEvent<msgs::CallAnswer>,
                                     events::RoomEvent<msgs::CallHangUp>>;
 
+//! A wapper around TimelineEvent, that produces less noisy compiler errors.
 struct TimelineEvent
 {
         TimelineEvents data;
@@ -151,6 +155,7 @@ from_json(const json &obj, TimelineEvent &e);
 
 } // namespace collections
 
+//! Get the right event type for some type of message content.
 template<typename Content>
 constexpr inline EventType message_content_to_type = EventType::Unsupported;
 
@@ -195,6 +200,7 @@ template<>
 constexpr inline EventType message_content_to_type<mtx::events::msg::CallHangUp> =
   EventType::CallHangUp;
 
+//! Get the right event type for some type of state event content.
 template<typename Content>
 constexpr inline EventType state_content_to_type = EventType::Unsupported;
 
@@ -239,6 +245,7 @@ constexpr inline EventType state_content_to_type<mtx::events::state::Tombstone> 
 template<>
 constexpr inline EventType state_content_to_type<mtx::events::state::Topic> = EventType::RoomTopic;
 
+//! Get the right event type for some type of device message content.
 template<typename Content>
 constexpr inline EventType to_device_content_to_type = EventType::Unsupported;
 

@@ -1,5 +1,8 @@
 #pragma once
 
+/// @file
+/// @brief Error codes returned by the Matrix API.
+
 #if __has_include(<nlohmann/json_fwd.hpp>)
 #include <nlohmann/json_fwd.hpp>
 #else
@@ -8,8 +11,10 @@
 #include <string>
 
 namespace mtx {
+//! Namespace for Matrix errors.
 namespace errors {
 
+//! A Matrix error code.
 enum class ErrorCode
 {
         M_UNRECOGNIZED,
@@ -53,9 +58,11 @@ enum class ErrorCode
         M_INVALID_SIGNATURE,
 };
 
+//! Convert an error code into a string.
 std::string
 to_string(ErrorCode code);
 
+//! Parse an error code from a string.
 ErrorCode
 from_string(const std::string &code);
 

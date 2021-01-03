@@ -1,5 +1,8 @@
 #pragma once
 
+/// @file
+/// @brief The error struct returned by the Matrix API.
+
 #include "lightweight_error.hpp"
 #include "user_interactive.hpp"
 

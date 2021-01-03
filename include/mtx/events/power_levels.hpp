@@ -1,5 +1,8 @@
 #pragma once
 
+/// @file
+/// @brief The state event governing the different permissions in a room.
+
 #if __has_include(<nlohmann/json_fwd.hpp>)
 #include <nlohmann/json_fwd.hpp>
 #else
@@ -11,21 +14,28 @@
 namespace mtx {
 namespace events {
 namespace state {
+//! The type representing a power level.
 using power_level_t = int64_t;
 
+//! The default level required for events
 constexpr power_level_t EventsDefault = 0;
+//! The default level for users.
 constexpr power_level_t UsersDefault  = 0;
+//! The default level required for state events.
 constexpr power_level_t StatesDefault = 50;
 
+//! The power level usually associated with normal users.
 constexpr power_level_t User      = 0;
+//! The power level usually associated with moderators.
 constexpr power_level_t Moderator = 50;
+//! The power level usually associated with admins.
 constexpr power_level_t Admin     = 100;
 
-//! Content for the `m.room.power_levels` state event.
-//
-//! This event specifies the minimum level a user must have in
-//! order to perform a certain action. It also specifies the
-//! levels of each user in the room.
+/// @brief Content for the `m.room.power_levels` state event.
+///
+/// This event specifies the minimum level a user must have in
+/// order to perform a certain action. It also specifies the
+/// levels of each user in the room.
 struct PowerLevels
 {
         //! Returns the power_level for a given event type.

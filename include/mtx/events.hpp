@@ -1,5 +1,8 @@
 #pragma once
 
+/// @file
+/// @brief Basetypes for events. Content is defined elsewhere.
+
 #if __has_include(<nlohmann/json_fwd.hpp>)
 #include <nlohmann/json_fwd.hpp>
 #else

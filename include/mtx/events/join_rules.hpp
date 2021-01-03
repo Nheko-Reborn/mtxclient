@@ -1,5 +1,8 @@
 #pragma once
 
+/// @file
+/// @brief Manage the permission of how people can join a room.
+
 #if __has_include(<nlohmann/json_fwd.hpp>)
 #include <nlohmann/json_fwd.hpp>
 #else
@@ -11,7 +14,7 @@
 namespace mtx {
 namespace events {
 namespace state {
-
+//! The different JoinRules
 enum class JoinRule
 {
         //! Anyone can join the room without any prior action.

@@ -1,5 +1,8 @@
 #pragma once
 
+/// @file
+/// @brief State event describing the visibility of the history.
+
 #if __has_include(<nlohmann/json_fwd.hpp>)
 #include <nlohmann/json_fwd.hpp>
 #else
@@ -11,7 +14,7 @@
 namespace mtx {
 namespace events {
 namespace state {
-
+//! The different visibilities.
 enum class Visibility
 {
         //! All events while this is the `m.room.history_visibility`
