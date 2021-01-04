@@ -137,7 +137,7 @@ to_json(json &obj, const PublicRooms &request)
                 throw std::invalid_argument("third_party_instance_id id can only be set if include_all_networks is false");
         }
         obj["third_party_instance_id"] = request.third_party_instance_id;
-        obj["include_all_networks"] = !request.third_party_instance_id.empty();
+        obj["include_all_networks"] = request.third_party_instance_id.empty();
 }
 
 void
