@@ -820,19 +820,24 @@ TEST(ClientAPI, Typing)
 
                         SyncOpts opts;
                         opts.timeout = 0;
-                        alice->sync(opts,
-                                    [room_id, &can_continue](const mtx::responses::Sync &res,
-                                                             RequestErr err) {
-                                            check_error(err);
+                        alice->sync(
+                          opts,
+                          [room_id, &can_continue](const mtx::responses::Sync &res,
+                                                   RequestErr err) {
+                                  check_error(err);
 
-                                            can_continue = true;
+                                  can_continue = true;
 
-                                            auto room = res.rooms.join.at(room_id);
+                                  auto room = res.rooms.join.at(room_id);
 
-                                            EXPECT_EQ(room.ephemeral.typing.size(), 1);
-                                            EXPECT_EQ(room.ephemeral.typing.front(),
-                                                      "@alice:localhost");
-                                    });
+                                  EXPECT_EQ(room.ephemeral.events.size(), 1);
+                                  EXPECT_EQ(
+                                    std::get<
+                                      mtx::events::EphemeralEvent<mtx::events::ephemeral::Typing>>(
+                                      room.ephemeral.events.front())
+                                      .content.user_ids.front(),
+                                    "@alice:localhost");
+                          });
 
                         while (!can_continue)
                                 sleep();
@@ -848,7 +853,12 @@ TEST(ClientAPI, Typing)
                                     [room_id](const mtx::responses::Sync &res, RequestErr err) {
                                             check_error(err);
                                             auto room = res.rooms.join.at(room_id);
-                                            EXPECT_EQ(room.ephemeral.typing.size(), 0);
+                                            EXPECT_EQ(room.ephemeral.events.size(), 1);
+                                            EXPECT_EQ(std::get<mtx::events::EphemeralEvent<
+                                                        mtx::events::ephemeral::Typing>>(
+                                                        room.ephemeral.events.front())
+                                                        .content.user_ids.size(),
+                                                      0);
                                     });
                           });
                 });
@@ -1281,12 +1291,15 @@ TEST(ClientAPI, ReadMarkers)
                   opts, [room_id, event_id](const mtx::responses::Sync &res, RequestErr err) {
                           check_error(err);
 
-                          auto receipts = res.rooms.join.at(room_id.to_string()).ephemeral.receipts;
+                          auto receipts = res.rooms.join.at(room_id.to_string()).ephemeral.events;
                           EXPECT_EQ(receipts.size(), 1);
 
-                          auto users = receipts[event_id];
-                          EXPECT_EQ(users.size(), 1);
-                          ASSERT_TRUE(users["@alice:localhost"] > 0);
+                          auto users =
+                            std::get<mtx::events::EphemeralEvent<mtx::events::ephemeral::Receipt>>(
+                              receipts.front())
+                              .content.receipts[event_id];
+                          EXPECT_EQ(users.users.size(), 1);
+                          ASSERT_TRUE(users.users["@alice:localhost"].ts > 0);
                   });
         });
 

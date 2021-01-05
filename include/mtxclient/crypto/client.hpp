@@ -174,7 +174,7 @@ public:
         {}
 
         //! Base64 encoded string
-        using Base64String      = std::string;
+        using Base64String = std::string;
         //! A signed set of one time keys indexed by `<algorithm>:<key_id>`.
         using SignedOneTimeKeys = std::map<std::string, requests::SignedOneTimeKey>;
 

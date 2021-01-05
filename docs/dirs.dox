@@ -21,6 +21,9 @@
 /// @dir include/mtx/events/messages
 /// @brief The different types, that can be sent as a message event.
 
+/// @dir include/mtx/events/ephemeral/
+/// @brief Ephemeral events not part of the timeline like typing or read notifications.
+
 /// @dir include/mtx/events/nheko_extensions
 /// @brief Nheko specific event types not part of the official specification.
 

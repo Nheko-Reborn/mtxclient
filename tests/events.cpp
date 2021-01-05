@@ -830,6 +830,73 @@ TEST(RoomEvents, Encrypted)
           "\"session_id\":\"/bHcdWPHsJLFd8dkyvG0n7q/RTDmfBIc+gC4laHJCQQ\"}");
 }
 
+TEST(Ephemeral, Typing)
+{
+        json j = R"( {
+    "content": {
+        "user_ids": [
+            "@alice:matrix.org",
+            "@bob:example.com"
+        ]
+    },
+    "room_id": "!jEsUZKDJdhlrceRyVU:example.org",
+    "type": "m.typing"
+})"_json;
+
+        ns::EphemeralEvent<ns::ephemeral::Typing> event = j;
+
+        EXPECT_EQ(event.room_id, "!jEsUZKDJdhlrceRyVU:example.org");
+        EXPECT_EQ(event.type, ns::EventType::Typing);
+        EXPECT_EQ(event.content.user_ids.at(0), "@alice:matrix.org");
+        EXPECT_EQ(event.content.user_ids.at(1), "@bob:example.com");
+        EXPECT_EQ(j.dump(), json(event).dump());
+}
+
+TEST(Ephemeral, Receipt)
+{
+        json j = R"({
+    "content": {
+        "$1435641916114394fHBLK:matrix.org": {
+            "m.read": {
+                "@rikj:jki.re": {
+                    "ts": 1436451550453
+                }
+            }
+        }
+    },
+    "room_id": "!jEsUZKDJdhlrceRyVU:example.org",
+    "type": "m.receipt"
+})"_json;
+
+        ns::EphemeralEvent<ns::ephemeral::Receipt> event = j;
+
+        EXPECT_EQ(event.room_id, "!jEsUZKDJdhlrceRyVU:example.org");
+        EXPECT_EQ(event.type, ns::EventType::Receipt);
+        EXPECT_EQ(event.content.receipts.at("$1435641916114394fHBLK:matrix.org")
+                    .users.at("@rikj:jki.re")
+                    .ts,
+                  1436451550453);
+        EXPECT_EQ(j.dump(), json(event).dump());
+}
+
+TEST(Ephemeral, FullyRead)
+{
+        json j = R"({
+            "content": {
+            "event_id": "$someplace:example.org"
+          },
+          "room_id": "!somewhere:example.org",
+          "type": "m.fully_read"
+        })"_json;
+
+        ns::EphemeralEvent<ns::ephemeral::FullyRead> event = j;
+
+        EXPECT_EQ(event.room_id, "!somewhere:example.org");
+        EXPECT_EQ(event.type, ns::EventType::FullyRead);
+        EXPECT_EQ(event.content.event_id, "$someplace:example.org");
+        EXPECT_EQ(j.dump(), json(event).dump());
+}
+
 TEST(ToDevice, KeyVerificationRequest)
 {
         json request_data = R"({

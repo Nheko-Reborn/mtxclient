@@ -62,13 +62,15 @@ namespace utils {
 //! Multiple account_data events.
 using RoomAccountDataEvents = std::vector<mtx::events::collections::RoomAccountDataEvents>;
 //! Multiple TimelineEvents.
-using TimelineEvents        = std::vector<mtx::events::collections::TimelineEvents>;
+using TimelineEvents = std::vector<mtx::events::collections::TimelineEvents>;
 //! Multiple StateEvents.
-using StateEvents           = std::vector<mtx::events::collections::StateEvents>;
+using StateEvents = std::vector<mtx::events::collections::StateEvents>;
 //! Multiple StrippedEvents.
-using StrippedEvents        = std::vector<mtx::events::collections::StrippedEvents>;
+using StrippedEvents = std::vector<mtx::events::collections::StrippedEvents>;
 //! Multiple DeviceEvents.
-using DeviceEvents          = std::vector<mtx::events::collections::DeviceEvents>;
+using DeviceEvents = std::vector<mtx::events::collections::DeviceEvents>;
+//! Multiple EphemeralEvents.
+using EphemeralEvents = std::vector<mtx::events::collections::EphemeralEvents>;
 
 namespace states = mtx::events::state;
 namespace msgs   = mtx::events::msg;
@@ -101,6 +103,10 @@ parse_stripped_events(const nlohmann::json &events, StrippedEvents &container);
 //! Parse multiple device events.
 void
 parse_device_events(const nlohmann::json &events, DeviceEvents &container);
+
+//! Parse multiple ephemeral events.
+void
+parse_ephemeral_events(const nlohmann::json &events, EphemeralEvents &container);
 }
 }
 }

@@ -143,6 +143,9 @@ parse_room_account_data_events(
                 case events::EventType::CallCandidates:
                 case events::EventType::CallAnswer:
                 case events::EventType::CallHangUp:
+                case events::EventType::Typing:
+                case events::EventType::Receipt:
+                case events::EventType::FullyRead:
                 case events::EventType::Unsupported:
                         continue;
                 }
@@ -558,6 +561,9 @@ parse_timeline_events(const json &events,
                 case events::EventType::PushRules:        // Not part of the timeline or state
                 case events::EventType::SecretRequest:    // Not part of the timeline or state
                 case events::EventType::SecretSend:       // Not part of the timeline or state
+                case events::EventType::Typing:
+                case events::EventType::Receipt:
+                case events::EventType::FullyRead:
                 case events::EventType::Unsupported:
                 case events::EventType::NhekoHiddenEvents:
                         continue;
@@ -869,6 +875,9 @@ parse_state_events(const json &events,
                 case events::EventType::CallCandidates:
                 case events::EventType::CallAnswer:
                 case events::EventType::CallHangUp:
+                case events::EventType::Typing:
+                case events::EventType::Receipt:
+                case events::EventType::FullyRead:
                 case events::EventType::NhekoHiddenEvents:
                         continue;
                 }
@@ -1022,7 +1031,56 @@ parse_stripped_events(const json &events,
                 case events::EventType::CallCandidates:
                 case events::EventType::CallAnswer:
                 case events::EventType::CallHangUp:
+                case events::EventType::Typing:
+                case events::EventType::Receipt:
+                case events::EventType::FullyRead:
                 case events::EventType::NhekoHiddenEvents:
+                        continue;
+                }
+        }
+}
+
+void
+parse_ephemeral_events(const json &events,
+                       std::vector<mtx::events::collections::EphemeralEvents> &container)
+{
+        container.clear();
+        container.reserve(events.size());
+        for (const auto &e : events) {
+                const auto type = mtx::events::getEventType(e);
+
+                switch (type) {
+                case events::EventType::Typing: {
+                        try {
+                                container.emplace_back(
+                                  events::EphemeralEvent<events::ephemeral::Typing>(e));
+                        } catch (json::exception &err) {
+                                log_error(err, e);
+                        }
+
+                        break;
+                }
+                case events::EventType::Receipt: {
+                        try {
+                                container.emplace_back(
+                                  events::EphemeralEvent<events::ephemeral::Receipt>(e));
+                        } catch (json::exception &err) {
+                                log_error(err, e);
+                        }
+
+                        break;
+                }
+                case events::EventType::FullyRead: {
+                        try {
+                                container.emplace_back(
+                                  events::EphemeralEvent<events::ephemeral::FullyRead>(e));
+                        } catch (json::exception &err) {
+                                log_error(err, e);
+                        }
+
+                        break;
+                }
+                default:
                         continue;
                 }
         }

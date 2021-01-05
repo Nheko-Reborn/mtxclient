@@ -71,10 +71,8 @@ from_json(const nlohmann::json &obj, UnreadNotifications &notifications);
 //! the timeline or state of the room. e.g. typing.
 struct Ephemeral
 {
-        //! A list of users that are currently typing.
-        std::vector<std::string> typing;
-        //! Map of events and the users that have read them.
-        std::map<std::string, std::map<std::string, uint64_t>> receipts;
+        //! A list of ephemeral events like typing and read notifications.
+        std::vector<events::collections::EphemeralEvents> events;
 };
 
 void

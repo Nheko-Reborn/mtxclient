@@ -96,6 +96,13 @@ enum class EventType
         // m.secret.send
         SecretSend,
 
+        //! m.typing
+        Typing,
+        //! m.receipt
+        Receipt,
+        //! m.fully_read
+        FullyRead,
+
         // custom events
         // im.nheko.hidden_events
         NhekoHiddenEvents,

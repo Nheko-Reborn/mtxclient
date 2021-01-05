@@ -82,6 +82,10 @@ MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::DeviceEvent, msgs::KeyRequest)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::DeviceEvent, msgs::SecretRequest)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::DeviceEvent, msgs::SecretSend)
 
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::EphemeralEvent, ephemeral::Typing)
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::EphemeralEvent, ephemeral::Receipt)
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::EphemeralEvent, ephemeral::FullyRead)
+
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::Event, mtx::events::account_data::Tags)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::Event, pushrules::GlobalRuleset)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::Event,
@@ -297,6 +301,9 @@ from_json(const json &obj, TimelineEvent &e)
         case events::EventType::PushRules:        // Not part of the timeline
         case events::EventType::SecretRequest:    // Not part of the timeline
         case events::EventType::SecretSend:       // Not part of the timeline
+        case events::EventType::Typing:
+        case events::EventType::Receipt:
+        case events::EventType::FullyRead:
         case events::EventType::NhekoHiddenEvents:
         case events::EventType::Unsupported:
                 return;

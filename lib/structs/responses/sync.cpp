@@ -49,46 +49,7 @@ from_json(const json &obj, Ephemeral &ephemeral)
         if (obj.count("events") == 0)
                 return;
 
-        auto events = obj.at("events");
-
-        for (auto event : events) {
-                auto type = event.at("type");
-
-                if (type == "m.typing") {
-                        auto content     = event.at("content");
-                        ephemeral.typing = content.at("user_ids").get<std::vector<std::string>>();
-                } else if (type == "m.receipt") {
-                        std::map<std::string, std::map<std::string, uint64_t>> receipts;
-
-                        const auto content = event.at("content");
-
-                        for (auto it = content.begin(); it != content.end(); ++it) {
-                                std::map<std::string, uint64_t> user_times;
-
-                                if (it.value().count("m.read") == 0)
-                                        continue;
-
-                                auto event_id = it.key();
-                                auto users    = it.value().at("m.read");
-
-                                for (auto uit = users.begin(); uit != users.end(); ++uit) {
-                                        uint64_t ts = 0;
-                                        try {
-                                                ts = uit.value().at("ts");
-                                        } catch (json::type_error &) {
-                                                mtx::utils::log::log_warning(
-                                                  "mtxclient: Workaround synapse bug #4898, "
-                                                  "ignoring timestamp for m.receipt event");
-                                        }
-                                        user_times.emplace(uit.key(), ts);
-                                }
-
-                                receipts.emplace(event_id, user_times);
-                        }
-
-                        ephemeral.receipts = receipts;
-                }
-        }
+        utils::parse_ephemeral_events(obj.at("events"), ephemeral.events);
 }
 
 void

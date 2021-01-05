@@ -196,4 +196,26 @@ from_json(const json &obj, EncryptedEvent<Content> &event)
         from_json(obj, base);
 }
 
+template<class Content>
+void
+to_json(json &obj, const EphemeralEvent<Content> &event)
+{
+        obj["content"] = event.content;
+        obj["type"]    = ::mtx::events::to_string(event.type);
+
+        if (!event.room_id.empty())
+                obj["room_id"] = event.room_id;
+}
+
+template<class Content>
+void
+from_json(const json &obj, EphemeralEvent<Content> &event)
+{
+        event.content = obj.at("content").get<Content>();
+        event.type    = getEventType(obj.at("type").get<std::string>());
+
+        if (obj.contains("room_id"))
+                event.room_id = obj.at("room_id").get<std::string>();
+}
+
 }

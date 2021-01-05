@@ -23,23 +23,23 @@ using AuthType = std::string;
 //! The different auth types.
 namespace auth_types {
 //! Password based authentication.
-constexpr std::string_view password       = "m.login.password";
+constexpr std::string_view password = "m.login.password";
 //! Authentication using a ReCaptcha.
-constexpr std::string_view recaptcha      = "m.login.recaptcha";
+constexpr std::string_view recaptcha = "m.login.recaptcha";
 //! Authentication using oauth2.
-constexpr std::string_view oauth2         = "m.login.oauth2";
+constexpr std::string_view oauth2 = "m.login.oauth2";
 //! Authentication via email.
 constexpr std::string_view email_identity = "m.login.email.identity";
 //! Authentication using SMS?
-constexpr std::string_view msisdn         = "m.login.msisdn";
+constexpr std::string_view msisdn = "m.login.msisdn";
 //! Token based auth.
-constexpr std::string_view token          = "m.login.token";
+constexpr std::string_view token = "m.login.token";
 //! Single Sign On.
-constexpr std::string_view sso            = "m.login.sso"; // needed for /login at least
+constexpr std::string_view sso = "m.login.sso"; // needed for /login at least
 //! Placeholder used in alternative auth flows.
-constexpr std::string_view dummy          = "m.login.dummy";
+constexpr std::string_view dummy = "m.login.dummy";
 //! Authentication by accepting a set of terms like a privacy policy.
-constexpr std::string_view terms          = "m.login.terms"; // see MSC1692
+constexpr std::string_view terms = "m.login.terms"; // see MSC1692
 }
 
 //! A list of auth types

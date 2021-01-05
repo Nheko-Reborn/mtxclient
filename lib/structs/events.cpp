@@ -88,6 +88,12 @@ getEventType(const std::string &type)
                 return EventType::SecretRequest;
         else if (type == "m.secret.send")
                 return EventType::SecretSend;
+        else if (type == "m.typing")
+                return EventType::Typing;
+        else if (type == "m.receipt")
+                return EventType::Receipt;
+        else if (type == "m.fully_read")
+                return EventType::FullyRead;
         else if (type == "im.nheko.hidden_events")
                 return EventType::NhekoHiddenEvents;
         else
@@ -176,6 +182,12 @@ to_string(EventType type)
                 return "m.secret.request";
         case EventType::SecretSend:
                 return "m.secret.send";
+        case EventType::Typing:
+                return "m.typing";
+        case EventType::Receipt:
+                return "m.receipt";
+        case EventType::FullyRead:
+                return "m.fully_read";
         case EventType::NhekoHiddenEvents:
                 return "im.nheko.hidden_events";
         case EventType::Unsupported:

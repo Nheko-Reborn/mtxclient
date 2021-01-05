@@ -20,16 +20,16 @@ using power_level_t = int64_t;
 //! The default level required for events
 constexpr power_level_t EventsDefault = 0;
 //! The default level for users.
-constexpr power_level_t UsersDefault  = 0;
+constexpr power_level_t UsersDefault = 0;
 //! The default level required for state events.
 constexpr power_level_t StatesDefault = 50;
 
 //! The power level usually associated with normal users.
-constexpr power_level_t User      = 0;
+constexpr power_level_t User = 0;
 //! The power level usually associated with moderators.
 constexpr power_level_t Moderator = 50;
 //! The power level usually associated with admins.
-constexpr power_level_t Admin     = 100;
+constexpr power_level_t Admin = 100;
 
 /// @brief Content for the `m.room.power_levels` state event.
 ///

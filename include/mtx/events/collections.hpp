@@ -12,6 +12,9 @@
 #include "mtx/events/create.hpp"
 #include "mtx/events/encrypted.hpp"
 #include "mtx/events/encryption.hpp"
+#include "mtx/events/ephemeral/fully_read.hpp"
+#include "mtx/events/ephemeral/receipt.hpp"
+#include "mtx/events/ephemeral/typing.hpp"
 #include "mtx/events/guest_access.hpp"
 #include "mtx/events/history_visibility.hpp"
 #include "mtx/events/join_rules.hpp"
@@ -143,6 +146,10 @@ using TimelineEvents = std::variant<events::StateEvent<states::Aliases>,
                                     events::RoomEvent<msgs::CallCandidates>,
                                     events::RoomEvent<msgs::CallAnswer>,
                                     events::RoomEvent<msgs::CallHangUp>>;
+
+using EphemeralEvents = std::variant<events::EphemeralEvent<ephemeral::Typing>,
+                                     events::EphemeralEvent<ephemeral::Receipt>,
+                                     events::EphemeralEvent<ephemeral::FullyRead>>;
 
 //! A wapper around TimelineEvent, that produces less noisy compiler errors.
 struct TimelineEvent
