@@ -221,5 +221,10 @@ template<class Content>
 void
 from_json(const json &obj, EphemeralEvent<Content> &event);
 
+/// @brief An account_data event like fully_read or tags.
+/// @sa Event
+template<class Content>
+using AccountDataEvent = EphemeralEvent<Content>;
+
 } // namespace events
 } // namespace mtx

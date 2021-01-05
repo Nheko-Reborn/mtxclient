@@ -1,10 +1,10 @@
 #include <nlohmann/json.hpp>
 
-#include "mtx/events/ephemeral/fully_read.hpp"
+#include "mtx/events/account_data/fully_read.hpp"
 
 namespace mtx {
 namespace events {
-namespace ephemeral {
+namespace account_data {
 
 void
 from_json(const nlohmann::json &obj, FullyRead &content)

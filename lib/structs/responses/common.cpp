@@ -83,15 +83,26 @@ parse_room_account_data_events(
                 switch (type) {
                 case events::EventType::Tag: {
                         try {
-                                container.emplace_back(events::Event<Tags>(e));
+                                container.emplace_back(events::AccountDataEvent<Tags>(e));
                         } catch (json::exception &err) {
                                 log_error(err, e);
                         }
                         break;
                 }
+                case events::EventType::FullyRead: {
+                        try {
+                                container.emplace_back(
+                                  events::AccountDataEvent<events::account_data::FullyRead>(e));
+                        } catch (json::exception &err) {
+                                log_error(err, e);
+                        }
+
+                        break;
+                }
                 case events::EventType::PushRules: {
                         try {
-                                container.emplace_back(events::Event<pushrules::GlobalRuleset>(e));
+                                container.emplace_back(
+                                  events::AccountDataEvent<pushrules::GlobalRuleset>(e));
                         } catch (json::exception &err) {
                                 log_error(err, e);
                         }
@@ -100,7 +111,7 @@ parse_room_account_data_events(
                 case events::EventType::NhekoHiddenEvents: {
                         try {
                                 container.emplace_back(
-                                  events::Event<nheko_extensions::HiddenEvents>(e));
+                                  events::AccountDataEvent<nheko_extensions::HiddenEvents>(e));
                         } catch (json::exception &err) {
                                 log_error(err, e);
                         }
@@ -145,7 +156,6 @@ parse_room_account_data_events(
                 case events::EventType::CallHangUp:
                 case events::EventType::Typing:
                 case events::EventType::Receipt:
-                case events::EventType::FullyRead:
                 case events::EventType::Unsupported:
                         continue;
                 }
@@ -1064,16 +1074,6 @@ parse_ephemeral_events(const json &events,
                         try {
                                 container.emplace_back(
                                   events::EphemeralEvent<events::ephemeral::Receipt>(e));
-                        } catch (json::exception &err) {
-                                log_error(err, e);
-                        }
-
-                        break;
-                }
-                case events::EventType::FullyRead: {
-                        try {
-                                container.emplace_back(
-                                  events::EphemeralEvent<events::ephemeral::FullyRead>(e));
                         } catch (json::exception &err) {
                                 log_error(err, e);
                         }

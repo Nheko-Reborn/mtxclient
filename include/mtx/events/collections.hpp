@@ -6,13 +6,13 @@
 #include <variant>
 
 #include "mtx/events.hpp"
+#include "mtx/events/account_data/fully_read.hpp"
 #include "mtx/events/aliases.hpp"
 #include "mtx/events/avatar.hpp"
 #include "mtx/events/canonical_alias.hpp"
 #include "mtx/events/create.hpp"
 #include "mtx/events/encrypted.hpp"
 #include "mtx/events/encryption.hpp"
-#include "mtx/events/ephemeral/fully_read.hpp"
 #include "mtx/events/ephemeral/receipt.hpp"
 #include "mtx/events/ephemeral/typing.hpp"
 #include "mtx/events/guest_access.hpp"
@@ -69,9 +69,10 @@ using DeviceEvents = std::variant<events::DeviceEvent<msgs::RoomKey>,
 
 //! Collection of room specific account data
 using RoomAccountDataEvents =
-  std::variant<events::Event<account_data::Tags>,
-               events::Event<pushrules::GlobalRuleset>,
-               events::Event<account_data::nheko_extensions::HiddenEvents>>;
+  std::variant<events::AccountDataEvent<account_data::Tags>,
+               events::AccountDataEvent<account_data::FullyRead>,
+               events::AccountDataEvent<pushrules::GlobalRuleset>,
+               events::AccountDataEvent<account_data::nheko_extensions::HiddenEvents>>;
 
 //! Collection of @p StateEvent only.
 using StateEvents = std::variant<events::StateEvent<states::Aliases>,
@@ -148,8 +149,7 @@ using TimelineEvents = std::variant<events::StateEvent<states::Aliases>,
                                     events::RoomEvent<msgs::CallHangUp>>;
 
 using EphemeralEvents = std::variant<events::EphemeralEvent<ephemeral::Typing>,
-                                     events::EphemeralEvent<ephemeral::Receipt>,
-                                     events::EphemeralEvent<ephemeral::FullyRead>>;
+                                     events::EphemeralEvent<ephemeral::Receipt>>;
 
 //! A wapper around TimelineEvent, that produces less noisy compiler errors.
 struct TimelineEvent

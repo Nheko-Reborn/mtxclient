@@ -13,7 +13,7 @@
 
 namespace mtx {
 namespace events {
-namespace ephemeral {
+namespace account_data {
 
 /// @brief The fully read marker for this user / `m.fully_read`.
 ///

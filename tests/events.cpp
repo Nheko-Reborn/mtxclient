@@ -889,7 +889,7 @@ TEST(Ephemeral, FullyRead)
           "type": "m.fully_read"
         })"_json;
 
-        ns::EphemeralEvent<ns::ephemeral::FullyRead> event = j;
+        ns::AccountDataEvent<ns::account_data::FullyRead> event = j;
 
         EXPECT_EQ(event.room_id, "!somewhere:example.org");
         EXPECT_EQ(event.type, ns::EventType::FullyRead);
@@ -1203,7 +1203,7 @@ TEST(RoomAccountData, Tags)
           "type": "m.tag"
         })"_json;
 
-        ns::Event<ns::account_data::Tags> event = data;
+        ns::AccountDataEvent<ns::account_data::Tags> event = data;
 
         EXPECT_EQ(event.type, ns::EventType::Tag);
         EXPECT_EQ(event.content.tags.size(), 3);
@@ -1225,7 +1225,7 @@ TEST(RoomAccountData, NhekoHiddenEvents)
           "type": "im.nheko.hidden_events"
         })"_json;
 
-        ns::Event<ns::account_data::nheko_extensions::HiddenEvents> event = data;
+        ns::AccountDataEvent<ns::account_data::nheko_extensions::HiddenEvents> event = data;
 
         EXPECT_EQ(event.type, ns::EventType::NhekoHiddenEvents);
         EXPECT_EQ(event.content.hidden_event_types.size(), 2);

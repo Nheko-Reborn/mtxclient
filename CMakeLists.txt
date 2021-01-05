@@ -169,7 +169,7 @@ target_sources(matrix_client
 	lib/structs/events/tombstone.cpp
 	lib/structs/events/topic.cpp
 	lib/structs/events/voip.cpp
-	lib/structs/events/ephemeral/fully_read.cpp
+	lib/structs/events/account_data/fully_read.cpp
 	lib/structs/events/ephemeral/receipt.cpp
 	lib/structs/events/ephemeral/typing.cpp
 	lib/structs/events/nheko_extensions/hidden_events.cpp

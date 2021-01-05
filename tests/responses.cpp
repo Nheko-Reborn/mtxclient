@@ -340,7 +340,7 @@ TEST(Responses, Sync)
         EXPECT_EQ(nheko.timeline.limited, true);
         EXPECT_EQ(nheko.timeline.prev_batch,
                   "t10853-333025362_324502987_444424_65663508_21685260_193623_2377336_2940807_454");
-        EXPECT_EQ(nheko.account_data.events.size(), 1);
+        EXPECT_EQ(nheko.account_data.events.size(), 2);
 
         EXPECT_EQ(sync1.rooms.leave.size(), 1);
         EXPECT_EQ(sync1.rooms.invite.size(), 0);
