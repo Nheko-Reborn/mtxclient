@@ -53,7 +53,7 @@ struct PublicRoomsChunk
     //! Aliases of the room. May be empty.
     std::vector<std::string> aliases;
     //! The canonical alias of the room, if any.
-    std::string canonical_alias;
+    std::string canonical_alias = "";
     //! The name of the room, if any.
     std::string name;
     //! **Required.** The number of members joined to the room.
