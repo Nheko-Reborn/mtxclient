@@ -85,10 +85,10 @@ MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::DeviceEvent, msgs::SecretSend)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::EphemeralEvent, ephemeral::Typing)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::EphemeralEvent, ephemeral::Receipt)
 
-MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::EphemeralEvent, mtx::events::account_data::Tags)
-MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::EphemeralEvent, account_data::FullyRead)
-MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::EphemeralEvent, pushrules::GlobalRuleset)
-MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::EphemeralEvent,
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::AccountDataEvent, mtx::events::account_data::Tags)
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::AccountDataEvent, mtx::events::account_data::FullyRead)
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::AccountDataEvent, pushrules::GlobalRuleset)
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::AccountDataEvent,
                                      mtx::events::account_data::nheko_extensions::HiddenEvents)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::Event, presence::Presence)
 
