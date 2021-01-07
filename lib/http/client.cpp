@@ -22,6 +22,8 @@
 #include "mtx/requests.hpp"
 #include "mtx/responses.hpp"
 
+#include <iostream>
+
 using namespace mtx::http;
 using namespace boost::beast;
 
@@ -1001,13 +1003,14 @@ Client::get_public_rooms(Callback<mtx::responses::PublicRooms> cb, const std::st
                         size_t limit, const std::string &since) 
 {
         const auto api_path = 
-        "/client/r0/publicRooms" +
+        "/client/r0/publicRooms?" +
          mtx::client::utils::query_params({{"server", server}, {"limit", std::to_string(limit)}, {"since", since}});
         
         get<mtx::responses::PublicRooms>(api_path, 
                                         [cb](const mtx::responses::PublicRooms &res,
                                              HeaderFields,
-                                             RequestErr err) { cb(res, err); });
+                                             RequestErr err) { 
+                                                     cb(res, err); });
 }
 
 

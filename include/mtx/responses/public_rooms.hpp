@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <string>
+#include <optional>
 
 #if __has_include(<nlohmann/json_fwd.hpp>)
 #include <nlohmann/json_fwd.hpp>
@@ -91,6 +92,7 @@ struct PublicRooms
         std::string prev_batch;
         //! An estimate on the total number of public rooms,
         //! if the server has an estimate.
+        // std::optional<size_t>
         int total_room_count_estimate;
 };
 

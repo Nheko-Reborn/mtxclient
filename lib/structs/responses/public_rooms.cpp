@@ -3,6 +3,8 @@
 #include "mtx/identifiers.hpp"
 #include "mtx/responses/public_rooms.hpp"
 
+#include <iostream>
+
 namespace mtx {
 namespace responses {
 
@@ -15,6 +17,8 @@ from_json(const nlohmann::json &obj, RoomVisibility &res)
 void
 from_json(const nlohmann::json &obj, PublicRoomsChunk &res) 
 {
+    std::cout << obj.dump(4) << std::endl;
+    
     res.aliases = obj.value("aliases", std::vector<std::string>{}); 
 
     res.canonical_alias = obj.value("canonical_alias", std::string{});

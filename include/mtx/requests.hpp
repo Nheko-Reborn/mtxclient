@@ -173,7 +173,7 @@ struct PublicRooms
         PublicRoomsFilter filter;
         //! Whether or not to include all known networks/protocols from
         //! application services on the homeserver. Defaults to false.
-        bool include_all_networks = false;
+        bool include_all_networks;
         //! The specific third party network/protocol to request from
         //! the homeserver. Can only be used if include_all_networks is false.
         std::string third_party_instance_id;
