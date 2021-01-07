@@ -21,7 +21,7 @@ BinaryBuf
 create_buffer(std::size_t nbytes)
 {
         auto buf = BinaryBuf(nbytes);
-        RAND_bytes(buf.data(), buf.size());
+        RAND_bytes(buf.data(), (int)buf.size());
 
         return buf;
 }
@@ -34,12 +34,12 @@ PBKDF2_HMAC_SHA_512(const std::string pass,
 {
         BinaryBuf out(keylen);
         PKCS5_PBKDF2_HMAC(&pass[0],
-                          pass.size(),
+                          (int)pass.size(),
                           salt.data(),
-                          salt.size(),
+                          (int)salt.size(),
                           iterations,
                           EVP_sha512(),
-                          keylen,
+                          (int)keylen,
                           out.data());
 
         return out;
@@ -138,15 +138,15 @@ HKDF_SHA256(const BinaryBuf &key, const BinaryBuf &salt, const BinaryBuf &info)
                 EVP_PKEY_CTX_free(pctx);
                 throw std::runtime_error("HKDF: failed to set digest");
         }
-        if (EVP_PKEY_CTX_set1_hkdf_salt(pctx, salt.data(), salt.size()) <= 0) {
+        if (EVP_PKEY_CTX_set1_hkdf_salt(pctx, salt.data(), (int)salt.size()) <= 0) {
                 EVP_PKEY_CTX_free(pctx);
                 throw std::runtime_error("HKDF: failed to set salt");
         }
-        if (EVP_PKEY_CTX_set1_hkdf_key(pctx, key.data(), key.size()) <= 0) {
+        if (EVP_PKEY_CTX_set1_hkdf_key(pctx, key.data(), (int)key.size()) <= 0) {
                 EVP_PKEY_CTX_free(pctx);
                 throw std::runtime_error("HKDF: failed to set key");
         }
-        if (EVP_PKEY_CTX_add1_hkdf_info(pctx, info.data(), info.size()) <= 0) {
+        if (EVP_PKEY_CTX_add1_hkdf_info(pctx, info.data(), (int)info.size()) <= 0) {
                 EVP_PKEY_CTX_free(pctx);
                 throw std::runtime_error("HKDF: failed to set info");
         }
@@ -182,7 +182,8 @@ AES_CTR_256_Encrypt(const std::string plaintext, const BinaryBuf aes256Key, Bina
 
         uint8_t *iv_data = iv.data();
         // need to set bit 63 to 0
-        *(iv_data) &= ~(1UL << 63);
+        iv_data[63 % 8] &= ~(1UL << (63 / 8));
+        //*iv_data &= ~(1UL << (63));
 
         /* Create and initialise the context */
         if (!(ctx = EVP_CIPHER_CTX_new())) {
@@ -200,7 +201,7 @@ AES_CTR_256_Encrypt(const std::string plaintext, const BinaryBuf aes256Key, Bina
                                    encrypted.data(),
                                    &len,
                                    reinterpret_cast<const unsigned char *>(&plaintext.c_str()[0]),
-                                   plaintext.size())) {
+                                   (int)plaintext.size())) {
                 // handleErrors();
         }
         ciphertext_len = len;
@@ -253,7 +254,7 @@ AES_CTR_256_Decrypt(const std::string ciphertext, const BinaryBuf aes256Key, Bin
                                    decrypted.data(),
                                    &len,
                                    reinterpret_cast<const unsigned char *>(&ciphertext.data()[0]),
-                                   ciphertext.size())) {
+                                   (int)ciphertext.size())) {
                 // handleErrors();
         }
         plaintext_len = len;
@@ -385,6 +386,7 @@ encrypt_file(const std::string &plaintext)
         // iv has to be 16 bytes, key 32!
         BinaryBuf key = create_buffer(32);
         BinaryBuf iv  = create_buffer(16);
+        iv[63 % 8] &= ~(1UL << (63 / 8));
 
         BinaryBuf cyphertext = AES_CTR_256_Encrypt(plaintext, key, iv);
 
@@ -434,7 +436,13 @@ HMAC_SHA256(const BinaryBuf hmacKey, const BinaryBuf data)
 {
         unsigned int len = SHA256_DIGEST_LENGTH;
         unsigned char digest[SHA256_DIGEST_LENGTH];
-        HMAC(EVP_sha256(), hmacKey.data(), hmacKey.size(), data.data(), data.size(), digest, &len);
+        HMAC(EVP_sha256(),
+             hmacKey.data(),
+             (int)hmacKey.size(),
+             data.data(),
+             data.size(),
+             digest,
+             &len);
         BinaryBuf output(digest, digest + SHA256_DIGEST_LENGTH);
         return output;
 }

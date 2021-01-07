@@ -1,5 +1,9 @@
 #pragma once
 
+/// @file
+/// @brief A header including pretty much all the headers of the library.
+/// Including this will have a significant compile time cost.
+
 #include "mtx/identifiers.hpp"
 
 #include "mtx/events.hpp"

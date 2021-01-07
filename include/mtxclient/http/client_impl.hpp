@@ -1,13 +1,24 @@
 #pragma once
 
+/// @file
+/// @brief All the template stuff needed for the http client.
+///
+/// If you implement custom event types, this can be useful, but in general including this header
+/// just adds compile time without any benefits.
+
 #include "client.hpp"
 #include "mtxclient/utils.hpp" // for random_token, url_encode, des...
 
 #include <nlohmann/json.hpp>
 
 namespace mtx {
+//! A few helpers for the http client.
 namespace client {
 namespace utils {
+
+/// @brief deserialize a type or string from json.
+///
+/// Used internally to deserialize the response types for the various http methods.
 template<class T>
 inline T
 deserialize(const std::string &data)
@@ -22,6 +33,9 @@ deserialize<std::string>(const std::string &data)
         return data;
 }
 
+/// @brief serialize a type or string to json.
+///
+/// Used internally to serialize the request types for the various http methods.
 template<class T>
 inline std::string
 serialize(const T &obj)
@@ -120,7 +134,7 @@ mtx::http::Client::prepare_callback(HeadersCallback<Response> callback)
                         // doesn't return an error struct for non 200 requests.
                         try {
                                 response_data = client::utils::deserialize<Response>(body);
-                        } catch (const nlohmann::json::exception &e) {
+                        } catch (const nlohmann::json::exception &) {
                         }
 
                         // The homeserver should return an error struct.

@@ -13906,70 +13906,70 @@
             {
               "content": {
                 "$1444906875441211LqxSn:matrix.org": {
-                  "read": {
+                  "m.read": {
                     "@erikj:jki.re": {
                       "ts": 1444909725366
                     }
                   }
                 },
                 "$1444942649470349pvBIx:matrix.org": {
-                  "read": {
+                  "m.read": {
                     "@Giom:matrix.org": {
                       "ts": 1444942906609
                     }
                   }
                 },
                 "$1444989648570085UXoqw:matrix.org": {
-                  "read": {
+                  "m.read": {
                     "@illicitonion:matrix.org": {
                       "ts": 1444989653302
                     }
                   }
                 },
                 "$1444997995575678hLDwD:matrix.org": {
-                  "read": {
+                  "m.read": {
                     "@ylecollen:matrix.org": {
                       "ts": 1444998014917
                     }
                   }
                 },
                 "$1445086124624032xemSw:matrix.org": {
-                  "read": {
+                  "m.read": {
                     "@alien:matrix.org": {
                       "ts": 1445124334703
                     }
                   }
                 },
                 "$1445157925657308UGMvb:matrix.org": {
-                  "read": {
+                  "m.read": {
                     "@kegan:matrix.org": {
                       "ts": 1445176357003
                     }
                   }
                 },
                 "$1445235196692182lrtXq:matrix.org": {
-                  "read": {
+                  "m.read": {
                     "@testme:matrix.org": {
                       "ts": 1445235665794
                     }
                   }
                 },
                 "$1445240016693466mNgPt:matrix.org": {
-                  "read": {
+                  "m.read": {
                     "@bobderbaumeister:matrix.org": {
                       "ts": 1445240381874
                     }
                   }
                 },
                 "$1445241200693761cqnxr:matrix.org": {
-                  "read": {
+                  "m.read": {
                     "@matthew:matrix.org": {
                       "ts": 1445241676648
                     }
                   }
                 },
                 "$1446084711126120YesBj:matrix.org": {
-                  "read": {
+                  "m.read": {
                     "@skaverat:m.skaverat.net": {
                       "ts": 1446099191370
                     }

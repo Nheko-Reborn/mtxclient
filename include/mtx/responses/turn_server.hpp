@@ -1,5 +1,8 @@
 #pragma once
 
+/// @file
+/// @brief Responses for the turn server used for calls.
+
 #include <string>
 #include <vector>
 

@@ -1,14 +1,20 @@
 #pragma once
 
+/// @file
+/// @brief Collections to store multiple events of different types
+
 #include <variant>
 
 #include "mtx/events.hpp"
+#include "mtx/events/account_data/fully_read.hpp"
 #include "mtx/events/aliases.hpp"
 #include "mtx/events/avatar.hpp"
 #include "mtx/events/canonical_alias.hpp"
 #include "mtx/events/create.hpp"
 #include "mtx/events/encrypted.hpp"
 #include "mtx/events/encryption.hpp"
+#include "mtx/events/ephemeral/receipt.hpp"
+#include "mtx/events/ephemeral/typing.hpp"
 #include "mtx/events/guest_access.hpp"
 #include "mtx/events/history_visibility.hpp"
 #include "mtx/events/join_rules.hpp"
@@ -57,13 +63,16 @@ using DeviceEvents = std::variant<events::DeviceEvent<msgs::RoomKey>,
                                   events::DeviceEvent<msgs::KeyVerificationAccept>,
                                   events::DeviceEvent<msgs::KeyVerificationCancel>,
                                   events::DeviceEvent<msgs::KeyVerificationKey>,
-                                  events::DeviceEvent<msgs::KeyVerificationMac>>;
+                                  events::DeviceEvent<msgs::KeyVerificationMac>,
+                                  events::DeviceEvent<msgs::SecretRequest>,
+                                  events::DeviceEvent<msgs::SecretSend>>;
 
 //! Collection of room specific account data
 using RoomAccountDataEvents =
-  std::variant<events::Event<account_data::Tags>,
-               events::Event<pushrules::GlobalRuleset>,
-               events::Event<account_data::nheko_extensions::HiddenEvents>>;
+  std::variant<events::AccountDataEvent<account_data::Tags>,
+               events::AccountDataEvent<account_data::FullyRead>,
+               events::AccountDataEvent<pushrules::GlobalRuleset>,
+               events::AccountDataEvent<account_data::nheko_extensions::HiddenEvents>>;
 
 //! Collection of @p StateEvent only.
 using StateEvents = std::variant<events::StateEvent<states::Aliases>,
@@ -139,6 +148,10 @@ using TimelineEvents = std::variant<events::StateEvent<states::Aliases>,
                                     events::RoomEvent<msgs::CallAnswer>,
                                     events::RoomEvent<msgs::CallHangUp>>;
 
+using EphemeralEvents = std::variant<events::EphemeralEvent<ephemeral::Typing>,
+                                     events::EphemeralEvent<ephemeral::Receipt>>;
+
+//! A wapper around TimelineEvent, that produces less noisy compiler errors.
 struct TimelineEvent
 {
         TimelineEvents data;
@@ -149,6 +162,7 @@ from_json(const json &obj, TimelineEvent &e);
 
 } // namespace collections
 
+//! Get the right event type for some type of message content.
 template<typename Content>
 constexpr inline EventType message_content_to_type = EventType::Unsupported;
 
@@ -193,6 +207,7 @@ template<>
 constexpr inline EventType message_content_to_type<mtx::events::msg::CallHangUp> =
   EventType::CallHangUp;
 
+//! Get the right event type for some type of state event content.
 template<typename Content>
 constexpr inline EventType state_content_to_type = EventType::Unsupported;
 
@@ -237,6 +252,7 @@ constexpr inline EventType state_content_to_type<mtx::events::state::Tombstone> 
 template<>
 constexpr inline EventType state_content_to_type<mtx::events::state::Topic> = EventType::RoomTopic;
 
+//! Get the right event type for some type of device message content.
 template<typename Content>
 constexpr inline EventType to_device_content_to_type = EventType::Unsupported;
 
@@ -279,5 +295,11 @@ constexpr inline EventType to_device_content_to_type<mtx::events::msg::KeyVerifi
 template<>
 constexpr inline EventType to_device_content_to_type<mtx::events::msg::KeyVerificationMac> =
   EventType::KeyVerificationMac;
+template<>
+constexpr inline EventType to_device_content_to_type<mtx::events::msg::SecretSend> =
+  EventType::SecretSend;
+template<>
+constexpr inline EventType to_device_content_to_type<mtx::events::msg::SecretRequest> =
+  EventType::SecretRequest;
 } // namespace events
 } // namespace mtx

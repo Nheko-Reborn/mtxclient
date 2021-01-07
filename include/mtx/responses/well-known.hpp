@@ -1,5 +1,8 @@
 #pragma once
 
+/// @file
+/// @brief Response for .well-known lookup.
+
 #include <optional>
 
 #if __has_include(<nlohmann/json_fwd.hpp>)
@@ -10,6 +13,7 @@
 
 namespace mtx {
 namespace responses {
+//! The info about this server.
 struct ServerInformation
 {
         //! Required. The base URL for client-server connections.

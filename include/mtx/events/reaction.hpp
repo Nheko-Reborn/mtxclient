@@ -1,5 +1,8 @@
 #pragma once
 
+/// @file
+/// @brief A reaction event used to attach small annotations to events.
+
 #if __has_include(<nlohmann/json_fwd.hpp>)
 #include <nlohmann/json_fwd.hpp>
 #else

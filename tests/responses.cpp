@@ -152,7 +152,7 @@ TEST(Responses, JoinedRoom)
         JoinedRoom room1 = data1;
 
         // It this succeeds parsing was done successfully
-        EXPECT_EQ(room1.ephemeral.receipts.size(), 1);
+        EXPECT_EQ(room1.ephemeral.events.size(), 1);
         EXPECT_EQ(room1.timeline.events.size(), 0);
         EXPECT_EQ(room1.unread_notifications.highlight_count, 2);
         EXPECT_EQ(room1.unread_notifications.notification_count, 4);
@@ -207,7 +207,7 @@ TEST(Responses, JoinedRoom)
 	})"_json;
 
         JoinedRoom room2 = data2;
-        EXPECT_EQ(room2.ephemeral.receipts.size(), 0);
+        EXPECT_EQ(room2.ephemeral.events.size(), 0);
         EXPECT_EQ(room2.timeline.events.size(), 2);
         EXPECT_EQ(room2.timeline.prev_batch, "s42_42_42_42_42_42_42_42_1");
         EXPECT_EQ(room2.unread_notifications.highlight_count, 2);
@@ -340,7 +340,7 @@ TEST(Responses, Sync)
         EXPECT_EQ(nheko.timeline.limited, true);
         EXPECT_EQ(nheko.timeline.prev_batch,
                   "t10853-333025362_324502987_444424_65663508_21685260_193623_2377336_2940807_454");
-        EXPECT_EQ(nheko.account_data.events.size(), 1);
+        EXPECT_EQ(nheko.account_data.events.size(), 2);
 
         EXPECT_EQ(sync1.rooms.leave.size(), 1);
         EXPECT_EQ(sync1.rooms.invite.size(), 0);
@@ -674,9 +674,16 @@ TEST(Responses, EphemeralTyping)
 
         mtx::responses::Ephemeral ephemeral = data;
 
-        EXPECT_EQ(ephemeral.typing.size(), 2);
-        EXPECT_EQ(ephemeral.typing[0], "@alice:example.com");
-        EXPECT_EQ(ephemeral.typing[1], "@bob:example.com");
+        EXPECT_EQ(ephemeral.events.size(), 1);
+        ASSERT_TRUE(
+          std::holds_alternative<mtx::events::EphemeralEvent<mtx::events::ephemeral::Typing>>(
+            ephemeral.events[0]));
+        auto e = std::get<mtx::events::EphemeralEvent<mtx::events::ephemeral::Typing>>(
+          ephemeral.events[0]);
+
+        EXPECT_EQ(e.content.user_ids.size(), 2);
+        EXPECT_EQ(e.content.user_ids[0], "@alice:example.com");
+        EXPECT_EQ(e.content.user_ids[1], "@bob:example.com");
 }
 
 TEST(Responses, EphemeralReceipts)
@@ -730,14 +737,29 @@ TEST(Responses, EphemeralReceipts)
 
         mtx::responses::Ephemeral ephemeral = data;
 
-        EXPECT_EQ(ephemeral.typing.size(), 2);
-        EXPECT_EQ(ephemeral.typing[0], "@alice:example.com");
-        EXPECT_EQ(ephemeral.typing[1], "@bob:example.com");
+        EXPECT_EQ(ephemeral.events.size(), 2);
+        ASSERT_TRUE(
+          std::holds_alternative<mtx::events::EphemeralEvent<mtx::events::ephemeral::Typing>>(
+            ephemeral.events[0]));
+        auto e = std::get<mtx::events::EphemeralEvent<mtx::events::ephemeral::Typing>>(
+          ephemeral.events[0]);
 
-        EXPECT_EQ(ephemeral.receipts.size(), 5);
-        EXPECT_EQ(ephemeral.receipts["$149339947230ohuCC:krtdex.com"].size(), 1);
-        EXPECT_EQ(ephemeral.receipts["$14935874261161012PaoJD:matrix.org"].size(), 7);
-        EXPECT_EQ(ephemeral.receipts["$14935874261161012PaoJD:matrix.org"]["@matthew:matrix.org"],
+        EXPECT_EQ(e.content.user_ids.size(), 2);
+        EXPECT_EQ(e.content.user_ids[0], "@alice:example.com");
+        EXPECT_EQ(e.content.user_ids[1], "@bob:example.com");
+
+        ASSERT_TRUE(
+          std::holds_alternative<mtx::events::EphemeralEvent<mtx::events::ephemeral::Receipt>>(
+            ephemeral.events[1]));
+        auto read = std::get<mtx::events::EphemeralEvent<mtx::events::ephemeral::Receipt>>(
+          ephemeral.events[1]);
+
+        EXPECT_EQ(read.content.receipts.size(), 5);
+        EXPECT_EQ(read.content.receipts["$149339947230ohuCC:krtdex.com"].users.size(), 1);
+        EXPECT_EQ(read.content.receipts["$14935874261161012PaoJD:matrix.org"].users.size(), 7);
+        EXPECT_EQ(read.content.receipts["$14935874261161012PaoJD:matrix.org"]
+                    .users["@matthew:matrix.org"]
+                    .ts,
                   1510440324233);
 }
 

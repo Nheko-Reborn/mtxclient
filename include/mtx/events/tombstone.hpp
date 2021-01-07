@@ -1,5 +1,8 @@
 #pragma once
 
+/// @file
+/// @brief An event describing a room upgrade or shutdown.
+
 #if __has_include(<nlohmann/json_fwd.hpp>)
 #include <nlohmann/json_fwd.hpp>
 #else

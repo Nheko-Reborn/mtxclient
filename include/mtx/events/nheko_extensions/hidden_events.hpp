@@ -1,5 +1,8 @@
 #pragma once
 
+/// @file
+/// @brief A nheko specific event in account data used to hide events across different clients.
+
 #include <vector>
 
 #if __has_include(<nlohmann/json_fwd.hpp>)
@@ -13,6 +16,7 @@
 namespace mtx {
 namespace events {
 namespace account_data {
+//! Custom nheko specific event types
 namespace nheko_extensions {
 //! Custom event to hide certain event types in nheko
 struct HiddenEvents

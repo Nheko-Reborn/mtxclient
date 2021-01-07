@@ -1,5 +1,8 @@
 #pragma once
 
+/// @file
+/// @brief Responses returned by the media repo.
+
 #if __has_include(<nlohmann/json_fwd.hpp>)
 #include <nlohmann/json_fwd.hpp>
 #else

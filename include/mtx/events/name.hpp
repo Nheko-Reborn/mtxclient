@@ -1,5 +1,8 @@
 #pragma once
 
+/// @file
+/// @brief The room name state event.
+
 #if __has_include(<nlohmann/json_fwd.hpp>)
 #include <nlohmann/json_fwd.hpp>
 #else
@@ -9,11 +12,15 @@
 #include <string>
 
 namespace mtx {
+//! Namespace for all events.
 namespace events {
+//! Events, that can be used as a state event.
 namespace state {
 
+//! Content of the `m.room.name` event.
 struct Name
 {
+        //! The name of the room.
         std::string name;
 };
 

@@ -1,5 +1,8 @@
 #pragma once
 
+/// @file
+/// @brief Notification related endpoints.
+
 #if __has_include(<nlohmann/json_fwd.hpp>)
 #include <nlohmann/json_fwd.hpp>
 #else
@@ -12,6 +15,7 @@
 namespace mtx {
 namespace responses {
 
+//! Description for a notification.
 struct Notification
 {
         //! The action to perform when the conditions for this rule are met.

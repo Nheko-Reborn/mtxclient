@@ -435,6 +435,57 @@ to_json(json &obj, const KeyVerificationMac &event)
                 obj["m.relates_to"] = event.relates_to.value();
 }
 
+void
+from_json(const nlohmann::json &obj, SecretRequest &event)
+{
+        event.action = RequestAction::Unknown;
+        auto action  = obj.value("action", "");
+        if (action == "request") {
+                event.action = RequestAction::Request;
+        } else if (action == "request_cancellation") {
+                event.action = RequestAction::Cancellation;
+        }
+
+        event.name = obj.value("name", "");
+
+        event.request_id           = obj.value("request_id", "");
+        event.requesting_device_id = obj.value("requesting_device_id", "");
+}
+
+void
+to_json(nlohmann::json &obj, const SecretRequest &event)
+{
+        switch (event.action) {
+        case RequestAction::Request:
+                obj["action"] = "request";
+                break;
+        case RequestAction::Cancellation:
+                obj["action"] = "request_cancellation";
+                break;
+        default:
+                throw std::invalid_argument("Unknown secret request action type");
+        }
+
+        if (!event.name.empty())
+                obj["name"] = event.name;
+
+        obj["request_id"]           = event.request_id;
+        obj["requesting_device_id"] = event.requesting_device_id;
+}
+
+void
+from_json(const nlohmann::json &obj, SecretSend &event)
+{
+        event.request_id = obj.value("request_id", "");
+        event.secret     = obj.value("secret", "");
+}
+
+void
+to_json(nlohmann::json &obj, const SecretSend &event)
+{
+        obj["request_id"] = event.request_id;
+        obj["secret"]     = event.secret;
+}
 } // namespace msg
 } // namespace events
 } // namespace mtx

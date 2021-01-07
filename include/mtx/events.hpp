@@ -1,5 +1,8 @@
 #pragma once
 
+/// @file
+/// @brief Basetypes for events. Content is defined elsewhere.
+
 #if __has_include(<nlohmann/json_fwd.hpp>)
 #include <nlohmann/json_fwd.hpp>
 #else
@@ -193,6 +196,35 @@ getMessageType(const json &obj);
 
 struct Sticker : public RoomEvent<mtx::events::msg::StickerImage>
 {};
+
+/// @brief An ephemeral event like typing or read receipts
+/// @sa Event
+template<class Content>
+struct EphemeralEvent
+{
+        //! The fields in this object will vary depending on the type of event.
+        //! When interacting with the REST API, this is the HTTP body.
+        Content content;
+        //! The type of event.
+        //! This *should* be namespaced similar to Java package
+        //! naming conventions e.g. 'com.example.subdomain.event.type'
+        EventType type;
+        //! The room this was sent in. May not always be present.
+        std::string room_id;
+};
+
+template<class Content>
+void
+to_json(json &obj, const EphemeralEvent<Content> &event);
+
+template<class Content>
+void
+from_json(const json &obj, EphemeralEvent<Content> &event);
+
+/// @brief An account_data event like fully_read or tags.
+/// @sa Event
+template<class Content>
+using AccountDataEvent = EphemeralEvent<Content>;
 
 } // namespace events
 } // namespace mtx

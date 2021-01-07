@@ -1,5 +1,8 @@
 #pragma once
 
+/// @file
+/// @brief Collection header for all the different response structs.
+
 #include "responses/common.hpp"
 
 #include "responses/create_room.hpp"

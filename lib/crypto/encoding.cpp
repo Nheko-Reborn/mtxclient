@@ -38,7 +38,7 @@ invert_alphabet(std::array<char, N> alphabet)
                 e = 0xff;
 
         for (std::size_t i = 0; i < N; i++) {
-                inverted[static_cast<uint8_t>(alphabet[i])] = i;
+                inverted[static_cast<uint8_t>(alphabet[i])] = static_cast<uint8_t>(i);
         }
 
         return inverted;

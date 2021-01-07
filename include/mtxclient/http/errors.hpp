@@ -1,5 +1,8 @@
 #pragma once
 
+/// @file
+/// @brief Error codes returned by the client-server API
+
 #include "mtx/errors.hpp"
 #include <boost/beast/http/status.hpp>
 #include <boost/system/error_code.hpp>

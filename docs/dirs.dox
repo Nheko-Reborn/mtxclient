@@ -1,0 +1,32 @@
+/// @dir include
+/// @brief Include directory. Add this to your include path.
+
+/// @dir include/mtxclient
+/// @brief The root directory for all the client callbacks.
+
+/// @dir include/mtxclient/http
+/// @brief Functions to invoke the API over HTTP.
+
+/// @dir include/mtxclient/crypto
+/// @brief Wrappers around the olm library as well as other encryption specific
+/// functionality.
+
+/// @dir include/mtx
+/// @brief The root directory for all the type definitions listed in the
+/// specifications.
+
+/// @dir include/mtx/events
+/// @brief The different event types in the Matrix API.
+
+/// @dir include/mtx/events/messages
+/// @brief The different types, that can be sent as a message event.
+
+/// @dir include/mtx/events/ephemeral/
+/// @brief Ephemeral events not part of the timeline like typing or read notifications.
+
+/// @dir include/mtx/events/nheko_extensions
+/// @brief Nheko specific event types not part of the official specification.
+
+/// @dir include/mtx/responses
+/// @brief The reponses returned from each request.
+

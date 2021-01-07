@@ -1,5 +1,8 @@
 #pragma once
 
+/// @file
+/// @brief Return value of the server and API version query.
+
 #if __has_include(<nlohmann/json_fwd.hpp>)
 #include <nlohmann/json_fwd.hpp>
 #else

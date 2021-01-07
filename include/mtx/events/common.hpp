@@ -1,5 +1,8 @@
 #pragma once
 
+/// @file
+/// @brief Structs used in multiple different event types.
+
 #if __has_include(<nlohmann/json_fwd.hpp>)
 #include <nlohmann/json_fwd.hpp>
 #else

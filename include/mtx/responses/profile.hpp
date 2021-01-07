@@ -1,5 +1,8 @@
 #pragma once
 
+/// @file
+/// @brief Responses from the profile API.
+
 #if __has_include(<nlohmann/json_fwd.hpp>)
 #include <nlohmann/json_fwd.hpp>
 #else

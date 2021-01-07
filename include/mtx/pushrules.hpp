@@ -1,5 +1,8 @@
 #pragma once
 
+/// @file
+/// @brief Pushrules and notification settings.
+
 #if __has_include(<nlohmann/json_fwd.hpp>)
 #include <nlohmann/json_fwd.hpp>
 #else
@@ -11,7 +14,9 @@
 #include <vector>
 
 namespace mtx {
+//! Namespace for the pushrules specific endpoints.
 namespace pushrules {
+//! A condition to match pushrules on.
 struct PushCondition
 {
         //! Required. The kind of condition to apply. See conditions for more information on the
@@ -40,21 +45,34 @@ to_json(nlohmann::json &obj, const PushCondition &condition);
 void
 from_json(const nlohmann::json &obj, PushCondition &condition);
 
+//! Namespace for the different push actions.
 namespace actions {
+//! Notify the user.
 struct notify
 {};
+//! Don't notify the user.
 struct dont_notify
 {};
+/// @brief This enables notifications for matching events but activates homeserver specific
+/// behaviour to intelligently coalesce multiple events into a single notification.
+///
+/// Not all homeservers may support this. Those that do not support it should treat it as the notify
+/// action.
 struct coalesce
 {};
+//! Play a sound.
 struct set_tweak_sound
 {
+        //! The sound to play.
         std::string value = "default";
 };
+//! Highlight the message.
 struct set_tweak_highlight
 {
         bool value = true;
 };
+
+//! A collection for the different actions.
 using Action = std::variant<actions::notify,
                             actions::dont_notify,
                             actions::coalesce,
@@ -67,6 +85,7 @@ to_json(nlohmann::json &obj, const Action &action);
 void
 from_json(const nlohmann::json &obj, Action &action);
 
+//! A list of actions.
 struct Actions
 {
         std::vector<Action> actions;
@@ -78,6 +97,7 @@ void
 from_json(const nlohmann::json &obj, Actions &action);
 }
 
+//! A pushrule defining the notification behaviour for a message.
 struct PushRule
 {
         //! Required. Whether this is a default rule, or has been set explicitly.
@@ -102,6 +122,7 @@ to_json(nlohmann::json &obj, const PushRule &condition);
 void
 from_json(const nlohmann::json &obj, PushRule &condition);
 
+//! All the pushrules to evaluate for events.
 struct Ruleset
 {
         //! see https://matrix.org/docs/spec/client_server/latest#push-rules
@@ -126,8 +147,10 @@ to_json(nlohmann::json &obj, const Ruleset &condition);
 void
 from_json(const nlohmann::json &obj, Ruleset &condition);
 
+//! The global ruleset applied to all events.
 struct GlobalRuleset
 {
+        //! The actual ruleset.
         Ruleset global;
 };
 
@@ -137,6 +160,7 @@ to_json(nlohmann::json &obj, const GlobalRuleset &set);
 void
 from_json(const nlohmann::json &obj, GlobalRuleset &set);
 
+//! The response for queries, if a specific ruleset is enabled.
 struct Enabled
 {
         bool enabled = true;

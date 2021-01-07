@@ -1,5 +1,9 @@
 #pragma once
 
+/// @file
+/// @brief Holds most of the crypto functions and errors as well as a Client, which does the Olm
+/// account bookkeeping for you.
+
 #include <exception>
 #include <memory>
 #include <new>
@@ -21,11 +25,13 @@
 #include "mtxclient/crypto/utils.hpp"
 
 namespace mtx {
+//! Cryptography related types
 namespace crypto {
 
 //! Data representation used to interact with libolm.
 using BinaryBuf = std::vector<uint8_t>;
 
+//! Errors returned by the olm library
 class olm_exception : public std::exception
 {
 public:
@@ -45,6 +51,10 @@ public:
           : msg_(func + ": " + std::string(olm_pk_decryption_last_error(s)))
         {}
 
+        olm_exception(std::string func, OlmPkSigning *s)
+          : msg_(func + ": " + std::string(olm_pk_signing_last_error(s)))
+        {}
+
         olm_exception(std::string func, OlmOutboundGroupSession *s)
           : msg_(func + ": " + std::string(olm_outbound_group_session_last_error(s)))
         {}
@@ -61,25 +71,29 @@ public:
           : msg_(msg)
         {}
 
-        virtual const char *what() const throw() { return msg_.c_str(); }
+        //! Returns a description of the olm error.
+        const char *what() const noexcept override { return msg_.c_str(); }
 
 private:
         std::string msg_;
 };
 
+//! Serialize olm objects into strings encrypted using key to persist them on non volatile storage.
 template<class T>
 std::string
 pickle(typename T::olm_type *object, const std::string &key)
 {
-        auto tmp      = create_buffer(T::pickle_length(object));
-        const int ret = T::pickle(object, key.data(), key.size(), tmp.data(), tmp.size());
+        auto tmp       = create_buffer(T::pickle_length(object));
+        const auto ret = T::pickle(object, key.data(), key.size(), tmp.data(), tmp.size());
 
-        if (ret == -1)
+        if (ret == olm_error())
                 throw olm_exception("pickle", object);
 
         return std::string((char *)tmp.data(), tmp.size());
 }
 
+//! Deserialize olm objects from strings encrypted using key previously persisted on non volatile
+//! storage.
 template<class T>
 std::unique_ptr<typename T::olm_type, OlmDeleter>
 unpickle(const std::string &pickled, const std::string &key)
@@ -95,38 +109,78 @@ unpickle(const std::string &pickled, const std::string &key)
         return object;
 }
 
+//! Return value from decrypting a group message.
 struct GroupPlaintext
 {
+        //! The plain text, which was decrypted.
         BinaryBuf data;
+        //! The message index used for this message.
         uint32_t message_index;
 };
 
+//! Helper to generate Short Authentication Strings (SAS)
 struct SAS
 {
+        //! Create a new SAS object.
         SAS();
+        //! Query the public key generated for this object.
         std::string public_key();
+        //! Set the key of the other party being verified.
         void set_their_key(std::string their_public_key);
+        /// @brief Returns 3 integers ranging from 1000 to 9191, to be used only after
+        /// using `set_their_key`
+        ///
+        /// These are meant to be compared by the users verifying each other.
         std::vector<int> generate_bytes_decimal(std::string info);
+        /// @brief Returns 7 integers in the range from 0 to 63, to be used only after using
+        /// `set_their_key`
+        ///
+        /// Map these numpers to one of the 64 emoji from the specification and let the user compare
+        /// them.
         std::vector<int> generate_bytes_emoji(std::string info);
+        //! Calculate MACs after verification to verify keys.
         std::string calculate_mac(std::string input_data, std::string info);
 
 private:
         SASPtr sas;
 };
 
+//! Helper to sign arbitrary messages using an ed25519 key
+struct PkSigning
+{
+        //! Construct from base64 key
+        static PkSigning from_seed(std::string seed);
+        std::string sign(const std::string &message);
+
+        //! base64 public key
+        std::string public_key() const { return public_key_; }
+
+private:
+        PkSigning() {}
+        std::unique_ptr<OlmPkSigning, OlmDeleter> signing;
+        std::string public_key_;
+};
+
+//! Client for all the cryptography related functionality like olm accounts, session keys
+//! encryption, signing and a few more things.
 class OlmClient : public std::enable_shared_from_this<OlmClient>
 {
 public:
         OlmClient() = default;
+        //! Initialize a crypto client for the specified device of the specified user.
         OlmClient(std::string user_id, std::string device_id)
           : user_id_(std::move(user_id))
           , device_id_(std::move(device_id))
         {}
 
-        using Base64String      = std::string;
+        //! Base64 encoded string
+        using Base64String = std::string;
+        //! A signed set of one time keys indexed by `<algorithm>:<key_id>`.
         using SignedOneTimeKeys = std::map<std::string, requests::SignedOneTimeKey>;
 
+        //! Set the id of this device.
         void set_device_id(std::string device_id) { device_id_ = std::move(device_id); }
+        //! Set the id of this user.
         void set_user_id(std::string user_id) { user_id_ = std::move(user_id); }
 
         //! Sign the given message.
@@ -134,8 +188,11 @@ public:
 
         //! Create a new olm Account. Must be called before any other operation.
         void create_new_account();
+        //! Create a new olm utility object.
         void create_new_utility() { utility_ = create_olm_object<UtilityObject>(); }
 
+        /// @brief Restore the olm account from a pickled string encrypted by `key`
+        /// @see load
         void restore_account(const std::string &saved_data, const std::string &key);
 
         //! Retrieve the json representation of the identity keys for the given account.
@@ -161,6 +218,7 @@ public:
 
         //! Prepare request for the /keys/upload endpoint by signing identity & one time keys.
         mtx::requests::UploadKeys create_upload_keys_request(const OneTimeKeys &keys);
+        //! Prepare an empty /keys/upload request.
         mtx::requests::UploadKeys create_upload_keys_request();
 
         //! Decrypt a message using megolm.
@@ -177,17 +235,40 @@ public:
                                   std::size_t msg_type,
                                   const std::string &msg);
 
-        //! Create an outbount megolm session.
+        /// @brief Create an outbound megolm session.
+        /// @sa init_inbound_group_session(const std::string&), import_inbound_group_session()
         OutboundGroupSessionPtr init_outbound_group_session();
+        /// @brief Initialize an inbound group session from a shared session key (an m.room_key
+        /// event).
+        /// @sa init_inbound_group_session(), import_inbound_group_session()
         InboundGroupSessionPtr init_inbound_group_session(const std::string &session_key);
+        /// @brief Initialize an inbound group session from a forwarded session key (an
+        /// m.forwarded_room_key event).
+        /// @sa init_inbound_group_session(const std::string&), init_inbound_group_session()
         InboundGroupSessionPtr import_inbound_group_session(const std::string &session_key);
+
+        /// @brief create an outbound session to encrypt to device messages.
+        /// @param identity_key The curve25519 key of the other party.
+        /// @param one_time_key The claimed one time key of the other party.
         OlmSessionPtr create_outbound_session(const std::string &identity_key,
                                               const std::string &one_time_key);
+        /// @brief Creates an inbound session from an inbound message. DON'T USE THIS, use
+        /// create_inbound_session_from() instead.
+        /// @sa create_inbound_session_from()
         OlmSessionPtr create_inbound_session(const BinaryBuf &one_time_key_message);
+        /// @brief Creates an inbound session from an inbound message. DON'T USE THIS, use
+        /// create_inbound_session_from() instead.
+        /// @sa create_inbound_session_from()
         OlmSessionPtr create_inbound_session(const std::string &one_time_key_message);
 
+        /// @brief Create an inbound olm session from the other users message and identity key
+        /// @sa create_inbound_session_from(const std::string&, const std::string&),
+        /// create_outbound_session(), create_inbound_session()
         OlmSessionPtr create_inbound_session_from(const std::string &their_curve25519,
                                                   const BinaryBuf &one_time_key_message);
+        /// @brief Create an inbound olm session from the other users message and identity key
+        /// @sa create_inbound_session_from(const std::string&, const BinaryBuf&),
+        /// create_outbound_session(), create_inbound_session()
         OlmSessionPtr create_inbound_session_from(const std::string &their_curve25519,
                                                   const std::string &one_time_key_message);
 
@@ -199,13 +280,18 @@ public:
                                                     const std::string &recipient_ed25519_key,
                                                     const std::string &recipient_curve25519_key);
 
+        //! store the account in a pickled string encrypted by `key`
         std::string save(const std::string &key);
+        /// @brief Restore the account from a pickled string encrypted by `key`
+        /// @see restore_account
         void load(const std::string &data, const std::string &key)
         {
                 account_ = unpickle<AccountObject>(data, key);
         }
 
+        //! Access the olm account directly.
         OlmAccount *account() { return account_.get(); }
+        //! Access the olm utility object directly.
         OlmUtility *utility() { return utility_.get(); }
 
         //! SAS related stuff
@@ -240,17 +326,23 @@ export_session(OlmInboundGroupSession *s);
 InboundGroupSessionPtr
 import_session(const std::string &session_key);
 
+/// Checks if an inbound session matches a pre key message.
+///
+/// Use matches_inbound_session_from() instead.
 bool
 matches_inbound_session(OlmSession *session, const std::string &one_time_key_message);
 
+//! Checks if an inbound session matches a pre key message
 bool
 matches_inbound_session_from(OlmSession *session,
                              const std::string &id_key,
                              const std::string &one_time_key_message);
 
+//! Encrypt the exported sessions according to the export format from the spec.
 std::string
 encrypt_exported_sessions(const mtx::crypto::ExportedSessionKeys &keys, std::string pass);
 
+//! Decrypt the exported sessions according to the export format from the spec.
 mtx::crypto::ExportedSessionKeys
 decrypt_exported_sessions(const std::string &data, std::string pass);
 
@@ -259,7 +351,7 @@ bool
 verify_identity_signature(const DeviceKeys &device_keys,
                           const DeviceId &device_id,
                           const UserId &user_id);
-//! this function is for verifying the signatures
+//! Verify an ed25519 signature.
 bool
 ed25519_verify_signature(std::string signing_key, nlohmann::json obj, std::string signature);
 

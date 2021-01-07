@@ -1,5 +1,8 @@
 #pragma once
 
+/// @file
+/// @brief Structs for for requests to the Matrix API.
+
 #include <string>
 #include <variant>
 
@@ -14,6 +17,7 @@
 using json = nlohmann::json;
 
 namespace mtx {
+//! Namespace for request structs
 namespace requests {
 
 //! Whether or not the room will be visible by non members.
@@ -208,7 +212,7 @@ struct UploadKeys
         //! May be absent if no new identity keys are required.
         mtx::crypto::DeviceKeys device_keys;
         //! One-time public keys for "pre-key" messages.
-        //! The names of the properties should be in the format <algorithm>:<key_id>.
+        //! The names of the properties should be in the format `<algorithm>:<key_id>`.
         //! The format of the key is determined by the key algorithm.
         std::map<std::string, std::variant<std::string, SignedOneTimeKey>> one_time_keys;
 };
