@@ -15,6 +15,7 @@
 #include "mtx/identifiers.hpp"
 
 using json = nlohmann::json;
+//! Top level namespace for mtxclient
 namespace mtx {
 namespace events {
 //! The basic set of fields all events must have.
