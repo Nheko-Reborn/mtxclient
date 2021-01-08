@@ -126,7 +126,9 @@ to_json(json &obj, const PublicRoomsFilter &request)
 void
 to_json(json &obj, const PublicRooms &request)
 {
-        obj["limit"] = request.limit;
+        if (request.limit > 0) {
+                obj["limit"] = request.limit;
+        }
         
         if (!request.since.empty()) {
                 obj["since"] = request.since;
@@ -145,7 +147,7 @@ to_json(json &obj, const PublicRooms &request)
                 obj["third_party_instance_id"] = request.third_party_instance_id;
                 obj["include_all_networks"] = false;
         } else {
-                obj["include_all_networks"] = request.third_party_instance_id.empty();
+                obj["include_all_networks"] = true;
         }
 }
 
