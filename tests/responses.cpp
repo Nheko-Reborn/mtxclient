@@ -1107,16 +1107,16 @@ TEST(Responses, TurnServer)
 
 TEST(Responses, RoomVisibility)
 {
-        json data = {{"visibility", "public"}};
+        json data                     = {{"visibility", "public"}};
         RoomVisibility roomVisibility = data;
         EXPECT_EQ(roomVisibility.visibility, mtx::responses::Visibility::Public);
 
-        data = {{"visibility", "private"}};
+        data           = {{"visibility", "private"}};
         roomVisibility = data;
         EXPECT_EQ(roomVisibility.visibility, mtx::responses::Visibility::Private);
 }
 
-TEST(Responses, PublicRooms) 
+TEST(Responses, PublicRooms)
 {
         json data = R"({
           "chunk": [

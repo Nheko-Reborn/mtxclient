@@ -129,23 +129,24 @@ to_json(json &obj, const PublicRooms &request)
         if (request.limit > 0) {
                 obj["limit"] = request.limit;
         }
-        
+
         if (!request.since.empty()) {
                 obj["since"] = request.since;
         }
-        
+
         if (!request.filter.generic_search_term.empty()) {
                 obj["filter"] = request.filter;
         }
-        
+
         // Based on the spec, third_party_instance_id can only be used if
         // include_all_networks is false. A case where the latter is true and
         // the former is set is invalid.
         if (request.include_all_networks && !request.third_party_instance_id.empty()) {
-                throw std::invalid_argument("third_party_instance_id can only be set if include_all_networks is false");
+                throw std::invalid_argument(
+                  "third_party_instance_id can only be set if include_all_networks is false");
         } else if (!request.third_party_instance_id.empty()) {
                 obj["third_party_instance_id"] = request.third_party_instance_id;
-                obj["include_all_networks"] = false;
+                obj["include_all_networks"]    = false;
         } else {
                 obj["include_all_networks"] = true;
         }

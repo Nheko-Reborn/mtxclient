@@ -965,55 +965,65 @@ Client::send_to_device(const std::string &event_type,
 }
 
 void
-Client::get_room_visibility(const std::string &room_id,
-                            Callback<mtx::responses::RoomVisibility> cb)
+Client::get_room_visibility(const std::string &room_id, Callback<mtx::responses::RoomVisibility> cb)
 {
-        const auto api_path = "/client/r0/directory/list/room/" +
-                               mtx::client::utils::url_encode(room_id);
+        const auto api_path =
+          "/client/r0/directory/list/room/" + mtx::client::utils::url_encode(room_id);
 
-        get<mtx::responses::RoomVisibility>(api_path,
-                                            [cb](const mtx::responses::RoomVisibility &res,
-                                                  HeaderFields,
-                                                  RequestErr err) { cb(res, err); });
+        get<mtx::responses::RoomVisibility>(
+          api_path, [cb](const mtx::responses::RoomVisibility &res, HeaderFields, RequestErr err) {
+                  cb(res, err);
+          });
 }
 
-void 
+void
 Client::put_room_visibility(const std::string &room_id,
-                                 const mtx::requests::RoomVisibility &req,
-                                 ErrCallback cb)
+                            const mtx::requests::RoomVisibility &req,
+                            ErrCallback cb)
 {
-        const auto api_path = "/client/r0/directory/list/room/"
-                                + mtx::client::utils::url_encode(room_id);
-        std::cout << api_path << "\n"; 
+        const auto api_path =
+          "/client/r0/directory/list/room/" + mtx::client::utils::url_encode(room_id);
+        std::cout << api_path << "\n";
         put<mtx::requests::RoomVisibility>(api_path, req, cb);
         std::cout << "Does ths work?\n";
 }
 
 void
-Client::post_public_rooms(const mtx::requests::PublicRooms &req, 
-                                Callback<mtx::responses::PublicRooms> cb, const std::string &server)
-{       
-        const auto api_path = "/client/r0/publicRooms?" + 
-                                mtx::client::utils::query_params({{"server", server}});
-        post<mtx::requests::PublicRooms, mtx::responses::PublicRooms>(
-        api_path, req, cb);    
+Client::post_public_rooms(const mtx::requests::PublicRooms &req,
+                          Callback<mtx::responses::PublicRooms> cb,
+                          const std::string &server)
+{
+        std::string api_path = "/client/r0/publicRooms";
+
+        if (!server.empty())
+                api_path += "?" + mtx::client::utils::query_params({{"server", server}});
+        post<mtx::requests::PublicRooms, mtx::responses::PublicRooms>(api_path, req, cb);
 }
 
 void
-Client::get_public_rooms(Callback<mtx::responses::PublicRooms> cb, const std::string &server, 
-                        size_t limit, const std::string &since) 
+Client::get_public_rooms(Callback<mtx::responses::PublicRooms> cb,
+                         const std::string &server,
+                         size_t limit,
+                         const std::string &since)
 {
-        const auto api_path = 
-        "/client/r0/publicRooms?" +
-         mtx::client::utils::query_params({{"server", server}, {"limit", std::to_string(limit)}, {"since", since}});
-        
-        get<mtx::responses::PublicRooms>(api_path, 
-                                        [cb](const mtx::responses::PublicRooms &res,
-                                             HeaderFields,
-                                             RequestErr err) { 
-                                                     cb(res, err); });
-}
+        std::string api_path = "/client/r0/publicRooms";
 
+        std::map<std::string, std::string> params;
+        if (!server.empty())
+                params["server"] = server;
+        if (limit > 0)
+                params["limit"] = std::to_string(limit);
+        if (!since.empty())
+                params["since"] = since;
+
+        if (!params.empty())
+                api_path += "?" + mtx::client::utils::query_params(params);
+
+        get<mtx::responses::PublicRooms>(
+          api_path, [cb](const mtx::responses::PublicRooms &res, HeaderFields, RequestErr err) {
+                  cb(res, err);
+          });
+}
 
 //
 // Group related endpoints.
