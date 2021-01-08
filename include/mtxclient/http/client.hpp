@@ -460,7 +460,7 @@ public:
 
         //! Sets the visibility of a given room in the server's public room directory.
         void put_room_visibility(const std::string &room_id,
-                                 const nlohmann::json &body,
+                                 const mtx::requests::RoomVisibility &req,
                                  ErrCallback cb);
 
         //! Lists the public rooms on the server. This API returns paginated responses.

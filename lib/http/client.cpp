@@ -979,13 +979,13 @@ Client::get_room_visibility(const std::string &room_id,
 
 void 
 Client::put_room_visibility(const std::string &room_id,
-                                 const nlohmann::json &body,
+                                 const mtx::requests::RoomVisibility &req,
                                  ErrCallback cb)
 {
         const auto api_path = "/client/r0/directory/list/room/"
                                 + mtx::client::utils::url_encode(room_id);
-        
-        put<nlohmann::json>(api_path, body, cb);
+        std::cout << api_path << "\n"; 
+        put<mtx::requests::RoomVisibility>(api_path, req, cb);
 }
 
 void
