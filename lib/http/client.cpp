@@ -986,6 +986,7 @@ Client::put_room_visibility(const std::string &room_id,
                                 + mtx::client::utils::url_encode(room_id);
         std::cout << api_path << "\n"; 
         put<mtx::requests::RoomVisibility>(api_path, req, cb);
+        std::cout << "Does ths work?\n";
 }
 
 void
