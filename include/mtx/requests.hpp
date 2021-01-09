@@ -147,24 +147,26 @@ to_json(json &obj, const TypingNotification &request);
 //! Request payload for the `PUT /_matrix/client/r0/directory/list/room/{roomId}` endpoint
 struct RoomVisibility
 {
-        //! The new visibility setting for the room. Defaults to 'public'. One of: ["private", "public"]
+        //! The new visibility setting for the room. Defaults to 'public'. One of: ["private",
+        //! "public"]
         Visibility visibility;
 };
 
 void
 to_json(json &obj, const RoomVisibility &request);
 
-struct PublicRoomsFilter {
-    //! A string to search for in the room metadata,
-    //! e.g. name, topic, canonical alias etc. (Optional).
-    std::string generic_search_term;
+struct PublicRoomsFilter
+{
+        //! A string to search for in the room metadata,
+        //! e.g. name, topic, canonical alias etc. (Optional).
+        std::string generic_search_term;
 };
 
 void
 to_json(nlohmann::json &obj, const PublicRoomsFilter &req);
 
 //! Request payload for the `POST /_matrix/client/r0/publicRooms` endpoint.
-struct PublicRooms 
+struct PublicRooms
 {
         //! Limit the number of results returned.
         int limit;
