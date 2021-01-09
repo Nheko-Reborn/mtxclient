@@ -139,7 +139,7 @@ TEST(ClientAPI, SSORedirect)
         mtx_client->close();
 }
 
-TEST(ClientAPI, DISABLED_EmptyUserAvatar)
+TEST(ClientAPI, EmptyUserAvatar)
 {
         auto alice = std::make_shared<Client>("localhost");
 
@@ -177,7 +177,7 @@ TEST(ClientAPI, DISABLED_EmptyUserAvatar)
         alice->close();
 }
 
-TEST(ClientAPI, DISABLED_RealUserAvatar)
+TEST(ClientAPI, RealUserAvatar)
 {
         auto alice = std::make_shared<Client>("localhost");
 
@@ -797,7 +797,7 @@ TEST(ClientAPI, Versions)
         mtx_client->close();
 }
 
-TEST(ClientAPI, DISABLED_Typing)
+TEST(ClientAPI, Typing)
 {
         auto alice = std::make_shared<Client>("localhost");
 
@@ -981,7 +981,7 @@ TEST(ClientAPI, PresenceOverSync)
         alice->close();
 }
 
-TEST(ClientAPI, DISABLED_SendMessages)
+TEST(ClientAPI, SendMessages)
 {
         auto alice = std::make_shared<Client>("localhost");
         auto bob   = std::make_shared<Client>("localhost");
@@ -1097,7 +1097,7 @@ TEST(ClientAPI, RedactEvent)
         alice->close();
 }
 
-TEST(ClientAPI, DISABLED_SendStateEvents)
+TEST(ClientAPI, SendStateEvents)
 {
         auto alice = std::make_shared<Client>("localhost");
         auto bob   = std::make_shared<Client>("localhost");
@@ -1246,7 +1246,7 @@ TEST(ClientAPI, UploadFilter)
         alice->close();
 }
 
-TEST(ClientAPI, DISABLED_ReadMarkers)
+TEST(ClientAPI, ReadMarkers)
 {
         auto alice = std::make_shared<Client>("localhost");
 
@@ -1470,7 +1470,7 @@ TEST(ClientAPI, RetrieveSingleEvent)
         bob->close();
 }
 
-TEST(Groups, DISABLED_Rooms)
+TEST(Groups, Rooms)
 {
         auto alice = std::make_shared<Client>("localhost");
         alice->login("alice", "secret", check_login);
@@ -1540,7 +1540,7 @@ TEST(Groups, DISABLED_Rooms)
         alice->close();
 }
 
-TEST(Groups, DISABLED_Profiles)
+TEST(Groups, Profiles)
 {
         auto alice = std::make_shared<Client>("localhost");
         alice->login("alice", "secret", check_login);
@@ -1578,7 +1578,7 @@ TEST(Groups, DISABLED_Profiles)
 
 TEST(ClientAPI, PublicRooms)
 {
-        // Setup : Create a new (public) room with some settings, add a user to the room
+        // Setup : Create a new (public) room with some settings
         auto alice = std::make_shared<Client>("localhost");
         auto bob   = std::make_shared<Client>("localhost");
 
@@ -1593,6 +1593,7 @@ TEST(ClientAPI, PublicRooms)
         while (alice->access_token().empty() || bob->access_token().empty())
                 sleep();
 
+        // access tokens used for debugging w/ curl
         std::cout << "Alice AT: " << alice->access_token() << "\n";
         std::cout << "Bob AT: " << bob->access_token() << "\n";
 
@@ -1603,24 +1604,20 @@ TEST(ClientAPI, PublicRooms)
         req.invite          = {"@bob:localhost"};
         req.room_alias_name = alice->generate_txn_id();
         req.preset          = Preset::PublicChat;
-        // req.room_alias_name = "foo";
 
         alice->create_room(
           req, [alice, bob](const mtx::responses::CreateRoom &res, RequestErr err) {
                   check_error(err);
                   auto room_id = res.room_id;
+                  std::cout << "Created room w/ Room ID: " << room_id.to_string() << std::endl;
 
                   // TEST 1: endpoints to set and get the visibility of the room we just created
                   mtx::requests::RoomVisibility r;
                   r.visibility = mtx::requests::Visibility::Public;
 
-                  std::cout << "HERE\n";
-
                   alice->put_room_visibility(
                     room_id.to_string(), r, [alice, bob, room_id](RequestErr err) {
                             check_error(err);
-
-                            std::cout << "PLS WORK!\n";
 
                             alice->get_room_visibility(
                               "",
@@ -1631,11 +1628,9 @@ TEST(ClientAPI, PublicRooms)
                                                 "M_NOT_FOUND");
                               });
 
-                            std::atomic<bool> done = false;
-
                             alice->get_room_visibility(
                               room_id.to_string(),
-                              [alice, bob, room_id, &done](
+                              [alice, bob, room_id](
                                 const mtx::responses::RoomVisibility &res, RequestErr err) {
                                       check_error(err);
                                       EXPECT_EQ(visibilityToString(res.visibility), "public");
@@ -1645,8 +1640,6 @@ TEST(ClientAPI, PublicRooms)
                                       mtx::requests::PublicRooms room_req;
                                       room_req.limit                = 1;
                                       room_req.include_all_networks = true;
-                                      json j                        = room_req;
-                                      std::cout << j.dump(4) << "\n";
 
                                       alice->post_public_rooms(
                                         room_req,
@@ -1654,21 +1647,43 @@ TEST(ClientAPI, PublicRooms)
                                           const mtx::responses::PublicRooms &, RequestErr err) {
                                                 check_error(err);
 
-                                                std::cout << "POST req\n";
-
                                                 alice->get_public_rooms(
                                                   [alice, bob, room_id](
                                                     const mtx::responses::PublicRooms &res,
                                                     RequestErr err) {
                                                           check_error(err);
-                                                          std::cout << res.chunk.size()
-                                                                    << std::endl;
-                                                          //           EXPECT_EQ(res.chunk[0].name,
-                                                          //                     "Public Room");
-                                                          //           EXPECT_EQ(res.chunk[0].topic,
-                                                          //           "Test");
-                                                          //           EXPECT_EQ(res.chunk[0].num_joined_members,
-                                                          //                     2);
+                                                          std::cout << "GETting the listing pt 1\n";
+                                                                    EXPECT_EQ(res.chunk[0].name,
+                                                                              "Public Room");
+                                                                    EXPECT_EQ(res.chunk[0].topic,
+                                                                    "Test");
+                                                                    EXPECT_EQ(res.chunk[0].num_joined_members,
+                                                                              1);
+                                                                // Have bob join the room and verify there are 2 members
+                                                                std::atomic<bool> joined = false;
+                                                                bob->join_room(room_id.to_string(), [alice, bob, room_id, &joined](const mtx::responses::RoomId &, RequestErr err){
+                                                                        check_error(err);
+                                                                        std::cout << "bob joined the room\n";
+                                                                        joined = true;
+                                                                });
+                                                                while (!joined)
+                                                                        sleep();
+                                                                alice->get_public_rooms(
+                                                                                [alice, bob, room_id](
+                                                                                const mtx::responses::PublicRooms &res, RequestErr err) {
+                                                                                check_error(err);
+                                                                                std::cout << "testing for joined members\n";
+                                                                                EXPECT_EQ(res.chunk[0].num_joined_members, 2);
+
+                                                                                // Teardown: remove the room from the room directory (maintain future tests)
+                                                                                mtx::requests::RoomVisibility r;
+                                                                                r.visibility = mtx::requests::Visibility::Private;
+                                                                                alice->put_room_visibility(
+                                                                                room_id.to_string(), r, [alice, bob, room_id](RequestErr err) {
+                                                                                        check_error(err);
+                                                                                        std::cout << "removed from room directory\n";
+                                                                                });
+                                                                        }, "localhost", 1);
                                                   },
                                                   "localhost",
                                                   1);
@@ -1676,69 +1691,6 @@ TEST(ClientAPI, PublicRooms)
                                         "localhost");
                               });
                     });
-
-                  // bob->join_room(room_id.to_string(), [alice, bob, room_id](const
-                  // mtx::responses::RoomId &, RequestErr err) {
-                  //         check_error(err);
-
-                  //         // TEST 1: endpoints to set and get the visibility of the room we just
-                  //         created mtx::requests::RoomVisibility r; r.visibility =
-                  //         mtx::requests::Visibility::Private;
-
-                  //         std::cout << "HERE\n";
-
-                  //         alice->put_room_visibility(room_id.to_string(), r, [alice, bob,
-                  //         room_id](RequestErr err){
-                  //                 check_error(err);
-
-                  //                 std::cout << "PLS WORK!\n";
-
-                  //                 alice->get_room_visibility
-                  //                         ("", [alice, room_id](const
-                  //                         mtx::responses::RoomVisibility &, RequestErr err) {
-                  //                                 check_error(err);
-                  //                                 ASSERT_TRUE(err);
-                  //                                 EXPECT_EQ(mtx::errors::to_string(err->matrix_error.errcode),
-                  //                                 "M_NOT_FOUND");
-                  //                 });
-
-                  //                 // alice->get_room_visibility
-                  //                 //         (room_id, [alice](const
-                  //                 mtx::responses::RoomVisibility &res, RequestErr err){
-
-                  //                 //         check_error(err);
-                  //                 //         EXPECT_EQ(visibilityToString(res.visibility),
-                  //                 "public");
-
-                  //                 //         // TEST 2: endpoints to add and list the public
-                  //                 rooms on the server
-                  //                 //         mtx::requests::PublicRooms room_req;
-                  //                 //         room_req.limit = 1;
-                  //                 //         room_req.include_all_networks = true;
-                  //                 //         json j = room_req;
-                  //                 //         std::cout << j.dump(4) << "\n";
-
-                  //                 //         alice->post_public_rooms
-                  //                 //         (room_req, [alice](const mtx::responses::PublicRooms
-                  //                 &, RequestErr err) {
-                  //                 //                 check_error(err);
-
-                  //                 //                 alice->get_public_rooms
-                  //                 //                 ([alice](const mtx::responses::PublicRooms
-                  //                 &res, RequestErr err) {
-                  //                 //                         check_error(err);
-                  //                 //                         std::cout << res.chunk.size() <<
-                  //                 std::endl;
-                  //                 //                         EXPECT_EQ(res.chunk[0].name, "Public
-                  //                 Room");
-                  //                 //                         EXPECT_EQ(res.chunk[0].topic,
-                  //                 "Test");
-                  //                 // EXPECT_EQ(res.chunk[0].num_joined_members, 2);
-                  //                 //                 }, "", 1);
-                  //                 //         });
-                  //                 // });
-                  //         });
-                  // });
           });
         alice->close();
         bob->close();
