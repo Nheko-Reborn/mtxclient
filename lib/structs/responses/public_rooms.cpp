@@ -3,8 +3,6 @@
 #include "mtx/identifiers.hpp"
 #include "mtx/responses/public_rooms.hpp"
 
-#include <iostream>
-
 namespace mtx {
 namespace responses {
 
@@ -17,15 +15,13 @@ from_json(const nlohmann::json &obj, RoomVisibility &res)
 void
 from_json(const nlohmann::json &obj, PublicRoomsChunk &res)
 {
-        std::cout << obj.dump(4) << std::endl;
-
         res.aliases = obj.value("aliases", std::vector<std::string>{});
 
         res.canonical_alias = obj.value("canonical_alias", std::string{});
 
         res.name = obj.value("name", std::string{});
 
-        res.num_joined_members = obj.at("num_joined_members").get<int>();
+        res.num_joined_members = obj.at("num_joined_members").get<size_t>();
 
         res.room_id = obj.at("room_id").get<std::string>();
 
@@ -52,10 +48,8 @@ from_json(const nlohmann::json &obj, PublicRooms &publicRooms)
                 publicRooms.prev_batch = obj.at("prev_batch").get<std::string>();
         }
 
-        if (obj.count("total_room_count_estimate")) {
-                publicRooms.total_room_count_estimate =
-                  obj.at("total_room_count_estimate").get<int>();
-        }
+        publicRooms.total_room_count_estimate = obj.count("total_room_count_estimate") ? 
+                                                std::optional<size_t>{obj.at("total_room_count_estimate").get<size_t>()} : std::nullopt;                                         
 }
 
 } // namespace responses

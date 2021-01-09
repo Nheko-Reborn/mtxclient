@@ -18,7 +18,7 @@ enum class Visibility
 {
         //! A private visibility will hide the room from the published room list.
         Private,
-        //! Indicates that the room will be shown in the published room list
+        //! Indicates that the room will be shown in the published room list.
         Public,
 };
 
@@ -58,7 +58,7 @@ struct PublicRoomsChunk
     //! The name of the room, if any.
     std::string name;
     //! **Required.** The number of members joined to the room.
-    int num_joined_members;
+    size_t num_joined_members;
     //! **Required.** The ID of the room.
     std::string room_id;
     //! The topic of the room, if any.
@@ -92,8 +92,7 @@ struct PublicRooms
         std::string prev_batch;
         //! An estimate on the total number of public rooms,
         //! if the server has an estimate.
-        // std::optional<size_t>
-        int total_room_count_estimate;
+        std::optional<size_t> total_room_count_estimate;
 };
 
 void
