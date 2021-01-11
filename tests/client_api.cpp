@@ -1593,10 +1593,6 @@ TEST(ClientAPI, PublicRooms)
         while (alice->access_token().empty() || bob->access_token().empty())
                 sleep();
 
-        // access tokens used for debugging w/ curl
-        std::cout << "Alice AT: " << alice->access_token() << "\n";
-        std::cout << "Bob AT: " << bob->access_token() << "\n";
-
         mtx::requests::CreateRoom req;
         req.name            = "Public Room";
         req.topic           = "Test";
@@ -1609,7 +1605,6 @@ TEST(ClientAPI, PublicRooms)
           req, [alice, bob](const mtx::responses::CreateRoom &res, RequestErr err) {
                   check_error(err);
                   auto room_id = res.room_id;
-                  std::cout << "Created room w/ Room ID: " << room_id.to_string() << std::endl;
 
                   // TEST 1: endpoints to set and get the visibility of the room we just created
                   mtx::requests::PublicRoomVisibility r;
@@ -1653,7 +1648,6 @@ TEST(ClientAPI, PublicRooms)
                                                     const mtx::responses::PublicRooms &res,
                                                     RequestErr err) {
                                                           check_error(err);
-                                                          std::cout << "GETting the listing pt 1\n";
                                                           EXPECT_EQ(res.chunk[0].name,
                                                                     "Public Room");
                                                           EXPECT_EQ(res.chunk[0].topic, "Test");
@@ -1668,8 +1662,6 @@ TEST(ClientAPI, PublicRooms)
                                                               const mtx::responses::RoomId &,
                                                               RequestErr err) {
                                                                     check_error(err);
-                                                                    std::cout
-                                                                      << "bob joined the room\n";
                                                                     joined = true;
                                                             });
                                                           while (!joined)
@@ -1680,8 +1672,6 @@ TEST(ClientAPI, PublicRooms)
                                                                 &res,
                                                               RequestErr err) {
                                                                     check_error(err);
-                                                                    std::cout << "testing for "
-                                                                                 "joined members\n";
                                                                     EXPECT_EQ(res.chunk[0]
                                                                                 .num_joined_members,
                                                                               2);
@@ -1699,10 +1689,6 @@ TEST(ClientAPI, PublicRooms)
                                                                       [alice, bob, room_id](
                                                                         RequestErr err) {
                                                                               check_error(err);
-                                                                              std::cout
-                                                                                << "removed from "
-                                                                                   "room "
-                                                                                   "directory\n";
                                                                       });
                                                             },
                                                             "localhost",
