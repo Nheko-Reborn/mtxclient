@@ -142,17 +142,18 @@ struct PublicRoomVisibility
 void
 to_json(json &obj, const PublicRoomVisibility &request);
 
-struct PublicRoomsFilter {
-    //! A string to search for in the room metadata,
-    //! e.g. name, topic, canonical alias etc. (Optional).
-    std::string generic_search_term;
+struct PublicRoomsFilter
+{
+        //! A string to search for in the room metadata,
+        //! e.g. name, topic, canonical alias etc. (Optional).
+        std::string generic_search_term;
 };
 
 void
 to_json(nlohmann::json &obj, const PublicRoomsFilter &req);
 
 //! Request payload for the `POST /_matrix/client/r0/publicRooms` endpoint.
-struct PublicRooms 
+struct PublicRooms
 {
         //! Limit the number of results returned.
         int limit;

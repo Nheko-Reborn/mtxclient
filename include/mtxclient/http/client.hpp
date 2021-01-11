@@ -466,15 +466,15 @@ public:
 
         //! Lists the public rooms on the server. This API returns paginated responses.
         //! The rooms are ordered by the number of joined members, with the largest rooms first.
-        void get_public_rooms(Callback<mtx::responses::PublicRooms> cb, 
-                                const std::string &server = "", 
-                                size_t limit = 0, 
-                                const std::string &since = "");
-        
+        void get_public_rooms(Callback<mtx::responses::PublicRooms> cb,
+                              const std::string &server = "",
+                              size_t limit              = 0,
+                              const std::string &since  = "");
+
         //! Lists the public rooms on the server, with optional filter. POST Request.
-        void post_public_rooms(const mtx::requests::PublicRooms &req, 
-                                Callback<mtx::responses::PublicRooms> cb, 
-                                const std::string &server = ""); 
+        void post_public_rooms(const mtx::requests::PublicRooms &req,
+                               Callback<mtx::responses::PublicRooms> cb,
+                               const std::string &server = "");
 
         //
         // Group related endpoints.

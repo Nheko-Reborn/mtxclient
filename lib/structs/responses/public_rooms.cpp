@@ -49,8 +49,10 @@ from_json(const nlohmann::json &obj, PublicRooms &publicRooms)
                 publicRooms.prev_batch = obj.at("prev_batch").get<std::string>();
         }
 
-        publicRooms.total_room_count_estimate = obj.count("total_room_count_estimate") ? 
-                                                std::optional<size_t>{obj.at("total_room_count_estimate").get<size_t>()} : std::nullopt;                                         
+        publicRooms.total_room_count_estimate =
+          obj.count("total_room_count_estimate")
+            ? std::optional<size_t>{obj.at("total_room_count_estimate").get<size_t>()}
+            : std::nullopt;
 }
 
 } // namespace responses
