@@ -602,7 +602,23 @@ Client::create_room(const mtx::requests::CreateRoom &room_options,
 void
 Client::join_room(const std::string &room, Callback<mtx::responses::RoomId> callback)
 {
-        auto api_path = "/client/r0/join/" + mtx::client::utils::url_encode(room);
+        join_room(room, {}, std::move(callback));
+}
+
+void
+Client::join_room(const std::string &room,
+                  const std::vector<std::string> &via,
+                  Callback<mtx::responses::RoomId> callback)
+{
+        using mtx::client::utils::url_encode;
+        std::string query;
+        if (!via.empty()) {
+                query = "?server_name=" + url_encode(via[0]);
+                for (size_t i = 1; i < via.size(); i++) {
+                        query += "&server_name=" + url_encode(via[i]);
+                }
+        }
+        auto api_path = "/client/r0/join/" + url_encode(room) + query;
 
         post<std::string, mtx::responses::RoomId>(api_path, "{}", callback);
 }
