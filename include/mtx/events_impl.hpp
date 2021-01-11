@@ -2,6 +2,8 @@
 
 #include <nlohmann/json.hpp>
 
+#include "mtx/events/unknown.hpp"
+
 namespace mtx::events {
 template<class Content>
 [[gnu::used, llvm::used]] void
@@ -9,7 +11,10 @@ to_json(json &obj, const Event<Content> &event)
 {
         obj["content"] = event.content;
         obj["sender"]  = event.sender;
-        obj["type"]    = ::mtx::events::to_string(event.type);
+        if constexpr (std::is_same_v<Unknown, Content>)
+                obj["type"] = event.content.type;
+        else
+                obj["type"] = ::mtx::events::to_string(event.type);
 }
 
 template<class Content>
@@ -19,6 +24,9 @@ from_json(const json &obj, Event<Content> &event)
         event.content = obj.at("content").get<Content>();
         event.type    = getEventType(obj.at("type").get<std::string>());
         event.sender  = obj.value("sender", "");
+
+        if constexpr (std::is_same_v<Unknown, Content>)
+                event.content.type = obj.at("type").get<std::string>();
 }
 
 template<class Content>
@@ -201,7 +209,10 @@ template<class Content>
 to_json(json &obj, const EphemeralEvent<Content> &event)
 {
         obj["content"] = event.content;
-        obj["type"]    = ::mtx::events::to_string(event.type);
+        if constexpr (std::is_same_v<Unknown, Content>)
+                obj["type"] = event.content.type;
+        else
+                obj["type"] = ::mtx::events::to_string(event.type);
 
         if (!event.room_id.empty())
                 obj["room_id"] = event.room_id;
@@ -213,6 +224,8 @@ from_json(const json &obj, EphemeralEvent<Content> &event)
 {
         event.content = obj.at("content").get<Content>();
         event.type    = getEventType(obj.at("type").get<std::string>());
+        if constexpr (std::is_same_v<Unknown, Content>)
+                event.content.type = obj.at("type").get<std::string>();
 
         if (obj.contains("room_id"))
                 event.room_id = obj.at("room_id").get<std::string>();

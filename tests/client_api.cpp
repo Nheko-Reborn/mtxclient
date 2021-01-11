@@ -1666,6 +1666,10 @@ TEST(ClientAPI, PublicRooms)
                                                             });
                                                           while (!joined)
                                                                   sleep();
+
+                                                          // Wait for background update
+                                                          sleep(1);
+
                                                           alice->get_public_rooms(
                                                             [alice, bob, room_id](
                                                               const mtx::responses::PublicRooms

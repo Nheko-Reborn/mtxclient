@@ -26,6 +26,7 @@ MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::StateEvent, states::PowerLevels)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::StateEvent, states::Tombstone)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::StateEvent, states::Topic)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::StateEvent, msgs::Redacted)
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::StateEvent, Unknown)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::EncryptedEvent, msgs::Encrypted)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::EncryptedEvent, msgs::OlmEncrypted)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::RoomEvent, msgs::StickerImage)
@@ -50,6 +51,7 @@ MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::RoomEvent, msgs::CallInvite)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::RoomEvent, msgs::CallCandidates)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::RoomEvent, msgs::CallAnswer)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::RoomEvent, msgs::CallHangUp)
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::RoomEvent, Unknown)
 
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::StrippedEvent, states::Aliases)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::StrippedEvent, states::Avatar)
@@ -65,6 +67,7 @@ MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::StrippedEvent, states::PinnedEvents
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::StrippedEvent, states::PowerLevels)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::StrippedEvent, states::Tombstone)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::StrippedEvent, states::Topic)
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::StrippedEvent, Unknown)
 
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::DeviceEvent, msgs::Encrypted)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::DeviceEvent, msgs::OlmEncrypted)
@@ -81,9 +84,11 @@ MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::DeviceEvent, msgs::ForwardedRoomKey
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::DeviceEvent, msgs::KeyRequest)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::DeviceEvent, msgs::SecretRequest)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::DeviceEvent, msgs::SecretSend)
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::DeviceEvent, Unknown)
 
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::EphemeralEvent, ephemeral::Typing)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::EphemeralEvent, ephemeral::Receipt)
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::EphemeralEvent, Unknown)
 
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::AccountDataEvent, mtx::events::account_data::Tags)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::AccountDataEvent, mtx::events::account_data::FullyRead)
@@ -267,8 +272,10 @@ from_json(const json &obj, TimelineEvent &e)
                         e.data = events::RoomEvent<events::msg::KeyVerificationRequest>(obj);
                         break;
                 }
-                case MsgType::Unknown:
+                case MsgType::Unknown: {
+                        e.data = events::RoomEvent<events::Unknown>(obj);
                         return;
+                }
                 }
                 break;
         }
@@ -292,6 +299,10 @@ from_json(const json &obj, TimelineEvent &e)
                 e.data = events::RoomEvent<events::msg::CallHangUp>(obj);
                 break;
         }
+        case events::EventType::Unsupported: {
+                e.data = events::RoomEvent<events::Unknown>(obj);
+                break;
+        }
         case events::EventType::RoomPinnedEvents:
         case events::EventType::RoomKey:          // not part of the timeline
         case events::EventType::ForwardedRoomKey: // not part of the timeline
@@ -305,7 +316,6 @@ from_json(const json &obj, TimelineEvent &e)
         case events::EventType::Receipt:
         case events::EventType::FullyRead:
         case events::EventType::NhekoHiddenEvents:
-        case events::EventType::Unsupported:
                 return;
         }
 }

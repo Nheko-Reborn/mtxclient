@@ -29,6 +29,7 @@
 #include "mtx/events/tag.hpp"
 #include "mtx/events/tombstone.hpp"
 #include "mtx/events/topic.hpp"
+#include "mtx/events/unknown.hpp"
 #include "mtx/events/voip.hpp"
 #include "mtx/pushrules.hpp"
 
@@ -65,14 +66,16 @@ using DeviceEvents = std::variant<events::DeviceEvent<msgs::RoomKey>,
                                   events::DeviceEvent<msgs::KeyVerificationKey>,
                                   events::DeviceEvent<msgs::KeyVerificationMac>,
                                   events::DeviceEvent<msgs::SecretRequest>,
-                                  events::DeviceEvent<msgs::SecretSend>>;
+                                  events::DeviceEvent<msgs::SecretSend>,
+                                  events::DeviceEvent<Unknown>>;
 
 //! Collection of room specific account data
 using RoomAccountDataEvents =
   std::variant<events::AccountDataEvent<account_data::Tags>,
                events::AccountDataEvent<account_data::FullyRead>,
                events::AccountDataEvent<pushrules::GlobalRuleset>,
-               events::AccountDataEvent<account_data::nheko_extensions::HiddenEvents>>;
+               events::AccountDataEvent<account_data::nheko_extensions::HiddenEvents>,
+               events::AccountDataEvent<Unknown>>;
 
 //! Collection of @p StateEvent only.
 using StateEvents = std::variant<events::StateEvent<states::Aliases>,
@@ -89,7 +92,8 @@ using StateEvents = std::variant<events::StateEvent<states::Aliases>,
                                  events::StateEvent<states::PowerLevels>,
                                  events::StateEvent<states::Tombstone>,
                                  events::StateEvent<states::Topic>,
-                                 events::StateEvent<msgs::Redacted>>;
+                                 events::StateEvent<msgs::Redacted>,
+                                 events::StateEvent<Unknown>>;
 
 //! Collection of @p StrippedEvent only.
 using StrippedEvents = std::variant<events::StrippedEvent<states::Aliases>,
@@ -104,7 +108,8 @@ using StrippedEvents = std::variant<events::StrippedEvent<states::Aliases>,
                                     events::StrippedEvent<states::PinnedEvents>,
                                     events::StrippedEvent<states::PowerLevels>,
                                     events::StrippedEvent<states::Tombstone>,
-                                    events::StrippedEvent<states::Topic>>;
+                                    events::StrippedEvent<states::Topic>,
+                                    events::StrippedEvent<Unknown>>;
 
 //! Collection of @p StateEvent and @p RoomEvent. Those events would be
 //! available on the returned timeline.
@@ -146,10 +151,12 @@ using TimelineEvents = std::variant<events::StateEvent<states::Aliases>,
                                     events::RoomEvent<msgs::CallInvite>,
                                     events::RoomEvent<msgs::CallCandidates>,
                                     events::RoomEvent<msgs::CallAnswer>,
-                                    events::RoomEvent<msgs::CallHangUp>>;
+                                    events::RoomEvent<msgs::CallHangUp>,
+                                    events::RoomEvent<Unknown>>;
 
 using EphemeralEvents = std::variant<events::EphemeralEvent<ephemeral::Typing>,
-                                     events::EphemeralEvent<ephemeral::Receipt>>;
+                                     events::EphemeralEvent<ephemeral::Receipt>,
+                                     events::EphemeralEvent<Unknown>>;
 
 //! A wapper around TimelineEvent, that produces less noisy compiler errors.
 struct TimelineEvent

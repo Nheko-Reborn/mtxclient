@@ -117,6 +117,14 @@ parse_room_account_data_events(
                         }
                         break;
                 }
+                case events::EventType::Unsupported: {
+                        try {
+                                container.emplace_back(events::EphemeralEvent<events::Unknown>(e));
+                        } catch (json::exception &err) {
+                                log_error(err, e);
+                        }
+                        break;
+                }
                 case events::EventType::KeyVerificationCancel:
                 case events::EventType::KeyVerificationRequest:
                 case events::EventType::KeyVerificationStart:
@@ -156,7 +164,6 @@ parse_room_account_data_events(
                 case events::EventType::CallHangUp:
                 case events::EventType::Typing:
                 case events::EventType::Receipt:
-                case events::EventType::Unsupported:
                         continue;
                 }
         }
@@ -507,8 +514,15 @@ parse_timeline_events(const json &events,
 
                                 break;
                         }
-                        case MsgType::Unknown:
-                                continue;
+                        case MsgType::Unknown: {
+                                try {
+                                        container.emplace_back(
+                                          events::RoomEvent<events::Unknown>(e));
+                                } catch (json::exception &err) {
+                                        log_error(err, e);
+                                }
+                                break;
+                        }
                         }
                         break;
                 }
@@ -561,6 +575,15 @@ parse_timeline_events(const json &events,
 
                         break;
                 }
+                case events::EventType::Unsupported: {
+                        try {
+                                container.emplace_back(events::RoomEvent<events::Unknown>(e));
+                        } catch (json::exception &err) {
+                                log_error(err, e);
+                        }
+
+                        break;
+                }
                 case events::EventType::KeyVerificationRequest:
                 case events::EventType::RoomPinnedEvents:
                 case events::EventType::RoomKey:          // Not part of timeline or state
@@ -574,7 +597,6 @@ parse_timeline_events(const json &events,
                 case events::EventType::Typing:
                 case events::EventType::Receipt:
                 case events::EventType::FullyRead:
-                case events::EventType::Unsupported:
                 case events::EventType::NhekoHiddenEvents:
                         continue;
                 }
@@ -724,6 +746,14 @@ parse_device_events(const json &events,
                         }
 
                         break;
+                case events::EventType::Unsupported:
+                        try {
+                                container.emplace_back(events::DeviceEvent<events::Unknown>(e));
+                        } catch (json::exception &err) {
+                                log_error(err, e);
+                        }
+
+                        break;
                 default:
                         continue;
                 }
@@ -858,6 +888,15 @@ parse_state_events(const json &events,
 
                         break;
                 }
+                case events::EventType::Unsupported: {
+                        try {
+                                container.emplace_back(events::StateEvent<events::Unknown>(e));
+                        } catch (json::exception &err) {
+                                log_error(err, e);
+                        }
+
+                        break;
+                }
                 case events::EventType::Sticker:
                 case events::EventType::Reaction:
                 case events::EventType::RoomEncrypted:    /* Does this need to be here? */
@@ -870,7 +909,6 @@ parse_state_events(const json &events,
                 case events::EventType::Tag:       // Not part of the timeline or state
                 case events::EventType::Presence:  // Not part of the timeline or state
                 case events::EventType::PushRules: // Not part of the timeline or state
-                case events::EventType::Unsupported:
                 case events::EventType::KeyVerificationCancel:
                 case events::EventType::KeyVerificationRequest:
                 case events::EventType::KeyVerificationStart:
@@ -1013,6 +1051,15 @@ parse_stripped_events(const json &events,
 
                         break;
                 }
+                case events::EventType::Unsupported: {
+                        try {
+                                container.emplace_back(events::StrippedEvent<events::Unknown>(e));
+                        } catch (json::exception &err) {
+                                log_error(err, e);
+                        }
+
+                        break;
+                }
                 case events::EventType::Sticker:
                 case events::EventType::Reaction:
                 case events::EventType::RoomEncrypted:
@@ -1026,7 +1073,6 @@ parse_stripped_events(const json &events,
                 case events::EventType::Tag:       // Not part of the timeline or state
                 case events::EventType::Presence:  // Not part of the timeline or state
                 case events::EventType::PushRules: // Not part of the timeline or state
-                case events::EventType::Unsupported:
                 case events::EventType::KeyVerificationCancel:
                 case events::EventType::KeyVerificationRequest:
                 case events::EventType::KeyVerificationStart:
@@ -1074,6 +1120,15 @@ parse_ephemeral_events(const json &events,
                         try {
                                 container.emplace_back(
                                   events::EphemeralEvent<events::ephemeral::Receipt>(e));
+                        } catch (json::exception &err) {
+                                log_error(err, e);
+                        }
+
+                        break;
+                }
+                case events::EventType::Unsupported: {
+                        try {
+                                container.emplace_back(events::EphemeralEvent<events::Unknown>(e));
                         } catch (json::exception &err) {
                                 log_error(err, e);
                         }
