@@ -14,7 +14,7 @@
 #include <nlohmann/json.hpp>
 #endif
 
-using json = nlohmann::json;
+using json       = nlohmann::json;
 namespace common = mtx::common;
 
 namespace mtx {
@@ -135,7 +135,8 @@ to_json(json &obj, const TypingNotification &request);
 //! Request payload for the `PUT /_matrix/client/r0/directory/list/room/{roomId}` endpoint
 struct PublicRoomVisibility
 {
-        //! The new visibility setting for the room. Defaults to 'public'. One of: ["private", "public"]
+        //! The new visibility setting for the room. Defaults to 'public'. One of: ["private",
+        //! "public"]
         common::RoomVisibility visibility;
 };
 

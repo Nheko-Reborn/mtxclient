@@ -1630,10 +1630,11 @@ TEST(ClientAPI, PublicRooms)
 
                             alice->get_room_visibility(
                               room_id.to_string(),
-                              [alice, bob, room_id](
-                                const mtx::responses::PublicRoomVisibility &res, RequestErr err) {
+                              [alice, bob, room_id](const mtx::responses::PublicRoomVisibility &res,
+                                                    RequestErr err) {
                                       check_error(err);
-                                      EXPECT_EQ(mtx::common::visibilityToString(res.visibility), "public");
+                                      EXPECT_EQ(mtx::common::visibilityToString(res.visibility),
+                                                "public");
 
                                       // TEST 2: endpoints to add and list the public rooms on the
                                       // server
@@ -1653,37 +1654,59 @@ TEST(ClientAPI, PublicRooms)
                                                     RequestErr err) {
                                                           check_error(err);
                                                           std::cout << "GETting the listing pt 1\n";
-                                                                    EXPECT_EQ(res.chunk[0].name,
-                                                                              "Public Room");
-                                                                    EXPECT_EQ(res.chunk[0].topic,
-                                                                    "Test");
-                                                                    EXPECT_EQ(res.chunk[0].num_joined_members,
-                                                                              1);
-                                                                // Have bob join the room and verify there are 2 members
-                                                                std::atomic<bool> joined = false;
-                                                                bob->join_room(room_id.to_string(), [alice, bob, room_id, &joined](const mtx::responses::RoomId &, RequestErr err){
-                                                                        check_error(err);
-                                                                        std::cout << "bob joined the room\n";
-                                                                        joined = true;
-                                                                });
-                                                                while (!joined)
-                                                                        sleep();
-                                                                alice->get_public_rooms(
-                                                                                [alice, bob, room_id](
-                                                                                const mtx::responses::PublicRooms &res, RequestErr err) {
-                                                                                check_error(err);
-                                                                                std::cout << "testing for joined members\n";
-                                                                                EXPECT_EQ(res.chunk[0].num_joined_members, 2);
+                                                          EXPECT_EQ(res.chunk[0].name,
+                                                                    "Public Room");
+                                                          EXPECT_EQ(res.chunk[0].topic, "Test");
+                                                          EXPECT_EQ(res.chunk[0].num_joined_members,
+                                                                    1);
+                                                          // Have bob join the room and verify there
+                                                          // are 2 members
+                                                          std::atomic<bool> joined = false;
+                                                          bob->join_room(
+                                                            room_id.to_string(),
+                                                            [alice, bob, room_id, &joined](
+                                                              const mtx::responses::RoomId &,
+                                                              RequestErr err) {
+                                                                    check_error(err);
+                                                                    std::cout
+                                                                      << "bob joined the room\n";
+                                                                    joined = true;
+                                                            });
+                                                          while (!joined)
+                                                                  sleep();
+                                                          alice->get_public_rooms(
+                                                            [alice, bob, room_id](
+                                                              const mtx::responses::PublicRooms
+                                                                &res,
+                                                              RequestErr err) {
+                                                                    check_error(err);
+                                                                    std::cout << "testing for "
+                                                                                 "joined members\n";
+                                                                    EXPECT_EQ(res.chunk[0]
+                                                                                .num_joined_members,
+                                                                              2);
 
-                                                                                // Teardown: remove the room from the room directory (maintain future tests)
-                                                                                mtx::requests::PublicRoomVisibility r;
-                                                                                r.visibility = mtx::common::RoomVisibility::Private;
-                                                                                alice->put_room_visibility(
-                                                                                room_id.to_string(), r, [alice, bob, room_id](RequestErr err) {
-                                                                                        check_error(err);
-                                                                                        std::cout << "removed from room directory\n";
-                                                                                });
-                                                                        }, "localhost", 1);
+                                                                    // Teardown: remove the room
+                                                                    // from the room directory
+                                                                    // (maintain future tests)
+                                                                    mtx::requests::
+                                                                      PublicRoomVisibility r;
+                                                                    r.visibility = mtx::common::
+                                                                      RoomVisibility::Private;
+                                                                    alice->put_room_visibility(
+                                                                      room_id.to_string(),
+                                                                      r,
+                                                                      [alice, bob, room_id](
+                                                                        RequestErr err) {
+                                                                              check_error(err);
+                                                                              std::cout
+                                                                                << "removed from "
+                                                                                   "room "
+                                                                                   "directory\n";
+                                                                      });
+                                                            },
+                                                            "localhost",
+                                                            1);
                                                   },
                                                   "localhost",
                                                   1);

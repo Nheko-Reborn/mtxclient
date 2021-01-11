@@ -1107,7 +1107,7 @@ TEST(Responses, TurnServer)
 
 TEST(Responses, PublicRoomVisibility)
 {
-        json data                     = {{"visibility", "public"}};
+        json data                                           = {{"visibility", "public"}};
         mtx::responses::PublicRoomVisibility roomVisibility = data;
         EXPECT_EQ(roomVisibility.visibility, mtx::common::RoomVisibility::Public);
 

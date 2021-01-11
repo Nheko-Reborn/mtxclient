@@ -963,13 +963,15 @@ Client::send_to_device(const std::string &event_type,
 }
 
 void
-Client::get_room_visibility(const std::string &room_id, Callback<mtx::responses::PublicRoomVisibility> cb)
+Client::get_room_visibility(const std::string &room_id,
+                            Callback<mtx::responses::PublicRoomVisibility> cb)
 {
         const auto api_path =
           "/client/r0/directory/list/room/" + mtx::client::utils::url_encode(room_id);
 
         get<mtx::responses::PublicRoomVisibility>(
-          api_path, [cb](const mtx::responses::PublicRoomVisibility &res, HeaderFields, RequestErr err) {
+          api_path,
+          [cb](const mtx::responses::PublicRoomVisibility &res, HeaderFields, RequestErr err) {
                   cb(res, err);
           });
 }

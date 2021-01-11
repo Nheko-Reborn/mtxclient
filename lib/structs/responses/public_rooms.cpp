@@ -1,8 +1,8 @@
 #include <nlohmann/json.hpp>
 
+#include "mtx/common.hpp"
 #include "mtx/identifiers.hpp"
 #include "mtx/responses/public_rooms.hpp"
-#include "mtx/common.hpp"
 
 namespace mtx {
 namespace responses {

@@ -17,9 +17,10 @@ namespace common = mtx::common;
 namespace mtx {
 namespace responses {
 //! Response from the `GET /_matrix/client/r0/directory/list/room/{roomId}`endpoint.
-struct PublicRoomVisibility {
-    //! The visibility of the room in the directory. One of: ["private", "public"]
-     common::RoomVisibility visibility;
+struct PublicRoomVisibility
+{
+        //! The visibility of the room in the directory. One of: ["private", "public"]
+        common::RoomVisibility visibility;
 };
 
 void

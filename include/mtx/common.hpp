@@ -11,7 +11,8 @@
 #include <vector>
 
 /// @file
-/// @brief Common types used by the crypto related endpoints. Common types used by room directory endpoints.
+/// @brief Common types used by the crypto related endpoints. Common types used by room directory
+/// endpoints.
 
 namespace mtx {
 namespace crypto {
@@ -120,9 +121,9 @@ to_json(nlohmann::json &obj, const EncryptedFile &res);
 
 } // namespace crypto
 
-// 
+//
 namespace common {
-        //! Whether or not the room will be visible by non members.
+//! Whether or not the room will be visible by non members.
 enum class RoomVisibility
 {
         //! A private visibility will hide the room from the published room list.
@@ -131,8 +132,8 @@ enum class RoomVisibility
         Public,
 };
 
-inline
-std::string visibilityToString(RoomVisibility visibility)
+inline std::string
+visibilityToString(RoomVisibility visibility)
 {
         if (visibility == RoomVisibility::Private) {
                 return "private";
@@ -141,12 +142,13 @@ std::string visibilityToString(RoomVisibility visibility)
         return "public";
 }
 
-inline
-RoomVisibility stringToVisibility(const std::string &s) {
-    if (s == "private") {
-        return RoomVisibility::Private;
-    }
-    return RoomVisibility::Public;
+inline RoomVisibility
+stringToVisibility(const std::string &s)
+{
+        if (s == "private") {
+                return RoomVisibility::Private;
+        }
+        return RoomVisibility::Public;
 }
 } // namespace common
 } // namespace mtx
