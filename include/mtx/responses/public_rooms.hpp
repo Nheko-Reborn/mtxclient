@@ -4,50 +4,26 @@
 #include <string>
 #include <optional>
 
+#include "mtx/common.hpp"
+
 #if __has_include(<nlohmann/json_fwd.hpp>)
 #include <nlohmann/json_fwd.hpp>
 #else
 #include <nlohmann/json.hpp>
 #endif
 
+namespace common = mtx::common;
+
 namespace mtx {
 namespace responses {
-
-//! Whether or not the room will be visible by non members.
-enum class Visibility
-{
-        //! A private visibility will hide the room from the published room list.
-        Private,
-        //! Indicates that the room will be shown in the published room list.
-        Public,
-};
-
-inline
-std::string visibilityToString(Visibility visibility)
-{
-        if (visibility == Visibility::Private) {
-                return "private";
-        }
-
-        return "public";
-}
-
-inline
-Visibility stringToVisibility(const std::string &s) {
-    if (s == "private") {
-        return Visibility::Private;
-    }
-    return Visibility::Public;
-}
-
 //! Response from the `GET /_matrix/client/r0/directory/list/room/{roomId}`endpoint.
-struct RoomVisibility {
+struct PublicRoomVisibility {
     //! The visibility of the room in the directory. One of: ["private", "public"]
-    Visibility visibility;
+     common::RoomVisibility visibility;
 };
 
 void
-from_json(const nlohmann::json &obj, RoomVisibility &res);
+from_json(const nlohmann::json &obj, PublicRoomVisibility &res);
 
 struct PublicRoomsChunk
 {

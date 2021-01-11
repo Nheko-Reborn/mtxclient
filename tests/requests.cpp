@@ -283,14 +283,14 @@ TEST(Requests, UserInteractiveAuth)
 
 TEST(Requests, RoomVisibility)
 {
-        RoomVisibility req;
-        req.visibility = Visibility::Private;
+        mtx::requests::PublicRoomVisibility req;
+        req.visibility = mtx::common::RoomVisibility::Private;
         json j         = req;
         EXPECT_EQ(j, R"({
     "visibility" : "private"
   })"_json);
 
-        req.visibility = Visibility::Public;
+        req.visibility = mtx::common::RoomVisibility::Public;
         j              = req;
         EXPECT_EQ(j, R"({
     "visibility" : "public"
@@ -334,5 +334,5 @@ TEST(Requests, PublicRooms)
         b3.include_all_networks    = true;
         b3.third_party_instance_id = "irc";
 
-        // EXPECT_THROW(json req = b3, std::invalid_argument);
+        EXPECT_THROW(json req = b3, std::invalid_argument);
 }

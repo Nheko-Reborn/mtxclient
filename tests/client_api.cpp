@@ -1600,7 +1600,7 @@ TEST(ClientAPI, PublicRooms)
         mtx::requests::CreateRoom req;
         req.name            = "Public Room";
         req.topic           = "Test";
-        req.visibility      = Visibility::Public;
+        req.visibility      = mtx::common::RoomVisibility::Public;
         req.invite          = {"@bob:localhost"};
         req.room_alias_name = alice->generate_txn_id();
         req.preset          = Preset::PublicChat;
@@ -1612,8 +1612,8 @@ TEST(ClientAPI, PublicRooms)
                   std::cout << "Created room w/ Room ID: " << room_id.to_string() << std::endl;
 
                   // TEST 1: endpoints to set and get the visibility of the room we just created
-                  mtx::requests::RoomVisibility r;
-                  r.visibility = mtx::requests::Visibility::Public;
+                  mtx::requests::PublicRoomVisibility r;
+                  r.visibility = mtx::common::RoomVisibility::Public;
 
                   alice->put_room_visibility(
                     room_id.to_string(), r, [alice, bob, room_id](RequestErr err) {
@@ -1621,7 +1621,7 @@ TEST(ClientAPI, PublicRooms)
 
                             alice->get_room_visibility(
                               "",
-                              [alice, room_id](const mtx::responses::RoomVisibility &,
+                              [alice, room_id](const mtx::responses::PublicRoomVisibility &,
                                                RequestErr err) {
                                       ASSERT_TRUE(err);
                                       EXPECT_EQ(mtx::errors::to_string(err->matrix_error.errcode),
@@ -1631,9 +1631,9 @@ TEST(ClientAPI, PublicRooms)
                             alice->get_room_visibility(
                               room_id.to_string(),
                               [alice, bob, room_id](
-                                const mtx::responses::RoomVisibility &res, RequestErr err) {
+                                const mtx::responses::PublicRoomVisibility &res, RequestErr err) {
                                       check_error(err);
-                                      EXPECT_EQ(visibilityToString(res.visibility), "public");
+                                      EXPECT_EQ(mtx::common::visibilityToString(res.visibility), "public");
 
                                       // TEST 2: endpoints to add and list the public rooms on the
                                       // server
@@ -1676,8 +1676,8 @@ TEST(ClientAPI, PublicRooms)
                                                                                 EXPECT_EQ(res.chunk[0].num_joined_members, 2);
 
                                                                                 // Teardown: remove the room from the room directory (maintain future tests)
-                                                                                mtx::requests::RoomVisibility r;
-                                                                                r.visibility = mtx::requests::Visibility::Private;
+                                                                                mtx::requests::PublicRoomVisibility r;
+                                                                                r.visibility = mtx::common::RoomVisibility::Private;
                                                                                 alice->put_room_visibility(
                                                                                 room_id.to_string(), r, [alice, bob, room_id](RequestErr err) {
                                                                                         check_error(err);

@@ -11,16 +11,6 @@ namespace mtx {
 namespace requests {
 
 std::string
-visibilityToString(Visibility visibility)
-{
-        if (visibility == Visibility::Private) {
-                return "private";
-        }
-
-        return "public";
-}
-
-std::string
 presetToString(Preset preset)
 {
         switch (preset) {
@@ -112,9 +102,9 @@ to_json(json &obj, const TypingNotification &request)
 }
 
 void
-to_json(json &obj, const RoomVisibility &request)
+to_json(json &obj, const PublicRoomVisibility &request)
 {
-        obj["visibility"] = visibilityToString(request.visibility);
+        obj["visibility"] = mtx::common::visibilityToString(request.visibility);
 }
 
 void

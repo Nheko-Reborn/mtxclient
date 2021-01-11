@@ -20,6 +20,7 @@
 #include "mtx/secret_storage.hpp"
 #include "mtxclient/http/errors.hpp" // for ClientError
 #include "mtxclient/utils.hpp"       // for random_token, url_encode, des...
+// #include "mtx/common.hpp"
 
 #include <boost/beast/http/fields.hpp> // for fields
 #include <boost/beast/http/status.hpp> // for status
@@ -46,7 +47,7 @@ struct Login;
 struct QueryKeys;
 struct ClaimKeys;
 struct UploadKeys;
-struct RoomVisibility;
+struct PublicRoomVisibility;
 struct PublicRooms;
 }
 namespace responses {
@@ -74,7 +75,7 @@ struct TurnServer;
 struct UploadKeys;
 struct Versions;
 struct WellKnown;
-struct RoomVisibility;
+struct PublicRoomVisibility;
 struct PublicRooms;
 namespace backup {
 struct SessionBackup;
@@ -456,11 +457,11 @@ public:
 
         //! Gets the visibility of a given room on the server's public room directory.
         void get_room_visibility(const std::string &room_id,
-                                 Callback<mtx::responses::RoomVisibility> cb);
+                                 Callback<mtx::responses::PublicRoomVisibility> cb);
 
         //! Sets the visibility of a given room in the server's public room directory.
         void put_room_visibility(const std::string &room_id,
-                                 const mtx::requests::RoomVisibility &req,
+                                 const mtx::requests::PublicRoomVisibility &req,
                                  ErrCallback cb);
 
         //! Lists the public rooms on the server. This API returns paginated responses.

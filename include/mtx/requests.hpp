@@ -15,23 +15,11 @@
 #endif
 
 using json = nlohmann::json;
+namespace common = mtx::common;
 
 namespace mtx {
 //! Namespace for request structs
 namespace requests {
-
-//! Whether or not the room will be visible by non members.
-enum class Visibility
-{
-        //! A private visibility will hide the room from the published room list.
-        Private,
-        //! Indicates that the room will be shown in the published room list
-        Public,
-};
-
-std::string
-visibilityToString(Visibility visibility);
-
 //! Convenience parameter for setting various default state events based on a preset.
 enum class Preset
 {
@@ -63,7 +51,7 @@ struct CreateRoom
         //! Convenience parameter for setting various default state events.
         Preset preset = Preset::PrivateChat;
         //! Whether or not the room will be visible by non members.
-        Visibility visibility = Visibility::Private;
+        common::RoomVisibility visibility = common::RoomVisibility::Private;
 };
 
 void
@@ -145,14 +133,14 @@ void
 to_json(json &obj, const TypingNotification &request);
 
 //! Request payload for the `PUT /_matrix/client/r0/directory/list/room/{roomId}` endpoint
-struct RoomVisibility
+struct PublicRoomVisibility
 {
         //! The new visibility setting for the room. Defaults to 'public'. One of: ["private", "public"]
-        Visibility visibility;
+        common::RoomVisibility visibility;
 };
 
 void
-to_json(json &obj, const RoomVisibility &request);
+to_json(json &obj, const PublicRoomVisibility &request);
 
 struct PublicRoomsFilter {
     //! A string to search for in the room metadata,

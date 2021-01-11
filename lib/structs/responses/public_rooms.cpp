@@ -2,14 +2,15 @@
 
 #include "mtx/identifiers.hpp"
 #include "mtx/responses/public_rooms.hpp"
+#include "mtx/common.hpp"
 
 namespace mtx {
 namespace responses {
 
 void
-from_json(const nlohmann::json &obj, RoomVisibility &res)
+from_json(const nlohmann::json &obj, PublicRoomVisibility &res)
 {
-        res.visibility = stringToVisibility(obj.at("visibility").get<std::string>());
+        res.visibility = mtx::common::stringToVisibility(obj.at("visibility").get<std::string>());
 }
 
 void

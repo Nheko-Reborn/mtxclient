@@ -963,25 +963,25 @@ Client::send_to_device(const std::string &event_type,
 }
 
 void
-Client::get_room_visibility(const std::string &room_id, Callback<mtx::responses::RoomVisibility> cb)
+Client::get_room_visibility(const std::string &room_id, Callback<mtx::responses::PublicRoomVisibility> cb)
 {
         const auto api_path =
           "/client/r0/directory/list/room/" + mtx::client::utils::url_encode(room_id);
 
-        get<mtx::responses::RoomVisibility>(
-          api_path, [cb](const mtx::responses::RoomVisibility &res, HeaderFields, RequestErr err) {
+        get<mtx::responses::PublicRoomVisibility>(
+          api_path, [cb](const mtx::responses::PublicRoomVisibility &res, HeaderFields, RequestErr err) {
                   cb(res, err);
           });
 }
 
 void
 Client::put_room_visibility(const std::string &room_id,
-                            const mtx::requests::RoomVisibility &req,
+                            const mtx::requests::PublicRoomVisibility &req,
                             ErrCallback cb)
 {
         const auto api_path =
           "/client/r0/directory/list/room/" + mtx::client::utils::url_encode(room_id);
-        put<mtx::requests::RoomVisibility>(api_path, req, cb);
+        put<mtx::requests::PublicRoomVisibility>(api_path, req, cb);
 }
 
 void

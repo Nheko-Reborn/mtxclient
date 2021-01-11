@@ -1105,15 +1105,15 @@ TEST(Responses, TurnServer)
         EXPECT_EQ(turnServer.ttl, 86400);
 }
 
-TEST(Responses, RoomVisibility)
+TEST(Responses, PublicRoomVisibility)
 {
         json data                     = {{"visibility", "public"}};
-        RoomVisibility roomVisibility = data;
-        EXPECT_EQ(roomVisibility.visibility, mtx::responses::Visibility::Public);
+        mtx::responses::PublicRoomVisibility roomVisibility = data;
+        EXPECT_EQ(roomVisibility.visibility, mtx::common::RoomVisibility::Public);
 
         data           = {{"visibility", "private"}};
         roomVisibility = data;
-        EXPECT_EQ(roomVisibility.visibility, mtx::responses::Visibility::Private);
+        EXPECT_EQ(roomVisibility.visibility, mtx::common::RoomVisibility::Private);
 }
 
 TEST(Responses, PublicRooms)
