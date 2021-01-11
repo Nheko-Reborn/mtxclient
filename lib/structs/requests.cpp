@@ -11,16 +11,6 @@ namespace mtx {
 namespace requests {
 
 std::string
-visibilityToString(Visibility visibility)
-{
-        if (visibility == Visibility::Private) {
-                return "private";
-        }
-
-        return "public";
-}
-
-std::string
 presetToString(Preset preset)
 {
         switch (preset) {
@@ -109,6 +99,47 @@ to_json(json &obj, const TypingNotification &request)
 {
         obj["typing"]  = request.typing;
         obj["timeout"] = request.timeout;
+}
+
+void
+to_json(json &obj, const PublicRoomVisibility &request)
+{
+        obj["visibility"] = mtx::common::visibilityToString(request.visibility);
+}
+
+void
+to_json(json &obj, const PublicRoomsFilter &request)
+{
+        obj["generic_search_term"] = request.generic_search_term;
+}
+
+void
+to_json(json &obj, const PublicRooms &request)
+{
+        if (request.limit > 0) {
+                obj["limit"] = request.limit;
+        }
+
+        if (!request.since.empty()) {
+                obj["since"] = request.since;
+        }
+
+        if (!request.filter.generic_search_term.empty()) {
+                obj["filter"] = request.filter;
+        }
+
+        // Based on the spec, third_party_instance_id can only be used if
+        // include_all_networks is false. A case where the latter is true and
+        // the former is set is invalid.
+        if (request.include_all_networks && !request.third_party_instance_id.empty()) {
+                throw std::invalid_argument(
+                  "third_party_instance_id can only be set if include_all_networks is false");
+        } else if (!request.third_party_instance_id.empty()) {
+                obj["third_party_instance_id"] = request.third_party_instance_id;
+                obj["include_all_networks"]    = false;
+        } else {
+                obj["include_all_networks"] = true;
+        }
 }
 
 void

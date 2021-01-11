@@ -14,21 +14,12 @@
 #include <nlohmann/json.hpp>
 #endif
 
-using json = nlohmann::json;
+using json       = nlohmann::json;
+namespace common = mtx::common;
 
 namespace mtx {
 //! Namespace for request structs
 namespace requests {
-
-//! Whether or not the room will be visible by non members.
-enum class Visibility
-{
-        //! A private visibility will hide the room from the published room list.
-        Private,
-        //! Indicates that the room will be shown in the published room list
-        Public,
-};
-
 //! Convenience parameter for setting various default state events based on a preset.
 enum class Preset
 {
@@ -60,7 +51,7 @@ struct CreateRoom
         //! Convenience parameter for setting various default state events.
         Preset preset = Preset::PrivateChat;
         //! Whether or not the room will be visible by non members.
-        Visibility visibility = Visibility::Private;
+        common::RoomVisibility visibility = common::RoomVisibility::Private;
 };
 
 void
@@ -140,6 +131,50 @@ struct TypingNotification
 
 void
 to_json(json &obj, const TypingNotification &request);
+
+//! Request payload for the `PUT /_matrix/client/r0/directory/list/room/{roomId}` endpoint
+struct PublicRoomVisibility
+{
+        //! The new visibility setting for the room. Defaults to 'public'. One of: ["private",
+        //! "public"]
+        common::RoomVisibility visibility;
+};
+
+void
+to_json(json &obj, const PublicRoomVisibility &request);
+
+struct PublicRoomsFilter
+{
+        //! A string to search for in the room metadata,
+        //! e.g. name, topic, canonical alias etc. (Optional).
+        std::string generic_search_term;
+};
+
+void
+to_json(nlohmann::json &obj, const PublicRoomsFilter &req);
+
+//! Request payload for the `POST /_matrix/client/r0/publicRooms` endpoint.
+struct PublicRooms
+{
+        //! Limit the number of results returned.
+        int limit;
+        //! A pagination token from a previous request, allowing clients
+        //! to get the next (or previous) batch of rooms. The direction of
+        //! pagination is specified solely by which token is supplied,
+        //! rather than via an explicit flag.
+        std::string since;
+        //! Filter to apply to the results.
+        PublicRoomsFilter filter;
+        //! Whether or not to include all known networks/protocols from
+        //! application services on the homeserver. Defaults to false.
+        bool include_all_networks = false;
+        //! The specific third party network/protocol to request from
+        //! the homeserver. Can only be used if include_all_networks is false.
+        std::string third_party_instance_id;
+};
+
+void
+to_json(json &obj, const PublicRooms &request);
 
 struct Empty
 {};

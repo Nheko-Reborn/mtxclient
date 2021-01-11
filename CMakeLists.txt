@@ -194,7 +194,8 @@ target_sources(matrix_client
 	lib/structs/responses/sync.cpp
 	lib/structs/responses/turn_server.cpp
 	lib/structs/responses/version.cpp
-	lib/structs/responses/well-known.cpp)
+	lib/structs/responses/well-known.cpp
+	lib/structs/responses/public_rooms.cpp)
 add_library(MatrixClient::MatrixClient ALIAS matrix_client)
 set_property(TARGET matrix_client  PROPERTY CXX_STANDARD 17)
 set_property(TARGET matrix_client  PROPERTY CXX_EXTENSIONS OFF)

@@ -1104,3 +1104,52 @@ TEST(Responses, TurnServer)
         EXPECT_EQ(turnServer.uris[2], "turns:10.20.30.40:443?transport=tcp");
         EXPECT_EQ(turnServer.ttl, 86400);
 }
+
+TEST(Responses, PublicRoomVisibility)
+{
+        json data                                           = {{"visibility", "public"}};
+        mtx::responses::PublicRoomVisibility roomVisibility = data;
+        EXPECT_EQ(roomVisibility.visibility, mtx::common::RoomVisibility::Public);
+
+        data           = {{"visibility", "private"}};
+        roomVisibility = data;
+        EXPECT_EQ(roomVisibility.visibility, mtx::common::RoomVisibility::Private);
+}
+
+TEST(Responses, PublicRooms)
+{
+        json data = R"({
+          "chunk": [
+            {
+              "aliases": [
+                "#murrays:cheese.bar"
+              ],
+              "avatar_url": "mxc://bleeker.street/CHEDDARandBRIE",
+              "guest_can_join": false,
+              "name": "CHEESE",
+              "num_joined_members": 37,
+              "room_id": "!ol19s:bleecker.street",
+              "topic": "Tasty tasty cheese",
+              "world_readable": true
+            }
+          ],
+          "next_batch": "p190q",
+          "prev_batch": "p1902",
+          "total_room_count_estimate": 115
+        })"_json;
+
+        PublicRooms publicRooms = data;
+        EXPECT_EQ(publicRooms.chunk.size(), 1);
+        auto &chunk = publicRooms.chunk[0];
+        EXPECT_EQ(chunk.aliases.size(), 1);
+        EXPECT_EQ(chunk.aliases[0], "#murrays:cheese.bar");
+        EXPECT_EQ(chunk.avatar_url, "mxc://bleeker.street/CHEDDARandBRIE");
+        EXPECT_EQ(chunk.guest_can_join, false);
+        EXPECT_EQ(chunk.name, "CHEESE");
+        EXPECT_EQ(chunk.num_joined_members, 37);
+        EXPECT_EQ(chunk.room_id, "!ol19s:bleecker.street");
+        EXPECT_EQ(chunk.topic, "Tasty tasty cheese");
+        EXPECT_EQ(publicRooms.next_batch, "p190q");
+        EXPECT_EQ(publicRooms.prev_batch, "p1902");
+        EXPECT_EQ(publicRooms.total_room_count_estimate, 115);
+}

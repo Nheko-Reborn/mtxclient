@@ -14,6 +14,7 @@
 #include "responses/messages.hpp"
 #include "responses/notifications.hpp"
 #include "responses/profile.hpp"
+#include "responses/public_rooms.hpp"
 #include "responses/register.hpp"
 #include "responses/sync.hpp"
 #include "responses/turn_server.hpp"

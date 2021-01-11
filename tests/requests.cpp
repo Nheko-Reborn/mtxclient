@@ -280,3 +280,59 @@ TEST(Requests, UserInteractiveAuth)
   "session": "<session ID>"
 })"_json);
 }
+
+TEST(Requests, RoomVisibility)
+{
+        mtx::requests::PublicRoomVisibility req;
+        req.visibility = mtx::common::RoomVisibility::Private;
+        json j         = req;
+        EXPECT_EQ(j, R"({
+    "visibility" : "private"
+  })"_json);
+
+        req.visibility = mtx::common::RoomVisibility::Public;
+        j              = req;
+        EXPECT_EQ(j, R"({
+    "visibility" : "public"
+  })"_json);
+}
+
+TEST(Requests, PublicRooms)
+{
+        PublicRooms b1, b2, b3;
+
+        b1.limit                      = 10;
+        b1.filter.generic_search_term = "foo";
+        b1.include_all_networks       = false;
+        b1.third_party_instance_id    = "irc";
+
+        json j = b1;
+
+        EXPECT_EQ(j, R"({
+    "limit" : 10,
+    "filter" : {
+      "generic_search_term" : "foo"
+    },
+    "include_all_networks" : false,
+    "third_party_instance_id" : "irc"
+  })"_json);
+
+        // if third_party_instance_id is set, then the include_all_networks flag should
+        // default to false
+        b2.limit                   = 10;
+        b2.third_party_instance_id = "matrix";
+        j                          = b2;
+        EXPECT_EQ(j, R"({
+    "limit" : 10,
+    "include_all_networks" : false,
+    "third_party_instance_id" : "matrix"
+  })"_json);
+
+        // if include_all_networks is true, then third_party_instance_id cannot be used.
+        // if it is somehow set, then we expect an exception to be thrown
+        b3.limit                   = 2;
+        b3.include_all_networks    = true;
+        b3.third_party_instance_id = "irc";
+
+        EXPECT_THROW(json req = b3, std::invalid_argument);
+}
