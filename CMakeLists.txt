@@ -61,6 +61,7 @@ if(NOT MSVC)
 		-pedantic \
 		-fsized-deallocation \
 		-fdiagnostics-color=always \
+		-Wno-attributes \
 		-Wunreachable-code"
 		)
 endif()

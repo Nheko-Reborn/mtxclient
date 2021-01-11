@@ -624,7 +624,7 @@ private:
 }
 
 template<class Payload>
-void
+[[gnu::used, llvm::used]] void
 mtx::http::Client::send_room_message(const std::string &room_id,
                                      const Payload &payload,
                                      Callback<mtx::responses::EventId> callback)
@@ -633,7 +633,7 @@ mtx::http::Client::send_room_message(const std::string &room_id,
 }
 
 template<class Payload>
-void
+[[gnu::used, llvm::used]] void
 mtx::http::Client::send_room_message(const std::string &room_id,
                                      const std::string &txn_id,
                                      const Payload &payload,
@@ -650,7 +650,7 @@ mtx::http::Client::send_room_message(const std::string &room_id,
 }
 
 template<class Payload>
-void
+[[gnu::used, llvm::used]] void
 mtx::http::Client::send_state_event(const std::string &room_id,
                                     const std::string &state_key,
                                     const Payload &payload,
@@ -667,7 +667,7 @@ mtx::http::Client::send_state_event(const std::string &room_id,
 }
 
 template<class Payload>
-void
+[[gnu::used, llvm::used]] void
 mtx::http::Client::send_state_event(const std::string &room_id,
                                     const Payload &payload,
                                     Callback<mtx::responses::EventId> callback)

@@ -4,7 +4,7 @@
 
 namespace mtx::events {
 template<class Content>
-void
+[[gnu::used, llvm::used]] void
 to_json(json &obj, const Event<Content> &event)
 {
         obj["content"] = event.content;
@@ -13,7 +13,7 @@ to_json(json &obj, const Event<Content> &event)
 }
 
 template<class Content>
-void
+[[gnu::used, llvm::used]] void
 from_json(const json &obj, Event<Content> &event)
 {
         event.content = obj.at("content").get<Content>();
@@ -22,7 +22,7 @@ from_json(const json &obj, Event<Content> &event)
 }
 
 template<class Content>
-void
+[[gnu::used, llvm::used]] void
 from_json(const json &obj, DeviceEvent<Content> &event)
 {
         Event<Content> base_event = event;
@@ -33,7 +33,7 @@ from_json(const json &obj, DeviceEvent<Content> &event)
 }
 
 template<class Content>
-void
+[[gnu::used, llvm::used]] void
 to_json(json &obj, const DeviceEvent<Content> &event)
 {
         Event<Content> base_event = event;
@@ -88,7 +88,7 @@ to_json(json &obj, const UnsignedData &event)
 }
 
 template<class Content>
-void
+[[gnu::used, llvm::used]] void
 from_json(const json &obj, StrippedEvent<Content> &event)
 {
         Event<Content> &base = event;
@@ -98,7 +98,7 @@ from_json(const json &obj, StrippedEvent<Content> &event)
 }
 
 template<class Content>
-void
+[[gnu::used, llvm::used]] void
 to_json(json &obj, const StrippedEvent<Content> &event)
 {
         Event<Content> base_event = event;
@@ -108,7 +108,7 @@ to_json(json &obj, const StrippedEvent<Content> &event)
 }
 
 template<class Content>
-void
+[[gnu::used, llvm::used]] void
 from_json(const json &obj, RoomEvent<Content> &event)
 {
         Event<Content> &base = event;
@@ -126,7 +126,7 @@ from_json(const json &obj, RoomEvent<Content> &event)
 }
 
 template<class Content>
-void
+[[gnu::used, llvm::used]] void
 to_json(json &obj, const RoomEvent<Content> &event)
 {
         Event<Content> base_event = event;
@@ -141,7 +141,7 @@ to_json(json &obj, const RoomEvent<Content> &event)
 }
 
 template<class Content>
-void
+[[gnu::used, llvm::used]] void
 to_json(json &obj, const StateEvent<Content> &event)
 {
         RoomEvent<Content> base_event = event;
@@ -151,7 +151,7 @@ to_json(json &obj, const StateEvent<Content> &event)
 }
 
 template<class Content>
-void
+[[gnu::used, llvm::used]] void
 from_json(const json &obj, StateEvent<Content> &event)
 {
         RoomEvent<Content> &base = event;
@@ -161,7 +161,7 @@ from_json(const json &obj, StateEvent<Content> &event)
 }
 
 template<class Content>
-void
+[[gnu::used, llvm::used]] void
 to_json(json &obj, const RedactionEvent<Content> &event)
 {
         RoomEvent<Content> base_event = event;
@@ -171,7 +171,7 @@ to_json(json &obj, const RedactionEvent<Content> &event)
 }
 
 template<class Content>
-void
+[[gnu::used, llvm::used]] void
 from_json(const json &obj, RedactionEvent<Content> &event)
 {
         RoomEvent<Content> &base = event;
@@ -181,7 +181,7 @@ from_json(const json &obj, RedactionEvent<Content> &event)
 }
 
 template<class Content>
-void
+[[gnu::used, llvm::used]] void
 to_json(json &obj, const EncryptedEvent<Content> &event)
 {
         RoomEvent<Content> base_event = event;
@@ -189,7 +189,7 @@ to_json(json &obj, const EncryptedEvent<Content> &event)
 }
 
 template<class Content>
-void
+[[gnu::used, llvm::used]] void
 from_json(const json &obj, EncryptedEvent<Content> &event)
 {
         RoomEvent<Content> &base = event;
@@ -197,7 +197,7 @@ from_json(const json &obj, EncryptedEvent<Content> &event)
 }
 
 template<class Content>
-void
+[[gnu::used, llvm::used]] void
 to_json(json &obj, const EphemeralEvent<Content> &event)
 {
         obj["content"] = event.content;
@@ -208,7 +208,7 @@ to_json(json &obj, const EphemeralEvent<Content> &event)
 }
 
 template<class Content>
-void
+[[gnu::used, llvm::used]] void
 from_json(const json &obj, EphemeralEvent<Content> &event)
 {
         event.content = obj.at("content").get<Content>();

@@ -166,7 +166,7 @@ mtx::http::Client::prepare_callback(HeadersCallback<Response> callback)
 }
 
 template<typename EventContent>
-void
+[[gnu::used, llvm::used]] void
 mtx::http::Client::send_to_device(
   const std::string &txid,
   const std::map<mtx::identifiers::User, std::map<std::string, EventContent>> &messages,
