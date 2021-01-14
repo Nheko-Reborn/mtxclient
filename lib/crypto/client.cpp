@@ -791,12 +791,20 @@ mtx::crypto::decrypt_exported_sessions(const std::string &data, std::string pass
 
         std::string binary_str = base642bin(unpacked);
 
+        if (binary_str.size() <
+            1 + pwhash_SALTBYTES + AES_BLOCK_SIZE + sizeof(uint32_t) + SHA256_DIGEST_LENGTH + 2)
+                throw crypto_exception("decrypt_exported_sessions",
+                                       "Invalid session file: too short");
+
         const auto binary_start = binary_str.begin();
         const auto binary_end   = binary_str.end();
 
         // Format version 0x01, 1 byte
         const auto format_end = binary_start + 1;
         auto format           = BinaryBuf(binary_start, format_end);
+        if (format[0] != 0x01)
+                throw crypto_exception("decrypt_exported_sessions",
+                                       "Unsupported backup file format.");
 
         // Salt, 16 bytes
         const auto salt_end = format_end + pwhash_SALTBYTES;
