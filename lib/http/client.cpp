@@ -1257,6 +1257,10 @@ Client::get_turn_server(Callback<mtx::responses::TurnServer> cb)
           const std::string &,                                                                     \
           const std::string &state_key,                                                            \
           const mtx::events::state::Content &,                                                     \
+          Callback<mtx::responses::EventId> cb);                                                   \
+        template void mtx::http::Client::send_state_event<mtx::events::state::Content>(            \
+          const std::string &,                                                                     \
+          const mtx::events::state::Content &,                                                     \
           Callback<mtx::responses::EventId> cb);
 
 MTXCLIENT_SEND_STATE_EVENT(Aliases)

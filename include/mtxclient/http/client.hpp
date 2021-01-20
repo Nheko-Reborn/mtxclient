@@ -628,54 +628,84 @@ private:
 }
 }
 
-template<class Payload>
-[[gnu::used, llvm::used]] void
-mtx::http::Client::send_room_message(const std::string &room_id,
-                                     const Payload &payload,
-                                     Callback<mtx::responses::EventId> callback)
-{
-        send_room_message<Payload>(room_id, generate_txn_id(), payload, callback);
-}
+// Template instantiations for the various send functions
 
-template<class Payload>
-[[gnu::used, llvm::used]] void
-mtx::http::Client::send_room_message(const std::string &room_id,
-                                     const std::string &txn_id,
-                                     const Payload &payload,
-                                     Callback<mtx::responses::EventId> callback)
-{
-        constexpr auto event_type = mtx::events::message_content_to_type<Payload>;
-        static_assert(event_type != mtx::events::EventType::Unsupported);
+#define MTXCLIENT_SEND_STATE_EVENT_FWD(Content)                                                    \
+        extern template void mtx::http::Client::send_state_event<mtx::events::state::Content>(     \
+          const std::string &,                                                                     \
+          const std::string &state_key,                                                            \
+          const mtx::events::state::Content &,                                                     \
+          Callback<mtx::responses::EventId> cb);                                                   \
+        extern template void mtx::http::Client::send_state_event<mtx::events::state::Content>(     \
+          const std::string &,                                                                     \
+          const mtx::events::state::Content &,                                                     \
+          Callback<mtx::responses::EventId> cb);
 
-        const auto api_path = "/client/r0/rooms/" + mtx::client::utils::url_encode(room_id) +
-                              "/send/" + mtx::events::to_string(event_type) + "/" +
-                              mtx::client::utils::url_encode(txn_id);
+MTXCLIENT_SEND_STATE_EVENT_FWD(Aliases)
+MTXCLIENT_SEND_STATE_EVENT_FWD(Avatar)
+MTXCLIENT_SEND_STATE_EVENT_FWD(CanonicalAlias)
+MTXCLIENT_SEND_STATE_EVENT_FWD(Create)
+MTXCLIENT_SEND_STATE_EVENT_FWD(Encryption)
+MTXCLIENT_SEND_STATE_EVENT_FWD(GuestAccess)
+MTXCLIENT_SEND_STATE_EVENT_FWD(HistoryVisibility)
+MTXCLIENT_SEND_STATE_EVENT_FWD(JoinRules)
+MTXCLIENT_SEND_STATE_EVENT_FWD(Member)
+MTXCLIENT_SEND_STATE_EVENT_FWD(Name)
+MTXCLIENT_SEND_STATE_EVENT_FWD(PinnedEvents)
+MTXCLIENT_SEND_STATE_EVENT_FWD(PowerLevels)
+MTXCLIENT_SEND_STATE_EVENT_FWD(Tombstone)
+MTXCLIENT_SEND_STATE_EVENT_FWD(Topic)
 
-        put<Payload, mtx::responses::EventId>(api_path, payload, callback);
-}
+#define MTXCLIENT_SEND_ROOM_MESSAGE_FWD(Content)                                                   \
+        extern template void mtx::http::Client::send_room_message<Content>(                        \
+          const std::string &,                                                                     \
+          const std::string &,                                                                     \
+          const Content &,                                                                         \
+          Callback<mtx::responses::EventId> cb);                                                   \
+        extern template void mtx::http::Client::send_room_message<Content>(                        \
+          const std::string &, const Content &, Callback<mtx::responses::EventId> cb);
 
-template<class Payload>
-[[gnu::used, llvm::used]] void
-mtx::http::Client::send_state_event(const std::string &room_id,
-                                    const std::string &state_key,
-                                    const Payload &payload,
-                                    Callback<mtx::responses::EventId> callback)
-{
-        constexpr auto event_type = mtx::events::state_content_to_type<Payload>;
-        static_assert(event_type != mtx::events::EventType::Unsupported);
+MTXCLIENT_SEND_ROOM_MESSAGE_FWD(mtx::events::msg::Encrypted)
+MTXCLIENT_SEND_ROOM_MESSAGE_FWD(mtx::events::msg::StickerImage)
+MTXCLIENT_SEND_ROOM_MESSAGE_FWD(mtx::events::msg::Reaction)
+MTXCLIENT_SEND_ROOM_MESSAGE_FWD(mtx::events::msg::Audio)
+MTXCLIENT_SEND_ROOM_MESSAGE_FWD(mtx::events::msg::Emote)
+MTXCLIENT_SEND_ROOM_MESSAGE_FWD(mtx::events::msg::File)
+MTXCLIENT_SEND_ROOM_MESSAGE_FWD(mtx::events::msg::Image)
+MTXCLIENT_SEND_ROOM_MESSAGE_FWD(mtx::events::msg::Notice)
+MTXCLIENT_SEND_ROOM_MESSAGE_FWD(mtx::events::msg::Text)
+MTXCLIENT_SEND_ROOM_MESSAGE_FWD(mtx::events::msg::Video)
+// MTXCLIENT_SEND_ROOM_MESSAGE(mtx::events::msg::KeyVerificationRequest)
+// MTXCLIENT_SEND_ROOM_MESSAGE(mtx::events::msg::KeyVerificationStart)
+// MTXCLIENT_SEND_ROOM_MESSAGE(mtx::events::msg::KeyVerificationReady)
+// MTXCLIENT_SEND_ROOM_MESSAGE(mtx::events::msg::KeyVerificationDone)
+// MTXCLIENT_SEND_ROOM_MESSAGE(mtx::events::msg::KeyVerificationAccept)
+// MTXCLIENT_SEND_ROOM_MESSAGE(mtx::events::msg::KeyVerificationCancel)
+// MTXCLIENT_SEND_ROOM_MESSAGE(mtx::events::msg::KeyVerificationKey)
+// MTXCLIENT_SEND_ROOM_MESSAGE(mtx::events::msg::KeyVerificationMac)
+MTXCLIENT_SEND_ROOM_MESSAGE_FWD(mtx::events::msg::CallInvite)
+MTXCLIENT_SEND_ROOM_MESSAGE_FWD(mtx::events::msg::CallCandidates)
+MTXCLIENT_SEND_ROOM_MESSAGE_FWD(mtx::events::msg::CallAnswer)
+MTXCLIENT_SEND_ROOM_MESSAGE_FWD(mtx::events::msg::CallHangUp)
 
-        const auto api_path = "/client/r0/rooms/" + mtx::client::utils::url_encode(room_id) +
-                              "/state/" + mtx::events::to_string(event_type) + "/" +
-                              mtx::client::utils::url_encode(state_key);
+#define MTXCLIENT_SEND_TO_DEVICE_FWD(Content)                                                      \
+        extern template void mtx::http::Client::send_to_device<Content>(                           \
+          const std::string &txid,                                                                 \
+          const std::map<mtx::identifiers::User, std::map<std::string, Content>> &messages,        \
+          ErrCallback callback);
 
-        put<Payload, mtx::responses::EventId>(api_path, payload, callback);
-}
-
-template<class Payload>
-[[gnu::used, llvm::used]] void
-mtx::http::Client::send_state_event(const std::string &room_id,
-                                    const Payload &payload,
-                                    Callback<mtx::responses::EventId> callback)
-{
-        send_state_event<Payload>(room_id, "", payload, callback);
-}
+MTXCLIENT_SEND_TO_DEVICE_FWD(mtx::events::msg::RoomKey)
+MTXCLIENT_SEND_TO_DEVICE_FWD(mtx::events::msg::ForwardedRoomKey)
+MTXCLIENT_SEND_TO_DEVICE_FWD(mtx::events::msg::KeyRequest)
+MTXCLIENT_SEND_TO_DEVICE_FWD(mtx::events::msg::OlmEncrypted)
+MTXCLIENT_SEND_TO_DEVICE_FWD(mtx::events::msg::Encrypted)
+MTXCLIENT_SEND_TO_DEVICE_FWD(mtx::events::msg::KeyVerificationRequest)
+MTXCLIENT_SEND_TO_DEVICE_FWD(mtx::events::msg::KeyVerificationStart)
+MTXCLIENT_SEND_TO_DEVICE_FWD(mtx::events::msg::KeyVerificationReady)
+MTXCLIENT_SEND_TO_DEVICE_FWD(mtx::events::msg::KeyVerificationDone)
+MTXCLIENT_SEND_TO_DEVICE_FWD(mtx::events::msg::KeyVerificationAccept)
+MTXCLIENT_SEND_TO_DEVICE_FWD(mtx::events::msg::KeyVerificationCancel)
+MTXCLIENT_SEND_TO_DEVICE_FWD(mtx::events::msg::KeyVerificationKey)
+MTXCLIENT_SEND_TO_DEVICE_FWD(mtx::events::msg::KeyVerificationMac)
+MTXCLIENT_SEND_TO_DEVICE_FWD(mtx::events::msg::SecretSend)
+MTXCLIENT_SEND_TO_DEVICE_FWD(mtx::events::msg::SecretRequest)

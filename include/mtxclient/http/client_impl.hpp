@@ -182,3 +182,55 @@ mtx::http::Client::send_to_device(
 
         send_to_device(mtx::events::to_string(event_type), txid, j, callback);
 }
+
+template<class Payload>
+[[gnu::used, llvm::used]] void
+mtx::http::Client::send_room_message(const std::string &room_id,
+                                     const Payload &payload,
+                                     Callback<mtx::responses::EventId> callback)
+{
+        send_room_message<Payload>(room_id, generate_txn_id(), payload, callback);
+}
+
+template<class Payload>
+[[gnu::used, llvm::used]] void
+mtx::http::Client::send_room_message(const std::string &room_id,
+                                     const std::string &txn_id,
+                                     const Payload &payload,
+                                     Callback<mtx::responses::EventId> callback)
+{
+        constexpr auto event_type = mtx::events::message_content_to_type<Payload>;
+        static_assert(event_type != mtx::events::EventType::Unsupported);
+
+        const auto api_path = "/client/r0/rooms/" + mtx::client::utils::url_encode(room_id) +
+                              "/send/" + mtx::events::to_string(event_type) + "/" +
+                              mtx::client::utils::url_encode(txn_id);
+
+        put<Payload, mtx::responses::EventId>(api_path, payload, callback);
+}
+
+template<class Payload>
+[[gnu::used, llvm::used]] void
+mtx::http::Client::send_state_event(const std::string &room_id,
+                                    const std::string &state_key,
+                                    const Payload &payload,
+                                    Callback<mtx::responses::EventId> callback)
+{
+        constexpr auto event_type = mtx::events::state_content_to_type<Payload>;
+        static_assert(event_type != mtx::events::EventType::Unsupported);
+
+        const auto api_path = "/client/r0/rooms/" + mtx::client::utils::url_encode(room_id) +
+                              "/state/" + mtx::events::to_string(event_type) + "/" +
+                              mtx::client::utils::url_encode(state_key);
+
+        put<Payload, mtx::responses::EventId>(api_path, payload, callback);
+}
+
+template<class Payload>
+[[gnu::used, llvm::used]] void
+mtx::http::Client::send_state_event(const std::string &room_id,
+                                    const Payload &payload,
+                                    Callback<mtx::responses::EventId> callback)
+{
+        send_state_event<Payload>(room_id, "", payload, callback);
+}
