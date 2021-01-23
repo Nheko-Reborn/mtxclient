@@ -31,51 +31,79 @@ namespace crypto {
 //! Data representation used to interact with libolm.
 using BinaryBuf = std::vector<uint8_t>;
 
+enum class OlmErrorCode {
+	UNKNOWN_ERROR = - 1,
+	SUCCESS,
+	NOT_ENOUGH_RANDOM,
+	OUTPUT_BUFFER_TOO_SMALL,
+	BAD_MESSAGE_VERSION,
+	BAD_MESSAGE_FORMAT,
+	BAD_MESSAGE_MAC,
+	BAD_MESSAGE_KEY_ID,
+	INVALID_BASE64,
+	BAD_ACCOUNT_KEY,
+	UNKNOWN_PICKLE_VERSION,
+	CORRUPTED_PICKLE,
+	BAD_SESSION_KEY,
+	UNKNOWN_MESSAGE_INDEX,
+	BAD_LEGACY_ACCOUNT_PICKLE,
+	BAD_SIGNATURE,
+	OLM_INPUT_BUFFER_TOO_SMALL,
+	OLM_SAS_THEIR_KEY_NOT_SET
+};
+
 //! Errors returned by the olm library
 class olm_exception : public std::exception
 {
-public:
-        olm_exception(std::string func, OlmSession *s)
-          : msg_(func + ": " + std::string(olm_session_last_error(s)))
-        {}
+	public:
+		olm_exception(std::string func, OlmSession *s)
+			: olm_exception(std::move(func), std::string(olm_session_last_error(s)))
+		{}
 
-        olm_exception(std::string func, OlmAccount *acc)
-          : msg_(func + ": " + std::string(olm_account_last_error(acc)))
-        {}
+		olm_exception(std::string func, OlmAccount *acc)
+			: olm_exception(std::move(func), std::string(olm_account_last_error(acc)))
+		{}
 
-        olm_exception(std::string func, OlmUtility *util)
-          : msg_(func + ": " + std::string(olm_utility_last_error(util)))
-        {}
+		olm_exception(std::string func, OlmUtility *util)
+			: olm_exception(std::move(func), std::string(olm_utility_last_error(util)))
+		{}
 
-        olm_exception(std::string func, OlmPkDecryption *s)
-          : msg_(func + ": " + std::string(olm_pk_decryption_last_error(s)))
-        {}
+		olm_exception(std::string func, OlmPkDecryption *s)
+			: olm_exception(std::move(func), std::string(olm_pk_decryption_last_error(s)))
+		{}
 
-        olm_exception(std::string func, OlmPkSigning *s)
-          : msg_(func + ": " + std::string(olm_pk_signing_last_error(s)))
-        {}
+		olm_exception(std::string func, OlmPkSigning *s)
+			: olm_exception(std::move(func), std::string(olm_pk_signing_last_error(s)))
+		{}
 
-        olm_exception(std::string func, OlmOutboundGroupSession *s)
-          : msg_(func + ": " + std::string(olm_outbound_group_session_last_error(s)))
-        {}
+		olm_exception(std::string func, OlmOutboundGroupSession *s)
+			: olm_exception(std::move(func), std::string(olm_outbound_group_session_last_error(s)))
+		{}
 
-        olm_exception(std::string func, OlmInboundGroupSession *s)
-          : msg_(func + ": " + std::string(olm_inbound_group_session_last_error(s)))
-        {}
+		olm_exception(std::string func, OlmInboundGroupSession *s)
+			: olm_exception(std::move(func), std::string(olm_inbound_group_session_last_error(s)))
+		{}
 
-        olm_exception(std::string func, OlmSAS *s)
-          : msg_(func + ":" + std::string(olm_sas_last_error(s)))
-        {}
+		olm_exception(std::string func, OlmSAS *s)
+			: olm_exception(std::move(func), std::string(olm_sas_last_error(s)))
+		{}
 
-        olm_exception(std::string msg)
-          : msg_(msg)
-        {}
+                //! Returns a description of the olm error.
+                const char *what() const noexcept override { return msg_.c_str(); }
 
-        //! Returns a description of the olm error.
-        const char *what() const noexcept override { return msg_.c_str(); }
+                //! Returns an error code reconstructed from the error string returned by olm
+                OlmErrorCode error_code() const noexcept { return ec_; }
 
-private:
+        private:
+                olm_exception(std::string &&func, std::string error_string)
+                  : msg_(func + ": " + error_string)
+                  , ec_(ec_from_string(error_string))
+                {}
+
+		OlmErrorCode ec_from_string(std::string_view);
+
         std::string msg_;
+	OlmErrorCode ec_ = OlmErrorCode::UNKNOWN_ERROR;
 };
 
 //! Serialize olm objects into strings encrypted using key to persist them on non volatile storage.

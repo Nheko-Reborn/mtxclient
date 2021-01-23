@@ -14,6 +14,40 @@ using namespace mtx::crypto;
 
 static constexpr auto pwhash_SALTBYTES = 16u;
 
+using namespace std::string_view_literals;
+
+static const std::array olmErrorStrings{
+  "SUCCESS"sv,
+  "NOT_ENOUGH_RANDOM"sv,
+  "OUTPUT_BUFFER_TOO_SMALL"sv,
+  "BAD_MESSAGE_VERSION"sv,
+  "BAD_MESSAGE_FORMAT"sv,
+  "BAD_MESSAGE_MAC"sv,
+  "BAD_MESSAGE_KEY_ID"sv,
+  "INVALID_BASE64"sv,
+  "BAD_ACCOUNT_KEY"sv,
+  "UNKNOWN_PICKLE_VERSION"sv,
+  "CORRUPTED_PICKLE"sv,
+  "BAD_SESSION_KEY"sv,
+  "UNKNOWN_MESSAGE_INDEX"sv,
+  "BAD_LEGACY_ACCOUNT_PICKLE"sv,
+  "BAD_SIGNATURE"sv,
+  "OLM_INPUT_BUFFER_TOO_SMALL"sv,
+  "OLM_SAS_THEIR_KEY_NOT_SET"sv,
+
+};
+
+OlmErrorCode
+olm_exception::ec_from_string(std::string_view error)
+{
+        for (size_t i = 0; i < olmErrorStrings.size(); i++) {
+                if (olmErrorStrings[i] == error)
+                        return static_cast<OlmErrorCode>(i);
+        }
+
+        return OlmErrorCode::UNKNOWN_ERROR;
+}
+
 void
 OlmClient::create_new_account()
 {
