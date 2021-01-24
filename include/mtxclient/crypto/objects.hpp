@@ -28,19 +28,48 @@ namespace crypto {
 /// ```
 struct OlmDeleter
 {
-        void operator()(OlmAccount *ptr) { delete[](reinterpret_cast<uint8_t *>(ptr)); }
-        void operator()(OlmUtility *ptr) { delete[](reinterpret_cast<uint8_t *>(ptr)); }
-
-        void operator()(OlmPkDecryption *ptr) { delete[](reinterpret_cast<uint8_t *>(ptr)); }
-        void operator()(OlmPkSigning *ptr) { delete[](reinterpret_cast<uint8_t *>(ptr)); }
-
-        void operator()(OlmSession *ptr) { delete[](reinterpret_cast<uint8_t *>(ptr)); }
-        void operator()(OlmOutboundGroupSession *ptr)
+        void operator()(OlmAccount *ptr)
         {
+                olm_clear_account(ptr);
                 delete[](reinterpret_cast<uint8_t *>(ptr));
         }
-        void operator()(OlmInboundGroupSession *ptr) { delete[](reinterpret_cast<uint8_t *>(ptr)); }
-        void operator()(OlmSAS *ptr) { delete[](reinterpret_cast<uint8_t *>(ptr)); }
+        void operator()(OlmUtility *ptr)
+        {
+                olm_clear_utility(ptr);
+                delete[](reinterpret_cast<uint8_t *>(ptr));
+        }
+
+        void operator()(OlmPkDecryption *ptr)
+        {
+                olm_clear_pk_decryption(ptr);
+                delete[](reinterpret_cast<uint8_t *>(ptr));
+        }
+        void operator()(OlmPkSigning *ptr)
+        {
+                olm_clear_pk_signing(ptr);
+                delete[](reinterpret_cast<uint8_t *>(ptr));
+        }
+
+        void operator()(OlmSession *ptr)
+        {
+                olm_clear_session(ptr);
+                delete[](reinterpret_cast<uint8_t *>(ptr));
+        }
+        void operator()(OlmOutboundGroupSession *ptr)
+        {
+                olm_clear_outbound_group_session(ptr);
+                delete[](reinterpret_cast<uint8_t *>(ptr));
+        }
+        void operator()(OlmInboundGroupSession *ptr)
+        {
+                olm_clear_inbound_group_session(ptr);
+                delete[](reinterpret_cast<uint8_t *>(ptr));
+        }
+        void operator()(OlmSAS *ptr)
+        {
+                olm_clear_sas(ptr);
+                delete[](reinterpret_cast<uint8_t *>(ptr));
+        }
 };
 
 //! Olm type for Short Authentication Strings.
