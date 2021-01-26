@@ -27,8 +27,7 @@ from_json(const json &obj, Video &content)
         if (obj.find("file") != obj.end())
                 content.file = obj.at("file").get<crypto::EncryptedFile>();
 
-        if (obj.count("m.relates_to") != 0)
-                content.relates_to = obj.at("m.relates_to").get<common::ReplyRelatesTo>();
+        content.relations = common::parse_relations(obj);
 }
 
 void
@@ -43,8 +42,7 @@ to_json(json &obj, const Video &content)
         else
                 obj["url"] = content.url;
 
-        if (!content.relates_to.in_reply_to.event_id.empty())
-                obj["m.relates_to"] = content.relates_to;
+        common::add_relations(obj, content.relations);
 }
 
 } // namespace msg

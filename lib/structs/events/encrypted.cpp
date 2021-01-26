@@ -100,12 +100,7 @@ from_json(const json &obj, Encrypted &content)
         content.device_id  = obj.at("device_id").get<std::string>();
         content.sender_key = obj.at("sender_key").get<std::string>();
         content.session_id = obj.at("session_id").get<std::string>();
-        if (obj.count("m.relates_to") != 0) {
-                if (obj.at("m.relates_to").contains("m.in_reply_to"))
-                        content.relates_to = obj.at("m.relates_to").get<common::ReplyRelatesTo>();
-                else
-                        content.r_relates_to = obj.at("m.relates_to").get<common::RelatesTo>();
-        }
+        content.relations  = common::parse_relations(obj);
 }
 
 void
@@ -117,10 +112,7 @@ to_json(json &obj, const Encrypted &content)
         obj["sender_key"] = content.sender_key;
         obj["session_id"] = content.session_id;
 
-        if (!content.relates_to.in_reply_to.event_id.empty())
-                obj["m.relates_to"] = content.relates_to;
-        if (!content.r_relates_to.event_id.empty())
-                obj["m.relates_to"] = content.r_relates_to;
+        common::add_relations(obj, content.relations);
 }
 
 void
@@ -272,8 +264,7 @@ from_json(const json &obj, KeyVerificationStart &event)
           obj.at("message_authentication_codes").get<std::vector<std::string>>();
         event.short_authentication_string =
           obj.at("short_authentication_string").get<std::vector<SASMethods>>();
-        if (obj.count("m.relates_to") != 0)
-                event.relates_to = obj.at("m.relates_to").get<common::RelatesTo>();
+        event.relations = common::parse_relations(obj);
 }
 
 void
@@ -289,8 +280,7 @@ to_json(json &obj, const KeyVerificationStart &event)
         obj["hashes"]                       = event.hashes;
         obj["message_authentication_codes"] = event.message_authentication_codes;
         obj["short_authentication_string"]  = event.short_authentication_string;
-        if (event.relates_to.has_value())
-                obj["m.relates_to"] = event.relates_to.value();
+        common::add_relations(obj, event.relations);
 }
 
 void
@@ -301,8 +291,7 @@ from_json(const json &obj, KeyVerificationReady &event)
         }
         event.methods     = obj.at("methods").get<std::vector<VerificationMethods>>();
         event.from_device = obj.at("from_device").get<std::string>();
-        if (obj.count("m.relates_to") != 0)
-                event.relates_to = obj.at("m.relates_to").get<common::RelatesTo>();
+        event.relations   = common::parse_relations(obj);
 }
 
 void
@@ -312,8 +301,7 @@ to_json(json &obj, const KeyVerificationReady &event)
         if (event.transaction_id.has_value())
                 obj["transaction_id"] = event.transaction_id.value();
         obj["from_device"] = event.from_device;
-        if (event.relates_to.has_value())
-                obj["m.relates_to"] = event.relates_to.value();
+        common::add_relations(obj, event.relations);
 }
 
 void
@@ -322,8 +310,7 @@ from_json(const nlohmann::json &obj, KeyVerificationDone &event)
         if (obj.count("transaction_id") != 0) {
                 event.transaction_id = obj.at("transaction_id").get<std::string>();
         }
-        if (obj.count("m.relates_to") != 0)
-                event.relates_to = obj.at("m.relates_to").get<common::RelatesTo>();
+        event.relations = common::parse_relations(obj);
 }
 
 void
@@ -331,8 +318,7 @@ to_json(nlohmann::json &obj, const KeyVerificationDone &event)
 {
         if (event.transaction_id.has_value())
                 obj["transaction_id"] = event.transaction_id.value();
-        if (event.relates_to.has_value())
-                obj["m.relates_to"] = event.relates_to.value();
+        common::add_relations(obj, event.relations);
 }
 
 void
@@ -349,8 +335,7 @@ from_json(const json &obj, KeyVerificationAccept &event)
           obj.at("short_authentication_string").get<std::vector<SASMethods>>();
         event.commitment = obj.at("commitment").get<std::string>();
         event.method     = obj.value("method", VerificationMethods::SASv1);
-        if (obj.count("m.relates_to") != 0)
-                event.relates_to = obj.at("m.relates_to").get<common::RelatesTo>();
+        event.relations  = common::parse_relations(obj);
 }
 
 void
@@ -364,8 +349,7 @@ to_json(json &obj, const KeyVerificationAccept &event)
         obj["short_authentication_string"] = event.short_authentication_string;
         obj["commitment"]                  = event.commitment;
         obj["method"]                      = event.method;
-        if (event.relates_to.has_value())
-                obj["m.relates_to"] = event.relates_to.value();
+        common::add_relations(obj, event.relations);
 }
 
 void
@@ -374,10 +358,9 @@ from_json(const json &obj, KeyVerificationCancel &event)
         if (obj.count("transaction_id") != 0) {
                 event.transaction_id = obj.at("transaction_id").get<std::string>();
         }
-        event.reason = obj.value("reason", "");
-        event.code   = obj.value("code", "");
-        if (obj.count("m.relates_to") != 0)
-                event.relates_to = obj.at("m.relates_to").get<common::RelatesTo>();
+        event.reason    = obj.value("reason", "");
+        event.code      = obj.value("code", "");
+        event.relations = common::parse_relations(obj);
 }
 
 void
@@ -387,8 +370,7 @@ to_json(json &obj, const KeyVerificationCancel &event)
                 obj["transaction_id"] = event.transaction_id.value();
         obj["reason"] = event.reason;
         obj["code"]   = event.code;
-        if (event.relates_to.has_value())
-                obj["m.relates_to"] = event.relates_to.value();
+        common::add_relations(obj, event.relations);
 }
 
 void
@@ -397,9 +379,8 @@ from_json(const json &obj, KeyVerificationKey &event)
         if (obj.count("transaction_id") != 0) {
                 event.transaction_id = obj.at("transaction_id").get<std::string>();
         }
-        event.key = obj.at("key").get<std::string>();
-        if (obj.count("m.relates_to") != 0)
-                event.relates_to = obj.at("m.relates_to").get<common::RelatesTo>();
+        event.key       = obj.at("key").get<std::string>();
+        event.relations = common::parse_relations(obj);
 }
 
 void
@@ -408,8 +389,7 @@ to_json(json &obj, const KeyVerificationKey &event)
         if (event.transaction_id.has_value())
                 obj["transaction_id"] = event.transaction_id.value();
         obj["key"] = event.key;
-        if (event.relates_to.has_value())
-                obj["m.relates_to"] = event.relates_to.value();
+        common::add_relations(obj, event.relations);
 }
 
 void
@@ -418,10 +398,9 @@ from_json(const json &obj, KeyVerificationMac &event)
         if (obj.count("transaction_id") != 0) {
                 event.transaction_id = obj.at("transaction_id").get<std::string>();
         }
-        event.mac  = obj.at("mac").get<std::map<std::string, std::string>>();
-        event.keys = obj.at("keys").get<std::string>();
-        if (obj.count("m.relates_to") != 0)
-                event.relates_to = obj.at("m.relates_to").get<common::RelatesTo>();
+        event.mac       = obj.at("mac").get<std::map<std::string, std::string>>();
+        event.keys      = obj.at("keys").get<std::string>();
+        event.relations = common::parse_relations(obj);
 }
 
 void
@@ -431,8 +410,7 @@ to_json(json &obj, const KeyVerificationMac &event)
                 obj["transaction_id"] = event.transaction_id.value();
         obj["mac"]  = event.mac;
         obj["keys"] = event.keys;
-        if (event.relates_to.has_value())
-                obj["m.relates_to"] = event.relates_to.value();
+        common::add_relations(obj, event.relations);
 }
 
 void

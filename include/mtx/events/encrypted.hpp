@@ -81,7 +81,6 @@ from_json(const nlohmann::json &obj, OlmEncrypted &event);
 void
 to_json(nlohmann::json &obj, const OlmEncrypted &event);
 
-// !TODO Change the RelatesTo to handle ReplyRelatesTo type of event
 //! Content of the `m.room.encrypted` event.
 struct Encrypted
 {
@@ -95,10 +94,8 @@ struct Encrypted
         std::string sender_key;
         //! Outbound group session id.
         std::string session_id;
-        //! Relates to for rich replies
-        common::ReplyRelatesTo relates_to;
-        //! Relates to used for verification messages
-        common::RelatesTo r_relates_to;
+        //! Relations like rich replies
+        common::Relations relations;
 };
 
 void
@@ -271,7 +268,7 @@ struct KeyVerificationStart
         ///
         /// @note Will be used only for room-verification msgs where this is used in place of
         /// transaction_id.
-        std::optional<mtx::common::RelatesTo> relates_to;
+        common::Relations relations;
 };
 
 void
@@ -292,7 +289,7 @@ struct KeyVerificationReady
         //! this is used for relating this message with previously sent
         //! key.verification.request will be used only for room-verification msgs where this
         //! is used in place of txnid
-        std::optional<mtx::common::RelatesTo> relates_to;
+        common::Relations relations;
 };
 
 void
@@ -308,7 +305,7 @@ struct KeyVerificationDone
         std::optional<std::string> transaction_id;
         //! this is used for relating this message with previously sent key.verification.request
         //! will be used only for room-verification msgs where this is used in place of txnid
-        std::optional<mtx::common::RelatesTo> relates_to;
+        common::Relations relations;
 };
 
 void
@@ -344,7 +341,7 @@ struct KeyVerificationAccept
         std::string commitment;
         //! this is used for relating this message with previously sent key.verification.request
         //! will be used only for room-verification msgs where this is used in place of txnid
-        std::optional<mtx::common::RelatesTo> relates_to;
+        common::Relations relations;
 };
 
 void
@@ -389,7 +386,7 @@ struct KeyVerificationCancel
         std::string code;
         //! this is used for relating this message with previously sent key.verification.request
         //! will be used only for room-verification msgs where this is used in place of txnid
-        std::optional<mtx::common::RelatesTo> relates_to;
+        common::Relations relations;
 };
 
 void
@@ -407,7 +404,7 @@ struct KeyVerificationKey
         std::string key;
         //! this is used for relating this message with previously sent key.verification.request
         //! will be used only for room-verification msgs where this is used in place of txnid
-        std::optional<mtx::common::RelatesTo> relates_to;
+        common::Relations relations;
 };
 
 void
@@ -429,7 +426,7 @@ struct KeyVerificationMac
         std::string keys;
         //! this is used for relating this message with previously sent key.verification.request
         //! will be used only for room-verification msgs where this is used in place of txnid
-        std::optional<mtx::common::RelatesTo> relates_to;
+        common::Relations relations;
 };
 
 void

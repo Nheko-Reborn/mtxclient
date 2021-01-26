@@ -10,16 +10,17 @@ namespace events {
 namespace msg {
 
 void
-from_json(const json &obj, Reaction &event)
+from_json(const json &obj, Reaction &content)
 {
-        if (obj.count("m.relates_to") != 0)
-                event.relates_to = obj.at("m.relates_to").get<common::RelatesTo>();
+        content.relations = common::parse_relations(obj);
 }
 
 void
-to_json(json &obj, const Reaction &event)
+to_json(json &obj, const Reaction &content)
 {
-        obj["m.relates_to"] = event.relates_to;
+        obj = nlohmann::json::object();
+
+        common::add_relations(obj, content.relations);
 }
 
 } // namespace msg

@@ -143,31 +143,18 @@ from_json(const nlohmann::json &obj, VideoInfo &info);
 void
 to_json(nlohmann::json &obj, const VideoInfo &info);
 
-//! In reply to data for rich replies (notice and text events)
-struct InReplyTo
-{
-        //! Event id being replied to
-        std::string event_id;
-};
-
-//! Deserialization method needed by @p nlohmann::json.
-void
-from_json(const nlohmann::json &obj, InReplyTo &in_reply_to);
-
-//! Serialization method needed by @p nlohmann::json.
-void
-to_json(nlohmann::json &obj, const InReplyTo &in_reply_to);
-
 //! Definition of rel_type for relations.
 enum class RelationType
 {
-        // m.annotation rel_type
+        //! m.annotation rel_type
         Annotation,
-        // m.reference rel_type
+        //! m.reference rel_type
         Reference,
-        // m.replace rel_type
+        //! m.replace rel_type
         Replace,
-        // not one of the supported types
+        //! im.nheko.relations.v1.in_reply_to rel_type
+        InReplyTo,
+        //! not one of the supported types
         Unsupported
 };
 
@@ -178,38 +165,45 @@ void
 to_json(nlohmann::json &obj, const RelationType &type);
 
 //! Relates to for reactions
-struct RelatesTo
+struct Relation
 {
-        // Type of relation
-        RelationType rel_type;
-        // event id being reacted to
-        std::string event_id;
-        // key is the reaction itself
-        std::optional<std::string> key;
+        //! Type of relation
+        RelationType rel_type = RelationType::Unsupported;
+        //! event id being reacted to
+        std::string event_id = "";
+        //! key is the reaction itself
+        std::optional<std::string> key = std::nullopt;
+};
+void
+from_json(const nlohmann::json &obj, Relation &relation);
+void
+to_json(nlohmann::json &obj, const Relation &relation);
+
+//! Multiple relations for a event
+struct Relations
+{
+        //! All the relations for this event
+        std::vector<Relation> relations;
+        //! Flag, if we generated this from relates_to relations or used
+        //! im.nheko.relactions.v1.relations
+        bool synthesized = false;
+
+        std::optional<std::string> reply_to() const;
+        std::optional<std::string> replaces() const;
+        std::optional<std::string> references() const;
+        std::optional<Relation> annotates() const;
 };
 
-//! Deserialization method needed by @p nlohmann::json.
+/// @brief Parses relations from a content object
+///
+/// @param obj The content object of an event.
+Relations
+parse_relations(const nlohmann::json &obj);
+
+/// @brief Serializes relations to a content object
+///
+/// @param obj The content object of an event.
 void
-from_json(const nlohmann::json &obj, RelatesTo &relates_to);
-
-//! Serialization method needed by @p nlohmann::json.
-void
-to_json(nlohmann::json &obj, const RelatesTo &relates_to);
-
-//! Relates to data for rich replies (notice and text events)
-struct ReplyRelatesTo
-{
-        //! What the message is in reply to
-        InReplyTo in_reply_to;
-};
-
-//! Deserialization method needed by @p nlohmann::json.
-void
-from_json(const nlohmann::json &obj, ReplyRelatesTo &relates_to);
-
-//! Serialization method needed by @p nlohmann::json.
-void
-to_json(nlohmann::json &obj, const ReplyRelatesTo &relates_to);
-
+add_relations(nlohmann::json &obj, const Relations &relations);
 } // namespace common
 } // namespace mtx

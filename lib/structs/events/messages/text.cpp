@@ -22,8 +22,7 @@ from_json(const json &obj, Text &content)
         if (obj.count("formatted_body") != 0)
                 content.formatted_body = obj.at("formatted_body").get<std::string>();
 
-        if (obj.count("m.relates_to") != 0)
-                content.relates_to = obj.at("m.relates_to").get<common::ReplyRelatesTo>();
+        content.relations = common::parse_relations(obj);
 }
 
 void
@@ -37,8 +36,7 @@ to_json(json &obj, const Text &content)
                 obj["formatted_body"] = content.formatted_body;
         }
 
-        if (!content.relates_to.in_reply_to.event_id.empty())
-                obj["m.relates_to"] = content.relates_to;
+        common::add_relations(obj, content.relations);
 }
 
 } // namespace msg

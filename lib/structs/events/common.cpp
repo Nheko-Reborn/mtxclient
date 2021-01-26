@@ -170,19 +170,6 @@ to_json(json &obj, const VideoInfo &info)
 }
 
 void
-from_json(const json &obj, InReplyTo &in_reply_to)
-{
-        if (obj.find("event_id") != obj.end())
-                in_reply_to.event_id = obj.at("event_id").get<std::string>();
-}
-
-void
-to_json(json &obj, const InReplyTo &in_reply_to)
-{
-        obj["event_id"] = in_reply_to.event_id;
-}
-
-void
 to_json(json &obj, const RelationType &type)
 {
         switch (type) {
@@ -194,6 +181,9 @@ to_json(json &obj, const RelationType &type)
                 break;
         case RelationType::Replace:
                 obj = "m.replace";
+                break;
+        case RelationType::InReplyTo:
+                obj = "im.nheko.relations.v1.in_reply_to";
                 break;
         case RelationType::Unsupported:
         default:
@@ -211,12 +201,111 @@ from_json(const json &obj, RelationType &type)
                 type = RelationType::Reference;
         else if (obj.get<std::string>() == "m.replace")
                 type = RelationType::Replace;
+        else if (obj.get<std::string>() == "im.nheko.relations.v1.in_reply_to")
+                type = RelationType::InReplyTo;
         else
                 type = RelationType::Unsupported;
 }
 
+Relations
+parse_relations(const nlohmann::json &content)
+{
+        try {
+                if (content.contains("im.nheko.relations.v1.relations")) {
+                        Relations rels;
+                        rels.relations = content.at("im.nheko.relations.v1.relations")
+                                           .get<std::vector<mtx::common::Relation>>();
+                        rels.synthesized = false;
+                        return rels;
+                } else if (content.contains("m.relates_to")) {
+                        if (content.at("m.relates_to").contains("m.in_reply_to")) {
+                                Relation r;
+                                r.event_id = content.at("m.relates_to")
+                                               .at("m.in_reply_to")
+                                               .at("event_id")
+                                               .get<std::string>();
+                                r.rel_type = RelationType::InReplyTo;
+
+                                Relations rels;
+                                rels.relations.push_back(r);
+                                rels.synthesized = true;
+                                return rels;
+                        } else {
+                                Relation r =
+                                  content.at("m.relates_to").get<mtx::common::Relation>();
+                                Relations rels;
+                                rels.relations.push_back(r);
+                                rels.synthesized = true;
+
+                                if (r.rel_type == RelationType::Replace &&
+                                    content.contains("m.new_content") &&
+                                    content.at("m.new_content").contains("m.relates_to")) {
+                                        const auto secondRel =
+                                          content["m.new_content"]["m.relates_to"];
+                                        if (secondRel.contains("m.in_reply_to")) {
+                                                Relation r2{};
+                                                r.rel_type = RelationType::InReplyTo;
+                                                r.event_id = secondRel.at("m.in_reply_to")
+                                                               .at("event_id")
+                                                               .get<std::string>();
+                                                rels.relations.push_back(r2);
+                                        } else {
+                                                rels.relations.push_back(secondRel.get<Relation>());
+                                        }
+                                }
+
+                                return rels;
+                        }
+                }
+        } catch (nlohmann::json &e) {
+        }
+        return {};
+}
+
 void
-from_json(const json &obj, RelatesTo &relates_to)
+add_relations(nlohmann::json &content, const Relations &relations)
+{
+        if (relations.relations.empty())
+                return;
+
+        std::optional<Relation> edit, not_edit;
+        for (const auto &r : relations.relations) {
+                if (r.rel_type == RelationType::Replace)
+                        edit = r;
+                else
+                        not_edit = r;
+        }
+
+        if (not_edit) {
+                if (not_edit->rel_type == RelationType::InReplyTo) {
+                        content["m.relates_to"]["m.in_reply_to"]["event_id"] = not_edit->event_id;
+                } else {
+                        content["m.relates_to"] = *not_edit;
+                }
+        }
+
+        if (edit) {
+                auto new_content         = content;
+                content["m.new_content"] = new_content;
+                content["m.relates_to"]  = *edit;
+
+                if (content.contains("body"))
+                        content["body"] = "* " + content["body"].get<std::string>();
+                if (content.contains("formatted_body"))
+                        content["formatted_body"] =
+                          "* " + content["formatted_body"].get<std::string>();
+        }
+
+        if (!relations.synthesized) {
+                for (const auto &r : relations.relations) {
+                        if (r.rel_type != RelationType::Unsupported)
+                                content["im.nheko.relations.v1.relations"].push_back(r);
+                }
+        }
+}
+
+void
+from_json(const json &obj, Relation &relates_to)
 {
         if (obj.find("rel_type") != obj.end())
                 relates_to.rel_type = obj.at("rel_type").get<RelationType>();
@@ -227,7 +316,7 @@ from_json(const json &obj, RelatesTo &relates_to)
 }
 
 void
-to_json(json &obj, const RelatesTo &relates_to)
+to_json(json &obj, const Relation &relates_to)
 {
         obj["rel_type"] = relates_to.rel_type;
         obj["event_id"] = relates_to.event_id;
@@ -235,18 +324,36 @@ to_json(json &obj, const RelatesTo &relates_to)
                 obj["key"] = relates_to.key.value();
 }
 
-void
-from_json(const json &obj, ReplyRelatesTo &relates_to)
+static inline std::optional<std::string>
+return_first_relation_matching(RelationType t, const Relations &rels)
 {
-        if (obj.find("m.in_reply_to") != obj.end())
-                relates_to.in_reply_to = obj.at("m.in_reply_to").get<InReplyTo>();
+        for (const auto &r : rels.relations)
+                if (r.rel_type == t)
+                        return r.event_id;
+        return std::nullopt;
 }
-
-void
-to_json(json &obj, const ReplyRelatesTo &relates_to)
+std::optional<std::string>
+Relations::reply_to() const
 {
-        obj["m.in_reply_to"] = relates_to.in_reply_to;
+        return return_first_relation_matching(RelationType::InReplyTo, *this);
 }
-
+std::optional<std::string>
+Relations::replaces() const
+{
+        return return_first_relation_matching(RelationType::Replace, *this);
+}
+std::optional<std::string>
+Relations::references() const
+{
+        return return_first_relation_matching(RelationType::Reference, *this);
+}
+std::optional<Relation>
+Relations::annotates() const
+{
+        for (const auto &r : relations)
+                if (r.rel_type == RelationType::Annotation)
+                        return r;
+        return std::nullopt;
+}
 } // namespace common
 } // namespace mtx

@@ -29,25 +29,25 @@ from_json(const json &obj, File &content)
         if (obj.find("file") != obj.end())
                 content.file = obj.at("file").get<crypto::EncryptedFile>();
 
-        if (obj.count("m.relates_to") != 0)
-                content.relates_to = obj.at("m.relates_to").get<common::ReplyRelatesTo>();
+        content.relations = common::parse_relations(obj);
 }
 
 void
 to_json(json &obj, const File &content)
 {
-        obj["msgtype"]  = "m.file";
-        obj["body"]     = content.body;
-        obj["filename"] = content.filename;
-        obj["info"]     = content.info;
+        obj["msgtype"] = "m.file";
+        obj["body"]    = content.body;
+
+        if (!content.filename.empty())
+                obj["filename"] = content.filename;
+        obj["info"] = content.info;
 
         if (content.file)
                 obj["file"] = content.file.value();
         else
                 obj["url"] = content.url;
 
-        if (!content.relates_to.in_reply_to.event_id.empty())
-                obj["m.relates_to"] = content.relates_to;
+        common::add_relations(obj, content.relations);
 }
 
 } // namespace msg

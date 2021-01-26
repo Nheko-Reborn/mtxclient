@@ -20,8 +20,8 @@ namespace msg {
 //! Content for the `m.reaction` event.
 struct Reaction
 {
-        //! The event being reacted to
-        mtx::common::RelatesTo relates_to;
+        //! Should be an annotation relation
+        common::Relations relations;
 };
 
 void
