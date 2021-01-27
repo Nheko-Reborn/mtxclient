@@ -5,6 +5,7 @@
 #include "mtx/events/unknown.hpp"
 
 namespace mtx::events {
+
 template<class Content>
 [[gnu::used, llvm::used]] void
 to_json(json &obj, const Event<Content> &event)
@@ -21,9 +22,20 @@ template<class Content>
 [[gnu::used, llvm::used]] void
 from_json(const json &obj, Event<Content> &event)
 {
-        event.content = obj.at("content").get<Content>();
-        event.type    = getEventType(obj.at("type").get<std::string>());
-        event.sender  = obj.value("sender", "");
+        if (obj.at("content").contains("m.new_content")) {
+                auto new_content = obj.at("content");
+                for (const auto &e : obj["content"]["m.new_content"].items()) {
+                        if (e.key() != "m.relates_to" &&
+                            e.key() != "im.nheko.relations.v1.relations")
+                                new_content[e.key()] = e.value();
+                }
+                event.content = new_content.get<Content>();
+        } else {
+                event.content = obj.at("content").get<Content>();
+        }
+
+        event.type   = getEventType(obj.at("type").get<std::string>());
+        event.sender = obj.value("sender", "");
 
         if constexpr (std::is_same_v<Unknown, Content>)
                 event.content.type = obj.at("type").get<std::string>();
