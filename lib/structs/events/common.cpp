@@ -285,15 +285,9 @@ add_relations(nlohmann::json &content, const Relations &relations)
         }
 
         if (edit) {
-                auto new_content         = content;
-                content["m.new_content"] = new_content;
-                content["m.relates_to"]  = *edit;
-
-                if (content.contains("body"))
-                        content["body"] = "* " + content["body"].get<std::string>();
-                if (content.contains("formatted_body"))
-                        content["formatted_body"] =
-                          "* " + content["formatted_body"].get<std::string>();
+                if (not_edit)
+                        content["m.new_content"]["m.relates_to"] = content["m.relates_to"];
+                content["m.relates_to"] = *edit;
         }
 
         if (!relations.synthesized) {

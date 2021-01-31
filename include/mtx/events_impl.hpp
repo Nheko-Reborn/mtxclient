@@ -5,13 +5,45 @@
 #include "mtx/events/unknown.hpp"
 
 namespace mtx::events {
+namespace detail {
+
+template<typename, typename = void>
+struct can_edit : std::false_type
+{};
+
+template<typename Content>
+struct can_edit<Content, std::void_t<decltype(Content::relations)>>
+  : std::is_same<decltype(Content::relations), mtx::common::Relations>
+{};
+}
 
 template<class Content>
 [[gnu::used, llvm::used]] void
 to_json(json &obj, const Event<Content> &event)
 {
         obj["content"] = event.content;
-        obj["sender"]  = event.sender;
+
+        if constexpr (detail::can_edit<Content>::value) {
+                if (event.content.relations.replaces()) {
+                        for (const auto &e : obj["content"].items()) {
+                                if (e.key() != "m.relates_to" &&
+                                    e.key() != "im.nheko.relations.v1.relations" &&
+                                    e.key() != "m.new_content")
+                                        obj["content"]["m.new_content"][e.key()] = e.value();
+                        }
+
+                        if (obj["content"].contains("body")) {
+                                obj["content"]["body"] =
+                                  "* " + obj["content"]["body"].get<std::string>();
+                        }
+                        if (obj["content"].contains("formatted_body")) {
+                                obj["content"]["formatted_body"] =
+                                  "* " + obj["content"]["formatted_body"].get<std::string>();
+                        }
+                }
+        }
+
+        obj["sender"] = event.sender;
         if constexpr (std::is_same_v<Unknown, Content>)
                 obj["type"] = event.content.type;
         else
