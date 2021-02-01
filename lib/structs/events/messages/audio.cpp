@@ -41,7 +41,7 @@ to_json(json &obj, const Audio &content)
         else
                 obj["url"] = content.url;
 
-        common::add_relations(obj, content.relations);
+        common::apply_relations(obj, content.relations);
 }
 
 } // namespace msg

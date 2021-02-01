@@ -36,7 +36,7 @@ to_json(json &obj, const Emote &content)
                 obj["formatted_body"] = content.formatted_body;
         }
 
-        common::add_relations(obj, content.relations);
+        common::apply_relations(obj, content.relations);
 }
 
 } // namespace msg

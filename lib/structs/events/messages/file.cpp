@@ -47,7 +47,7 @@ to_json(json &obj, const File &content)
         else
                 obj["url"] = content.url;
 
-        common::add_relations(obj, content.relations);
+        common::apply_relations(obj, content.relations);
 }
 
 } // namespace msg

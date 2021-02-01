@@ -40,7 +40,7 @@ to_json(json &obj, const Image &content)
         else
                 obj["url"] = content.url;
 
-        common::add_relations(obj, content.relations);
+        common::apply_relations(obj, content.relations);
 }
 
 void
@@ -70,7 +70,7 @@ to_json(json &obj, const StickerImage &content)
         else
                 obj["url"] = content.url;
 
-        common::add_relations(obj, content.relations);
+        common::apply_relations(obj, content.relations);
 }
 
 } // namespace msg

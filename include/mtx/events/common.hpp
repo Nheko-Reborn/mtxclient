@@ -205,5 +205,11 @@ parse_relations(const nlohmann::json &obj);
 /// @param obj The content object of an event.
 void
 add_relations(nlohmann::json &obj, const Relations &relations);
+
+/// @brief Applies also all the edit rules to the event in addition to adding the relations
+///
+/// @param obj The content object of an event.
+void
+apply_relations(nlohmann::json &obj, const Relations &relations);
 } // namespace common
 } // namespace mtx

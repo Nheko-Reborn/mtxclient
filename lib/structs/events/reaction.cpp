@@ -20,7 +20,7 @@ to_json(json &obj, const Reaction &content)
 {
         obj = nlohmann::json::object();
 
-        common::add_relations(obj, content.relations);
+        common::apply_relations(obj, content.relations);
 }
 
 } // namespace msg

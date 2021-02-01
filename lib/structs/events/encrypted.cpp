@@ -112,6 +112,7 @@ to_json(json &obj, const Encrypted &content)
         obj["sender_key"] = content.sender_key;
         obj["session_id"] = content.session_id;
 
+        // For encrypted events, only add releations, don't generate new_content and friends
         common::add_relations(obj, content.relations);
 }
 
@@ -280,7 +281,7 @@ to_json(json &obj, const KeyVerificationStart &event)
         obj["hashes"]                       = event.hashes;
         obj["message_authentication_codes"] = event.message_authentication_codes;
         obj["short_authentication_string"]  = event.short_authentication_string;
-        common::add_relations(obj, event.relations);
+        common::apply_relations(obj, event.relations);
 }
 
 void
@@ -301,7 +302,7 @@ to_json(json &obj, const KeyVerificationReady &event)
         if (event.transaction_id.has_value())
                 obj["transaction_id"] = event.transaction_id.value();
         obj["from_device"] = event.from_device;
-        common::add_relations(obj, event.relations);
+        common::apply_relations(obj, event.relations);
 }
 
 void
@@ -318,7 +319,7 @@ to_json(nlohmann::json &obj, const KeyVerificationDone &event)
 {
         if (event.transaction_id.has_value())
                 obj["transaction_id"] = event.transaction_id.value();
-        common::add_relations(obj, event.relations);
+        common::apply_relations(obj, event.relations);
 }
 
 void
@@ -349,7 +350,7 @@ to_json(json &obj, const KeyVerificationAccept &event)
         obj["short_authentication_string"] = event.short_authentication_string;
         obj["commitment"]                  = event.commitment;
         obj["method"]                      = event.method;
-        common::add_relations(obj, event.relations);
+        common::apply_relations(obj, event.relations);
 }
 
 void
@@ -370,7 +371,7 @@ to_json(json &obj, const KeyVerificationCancel &event)
                 obj["transaction_id"] = event.transaction_id.value();
         obj["reason"] = event.reason;
         obj["code"]   = event.code;
-        common::add_relations(obj, event.relations);
+        common::apply_relations(obj, event.relations);
 }
 
 void
@@ -389,7 +390,7 @@ to_json(json &obj, const KeyVerificationKey &event)
         if (event.transaction_id.has_value())
                 obj["transaction_id"] = event.transaction_id.value();
         obj["key"] = event.key;
-        common::add_relations(obj, event.relations);
+        common::apply_relations(obj, event.relations);
 }
 
 void
@@ -410,7 +411,7 @@ to_json(json &obj, const KeyVerificationMac &event)
                 obj["transaction_id"] = event.transaction_id.value();
         obj["mac"]  = event.mac;
         obj["keys"] = event.keys;
-        common::add_relations(obj, event.relations);
+        common::apply_relations(obj, event.relations);
 }
 
 void

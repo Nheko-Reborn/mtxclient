@@ -297,6 +297,29 @@ add_relations(nlohmann::json &content, const Relations &relations)
                 }
         }
 }
+void
+apply_relations(nlohmann::json &content, const Relations &relations)
+{
+        add_relations(content, relations);
+
+        if (relations.replaces()) {
+                for (const auto &e : content.items()) {
+                        if (e.key() != "m.relates_to" &&
+                            e.key() != "im.nheko.relations.v1.relations" &&
+                            e.key() != "m.new_content") {
+                                content["m.new_content"][e.key()] = e.value();
+                        }
+                }
+
+                if (content.contains("body")) {
+                        content["body"] = "* " + content["body"].get<std::string>();
+                }
+                if (content.contains("formatted_body")) {
+                        content["formatted_body"] =
+                          "* " + content["formatted_body"].get<std::string>();
+                }
+        }
+}
 
 void
 from_json(const json &obj, Relation &relates_to)
