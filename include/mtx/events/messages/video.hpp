@@ -34,7 +34,7 @@ struct Video
         //! Encryption members. If present, they replace url.
         std::optional<crypto::EncryptedFile> file;
         //! Relates to for rich replies
-        mtx::common::ReplyRelatesTo relates_to;
+        mtx::common::Relations relations;
 };
 
 void

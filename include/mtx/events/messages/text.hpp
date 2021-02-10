@@ -30,7 +30,7 @@ struct Text
         //! HTML formatted message.
         std::string formatted_body;
         //! Relates to for rich replies
-        mtx::common::ReplyRelatesTo relates_to;
+        mtx::common::Relations relations;
 };
 
 void

@@ -35,10 +35,11 @@ TEST(RoomEvents, Reaction)
         EXPECT_EQ(event.sender, "@example:localhost");
         EXPECT_EQ(event.origin_server_ts, 1588536414112L);
         EXPECT_EQ(event.unsigned_data.age, 1905609L);
-        EXPECT_EQ(event.content.relates_to.event_id,
+        EXPECT_EQ(event.content.relations.relations.at(0).event_id,
                   "$oGKg0tfsnDamWPsGxUptGLWR5b8Xq6QNFFsysQNSnake");
-        EXPECT_EQ(event.content.relates_to.key, "👀");
-        EXPECT_EQ(event.content.relates_to.rel_type, mtx::common::RelationType::Annotation);
+        EXPECT_EQ(event.content.relations.relations.at(0).key, "👀");
+        EXPECT_EQ(event.content.relations.relations.at(0).rel_type,
+                  mtx::common::RelationType::Annotation);
 
         EXPECT_EQ(data.dump(), json(event).dump());
 }
@@ -112,8 +113,10 @@ TEST(RoomEvents, AudioMessage)
         EXPECT_EQ(event.content.info.mimetype, "audio/mpeg");
         EXPECT_EQ(event.content.info.size, 1563685);
         EXPECT_EQ(event.content.info.duration, 2140786);
-        EXPECT_EQ(event.content.relates_to.in_reply_to.event_id,
+        EXPECT_EQ(event.content.relations.reply_to().value(),
                   "$6GKhAfJOcwNd69lgSizdcTob8z2pWQgBOZPrnsWMA1E");
+        EXPECT_EQ(event.content.relations.relations.at(0).rel_type,
+                  mtx::common::RelationType::InReplyTo);
 }
 
 TEST(RoomEvents, EmoteMessage)
@@ -148,8 +151,10 @@ TEST(RoomEvents, EmoteMessage)
         EXPECT_EQ(event.unsigned_data.age, 626351821);
         EXPECT_EQ(event.content.body, "tests");
         EXPECT_EQ(event.content.msgtype, "m.emote");
-        EXPECT_EQ(event.content.relates_to.in_reply_to.event_id,
+        EXPECT_EQ(event.content.relations.relations.at(0).event_id,
                   "$6GKhAfJOcwNd69lgSizdcTob8z2pWQgBOZPrnsWMA1E");
+        EXPECT_EQ(event.content.relations.relations.at(0).rel_type,
+                  mtx::common::RelationType::InReplyTo);
 }
 
 TEST(RoomEvents, FileMessage)
@@ -202,8 +207,10 @@ TEST(RoomEvents, FileMessage)
         EXPECT_EQ(event.content.url, "mxc://matrix.org/XpxykZBESCSQnYkLKbbIKnVn");
         EXPECT_EQ(event.content.info.mimetype, "application/pdf");
         EXPECT_EQ(event.content.info.size, 40565);
-        EXPECT_EQ(event.content.relates_to.in_reply_to.event_id,
+        EXPECT_EQ(event.content.relations.relations.at(0).event_id,
                   "$6GKhAfJOcwNd69lgSizdcTob8z2pWQgBOZPrnsWMA1E");
+        EXPECT_EQ(event.content.relations.relations.at(0).rel_type,
+                  mtx::common::RelationType::InReplyTo);
 
         json withThumb = event;
         EXPECT_EQ(withThumb["content"]["info"].count("thumbnail_url"), 1);
@@ -350,8 +357,10 @@ TEST(RoomEvents, ImageMessage)
         EXPECT_EQ(event.content.info.thumbnail_info.w, 474);
         EXPECT_EQ(event.content.info.thumbnail_info.h, 302);
         EXPECT_EQ(event.content.info.thumbnail_info.size, 33504);
-        EXPECT_EQ(event.content.relates_to.in_reply_to.event_id,
+        EXPECT_EQ(event.content.relations.relations.at(0).event_id,
                   "$6GKhAfJOcwNd69lgSizdcTob8z2pWQgBOZPrnsWMA1E");
+        EXPECT_EQ(event.content.relations.relations.at(0).rel_type,
+                  mtx::common::RelationType::InReplyTo);
 
         json withThumb = event;
         EXPECT_EQ(withThumb["content"]["info"].count("thumbnail_url"), 1);
@@ -415,8 +424,10 @@ TEST(RoomEvents, ImageMessage)
         EXPECT_EQ(event.content.info.thumbnail_info.w, 0);
         EXPECT_EQ(event.content.info.thumbnail_info.h, 0);
         EXPECT_EQ(event.content.info.thumbnail_info.size, 0);
-        EXPECT_EQ(event.content.relates_to.in_reply_to.event_id,
+        EXPECT_EQ(event.content.relations.relations.at(0).event_id,
                   "$6GKhAfJOcwNd69lgSizdcTob8z2pWQgBOZPrnsWMA1E");
+        EXPECT_EQ(event.content.relations.relations.at(0).rel_type,
+                  mtx::common::RelationType::InReplyTo);
 }
 
 TEST(RoomEvents, LocationMessage) {}
@@ -454,8 +465,10 @@ TEST(RoomEvents, NoticeMessage)
         EXPECT_EQ(event.content.body,
                   "https://github.com/postmarketOS/pmbootstrap/issues/900 : Package nheko");
         EXPECT_EQ(event.content.msgtype, "m.notice");
-        EXPECT_EQ(event.content.relates_to.in_reply_to.event_id,
+        EXPECT_EQ(event.content.relations.relations.at(0).event_id,
                   "$6GKhAfJOcwNd69lgSizdcTob8z2pWQgBOZPrnsWMA1E");
+        EXPECT_EQ(event.content.relations.relations.at(0).rel_type,
+                  mtx::common::RelationType::InReplyTo);
 }
 
 TEST(RoomEvents, TextMessage)
@@ -493,8 +506,10 @@ TEST(RoomEvents, TextMessage)
 
         EXPECT_EQ(event.content.body, "hey there");
         EXPECT_EQ(event.content.msgtype, "m.text");
-        EXPECT_EQ(event.content.relates_to.in_reply_to.event_id,
+        EXPECT_EQ(event.content.relations.relations.at(0).event_id,
                   "$6GKhAfJOcwNd69lgSizdcTob8z2pWQgBOZPrnsWMA1E");
+        EXPECT_EQ(event.content.relations.relations.at(0).rel_type,
+                  mtx::common::RelationType::InReplyTo);
 
         EXPECT_EQ(data.dump(), json(event).dump());
 }
@@ -556,8 +571,10 @@ TEST(RoomEvents, VideoMessage)
         EXPECT_EQ(event.content.info.thumbnail_info.h, 300);
         EXPECT_EQ(event.content.info.thumbnail_info.w, 310);
         EXPECT_EQ(event.content.info.thumbnail_info.size, 46144);
-        EXPECT_EQ(event.content.relates_to.in_reply_to.event_id,
+        EXPECT_EQ(event.content.relations.relations.at(0).event_id,
                   "$6GKhAfJOcwNd69lgSizdcTob8z2pWQgBOZPrnsWMA1E");
+        EXPECT_EQ(event.content.relations.relations.at(0).rel_type,
+                  mtx::common::RelationType::InReplyTo);
 }
 
 TEST(RoomEvents, Sticker)
@@ -602,8 +619,10 @@ TEST(RoomEvents, Sticker)
         EXPECT_EQ(event.content.info.w, 140);
         EXPECT_EQ(event.content.info.h, 200);
         EXPECT_EQ(event.content.info.size, 73602);
-        EXPECT_EQ(event.content.relates_to.in_reply_to.event_id,
+        EXPECT_EQ(event.content.relations.relations.at(0).event_id,
                   "$6GKhAfJOcwNd69lgSizdcTob8z2pWQgBOZPrnsWMA1E");
+        EXPECT_EQ(event.content.relations.relations.at(0).rel_type,
+                  mtx::common::RelationType::InReplyTo);
 
         json data2     = R"({
 	  "type": "m.sticker",
@@ -742,8 +761,10 @@ TEST(RoomEvents, Encrypted)
         EXPECT_EQ(event.content.device_id, "RJYKSTBOIE");
         EXPECT_EQ(event.content.sender_key, "IlRMeOPX2e0MurIyfWEucYBRVOEEUMrOHqn/8mLqMjA");
         EXPECT_EQ(event.content.session_id, "X3lUlvLELLYxeTx4yOVu6UDpasGEVO0Jbu+QFnm0cKQ");
-        EXPECT_EQ(event.content.relates_to.in_reply_to.event_id,
+        EXPECT_EQ(event.content.relations.relations.at(0).event_id,
                   "$6GKhAfJOcwNd69lgSizdcTob8z2pWQgBOZPrnsWMA1E");
+        EXPECT_EQ(event.content.relations.relations.at(0).rel_type,
+                  mtx::common::RelationType::InReplyTo);
 
         EXPECT_EQ(data, json(event));
 }
