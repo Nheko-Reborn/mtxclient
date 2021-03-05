@@ -1,4 +1,3 @@
-#include <cstdlib>
 #include <string>
 
 #include "mtx/events/voip.hpp"
@@ -8,17 +7,12 @@
 using json = nlohmann::json;
 
 namespace {
-uint16_t
+std::string
 version(const json &obj)
 {
         auto v = obj.at("version");
-        try {
-                return v.get<uint16_t>();
-        } catch (const json::type_error &) {
-                return std::atoi(v.get<std::string>().c_str());
-        }
+        return v.is_number() ? "0" : v.get<std::string>();
 }
-
 }
 
 namespace mtx::events::msg {
