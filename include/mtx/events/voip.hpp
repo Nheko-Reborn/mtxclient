@@ -22,7 +22,7 @@ struct CallInvite
         //! The SDP text of the session description.
         std::string sdp;
         //! The version of the VoIP specification this message adheres to.
-        uint16_t version;
+        std::string version;
         //! The time in milliseconds that the invite is valid for.
         uint32_t lifetime;
 };
@@ -51,7 +51,7 @@ struct CallCandidates
         //! Array of objects describing the candidates.
         std::vector<Candidate> candidates;
         //! The version of the VoIP specification this message adheres to.
-        uint16_t version;
+        std::string version;
 };
 
 void
@@ -68,7 +68,7 @@ struct CallAnswer
         //! The SDP text of the session description.
         std::string sdp;
         //! The version of the VoIP specification this message adheres to.
-        uint16_t version;
+        std::string version;
 };
 
 void
@@ -90,7 +90,7 @@ struct CallHangUp
         //! The ID of the call this event relates to.
         std::string call_id;
         //! The version of the VoIP specification this message adheres to.
-        uint16_t version;
+        std::string version;
         //! The reason for the call hang up.
         Reason reason = Reason::User;
 };

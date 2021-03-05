@@ -1,8 +1,19 @@
+#include <string>
+
 #include "mtx/events/voip.hpp"
 
 #include <nlohmann/json.hpp>
 
 using json = nlohmann::json;
+
+namespace {
+std::string
+version(const json &obj)
+{
+        auto v = obj.at("version");
+        return v.is_number() ? "0" : v.get<std::string>();
+}
+}
 
 namespace mtx::events::msg {
 
@@ -12,7 +23,7 @@ from_json(const json &obj, CallInvite &content)
 {
         content.call_id  = obj.at("call_id").get<std::string>();
         content.sdp      = obj.at("offer").at("sdp").get<std::string>();
-        content.version  = obj.at("version").get<uint16_t>();
+        content.version  = version(obj);
         content.lifetime = obj.at("lifetime").get<uint32_t>();
 }
 
@@ -47,7 +58,7 @@ from_json(const json &obj, CallCandidates &content)
 {
         content.call_id    = obj.at("call_id").get<std::string>();
         content.candidates = obj.at("candidates").get<std::vector<CallCandidates::Candidate>>();
-        content.version    = obj.at("version").get<uint16_t>();
+        content.version    = version(obj);
 }
 
 void
@@ -64,7 +75,7 @@ from_json(const json &obj, CallAnswer &content)
 {
         content.call_id = obj.at("call_id").get<std::string>();
         content.sdp     = obj.at("answer").at("sdp").get<std::string>();
-        content.version = obj.at("version").get<uint16_t>();
+        content.version = version(obj);
 }
 
 void
@@ -80,7 +91,7 @@ void
 from_json(const json &obj, CallHangUp &content)
 {
         content.call_id = obj.at("call_id").get<std::string>();
-        content.version = obj.at("version").get<uint16_t>();
+        content.version = version(obj);
         if (obj.count("reason") == 0) {
                 content.reason = CallHangUp::Reason::User;
         } else {
