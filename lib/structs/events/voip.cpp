@@ -13,6 +13,15 @@ version(const json &obj)
         auto v = obj.at("version");
         return v.is_number() ? "0" : v.get<std::string>();
 }
+
+void
+add_version(json &obj, std::string_view version)
+{
+        if (version == "0")
+                obj["version"] = 0;
+        else
+                obj["version"] = version;
+}
 }
 
 namespace mtx::events::msg {
@@ -30,9 +39,9 @@ from_json(const json &obj, CallInvite &content)
 void
 to_json(json &obj, const CallInvite &content)
 {
-        obj["call_id"]  = content.call_id;
-        obj["offer"]    = {{"sdp", content.sdp}, {"type", "offer"}};
-        obj["version"]  = content.version;
+        obj["call_id"] = content.call_id;
+        obj["offer"]   = {{"sdp", content.sdp}, {"type", "offer"}};
+        add_version(obj, content.version);
         obj["lifetime"] = content.lifetime;
 }
 
@@ -66,7 +75,7 @@ to_json(json &obj, const CallCandidates &content)
 {
         obj["call_id"]    = content.call_id;
         obj["candidates"] = content.candidates;
-        obj["version"]    = content.version;
+        add_version(obj, content.version);
 }
 
 // m.call.answer
@@ -83,7 +92,7 @@ to_json(json &obj, const CallAnswer &content)
 {
         obj["call_id"] = content.call_id;
         obj["answer"]  = {{"sdp", content.sdp}, {"type", "answer"}};
-        obj["version"] = content.version;
+        add_version(obj, content.version);
 }
 
 // m.call.hangup
@@ -106,7 +115,7 @@ void
 to_json(json &obj, const CallHangUp &content)
 {
         obj["call_id"] = content.call_id;
-        obj["version"] = content.version;
+        add_version(obj, content.version);
         if (content.reason == CallHangUp::Reason::ICEFailed)
                 obj["reason"] = "ice_failed";
         else if (content.reason == CallHangUp::Reason::InviteTimeOut)
