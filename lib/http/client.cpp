@@ -34,7 +34,7 @@ struct ClientPrivate
         //! Worker threads for the requests.
         boost::thread_group thread_group_;
         //! SSL context for requests.
-        boost::asio::ssl::context ssl_ctx_{boost::asio::ssl::context::sslv23_client};
+        boost::asio::ssl::context ssl_ctx_{boost::asio::ssl::context::tls_client};
         //! All the active sessions will shutdown the connection.
         boost::signals2::signal<void()> shutdown_signal;
 };
@@ -47,6 +47,13 @@ Client::Client(const std::string &server, uint16_t port)
 {
         using namespace boost::asio;
         const auto threads_num = std::min(8U, std::max(1U, std::thread::hardware_concurrency()));
+
+        using boost::asio::ssl::context;
+        p->ssl_ctx_.set_options(context::default_workarounds | context::no_sslv2 |
+                                context::no_sslv3 | context::no_tlsv1 | context::no_tlsv1_1);
+        p->ssl_ctx_.set_default_verify_paths();
+        verify_certificates(true);
+        p->ssl_ctx_.set_verify_callback(ssl::rfc2818_verification(server));
 
         for (unsigned int i = 0; i < threads_num; ++i)
                 p->thread_group_.add_thread(new boost::thread([this]() { p->ios_.run(); }));
@@ -196,6 +203,13 @@ mtx::http::Client::get(const std::string &endpoint,
 }
 
 void
+Client::verify_certificates(bool enabled)
+{
+        using namespace boost::asio;
+        p->ssl_ctx_.set_verify_mode(enabled ? ssl::verify_peer : ssl::verify_none);
+}
+
+void
 Client::set_server(const std::string &server)
 {
         std::string_view server_name = server;
@@ -223,6 +237,8 @@ Client::set_server(const std::string &server)
                 server_ = server_name;
                 port_   = port;
         }
+        p->ssl_ctx_.set_verify_callback(
+          boost::asio::ssl::rfc2818_verification(std::string(server_)));
 }
 
 void

@@ -14,20 +14,17 @@ using namespace std;
 
 TEST(Basic, Connection)
 {
-        auto alice = std::make_shared<Client>("localhost", 8448);
-        auto bob   = std::make_shared<Client>("localhost", 443);
+        auto client = make_test_client();
 
-        alice->versions(
+        client->versions(
           [](const mtx::responses::Versions &, RequestErr err) { ASSERT_FALSE(err); });
-        bob->versions([](const mtx::responses::Versions &, RequestErr err) { ASSERT_FALSE(err); });
-
-        bob->close();
-        alice->close();
+        client->close();
 }
 
 TEST(Basic, ServerWithPort)
 {
         auto alice = std::make_shared<Client>("matrix.org");
+        alice->verify_certificates(false);
         alice->set_server("localhost:8448");
 
         EXPECT_EQ(alice->server(), "localhost");
@@ -41,13 +38,14 @@ TEST(Basic, ServerWithPort)
 TEST(Basic, Failure)
 {
         auto alice = std::make_shared<Client>("not-resolvable-example-domain.wrong");
+        alice->verify_certificates(false);
         alice->versions([](const mtx::responses::Versions &, RequestErr err) { ASSERT_TRUE(err); });
         alice->close();
 }
 
 TEST(Basic, Shutdown)
 {
-        std::shared_ptr<Client> client = std::make_shared<Client>("localhost");
+        std::shared_ptr<Client> client = make_test_client();
 
         client->login("carl", "secret", [client](const mtx::responses::Login &, RequestErr err) {
                 check_error(err);

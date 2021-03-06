@@ -231,7 +231,7 @@ TEST(Pushrules, GlobalRuleset)
 
 TEST(Pushrules, GetGlobalRuleset)
 {
-        std::shared_ptr<Client> client = std::make_shared<Client>("localhost");
+        std::shared_ptr<Client> client = make_test_client();
 
         client->login(
           "alice", "secret", [client](const mtx::responses::Login &res, RequestErr err) {
@@ -247,7 +247,7 @@ TEST(Pushrules, GetGlobalRuleset)
 
 TEST(Pushrules, GetRuleset)
 {
-        std::shared_ptr<Client> client = std::make_shared<Client>("localhost");
+        std::shared_ptr<Client> client = make_test_client();
 
         client->login(
           "alice", "secret", [client](const mtx::responses::Login &res, RequestErr err) {
@@ -267,7 +267,7 @@ TEST(Pushrules, GetRuleset)
 
 TEST(Pushrules, PutAndDeleteRuleset)
 {
-        std::shared_ptr<Client> client = std::make_shared<Client>("localhost");
+        std::shared_ptr<Client> client = make_test_client();
 
         client->login(
           "alice", "secret", [client](const mtx::responses::Login &res, RequestErr err) {
@@ -297,7 +297,7 @@ TEST(Pushrules, PutAndDeleteRuleset)
 
 TEST(Pushrules, RulesetEnabled)
 {
-        std::shared_ptr<Client> client = std::make_shared<Client>("localhost");
+        std::shared_ptr<Client> client = make_test_client();
 
         client->login(
           "alice", "secret", [client](const mtx::responses::Login &res, RequestErr err) {
@@ -344,7 +344,7 @@ TEST(Pushrules, RulesetEnabled)
 
 TEST(Pushrules, Actions)
 {
-        std::shared_ptr<Client> client = std::make_shared<Client>("localhost");
+        std::shared_ptr<Client> client = make_test_client();
 
         client->login(
           "alice", "secret", [client](const mtx::responses::Login &res, RequestErr err) {
@@ -378,7 +378,7 @@ TEST(Pushrules, Actions)
 
 TEST(Pushrules, RoomRuleMute)
 {
-        std::shared_ptr<Client> client = std::make_shared<Client>("localhost");
+        std::shared_ptr<Client> client = make_test_client();
 
         client->login(
           "alice", "secret", [client](const mtx::responses::Login &res, RequestErr err) {
@@ -418,7 +418,7 @@ TEST(Pushrules, RoomRuleMute)
 
 TEST(Pushrules, RoomRuleMentions)
 {
-        std::shared_ptr<Client> client = std::make_shared<Client>("localhost");
+        std::shared_ptr<Client> client = make_test_client();
 
         client->login(
           "alice", "secret", [client](const mtx::responses::Login &res, RequestErr err) {

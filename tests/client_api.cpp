@@ -25,7 +25,7 @@ using namespace std;
 
 TEST(ClientAPI, Register)
 {
-        auto user = std::make_shared<Client>("localhost");
+        auto user = make_test_client();
 
         user->registration("alice", "secret", [](const mtx::responses::Register &, RequestErr err) {
                 ASSERT_TRUE(err);
@@ -62,7 +62,7 @@ TEST(ClientAPI, Register)
 
 TEST(ClientAPI, LoginSuccess)
 {
-        std::shared_ptr<Client> mtx_client = std::make_shared<Client>("localhost");
+        std::shared_ptr<Client> mtx_client = make_test_client();
 
         mtx_client->login("alice", "secret", [](const mtx::responses::Login &res, RequestErr err) {
                 check_error(err);
@@ -84,7 +84,7 @@ TEST(ClientAPI, LoginSuccess)
 
 TEST(ClientAPI, LoginWrongPassword)
 {
-        std::shared_ptr<Client> mtx_client = std::make_shared<Client>("localhost");
+        std::shared_ptr<Client> mtx_client = make_test_client();
 
         mtx_client->login(
           "alice", "wrong_password", [](const mtx::responses::Login &res, RequestErr err) {
@@ -102,7 +102,7 @@ TEST(ClientAPI, LoginWrongPassword)
 
 TEST(ClientAPI, LoginWrongUsername)
 {
-        std::shared_ptr<Client> mtx_client = std::make_shared<Client>("localhost");
+        std::shared_ptr<Client> mtx_client = make_test_client();
 
         mtx_client->login("john", "secret", [](const mtx::responses::Login &res, RequestErr err) {
                 ASSERT_TRUE(err);
@@ -119,7 +119,7 @@ TEST(ClientAPI, LoginWrongUsername)
 
 TEST(ClientAPI, LoginFlows)
 {
-        std::shared_ptr<Client> mtx_client = std::make_shared<Client>("localhost");
+        std::shared_ptr<Client> mtx_client = make_test_client();
 
         mtx_client->get_login([](const mtx::responses::LoginFlows &res, RequestErr err) {
                 ASSERT_FALSE(err);
@@ -132,7 +132,7 @@ TEST(ClientAPI, LoginFlows)
 
 TEST(ClientAPI, SSORedirect)
 {
-        std::shared_ptr<Client> mtx_client = std::make_shared<Client>("localhost");
+        std::shared_ptr<Client> mtx_client = std::make_shared<Client>("localhost", 443);
         EXPECT_EQ(mtx_client->login_sso_redirect("http://aaa:555/sso"),
                   "https://localhost:443/_matrix/client/r0/login/sso/"
                   "redirect?redirectUrl=http%3A%2F%2Faaa%3A555%2Fsso");
@@ -141,7 +141,7 @@ TEST(ClientAPI, SSORedirect)
 
 TEST(ClientAPI, EmptyUserAvatar)
 {
-        auto alice = std::make_shared<Client>("localhost");
+        auto alice = make_test_client();
 
         alice->login("alice", "secret", [alice](const mtx::responses::Login &res, RequestErr err) {
                 ASSERT_FALSE(err);
@@ -179,7 +179,7 @@ TEST(ClientAPI, EmptyUserAvatar)
 
 TEST(ClientAPI, RealUserAvatar)
 {
-        auto alice = std::make_shared<Client>("localhost");
+        auto alice = make_test_client();
 
         alice->login("alice", "secret", [alice](const mtx::responses::Login &res, RequestErr err) {
                 ASSERT_FALSE(err);
@@ -219,7 +219,7 @@ TEST(ClientAPI, RealUserAvatar)
 
 TEST(ClientAPI, ChangeDisplayName)
 {
-        std::shared_ptr<Client> mtx_client = std::make_shared<Client>("localhost");
+        std::shared_ptr<Client> mtx_client = make_test_client();
 
         mtx_client->login(
           "alice", "secret", [mtx_client](const mtx::responses::Login &, RequestErr err) {
@@ -236,7 +236,7 @@ TEST(ClientAPI, ChangeDisplayName)
 
 TEST(ClientAPI, EmptyDisplayName)
 {
-        std::shared_ptr<Client> mtx_client = std::make_shared<Client>("localhost");
+        std::shared_ptr<Client> mtx_client = make_test_client();
 
         mtx_client->login(
           "alice", "secret", [mtx_client](const mtx::responses::Login &, RequestErr err) {
@@ -252,7 +252,7 @@ TEST(ClientAPI, EmptyDisplayName)
 
 TEST(ClientAPI, CreateRoom)
 {
-        std::shared_ptr<Client> mtx_client = std::make_shared<Client>("localhost");
+        std::shared_ptr<Client> mtx_client = make_test_client();
 
         mtx_client->login(
           "alice", "secret", [mtx_client](const mtx::responses::Login &, RequestErr err) {
@@ -276,7 +276,7 @@ TEST(ClientAPI, CreateRoom)
 
 TEST(ClientAPI, TagRoom)
 {
-        std::shared_ptr<Client> mtx_client = std::make_shared<Client>("localhost");
+        std::shared_ptr<Client> mtx_client = make_test_client();
 
         mtx_client->login(
           "alice", "secret", [mtx_client](const mtx::responses::Login &, RequestErr err) {
@@ -330,7 +330,7 @@ TEST(ClientAPI, TagRoom)
 
 TEST(ClientAPI, LogoutSuccess)
 {
-        std::shared_ptr<Client> mtx_client = std::make_shared<Client>("localhost");
+        std::shared_ptr<Client> mtx_client = make_test_client();
         std::string token;
 
         // Login and prove that login was successful by creating a room
@@ -373,7 +373,7 @@ TEST(ClientAPI, LogoutSuccess)
 
 TEST(ClientAPI, LogoutInvalidatesTokenOnServer)
 {
-        std::shared_ptr<Client> mtx_client = std::make_shared<Client>("localhost");
+        std::shared_ptr<Client> mtx_client = make_test_client();
         std::string token;
 
         // Login and prove that login was successful by creating a room
@@ -418,9 +418,9 @@ TEST(ClientAPI, LogoutInvalidatesTokenOnServer)
 
 TEST(ClientAPI, CreateRoomInvites)
 {
-        auto alice = std::make_shared<Client>("localhost");
-        auto bob   = std::make_shared<Client>("localhost");
-        auto carl  = std::make_shared<Client>("localhost");
+        auto alice = make_test_client();
+        auto bob   = make_test_client();
+        auto carl  = make_test_client();
 
         alice->login("alice", "secret", [alice](const mtx::responses::Login &, RequestErr err) {
                 check_error(err);
@@ -462,8 +462,8 @@ TEST(ClientAPI, CreateRoomInvites)
 
 TEST(ClientAPI, JoinRoom)
 {
-        auto alice = std::make_shared<Client>("localhost");
-        auto bob   = std::make_shared<Client>("localhost");
+        auto alice = make_test_client();
+        auto bob   = make_test_client();
 
         alice->login("alice", "secret", [alice](const mtx::responses::Login &, RequestErr err) {
                 check_error(err);
@@ -515,8 +515,8 @@ TEST(ClientAPI, JoinRoom)
 
 TEST(ClientAPI, LeaveRoom)
 {
-        auto alice = std::make_shared<Client>("localhost");
-        auto bob   = std::make_shared<Client>("localhost");
+        auto alice = make_test_client();
+        auto bob   = make_test_client();
 
         alice->login("alice", "secret", [alice](const mtx::responses::Login &, RequestErr err) {
                 check_error(err);
@@ -561,8 +561,8 @@ TEST(ClientAPI, LeaveRoom)
 
 TEST(ClientAPI, InviteRoom)
 {
-        auto alice = std::make_shared<Client>("localhost");
-        auto bob   = std::make_shared<Client>("localhost");
+        auto alice = make_test_client();
+        auto bob   = make_test_client();
 
         alice->login("alice", "secret", [alice](const mtx::responses::Login &, RequestErr err) {
                 check_error(err);
@@ -603,8 +603,8 @@ TEST(ClientAPI, InviteRoom)
 
 TEST(ClientAPI, KickRoom)
 {
-        auto alice = std::make_shared<Client>("localhost");
-        auto bob   = std::make_shared<Client>("localhost");
+        auto alice = make_test_client();
+        auto bob   = make_test_client();
 
         alice->login("alice", "secret", [alice](const mtx::responses::Login &, RequestErr err) {
                 check_error(err);
@@ -651,8 +651,8 @@ TEST(ClientAPI, KickRoom)
 
 TEST(ClientAPI, BanRoom)
 {
-        auto alice = std::make_shared<Client>("localhost");
-        auto bob   = std::make_shared<Client>("localhost");
+        auto alice = make_test_client();
+        auto bob   = make_test_client();
 
         alice->login("alice", "secret", [alice](const mtx::responses::Login &, RequestErr err) {
                 check_error(err);
@@ -709,8 +709,8 @@ TEST(ClientAPI, BanRoom)
 
 TEST(ClientAPI, InvalidInvite)
 {
-        auto alice = std::make_shared<Client>("localhost");
-        auto bob   = std::make_shared<Client>("localhost");
+        auto alice = make_test_client();
+        auto bob   = make_test_client();
 
         alice->login("alice", "secret", [alice](const mtx::responses::Login &, RequestErr err) {
                 check_error(err);
@@ -748,7 +748,7 @@ TEST(ClientAPI, InvalidInvite)
 
 TEST(ClientAPI, Sync)
 {
-        std::shared_ptr<Client> mtx_client = std::make_shared<Client>("localhost");
+        std::shared_ptr<Client> mtx_client = make_test_client();
 
         mtx_client->login(
           "alice", "secret", [mtx_client](const mtx::responses::Login &, RequestErr err) {
@@ -779,7 +779,7 @@ TEST(ClientAPI, Sync)
 
 TEST(ClientAPI, Versions)
 {
-        std::shared_ptr<Client> mtx_client = std::make_shared<Client>("localhost");
+        std::shared_ptr<Client> mtx_client = make_test_client();
 
         mtx_client->versions([](const mtx::responses::Versions &res, RequestErr err) {
                 check_error(err);
@@ -799,7 +799,7 @@ TEST(ClientAPI, Versions)
 
 TEST(ClientAPI, Typing)
 {
-        auto alice = std::make_shared<Client>("localhost");
+        auto alice = make_test_client();
 
         alice->login("alice", "secret", [](const mtx::responses::Login &, RequestErr err) {
                 check_error(err);
@@ -869,7 +869,7 @@ TEST(ClientAPI, Typing)
 
 TEST(ClientAPI, Presence)
 {
-        auto alice = std::make_shared<Client>("localhost");
+        auto alice = make_test_client();
 
         alice->login("alice", "secret", [](const mtx::responses::Login &, RequestErr err) {
                 check_error(err);
@@ -913,8 +913,8 @@ TEST(ClientAPI, Presence)
 
 TEST(ClientAPI, PresenceOverSync)
 {
-        auto alice = std::make_shared<Client>("localhost");
-        auto bob   = std::make_shared<Client>("localhost");
+        auto alice = make_test_client();
+        auto bob   = make_test_client();
 
         alice->login("alice", "secret", [](const mtx::responses::Login &, RequestErr err) {
                 check_error(err);
@@ -983,8 +983,8 @@ TEST(ClientAPI, PresenceOverSync)
 
 TEST(ClientAPI, SendMessages)
 {
-        auto alice = std::make_shared<Client>("localhost");
-        auto bob   = std::make_shared<Client>("localhost");
+        auto alice = make_test_client();
+        auto bob   = make_test_client();
 
         alice->login("alice", "secret", [alice](const mtx::responses::Login &, RequestErr err) {
                 check_error(err);
@@ -1064,7 +1064,7 @@ TEST(ClientAPI, SendMessages)
 
 TEST(ClientAPI, RedactEvent)
 {
-        auto alice = std::make_shared<Client>("localhost");
+        auto alice = make_test_client();
         alice->login("alice", "secret", check_login);
 
         while (alice->access_token().empty())
@@ -1099,8 +1099,8 @@ TEST(ClientAPI, RedactEvent)
 
 TEST(ClientAPI, SendStateEvents)
 {
-        auto alice = std::make_shared<Client>("localhost");
-        auto bob   = std::make_shared<Client>("localhost");
+        auto alice = make_test_client();
+        auto bob   = make_test_client();
 
         alice->login("alice", "secret", [alice](const mtx::responses::Login &, RequestErr err) {
                 check_error(err);
@@ -1181,7 +1181,7 @@ TEST(ClientAPI, SendStateEvents)
 
 TEST(ClientAPI, Pagination)
 {
-        auto alice = std::make_shared<Client>("localhost");
+        auto alice = make_test_client();
 
         alice->login("alice", "secret", [alice](const mtx::responses::Login &, RequestErr err) {
                 check_error(err);
@@ -1224,7 +1224,7 @@ TEST(ClientAPI, Pagination)
 
 TEST(ClientAPI, UploadFilter)
 {
-        auto alice = std::make_shared<Client>("localhost");
+        auto alice = make_test_client();
 
         alice->login("alice", "secret", [alice](const mtx::responses::Login &, RequestErr err) {
                 check_error(err);
@@ -1248,7 +1248,7 @@ TEST(ClientAPI, UploadFilter)
 
 TEST(ClientAPI, ReadMarkers)
 {
-        auto alice = std::make_shared<Client>("localhost");
+        auto alice = make_test_client();
 
         alice->login("alice", "secret", [alice](const mtx::responses::Login &, RequestErr err) {
                 check_error(err);
@@ -1308,8 +1308,8 @@ TEST(ClientAPI, ReadMarkers)
 
 TEST(ClientAPI, SendToDevice)
 {
-        auto alice = std::make_shared<Client>("localhost");
-        auto bob   = std::make_shared<Client>("localhost");
+        auto alice = make_test_client();
+        auto bob   = make_test_client();
 
         alice->login("alice", "secret", &check_login);
         bob->login("bob", "secret", &check_login);
@@ -1361,9 +1361,9 @@ TEST(ClientAPI, SendToDevice)
 
 TEST(ClientAPI, NewSendToDevice)
 {
-        auto alice = std::make_shared<Client>("localhost");
-        auto bob   = std::make_shared<Client>("localhost");
-        auto carl  = std::make_shared<Client>("localhost");
+        auto alice = make_test_client();
+        auto bob   = make_test_client();
+        auto carl  = make_test_client();
 
         alice->login("alice", "secret", &check_login);
         bob->login("bob", "secret", &check_login);
@@ -1420,7 +1420,7 @@ TEST(ClientAPI, NewSendToDevice)
 
 TEST(ClientAPI, RetrieveSingleEvent)
 {
-        auto bob = std::make_shared<Client>("localhost");
+        auto bob = make_test_client();
         bob->login("bob", "secret", check_login);
 
         while (bob->access_token().empty())
@@ -1472,7 +1472,7 @@ TEST(ClientAPI, RetrieveSingleEvent)
 
 TEST(Groups, Rooms)
 {
-        auto alice = std::make_shared<Client>("localhost");
+        auto alice = make_test_client();
         alice->login("alice", "secret", check_login);
 
         WAIT_UNTIL(!alice->access_token().empty())
@@ -1542,7 +1542,7 @@ TEST(Groups, Rooms)
 
 TEST(Groups, Profiles)
 {
-        auto alice = std::make_shared<Client>("localhost");
+        auto alice = make_test_client();
         alice->login("alice", "secret", check_login);
 
         WAIT_UNTIL(!alice->access_token().empty())
@@ -1579,8 +1579,8 @@ TEST(Groups, Profiles)
 TEST(ClientAPI, PublicRooms)
 {
         // Setup : Create a new (public) room with some settings
-        auto alice = std::make_shared<Client>("localhost");
-        auto bob   = std::make_shared<Client>("localhost");
+        auto alice = make_test_client();
+        auto bob   = make_test_client();
 
         alice->login("alice", "secret", [alice](const mtx::responses::Login &, RequestErr err) {
                 check_error(err);

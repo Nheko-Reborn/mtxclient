@@ -172,6 +172,8 @@ public:
 
         //! Wait for the client to close.
         void close(bool force = false);
+        //! Enable or disable certificate verification. On by default
+        void verify_certificates(bool enabled = true);
         //! Set the homeserver domain name.
         void set_user(const mtx::identifiers::User &user) { user_id_ = user; }
         //! Set the device ID.

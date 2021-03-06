@@ -11,6 +11,8 @@
 #include <mtx/responses.hpp>
 #include <mtxclient/http/client.hpp>
 
+#include "test_helpers.hpp"
+
 using namespace mtx::http;
 using namespace mtx::identifiers;
 
@@ -43,7 +45,7 @@ validate_upload(const mtx::responses::ContentURI &res, RequestErr err)
 
 TEST(MediaAPI, UploadTextFile)
 {
-        std::shared_ptr<Client> alice = std::make_shared<Client>("localhost");
+        std::shared_ptr<Client> alice = make_test_client();
 
         alice->login("alice", "secret", [alice](const mtx::responses::Login &, RequestErr err) {
                 ASSERT_FALSE(err);
@@ -77,7 +79,7 @@ TEST(MediaAPI, UploadTextFile)
 
 TEST(MediaAPI, UploadAudio)
 {
-        std::shared_ptr<Client> bob = std::make_shared<Client>("localhost");
+        std::shared_ptr<Client> bob = make_test_client();
 
         bob->login("bob", "secret", [bob](const mtx::responses::Login &, RequestErr err) {
                 ASSERT_FALSE(err);
@@ -108,7 +110,7 @@ TEST(MediaAPI, UploadAudio)
 
 TEST(MediaAPI, UploadImage)
 {
-        std::shared_ptr<Client> carl = std::make_shared<Client>("localhost");
+        std::shared_ptr<Client> carl = make_test_client();
 
         carl->login("carl", "secret", [carl](const mtx::responses::Login &, RequestErr err) {
                 ASSERT_FALSE(err);
@@ -154,7 +156,7 @@ TEST(MediaAPI, UploadImage)
 
 TEST(MediaAPI, UploadSVG)
 {
-        std::shared_ptr<Client> carl = std::make_shared<Client>("localhost");
+        std::shared_ptr<Client> carl = make_test_client();
 
         carl->login("carl", "secret", [carl](const mtx::responses::Login &, RequestErr err) {
                 ASSERT_FALSE(err);

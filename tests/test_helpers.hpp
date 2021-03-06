@@ -50,6 +50,15 @@ check_error(mtx::http::RequestErr err)
         ASSERT_FALSE(err);
 }
 
+inline auto
+make_test_client()
+{
+        const char *server = std::getenv("MTXCLIENT_SERVER");
+        auto client        = std::make_shared<mtx::http::Client>(server ? server : "localhost");
+        client->verify_certificates(false);
+        return client;
+}
+
 inline void
 check_login(const mtx::responses::Login &, mtx::http::RequestErr err)
 {
