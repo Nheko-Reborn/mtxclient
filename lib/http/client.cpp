@@ -28,9 +28,10 @@ using namespace boost::beast;
 namespace mtx::http {
 struct ClientPrivate
 {
-        boost::asio::io_service ios_;
+        boost::asio::io_context ioc_;
         //! Used to prevent the event loop from shutting down.
-        std::optional<boost::asio::io_context::work> work_{ios_};
+        boost::asio::executor_work_guard<boost::asio::io_context::executor_type> work_{
+          ioc_.get_executor()};
         //! Worker threads for the requests.
         boost::thread_group thread_group_;
         //! SSL context for requests.
@@ -56,7 +57,7 @@ Client::Client(const std::string &server, uint16_t port)
         p->ssl_ctx_.set_verify_callback(ssl::rfc2818_verification(server));
 
         for (unsigned int i = 0; i < threads_num; ++i)
-                p->thread_group_.add_thread(new boost::thread([this]() { p->ios_.run(); }));
+                p->thread_group_.add_thread(new boost::thread([this]() { p->ioc_.run(); }));
 }
 
 // call destuctor of work queue and ios first!
@@ -66,8 +67,8 @@ std::shared_ptr<Session>
 Client::create_session(TypeErasedCallback type_erased_cb)
 {
         auto session = std::make_shared<Session>(
-          std::ref(p->ios_),
-          std::ref(p->ssl_ctx_),
+          boost::asio::make_strand(p->ioc_),
+          p->ssl_ctx_,
           server_,
           port_,
           client::utils::random_token(),
@@ -247,7 +248,7 @@ Client::close(bool force)
         // We close all open connections.
         if (force) {
                 shutdown();
-                p->ios_.stop();
+                p->ioc_.stop();
         }
 
         // Destroy work object. This allows the I/O thread to
