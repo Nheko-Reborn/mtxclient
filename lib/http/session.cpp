@@ -6,7 +6,7 @@
 
 using namespace mtx::http;
 
-Session::Session(boost::asio::io_service &ios,
+Session::Session(boost::asio::strand<boost::asio::io_context::executor_type> ios,
                  boost::asio::ssl::context &ssl_ctx,
                  const std::string &host,
                  uint16_t port,
@@ -17,8 +17,8 @@ Session::Session(boost::asio::io_service &ios,
   // I don't know, if we need to use the same strand for both the socket and the resolver or if one
   // for each works as well. Taken from this example:
   // https://www.boost.org/doc/libs/1_71_0/libs/beast/example/http/client/async-ssl/http_client_async_ssl.cpp
-  : resolver_(boost::asio::make_strand(ios))
-  , socket(boost::asio::make_strand(ios), ssl_ctx)
+  : resolver_(ios)
+  , socket(ios, ssl_ctx)
   , host(std::move(host))
   , port{port}
   , id(std::move(id))
@@ -99,10 +99,12 @@ Session::shutdown()
 void
 Session::on_request_complete()
 {
-        if (is_shutting_down_)
-                return;
-
         boost::system::error_code ec(error_code);
+        if (is_shutting_down_) {
+                on_failure(id, ec);
+                return;
+        }
+
         on_success(id, parser.get(), ec);
 
         shutdown();
