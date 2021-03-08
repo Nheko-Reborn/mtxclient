@@ -99,10 +99,12 @@ Session::shutdown()
 void
 Session::on_request_complete()
 {
-        if (is_shutting_down_)
-                return;
-
         boost::system::error_code ec(error_code);
+        if (is_shutting_down_) {
+                on_failure(id, ec);
+                return;
+        }
+
         on_success(id, parser.get(), ec);
 
         shutdown();
