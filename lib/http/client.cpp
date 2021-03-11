@@ -1,3 +1,5 @@
+#include "mtxclient/http/asio_overrides.hpp"
+
 #include "mtxclient/http/client.hpp"
 #include "mtxclient/http/client_impl.hpp"
 

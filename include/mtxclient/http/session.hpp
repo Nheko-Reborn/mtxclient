@@ -5,6 +5,8 @@
 ///
 /// You usually don't need to include this as session handling is handled by the library for you.
 
+#include "mtxclient/http/asio_overrides.hpp"
+
 #include <boost/asio.hpp>
 #include <boost/asio/ssl.hpp>
 #include <boost/asio/strand.hpp>
