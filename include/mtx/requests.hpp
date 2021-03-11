@@ -254,5 +254,48 @@ struct KeySignaturesUpload
 
 void
 to_json(json &obj, const KeySignaturesUpload &req);
+
+struct PusherData {
+        //! Required if `kind` is http. The URL to use to send notifications to.
+        //! MUST be an HTTPS URL with a path of /_matrix/push/v1/notify.
+        std::string url;
+        //! The format to send notifications in to Push Gateways if the kind is http.
+        //! The details about what fields the homeserver should send to the push gateway are
+        //! defined in the Push Gateway Specification. Currently the only format available is
+        //! 'event_id_only'.
+        std::string format;
+};
+
+void
+to_json(json &obj, const PusherData &data);
+
+//! Request payload for the `POST /_matrix/client/r0/pushers/set` endpoint.
+struct SetPusher {
+        //! Required. Unique identifier for this pusher.
+        std::string pushkey;
+        //! Required. The kind of pusher to configure. "http" makes a pusher that sends HTTP pokes.
+        //! "email" makes a pusher that emails the user with unread notifications.
+        //! null deletes the pusher.
+        std::string kind;
+        //! Required. This is a reverse-DNS style identifier for the application.
+        //! If the `kind` is "email", this is "m.email".
+        std::string app_id;
+        //! Required. A string that will allow the user to identify what application owns this pusher.
+        std::string app_display_name;
+        //! Required. A string that will allow the user to identify what device owns this pusher.
+        std::string device_display_name;
+        //! Determines which set of device specific rules this pusher executes.
+        std::string profile_tag;
+        //! Required. The preferred language for receiving notifications.
+        std::string lang;
+        //! Required. Data for the pusher implementation (for example, if `kind` is `http`, includes
+        //! the URL to push to).
+        PusherData data;
+        //! If true, add another pusher instead of updating an existing one.
+        bool append = false;
+};
+
+void
+to_json(json &obj, const SetPusher &req);
 } // namespace requests
 } // namespace mtx

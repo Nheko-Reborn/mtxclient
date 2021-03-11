@@ -49,6 +49,8 @@ struct ClaimKeys;
 struct UploadKeys;
 struct PublicRoomVisibility;
 struct PublicRooms;
+struct PushersData;
+struct SetPushers;
 }
 namespace responses {
 struct AvatarUrl;
@@ -557,6 +559,10 @@ public:
 
         //! Gets any TURN server URIs and authentication credentials
         void get_turn_server(Callback<mtx::responses::TurnServer> cb);
+
+        //! Sets, updates, or deletes a pusher
+        void set_pusher(const mtx::requests::SetPusher &req,
+                        Callback<mtx::responses::Empty> cb);
 
 private:
         template<class Request, class Response>
