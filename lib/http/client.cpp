@@ -1266,6 +1266,12 @@ Client::get_turn_server(Callback<mtx::responses::TurnServer> cb)
                                              RequestErr err) { cb(res, err); });
 }
 
+void
+Client::set_pusher(const mtx::requests::SetPusher &req, Callback<mtx::responses::Empty> cb)
+{
+        post<mtx::requests::SetPusher, mtx::responses::Empty>("/client/r0/pushers/set", req, cb);
+}
+
 // Template instantiations for the various send functions
 
 #define MTXCLIENT_SEND_STATE_EVENT(Content)                                                        \
