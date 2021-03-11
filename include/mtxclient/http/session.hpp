@@ -7,6 +7,7 @@
 
 #include <boost/asio.hpp>
 #include <boost/asio/ssl.hpp>
+#include <boost/asio/strand.hpp>
 #include <boost/beast.hpp>
 
 #include <nlohmann/json.hpp>
@@ -33,7 +34,7 @@ using FailureCallback =
 //! Represents a context of a single request.
 struct Session : public std::enable_shared_from_this<Session>
 {
-        Session(boost::asio::io_service &ios,
+        Session(boost::asio::strand<boost::asio::io_context::executor_type> ios,
                 boost::asio::ssl::context &ssl_ctx,
                 const std::string &host,
                 uint16_t port,
