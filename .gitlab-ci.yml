@@ -27,21 +27,25 @@ stages:
   script:
     - mkdir -p /kaniko/.docker
     - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
-    - /kaniko/executor --whitelist-var-run=false --context $CI_PROJECT_DIR/.ci/synapse --dockerfile $CI_PROJECT_DIR/.ci/synapse/Dockerfile --destination $CI_REGISTRY_IMAGE/synapse:latest
+    - /kaniko/executor --whitelist-var-run=false --context $CI_PROJECT_DIR/.ci/synapse --dockerfile $CI_PROJECT_DIR/.ci/synapse/Dockerfile --destination $CI_REGISTRY_IMAGE/synapse-${CMAKE_ARCH}:latest
 
 build synapse amd64:
   extends: .build-synapse-image
   tags: [docker]
+  variables:
+    CMAKE_ARCH: x86_64
 
 build synapse arm64:
   extends: .build-synapse-image
   tags: [docker-arm64]
+  variables:
+    CMAKE_ARCH: aarch64
 
 .build-linux:
   stage: build
   image: ubuntu:16.04
   services:
-    - name: $CI_REGISTRY_IMAGE/synapse:latest
+    - name: $CI_REGISTRY_IMAGE/synapse-${CMAKE_ARCH}:latest
       alias: synapse
   variables:
     CXX: g++-8
@@ -54,7 +58,7 @@ build synapse arm64:
     - apt-get update && apt-get -y install --no-install-recommends ${CXX} ${CC} build-essential ninja-build libssl-dev git ccache curl
     # need recommended deps for wget
     - apt-get -y install wget
-    - wget https://github.com/Kitware/CMake/releases/download/v3.19.0/cmake-3.19.0-Linux-${CMAKE_ARCH}.sh && sh cmake-3.19.0-Linux-${CMAKE_ARCH}.sh  --skip-license  --prefix=/usr/local
+    - wget https://github.com/Kitware/CMake/releases/download/v3.19.6/cmake-3.19.6-Linux-${CMAKE_ARCH}.sh && sh cmake-3.19.6-Linux-${CMAKE_ARCH}.sh  --skip-license  --prefix=/usr/local
     - /usr/sbin/update-ccache-symlinks
     - update-alternatives --install /usr/bin/gcc gcc "/usr/bin/${CC}" 10
     - update-alternatives --install /usr/bin/g++ g++ "/usr/bin/${CXX}" 10
