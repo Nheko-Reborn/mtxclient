@@ -54,7 +54,7 @@ build synapse arm64:
     - apt-get update && apt-get -y install --no-install-recommends ${CXX} ${CC} build-essential ninja-build libssl-dev git ccache curl
     # need recommended deps for wget
     - apt-get -y install wget
-    - wget https://github.com/Kitware/CMake/releases/download/v3.19.0/cmake-3.19.0-Linux-x86_64.sh && sh cmake-3.19.0-Linux-x86_64.sh  --skip-license  --prefix=/usr/local
+    - wget https://github.com/Kitware/CMake/releases/download/v3.19.0/cmake-3.19.0-Linux-${CMAKE_ARCH}.sh && sh cmake-3.19.0-Linux-${CMAKE_ARCH}.sh  --skip-license  --prefix=/usr/local
     - /usr/sbin/update-ccache-symlinks
     - update-alternatives --install /usr/bin/gcc gcc "/usr/bin/${CC}" 10
     - update-alternatives --install /usr/bin/g++ g++ "/usr/bin/${CXX}" 10
@@ -89,10 +89,14 @@ build synapse arm64:
 build linux amd64:
   extends: .build-linux
   tags: [docker]
+  variables:
+    CMAKE_ARCH: x86_64
 
 build linux arm64:
   extends: .build-linux
   tags: [docker-arm64]
+  variables:
+    CMAKE_ARCH: aarch64
 
 build-macos:
   stage: build
