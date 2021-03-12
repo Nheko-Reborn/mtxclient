@@ -23,12 +23,13 @@ TEST(Basic, Connection)
 
 TEST(Basic, ServerWithPort)
 {
-        auto alice = std::make_shared<Client>("matrix.org");
+        std::string server = server_name();
+        auto alice         = std::make_shared<Client>("matrix.org");
         alice->verify_certificates(false);
-        alice->set_server("localhost:8448");
+        alice->set_server(server + ":8008");
 
-        EXPECT_EQ(alice->server(), "localhost");
-        EXPECT_EQ(alice->port(), 8448);
+        EXPECT_EQ(alice->server(), server);
+        EXPECT_EQ(alice->port(), 8008);
 
         alice->versions(
           [](const mtx::responses::Versions &, RequestErr err) { ASSERT_FALSE(err); });

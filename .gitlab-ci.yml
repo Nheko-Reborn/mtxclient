@@ -1,8 +1,150 @@
+variables:
+  CCACHE_COMPILERCHECK: content
+  CCACHE_DIR: "${CI_PROJECT_DIR}/.ccache"
+  # prevent configure tzdata hanging apt install commands
+  DEBIAN_FRONTEND: noninteractive
+
+include:
+  - template: 'Workflows/Branch-Pipelines.gitlab-ci.yml'
+
+stages:
+  - prepare
+  - build
+
+.build-synapse-image:
+  stage: prepare
+  image:
+    name: gcr.io/kaniko-project/executor:debug
+    entrypoint: [""]
+  rules:
+    - if: $CI_COMMIT_BRANCH
+      changes:
+        - .ci/synapse/Dockerfile
+        - .ci/synapse/setup-synapse.sh
+        - .ci/synapse/service/synapse/*
+        - .ci/synapse/service/postgresql/*
+        - .gitlab-ci.yml
+  script:
+    - mkdir -p /kaniko/.docker
+    - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
+    - /kaniko/executor --whitelist-var-run=false --context $CI_PROJECT_DIR/.ci/synapse --dockerfile $CI_PROJECT_DIR/.ci/synapse/Dockerfile --destination $CI_REGISTRY_IMAGE/synapse-${M_ARCH}:latest
+
+build synapse amd64:
+  extends: .build-synapse-image
+  tags: [docker]
+  variables:
+    M_ARCH: x86_64
+
+build synapse arm64:
+  extends: .build-synapse-image
+  tags: [docker-arm64]
+  variables:
+    M_ARCH: aarch64
+
+.build-linux:
+  stage: build
+  image: ubuntu:16.04
+  services:
+    - name: $CI_REGISTRY_IMAGE/synapse-${M_ARCH}:latest
+      alias: synapse
+  variables:
+    CXX: g++-8
+    CC: gcc-8
+    TRAVIS_OS_NAME: linux
+  before_script:
+    - apt-get update
+    - apt-get install -y software-properties-common
+    - add-apt-repository ppa:ubuntu-toolchain-r/test -y
+    - apt-get update && apt-get -y install --no-install-recommends ${CXX} ${CC} build-essential ninja-build libssl-dev git ccache curl
+    # need recommended deps for wget
+    - apt-get -y install wget
+    - wget https://github.com/Kitware/CMake/releases/download/v3.20.0-rc4/cmake-3.20.0-rc4-linux-${M_ARCH}.sh && sh cmake-3.20.0-rc4-linux-${M_ARCH}.sh  --skip-license  --prefix=/usr/local
+    - /usr/sbin/update-ccache-symlinks
+    - update-alternatives --install /usr/bin/gcc gcc "/usr/bin/${CC}" 10
+    - update-alternatives --install /usr/bin/g++ g++ "/usr/bin/${CXX}" 10
+    - update-alternatives --set gcc "/usr/bin/${CC}"
+    - update-alternatives --set g++ "/usr/bin/${CXX}"
+  script:
+    - curl -s -f -k https://synapse:8008/_matrix/client/versions
+    - export PATH="/usr/lib/ccache:${PATH}"
+    - export CMAKE_BUILD_PARALLEL_LEVEL=$(cat /proc/cpuinfo | awk '/^processor/{print $3}' | wc -l)
+    - export PATH="/usr/local/bin/:${PATH}"
+    - mkdir -p .deps/usr .hunter
+    - mkdir -p build
+    - cmake -GNinja -H. -Bbuild
+        -DCMAKE_INSTALL_PREFIX=.deps/usr
+        -DHUNTER_ROOT=".hunter"
+        -DHUNTER_ENABLED=ON -DBUILD_SHARED_LIBS=OFF
+        -DCMAKE_BUILD_TYPE=Release -DHUNTER_CONFIGURATION_TYPES=Debug
+        -DCI_BUILD=ON
+    - cmake --build build
+    - MTXCLIENT_SERVER=synapse GTEST_OUTPUT=xml:junit-output/ make test
+  cache:
+    key: "$CI_JOB_NAME"
+    paths:
+      - .hunter/
+      - .ccache
+  artifacts:
+    reports:
+      junit: build/junit-output/*.xml
+    paths: 
+      - build/junit-output/*.xml
+
+build linux amd64:
+  extends: .build-linux
+  tags: [docker]
+  variables:
+    M_ARCH: x86_64
+
+build linux arm64:
+  extends: .build-linux
+  tags: [docker-arm64]
+  variables:
+    M_ARCH: aarch64
+
+build-macos:
+  stage: build
+  tags: [macos]
+  needs: []
+  before_script:
+    - brew update
+    - brew reinstall --force python3
+    - brew bundle --file=./.ci/macos/Brewfile --force --cleanup
+  script:
+    - export PATH=/usr/local/opt/qt/bin/:${PATH}
+    - cmake -GNinja -H. -Bbuild
+        -DCMAKE_BUILD_TYPE=RelWithDebInfo
+        -DCMAKE_INSTALL_PREFIX=.deps/usr
+        -DHUNTER_ROOT=".hunter"
+        -DHUNTER_ENABLED=ON -DBUILD_SHARED_LIBS=OFF
+        -DCMAKE_BUILD_TYPE=RelWithDebInfo -DHUNTER_CONFIGURATION_TYPES=RelWithDebInfo
+        -DUSE_BUNDLED_OPENSSL=ON
+        -DUSE_BUNDLED_BOOST=ON
+        -DCI_BUILD=ON
+    - cmake --build build
+  cache:
+    key: "${CI_JOB_NAME}"
+    paths:
+      - .hunter/
+      - "${CCACHE_DIR}"
+
+linting:
+  stage: build
+  image: alpine:latest
+  tags: [docker]
+  needs: []
+  before_script:
+    - apk update && apk add clang make git
+  script:
+    - make lint
+
 test-pages:
+  stage: build
   tags: [docker]
   image: alpine
   except:
     - master
+  needs: []
   before_script:
     - apk update
     - apk add doxygen git texlive-full py3-jinja2 py3-pygments
@@ -15,10 +157,12 @@ test-pages:
       - public
   
 pages:
+  stage: build
   tags: [docker]
   image: alpine
   only:
     - master
+  needs: []
   before_script:
     - apk update
     - apk add doxygen git texlive-full py3-jinja2 py3-pygments
@@ -29,3 +173,4 @@ pages:
   artifacts:
     paths:
       - public
+

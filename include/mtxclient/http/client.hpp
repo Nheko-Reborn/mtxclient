@@ -561,8 +561,7 @@ public:
         void get_turn_server(Callback<mtx::responses::TurnServer> cb);
 
         //! Sets, updates, or deletes a pusher
-        void set_pusher(const mtx::requests::SetPusher &req,
-                        Callback<mtx::responses::Empty> cb);
+        void set_pusher(const mtx::requests::SetPusher &req, Callback<mtx::responses::Empty> cb);
 
 private:
         template<class Request, class Response>

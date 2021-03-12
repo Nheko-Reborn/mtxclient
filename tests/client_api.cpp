@@ -50,7 +50,7 @@ TEST(ClientAPI, Register)
                     "secret",
                     {err->matrix_error.unauthorized.session, mtx::user_interactive::auth::Dummy{}},
                     [username](const mtx::responses::Register &res, RequestErr err) {
-                            const auto user_id = "@" + username + ":localhost";
+                            const auto user_id = "@" + username + ":" + server_name();
 
                             check_error(err);
                             EXPECT_EQ(res.user_id.to_string(), user_id);
@@ -66,17 +66,17 @@ TEST(ClientAPI, LoginSuccess)
 
         mtx_client->login("alice", "secret", [](const mtx::responses::Login &res, RequestErr err) {
                 check_error(err);
-                validate_login("@alice:localhost", res);
+                validate_login("@alice:" + server_name(), res);
         });
 
         mtx_client->login("bob", "secret", [](const mtx::responses::Login &res, RequestErr err) {
                 check_error(err);
-                validate_login("@bob:localhost", res);
+                validate_login("@bob:" + server_name(), res);
         });
 
         mtx_client->login("carl", "secret", [](const mtx::responses::Login &res, RequestErr err) {
                 check_error(err);
-                validate_login("@carl:localhost", res);
+                validate_login("@carl:" + server_name(), res);
         });
 
         mtx_client->close();
@@ -268,7 +268,7 @@ TEST(ClientAPI, CreateRoom)
         mtx_client->create_room(req, [](const mtx::responses::CreateRoom &res, RequestErr err) {
                 check_error(err);
                 ASSERT_TRUE(res.room_id.localpart().size() > 10);
-                EXPECT_EQ(res.room_id.hostname(), "localhost");
+                EXPECT_EQ(res.room_id.hostname(), server_name());
         });
 
         mtx_client->close();
@@ -441,7 +441,7 @@ TEST(ClientAPI, CreateRoomInvites)
         mtx::requests::CreateRoom req;
         req.name   = "Name";
         req.topic  = "Topic";
-        req.invite = {"@bob:localhost", "@carl:localhost"};
+        req.invite = {"@bob:" + server_name(), "@carl:" + server_name()};
         alice->create_room(req, [bob, carl](const mtx::responses::CreateRoom &res, RequestErr err) {
                 check_error(err);
                 auto room_id = res.room_id.to_string();
@@ -483,7 +483,7 @@ TEST(ClientAPI, JoinRoom)
         mtx::requests::CreateRoom req;
         req.name            = "Name";
         req.topic           = "Topic";
-        req.invite          = {"@bob:localhost"};
+        req.invite          = {"@bob:" + server_name()};
         req.room_alias_name = alias;
         alice->create_room(
           req, [bob, alias](const mtx::responses::CreateRoom &res, RequestErr err) {
@@ -495,7 +495,7 @@ TEST(ClientAPI, JoinRoom)
                   });
 
                   using namespace mtx::identifiers;
-                  bob->join_room("!random_room_id:localhost",
+                  bob->join_room("!random_room_id:" + server_name(),
                                  [](const mtx::responses::RoomId &, RequestErr err) {
                                          ASSERT_TRUE(err);
                                          EXPECT_EQ(
@@ -505,7 +505,7 @@ TEST(ClientAPI, JoinRoom)
 
                   // Join the room using an alias.
                   bob->join_room(
-                    "#" + alias + ":localhost",
+                    "#" + alias + ":" + server_name(),
                     [](const mtx::responses::RoomId &, RequestErr err) { check_error(err); });
           });
 
@@ -532,7 +532,7 @@ TEST(ClientAPI, LeaveRoom)
         mtx::requests::CreateRoom req;
         req.name   = "Name";
         req.topic  = "Topic";
-        req.invite = {"@bob:localhost"};
+        req.invite = {"@bob:" + server_name()};
         alice->create_room(req, [bob](const mtx::responses::CreateRoom &res, RequestErr err) {
                 check_error(err);
                 auto room_id = res.room_id;
@@ -549,11 +549,12 @@ TEST(ClientAPI, LeaveRoom)
         });
 
         // Trying to leave a non-existent room should fail.
-        bob->leave_room("!random_room_id:localhost", [](mtx::responses::Empty, RequestErr err) {
-                ASSERT_TRUE(err);
-                EXPECT_EQ(mtx::errors::to_string(err->matrix_error.errcode), "M_UNKNOWN");
-                EXPECT_EQ(err->matrix_error.error, "Not a known room");
-        });
+        bob->leave_room(
+          "!random_room_id:" + server_name(), [](mtx::responses::Empty, RequestErr err) {
+                  ASSERT_TRUE(err);
+                  EXPECT_EQ(mtx::errors::to_string(err->matrix_error.errcode), "M_UNKNOWN");
+                  EXPECT_EQ(err->matrix_error.error, "Not a known room");
+          });
 
         alice->close();
         bob->close();
@@ -585,7 +586,7 @@ TEST(ClientAPI, InviteRoom)
                   auto room_id = res.room_id.to_string();
 
                   alice->invite_user(room_id,
-                                     "@bob:localhost",
+                                     "@bob:" + server_name(),
                                      [room_id, bob](const mtx::responses::Empty &, RequestErr err) {
                                              check_error(err);
 
@@ -628,7 +629,7 @@ TEST(ClientAPI, KickRoom)
 
                   alice->invite_user(
                     room_id,
-                    "@bob:localhost",
+                    "@bob:" + server_name(),
                     [room_id, alice, bob](const mtx::responses::Empty &, RequestErr err) {
                             check_error(err);
 
@@ -638,7 +639,7 @@ TEST(ClientAPI, KickRoom)
                                       check_error(err);
 
                                       alice->kick_user(room_id,
-                                                       "@bob:localhost",
+                                                       "@bob:" + server_name(),
                                                        [](const mtx::responses::Empty &,
                                                           RequestErr err) { check_error(err); });
                               });
@@ -676,7 +677,7 @@ TEST(ClientAPI, BanRoom)
 
                   alice->invite_user(
                     room_id,
-                    "@bob:localhost",
+                    "@bob:" + server_name(),
                     [room_id, alice, bob](const mtx::responses::Empty &, RequestErr err) {
                             check_error(err);
 
@@ -687,13 +688,13 @@ TEST(ClientAPI, BanRoom)
 
                                       alice->ban_user(
                                         room_id,
-                                        "@bob:localhost",
+                                        "@bob:" + server_name(),
                                         [alice, room_id](const mtx::responses::Empty &,
                                                          RequestErr err) {
                                                 check_error(err);
                                                 alice->unban_user(
                                                   room_id,
-                                                  "@bob:localhost",
+                                                  "@bob:" + server_name(),
                                                   [](const mtx::responses::Empty &,
                                                      RequestErr err) { check_error(err); },
                                                   "You not bad anymore!");
@@ -733,7 +734,7 @@ TEST(ClientAPI, InvalidInvite)
                   auto room_id = res.room_id.to_string();
 
                   bob->invite_user(room_id,
-                                   "@carl:localhost",
+                                   "@carl:" + server_name(),
                                    [room_id, bob](const mtx::responses::Empty &, RequestErr err) {
                                            ASSERT_TRUE(err);
                                            EXPECT_EQ(
@@ -836,7 +837,7 @@ TEST(ClientAPI, Typing)
                                       mtx::events::EphemeralEvent<mtx::events::ephemeral::Typing>>(
                                       room.ephemeral.events.front())
                                       .content.user_ids.front(),
-                                    "@alice:localhost");
+                                    "@alice:" + server_name());
                           });
 
                         while (!can_continue)
@@ -926,7 +927,7 @@ TEST(ClientAPI, PresenceOverSync)
                 sleep();
 
         mtx::requests::CreateRoom req;
-        req.invite = {"@bob:localhost"};
+        req.invite = {"@bob:" + server_name()};
         alice->create_room(
           req, [alice, bob](const mtx::responses::CreateRoom &res, RequestErr err) {
                   check_error(err);
@@ -960,7 +961,7 @@ TEST(ClientAPI, PresenceOverSync)
                                                           bool found = false;
                                                           for (const auto &p : s.presence) {
                                                                   if (p.sender ==
-                                                                      "@alice:localhost") {
+                                                                      "@alice:" + server_name()) {
                                                                           found = true;
                                                                           EXPECT_EQ(
                                                                             p.content.presence,
@@ -998,7 +999,7 @@ TEST(ClientAPI, SendMessages)
                 sleep();
 
         mtx::requests::CreateRoom req;
-        req.invite = {"@bob:localhost"};
+        req.invite = {"@bob:" + server_name()};
         alice->create_room(
           req, [alice, bob](const mtx::responses::CreateRoom &res, RequestErr err) {
                   check_error(err);
@@ -1114,7 +1115,7 @@ TEST(ClientAPI, SendStateEvents)
                 sleep();
 
         mtx::requests::CreateRoom req;
-        req.invite = {"@bob:localhost"};
+        req.invite = {"@bob:" + server_name()};
         alice->create_room(
           req, [alice, bob](const mtx::responses::CreateRoom &res, RequestErr err) {
                   check_error(err);
@@ -1299,7 +1300,7 @@ TEST(ClientAPI, ReadMarkers)
                               receipts.front())
                               .content.receipts[event_id];
                           EXPECT_EQ(users.users.size(), 1);
-                          ASSERT_TRUE(users.users["@alice:localhost"].ts > 0);
+                          ASSERT_TRUE(users.users["@alice:" + server_name()].ts > 0);
                   });
         });
 
@@ -1351,7 +1352,7 @@ TEST(ClientAPI, SendToDevice)
                         EXPECT_EQ(event.content.request_id, "test_request_id");
                         EXPECT_EQ(event.content.requesting_device_id, "test_req_id");
                         EXPECT_EQ(event.type, mtx::events::EventType::RoomKeyRequest);
-                        EXPECT_EQ(event.sender, "@alice:localhost");
+                        EXPECT_EQ(event.sender, "@alice:" + server_name());
                 });
         });
 
@@ -1452,13 +1453,13 @@ TEST(ClientAPI, RetrieveSingleEvent)
                                     auto e =
                                       std::get<mtx::events::RoomEvent<mtx::events::msg::Text>>(res);
                                     EXPECT_EQ(e.content.body, "Hello Alice!");
-                                    EXPECT_EQ(e.sender, "@bob:localhost");
+                                    EXPECT_EQ(e.sender, "@bob:" + server_name());
                                     EXPECT_EQ(e.event_id, event_id);
                             });
 
                           bob->get_event(
                             room_id,
-                            "$random_event:localhost",
+                            "$random_event:" + server_name(),
                             [event_id = res.event_id.to_string()](
                               const mtx::events::collections::TimelineEvents &, RequestErr err) {
                                     ASSERT_TRUE(err);
@@ -1516,21 +1517,21 @@ TEST(Groups, Rooms)
 
                   WAIT_UNTIL(rooms_added == 2)
 
-                  alice->joined_groups(
-                    [random_group_id](const mtx::responses::JoinedGroups &res, RequestErr err) {
-                            check_error(err);
+                  alice->joined_groups([random_group_id](const mtx::responses::JoinedGroups &res,
+                                                         RequestErr err) {
+                          check_error(err);
 
-                            ASSERT_GE(res.groups.size(), 1);
+                          ASSERT_GE(res.groups.size(), 1);
 
-                            for (const auto &g : res.groups) {
-                                    if (g == std::string("+" + random_group_id + ":localhost"))
-                                            return;
-                            }
+                          for (const auto &g : res.groups) {
+                                  if (g == std::string("+" + random_group_id + ":" + server_name()))
+                                          return;
+                          }
 
-                            FAIL();
-                    });
+                          FAIL();
+                  });
 
-                  alice->group_rooms("+" + random_group_id + ":localhost",
+                  alice->group_rooms("+" + random_group_id + ":" + server_name(),
                                      [](const nlohmann::json &res, RequestErr err) {
                                              check_error(err);
                                              EXPECT_GE(res.at("chunk").size(), 2);
@@ -1558,13 +1559,13 @@ TEST(Groups, Profiles)
                   json profile;
                   profile["name"] = "Name";
                   alice->set_group_profile(
-                    "+" + random_group_id + ":localhost",
+                    "+" + random_group_id + ":" + server_name(),
                     profile,
                     [alice, random_group_id](const nlohmann::json &, RequestErr err) {
                             check_error(err);
 
                             alice->group_profile(
-                              "+" + random_group_id + ":localhost",
+                              "+" + random_group_id + ":" + server_name(),
                               [](const mtx::responses::GroupProfile &res, RequestErr err) {
                                       check_error(err);
                                       EXPECT_EQ(res.name, "Name");
@@ -1597,7 +1598,7 @@ TEST(ClientAPI, PublicRooms)
         req.name            = "Public Room";
         req.topic           = "Test";
         req.visibility      = mtx::common::RoomVisibility::Public;
-        req.invite          = {"@bob:localhost"};
+        req.invite          = {"@bob:" + server_name()};
         req.room_alias_name = alice->generate_txn_id();
         req.preset          = Preset::PublicChat;
 
@@ -1695,13 +1696,13 @@ TEST(ClientAPI, PublicRooms)
                                                                               check_error(err);
                                                                       });
                                                             },
-                                                            "localhost",
+                                                            server_name(),
                                                             1);
                                                   },
-                                                  "localhost",
+                                                  server_name(),
                                                   1);
                                         },
-                                        "localhost");
+                                        server_name());
                               });
                     });
           });

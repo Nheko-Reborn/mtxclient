@@ -187,7 +187,6 @@ to_json(json &obj, const KeySignaturesUpload &req)
                           std::visit([](const auto &e) { return json(e); }, keyVar);
 }
 
-
 void
 to_json(json &obj, const PusherData &data)
 {
@@ -202,16 +201,16 @@ to_json(json &obj, const PusherData &data)
 void
 to_json(json &obj, const SetPusher &req)
 {
-        obj["pushkey"] = req.pushkey;
-        obj["kind"] = req.kind;
-        obj["app_id"] = req.app_id;
-        obj["app_display_name"] = req.app_display_name;
+        obj["pushkey"]             = req.pushkey;
+        obj["kind"]                = req.kind;
+        obj["app_id"]              = req.app_id;
+        obj["app_display_name"]    = req.app_display_name;
         obj["device_display_name"] = req.device_display_name;
         if (!req.profile_tag.empty()) {
                 obj["profile_tag"] = req.profile_tag;
         }
-        obj["lang"] = req.lang;
-        obj["data"] = req.data;
+        obj["lang"]   = req.lang;
+        obj["data"]   = req.data;
         obj["append"] = req.append;
 }
 

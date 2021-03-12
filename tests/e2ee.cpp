@@ -551,7 +551,7 @@ TEST(Encryption, EnableEncryption)
         mtx::identifiers::Room joined_room;
 
         mtx::requests::CreateRoom req;
-        req.invite = {"@carl:localhost"};
+        req.invite = {"@carl:" + server_name()};
         bob->create_room(
           req,
           [bob, carl, &responses, &joined_room](const mtx::responses::CreateRoom &res,
@@ -852,7 +852,7 @@ TEST(Encryption, OlmRoomKeyEncryption)
         auto out_session = alice_olm->create_outbound_session(bob_curve25519, bob_otk);
         auto device_msg  = alice_olm->create_olm_encrypted_content(out_session.get(),
                                                                   payload,
-                                                                  UserId("@bob:localhost"),
+                                                                  UserId("@bob:" + server_name()),
                                                                   bob_olm->identity_keys().ed25519,
                                                                   bob_curve25519);
 
@@ -1039,7 +1039,7 @@ TEST(Encryption, ShareSecret)
                           auto device_msg = alice_olm->create_olm_encrypted_content(
                             out_session.get(),
                             payload,
-                            UserId("@bob:localhost"),
+                            UserId("@bob:" + server_name()),
                             bob_olm->identity_keys().ed25519,
                             bob_curve25519);
 

@@ -1,0 +1,3 @@
+#!/bin/sh
+
+exec chpst -u postgres:postgres /usr/lib/postgresql/11/bin/postgres -D '/data2/db' 2>&1
