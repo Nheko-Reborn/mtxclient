@@ -11,9 +11,8 @@ stages:
   - prepare
   - build
 
-build:
+.build-synapse-image:
   stage: prepare
-  tags: [docker]
   image:
     name: gcr.io/kaniko-project/executor:debug
     entrypoint: [""]
@@ -24,15 +23,23 @@ build:
         - .ci/synapse/setup-synapse.sh
         - .ci/synapse/service/synapse/*
         - .ci/synapse/service/postgresql/*
+        - .gitlab-ci.yml
   script:
     - mkdir -p /kaniko/.docker
     - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
     - /kaniko/executor --whitelist-var-run=false --context $CI_PROJECT_DIR/.ci/synapse --dockerfile $CI_PROJECT_DIR/.ci/synapse/Dockerfile --destination $CI_REGISTRY_IMAGE/synapse:latest
 
-build-gcc7:
+build synapse amd64:
+  extends: .build-synapse-image
+  tags: [docker]
+
+build synapse arm64:
+  extends: .build-synapse-image
+  tags: [docker-arm64]
+
+.build-linux:
   stage: build
   image: ubuntu:16.04
-  tags: [docker]
   services:
     - name: $CI_REGISTRY_IMAGE/synapse:latest
       alias: synapse
@@ -78,6 +85,14 @@ build-gcc7:
       junit: build/junit-output/*.xml
     paths: 
       - build/junit-output/*.xml
+
+build linux amd64:
+  extends: .build-linux
+  tags: [docker]
+
+build linux arm64:
+  extends: .build-linux
+  tags: [docker-arm64]
 
 build-macos:
   stage: build
