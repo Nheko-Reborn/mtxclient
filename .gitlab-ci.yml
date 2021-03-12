@@ -58,7 +58,7 @@ build synapse arm64:
     - apt-get update && apt-get -y install --no-install-recommends ${CXX} ${CC} build-essential ninja-build libssl-dev git ccache curl
     # need recommended deps for wget
     - apt-get -y install wget
-    - wget https://github.com/Kitware/CMake/releases/download/v3.19.3/cmake-3.19.3-Linux-${M_ARCH}.sh && sh cmake-3.19.3-Linux-${M_ARCH}.sh  --skip-license  --prefix=/usr/local
+    - wget https://github.com/Kitware/CMake/releases/download/v3.20.0-rc4/cmake-3.20.0-rc4-linux-${M_ARCH}.sh && sh cmake-3.20.0-rc4-linux-${M_ARCH}.sh  --skip-license  --prefix=/usr/local
     - /usr/sbin/update-ccache-symlinks
     - update-alternatives --install /usr/bin/gcc gcc "/usr/bin/${CC}" 10
     - update-alternatives --install /usr/bin/g++ g++ "/usr/bin/${CXX}" 10
