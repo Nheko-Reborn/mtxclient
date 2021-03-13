@@ -24,6 +24,44 @@
 #include "mtx/requests.hpp"
 #include "mtx/responses.hpp"
 
+#ifdef WIN32
+#include <openssl/x509.h>
+#include <wincrypt.h>
+
+void
+load_windows_certificates(boost::asio::ssl::context &ssl_ctx_)
+{
+        HCERTSTORE store = CertOpenSystemStoreA(NULL, "ROOT");
+        if (!store)
+                return;
+
+        PCCERT_CONTEXT ctx = nullptr;
+
+        // server authentication usage, see http://www.oid-info.com/get/1.3.6.1.5.5.7.3.1
+        char *usages[] = {szOID_PKIX_KP_SERVER_AUTH};
+        CERT_ENHKEY_USAGE filter{std::size(usages), usages};
+        while (ctx = CertFindCertificateInStore(store,
+                                                X509_ASN_ENCODING,
+                                                CERT_FIND_OPTIONAL_ENHKEY_USAGE_FLAG,
+                                                CERT_FIND_ENHKEY_USAGE,
+                                                &filter,
+                                                ctx)) {
+                if (!(ctx->dwCertEncodingType & X509_ASN_ENCODING))
+                        continue;
+
+                const unsigned char *encodedCert = ctx->pbCertEncoded;
+                X509 *x509 = d2i_X509(nullptr, &encodedCert, ctx->cbCertEncoded);
+                if (x509) {
+                        if (1 == X509_STORE_add_cert(
+                                   SSL_CTX_get_cert_store(ssl_ctx_.native_handle()), x509)) {
+                        }
+                        X509_free(x509);
+                }
+        }
+        CertCloseStore(store, 0);
+}
+#endif
+
 using namespace mtx::http;
 using namespace boost::beast;
 
@@ -54,7 +92,12 @@ Client::Client(const std::string &server, uint16_t port)
         using boost::asio::ssl::context;
         p->ssl_ctx_.set_options(context::default_workarounds | context::no_sslv2 |
                                 context::no_sslv3 | context::no_tlsv1 | context::no_tlsv1_1);
+#ifdef WIN32
+        load_windows_certificates(p->ssl_ctx_);
+#else
         p->ssl_ctx_.set_default_verify_paths();
+#endif
+
         verify_certificates(true);
         p->ssl_ctx_.set_verify_callback(ssl::rfc2818_verification(server));
 
