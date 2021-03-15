@@ -23,10 +23,10 @@ struct Encryption
         std::string algorithm = "m.megolm.v1.aes-sha2";
         //! How long the session should be used before changing it. 604800000 (a week) is the
         //! recommended default.
-        int rotation_period_ms = 604800000;
+        uint64_t rotation_period_ms = 604800000;
         //! How many messages should be sent before changing the session. 100 is the recommended
         //! default.
-        int rotation_period_msgs = 100;
+        uint64_t rotation_period_msgs = 100;
 };
 
 void
