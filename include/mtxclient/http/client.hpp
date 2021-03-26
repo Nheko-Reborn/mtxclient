@@ -22,6 +22,9 @@
 #include "mtxclient/utils.hpp"       // for random_token, url_encode, des...
 // #include "mtx/common.hpp"
 
+#if __APPLE__
+#include <boost/asio/ssl.hpp>
+#endif 
 #include <boost/beast/http/fields.hpp> // for fields
 #include <boost/beast/http/status.hpp> // for status
 #include <boost/system/error_code.hpp> // for error_code
@@ -164,6 +167,12 @@ struct ThumbOpts
 
 struct ClientPrivate;
 struct Session;
+
+#if __APPLE__
+bool handle_cert_verification(const std::string &server, bool preverified, boost::asio::ssl::verify_context &ctx);
+bool verify_cert_chain(boost::asio::ssl::verify_context &ctx, const std::string &hostName);
+bool verify_X509_cert_chain(const std::vector<std::string>& certChain, const std::string& hostName);
+#endif
 
 //! The main object that the user will interact.
 class Client : public std::enable_shared_from_this<Client>
