@@ -1,6 +1,6 @@
-#include "mtxclient/http/asio_overrides.hpp"
-
 #include "mtxclient/http/client.hpp"
+#include "mtx/log.hpp"
+#include "mtxclient/http/asio_overrides.hpp"
 #include "mtxclient/http/client_impl.hpp"
 
 #if defined(__APPLE__)
@@ -11,7 +11,6 @@
 #include <Security/SecTrust.h>
 #endif
 
-#include <iostream>
 #include <mutex>
 #include <thread>
 
@@ -129,7 +128,7 @@ private:
         T value;
 };
 
-bool
+void
 import_apple_keychain(boost::asio::ssl::context &ssl_ctx_)
 {
         cf_ref<CFArrayRef> result;
@@ -137,37 +136,36 @@ import_apple_keychain(boost::asio::ssl::context &ssl_ctx_)
 
         // Copy macOS root certificates into CFArray
         if ((osStatus = SecTrustCopyAnchorCertificates(&result.get())) != 0) {
-                std::cerr << "Error enumerating macOS certificates: " << std::endl;
-                return false;
+                mtx::utils::log::log_error("Error enumerating macOS certificates.");
+                return;
         }
 
         for (CFIndex i = 0; i < CFArrayGetCount(result.get()); i++) {
                 SecCertificateRef cert = (SecCertificateRef)CFArrayGetValueAtIndex(result.get(), i);
                 cf_ref<CFDataRef> rawDataRef = SecCertificateCopyData(cert);
                 if (rawDataRef.get() == nullptr) {
-                        std::cerr << "Error enumerating macOS certificates: " << std::endl;
-                        return false;
+                        mtx::utils::log::log_error("Error enumerating macOS certificate");
+                        continue;
                 }
                 const uint8_t *rawDataPtr = CFDataGetBytePtr(rawDataRef.get());
 
                 // Parse an openssl X509 object from each returned certificate
-                X509 *x509Cert = d2i_X509(NULL, &rawDataPtr, CFDataGetLength(rawDataRef.get()));
+                X509 *x509Cert = d2i_X509(nullptr, &rawDataPtr, CFDataGetLength(rawDataRef.get()));
                 if (!x509Cert) {
-                        std::cerr << "Error parsing X509 Certificate from system keychain"
-                                  << std::endl;
-                        return false;
+                        auto errMsg = std::string(ERR_reason_error_string(ERR_peek_last_error()));
+                        mtx::utils::log::log_error(
+                          "Error parsing X509 Certificate from system keychain: " + errMsg);
+                        continue;
                 }
                 // Add the parsed X509 object to the X509_STORE verification store
                 const auto addStatus =
                   X509_STORE_add_cert(SSL_CTX_get_cert_store(ssl_ctx_.native_handle()), x509Cert);
                 X509_free(x509Cert);
                 if (addStatus != 1) {
-                        std::cerr << "Error loading system certificate into OpenSSL" << std::endl;
-                        return false;
+                        mtx::utils::log::log_error("Error loading system certificate into OpenSSL");
+                        continue;
                 }
         }
-
-        return true;
 }
 #endif
 
@@ -184,7 +182,7 @@ Client::Client(const std::string &server, uint16_t port)
         using boost::asio::ssl::context;
         p->ssl_ctx_.set_options(context::default_workarounds | context::no_sslv2 |
                                 context::no_sslv3 | context::no_tlsv1 | context::no_tlsv1_1);
-#if WIN32
+#ifdef WIN32
         load_windows_certificates(p->ssl_ctx_);
 #elif __APPLE__
         import_apple_keychain(p->ssl_ctx_);

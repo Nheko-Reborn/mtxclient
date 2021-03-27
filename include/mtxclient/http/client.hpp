@@ -168,11 +168,6 @@ struct ThumbOpts
 struct ClientPrivate;
 struct Session;
 
-#if __APPLE__
-bool
-import_apple_keychain(boost::asio::ssl::context &ssl_ctx_);
-#endif
-
 //! The main object that the user will interact.
 class Client : public std::enable_shared_from_this<Client>
 {
