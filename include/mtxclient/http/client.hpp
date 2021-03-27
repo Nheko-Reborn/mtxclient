@@ -22,9 +22,6 @@
 #include "mtxclient/utils.hpp"       // for random_token, url_encode, des...
 // #include "mtx/common.hpp"
 
-#if __APPLE__
-#include <boost/asio/ssl.hpp>
-#endif
 #include <boost/beast/http/fields.hpp> // for fields
 #include <boost/beast/http/status.hpp> // for status
 #include <boost/system/error_code.hpp> // for error_code

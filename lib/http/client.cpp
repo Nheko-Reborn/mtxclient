@@ -1,6 +1,7 @@
-#include "mtxclient/http/client.hpp"
-#include "mtx/log.hpp"
 #include "mtxclient/http/asio_overrides.hpp"
+
+#include "mtx/log.hpp"
+#include "mtxclient/http/client.hpp"
 #include "mtxclient/http/client_impl.hpp"
 
 #if defined(__APPLE__)
