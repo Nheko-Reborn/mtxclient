@@ -24,7 +24,7 @@
 
 #if __APPLE__
 #include <boost/asio/ssl.hpp>
-#endif 
+#endif
 #include <boost/beast/http/fields.hpp> // for fields
 #include <boost/beast/http/status.hpp> // for status
 #include <boost/system/error_code.hpp> // for error_code
@@ -169,9 +169,8 @@ struct ClientPrivate;
 struct Session;
 
 #if __APPLE__
-bool handle_cert_verification(const std::string &server, bool preverified, boost::asio::ssl::verify_context &ctx);
-bool verify_cert_chain(boost::asio::ssl::verify_context &ctx, const std::string &hostName);
-bool verify_X509_cert_chain(const std::vector<std::string>& certChain, const std::string& hostName);
+bool
+import_apple_keychain(boost::asio::ssl::context &ssl_ctx_);
 #endif
 
 //! The main object that the user will interact.
