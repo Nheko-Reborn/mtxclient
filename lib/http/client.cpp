@@ -11,14 +11,13 @@
 #include <Security/SecTrust.h>
 #endif
 
+#include <iostream>
 #include <mutex>
 #include <thread>
-#include <iostream>
 
 #include <nlohmann/json.hpp>
 
 #include <boost/algorithm/string.hpp>
-#include <boost/utility/typed_in_place_factory.hpp>
 #include <boost/asio/ssl.hpp>
 #include <boost/asio/ssl/context.hpp>
 #include <boost/beast/http/message.hpp>
@@ -26,6 +25,7 @@
 #include <boost/signals2/signal.hpp>
 #include <boost/signals2/signal_type.hpp>
 #include <boost/thread/thread.hpp>
+#include <boost/utility/typed_in_place_factory.hpp>
 
 #include "mtxclient/http/session.hpp"
 #include "mtxclient/utils.hpp"
@@ -90,154 +90,84 @@ struct ClientPrivate
 };
 
 #if defined(__APPLE__)
-// This whole if defined section is basically taken verbatim from MS cpprestsdk:
-// https://github.com/microsoft/cpprestsdk
-// It will be changed once the correct fixes are identified (I just want it to work first...)
-bool
-handle_cert_verification(const std::string &server, bool preverified, boost::asio::ssl::verify_context &ctx)
-{
-        std::cout << "Handling Cert Verification for " << server << std::endl;
-        std::cout << "preverified: " << std::to_string(preverified) << std::endl;
-        if (!preverified)
-        {
-                return false;
-        }
 
-        return verify_cert_chain(ctx, server);
-}
+// cf_ref RAII code taken from Microsoft cpprestsdk (MIT licensed):
+// https://github.com/microsoft/cpprestsdk/blob/7fbb08c491f9c8888cc0f3d86962acb3af672772/Release/src/http/client/x509_cert_utilities.cpp#L290
 
-bool
-verify_cert_chain(boost::asio::ssl::verify_context &verifyCtx, const std::string &hostName)
-{
-        X509_STORE_CTX *storeContext = verifyCtx.native_handle();
-        int currentDepth             = X509_STORE_CTX_get_error_depth(storeContext);
-        if (currentDepth != 0) {
-                return true;
-        }
-
-#if (OPENSSL_VERSION_NUMBER < 0x10100000L)
-        STACK_OF(X509) *certStack = X509_STORE_CTX_get_chain(storeContext);
-#else
-        STACK_OF(X509) *certStack = X509_STORE_CTX_get0_chain(storeContext);
-#endif
-
-        const int numCerts = sk_X509_num(certStack);
-        if (numCerts < 0) {
-                std::cout << "numCerts == 0!" << std::endl;
-                return false;
-        }
-
-        std::vector<std::string> certChain;
-        certChain.reserve(numCerts);
-        for (int i = 0; i < numCerts; ++i) {
-                X509 *cert = sk_X509_value(certStack, i);
-
-                // Encode into DER format into raw memory.
-                int len = i2d_X509(cert, nullptr);
-                if (len < 0) {
-                        return false;
-                }
-
-                std::string certData;
-                certData.resize(len);
-                unsigned char *buffer = reinterpret_cast<unsigned char *>(&certData[0]);
-                len                   = i2d_X509(cert, &buffer);
-                if (len < 0) {
-                        return false;
-                }
-
-                certChain.push_back(std::move(certData));
-        }
-
-        auto verify_result = verify_X509_cert_chain(certChain, hostName);
-
-        return verify_result;
-}
 // Simple RAII pattern wrapper to perform CFRelease on objects.
 template<typename T>
 class cf_ref
 {
 public:
-    cf_ref(T v) : value(v)
-    {
-        static_assert(sizeof(cf_ref<T>) == sizeof(T), "Code assumes just a wrapper, see usage in CFArrayCreate below.");
-    }
-    cf_ref() : value(nullptr) {}
-    cf_ref(cf_ref&& other) : value(other.value) { other.value = nullptr; }
-
-    ~cf_ref()
-    {
-        if (value != nullptr)
+        cf_ref(T v)
+          : value(v)
         {
-            CFRelease(value);
+                static_assert(sizeof(cf_ref<T>) == sizeof(T),
+                              "Code assumes just a wrapper, see usage in CFArrayCreate below.");
         }
-    }
+        cf_ref()
+          : value(nullptr)
+        {}
+        cf_ref(cf_ref &&other)
+          : value(other.value)
+        {
+                other.value = nullptr;
+        }
 
-    T& get() { return value; }
+        ~cf_ref()
+        {
+                if (value != nullptr) {
+                        CFRelease(value);
+                }
+        }
+
+        T &get() { return value; }
 
 private:
-    cf_ref(const cf_ref&);
-    cf_ref& operator=(const cf_ref&);
-    T value;
+        cf_ref(const cf_ref &);
+        cf_ref &operator=(const cf_ref &);
+        T value;
 };
 
-bool verify_X509_cert_chain(const std::vector<std::string>& certChain, const std::string& hostName)
+bool
+import_apple_keychain(boost::asio::ssl::context &ssl_ctx_)
 {
-    // Build up CFArrayRef with all the certificates.
-    // All this code is basically just to get into the correct structures for the Apple APIs.
-    // Copies are avoided whenever possible.
-    std::vector<cf_ref<SecCertificateRef>> certs;
-    for (const auto& certBuf : certChain)
-    {
-        cf_ref<CFDataRef> certDataRef =
-            CFDataCreateWithBytesNoCopy(kCFAllocatorDefault,
-                                        reinterpret_cast<const unsigned char*>(certBuf.c_str()),
-                                        certBuf.size(),
-                                        kCFAllocatorNull);
-        if (certDataRef.get() == nullptr)
-        {
-                std::cout << "certDataRef is null!" << std::endl;
-            return false;
+        cf_ref<CFArrayRef> result;
+        OSStatus osStatus;
+
+        // Copy macOS root certificates into CFArray
+        if ((osStatus = SecTrustCopyAnchorCertificates(&result.get())) != 0) {
+                std::cerr << "Error enumerating macOS certificates: " << std::endl;
+                return false;
         }
 
-        cf_ref<SecCertificateRef> certObj = SecCertificateCreateWithData(nullptr, certDataRef.get());
-        if (certObj.get() == nullptr)
-        {
-                std::cout << "certObj is null!" << std::endl;
-            return false;
+        for (CFIndex i = 0; i < CFArrayGetCount(result.get()); i++) {
+                SecCertificateRef cert = (SecCertificateRef)CFArrayGetValueAtIndex(result.get(), i);
+                cf_ref<CFDataRef> rawDataRef = SecCertificateCopyData(cert);
+                if (rawDataRef.get() == nullptr) {
+                        std::cerr << "Error enumerating macOS certificates: " << std::endl;
+                        return false;
+                }
+                const uint8_t *rawDataPtr = CFDataGetBytePtr(rawDataRef.get());
+
+                // Parse an openssl X509 object from each returned certificate
+                X509 *x509Cert = d2i_X509(NULL, &rawDataPtr, CFDataGetLength(rawDataRef.get()));
+                if (!x509Cert) {
+                        std::cerr << "Error parsing X509 Certificate from system keychain"
+                                  << std::endl;
+                        return false;
+                }
+                // Add the parsed X509 object to the X509_STORE verification store
+                const auto addStatus =
+                  X509_STORE_add_cert(SSL_CTX_get_cert_store(ssl_ctx_.native_handle()), x509Cert);
+                X509_free(x509Cert);
+                if (addStatus != 1) {
+                        std::cerr << "Error loading system certificate into OpenSSL" << std::endl;
+                        return false;
+                }
         }
-        certs.push_back(std::move(certObj));
-    }
-    cf_ref<CFArrayRef> certsArray = CFArrayCreate(
-        kCFAllocatorDefault, const_cast<const void**>(reinterpret_cast<void**>(&certs[0])), certs.size(), nullptr);
-    if (certsArray.get() == nullptr)
-    {
-            std::cout << "certObj is null!" << std::endl;
-        return false;
-    }
 
-    // Create trust management object with certificates and SSL policy.
-    // Note: SecTrustCreateWithCertificates expects the certificate to be
-    // verified is the first element.
-    cf_ref<CFStringRef> cfHostName = CFStringCreateWithCStringNoCopy(
-        kCFAllocatorDefault, hostName.c_str(), kCFStringEncodingASCII, kCFAllocatorNull);
-    if (cfHostName.get() == nullptr)
-    {
-        return false;
-    }
-    cf_ref<SecPolicyRef> policy = SecPolicyCreateSSL(true /* client side */, cfHostName.get());
-    cf_ref<SecTrustRef> trust;
-    OSStatus status = SecTrustCreateWithCertificates(certsArray.get(), policy.get(), &trust.get());
-    std::cout << status << std::endl;
-    if (status == noErr)
-    {
-        // Perform actual certificate verification.
-        status = SecTrustEvaluateWithError(trust.get(), nullptr);
-        std::cout << status << std::endl;
-        return status;
-    }
-
-    return false;
+        return true;
 }
 #endif
 
@@ -254,21 +184,17 @@ Client::Client(const std::string &server, uint16_t port)
         using boost::asio::ssl::context;
         p->ssl_ctx_.set_options(context::default_workarounds | context::no_sslv2 |
                                 context::no_sslv3 | context::no_tlsv1 | context::no_tlsv1_1);
-#ifdef WIN32
+#if WIN32
         load_windows_certificates(p->ssl_ctx_);
+#elif __APPLE__
+        import_apple_keychain(p->ssl_ctx_);
 #else
         p->ssl_ctx_.set_default_verify_paths();
 #endif
 
         verify_certificates(true);
-
-#ifdef __APPLE__
-        p->ssl_ctx_.set_verify_callback([server](bool preverified, boost::asio::ssl::verify_context &ctx) {
-                return handle_cert_verification(server, preverified, ctx);
-        });
-#else
         p->ssl_ctx_.set_verify_callback(ssl::rfc2818_verification(server));
-#endif
+
         for (unsigned int i = 0; i < threads_num; ++i)
                 p->thread_group_.add_thread(new boost::thread([this]() { p->ioc_.run(); }));
 }
