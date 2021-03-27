@@ -220,6 +220,8 @@ if(NOT MSVC AND NOT APPLE)
 	target_link_libraries(matrix_client PUBLIC Threads::Threads)
 elseif(MSVC)
 	target_compile_options(matrix_client PUBLIC /Zc:__cplusplus /utf-8 /MP /Gm- /EHsc)
+elseif(APPLE)
+	target_link_libraries(matrix_client PUBLIC "-framework CoreFoundation" "-framework Security")
 endif()
 
 if(COVERAGE)

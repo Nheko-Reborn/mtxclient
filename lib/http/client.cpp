@@ -1,7 +1,16 @@
 #include "mtxclient/http/asio_overrides.hpp"
 
+#include "mtx/log.hpp"
 #include "mtxclient/http/client.hpp"
 #include "mtxclient/http/client_impl.hpp"
+
+#if defined(__APPLE__)
+#include <CoreFoundation/CFData.h>
+#include <Security/SecBase.h>
+#include <Security/SecCertificate.h>
+#include <Security/SecPolicy.h>
+#include <Security/SecTrust.h>
+#endif
 
 #include <mutex>
 #include <thread>
@@ -9,14 +18,14 @@
 #include <nlohmann/json.hpp>
 
 #include <boost/algorithm/string.hpp>
-#include <boost/utility/typed_in_place_factory.hpp>
-
+#include <boost/asio/ssl.hpp>
 #include <boost/asio/ssl/context.hpp>
 #include <boost/beast/http/message.hpp>
 #include <boost/iostreams/stream.hpp>
 #include <boost/signals2/signal.hpp>
 #include <boost/signals2/signal_type.hpp>
 #include <boost/thread/thread.hpp>
+#include <boost/utility/typed_in_place_factory.hpp>
 
 #include "mtxclient/http/session.hpp"
 #include "mtxclient/utils.hpp"
@@ -79,6 +88,88 @@ struct ClientPrivate
         //! All the active sessions will shutdown the connection.
         boost::signals2::signal<void()> shutdown_signal;
 };
+
+#if defined(__APPLE__)
+
+// cf_ref RAII code taken from Microsoft cpprestsdk (MIT licensed):
+// https://github.com/microsoft/cpprestsdk/blob/7fbb08c491f9c8888cc0f3d86962acb3af672772/Release/src/http/client/x509_cert_utilities.cpp#L290
+
+// Simple RAII pattern wrapper to perform CFRelease on objects.
+template<typename T>
+class cf_ref
+{
+public:
+        cf_ref(T v)
+          : value(v)
+        {
+                static_assert(sizeof(cf_ref<T>) == sizeof(T),
+                              "Code assumes just a wrapper, see usage in CFArrayCreate below.");
+        }
+        cf_ref()
+          : value(nullptr)
+        {}
+        cf_ref(cf_ref &&other)
+          : value(other.value)
+        {
+                other.value = nullptr;
+        }
+
+        ~cf_ref()
+        {
+                if (value != nullptr) {
+                        CFRelease(value);
+                }
+        }
+
+        T &get() { return value; }
+
+private:
+        cf_ref(const cf_ref &);
+        cf_ref &operator=(const cf_ref &);
+        T value;
+};
+
+void
+import_apple_keychain(boost::asio::ssl::context &ssl_ctx_)
+{
+        cf_ref<CFArrayRef> result;
+        OSStatus osStatus;
+
+        // Copy macOS root certificates into CFArray
+        if ((osStatus = SecTrustCopyAnchorCertificates(&result.get())) != 0) {
+                mtx::utils::log::log_error("Error enumerating macOS certificates.");
+                return;
+        }
+
+        for (CFIndex i = 0; i < CFArrayGetCount(result.get()); i++) {
+                SecCertificateRef cert = (SecCertificateRef)CFArrayGetValueAtIndex(result.get(), i);
+                cf_ref<CFDataRef> rawDataRef = SecCertificateCopyData(cert);
+                if (rawDataRef.get() == nullptr) {
+                        mtx::utils::log::log_error("Error enumerating macOS certificate");
+                        continue;
+                }
+                const uint8_t *rawDataPtr = CFDataGetBytePtr(rawDataRef.get());
+
+                // Parse an openssl X509 object from each returned certificate
+                X509 *x509Cert = d2i_X509(nullptr, &rawDataPtr, CFDataGetLength(rawDataRef.get()));
+                if (!x509Cert) {
+                        auto errMsg = std::string(ERR_reason_error_string(ERR_peek_last_error()));
+                        mtx::utils::log::log_error(
+                          "Error parsing X509 Certificate from system keychain: " + errMsg);
+                        continue;
+                }
+                // Add the parsed X509 object to the X509_STORE verification store
+                const auto addStatus =
+                  X509_STORE_add_cert(SSL_CTX_get_cert_store(ssl_ctx_.native_handle()), x509Cert);
+                X509_free(x509Cert);
+                if (addStatus != 1) {
+                        mtx::utils::log::log_error("Error loading system certificate into OpenSSL");
+                        continue;
+                }
+        }
+}
+#endif
+
 }
 
 Client::Client(const std::string &server, uint16_t port)
@@ -94,6 +185,8 @@ Client::Client(const std::string &server, uint16_t port)
                                 context::no_sslv3 | context::no_tlsv1 | context::no_tlsv1_1);
 #ifdef WIN32
         load_windows_certificates(p->ssl_ctx_);
+#elif __APPLE__
+        import_apple_keychain(p->ssl_ctx_);
 #else
         p->ssl_ctx_.set_default_verify_paths();
 #endif
