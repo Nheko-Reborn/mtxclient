@@ -712,6 +712,64 @@ TEST(StateEvents, Topic)
         EXPECT_EQ(event.content.topic, "Test topic");
 }
 
+TEST(StateEvents, ImagePack)
+{
+        json data = R"({
+          "origin_server_ts": 1510476064445,
+          "sender": "@nheko_test:matrix.org",
+          "event_id": "$15104760642668662QICBu:matrix.org",
+          "unsigned": {
+            "age": 37
+          },
+          "state_key": "my-pack",
+          "content": {
+  "images": {
+    "emote": {
+      "url": "mxc://example.org/blah"
+    },
+    "sticker": {
+      "url": "mxc://example.org/sticker",
+      "body": "stcikerly",
+      "usage": ["sticker"]
+    }
+  },
+  "pack": {
+    "display_name": "Awesome Pack",
+    "avatar_url": "mxc://example.org/asdjfasd",
+    "usage": ["emoticon"],
+    "license": "huh"
+  }
+},
+          "type": "im.ponies.room_emotes",
+          "room_id": "!lfoDRlNFWlvOnvkBwQ:matrix.org"
+        })"_json;
+
+        ns::StateEvent<ns::msc2545::ImagePack> event = data;
+
+        EXPECT_EQ(event.type, ns::EventType::ImagePackInRoom);
+        EXPECT_EQ(event.event_id, "$15104760642668662QICBu:matrix.org");
+        EXPECT_EQ(event.room_id, "!lfoDRlNFWlvOnvkBwQ:matrix.org");
+        EXPECT_EQ(event.sender, "@nheko_test:matrix.org");
+        EXPECT_EQ(event.origin_server_ts, 1510476064445);
+        EXPECT_EQ(event.unsigned_data.age, 37);
+        EXPECT_EQ(event.state_key, "my-pack");
+        EXPECT_EQ(event.content.pack.has_value(), true);
+        EXPECT_EQ(event.content.pack->display_name, "Awesome Pack");
+        EXPECT_EQ(event.content.pack->license, "huh");
+        EXPECT_EQ(event.content.pack->avatar_url, "mxc://example.org/asdjfasd");
+        EXPECT_EQ(event.content.pack->is_emoji(), true);
+        EXPECT_EQ(event.content.pack->is_sticker(), false);
+        ASSERT_EQ(event.content.images.size(), 2);
+        EXPECT_EQ(event.content.images["emote"].url, "mxc://example.org/blah");
+        EXPECT_EQ(event.content.images["emote"].overrides_usage(), false);
+        EXPECT_EQ(event.content.images["sticker"].url, "mxc://example.org/sticker");
+        EXPECT_EQ(event.content.images["sticker"].body, "stcikerly");
+        EXPECT_EQ(event.content.images["sticker"].is_sticker(), true);
+        EXPECT_EQ(event.content.images["sticker"].is_emoji(), false);
+        EXPECT_EQ(event.content.images["sticker"].overrides_usage(), true);
+        EXPECT_EQ(json(event)["content"]["images"].size(), 2);
+}
+
 TEST(RoomEvents, OlmEncrypted)
 {
         json data = R"({
@@ -1231,6 +1289,79 @@ TEST(RoomAccountData, NhekoHiddenEvents)
         EXPECT_EQ(event.content.hidden_event_types.size(), 2);
         EXPECT_EQ(event.content.hidden_event_types[0], ns::EventType::Reaction);
         EXPECT_EQ(event.content.hidden_event_types[1], ns::EventType::RoomMember);
+}
+
+TEST(RoomAccountData, ImagePack)
+{
+        json data = R"({
+          "content": {
+  "images": {
+    "emote": {
+      "url": "mxc://example.org/blah"
+    },
+    "sticker": {
+      "url": "mxc://example.org/sticker",
+      "body": "stcikerly",
+      "usage": ["sticker"]
+    }
+  },
+  "pack": {
+    "display_name": "Awesome Pack",
+    "avatar_url": "mxc://example.org/asdjfasd",
+    "usage": ["emoticon"],
+    "license": "huh"
+  }
+},
+          "type": "im.ponies.user_emotes"
+        })"_json;
+
+        ns::AccountDataEvent<ns::msc2545::ImagePack> event = data;
+
+        EXPECT_EQ(event.type, ns::EventType::ImagePackInAccountData);
+        EXPECT_EQ(event.content.pack.has_value(), true);
+        EXPECT_EQ(event.content.pack->display_name, "Awesome Pack");
+        EXPECT_EQ(event.content.pack->license, "huh");
+        EXPECT_EQ(event.content.pack->avatar_url, "mxc://example.org/asdjfasd");
+        EXPECT_EQ(event.content.pack->is_emoji(), true);
+        EXPECT_EQ(event.content.pack->is_sticker(), false);
+        ASSERT_EQ(event.content.images.size(), 2);
+        EXPECT_EQ(event.content.images["emote"].url, "mxc://example.org/blah");
+        EXPECT_EQ(event.content.images["emote"].overrides_usage(), false);
+        EXPECT_EQ(event.content.images["sticker"].url, "mxc://example.org/sticker");
+        EXPECT_EQ(event.content.images["sticker"].body, "stcikerly");
+        EXPECT_EQ(event.content.images["sticker"].is_sticker(), true);
+        EXPECT_EQ(event.content.images["sticker"].is_emoji(), false);
+        EXPECT_EQ(event.content.images["sticker"].overrides_usage(), true);
+        EXPECT_EQ(json(event)["content"]["images"].size(), 2);
+}
+
+TEST(RoomAccountData, ImagePackRooms)
+{
+        json data = R"({
+          "content": {
+  "rooms": {
+    "!someroom:example.org": {
+      "": {},
+      "de.sorunome.mx-puppet-bridge.discord": {}
+    },
+    "!someotherroom:example.org": {
+      "": {}
+    }
+  }
+},
+          "type": "im.ponies.emote_rooms"
+        })"_json;
+
+        ns::AccountDataEvent<ns::msc2545::ImagePackRooms> event = data;
+
+        EXPECT_EQ(event.type, ns::EventType::ImagePackRooms);
+        EXPECT_EQ(event.content.rooms.size(), 2);
+        EXPECT_EQ(event.content.rooms["!someroom:example.org"].size(), 2);
+        EXPECT_EQ(event.content.rooms["!someroom:example.org"].count(""), 1);
+        EXPECT_EQ(event.content.rooms["!someroom:example.org"].count(
+                    "de.sorunome.mx-puppet-bridge.discord"),
+                  1);
+        EXPECT_EQ(json(event)["content"]["rooms"].size(), 2);
 }
 
 TEST(Presence, Presence)

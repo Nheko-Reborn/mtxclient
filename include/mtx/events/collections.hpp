@@ -19,6 +19,7 @@
 #include "mtx/events/history_visibility.hpp"
 #include "mtx/events/join_rules.hpp"
 #include "mtx/events/member.hpp"
+#include "mtx/events/mscs/image_packs.hpp"
 #include "mtx/events/name.hpp"
 #include "mtx/events/nheko_extensions/hidden_events.hpp"
 #include "mtx/events/pinned_events.hpp"
@@ -75,6 +76,8 @@ using RoomAccountDataEvents =
                events::AccountDataEvent<account_data::FullyRead>,
                events::AccountDataEvent<pushrules::GlobalRuleset>,
                events::AccountDataEvent<account_data::nheko_extensions::HiddenEvents>,
+               events::AccountDataEvent<msc2545::ImagePack>,
+               events::AccountDataEvent<msc2545::ImagePackRooms>,
                events::AccountDataEvent<Unknown>>;
 
 //! Collection of @p StateEvent only.
@@ -93,6 +96,7 @@ using StateEvents = std::variant<events::StateEvent<states::Aliases>,
                                  events::StateEvent<states::Tombstone>,
                                  events::StateEvent<states::Topic>,
                                  events::StateEvent<msgs::Redacted>,
+                                 events::StateEvent<msc2545::ImagePack>,
                                  events::StateEvent<Unknown>>;
 
 //! Collection of @p StrippedEvent only.
@@ -127,6 +131,7 @@ using TimelineEvents = std::variant<events::StateEvent<states::Aliases>,
                                     events::StateEvent<states::PowerLevels>,
                                     events::StateEvent<states::Tombstone>,
                                     events::StateEvent<states::Topic>,
+                                    events::StateEvent<msc2545::ImagePack>,
                                     events::EncryptedEvent<msgs::Encrypted>,
                                     events::RedactionEvent<msgs::Redaction>,
                                     events::Sticker,
@@ -258,6 +263,9 @@ constexpr inline EventType state_content_to_type<mtx::events::state::Tombstone> 
   EventType::RoomTombstone;
 template<>
 constexpr inline EventType state_content_to_type<mtx::events::state::Topic> = EventType::RoomTopic;
+template<>
+constexpr inline EventType state_content_to_type<mtx::events::msc2545::ImagePack> =
+  EventType::ImagePackInRoom;
 
 //! Get the right event type for some type of device message content.
 template<typename Content>

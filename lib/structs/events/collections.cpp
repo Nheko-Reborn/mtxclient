@@ -26,6 +26,7 @@ MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::StateEvent, states::PowerLevels)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::StateEvent, states::Tombstone)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::StateEvent, states::Topic)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::StateEvent, msgs::Redacted)
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::StateEvent, msc2545::ImagePack)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::StateEvent, Unknown)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::EncryptedEvent, msgs::Encrypted)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::EncryptedEvent, msgs::OlmEncrypted)
@@ -95,6 +96,8 @@ MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::AccountDataEvent, mtx::events::acco
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::AccountDataEvent, pushrules::GlobalRuleset)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::AccountDataEvent,
                                      mtx::events::account_data::nheko_extensions::HiddenEvents)
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::AccountDataEvent, msc2545::ImagePackRooms)
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::AccountDataEvent, msc2545::ImagePack)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::Event, presence::Presence)
 
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::RedactionEvent, msg::Redaction)
@@ -179,6 +182,10 @@ from_json(const json &obj, TimelineEvent &e)
         }
         case events::EventType::RoomTopic: {
                 e.data = events::StateEvent<Topic>(obj);
+                break;
+        }
+        case events::EventType::ImagePackInRoom: {
+                e.data = events::StateEvent<msc2545::ImagePack>(obj);
                 break;
         }
         case events::EventType::KeyVerificationCancel: {
@@ -316,6 +323,8 @@ from_json(const json &obj, TimelineEvent &e)
         case events::EventType::Receipt:
         case events::EventType::FullyRead:
         case events::EventType::NhekoHiddenEvents:
+        case events::EventType::ImagePackInAccountData:
+        case events::EventType::ImagePackRooms:
                 return;
         }
 }

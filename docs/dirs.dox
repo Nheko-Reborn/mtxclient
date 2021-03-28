@@ -27,6 +27,9 @@
 /// @dir include/mtx/events/nheko_extensions
 /// @brief Nheko specific event types not part of the official specification.
 
+/// @dir include/mtx/events/mscs
+/// @brief MSCs, that are not yet part of the specification.
+
 /// @dir include/mtx/responses
 /// @brief The reponses returned from each request.
 

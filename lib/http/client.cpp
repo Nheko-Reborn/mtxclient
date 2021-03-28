@@ -1414,30 +1414,31 @@ Client::set_pusher(const mtx::requests::SetPusher &req, Callback<mtx::responses:
 // Template instantiations for the various send functions
 
 #define MTXCLIENT_SEND_STATE_EVENT(Content)                                                        \
-        template void mtx::http::Client::send_state_event<mtx::events::state::Content>(            \
+        template void mtx::http::Client::send_state_event<mtx::events::Content>(                   \
           const std::string &,                                                                     \
           const std::string &state_key,                                                            \
-          const mtx::events::state::Content &,                                                     \
+          const mtx::events::Content &,                                                            \
           Callback<mtx::responses::EventId> cb);                                                   \
-        template void mtx::http::Client::send_state_event<mtx::events::state::Content>(            \
+        template void mtx::http::Client::send_state_event<mtx::events::Content>(                   \
           const std::string &,                                                                     \
-          const mtx::events::state::Content &,                                                     \
+          const mtx::events::Content &,                                                            \
           Callback<mtx::responses::EventId> cb);
 
-MTXCLIENT_SEND_STATE_EVENT(Aliases)
-MTXCLIENT_SEND_STATE_EVENT(Avatar)
-MTXCLIENT_SEND_STATE_EVENT(CanonicalAlias)
-MTXCLIENT_SEND_STATE_EVENT(Create)
-MTXCLIENT_SEND_STATE_EVENT(Encryption)
-MTXCLIENT_SEND_STATE_EVENT(GuestAccess)
-MTXCLIENT_SEND_STATE_EVENT(HistoryVisibility)
-MTXCLIENT_SEND_STATE_EVENT(JoinRules)
-MTXCLIENT_SEND_STATE_EVENT(Member)
-MTXCLIENT_SEND_STATE_EVENT(Name)
-MTXCLIENT_SEND_STATE_EVENT(PinnedEvents)
-MTXCLIENT_SEND_STATE_EVENT(PowerLevels)
-MTXCLIENT_SEND_STATE_EVENT(Tombstone)
-MTXCLIENT_SEND_STATE_EVENT(Topic)
+MTXCLIENT_SEND_STATE_EVENT(state::Aliases)
+MTXCLIENT_SEND_STATE_EVENT(state::Avatar)
+MTXCLIENT_SEND_STATE_EVENT(state::CanonicalAlias)
+MTXCLIENT_SEND_STATE_EVENT(state::Create)
+MTXCLIENT_SEND_STATE_EVENT(state::Encryption)
+MTXCLIENT_SEND_STATE_EVENT(state::GuestAccess)
+MTXCLIENT_SEND_STATE_EVENT(state::HistoryVisibility)
+MTXCLIENT_SEND_STATE_EVENT(state::JoinRules)
+MTXCLIENT_SEND_STATE_EVENT(state::Member)
+MTXCLIENT_SEND_STATE_EVENT(state::Name)
+MTXCLIENT_SEND_STATE_EVENT(state::PinnedEvents)
+MTXCLIENT_SEND_STATE_EVENT(state::PowerLevels)
+MTXCLIENT_SEND_STATE_EVENT(state::Tombstone)
+MTXCLIENT_SEND_STATE_EVENT(state::Topic)
+MTXCLIENT_SEND_STATE_EVENT(msc2545::ImagePack)
 
 #define MTXCLIENT_SEND_ROOM_MESSAGE(Content)                                                       \
         template void mtx::http::Client::send_room_message<Content>(                               \

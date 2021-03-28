@@ -96,6 +96,12 @@ getEventType(const std::string &type)
                 return EventType::FullyRead;
         else if (type == "im.nheko.hidden_events")
                 return EventType::NhekoHiddenEvents;
+        else if (type == "im.ponies.room_emotes")
+                return EventType::ImagePackInRoom;
+        else if (type == "im.ponies.user_emotes")
+                return EventType::ImagePackInAccountData;
+        else if (type == "im.ponies.emote_rooms")
+                return EventType::ImagePackRooms;
         else
                 return EventType::Unsupported;
 }
@@ -190,6 +196,12 @@ to_string(EventType type)
                 return "m.fully_read";
         case EventType::NhekoHiddenEvents:
                 return "im.nheko.hidden_events";
+        case EventType::ImagePackInRoom:
+                return "im.ponies.room_emotes";
+        case EventType::ImagePackInAccountData:
+                return "im.ponies.user_emotes";
+        case EventType::ImagePackRooms:
+                return "im.ponies.emote_rooms";
         case EventType::Unsupported:
                 return "";
         }

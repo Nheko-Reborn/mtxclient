@@ -117,6 +117,24 @@ parse_room_account_data_events(
                         }
                         break;
                 }
+                case events::EventType::ImagePackRooms: {
+                        try {
+                                container.emplace_back(
+                                  events::AccountDataEvent<events::msc2545::ImagePackRooms>(e));
+                        } catch (json::exception &err) {
+                                log_error(err, e);
+                        }
+                        break;
+                }
+                case events::EventType::ImagePackInAccountData: {
+                        try {
+                                container.emplace_back(
+                                  events::AccountDataEvent<events::msc2545::ImagePack>(e));
+                        } catch (json::exception &err) {
+                                log_error(err, e);
+                        }
+                        break;
+                }
                 case events::EventType::Unsupported: {
                         try {
                                 container.emplace_back(events::EphemeralEvent<events::Unknown>(e));
@@ -164,6 +182,7 @@ parse_room_account_data_events(
                 case events::EventType::CallHangUp:
                 case events::EventType::Typing:
                 case events::EventType::Receipt:
+                case events::EventType::ImagePackInRoom:
                         continue;
                 }
         }
@@ -328,6 +347,16 @@ parse_timeline_events(const json &events,
                 case events::EventType::RoomTopic: {
                         try {
                                 container.emplace_back(events::StateEvent<Topic>(e));
+                        } catch (json::exception &err) {
+                                log_error(err, e);
+                        }
+
+                        break;
+                }
+                case events::EventType::ImagePackInRoom: {
+                        try {
+                                container.emplace_back(
+                                  events::StateEvent<events::msc2545::ImagePack>(e));
                         } catch (json::exception &err) {
                                 log_error(err, e);
                         }
@@ -598,6 +627,8 @@ parse_timeline_events(const json &events,
                 case events::EventType::Receipt:
                 case events::EventType::FullyRead:
                 case events::EventType::NhekoHiddenEvents:
+                case events::EventType::ImagePackRooms:
+                case events::EventType::ImagePackInAccountData:
                         continue;
                 }
         }
@@ -888,6 +919,16 @@ parse_state_events(const json &events,
 
                         break;
                 }
+                case events::EventType::ImagePackInRoom: {
+                        try {
+                                container.emplace_back(
+                                  events::StateEvent<events::msc2545::ImagePack>(e));
+                        } catch (json::exception &err) {
+                                log_error(err, e);
+                        }
+
+                        break;
+                }
                 case events::EventType::Unsupported: {
                         try {
                                 container.emplace_back(events::StateEvent<events::Unknown>(e));
@@ -927,6 +968,8 @@ parse_state_events(const json &events,
                 case events::EventType::Receipt:
                 case events::EventType::FullyRead:
                 case events::EventType::NhekoHiddenEvents:
+                case events::EventType::ImagePackRooms:
+                case events::EventType::ImagePackInAccountData:
                         continue;
                 }
         }
@@ -1091,6 +1134,9 @@ parse_stripped_events(const json &events,
                 case events::EventType::Receipt:
                 case events::EventType::FullyRead:
                 case events::EventType::NhekoHiddenEvents:
+                case events::EventType::ImagePackInAccountData:
+                case events::EventType::ImagePackInRoom:
+                case events::EventType::ImagePackRooms:
                         continue;
                 }
         }

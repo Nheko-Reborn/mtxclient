@@ -638,30 +638,31 @@ private:
 // Template instantiations for the various send functions
 
 #define MTXCLIENT_SEND_STATE_EVENT_FWD(Content)                                                    \
-        extern template void mtx::http::Client::send_state_event<mtx::events::state::Content>(     \
+        extern template void mtx::http::Client::send_state_event<mtx::events::Content>(            \
           const std::string &,                                                                     \
           const std::string &state_key,                                                            \
-          const mtx::events::state::Content &,                                                     \
+          const mtx::events::Content &,                                                            \
           Callback<mtx::responses::EventId> cb);                                                   \
-        extern template void mtx::http::Client::send_state_event<mtx::events::state::Content>(     \
+        extern template void mtx::http::Client::send_state_event<mtx::events::Content>(            \
           const std::string &,                                                                     \
-          const mtx::events::state::Content &,                                                     \
+          const mtx::events::Content &,                                                            \
           Callback<mtx::responses::EventId> cb);
 
-MTXCLIENT_SEND_STATE_EVENT_FWD(Aliases)
-MTXCLIENT_SEND_STATE_EVENT_FWD(Avatar)
-MTXCLIENT_SEND_STATE_EVENT_FWD(CanonicalAlias)
-MTXCLIENT_SEND_STATE_EVENT_FWD(Create)
-MTXCLIENT_SEND_STATE_EVENT_FWD(Encryption)
-MTXCLIENT_SEND_STATE_EVENT_FWD(GuestAccess)
-MTXCLIENT_SEND_STATE_EVENT_FWD(HistoryVisibility)
-MTXCLIENT_SEND_STATE_EVENT_FWD(JoinRules)
-MTXCLIENT_SEND_STATE_EVENT_FWD(Member)
-MTXCLIENT_SEND_STATE_EVENT_FWD(Name)
-MTXCLIENT_SEND_STATE_EVENT_FWD(PinnedEvents)
-MTXCLIENT_SEND_STATE_EVENT_FWD(PowerLevels)
-MTXCLIENT_SEND_STATE_EVENT_FWD(Tombstone)
-MTXCLIENT_SEND_STATE_EVENT_FWD(Topic)
+MTXCLIENT_SEND_STATE_EVENT_FWD(state::Aliases)
+MTXCLIENT_SEND_STATE_EVENT_FWD(state::Avatar)
+MTXCLIENT_SEND_STATE_EVENT_FWD(state::CanonicalAlias)
+MTXCLIENT_SEND_STATE_EVENT_FWD(state::Create)
+MTXCLIENT_SEND_STATE_EVENT_FWD(state::Encryption)
+MTXCLIENT_SEND_STATE_EVENT_FWD(state::GuestAccess)
+MTXCLIENT_SEND_STATE_EVENT_FWD(state::HistoryVisibility)
+MTXCLIENT_SEND_STATE_EVENT_FWD(state::JoinRules)
+MTXCLIENT_SEND_STATE_EVENT_FWD(state::Member)
+MTXCLIENT_SEND_STATE_EVENT_FWD(state::Name)
+MTXCLIENT_SEND_STATE_EVENT_FWD(state::PinnedEvents)
+MTXCLIENT_SEND_STATE_EVENT_FWD(state::PowerLevels)
+MTXCLIENT_SEND_STATE_EVENT_FWD(state::Tombstone)
+MTXCLIENT_SEND_STATE_EVENT_FWD(state::Topic)
+MTXCLIENT_SEND_STATE_EVENT_FWD(msc2545::ImagePack)
 
 #define MTXCLIENT_SEND_ROOM_MESSAGE_FWD(Content)                                                   \
         extern template void mtx::http::Client::send_room_message<Content>(                        \

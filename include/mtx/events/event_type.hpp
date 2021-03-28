@@ -107,6 +107,14 @@ enum class EventType
         // im.nheko.hidden_events
         NhekoHiddenEvents,
 
+        // MSCs
+        //! m.image_pack, currently im.ponies.room_emotes
+        ImagePackInRoom,
+        //! m.image_pack, currently im.ponies.user_emotes
+        ImagePackInAccountData,
+        //! m.image_pack.rooms, currently im.ponies.emote_rooms
+        ImagePackRooms,
+
         // Unsupported event
         Unsupported,
 };
