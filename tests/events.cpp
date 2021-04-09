@@ -181,32 +181,37 @@ TEST(StateEvents, Avatar)
 TEST(StateEvents, CanonicalAlias)
 {
         json data = R"({
-          "origin_server_ts": 1506762071625,
-          "sender": "@mujx:matrix.org",
-          "event_id": "$15067620711415511reUFC:matrix.org",
-          "age": 3717700323,
-          "unsigned": {
-            "age": 3717700323
-          },
-          "state_key": "",
-          "content": {
-            "alias": "#alias:matrix.org"
-          },
-          "room_id": "!VaMCVKSVcyPtXbcMXh:matrix.org",
-          "user_id": "@mujx:matrix.org",
-          "type": "m.room.canonical_alias"
-        })"_json;
+    "content": {
+        "alias": "#somewhere:localhost",
+        "alt_aliases": [
+            "#somewhere:example.org",
+            "#myroom:example.com"
+        ]
+    },
+    "event_id": "$143273582443PhrSn:example.org",
+    "origin_server_ts": 1432735824653,
+    "room_id": "!jEsUZKDJdhlrceRyVU:example.org",
+    "sender": "@example:example.org",
+    "state_key": "",
+    "type": "m.room.canonical_alias",
+    "unsigned": {
+        "age": 1234
+    }
+})"_json;
 
         ns::StateEvent<ns::state::CanonicalAlias> event = data;
 
         EXPECT_EQ(event.type, ns::EventType::RoomCanonicalAlias);
-        EXPECT_EQ(event.event_id, "$15067620711415511reUFC:matrix.org");
-        EXPECT_EQ(event.room_id, "!VaMCVKSVcyPtXbcMXh:matrix.org");
-        EXPECT_EQ(event.sender, "@mujx:matrix.org");
-        EXPECT_EQ(event.unsigned_data.age, 3717700323);
-        EXPECT_EQ(event.origin_server_ts, 1506762071625L);
+        EXPECT_EQ(event.event_id, "$143273582443PhrSn:example.org");
+        EXPECT_EQ(event.room_id, "!jEsUZKDJdhlrceRyVU:example.org");
+        EXPECT_EQ(event.sender, "@example:example.org");
+        EXPECT_EQ(event.unsigned_data.age, 1234);
+        EXPECT_EQ(event.origin_server_ts, 1432735824653L);
         EXPECT_EQ(event.state_key, "");
-        EXPECT_EQ(event.content.alias, "#alias:matrix.org");
+        EXPECT_EQ(event.content.alias, "#somewhere:localhost");
+        ASSERT_EQ(event.content.alt_aliases.size(), 2);
+        EXPECT_EQ(event.content.alt_aliases.at(0), "#somewhere:example.org");
+        EXPECT_EQ(event.content.alt_aliases.at(1), "#myroom:example.com");
 }
 
 TEST(StateEvents, Create)

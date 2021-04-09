@@ -25,6 +25,9 @@ struct CanonicalAlias
 {
         //! The canonical alias. Could be *null*.
         std::string alias;
+        //! Alternative aliases the room advertises. This list can have aliases despite the alias
+        //! field being null, empty, or otherwise not present.
+        std::vector<std::string> alt_aliases;
 };
 
 //! Deserialization method needed by @p nlohmann::json.

@@ -101,4 +101,3 @@ to_json(nlohmann::json &obj, const ImagePackRooms &content);
 } // namespace msc2545
 } // namespace events
 } // namespace mtx
-
