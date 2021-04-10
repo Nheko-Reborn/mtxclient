@@ -328,6 +328,83 @@ TEST(ClientAPI, TagRoom)
         mtx_client->close();
 }
 
+TEST(ClientAPI, RoomAccountData)
+{
+        std::shared_ptr<Client> mtx_client = make_test_client();
+
+        mtx_client->login(
+          "alice", "secret", [mtx_client](const mtx::responses::Login &, RequestErr err) {
+                  check_error(err);
+          });
+
+        while (mtx_client->access_token().empty())
+                sleep();
+
+        mtx::requests::CreateRoom req;
+        req.name  = "Name";
+        req.topic = "Topic";
+        mtx_client->create_room(
+          req, [mtx_client](const mtx::responses::CreateRoom &res, RequestErr err) {
+                  auto room_id = res.room_id;
+                  check_error(err);
+
+                  mtx::events::account_data::nheko_extensions::HiddenEvents hiddenEv;
+                  hiddenEv.hidden_event_types.push_back(mtx::events::EventType::RoomMember);
+
+                  mtx_client->put_room_account_data(
+                    room_id.to_string(), hiddenEv, [mtx_client, room_id](RequestErr err) {
+                            check_error(err);
+
+                            mtx_client->get_room_account_data<
+                              mtx::events::account_data::nheko_extensions::HiddenEvents>(
+                              room_id.to_string(),
+                              [](mtx::events::account_data::nheko_extensions::HiddenEvents hiddenEv,
+                                 RequestErr err) {
+                                      check_error(err);
+
+                                      ASSERT_EQ(hiddenEv.hidden_event_types.size(), 1);
+                                      EXPECT_EQ(hiddenEv.hidden_event_types.at(0),
+                                                mtx::events::EventType::RoomMember);
+                              });
+                    });
+          });
+
+        mtx_client->close();
+}
+
+TEST(ClientAPI, AccountData)
+{
+        std::shared_ptr<Client> mtx_client = make_test_client();
+
+        mtx_client->login(
+          "alice", "secret", [mtx_client](const mtx::responses::Login &, RequestErr err) {
+                  check_error(err);
+          });
+
+        while (mtx_client->access_token().empty())
+                sleep();
+
+        mtx::events::account_data::nheko_extensions::HiddenEvents hiddenEv;
+        hiddenEv.hidden_event_types.push_back(mtx::events::EventType::RoomMember);
+
+        mtx_client->put_account_data(hiddenEv, [mtx_client](RequestErr err) {
+                check_error(err);
+
+                mtx_client
+                  ->get_account_data<mtx::events::account_data::nheko_extensions::HiddenEvents>(
+                    [mtx_client](mtx::events::account_data::nheko_extensions::HiddenEvents hiddenEv,
+                                 RequestErr err) {
+                            check_error(err);
+
+                            ASSERT_EQ(hiddenEv.hidden_event_types.size(), 1);
+                            EXPECT_EQ(hiddenEv.hidden_event_types.at(0),
+                                      mtx::events::EventType::RoomMember);
+                    });
+        });
+
+        mtx_client->close();
+}
+
 TEST(ClientAPI, LogoutSuccess)
 {
         std::shared_ptr<Client> mtx_client = make_test_client();

@@ -234,3 +234,81 @@ mtx::http::Client::send_state_event(const std::string &room_id,
 {
         send_state_event<Payload>(room_id, "", payload, callback);
 }
+
+template<class Payload>
+[[gnu::used, llvm::used]] void
+mtx::http::Client::put_room_account_data(const std::string &room_id,
+                                         const std::string &type,
+                                         const Payload &payload,
+                                         ErrCallback cb)
+{
+        const auto api_path = "/client/r0/user/" +
+                              mtx::client::utils::url_encode(user_id_.to_string()) + "/rooms/" +
+                              mtx::client::utils::url_encode(room_id) + "/account_data/" + type;
+        put<Payload>(api_path, payload, cb);
+}
+template<class Payload>
+[[gnu::used, llvm::used]] void
+mtx::http::Client::put_room_account_data(const std::string &room_id,
+                                         const Payload &payload,
+                                         ErrCallback cb)
+{
+        constexpr auto event_type = mtx::events::account_data_content_to_type<Payload>;
+        static_assert(event_type != mtx::events::EventType::Unsupported);
+        put_room_account_data(room_id, to_string(event_type), payload, std::move(cb));
+}
+template<class Payload>
+[[gnu::used, llvm::used]] void
+mtx::http::Client::put_account_data(const std::string &type, const Payload &payload, ErrCallback cb)
+{
+        const auto api_path = "/client/r0/user/" +
+                              mtx::client::utils::url_encode(user_id_.to_string()) +
+                              "/account_data/" + type;
+        put<Payload>(api_path, payload, cb);
+}
+template<class Payload>
+[[gnu::used, llvm::used]] void
+mtx::http::Client::put_account_data(const Payload &payload, ErrCallback cb)
+{
+        constexpr auto event_type = mtx::events::account_data_content_to_type<Payload>;
+        static_assert(event_type != mtx::events::EventType::Unsupported);
+        put_account_data(to_string(event_type), payload, std::move(cb));
+}
+template<class Payload>
+[[gnu::used, llvm::used]] void
+mtx::http::Client::get_room_account_data(const std::string &room_id,
+                                         const std::string &type,
+                                         Callback<Payload> cb)
+{
+        const auto api_path = "/client/r0/user/" +
+                              mtx::client::utils::url_encode(user_id_.to_string()) + "/rooms/" +
+                              mtx::client::utils::url_encode(room_id) + "/account_data/" + type;
+        get<Payload>(api_path,
+                     [cb](const Payload &res, HeaderFields, RequestErr err) { cb(res, err); });
+}
+template<class Payload>
+[[gnu::used, llvm::used]] void
+mtx::http::Client::get_room_account_data(const std::string &room_id, Callback<Payload> cb)
+{
+        constexpr auto event_type = mtx::events::account_data_content_to_type<Payload>;
+        static_assert(event_type != mtx::events::EventType::Unsupported);
+        get_room_account_data(room_id, to_string(event_type), std::move(cb));
+}
+template<class Payload>
+[[gnu::used, llvm::used]] void
+mtx::http::Client::get_account_data(const std::string &type, Callback<Payload> cb)
+{
+        const auto api_path = "/client/r0/user/" +
+                              mtx::client::utils::url_encode(user_id_.to_string()) +
+                              "/account_data/" + type;
+        get<Payload>(api_path,
+                     [cb](const Payload &res, HeaderFields, RequestErr err) { cb(res, err); });
+}
+template<class Payload>
+[[gnu::used, llvm::used]] void
+mtx::http::Client::get_account_data(Callback<Payload> cb)
+{
+        constexpr auto event_type = mtx::events::account_data_content_to_type<Payload>;
+        static_assert(event_type != mtx::events::EventType::Unsupported);
+        get_account_data(to_string(event_type), std::move(cb));
+}

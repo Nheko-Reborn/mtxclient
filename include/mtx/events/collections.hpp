@@ -316,5 +316,24 @@ constexpr inline EventType to_device_content_to_type<mtx::events::msg::SecretSen
 template<>
 constexpr inline EventType to_device_content_to_type<mtx::events::msg::SecretRequest> =
   EventType::SecretRequest;
+
+//! Get the right event type for some type of account_data event content.
+template<typename Content>
+constexpr inline EventType account_data_content_to_type = EventType::Unsupported;
+
+template<>
+constexpr inline EventType account_data_content_to_type<mtx::events::msc2545::ImagePack> =
+  EventType::ImagePackInAccountData;
+template<>
+constexpr inline EventType account_data_content_to_type<mtx::events::msc2545::ImagePackRooms> =
+  EventType::ImagePackRooms;
+template<>
+constexpr inline EventType account_data_content_to_type<mtx::events::account_data::Tags> =
+  EventType::Tag;
+template<>
+constexpr inline EventType
+  account_data_content_to_type<mtx::events::account_data::nheko_extensions::HiddenEvents> =
+    EventType::NhekoHiddenEvents;
+
 } // namespace events
 } // namespace mtx

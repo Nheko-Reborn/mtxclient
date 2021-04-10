@@ -1493,3 +1493,28 @@ MTXCLIENT_SEND_TO_DEVICE(mtx::events::msg::KeyVerificationKey)
 MTXCLIENT_SEND_TO_DEVICE(mtx::events::msg::KeyVerificationMac)
 MTXCLIENT_SEND_TO_DEVICE(mtx::events::msg::SecretSend)
 MTXCLIENT_SEND_TO_DEVICE(mtx::events::msg::SecretRequest)
+
+#define MTXCLIENT_ACCOUNT_DATA(Payload)                                                            \
+        template void mtx::http::Client::put_room_account_data<Payload>(                           \
+          const std::string &room_id,                                                              \
+          const std::string &type,                                                                 \
+          const Payload &payload,                                                                  \
+          ErrCallback cb);                                                                         \
+        template void mtx::http::Client::put_room_account_data<Payload>(                           \
+          const std::string &room_id, const Payload &payload, ErrCallback cb);                     \
+        template void mtx::http::Client::put_account_data<Payload>(                                \
+          const std::string &type, const Payload &payload, ErrCallback cb);                        \
+        template void mtx::http::Client::put_account_data<Payload>(const Payload &payload,         \
+                                                                   ErrCallback cb);                \
+        template void mtx::http::Client::get_room_account_data<Payload>(                           \
+          const std::string &room_id, const std::string &type, Callback<Payload> payload);         \
+        template void mtx::http::Client::get_room_account_data<Payload>(                           \
+          const std::string &room_id, Callback<Payload> cb);                                       \
+        template void mtx::http::Client::get_account_data<Payload>(const std::string &type,        \
+                                                                   Callback<Payload> payload);     \
+        template void mtx::http::Client::get_account_data<Payload>(Callback<Payload> cb);
+
+MTXCLIENT_ACCOUNT_DATA(mtx::events::msc2545::ImagePack)
+MTXCLIENT_ACCOUNT_DATA(mtx::events::msc2545::ImagePackRooms)
+MTXCLIENT_ACCOUNT_DATA(mtx::events::account_data::nheko_extensions::HiddenEvents)
+MTXCLIENT_ACCOUNT_DATA(mtx::events::account_data::Tags)

@@ -421,6 +421,42 @@ public:
         void get_event(const std::string &room_id,
                        const std::string &event_id,
                        Callback<mtx::events::collections::TimelineEvents> cb);
+
+        //! Store a room account_data event.
+        template<class Payload>
+        void put_room_account_data(const std::string &room_id,
+                                   const std::string &type,
+                                   const Payload &payload,
+                                   ErrCallback cb);
+        //! Store a room account_data event.
+        template<class Payload>
+        void put_room_account_data(const std::string &room_id,
+                                   const Payload &payload,
+                                   ErrCallback cb);
+
+        //! Store an account_data event.
+        template<class Payload>
+        void put_account_data(const std::string &type, const Payload &payload, ErrCallback cb);
+        //! Store an account_data event.
+        template<class Payload>
+        void put_account_data(const Payload &payload, ErrCallback cb);
+
+        //! Retrieve a room account_data event.
+        template<class Payload>
+        void get_room_account_data(const std::string &room_id,
+                                   const std::string &type,
+                                   Callback<Payload> payload);
+        //! Retrieve a room account_data event.
+        template<class Payload>
+        void get_room_account_data(const std::string &room_id, Callback<Payload> cb);
+
+        //! Retrieve an account_data event.
+        template<class Payload>
+        void get_account_data(const std::string &type, Callback<Payload> payload);
+        //! Retrieve an account_data event.
+        template<class Payload>
+        void get_account_data(Callback<Payload> cb);
+
         //! Send a room message with auto-generated transaction id.
         template<class Payload>
         void send_room_message(const std::string &room_id,
@@ -717,3 +753,28 @@ MTXCLIENT_SEND_TO_DEVICE_FWD(mtx::events::msg::KeyVerificationKey)
 MTXCLIENT_SEND_TO_DEVICE_FWD(mtx::events::msg::KeyVerificationMac)
 MTXCLIENT_SEND_TO_DEVICE_FWD(mtx::events::msg::SecretSend)
 MTXCLIENT_SEND_TO_DEVICE_FWD(mtx::events::msg::SecretRequest)
+
+#define MTXCLIENT_ACCOUNT_DATA_FWD(Payload)                                                        \
+        extern template void mtx::http::Client::put_room_account_data<Payload>(                    \
+          const std::string &room_id,                                                              \
+          const std::string &type,                                                                 \
+          const Payload &payload,                                                                  \
+          ErrCallback cb);                                                                         \
+        extern template void mtx::http::Client::put_room_account_data<Payload>(                    \
+          const std::string &room_id, const Payload &payload, ErrCallback cb);                     \
+        extern template void mtx::http::Client::put_account_data<Payload>(                         \
+          const std::string &type, const Payload &payload, ErrCallback cb);                        \
+        extern template void mtx::http::Client::put_account_data<Payload>(const Payload &payload,  \
+                                                                          ErrCallback cb);         \
+        extern template void mtx::http::Client::get_room_account_data<Payload>(                    \
+          const std::string &room_id, const std::string &type, Callback<Payload> payload);         \
+        extern template void mtx::http::Client::get_room_account_data<Payload>(                    \
+          const std::string &room_id, Callback<Payload> cb);                                       \
+        extern template void mtx::http::Client::get_account_data<Payload>(                         \
+          const std::string &type, Callback<Payload> payload);                                     \
+        extern template void mtx::http::Client::get_account_data<Payload>(Callback<Payload> cb);
+
+MTXCLIENT_ACCOUNT_DATA_FWD(mtx::events::msc2545::ImagePack)
+MTXCLIENT_ACCOUNT_DATA_FWD(mtx::events::msc2545::ImagePackRooms)
+MTXCLIENT_ACCOUNT_DATA_FWD(mtx::events::account_data::nheko_extensions::HiddenEvents)
+MTXCLIENT_ACCOUNT_DATA_FWD(mtx::events::account_data::Tags)
