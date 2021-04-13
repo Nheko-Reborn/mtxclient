@@ -85,6 +85,7 @@ MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::DeviceEvent, msgs::ForwardedRoomKey
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::DeviceEvent, msgs::KeyRequest)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::DeviceEvent, msgs::SecretRequest)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::DeviceEvent, msgs::SecretSend)
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::DeviceEvent, msgs::Dummy)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::DeviceEvent, Unknown)
 
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::EphemeralEvent, ephemeral::Typing)
@@ -325,6 +326,7 @@ from_json(const json &obj, TimelineEvent &e)
         case events::EventType::NhekoHiddenEvents:
         case events::EventType::ImagePackInAccountData:
         case events::EventType::ImagePackRooms:
+        case events::EventType::Dummy:
                 return;
         }
 }

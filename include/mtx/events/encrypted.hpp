@@ -104,6 +104,16 @@ from_json(const nlohmann::json &obj, Encrypted &event);
 void
 to_json(nlohmann::json &obj, const Encrypted &event);
 
+//! Content of the `m.dummy` event.
+struct Dummy
+{};
+
+void
+from_json(const nlohmann::json &obj, Dummy &event);
+
+void
+to_json(nlohmann::json &obj, const Dummy &event);
+
 //! Content of the `m.room_key` event.
 struct RoomKey
 {

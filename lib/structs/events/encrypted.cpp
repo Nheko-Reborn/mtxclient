@@ -117,6 +117,16 @@ to_json(json &obj, const Encrypted &content)
 }
 
 void
+from_json(const json &, Dummy &)
+{}
+
+void
+to_json(json &obj, const Dummy &)
+{
+        obj = json::object();
+}
+
+void
 from_json(const json &obj, RoomKey &event)
 {
         event.algorithm   = obj.at("algorithm").get<std::string>();

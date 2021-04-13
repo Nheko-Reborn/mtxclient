@@ -44,6 +44,8 @@ getEventType(const std::string &type)
                 return EventType::RoomCreate;
         else if (type == "m.room.encrypted")
                 return EventType::RoomEncrypted;
+        else if (type == "m.dummy")
+                return EventType::Dummy;
         else if (type == "m.room.encryption")
                 return EventType::RoomEncryption;
         else if (type == "m.room.guest_access")
@@ -144,6 +146,8 @@ to_string(EventType type)
                 return "m.room.create";
         case EventType::RoomEncrypted:
                 return "m.room.encrypted";
+        case EventType::Dummy:
+                return "m.dummy";
         case EventType::RoomEncryption:
                 return "m.room.encryption";
         case EventType::RoomGuestAccess:

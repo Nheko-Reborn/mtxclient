@@ -58,6 +58,7 @@ using DeviceEvents = std::variant<events::DeviceEvent<msgs::RoomKey>,
                                   events::DeviceEvent<msgs::KeyRequest>,
                                   events::DeviceEvent<msgs::OlmEncrypted>,
                                   events::DeviceEvent<msgs::Encrypted>,
+                                  events::DeviceEvent<msgs::Dummy>,
                                   events::DeviceEvent<msgs::KeyVerificationRequest>,
                                   events::DeviceEvent<msgs::KeyVerificationStart>,
                                   events::DeviceEvent<msgs::KeyVerificationReady>,
@@ -286,6 +287,8 @@ constexpr inline EventType to_device_content_to_type<mtx::events::msg::OlmEncryp
 template<>
 constexpr inline EventType to_device_content_to_type<mtx::events::msg::Encrypted> =
   EventType::RoomEncrypted;
+template<>
+constexpr inline EventType to_device_content_to_type<mtx::events::msg::Dummy> = EventType::Dummy;
 template<>
 constexpr inline EventType to_device_content_to_type<mtx::events::msg::KeyVerificationRequest> =
   EventType::KeyVerificationRequest;

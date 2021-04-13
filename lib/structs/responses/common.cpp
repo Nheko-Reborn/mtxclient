@@ -160,6 +160,7 @@ parse_room_account_data_events(
                 case events::EventType::RoomCanonicalAlias:
                 case events::EventType::RoomCreate:
                 case events::EventType::RoomEncrypted:
+                case events::EventType::Dummy:
                 case events::EventType::RoomEncryption:
                 case events::EventType::RoomGuestAccess:
                 case events::EventType::RoomHistoryVisibility:
@@ -629,6 +630,7 @@ parse_timeline_events(const json &events,
                 case events::EventType::NhekoHiddenEvents:
                 case events::EventType::ImagePackRooms:
                 case events::EventType::ImagePackInAccountData:
+                case events::EventType::Dummy:
                         continue;
                 }
         }
@@ -658,6 +660,15 @@ parse_device_events(const json &events,
                                         log_error("Invalid m.room.encrypted algorithm", e);
                                         continue;
                                 }
+                        } catch (json::exception &err) {
+                                log_error(err, e);
+                        }
+
+                        break;
+                }
+                case events::EventType::Dummy: {
+                        try {
+                                container.emplace_back(events::DeviceEvent<Dummy>(e));
                         } catch (json::exception &err) {
                                 log_error(err, e);
                         }
@@ -970,6 +981,7 @@ parse_state_events(const json &events,
                 case events::EventType::NhekoHiddenEvents:
                 case events::EventType::ImagePackRooms:
                 case events::EventType::ImagePackInAccountData:
+                case events::EventType::Dummy:
                         continue;
                 }
         }
@@ -1137,6 +1149,7 @@ parse_stripped_events(const json &events,
                 case events::EventType::ImagePackInAccountData:
                 case events::EventType::ImagePackInRoom:
                 case events::EventType::ImagePackRooms:
+                case events::EventType::Dummy:
                         continue;
                 }
         }

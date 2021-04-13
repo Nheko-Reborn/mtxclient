@@ -115,7 +115,10 @@ enum class EventType
         //! m.image_pack.rooms, currently im.ponies.emote_rooms
         ImagePackRooms,
 
-        // Unsupported event
+        //! `m.dummy`, used in crypto for example
+        Dummy,
+
+        //! Unsupported event
         Unsupported,
 };
 
