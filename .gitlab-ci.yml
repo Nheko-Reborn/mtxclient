@@ -75,7 +75,7 @@ build synapse arm64:
         -DCMAKE_INSTALL_PREFIX=.deps/usr
         -DHUNTER_ROOT=".hunter"
         -DHUNTER_ENABLED=ON -DBUILD_SHARED_LIBS=OFF
-        -DCMAKE_BUILD_TYPE=Release -DHUNTER_CONFIGURATION_TYPES=Debug
+        -DCMAKE_BUILD_TYPE=Debug -DHUNTER_CONFIGURATION_TYPES=Debug
         -DCI_BUILD=ON
         -DCOVERAGE=${COVERAGE}
     - cmake --build build
@@ -98,7 +98,7 @@ build linux amd64:
     M_ARCH: x86_64
     COVERAGE: "ON"
   after_script:
-    - ./.ci/install.sh ./.ci/coverage.sh &&  bash <(curl -s https://codecov.io/bash) -f build/coverage.info || echo "Codecov failed"
+    - ./.ci/install.sh && ./.ci/coverage.sh &&  bash <(curl -s https://codecov.io/bash) -f build/coverage.info || echo "Codecov failed"
 
 build linux arm64:
   extends: .build-linux
