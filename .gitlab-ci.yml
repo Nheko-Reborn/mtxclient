@@ -77,6 +77,7 @@ build synapse arm64:
         -DHUNTER_ENABLED=ON -DBUILD_SHARED_LIBS=OFF
         -DCMAKE_BUILD_TYPE=Release -DHUNTER_CONFIGURATION_TYPES=Debug
         -DCI_BUILD=ON
+        -DCOVERAGE=${COVERAGE}
     - cmake --build build
     - MTXCLIENT_SERVER=synapse GTEST_OUTPUT=xml:junit-output/ make test
   cache:
@@ -95,6 +96,7 @@ build linux amd64:
   tags: [docker]
   variables:
     M_ARCH: x86_64
+    COVERAGE: "ON"
   after_script:
     - ./.ci/coverage.sh &&  bash <(curl -s https://codecov.io/bash) -f build/coverage.info || echo "Codecov failed"
 
