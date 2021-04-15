@@ -9,5 +9,5 @@ mkdir -p build-lcov
   curl -L http://downloads.sourceforge.net/ltp/lcov-1.14.tar.gz -o lcov-1.14.tar.gz
   tar xfz lcov-1.14.tar.gz
   cd lcov-1.14/
-  sudo make install )
+  make install )
 
