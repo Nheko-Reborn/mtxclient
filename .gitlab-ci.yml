@@ -95,6 +95,8 @@ build linux amd64:
   tags: [docker]
   variables:
     M_ARCH: x86_64
+  after_script:
+    - bash <(curl -s https://codecov.io/bash) -f build/coverage.info || echo "Codecov failed"
 
 build linux arm64:
   extends: .build-linux
