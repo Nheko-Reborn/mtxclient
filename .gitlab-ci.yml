@@ -55,7 +55,7 @@ build synapse arm64:
     - apt-get update
     - apt-get install -y software-properties-common
     - add-apt-repository ppa:ubuntu-toolchain-r/test -y
-    - apt-get update && apt-get -y install --no-install-recommends ${CXX} ${CC} build-essential ninja-build libssl-dev git ccache curl
+    - apt-get update && apt-get -y install --no-install-recommends ${CXX} ${CC} build-essential ninja-build libssl-dev git ccache curl lcov
     # need recommended deps for wget
     - apt-get -y install wget
     - wget https://github.com/Kitware/CMake/releases/download/v3.20.0-rc4/cmake-3.20.0-rc4-linux-${M_ARCH}.sh && sh cmake-3.20.0-rc4-linux-${M_ARCH}.sh  --skip-license  --prefix=/usr/local
@@ -96,7 +96,7 @@ build linux amd64:
   variables:
     M_ARCH: x86_64
   after_script:
-    - bash <(curl -s https://codecov.io/bash) -f build/coverage.info || echo "Codecov failed"
+    - ./.ci/coverage.sh &&  bash <(curl -s https://codecov.io/bash) -f build/coverage.info || echo "Codecov failed"
 
 build linux arm64:
   extends: .build-linux
