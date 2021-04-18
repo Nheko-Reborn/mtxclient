@@ -31,8 +31,11 @@ from_json(const json &obj, Create &create)
         if (obj.find("m.federate") != obj.end())
                 create.federate = obj.at("m.federate").get<bool>();
 
+        // Assume room verison 1 for events where it's not specified
         if (obj.find("room_version") != obj.end())
                 create.room_version = obj.at("room_version");
+        else
+                create.room_version = "1";
 
         if (obj.find("predecessor") != obj.end())
                 create.predecessor = obj.at("predecessor").get<PreviousRoom>();
@@ -43,7 +46,10 @@ to_json(json &obj, const Create &create)
 {
         obj["creator"]      = create.creator;
         obj["m.federate"]   = create.federate;
-        obj["room_version"] = create.room_version;
+        if (create.room_version.empty())
+                obj["room_version"] = "1";
+        else
+                obj["room_version"] = create.room_version;
 
         if (create.predecessor)
                 obj["predecessor"] = *create.predecessor;
