@@ -44,8 +44,8 @@ from_json(const json &obj, Create &create)
 void
 to_json(json &obj, const Create &create)
 {
-        obj["creator"]      = create.creator;
-        obj["m.federate"]   = create.federate;
+        obj["creator"]    = create.creator;
+        obj["m.federate"] = create.federate;
         if (create.room_version.empty())
                 obj["room_version"] = "1";
         else
