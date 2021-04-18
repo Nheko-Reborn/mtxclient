@@ -48,8 +48,8 @@ build synapse arm64:
     - name: $CI_REGISTRY_IMAGE/synapse-${M_ARCH}:latest
       alias: synapse
   variables:
-    CXX: g++-8
-    CC: gcc-8
+    CXX: g++-7
+    CC: gcc-7
     TRAVIS_OS_NAME: linux
   before_script:
     - apt-get update
@@ -98,7 +98,7 @@ build linux amd64:
     M_ARCH: x86_64
     COVERAGE: "ON"
   after_script:
-    - ./.ci/install.sh && ./.ci/coverage.sh &&  bash <(curl -s https://codecov.io/bash) -f build/coverage.info || echo "Codecov failed"
+    - ./.ci/coverage.sh &&  bash <(curl -s https://codecov.io/bash) -f build/coverage.info || echo "Codecov failed"
 
 build linux arm64:
   extends: .build-linux
