@@ -12,7 +12,9 @@
 #include <string>
 #include <vector>
 
-namespace mtx::events::msg {
+namespace mtx {
+namespace events {
+namespace msg {
 
 //! Content for the `m.call.invite` event.
 struct CallInvite
@@ -102,3 +104,5 @@ void
 to_json(nlohmann::json &obj, const CallHangUp &content);
 
 } // namespace mtx::events::msg
+}
+}

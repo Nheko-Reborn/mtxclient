@@ -12,7 +12,8 @@
 #include <nlohmann/json.hpp>
 #endif
 
-namespace mtx::responses {
+namespace mtx {
+namespace responses {
 
 //! Response of the `GET /_matrix/client/r0/voip/turnServer` endpoint.
 //
@@ -34,4 +35,5 @@ struct TurnServer
 
 void
 from_json(const nlohmann::json &obj, TurnServer &turnServer);
+}
 }
