@@ -347,9 +347,11 @@ session_id(OlmOutboundGroupSession *s);
 std::string
 session_key(OlmOutboundGroupSession *s);
 
-//! Retrieve the session key from an *inbound* megolm session.
+// @brief Retrieve the session key from an *inbound* megolm session with a specific minimum index.
+//
+// Use -1 to use the smallest index possible
 std::string
-export_session(OlmInboundGroupSession *s);
+export_session(OlmInboundGroupSession *s, uint32_t at_index);
 
 //! Create an *inbound* megolm session from an exported session key.
 InboundGroupSessionPtr

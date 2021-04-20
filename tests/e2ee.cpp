@@ -1270,7 +1270,7 @@ TEST(ExportSessions, InboundMegolmSessions)
 
         // ==================== SESSION IMPORT/EXPORT =================== //
 
-        auto exported_session_key     = export_session(inbound_megolm_session.get());
+        auto exported_session_key     = export_session(inbound_megolm_session.get(), -1);
         auto restored_inbound_session = import_session(exported_session_key);
 
         // Decrypt message again.

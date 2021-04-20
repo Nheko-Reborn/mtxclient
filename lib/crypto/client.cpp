@@ -659,10 +659,11 @@ mtx::crypto::session_key(OlmOutboundGroupSession *s)
 }
 
 std::string
-mtx::crypto::export_session(OlmInboundGroupSession *s)
+mtx::crypto::export_session(OlmInboundGroupSession *s, uint32_t at_index)
 {
-        const size_t len     = olm_export_inbound_group_session_length(s);
-        const uint32_t index = olm_inbound_group_session_first_known_index(s);
+        const size_t len = olm_export_inbound_group_session_length(s);
+        const uint32_t index =
+          at_index == uint32_t(-1) ? olm_inbound_group_session_first_known_index(s) : at_index;
 
         auto session_key = create_buffer(len);
         const std::size_t ret =
