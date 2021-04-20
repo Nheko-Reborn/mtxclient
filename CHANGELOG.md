@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.5.1] -- 2021-04-20
+
+* Allow exporting a session with a specific minimum index instead of all known indices.
+
 ## [0.5.0] -- 2021-04-18
 
 * Support edits
