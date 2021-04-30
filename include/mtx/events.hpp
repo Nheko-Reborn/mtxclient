@@ -56,6 +56,7 @@ template<class Content>
 void
 to_json(json &obj, const DeviceEvent<Content> &event);
 
+//! Additional server provided data for this event.
 struct UnsignedData
 {
         //! The time in milliseconds that has elapsed since the event was sent.
@@ -67,7 +68,9 @@ struct UnsignedData
         //! The client-supplied transaction ID, if the client
         //! being given the event is the same one which sent it.
         std::string transaction_id;
+        //! The previous sender of a state event.
         std::string prev_sender;
+        //! The replaced state event.
         std::string replaces_state;
         //! The event ID that redacted this event.
         std::string redacted_by;
