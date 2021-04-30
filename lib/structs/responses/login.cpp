@@ -16,7 +16,7 @@ from_json(const nlohmann::json &obj, Login &response)
         if (obj.count("device_id") != 0)
                 response.device_id = obj.at("device_id").get<std::string>();
 
-        if (obj.count("well_known") != 0)
+        if (obj.count("well_known") != 0 && obj.at("well_known").is_object())
                 response.well_known = obj.at("well_known").get<WellKnown>();
 }
 
