@@ -51,12 +51,6 @@ to_json(json &obj, const CreateRoom &request)
 void
 to_json(json &obj, const Login &request)
 {
-        if (!request.medium.empty())
-                obj["medium"] = request.medium;
-
-        if (!request.address.empty())
-                obj["address"] = request.address;
-
         if (!request.token.empty())
                 obj["token"] = request.token;
 
@@ -69,7 +63,25 @@ to_json(json &obj, const Login &request)
         if (!request.initial_device_display_name.empty())
                 obj["initial_device_display_name"] = request.initial_device_display_name;
 
-        obj["user"] = request.user;
+        std::visit(
+          [&obj](const auto &id) {
+                  if constexpr (std::is_same_v<const login_identifier::User &, decltype(id)>) {
+                          obj["identifier"]["type"] = "m.id.user";
+                          obj["identifier"]["user"] = id.user;
+                  } else if constexpr (std::is_same_v<const login_identifier::Thirdparty &,
+                                                      decltype(id)>) {
+                          obj["identifier"]["type"]    = "m.id.thirdparty";
+                          obj["identifier"]["medium"]  = id.medium;
+                          obj["identifier"]["address"] = id.address;
+                  } else if constexpr (std::is_same_v<const login_identifier::PhoneNumber &,
+                                                      decltype(id)>) {
+                          obj["identifier"]["type"]    = "m.id.phone";
+                          obj["identifier"]["country"] = id.country;
+                          obj["identifier"]["phone"]   = id.phone;
+                  }
+          },
+          request.identifier);
+
         obj["type"] = request.type;
 }
 

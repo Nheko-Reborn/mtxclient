@@ -57,18 +57,45 @@ struct CreateRoom
 void
 to_json(json &obj, const CreateRoom &request);
 
+namespace login_identifier {
+//! The user is identified by their Matrix ID.
+struct User
+{
+        //! A client can identify a user using their Matrix ID. This can either be the fully
+        //! qualified Matrix user ID, or just the localpart of the user ID.
+        std::string user;
+};
+//! The user is identified by a third-party identifier in canonicalised form.
+struct Thirdparty
+{
+        //! The medium of the third party identifier
+        std::string medium;
+        //! The canonicalised third party address of the user
+        std::string address;
+};
+//! The user is identified by a phone number.
+struct PhoneNumber
+{
+        //! The country is the two-letter uppercase ISO-3166-1 alpha-2 country code that the number
+        //! in phone should be parsed as if it were dialled from.
+        std::string country;
+        //! The phone number. If the client wishes to canonicalise the phone number, then it can use
+        //! the m.id.thirdparty identifier type with a medium of msisdn instead.
+        std::string phone;
+};
+}
+
 //! Request payload for the `POST /_matrix/client/r0/login` endpoint.
 struct Login
 {
         //! The login type being used. One of ["m.login.password", "m.login.token"]
         std::string type = "m.login.password";
-        //! The fully qualified user ID or just local part of the user ID, to log in.
-        std::string user;
-        //! When logging in using a third party identifier, the medium of the identifier.
-        //! Must be 'email'.
-        std::string medium;
-        //! Third party identifier for the user.
-        std::string address;
+        //! Identification information for the user. Usually you use `login_identifier::User` with
+        //! an mxid. Required.
+        std::variant<login_identifier::User,
+                     login_identifier::Thirdparty,
+                     login_identifier::PhoneNumber>
+          identifier;
         //! Required when type is m.login.token. The login token.
         std::string token;
         //! Required when type is m.login.password. The user's password.

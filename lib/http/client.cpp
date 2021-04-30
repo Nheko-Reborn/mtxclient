@@ -418,7 +418,7 @@ Client::login(const std::string &user,
               Callback<mtx::responses::Login> callback)
 {
         mtx::requests::Login req;
-        req.user                        = user;
+        req.identifier                  = mtx::requests::login_identifier::User{user};
         req.password                    = password;
         req.initial_device_display_name = device_name;
 
@@ -431,8 +431,8 @@ Client::login(const std::string &user,
               Callback<mtx::responses::Login> callback)
 {
         mtx::requests::Login req;
-        req.user     = user;
-        req.password = password;
+        req.identifier = mtx::requests::login_identifier::User{user};
+        req.password   = password;
 
         login(req, callback);
 }
