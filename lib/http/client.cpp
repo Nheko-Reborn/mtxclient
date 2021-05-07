@@ -576,10 +576,12 @@ Client::get_pushrules(const std::string &scope,
                       const std::string &ruleId,
                       Callback<mtx::pushrules::PushRule> cb)
 {
-        get<mtx::pushrules::PushRule>("/client/r0/pushrules/" + scope + "/" + kind + "/" + ruleId,
-                                      [cb](const mtx::pushrules::PushRule &res,
-                                           HeaderFields,
-                                           RequestErr err) { cb(res, err); });
+        get<mtx::pushrules::PushRule>(
+          "/client/r0/pushrules/" + mtx::client::utils::url_encode(scope) + "/" +
+            mtx::client::utils::url_encode(kind) + "/" + mtx::client::utils::url_encode(ruleId),
+          [cb](const mtx::pushrules::PushRule &res, HeaderFields, RequestErr err) {
+                  cb(res, err);
+          });
 }
 
 void
@@ -588,7 +590,8 @@ Client::delete_pushrules(const std::string &scope,
                          const std::string &ruleId,
                          ErrCallback cb)
 {
-        delete_("/client/r0/pushrules/" + scope + "/" + kind + "/" +
+        delete_("/client/r0/pushrules/" + mtx::client::utils::url_encode(scope) + "/" +
+                  mtx::client::utils::url_encode(kind) + "/" +
                   mtx::client::utils::url_encode(ruleId),
                 cb);
 }
@@ -610,11 +613,12 @@ Client::put_pushrules(const std::string &scope,
         if (!after.empty())
                 params.emplace("after", after);
 
-        put<mtx::pushrules::PushRule>("/client/r0/pushrules/" + scope + "/" + kind + "/" +
-                                        mtx::client::utils::url_encode(ruleId) + "?" +
-                                        mtx::client::utils::query_params(params),
-                                      rule,
-                                      cb);
+        std::string path = "/client/r0/pushrules/" + mtx::client::utils::url_encode(scope) + "/" +
+                           mtx::client::utils::url_encode(kind) + "/" +
+                           mtx::client::utils::url_encode(ruleId);
+        if (!params.empty())
+                path += "?" + mtx::client::utils::query_params(params);
+        put<mtx::pushrules::PushRule>(path, rule, cb);
 }
 
 void
@@ -624,8 +628,9 @@ Client::get_pushrules_enabled(const std::string &scope,
                               Callback<mtx::pushrules::Enabled> cb)
 {
         get<mtx::pushrules::Enabled>(
-          "/client/r0/pushrules/" + scope + "/" + kind + "/" +
-            mtx::client::utils::url_encode(ruleId) + "/enabled",
+          "/client/r0/pushrules/" + mtx::client::utils::url_encode(scope) + "/" +
+            mtx::client::utils::url_encode(kind) + "/" + mtx::client::utils::url_encode(ruleId) +
+            "/enabled",
           [cb](const mtx::pushrules::Enabled &res, HeaderFields, RequestErr err) { cb(res, err); });
 }
 
@@ -636,7 +641,9 @@ Client::put_pushrules_enabled(const std::string &scope,
                               bool enabled,
                               ErrCallback cb)
 {
-        put<mtx::pushrules::Enabled>("/client/r0/pushrules/" + scope + "/" + kind + "/" +
+        put<mtx::pushrules::Enabled>("/client/r0/pushrules/" +
+                                       mtx::client::utils::url_encode(scope) + "/" +
+                                       mtx::client::utils::url_encode(kind) + "/" +
                                        mtx::client::utils::url_encode(ruleId) + "/enabled",
                                      {enabled},
                                      cb);
@@ -648,11 +655,13 @@ Client::get_pushrules_actions(const std::string &scope,
                               const std::string &ruleId,
                               Callback<mtx::pushrules::actions::Actions> cb)
 {
-        get<mtx::pushrules::actions::Actions>("/client/r0/pushrules/" + scope + "/" + kind + "/" +
-                                                mtx::client::utils::url_encode(ruleId) + "/actions",
-                                              [cb](const mtx::pushrules::actions::Actions &res,
-                                                   HeaderFields,
-                                                   RequestErr err) { cb(res, err); });
+        get<mtx::pushrules::actions::Actions>(
+          "/client/r0/pushrules/" + mtx::client::utils::url_encode(scope) + "/" +
+            mtx::client::utils::url_encode(kind) + "/" + mtx::client::utils::url_encode(ruleId) +
+            "/actions",
+          [cb](const mtx::pushrules::actions::Actions &res, HeaderFields, RequestErr err) {
+                  cb(res, err);
+          });
 }
 
 void
@@ -662,7 +671,9 @@ Client::put_pushrules_actions(const std::string &scope,
                               const mtx::pushrules::actions::Actions &actions,
                               ErrCallback cb)
 {
-        put<mtx::pushrules::actions::Actions>("/client/r0/pushrules/" + scope + "/" + kind + "/" +
+        put<mtx::pushrules::actions::Actions>("/client/r0/pushrules/" +
+                                                mtx::client::utils::url_encode(scope) + "/" +
+                                                mtx::client::utils::url_encode(kind) + "/" +
                                                 mtx::client::utils::url_encode(ruleId) + "/actions",
                                               actions,
                                               cb);
