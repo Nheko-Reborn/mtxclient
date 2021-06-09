@@ -34,12 +34,14 @@ template<class Content>
 from_json(const json &obj, Event<Content> &event)
 {
         if (obj.at("content").contains("m.new_content")) {
-                auto new_content = obj.at("content");
-                for (const auto &e : obj["content"]["m.new_content"].items()) {
-                        if (e.key() != "m.relates_to" &&
-                            e.key() != "im.nheko.relations.v1.relations")
-                                new_content[e.key()] = e.value();
-                }
+                auto new_content = obj.at("content").at("m.new_content");
+
+                if (obj.at("content").contains("m.relates_to"))
+                        new_content["m.relates_to"] = obj.at("content").at("m.relates_to");
+                if (obj.at("content").contains("im.nheko.relations.v1.relations"))
+                        new_content["im.nheko.relations.v1.relations"] =
+                          obj.at("content").at("im.nheko.relations.v1.relations");
+
                 event.content = new_content.get<Content>();
         } else {
                 event.content = obj.at("content").get<Content>();
