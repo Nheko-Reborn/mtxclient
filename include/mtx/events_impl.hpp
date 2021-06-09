@@ -38,6 +38,9 @@ from_json(const json &obj, Event<Content> &event)
 
                 if (obj.at("content").contains("m.relates_to"))
                         new_content["m.relates_to"] = obj.at("content").at("m.relates_to");
+                if (obj.at("content").at("m.new_content").contains("m.relates_to"))
+                        new_content["m.new_content"]["m.relates_to"] =
+                          obj.at("content").at("m.new_content").at("m.relates_to");
                 if (obj.at("content").contains("im.nheko.relations.v1.relations"))
                         new_content["im.nheko.relations.v1.relations"] =
                           obj.at("content").at("im.nheko.relations.v1.relations");
