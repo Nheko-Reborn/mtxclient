@@ -27,6 +27,7 @@
 #include "mtx/events/presence.hpp"
 #include "mtx/events/reaction.hpp"
 #include "mtx/events/redaction.hpp"
+#include "mtx/events/spaces.hpp"
 #include "mtx/events/tag.hpp"
 #include "mtx/events/tombstone.hpp"
 #include "mtx/events/topic.hpp"
@@ -94,6 +95,8 @@ using StateEvents = std::variant<events::StateEvent<states::Aliases>,
                                  events::StateEvent<states::Name>,
                                  events::StateEvent<states::PinnedEvents>,
                                  events::StateEvent<states::PowerLevels>,
+                                 events::StateEvent<states::space::Child>,
+                                 events::StateEvent<states::space::Parent>,
                                  events::StateEvent<states::Tombstone>,
                                  events::StateEvent<states::Topic>,
                                  events::StateEvent<msgs::Redacted>,
@@ -112,6 +115,8 @@ using StrippedEvents = std::variant<events::StrippedEvent<states::Aliases>,
                                     events::StrippedEvent<states::Name>,
                                     events::StrippedEvent<states::PinnedEvents>,
                                     events::StrippedEvent<states::PowerLevels>,
+                                    events::StrippedEvent<states::space::Child>,
+                                    events::StrippedEvent<states::space::Parent>,
                                     events::StrippedEvent<states::Tombstone>,
                                     events::StrippedEvent<states::Topic>,
                                     events::StrippedEvent<Unknown>>;
@@ -130,6 +135,8 @@ using TimelineEvents = std::variant<events::StateEvent<states::Aliases>,
                                     events::StateEvent<states::Name>,
                                     events::StateEvent<states::PinnedEvents>,
                                     events::StateEvent<states::PowerLevels>,
+                                    events::StateEvent<states::space::Child>,
+                                    events::StateEvent<states::space::Parent>,
                                     events::StateEvent<states::Tombstone>,
                                     events::StateEvent<states::Topic>,
                                     events::StateEvent<msc2545::ImagePack>,
@@ -262,6 +269,14 @@ constexpr inline EventType state_content_to_type<mtx::events::state::PowerLevels
 template<>
 constexpr inline EventType state_content_to_type<mtx::events::state::Tombstone> =
   EventType::RoomTombstone;
+
+template<>
+constexpr inline EventType state_content_to_type<mtx::events::state::space::Child> =
+  EventType::SpaceChild;
+template<>
+constexpr inline EventType state_content_to_type<mtx::events::state::space::Parent> =
+  EventType::SpaceParent;
+
 template<>
 constexpr inline EventType state_content_to_type<mtx::events::state::Topic> = EventType::RoomTopic;
 template<>

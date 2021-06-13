@@ -108,6 +108,8 @@ TEST(Events, Conversions)
         EXPECT_EQ("m.room.tombstone", ns::to_string(ns::EventType::RoomTombstone));
         EXPECT_EQ("m.room.redaction", ns::to_string(ns::EventType::RoomRedaction));
         EXPECT_EQ("m.room.pinned_events", ns::to_string(ns::EventType::RoomPinnedEvents));
+        EXPECT_EQ("m.space.child", ns::to_string(ns::EventType::SpaceChild));
+        EXPECT_EQ("m.space.parent", ns::to_string(ns::EventType::SpaceParent));
         EXPECT_EQ("m.tag", ns::to_string(ns::EventType::Tag));
 }
 
@@ -239,6 +241,71 @@ TEST(StateEvents, Create)
         EXPECT_EQ(event.origin_server_ts, 1506761923948L);
         EXPECT_EQ(event.state_key, "");
         EXPECT_EQ(event.content.creator, "@mujx:matrix.org");
+
+        json example_from_spec = R"({
+            "content": {
+                "creator": "@example:example.org",
+                "m.federate": true,
+                "predecessor": {
+                    "event_id": "$something:example.org",
+                    "room_id": "!oldroom:example.org"
+                },
+                "room_version": "1"
+            },
+            "event_id": "$143273582443PhrSn:example.org",
+            "origin_server_ts": 1432735824653,
+            "room_id": "!jEsUZKDJdhlrceRyVU:example.org",
+            "sender": "@example:example.org",
+            "state_key": "",
+            "type": "m.room.create",
+            "unsigned": {
+                "age": 1234
+            }
+        })"_json;
+
+        event = example_from_spec;
+
+        EXPECT_EQ(event.type, ns::EventType::RoomCreate);
+        EXPECT_EQ(event.event_id, "$143273582443PhrSn:example.org");
+        EXPECT_EQ(event.sender, "@example:example.org");
+        EXPECT_EQ(event.unsigned_data.age, 1234);
+        EXPECT_EQ(event.origin_server_ts, 1432735824653L);
+        EXPECT_EQ(event.state_key, "");
+        EXPECT_EQ(event.content.creator, "@example:example.org");
+        EXPECT_EQ(event.content.federate, true);
+        EXPECT_EQ(event.content.room_version, "1");
+        EXPECT_EQ(event.content.predecessor->room_id, "!oldroom:example.org");
+        EXPECT_EQ(event.content.predecessor->event_id, "$something:example.org");
+}
+
+TEST(StateEvents, CreateWithType)
+{
+        json data = R"({
+          "origin_server_ts": 1506761923948,
+          "sender": "@mujx:matrix.org",
+          "event_id": "$15067619231414398jhvQC:matrix.org",
+          "unsigned": {
+            "age": 3715756343
+          },
+          "state_key": "",
+          "content": {
+            "creator": "@mujx:matrix.org",
+            "type": "m.space"
+          },
+          "type": "m.room.create"
+        })"_json;
+
+        ns::StateEvent<ns::state::Create> event = data;
+
+        EXPECT_EQ(event.type, ns::EventType::RoomCreate);
+        EXPECT_EQ(event.event_id, "$15067619231414398jhvQC:matrix.org");
+        EXPECT_EQ(event.sender, "@mujx:matrix.org");
+        EXPECT_EQ(event.unsigned_data.age, 3715756343L);
+        EXPECT_EQ(event.origin_server_ts, 1506761923948L);
+        EXPECT_EQ(event.state_key, "");
+        EXPECT_EQ(event.content.creator, "@mujx:matrix.org");
+        EXPECT_TRUE(event.content.type.has_value());
+        EXPECT_EQ(event.content.type.value(), ns::state::room_type::space);
 
         json example_from_spec = R"({
             "content": {
@@ -715,6 +782,302 @@ TEST(StateEvents, Topic)
         EXPECT_EQ(event.unsigned_data.age, 37);
         EXPECT_EQ(event.state_key, "");
         EXPECT_EQ(event.content.topic, "Test topic");
+}
+
+TEST(StateEvents, SpaceChild)
+{
+        json data = R"({
+          "origin_server_ts": 1510476064445,
+          "sender": "@nheko_test:matrix.org",
+          "event_id": "$15104760642668662QICBu:matrix.org",
+      "type": "m.space.child",
+      "state_key": "!abcd:example.com",
+      "content": {
+          "via": ["example.com", "test.org"]
+      }
+}
+        )"_json;
+
+        ns::StateEvent<ns::state::space::Child> event = data;
+
+        EXPECT_EQ(event.type, ns::EventType::SpaceChild);
+        EXPECT_EQ(event.event_id, "$15104760642668662QICBu:matrix.org");
+        EXPECT_EQ(event.sender, "@nheko_test:matrix.org");
+        EXPECT_EQ(event.origin_server_ts, 1510476064445);
+        EXPECT_EQ(event.state_key, "!abcd:example.com");
+        ASSERT_TRUE(event.content.via.has_value());
+        std::vector<std::string> via{"example.com", "test.org"};
+        EXPECT_EQ(event.content.via, via);
+        EXPECT_FALSE(event.content.order.has_value());
+
+        data = R"({
+          "origin_server_ts": 1510476064445,
+          "sender": "@nheko_test:matrix.org",
+          "event_id": "$15104760642668662QICBu:matrix.org",
+        "type": "m.space.child",
+        "state_key": "!efgh:example.com",
+        "content": {
+        "via": ["example.com"],
+        "order": "abcd"
+    }
+}
+        )"_json;
+
+        event = data;
+
+        EXPECT_EQ(event.type, ns::EventType::SpaceChild);
+        EXPECT_EQ(event.event_id, "$15104760642668662QICBu:matrix.org");
+        EXPECT_EQ(event.sender, "@nheko_test:matrix.org");
+        EXPECT_EQ(event.origin_server_ts, 1510476064445);
+        EXPECT_EQ(event.state_key, "!efgh:example.com");
+        ASSERT_TRUE(event.content.via.has_value());
+        std::vector<std::string> via2{"example.com"};
+        EXPECT_EQ(event.content.via, via2);
+        ASSERT_TRUE(event.content.order.has_value());
+        ASSERT_EQ(event.content.order, "abcd");
+
+        data = R"({
+          "origin_server_ts": 1510476064445,
+          "sender": "@nheko_test:matrix.org",
+          "event_id": "$15104760642668662QICBu:matrix.org",
+        "type": "m.space.child",
+        "state_key": "!jklm:example.com",
+        "content": {}
+}
+        )"_json;
+
+        event = data;
+
+        EXPECT_EQ(event.type, ns::EventType::SpaceChild);
+        EXPECT_EQ(event.event_id, "$15104760642668662QICBu:matrix.org");
+        EXPECT_EQ(event.sender, "@nheko_test:matrix.org");
+        EXPECT_EQ(event.origin_server_ts, 1510476064445);
+        EXPECT_EQ(event.state_key, "!jklm:example.com");
+        ASSERT_FALSE(event.content.via.has_value());
+        ASSERT_FALSE(event.content.order.has_value());
+
+        data = R"({
+          "origin_server_ts": 1510476064445,
+          "sender": "@nheko_test:matrix.org",
+          "event_id": "$15104760642668662QICBu:matrix.org",
+        "type": "m.space.child",
+        "state_key": "!efgh:example.com",
+        "content": {
+        "via": ["example.com"],
+        "order": "01234567890123456789012345678901234567890123456789_"
+    }
+}
+        )"_json;
+
+        event = data;
+
+        EXPECT_EQ(event.type, ns::EventType::SpaceChild);
+        EXPECT_EQ(event.event_id, "$15104760642668662QICBu:matrix.org");
+        EXPECT_EQ(event.sender, "@nheko_test:matrix.org");
+        EXPECT_EQ(event.origin_server_ts, 1510476064445);
+        EXPECT_EQ(event.state_key, "!efgh:example.com");
+        EXPECT_TRUE(event.content.via.has_value());
+        ASSERT_FALSE(event.content.order.has_value());
+
+        data = R"({
+          "origin_server_ts": 1510476064445,
+          "sender": "@nheko_test:matrix.org",
+          "event_id": "$15104760642668662QICBu:matrix.org",
+        "type": "m.space.child",
+        "state_key": "!efgh:example.com",
+        "content": {
+        "via": [],
+        "order": "01234567890123456789012345678901234567890123456789_"
+    }
+}
+        )"_json;
+
+        event = data;
+
+        EXPECT_FALSE(event.content.via.has_value());
+
+        data = R"({
+          "origin_server_ts": 1510476064445,
+          "sender": "@nheko_test:matrix.org",
+          "event_id": "$15104760642668662QICBu:matrix.org",
+        "type": "m.space.child",
+        "state_key": "!efgh:example.com",
+        "content": {
+        "via": 5,
+        "order": "01234567890123456789012345678901234567890123456789_"
+    }
+}
+        )"_json;
+
+        event = data;
+
+        EXPECT_FALSE(event.content.via.has_value());
+        data = R"({
+          "origin_server_ts": 1510476064445,
+          "sender": "@nheko_test:matrix.org",
+          "event_id": "$15104760642668662QICBu:matrix.org",
+        "type": "m.space.child",
+        "state_key": "!efgh:example.com",
+        "content": {
+        "via": null,
+        "order": "01234567890123456789012345678901234567890123456789_"
+    }
+}
+        )"_json;
+
+        event = data;
+
+        EXPECT_FALSE(event.content.via.has_value());
+
+        data = R"({
+          "origin_server_ts": 1510476064445,
+          "sender": "@nheko_test:matrix.org",
+          "event_id": "$15104760642668662QICBu:matrix.org",
+        "type": "m.space.child",
+        "state_key": "!efgh:example.com",
+        "content": {
+        "order": "01234567890123456789012345678901234567890123456789_"
+    }
+}
+        )"_json;
+
+        event = data;
+
+        EXPECT_FALSE(event.content.via.has_value());
+}
+TEST(StateEvents, SpaceParent)
+{
+        json data = R"({
+          "origin_server_ts": 1510476064445,
+          "sender": "@nheko_test:matrix.org",
+          "event_id": "$15104760642668662QICBu:matrix.org",
+          "type": "m.space.parent",
+          "state_key": "!space:example.com",
+          "content": {
+            "via": ["example.com"],
+            "canonical": true
+          }
+        })"_json;
+
+        ns::StateEvent<ns::state::space::Parent> event = data;
+
+        EXPECT_EQ(event.type, ns::EventType::SpaceParent);
+        EXPECT_EQ(event.event_id, "$15104760642668662QICBu:matrix.org");
+        EXPECT_EQ(event.sender, "@nheko_test:matrix.org");
+        EXPECT_EQ(event.origin_server_ts, 1510476064445);
+        EXPECT_EQ(event.state_key, "!space:example.com");
+        ASSERT_TRUE(event.content.via.has_value());
+        std::vector<std::string> via{"example.com"};
+        EXPECT_EQ(event.content.via, via);
+        EXPECT_TRUE(event.content.canonical);
+
+        data = R"({
+          "origin_server_ts": 1510476064445,
+          "sender": "@nheko_test:matrix.org",
+          "event_id": "$15104760642668662QICBu:matrix.org",
+          "type": "m.space.parent",
+          "state_key": "!space:example.com",
+          "content": {
+            "via": ["example.org"]
+          }
+        })"_json;
+
+        event = data;
+
+        EXPECT_EQ(event.type, ns::EventType::SpaceParent);
+        EXPECT_EQ(event.event_id, "$15104760642668662QICBu:matrix.org");
+        EXPECT_EQ(event.sender, "@nheko_test:matrix.org");
+        EXPECT_EQ(event.origin_server_ts, 1510476064445);
+        EXPECT_EQ(event.state_key, "!space:example.com");
+        EXPECT_TRUE(event.content.via.has_value());
+        EXPECT_FALSE(event.content.canonical);
+
+        data = R"({
+          "origin_server_ts": 1510476064445,
+          "sender": "@nheko_test:matrix.org",
+          "event_id": "$15104760642668662QICBu:matrix.org",
+          "type": "m.space.parent",
+          "state_key": "!space:example.com",
+          "content": {
+            "via": [],
+            "canonical": true
+          }
+        })"_json;
+
+        event = data;
+
+        EXPECT_EQ(event.type, ns::EventType::SpaceParent);
+        EXPECT_EQ(event.event_id, "$15104760642668662QICBu:matrix.org");
+        EXPECT_EQ(event.sender, "@nheko_test:matrix.org");
+        EXPECT_EQ(event.origin_server_ts, 1510476064445);
+        EXPECT_EQ(event.state_key, "!space:example.com");
+        EXPECT_FALSE(event.content.via.has_value());
+        EXPECT_TRUE(event.content.canonical);
+
+        data = R"({
+          "origin_server_ts": 1510476064445,
+          "sender": "@nheko_test:matrix.org",
+          "event_id": "$15104760642668662QICBu:matrix.org",
+          "type": "m.space.parent",
+          "state_key": "!space:example.com",
+          "content": {
+            "via": null,
+            "canonical": true
+          }
+        })"_json;
+
+        event = data;
+
+        EXPECT_EQ(event.type, ns::EventType::SpaceParent);
+        EXPECT_EQ(event.event_id, "$15104760642668662QICBu:matrix.org");
+        EXPECT_EQ(event.sender, "@nheko_test:matrix.org");
+        EXPECT_EQ(event.origin_server_ts, 1510476064445);
+        EXPECT_EQ(event.state_key, "!space:example.com");
+        EXPECT_FALSE(event.content.via.has_value());
+        EXPECT_TRUE(event.content.canonical);
+
+        data = R"({
+          "origin_server_ts": 1510476064445,
+          "sender": "@nheko_test:matrix.org",
+          "event_id": "$15104760642668662QICBu:matrix.org",
+          "type": "m.space.parent",
+          "state_key": "!space:example.com",
+          "content": {
+            "via": 5,
+            "canonical": true
+          }
+        })"_json;
+
+        event = data;
+
+        EXPECT_EQ(event.type, ns::EventType::SpaceParent);
+        EXPECT_EQ(event.event_id, "$15104760642668662QICBu:matrix.org");
+        EXPECT_EQ(event.sender, "@nheko_test:matrix.org");
+        EXPECT_EQ(event.origin_server_ts, 1510476064445);
+        EXPECT_EQ(event.state_key, "!space:example.com");
+        EXPECT_FALSE(event.content.via.has_value());
+        EXPECT_TRUE(event.content.canonical);
+        data = R"({
+          "origin_server_ts": 1510476064445,
+          "sender": "@nheko_test:matrix.org",
+          "event_id": "$15104760642668662QICBu:matrix.org",
+          "type": "m.space.parent",
+          "state_key": "!space:example.com",
+          "content": {
+            "via": "adjsa",
+            "canonical": true
+          }
+        })"_json;
+
+        event = data;
+
+        EXPECT_EQ(event.type, ns::EventType::SpaceParent);
+        EXPECT_EQ(event.event_id, "$15104760642668662QICBu:matrix.org");
+        EXPECT_EQ(event.sender, "@nheko_test:matrix.org");
+        EXPECT_EQ(event.origin_server_ts, 1510476064445);
+        EXPECT_EQ(event.state_key, "!space:example.com");
+        EXPECT_FALSE(event.content.via.has_value());
+        EXPECT_TRUE(event.content.canonical);
 }
 
 TEST(StateEvents, ImagePack)

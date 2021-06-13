@@ -82,6 +82,12 @@ enum class EventType
         Presence,
         // m.push_rules
         PushRules,
+
+        // m.space.child
+        SpaceChild,
+        // m.space.parent
+        SpaceParent,
+
         // m.call.invite
         CallInvite,
         // m.call.candidates

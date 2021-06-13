@@ -28,6 +28,9 @@ from_json(const json &obj, Create &create)
 {
         create.creator = obj.at("creator");
 
+        if (obj.contains("type") && obj.at("type").is_string())
+                create.type = obj.at("type");
+
         if (obj.find("m.federate") != obj.end())
                 create.federate = obj.at("m.federate").get<bool>();
 
@@ -51,6 +54,8 @@ to_json(json &obj, const Create &create)
         else
                 obj["room_version"] = create.room_version;
 
+        if (create.type)
+                obj["type"] = create.type.value();
         if (create.predecessor)
                 obj["predecessor"] = *create.predecessor;
 }

@@ -698,6 +698,8 @@ MTXCLIENT_SEND_STATE_EVENT_FWD(state::PinnedEvents)
 MTXCLIENT_SEND_STATE_EVENT_FWD(state::PowerLevels)
 MTXCLIENT_SEND_STATE_EVENT_FWD(state::Tombstone)
 MTXCLIENT_SEND_STATE_EVENT_FWD(state::Topic)
+MTXCLIENT_SEND_STATE_EVENT_FWD(state::space::Child)
+MTXCLIENT_SEND_STATE_EVENT_FWD(state::space::Parent)
 MTXCLIENT_SEND_STATE_EVENT_FWD(msc2545::ImagePack)
 
 #define MTXCLIENT_SEND_ROOM_MESSAGE_FWD(Content)                                                   \

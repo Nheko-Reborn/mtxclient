@@ -166,6 +166,7 @@ target_sources(matrix_client
 	lib/structs/events/presence.cpp
 	lib/structs/events/reaction.cpp
 	lib/structs/events/redaction.cpp
+	lib/structs/events/spaces.cpp
 	lib/structs/events/tag.cpp
 	lib/structs/events/tombstone.cpp
 	lib/structs/events/topic.cpp

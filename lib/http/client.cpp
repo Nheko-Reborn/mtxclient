@@ -1449,6 +1449,8 @@ MTXCLIENT_SEND_STATE_EVENT(state::PinnedEvents)
 MTXCLIENT_SEND_STATE_EVENT(state::PowerLevels)
 MTXCLIENT_SEND_STATE_EVENT(state::Tombstone)
 MTXCLIENT_SEND_STATE_EVENT(state::Topic)
+MTXCLIENT_SEND_STATE_EVENT(state::space::Child)
+MTXCLIENT_SEND_STATE_EVENT(state::space::Parent)
 MTXCLIENT_SEND_STATE_EVENT(msc2545::ImagePack)
 
 #define MTXCLIENT_SEND_ROOM_MESSAGE(Content)                                                       \

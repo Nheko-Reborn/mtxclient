@@ -72,6 +72,12 @@ getEventType(const std::string &type)
                 return EventType::RoomTombstone;
         else if (type == "m.sticker")
                 return EventType::Sticker;
+
+        else if (type == "m.space.child")
+                return EventType::SpaceChild;
+        else if (type == "m.space.parent")
+                return EventType::SpaceParent;
+
         else if (type == "m.tag")
                 return EventType::Tag;
         else if (type == "m.presence")
@@ -174,6 +180,12 @@ to_string(EventType type)
                 return "m.room.tombstone";
         case EventType::Sticker:
                 return "m.sticker";
+
+        case EventType::SpaceChild:
+                return "m.space.child";
+        case EventType::SpaceParent:
+                return "m.space.parent";
+
         case EventType::Tag:
                 return "m.tag";
         case EventType::Presence:

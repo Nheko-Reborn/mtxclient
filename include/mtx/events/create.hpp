@@ -23,6 +23,12 @@ struct PreviousRoom
         std::string event_id;
 };
 
+//! Definitions of different room types.
+namespace room_type {
+//! The room type for a space.
+constexpr std::string_view space = "m.space";
+}
+
 //! Content of the `m.room.create` event.
 //
 //! This is the first event in a room and cannot be changed.
@@ -31,6 +37,9 @@ struct Create
 {
         //! The `user_id` of the room creator. This is set by the homeserver.
         std::string creator;
+
+        //! The room type, for example `m.space` for spaces.
+        std::optional<std::string> type;
 
         //! Whether users on other servers can join this room.
         //! Defaults to **true** if key does not exist.
