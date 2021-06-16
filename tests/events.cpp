@@ -308,39 +308,26 @@ TEST(StateEvents, CreateWithType)
         EXPECT_EQ(event.content.type.value(), ns::state::room_type::space);
 
         json example_from_spec = R"({
-            "content": {
-                "creator": "@example:example.org",
-                "m.federate": true,
-                "predecessor": {
-                    "event_id": "$something:example.org",
-                    "room_id": "!oldroom:example.org"
-                },
-                "room_version": "1"
-            },
-            "event_id": "$143273582443PhrSn:example.org",
-            "origin_server_ts": 1432735824653,
-            "room_id": "!jEsUZKDJdhlrceRyVU:example.org",
-            "sender": "@example:example.org",
-            "state_key": "",
-            "type": "m.room.create",
-            "unsigned": {
-                "age": 1234
-            }
-        })"_json;
+  "content": {
+    "creator": "@deepbluev7:neko.dev",
+    "room_version": "6",
+    "type": "m.space"
+  },
+  "origin_server_ts": 1623788764437,
+  "sender": "@deepbluev7:neko.dev",
+  "state_key": "",
+  "type": "m.room.create",
+  "unsigned": {
+    "age": 2241800
+  },
+  "event_id": "$VXf-Ze1j8D3KQ95b66sB7cNp1LzCqOHOJ8nk2iHtZvE",
+  "room_id": "!KLPDfgYGHhdZWLbUwD:neko.dev"
+})"_json;
 
         event = example_from_spec;
 
-        EXPECT_EQ(event.type, ns::EventType::RoomCreate);
-        EXPECT_EQ(event.event_id, "$143273582443PhrSn:example.org");
-        EXPECT_EQ(event.sender, "@example:example.org");
-        EXPECT_EQ(event.unsigned_data.age, 1234);
-        EXPECT_EQ(event.origin_server_ts, 1432735824653L);
-        EXPECT_EQ(event.state_key, "");
-        EXPECT_EQ(event.content.creator, "@example:example.org");
-        EXPECT_EQ(event.content.federate, true);
-        EXPECT_EQ(event.content.room_version, "1");
-        EXPECT_EQ(event.content.predecessor->room_id, "!oldroom:example.org");
-        EXPECT_EQ(event.content.predecessor->event_id, "$something:example.org");
+        EXPECT_TRUE(event.content.type.has_value());
+        EXPECT_EQ(event.content.type.value(), ns::state::room_type::space);
 }
 
 TEST(StateEvents, GuestAccess)
