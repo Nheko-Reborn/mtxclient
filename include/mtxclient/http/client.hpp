@@ -422,6 +422,18 @@ public:
                        const std::string &event_id,
                        Callback<mtx::events::collections::TimelineEvents> cb);
 
+        //! Retrieve a single state event.
+        template<class Payload>
+        void get_state_event(const std::string &room_id,
+                             const std::string &type,
+                             const std::string &state_key,
+                             Callback<Payload> payload);
+        //! Retrieve a single state event.
+        template<class Payload>
+        void get_state_event(const std::string &room_id,
+                             const std::string &state_key,
+                             Callback<Payload> cb);
+
         //! Store a room account_data event.
         template<class Payload>
         void put_room_account_data(const std::string &room_id,

@@ -1257,6 +1257,61 @@ TEST(ClientAPI, SendStateEvents)
         bob->close();
 }
 
+TEST(ClientAPI, GetStateEvents)
+{
+        auto alice = make_test_client();
+        auto bob   = make_test_client();
+
+        alice->login("alice", "secret", [alice](const mtx::responses::Login &, RequestErr err) {
+                check_error(err);
+        });
+
+        bob->login("bob", "secret", [bob](const mtx::responses::Login &, RequestErr err) {
+                check_error(err);
+        });
+
+        while (alice->access_token().empty() || bob->access_token().empty())
+                sleep();
+
+        mtx::requests::CreateRoom req;
+        // req.visibility = common::RoomVisibility::Public;
+        req.name = "This is a test";
+        alice->create_room(
+          req, [alice, bob](const mtx::responses::CreateRoom &res, RequestErr err) {
+                  check_error(err);
+                  auto room_id = res.room_id;
+
+                  mtx::events::state::HistoryVisibility vis;
+                  vis.history_visibility = mtx::events::state::Visibility::WorldReadable;
+                  alice->send_state_event<mtx::events::state::HistoryVisibility>(
+                    room_id.to_string(),
+                    vis,
+                    [room_id, bob](const mtx::responses::EventId &, RequestErr err) {
+                            ASSERT_FALSE(err);
+
+                            bob->get_state_event<mtx::events::state::Name>(
+                              room_id.to_string(),
+                              "",
+                              [](const mtx::events::state::Name &name, RequestErr err) {
+                                      ASSERT_FALSE(err);
+
+                                      EXPECT_EQ(name.name, "This is a test");
+                              });
+                    });
+
+                  alice->get_state_event<mtx::events::state::Name>(
+                    room_id.to_string(),
+                    "",
+                    [](const mtx::events::state::Name &name, RequestErr err) {
+                            ASSERT_FALSE(err);
+
+                            EXPECT_EQ(name.name, "This is a test");
+                    });
+          });
+
+        alice->close();
+        bob->close();
+}
 TEST(ClientAPI, Pagination)
 {
         auto alice = make_test_client();

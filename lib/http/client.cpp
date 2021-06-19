@@ -1433,7 +1433,16 @@ Client::set_pusher(const mtx::requests::SetPusher &req, Callback<mtx::responses:
         template void mtx::http::Client::send_state_event<mtx::events::Content>(                   \
           const std::string &,                                                                     \
           const mtx::events::Content &,                                                            \
-          Callback<mtx::responses::EventId> cb);
+          Callback<mtx::responses::EventId> cb);                                                   \
+        template void mtx::http::Client::get_state_event<mtx::events::Content>(                    \
+          const std::string &room_id,                                                              \
+          const std::string &type,                                                                 \
+          const std::string &state_key,                                                            \
+          Callback<mtx::events::Content> cb);                                                      \
+        template void mtx::http::Client::get_state_event<mtx::events::Content>(                    \
+          const std::string &room_id,                                                              \
+          const std::string &state_key,                                                            \
+          Callback<mtx::events::Content> cb);
 
 MTXCLIENT_SEND_STATE_EVENT(state::Aliases)
 MTXCLIENT_SEND_STATE_EVENT(state::Avatar)

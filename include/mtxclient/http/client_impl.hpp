@@ -237,6 +237,33 @@ mtx::http::Client::send_state_event(const std::string &room_id,
 
 template<class Payload>
 [[gnu::used, llvm::used]] void
+mtx::http::Client::get_state_event(const std::string &room_id,
+                                   const std::string &type,
+                                   const std::string &state_key,
+                                   Callback<Payload> cb)
+{
+        const auto api_path = "/client/r0/rooms/" + mtx::client::utils::url_encode(room_id) +
+                              "/state/" + mtx::client::utils::url_encode(type) + "/" +
+                              mtx::client::utils::url_encode(state_key);
+
+        get<Payload>(api_path,
+                     [cb](const Payload &res, HeaderFields, RequestErr err) { cb(res, err); });
+}
+template<class Payload>
+[[gnu::used, llvm::used]] void
+mtx::http::Client::get_state_event(const std::string &room_id,
+                                   const std::string &state_key,
+                                   Callback<Payload> cb)
+{
+        constexpr auto event_type = mtx::events::state_content_to_type<Payload>;
+        static_assert(event_type != mtx::events::EventType::Unsupported);
+
+        get_state_event<Payload>(
+          room_id, mtx::events::to_string(event_type), state_key, std::move(cb));
+}
+
+template<class Payload>
+[[gnu::used, llvm::used]] void
 mtx::http::Client::put_room_account_data(const std::string &room_id,
                                          const std::string &type,
                                          const Payload &payload,
