@@ -29,6 +29,13 @@ option(USE_BUNDLED_JSON "Use the bundled version of nlohmann json."
 	${HUNTER_ENABLED})
 option(USE_BUNDLED_OPENSSL "Use the bundled version of OpenSSL."
 	${HUNTER_ENABLED})
+option(USE_BUNDLED_COEURL "Use a bundled version of the Curl wrapper"
+	${HUNTER_ENABLED})
+option(USE_BUNDLED_SPDLOG "Use the bundled version of spdlog." ${HUNTER_ENABLED})
+option(USE_BUNDLED_LIBEVENT "Use the bundled version of spdlog." ${HUNTER_ENABLED})
+option(USE_BUNDLED_LIBCURL "Use the bundled version of spdlog." ${HUNTER_ENABLED})
+option(USE_BUNDLED_SPDLOG "Use the bundled version of spdlog." ${HUNTER_ENABLED})
+
 
 if (CMAKE_VERSION VERSION_GREATER_EQUAL 3.12)
 project(matrix_client
@@ -73,6 +80,8 @@ endif()
 if(ASAN)
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address,undefined")
 endif()
+
+add_library(matrix_client)
 
 if(NOT MSVC AND NOT APPLE)
 	set(THREADS_PREFER_PTHREAD_FLAG ON)
@@ -128,12 +137,59 @@ set_package_properties(Boost PROPERTIES
 	TYPE REQUIRED
 	)
 
-add_library(matrix_client)
+## Need to repeat all libevent deps?!?
+# libevent
+if (USE_BUNDLED_LIBEVENT)
+	hunter_add_package(Libevent)
+	find_package(Libevent CONFIG REQUIRED)
+else()
+	find_package(PkgConfig REQUIRED) 
+	pkg_check_modules(libevent_core REQUIRED IMPORTED_TARGET libevent_core)
+	if (WIN32)
+		pkg_check_modules(libevent_windows REQUIRED IMPORTED_TARGET libevent_windows)
+	else()
+		pkg_check_modules(libevent_pthreads REQUIRED IMPORTED_TARGET
+			libevent_pthreads)
+	endif()
+endif()
+
+# curl
+if (USE_BUNDLED_LIBCURL)
+	hunter_add_package(CURL)
+	find_package(CURL CONFIG REQUIRED)
+else()
+	find_package(PkgConfig REQUIRED) 
+	pkg_check_modules(libcurl REQUIRED IMPORTED_TARGET libcurl)
+endif()
+
+# spdlog
+if(USE_BUNDLED_SPDLOG)
+	hunter_add_package(spdlog)
+endif()
+find_package(spdlog 1.0.0 CONFIG REQUIRED)
+
+if(USE_BUNDLED_COEURL)
+	include(FetchContent)
+	FetchContent_Declare(
+		coeurl
+		GIT_REPOSITORY https://nheko.im/Nheko-Reborn/coeurl.git
+		GIT_TAG        417821a07cfe4429b08a2efed5e480a498087afd
+		)
+	FetchContent_MakeAvailable(coeurl)
+	target_link_libraries(matrix_client PUBLIC coeurl::coeurl)
+elseif(coeurl_DIR)
+	find_package(coeurl CONFIG REQUIRED)
+	target_link_libraries(matrix_client PUBLIC coeurl::coeurl)
+else()
+	find_package(PkgConfig REQUIRED)
+	pkg_check_modules(coeurl REQUIRED IMPORTED_TARGET coeurl)
+	target_link_libraries(matrix_client PUBLIC PkgConfig::coeurl)
+endif()
+
 
 target_sources(matrix_client
 	PRIVATE
 	lib/http/client.cpp
-	lib/http/session.cpp
 	lib/crypto/client.cpp
 	lib/crypto/encoding.cpp
 	lib/crypto/types.cpp

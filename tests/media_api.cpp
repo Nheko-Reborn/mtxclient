@@ -31,12 +31,12 @@ void
 validate_upload(const mtx::responses::ContentURI &res, RequestErr err)
 {
         if (err) {
-                if (err->status_code != boost::beast::http::status::unknown)
+                if (err->status_code)
                         cout << err->status_code << "\n";
                 if (!err->matrix_error.error.empty())
                         cout << err->matrix_error.error << "\n";
                 if (err->error_code)
-                        cout << err->error_code.message() << "\n";
+                        cout << err->error_code << "\n";
         }
 
         ASSERT_FALSE(err);

@@ -1,7 +1,6 @@
 #include <atomic>
 
 #include <boost/algorithm/string.hpp>
-#include <boost/variant.hpp>
 
 #include <gtest/gtest.h>
 
@@ -90,7 +89,7 @@ TEST(ClientAPI, LoginWrongPassword)
           "alice", "wrong_password", [](const mtx::responses::Login &res, RequestErr err) {
                   ASSERT_TRUE(err);
                   EXPECT_EQ(mtx::errors::to_string(err->matrix_error.errcode), "M_FORBIDDEN");
-                  EXPECT_EQ(err->status_code, boost::beast::http::status::forbidden);
+                  EXPECT_EQ(err->status_code, 403);
 
                   EXPECT_EQ(res.user_id.to_string(), "");
                   EXPECT_EQ(res.device_id, "");
@@ -107,7 +106,7 @@ TEST(ClientAPI, LoginWrongUsername)
         mtx_client->login("john", "secret", [](const mtx::responses::Login &res, RequestErr err) {
                 ASSERT_TRUE(err);
                 EXPECT_EQ(mtx::errors::to_string(err->matrix_error.errcode), "M_FORBIDDEN");
-                EXPECT_EQ(err->status_code, boost::beast::http::status::forbidden);
+                EXPECT_EQ(err->status_code, 403);
 
                 EXPECT_EQ(res.user_id.to_string(), "");
                 EXPECT_EQ(res.device_id, "");
@@ -152,24 +151,18 @@ TEST(ClientAPI, EmptyUserAvatar)
                 alice->set_avatar_url("", [alice, alice_id](RequestErr err) {
                         ASSERT_FALSE(err);
 
-                        auto done = false;
-
                         alice->get_profile(
                           alice_id.to_string(),
-                          [&done](const mtx::responses::Profile &res, RequestErr err) {
+                          [alice, alice_id](const mtx::responses::Profile &res, RequestErr err) {
                                   ASSERT_FALSE(err);
                                   ASSERT_TRUE(res.avatar_url.size() == 0);
-                                  done = true;
-                          });
 
-                        while (!done)
-                                sleep();
-
-                        alice->get_avatar_url(
-                          alice_id.to_string(),
-                          [](const mtx::responses::AvatarUrl &res, RequestErr err) {
-                                  ASSERT_FALSE(err);
-                                  ASSERT_TRUE(res.avatar_url.size() == 0);
+                                  alice->get_avatar_url(
+                                    alice_id.to_string(),
+                                    [](const mtx::responses::AvatarUrl &res, RequestErr err) {
+                                            ASSERT_FALSE(err);
+                                            ASSERT_TRUE(res.avatar_url.size() == 0);
+                                    });
                           });
                 });
         });
@@ -192,24 +185,19 @@ TEST(ClientAPI, RealUserAvatar)
                 alice->set_avatar_url(avatar_url, [alice, alice_id, avatar_url](RequestErr err) {
                         ASSERT_FALSE(err);
 
-                        auto done = false;
-
                         alice->get_profile(
                           alice_id.to_string(),
-                          [avatar_url, &done](const mtx::responses::Profile &res, RequestErr err) {
+                          [avatar_url, alice, alice_id](const mtx::responses::Profile &res,
+                                                        RequestErr err) {
                                   ASSERT_FALSE(err);
                                   ASSERT_TRUE(res.avatar_url == avatar_url);
-                                  done = true;
-                          });
-
-                        while (!done)
-                                sleep();
-
-                        alice->get_avatar_url(
-                          alice_id.to_string(),
-                          [avatar_url](const mtx::responses::AvatarUrl &res, RequestErr err) {
-                                  ASSERT_FALSE(err);
-                                  ASSERT_TRUE(res.avatar_url == avatar_url);
+                                  alice->get_avatar_url(
+                                    alice_id.to_string(),
+                                    [avatar_url](const mtx::responses::AvatarUrl &res,
+                                                 RequestErr err) {
+                                            ASSERT_FALSE(err);
+                                            ASSERT_TRUE(res.avatar_url == avatar_url);
+                                    });
                           });
                 });
         });
@@ -894,17 +882,12 @@ TEST(ClientAPI, Typing)
                         check_error(err);
 
                         const auto room_id = res.room_id.to_string();
-                        atomic_bool can_continue(false);
 
                         SyncOpts opts;
                         opts.timeout = 0;
                         alice->sync(
-                          opts,
-                          [room_id, &can_continue](const mtx::responses::Sync &res,
-                                                   RequestErr err) {
+                          opts, [room_id, alice](const mtx::responses::Sync &res, RequestErr err) {
                                   check_error(err);
-
-                                  can_continue = true;
 
                                   auto room = res.rooms.join.at(room_id);
 
@@ -915,29 +898,26 @@ TEST(ClientAPI, Typing)
                                       room.ephemeral.events.front())
                                       .content.user_ids.front(),
                                     "@alice:" + server_name());
-                          });
 
-                        while (!can_continue)
-                                sleep();
+                                  alice->stop_typing(room_id, [alice, room_id](RequestErr err) {
+                                          check_error(err);
 
-                        alice->stop_typing(
-                          res.room_id.to_string(), [alice, room_id](RequestErr err) {
-                                  check_error(err);
-
-                                  SyncOpts opts;
-                                  opts.timeout = 0;
-                                  alice->sync(
-                                    opts,
-                                    [room_id](const mtx::responses::Sync &res, RequestErr err) {
-                                            check_error(err);
-                                            auto room = res.rooms.join.at(room_id);
-                                            EXPECT_EQ(room.ephemeral.events.size(), 1);
-                                            EXPECT_EQ(std::get<mtx::events::EphemeralEvent<
-                                                        mtx::events::ephemeral::Typing>>(
-                                                        room.ephemeral.events.front())
-                                                        .content.user_ids.size(),
-                                                      0);
-                                    });
+                                          SyncOpts opts;
+                                          opts.timeout = 0;
+                                          alice->sync(
+                                            opts,
+                                            [room_id](const mtx::responses::Sync &res,
+                                                      RequestErr err) {
+                                                    check_error(err);
+                                                    auto room = res.rooms.join.at(room_id);
+                                                    EXPECT_EQ(room.ephemeral.events.size(), 1);
+                                                    EXPECT_EQ(std::get<mtx::events::EphemeralEvent<
+                                                                mtx::events::ephemeral::Typing>>(
+                                                                room.ephemeral.events.front())
+                                                                .content.user_ids.size(),
+                                                              0);
+                                            });
+                                  });
                           });
                 });
         });
@@ -1003,20 +983,24 @@ TEST(ClientAPI, PresenceOverSync)
         while (alice->access_token().empty() && bob->access_token().empty())
                 sleep();
 
+        std::atomic<bool> can_exit = false;
+
         mtx::requests::CreateRoom req;
         req.invite = {"@bob:" + server_name()};
         alice->create_room(
-          req, [alice, bob](const mtx::responses::CreateRoom &res, RequestErr err) {
+          req, [alice, bob, &can_exit](const mtx::responses::CreateRoom &res, RequestErr err) {
                   check_error(err);
                   auto room_id = res.room_id.to_string();
 
                   bob->join_room(
-                    room_id, [alice, bob, room_id](const mtx::responses::RoomId &, RequestErr err) {
+                    room_id,
+                    [alice, bob, room_id, &can_exit](const mtx::responses::RoomId &,
+                                                     RequestErr err) {
                             check_error(err);
                             alice->put_presence_status(
                               mtx::presence::unavailable,
                               "Is this thing on?",
-                              [alice, bob](RequestErr err) {
+                              [alice, bob, &can_exit](RequestErr err) {
                                       check_error(err);
 
                                       SyncOpts opts;
@@ -1024,14 +1008,17 @@ TEST(ClientAPI, PresenceOverSync)
                                       opts.set_presence = mtx::presence::online;
                                       alice->sync(
                                         opts,
-                                        [bob, opts](const mtx::responses::Sync &, RequestErr err) {
+                                        [bob, opts, &can_exit](const mtx::responses::Sync &,
+                                                               RequestErr err) {
                                                 check_error(err);
 
                                                 bob->sync(
                                                   opts,
-                                                  [bob](const mtx::responses::Sync &s,
-                                                        RequestErr err) {
+                                                  [bob, &can_exit](const mtx::responses::Sync &s,
+                                                                   RequestErr err) {
                                                           check_error(err);
+
+                                                          can_exit = true;
 
                                                           ASSERT_GE(s.presence.size(), 1);
 
@@ -1048,15 +1035,18 @@ TEST(ClientAPI, PresenceOverSync)
                                                                             "Is this thing "
                                                                             "on?");
                                                                   }
-                                                                  EXPECT_TRUE(found);
                                                           }
+                                                          EXPECT_TRUE(found);
                                                   });
                                         });
                               });
                     });
           });
 
+        WAIT_UNTIL(can_exit);
+
         alice->close();
+        bob->close();
 }
 
 TEST(ClientAPI, SendMessages)
@@ -1086,58 +1076,59 @@ TEST(ClientAPI, SendMessages)
                     room_id, [alice, bob, room_id](const mtx::responses::RoomId &, RequestErr err) {
                             check_error(err);
 
-                            // Flag to indicate when those messages would be ready to be read by
-                            // alice.
-                            vector<string> event_ids;
-
                             mtx::events::msg::Text text;
                             text.body = "hello alice!";
 
                             bob->send_room_message<mtx::events::msg::Text>(
                               room_id,
                               text,
-                              [&event_ids](const mtx::responses::EventId &res, RequestErr err) {
-                                      event_ids.push_back(res.event_id.to_string());
+                              [alice, bob, room_id](const mtx::responses::EventId &res,
+                                                    RequestErr err) {
+                                      auto evid1 = res.event_id.to_string();
                                       check_error(err);
-                              });
 
-                            mtx::events::msg::Emote emote;
-                            emote.body = "*bob tests";
+                                      mtx::events::msg::Emote emote;
+                                      emote.body = "*bob tests";
 
-                            bob->send_room_message<mtx::events::msg::Emote>(
-                              room_id,
-                              emote,
-                              [&event_ids](const mtx::responses::EventId &res, RequestErr err) {
-                                      event_ids.push_back(res.event_id.to_string());
-                                      check_error(err);
-                              });
-
-                            while (event_ids.size() != 2)
-                                    sleep();
-
-                            SyncOpts opts;
-                            opts.timeout = 0;
-                            alice->sync(opts,
-                                        [room_id, event_ids](const mtx::responses::Sync &res,
-                                                             RequestErr err) {
+                                      bob->send_room_message<mtx::events::msg::Emote>(
+                                        room_id,
+                                        emote,
+                                        [alice, room_id, evid1](const mtx::responses::EventId &res,
+                                                                RequestErr err) {
+                                                auto evid2 = res.event_id.to_string();
                                                 check_error(err);
 
-                                                auto ids = get_event_ids<TimelineEvents>(
-                                                  res.rooms.join.at(room_id).timeline.events);
+                                                SyncOpts opts;
+                                                opts.timeout = 0;
+                                                alice->sync(
+                                                  opts,
+                                                  [room_id, evid1, evid2](
+                                                    const mtx::responses::Sync &res,
+                                                    RequestErr err) {
+                                                          check_error(err);
 
-                                                // The sent event ids should be visible in the
-                                                // timeline.
-                                                for (const auto &event_id : event_ids)
-                                                        ASSERT_TRUE(std::find(ids.begin(),
-                                                                              ids.end(),
-                                                                              event_id) !=
-                                                                    std::end(ids));
+                                                          auto ids = get_event_ids<TimelineEvents>(
+                                                            res.rooms.join.at(room_id)
+                                                              .timeline.events);
+
+                                                          // The sent event ids should be visible in
+                                                          // the timeline.
+                                                          ASSERT_TRUE(std::find(ids.begin(),
+                                                                                ids.end(),
+                                                                                evid1) !=
+                                                                      std::end(ids));
+                                                          ASSERT_TRUE(std::find(ids.begin(),
+                                                                                ids.end(),
+                                                                                evid2) !=
+                                                                      std::end(ids));
+                                                  });
                                         });
+                              });
                     });
           });
 
-        alice->close();
         bob->close();
+        alice->close();
 }
 
 TEST(ClientAPI, RedactEvent)
@@ -1198,10 +1189,6 @@ TEST(ClientAPI, SendStateEvents)
                   check_error(err);
                   auto room_id = res.room_id;
 
-                  // Flag to indicate when those messages would be ready to be read by
-                  // alice.
-                  vector<string> event_ids;
-
                   mtx::events::state::Name event;
                   event.name = "Bob's room";
 
@@ -1219,37 +1206,42 @@ TEST(ClientAPI, SendStateEvents)
                   alice->send_state_event<mtx::events::state::Name>(
                     room_id.to_string(),
                     name_event,
-                    [&event_ids](const mtx::responses::EventId &res, RequestErr err) {
+                    [alice, room_id](const mtx::responses::EventId &res, RequestErr err) {
                             check_error(err);
-                            event_ids.push_back(res.event_id.to_string());
-                    });
+                            auto evid1 = res.event_id.to_string();
 
-                  mtx::events::state::Avatar avatar;
-                  avatar.url = "mxc://localhost/random";
-                  alice->send_state_event<mtx::events::state::Avatar>(
-                    room_id.to_string(),
-                    avatar,
-                    [&event_ids](const mtx::responses::EventId &res, RequestErr err) {
-                            check_error(err);
-                            event_ids.push_back(res.event_id.to_string());
-                    });
+                            mtx::events::state::Avatar avatar;
+                            avatar.url = "mxc://localhost/random";
+                            alice->send_state_event<mtx::events::state::Avatar>(
+                              room_id.to_string(),
+                              avatar,
+                              [alice, room_id, evid1](const mtx::responses::EventId &res,
+                                                      RequestErr err) {
+                                      check_error(err);
+                                      auto evid2 = res.event_id.to_string();
 
-                  while (event_ids.size() != 2)
-                          sleep();
+                                      SyncOpts opts;
+                                      opts.timeout = 0;
+                                      alice->sync(
+                                        opts,
+                                        [room_id, evid1, evid2](const mtx::responses::Sync &res,
+                                                                RequestErr err) {
+                                                check_error(err);
 
-                  SyncOpts opts;
-                  opts.timeout = 0;
-                  alice->sync(
-                    opts, [room_id, event_ids](const mtx::responses::Sync &res, RequestErr err) {
-                            check_error(err);
+                                                auto ids = get_event_ids<TimelineEvents>(
+                                                  res.rooms.join.at(room_id.to_string())
+                                                    .timeline.events);
 
-                            auto ids = get_event_ids<TimelineEvents>(
-                              res.rooms.join.at(room_id.to_string()).timeline.events);
-
-                            // The sent event ids should be visible in the timeline.
-                            for (const auto &event_id : event_ids)
-                                    ASSERT_TRUE(std::find(ids.begin(), ids.end(), event_id) !=
-                                                std::end(ids));
+                                                // The sent event ids should be visible in the
+                                                // timeline.
+                                                ASSERT_TRUE(std::find(ids.begin(),
+                                                                      ids.end(),
+                                                                      evid1) != std::end(ids));
+                                                ASSERT_TRUE(std::find(ids.begin(),
+                                                                      ids.end(),
+                                                                      evid2) != std::end(ids));
+                                        });
+                              });
                     });
           });
 
@@ -1394,8 +1386,6 @@ TEST(ClientAPI, ReadMarkers)
         alice->create_room(req, [alice](const mtx::responses::CreateRoom &res, RequestErr err) {
                 check_error(err);
 
-                string event_id;
-
                 mtx::events::msg::Text text;
                 text.body = "hello alice!";
 
@@ -1404,35 +1394,36 @@ TEST(ClientAPI, ReadMarkers)
                 alice->send_room_message<mtx::events::msg::Text>(
                   room_id.to_string(),
                   text,
-                  [alice, &event_id, room_id](const mtx::responses::EventId &res, RequestErr err) {
+                  [alice, room_id](const mtx::responses::EventId &res, RequestErr err) {
                           check_error(err);
 
-                          alice->read_event(room_id.to_string(),
-                                            res.event_id.to_string(),
-                                            [&event_id, res](RequestErr err) {
-                                                    check_error(err);
-                                                    event_id = res.event_id.to_string();
-                                            });
-                  });
+                          alice->read_event(
+                            room_id.to_string(),
+                            res.event_id.to_string(),
+                            [alice, room_id, res](RequestErr err) {
+                                    check_error(err);
+                                    auto event_id = res.event_id.to_string();
 
-                while (event_id.size() == 0)
-                        sleep();
+                                    SyncOpts opts;
+                                    opts.timeout = 0;
+                                    alice->sync(
+                                      opts,
+                                      [room_id, event_id](const mtx::responses::Sync &res,
+                                                          RequestErr err) {
+                                              check_error(err);
 
-                SyncOpts opts;
-                opts.timeout = 0;
-                alice->sync(
-                  opts, [room_id, event_id](const mtx::responses::Sync &res, RequestErr err) {
-                          check_error(err);
+                                              auto receipts = res.rooms.join.at(room_id.to_string())
+                                                                .ephemeral.events;
+                                              EXPECT_EQ(receipts.size(), 1);
 
-                          auto receipts = res.rooms.join.at(room_id.to_string()).ephemeral.events;
-                          EXPECT_EQ(receipts.size(), 1);
-
-                          auto users =
-                            std::get<mtx::events::EphemeralEvent<mtx::events::ephemeral::Receipt>>(
-                              receipts.front())
-                              .content.receipts[event_id];
-                          EXPECT_EQ(users.users.size(), 1);
-                          ASSERT_TRUE(users.users["@alice:" + server_name()].ts > 0);
+                                              auto users = std::get<mtx::events::EphemeralEvent<
+                                                mtx::events::ephemeral::Receipt>>(receipts.front())
+                                                             .content.receipts[event_id];
+                                              EXPECT_EQ(users.users.size(), 1);
+                                              ASSERT_TRUE(
+                                                users.users["@alice:" + server_name()].ts > 0);
+                                      });
+                            });
                   });
         });
 
@@ -1633,41 +1624,43 @@ TEST(Groups, Rooms)
           [alice, rooms_ids, random_group_id](const mtx::responses::GroupId &res, RequestErr err) {
                   check_error(err);
 
-                  std::atomic<int> rooms_added(0);
+                  EXPECT_EQ(res.group_id, std::string("+" + random_group_id + ":" + server_name()));
+
+                  auto group_id = res.group_id;
 
                   alice->add_room_to_group(
-                    rooms_ids.at(0), res.group_id, [&rooms_added](RequestErr err) {
+                    rooms_ids.at(0), group_id, [alice, group_id, rooms_ids](RequestErr err) {
                             check_error(err);
-                            rooms_added += 1;
+
+                            alice->add_room_to_group(
+                              rooms_ids.at(1),
+                              group_id,
+                              [alice, rooms_ids, group_id](RequestErr err) {
+                                      check_error(err);
+
+                                      alice->joined_groups(
+                                        [group_id](const mtx::responses::JoinedGroups &res,
+                                                   RequestErr err) {
+                                                check_error(err);
+
+                                                ASSERT_GE(res.groups.size(), 1);
+
+                                                for (const auto &g : res.groups) {
+                                                        if (g == group_id)
+
+                                                                return;
+                                                }
+
+                                                FAIL();
+                                        });
+
+                                      alice->group_rooms(
+                                        group_id, [](const nlohmann::json &res, RequestErr err) {
+                                                check_error(err);
+                                                EXPECT_GE(res.at("chunk").size(), 2);
+                                        });
+                              });
                     });
-
-                  alice->add_room_to_group(
-                    rooms_ids.at(1), res.group_id, [&rooms_added](RequestErr err) {
-                            check_error(err);
-                            rooms_added += 1;
-                    });
-
-                  WAIT_UNTIL(rooms_added == 2)
-
-                  alice->joined_groups([random_group_id](const mtx::responses::JoinedGroups &res,
-                                                         RequestErr err) {
-                          check_error(err);
-
-                          ASSERT_GE(res.groups.size(), 1);
-
-                          for (const auto &g : res.groups) {
-                                  if (g == std::string("+" + random_group_id + ":" + server_name()))
-                                          return;
-                          }
-
-                          FAIL();
-                  });
-
-                  alice->group_rooms("+" + random_group_id + ":" + server_name(),
-                                     [](const nlohmann::json &res, RequestErr err) {
-                                             check_error(err);
-                                             EXPECT_GE(res.at("chunk").size(), 2);
-                                     });
           });
 
         alice->close();
@@ -1726,118 +1719,232 @@ TEST(ClientAPI, PublicRooms)
         while (alice->access_token().empty() || bob->access_token().empty())
                 sleep();
 
+        std::string room_name = "Public Room" + alice->generate_txn_id();
         mtx::requests::CreateRoom req;
-        req.name            = "Public Room";
+        req.name            = room_name;
         req.topic           = "Test";
         req.visibility      = mtx::common::RoomVisibility::Public;
         req.invite          = {"@bob:" + server_name()};
         req.room_alias_name = alice->generate_txn_id();
         req.preset          = Preset::PublicChat;
 
-        alice->create_room(
-          req, [alice, bob](const mtx::responses::CreateRoom &res, RequestErr err) {
-                  check_error(err);
-                  auto room_id = res.room_id;
+        std::atomic<bool> can_exit = false;
 
-                  // TEST 1: endpoints to set and get the visibility of the room we just created
-                  mtx::requests::PublicRoomVisibility r;
-                  r.visibility = mtx::common::RoomVisibility::Public;
+        alice
+          ->create_room(req,
+                        [&can_exit, alice, bob, room_name](const mtx::responses::CreateRoom &res,
+                                                           RequestErr err) {
+                                check_error(err);
+                                auto room_id = res.room_id;
 
-                  alice->put_room_visibility(
-                    room_id.to_string(), r, [alice, bob, room_id](RequestErr err) {
-                            check_error(err);
+                                // TEST 1: endpoints to set and get the visibility of the room we
+                                // just created
+                                mtx::requests::PublicRoomVisibility r;
+                                r.visibility = mtx::common::RoomVisibility::Public;
 
-                            alice->get_room_visibility(
-                              "",
-                              [alice, room_id](const mtx::responses::PublicRoomVisibility &,
-                                               RequestErr err) {
-                                      ASSERT_TRUE(err);
-                                      EXPECT_EQ(mtx::errors::to_string(err->matrix_error.errcode),
-                                                "M_NOT_FOUND");
-                              });
+                                alice->put_room_visibility(
+                                  room_id.to_string(),
+                                  r,
+                                  [&can_exit, alice, bob, room_id, room_name](RequestErr err) {
+                                          check_error(err);
 
-                            alice->get_room_visibility(
-                              room_id.to_string(),
-                              [alice, bob, room_id](const mtx::responses::PublicRoomVisibility &res,
-                                                    RequestErr err) {
-                                      check_error(err);
-                                      EXPECT_EQ(mtx::common::visibilityToString(res.visibility),
-                                                "public");
+                                          // prevent unknown room error.
+                                          std::this_thread::sleep_for(std::chrono::seconds(1));
 
-                                      // TEST 2: endpoints to add and list the public rooms on the
-                                      // server
-                                      mtx::requests::PublicRooms room_req;
-                                      room_req.limit                = 1;
-                                      room_req.include_all_networks = true;
+                                          alice->get_room_visibility(
+                                            "",
+                                            [alice,
+                                             room_id](const mtx::responses::PublicRoomVisibility &,
+                                                      RequestErr err) {
+                                                    ASSERT_TRUE(err);
+                                                    EXPECT_EQ(mtx::errors::to_string(
+                                                                err->matrix_error.errcode),
+                                                              "M_NOT_FOUND");
+                                            });
 
-                                      alice->post_public_rooms(
-                                        room_req,
-                                        [alice, bob, room_id, room_req](
-                                          const mtx::responses::PublicRooms &, RequestErr err) {
-                                                check_error(err);
+                                          alice
+                                            ->get_room_visibility(
+                                              room_id.to_string(),
+                                              [&can_exit, alice, bob, room_id, room_name](
+                                                const mtx::responses::PublicRoomVisibility &res,
+                                                RequestErr err) {
+                                                      check_error(err);
+                                                      EXPECT_EQ(mtx::common::visibilityToString(
+                                                                  res.visibility),
+                                                                "public");
 
-                                                alice->get_public_rooms(
-                                                  [alice, bob, room_id](
-                                                    const mtx::responses::PublicRooms &res,
-                                                    RequestErr err) {
-                                                          check_error(err);
-                                                          EXPECT_EQ(res.chunk[0].name,
-                                                                    "Public Room");
-                                                          EXPECT_EQ(res.chunk[0].topic, "Test");
-                                                          EXPECT_EQ(res.chunk[0].num_joined_members,
-                                                                    1);
-                                                          // Have bob join the room and verify there
-                                                          // are 2 members
-                                                          std::atomic<bool> joined = false;
-                                                          bob->join_room(
-                                                            room_id.to_string(),
-                                                            [alice, bob, room_id, &joined](
-                                                              const mtx::responses::RoomId &,
-                                                              RequestErr err) {
-                                                                    check_error(err);
-                                                                    joined = true;
-                                                            });
-                                                          while (!joined)
-                                                                  sleep();
+                                                      // TEST 2: endpoints to add and list the
+                                                      // public rooms on the server
+                                                      mtx::requests::PublicRooms room_req;
+                                                      room_req.limit                = 10;
+                                                      room_req.include_all_networks = true;
 
-                                                          // Wait for background update
-                                                          sleep(1);
+                                                      alice
+                                                        ->post_public_rooms(
+                                                          room_req,
+                                                          [&can_exit,
+                                                           alice,
+                                                           bob,
+                                                           room_id,
+                                                           room_req,
+                                                           room_name](
+                                                            const mtx::responses::PublicRooms &,
+                                                            RequestErr err) {
+                                                                  check_error(err);
 
-                                                          alice->get_public_rooms(
-                                                            [alice, bob, room_id](
-                                                              const mtx::responses::PublicRooms
-                                                                &res,
-                                                              RequestErr err) {
-                                                                    check_error(err);
-                                                                    EXPECT_EQ(res.chunk[0]
-                                                                                .num_joined_members,
-                                                                              2);
+                                                                  // wait for background update
+                                                                  std::this_thread::sleep_for(
+                                                                    std::chrono::seconds(1));
 
-                                                                    // Teardown: remove the room
-                                                                    // from the room directory
-                                                                    // (maintain future tests)
-                                                                    mtx::requests::
-                                                                      PublicRoomVisibility r;
-                                                                    r.visibility = mtx::common::
-                                                                      RoomVisibility::Private;
-                                                                    alice->put_room_visibility(
-                                                                      room_id.to_string(),
-                                                                      r,
-                                                                      [alice, bob, room_id](
+                                                                  alice
+                                                                    ->get_public_rooms(
+                                                                      [&can_exit,
+                                                                       alice,
+                                                                       bob,
+                                                                       room_id,
+                                                                       room_name](
+                                                                        const mtx::responses::
+                                                                          PublicRooms &res,
                                                                         RequestErr err) {
                                                                               check_error(err);
-                                                                      });
-                                                            },
-                                                            server_name(),
-                                                            1);
-                                                  },
-                                                  server_name(),
-                                                  1);
-                                        },
-                                        server_name());
-                              });
-                    });
-          });
+
+                                                                              size_t idx = 0;
+                                                                              for (const auto &c :
+                                                                                   res.chunk) {
+                                                                                      if (
+                                                                                        c.room_id ==
+                                                                                        room_id
+                                                                                          .to_string())
+                                                                                              break;
+                                                                                      idx++;
+                                                                              }
+
+                                                                              if (idx >=
+                                                                                  res.chunk.size())
+                                                                                      ADD_FAILURE();
+                                                                              else {
+                                                                                      EXPECT_EQ(
+                                                                                        res
+                                                                                          .chunk
+                                                                                            [idx]
+                                                                                          .name,
+                                                                                        room_name);
+                                                                                      EXPECT_EQ(
+                                                                                        res
+                                                                                          .chunk
+                                                                                            [idx]
+                                                                                          .topic,
+                                                                                        "Test");
+                                                                                      EXPECT_EQ(
+                                                                                        res
+                                                                                          .chunk
+                                                                                            [idx]
+                                                                                          .num_joined_members,
+                                                                                        1);
+                                                                              }
+
+                                                                              // Have bob join the
+                                                                              // room and verify
+                                                                              // there are 2 members
+                                                                              bob->join_room(room_id
+                                                                                               .to_string(),
+                                                                                             [&can_exit, alice, bob, room_id](const mtx::responses::RoomId &, RequestErr err) {
+                                                                                                     check_error(
+                                                                                                       err);
+
+                                                                                                     // wait for background update
+                                                                                                     std::this_thread::
+                                                                                                       sleep_for(
+                                                                                                         std::chrono::
+                                                                                                           seconds(
+                                                                                                             1));
+
+                                                                                                     alice
+                                                                                                       ->get_public_rooms(
+                                                                                                         [&can_exit,
+                                                                                                          alice,
+                                                                                                          bob,
+                                                                                                          room_id](
+                                                                                                           const mtx::
+                                                                                                             responses::
+                                                                                                               PublicRooms
+                                                                                                                 &res,
+                                                                                                           RequestErr
+                                                                                                             err) {
+                                                                                                                 check_error(
+                                                                                                                   err);
+
+                                                                                                                 size_t
+                                                                                                                   idx =
+                                                                                                                     0;
+                                                                                                                 for (
+                                                                                                                   const auto
+                                                                                                                     &c :
+                                                                                                                   res
+                                                                                                                     .chunk) {
+                                                                                                                         if (
+                                                                                                                           c.room_id ==
+                                                                                                                           room_id
+                                                                                                                             .to_string())
+                                                                                                                                 break;
+                                                                                                                         idx++;
+                                                                                                                 }
+
+                                                                                                                 if (
+                                                                                                                   idx <
+                                                                                                                   res
+                                                                                                                     .chunk
+                                                                                                                     .size())
+                                                                                                                         EXPECT_EQ(
+                                                                                                                           res
+                                                                                                                             .chunk
+                                                                                                                               [idx]
+                                                                                                                             .num_joined_members,
+                                                                                                                           2);
+                                                                                                                 else
+                                                                                                                         ADD_FAILURE();
+
+                                                                                                                 // Teardown: remove
+                                                                                                                 // the room from the
+                                                                                                                 // room directory
+                                                                                                                 // (maintain future
+                                                                                                                 // tests)
+                                                                                                                 mtx::requests::
+                                                                                                                   PublicRoomVisibility
+                                                                                                                     r;
+                                                                                                                 r.visibility =
+                                                                                                                   mtx::common::
+                                                                                                                     RoomVisibility::
+                                                                                                                       Private;
+                                                                                                                 alice
+                                                                                                                   ->put_room_visibility(
+                                                                                                                     room_id
+                                                                                                                       .to_string(),
+                                                                                                                     r,
+                                                                                                                     [&can_exit](
+                                                                                                                       RequestErr
+                                                                                                                         err) {
+                                                                                                                             check_error(
+                                                                                                                               err);
+
+                                                                                                                             can_exit =
+                                                                                                                               true;
+                                                                                                                     });
+                                                                                                         },
+                                                                                                         server_name(),
+                                                                                                         1);
+                                                                                             });
+                                                                      },
+                                                                      server_name(),
+                                                                      1);
+                                                          },
+                                                          server_name());
+                                              });
+                                  });
+                        });
+
+        WAIT_UNTIL(can_exit);
+
         alice->close();
         bob->close();
 }

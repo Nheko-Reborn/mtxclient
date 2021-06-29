@@ -326,12 +326,12 @@ Storage storage;
 void
 print_errors(RequestErr err)
 {
-        if (err->status_code != boost::beast::http::status::unknown)
+        if (err->status_code)
                 console->error("status code: {}", static_cast<uint16_t>(err->status_code));
         if (!err->matrix_error.error.empty())
                 console->error("matrix error: {}", err->matrix_error.error);
         if (err->error_code)
-                console->error("error code: {}", err->error_code.message());
+                console->error("error code: {}", err->error_code);
 }
 
 template<class T>
@@ -798,7 +798,7 @@ initial_sync_handler(const mtx::responses::Sync &res, RequestErr err)
                 console->error("error during initial sync");
                 print_errors(err);
 
-                if (err->status_code != boost::beast::http::status::ok) {
+                if (err->status_code != 200) {
                         console->error("retrying initial sync ..");
                         opts.timeout = 0;
                         client->sync(opts, &initial_sync_handler);

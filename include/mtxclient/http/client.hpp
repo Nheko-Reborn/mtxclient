@@ -22,10 +22,6 @@
 #include "mtxclient/utils.hpp"       // for random_token, url_encode, des...
 // #include "mtx/common.hpp"
 
-#include <boost/beast/http/fields.hpp> // for fields
-#include <boost/beast/http/status.hpp> // for status
-#include <boost/system/error_code.hpp> // for error_code
-
 #include <cstdint>    // for uint16_t, uint64_t
 #include <functional> // for function
 #include <memory>     // for allocator, shared_ptr, enable...
@@ -33,6 +29,8 @@
 #include <string>     // for string, operator+, char_traits
 #include <utility>    // for move
 #include <vector>     // for vector
+
+#include <coeurl/headers.hpp>
 
 // forward declarations
 namespace mtx {
@@ -108,7 +106,7 @@ to_string(PaginationDirection dir)
 }
 
 using RequestErr   = const std::optional<mtx::http::ClientError> &;
-using HeaderFields = const std::optional<boost::beast::http::fields> &;
+using HeaderFields = const std::optional<coeurl::Headers> &;
 using ErrCallback  = std::function<void(RequestErr)>;
 
 template<class Response>
@@ -116,10 +114,7 @@ using Callback = std::function<void(const Response &, RequestErr)>;
 
 template<class Response>
 using HeadersCallback    = std::function<void(const Response &, HeaderFields, RequestErr)>;
-using TypeErasedCallback = std::function<void(HeaderFields,
-                                              const std::string &,
-                                              const boost::system::error_code &,
-                                              boost::beast::http::status)>;
+using TypeErasedCallback = std::function<void(HeaderFields, const std::string_view &, int, int)>;
 
 //! Sync configuration options.
 struct SyncOpts
@@ -636,35 +631,34 @@ private:
         void get(const std::string &endpoint,
                  HeadersCallback<Response> cb,
                  bool requires_auth                    = true,
-                 const std::string &endpoint_namespace = "/_matrix");
+                 const std::string &endpoint_namespace = "/_matrix",
+                 int num_redirects                     = 0);
 
         // type erased versions of http verbs
         void post(const std::string &endpoint,
-                  const json &req,
+                  const std::string &req,
                   TypeErasedCallback cb,
                   bool requires_auth,
                   const std::string &content_type);
 
         void put(const std::string &endpoint,
-                 const json &req,
+                 const std::string &req,
                  TypeErasedCallback cb,
                  bool requires_auth);
 
         void get(const std::string &endpoint,
                  TypeErasedCallback cb,
                  bool requires_auth,
-                 const std::string &endpoint_namespace);
+                 const std::string &endpoint_namespace,
+                 int num_redirects = 0);
 
         void delete_(const std::string &endpoint, ErrCallback cb, bool requires_auth = true);
 
         template<class Response>
         TypeErasedCallback prepare_callback(HeadersCallback<Response> callback);
 
-        std::shared_ptr<Session> create_session(TypeErasedCallback type_erased_cb);
-
-        //! Setup http header with the access token if needed.
-        void setup_auth(Session *session, bool auth);
-
+        //! The protocol used, i.e. https or http
+        std::string protocol_;
         //! The homeserver to connect to.
         std::string server_;
         //! The access token that would be used for authentication.

@@ -4,8 +4,6 @@
 /// @brief Error codes returned by the client-server API
 
 #include "mtx/errors.hpp"
-#include <boost/beast/http/status.hpp>
-#include <boost/system/error_code.hpp>
 
 namespace mtx {
 namespace http {
@@ -16,9 +14,9 @@ struct ClientError
         //! Matrix client api related error.
         mtx::errors::Error matrix_error;
         //! Error code if a network related error occured.
-        boost::system::error_code error_code;
+        int error_code;
         //! Status code of the associated http response.
-        boost::beast::http::status status_code;
+        int status_code;
         //! Parsing response error.
         std::string parse_error;
 };

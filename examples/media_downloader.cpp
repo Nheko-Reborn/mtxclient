@@ -3,6 +3,8 @@
 #include <iostream>
 #include <variant>
 
+#include <unistd.h>
+
 #include "mtx.hpp"
 #include "mtxclient/http/client.hpp"
 #include "mtxclient/http/errors.hpp"
@@ -28,12 +30,12 @@ std::shared_ptr<Client> client = nullptr;
 void
 print_errors(RequestErr err)
 {
-        if (err->status_code != boost::beast::http::status::unknown)
+        if (err->status_code)
                 cout << err->status_code << "\n";
         if (!err->matrix_error.error.empty())
                 cout << err->matrix_error.error << "\n";
         if (err->error_code)
-                cout << err->error_code.message() << "\n";
+                cout << err->error_code << "\n";
 }
 
 // Check if the given event has a textual representation.
@@ -173,7 +175,7 @@ initial_sync_handler(const mtx::responses::Sync &res, RequestErr err)
                 cout << "error during initial sync:\n";
                 print_errors(err);
 
-                if (err->status_code != boost::beast::http::status::ok) {
+                if (err->status_code != 200) {
                         cout << "retrying initial sync ...\n";
                         SyncOpts sopts;
                         sopts.timeout = 0;

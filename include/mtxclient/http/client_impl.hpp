@@ -21,16 +21,16 @@ namespace utils {
 /// Used internally to deserialize the response types for the various http methods.
 template<class T>
 inline T
-deserialize(const std::string &data)
+deserialize(std::string_view data)
 {
         return nlohmann::json::parse(data);
 }
 
 template<>
 inline std::string
-deserialize<std::string>(const std::string &data)
+deserialize<std::string>(std::string_view data)
 {
-        return data;
+        return std::string(data);
 }
 
 /// @brief serialize a type or string to json.
@@ -62,7 +62,7 @@ mtx::http::Client::post(const std::string &endpoint,
 {
         post(
           endpoint,
-          client::utils::serialize(req),
+          client::utils::serialize<Request>(req),
           prepare_callback<Response>(
             [callback](const Response &res, HeaderFields, RequestErr err) { callback(res, err); }),
           requires_auth,
@@ -105,9 +105,14 @@ void
 mtx::http::Client::get(const std::string &endpoint,
                        HeadersCallback<Response> callback,
                        bool requires_auth,
-                       const std::string &endpoint_namespace)
+                       const std::string &endpoint_namespace,
+                       int num_redirects)
 {
-        get(endpoint, prepare_callback<Response>(callback), requires_auth, endpoint_namespace);
+        get(endpoint,
+            prepare_callback<Response>(callback),
+            requires_auth,
+            endpoint_namespace,
+            num_redirects);
 }
 
 template<class Response>
@@ -115,9 +120,9 @@ mtx::http::TypeErasedCallback
 mtx::http::Client::prepare_callback(HeadersCallback<Response> callback)
 {
         auto type_erased_cb = [callback](HeaderFields headers,
-                                         const std::string &body,
-                                         const boost::system::error_code &err_code,
-                                         boost::beast::http::status status_code) {
+                                         const std::string_view &body,
+                                         int err_code,
+                                         int status_code) {
                 Response response_data;
                 mtx::http::ClientError client_error;
 
@@ -127,7 +132,7 @@ mtx::http::Client::prepare_callback(HeadersCallback<Response> callback)
                 }
 
                 // We only count 2xx status codes as success.
-                if (static_cast<int>(status_code) < 200 || static_cast<int>(status_code) >= 300) {
+                if (status_code < 200 || status_code >= 300) {
                         client_error.status_code = status_code;
 
                         // Try to parse the response in case we have an endpoint that
@@ -145,7 +150,8 @@ mtx::http::Client::prepare_callback(HeadersCallback<Response> callback)
                                 client_error.matrix_error = matrix_error;
                                 return callback(response_data, headers, client_error);
                         } catch (const nlohmann::json::exception &e) {
-                                client_error.parse_error = std::string(e.what()) + ": " + body;
+                                client_error.parse_error =
+                                  std::string(e.what()) + ": " + std::string(body);
 
                                 return callback(response_data, headers, client_error);
                         }
@@ -157,7 +163,7 @@ mtx::http::Client::prepare_callback(HeadersCallback<Response> callback)
                         auto res = client::utils::deserialize<Response>(body);
                         callback(std::move(res), headers, {});
                 } catch (const nlohmann::json::exception &e) {
-                        client_error.parse_error = std::string(e.what()) + ": " + body;
+                        client_error.parse_error = std::string(e.what()) + ": " + std::string(body);
                         callback(response_data, headers, client_error);
                 }
         };
