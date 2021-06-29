@@ -43,6 +43,25 @@ Client::shutdown()
         p->client.shutdown();
 }
 
+coeurl::Headers
+mtx::http::Client::prepare_headers(bool requires_auth)
+{
+        coeurl::Headers headers;
+        headers["User-Agent"] = "mtxclient v0.5.1";
+
+        if (requires_auth && !access_token_.empty())
+                headers["Authorization"] = "Bearer " + access_token();
+
+        return headers;
+}
+
+std::string
+mtx::http::Client::endpoint_to_url(const std::string &endpoint, const char *endpoint_namespace)
+{
+        return protocol_ + "://" + server_ + ":" + std::to_string(port_) + endpoint_namespace +
+               endpoint;
+}
+
 void
 mtx::http::Client::post(const std::string &endpoint,
                         const std::string &req,
@@ -50,33 +69,21 @@ mtx::http::Client::post(const std::string &endpoint,
                         bool requires_auth,
                         const std::string &content_type)
 {
-        coeurl::Headers headers;
-        headers["User-Agent"] = "mtxclient v0.5.1";
-
-        if (requires_auth && !access_token_.empty())
-                headers["Authorization"] = "Bearer " + access_token();
-
         p->client.post(
-          protocol_ + "://" + server_ + ":" + std::to_string(port_) + "/_matrix" + endpoint,
+          endpoint_to_url(endpoint),
           req,
           content_type,
           [cb](const coeurl::Request &r) {
                   cb(r.response_headers(), r.response(), r.error_code(), r.response_code());
           },
-          headers);
+          prepare_headers(requires_auth));
 }
 
 void
 mtx::http::Client::delete_(const std::string &endpoint, ErrCallback cb, bool requires_auth)
 {
-        coeurl::Headers headers;
-        headers["User-Agent"] = "mtxclient v0.5.1";
-
-        if (requires_auth && !access_token_.empty())
-                headers["Authorization"] = "Bearer " + access_token();
-
         p->client.delete_(
-          protocol_ + "://" + server_ + ":" + std::to_string(port_) + "/_matrix" + endpoint,
+          endpoint_to_url(endpoint),
           [cb](const coeurl::Request &r) {
                   mtx::http::ClientError client_error;
                   if (r.error_code()) {
@@ -102,7 +109,7 @@ mtx::http::Client::delete_(const std::string &endpoint, ErrCallback cb, bool req
                   }
                   return cb({});
           },
-          headers);
+          prepare_headers(requires_auth));
 }
 
 void
@@ -111,20 +118,14 @@ mtx::http::Client::put(const std::string &endpoint,
                        mtx::http::TypeErasedCallback cb,
                        bool requires_auth)
 {
-        coeurl::Headers headers;
-        headers["User-Agent"] = "mtxclient v0.5.1";
-
-        if (requires_auth && !access_token_.empty())
-                headers["Authorization"] = "Bearer " + access_token();
-
         p->client.put(
-          protocol_ + "://" + server_ + ":" + std::to_string(port_) + "/_matrix" + endpoint,
+          endpoint_to_url(endpoint),
           req,
           "application/json",
           [cb](const coeurl::Request &r) {
                   cb(r.response_headers(), r.response(), r.error_code(), r.response_code());
           },
-          headers);
+          prepare_headers(requires_auth));
 }
 
 void
@@ -134,18 +135,12 @@ mtx::http::Client::get(const std::string &endpoint,
                        const std::string &endpoint_namespace,
                        int num_redirects)
 {
-        coeurl::Headers headers;
-        headers["User-Agent"] = "mtxclient v0.5.1";
-
-        if (requires_auth && !access_token_.empty())
-                headers["Authorization"] = "Bearer " + access_token();
-
         p->client.get(
-          protocol_ + "://" + server_ + ":" + std::to_string(port_) + endpoint_namespace + endpoint,
+          endpoint_to_url(endpoint, endpoint_namespace.c_str()),
           [cb](const coeurl::Request &r) {
                   cb(r.response_headers(), r.response(), r.error_code(), r.response_code());
           },
-          headers,
+          prepare_headers(requires_auth),
           num_redirects);
 }
 

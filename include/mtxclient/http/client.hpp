@@ -654,6 +654,10 @@ private:
 
         void delete_(const std::string &endpoint, ErrCallback cb, bool requires_auth = true);
 
+        coeurl::Headers prepare_headers(bool requires_auth);
+        std::string endpoint_to_url(const std::string &endpoint,
+                                    const char *endpoint_namespace = "/_matrix");
+
         template<class Response>
         TypeErasedCallback prepare_callback(HeadersCallback<Response> callback);
 
