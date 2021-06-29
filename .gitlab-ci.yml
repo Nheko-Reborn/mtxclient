@@ -99,12 +99,18 @@ build linux amd64:
     COVERAGE: "ON"
   after_script:
     - ./.ci/coverage.sh &&  bash <(curl -s https://codecov.io/bash) -f build/coverage.info || echo "Codecov failed"
+  needs:
+    - job: "build synapse amd64"
+      optional: true
 
 build linux arm64:
   extends: .build-linux
   tags: [docker-arm64]
   variables:
     M_ARCH: aarch64
+  needs:
+    - job: "build synapse arm64"
+      optional: true
 
 build-macos:
   stage: build
