@@ -138,7 +138,7 @@ linting:
   tags: [docker]
   needs: []
   before_script:
-    - apk update && apk add clang make git
+    - apk update && apk add clang-extra-tools make git
   script:
     - make lint
 
