@@ -1,5 +1,3 @@
-#include <boost/algorithm/string/predicate.hpp>
-
 #include <csignal>
 #include <cstdlib>
 

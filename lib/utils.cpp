@@ -1,13 +1,11 @@
 #include "mtxclient/utils.hpp"
 
-#include <cctype>
+#include <algorithm>
 #include <iomanip>
 #include <random>
 #include <sstream>
 #include <string>
 #include <utility>
-
-#include <boost/algorithm/string.hpp>
 
 mtx::client::utils::MxcUrl
 mtx::client::utils::parse_mxc_url(const std::string &url)
@@ -21,7 +19,13 @@ mtx::client::utils::parse_mxc_url(const std::string &url)
         auto str_left = url.substr(6);
 
         std::vector<std::string> parts;
-        boost::split(parts, str_left, [](char c) { return c == '/'; });
+
+        size_t pos = 0;
+        while ((pos = str_left.find('/')) != std::string_view::npos) {
+                parts.push_back(std::string(str_left.substr(0, pos)));
+                str_left = str_left.substr(pos + 1);
+        }
+        parts.push_back(std::string(str_left));
 
         if (parts.size() != 2) {
                 res.server = parts.at(0);

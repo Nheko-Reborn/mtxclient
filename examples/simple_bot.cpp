@@ -1,4 +1,4 @@
-#include <boost/algorithm/string/predicate.hpp>
+#include <unistd.h>
 
 #include <iostream>
 #include <variant>
@@ -126,7 +126,7 @@ parse_messages(const mtx::responses::Sync &res, bool parse_repeat_cmd = false)
                                 continue;
 
                         auto body = get_body(e);
-                        if (!boost::starts_with(body, repeat_cmd))
+                        if (body.find(repeat_cmd) != 0)
                                 continue;
 
                         auto word = std::string(body.begin() + repeat_cmd.size(), body.end());

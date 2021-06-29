@@ -1,7 +1,5 @@
 #include <atomic>
 
-#include <boost/algorithm/string.hpp>
-
 #include <gtest/gtest.h>
 
 #include <nlohmann/json.hpp>

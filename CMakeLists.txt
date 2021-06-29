@@ -19,7 +19,6 @@ HunterGate(
     SHA1 "13775235910a3fa85644568d1c5be8271de72e1c"
 )
 
-option(USE_BUNDLED_BOOST "Use the bundled version of Boost." ${HUNTER_ENABLED})
 option(USE_BUNDLED_SPDLOG "Use the bundled version of spdlog."
 	${HUNTER_ENABLED})
 option(USE_BUNDLED_OLM "Use the bundled version of libolm." ${HUNTER_ENABLED})
@@ -40,12 +39,12 @@ option(USE_BUNDLED_SPDLOG "Use the bundled version of spdlog." ${HUNTER_ENABLED}
 if (CMAKE_VERSION VERSION_GREATER_EQUAL 3.12)
 project(matrix_client
 	VERSION 0.5.1
-	DESCRIPTION "Client API library for Matrix, built on top of Boost.Asio"
+	DESCRIPTION "Client API library for Matrix."
 	HOMEPAGE_URL https://github.com/Nheko-Reborn/mtxclient)
 else()
 project(matrix_client
 	VERSION 0.5.1
-	DESCRIPTION "Client API library for Matrix, built on top of Boost.Asio")
+	DESCRIPTION "Client API library for Matrix.")
 endif()
 
 
@@ -124,16 +123,6 @@ find_package(nlohmann_json 3.2.0 CONFIG REQUIRED)
 set_package_properties(nlohmann_json PROPERTIES
 	DESCRIPTION "JSON for Modern C++, a C++11 header-only JSON class"
 	URL "https://nlohmann.github.io/json/"
-	TYPE REQUIRED
-	)
-
-if(USE_BUNDLED_BOOST)
-	hunter_add_package(Boost COMPONENTS iostreams system thread)
-endif()
-find_package(Boost 1.70 COMPONENTS REQUIRED iostreams system thread)
-set_package_properties(Boost PROPERTIES
-	DESCRIPTION "Free peer-reviewed portable C++ source libraries"
-	URL "https://www.boost.org/"
 	TYPE REQUIRED
 	)
 
@@ -266,9 +255,6 @@ target_include_directories(
 	$<INSTALL_INTERFACE:include>)
 target_link_libraries(matrix_client
 	PUBLIC
-	Boost::iostreams
-	Boost::system
-	Boost::thread
 	OpenSSL::Crypto
 	OpenSSL::SSL
 	Olm::Olm

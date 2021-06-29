@@ -1,7 +1,5 @@
 #include <atomic>
 
-#include <boost/algorithm/string.hpp>
-
 #include <gtest/gtest.h>
 
 #include <nlohmann/json.hpp>
@@ -34,7 +32,9 @@ TEST(ClientAPI, Register)
         auto username = utils::random_token(10, false);
 
         // Synapse converts the username to lowercase.
-        boost::algorithm::to_lower(username);
+        for (auto &c : username) {
+                c = (char)std::tolower(c);
+        }
 
         user->registration(
           username, "secret", [user, username](const mtx::responses::Register &, RequestErr err) {

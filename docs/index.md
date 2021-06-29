@@ -10,7 +10,7 @@ are described there and this library provides similarly named types and function
 to invoke those endpoints.
 
 mtxclient is built on top of
-[Boost.Asio](https://www.boost.org/doc/libs/1_75_0/doc/html/boost_asio.html) and
+[curl](https://curl.se/libcurl/) and
 [nlohmann/json](https://github.com/nlohmann/json). Many of the data structures
 in this library can be serialized to and deserialized from JSON. Most endpoints
 use a callback to inform the caller, if the request completed and what the
