@@ -15,8 +15,8 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON CACHE BOOL "compile as PIC by default")
 option(HUNTER_ENABLED "Enable Hunter package manager" OFF)
 include("cmake/HunterGate.cmake")
 HunterGate(
-    URL "https://github.com/cpp-pm/hunter/archive/v0.23.260.tar.gz"
-    SHA1 "13775235910a3fa85644568d1c5be8271de72e1c"
+    URL "https://github.com/cpp-pm/hunter/archive/v0.23.305.tar.gz"
+    SHA1 "fc8d7a6dac2fa23681847b3872d88d3839b657b0"
 )
 
 option(USE_BUNDLED_SPDLOG "Use the bundled version of spdlog."
