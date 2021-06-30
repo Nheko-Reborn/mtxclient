@@ -15,11 +15,10 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON CACHE BOOL "compile as PIC by default")
 option(HUNTER_ENABLED "Enable Hunter package manager" OFF)
 include("cmake/HunterGate.cmake")
 HunterGate(
-    URL "https://github.com/cpp-pm/hunter/archive/v0.23.260.tar.gz"
-    SHA1 "13775235910a3fa85644568d1c5be8271de72e1c"
+    URL "https://github.com/cpp-pm/hunter/archive/v0.23.305.tar.gz"
+    SHA1 "fc8d7a6dac2fa23681847b3872d88d3839b657b0"
 )
 
-option(USE_BUNDLED_BOOST "Use the bundled version of Boost." ${HUNTER_ENABLED})
 option(USE_BUNDLED_SPDLOG "Use the bundled version of spdlog."
 	${HUNTER_ENABLED})
 option(USE_BUNDLED_OLM "Use the bundled version of libolm." ${HUNTER_ENABLED})
@@ -29,16 +28,22 @@ option(USE_BUNDLED_JSON "Use the bundled version of nlohmann json."
 	${HUNTER_ENABLED})
 option(USE_BUNDLED_OPENSSL "Use the bundled version of OpenSSL."
 	${HUNTER_ENABLED})
+option(USE_BUNDLED_COEURL "Use a bundled version of the Curl wrapper"
+	${HUNTER_ENABLED})
+option(USE_BUNDLED_LIBEVENT "Use the bundled version of spdlog." ${HUNTER_ENABLED})
+option(USE_BUNDLED_LIBCURL "Use the bundled version of spdlog." ${HUNTER_ENABLED})
+option(USE_BUNDLED_SPDLOG "Use the bundled version of spdlog." ${HUNTER_ENABLED})
+
 
 if (CMAKE_VERSION VERSION_GREATER_EQUAL 3.12)
 project(matrix_client
 	VERSION 0.5.1
-	DESCRIPTION "Client API library for Matrix, built on top of Boost.Asio"
+	DESCRIPTION "Client API library for Matrix."
 	HOMEPAGE_URL https://github.com/Nheko-Reborn/mtxclient)
 else()
 project(matrix_client
 	VERSION 0.5.1
-	DESCRIPTION "Client API library for Matrix, built on top of Boost.Asio")
+	DESCRIPTION "Client API library for Matrix.")
 endif()
 
 
@@ -73,6 +78,8 @@ endif()
 if(ASAN)
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address,undefined")
 endif()
+
+add_library(matrix_client)
 
 if(NOT MSVC AND NOT APPLE)
 	set(THREADS_PREFER_PTHREAD_FLAG ON)
@@ -118,22 +125,59 @@ set_package_properties(nlohmann_json PROPERTIES
 	TYPE REQUIRED
 	)
 
-if(USE_BUNDLED_BOOST)
-	hunter_add_package(Boost COMPONENTS iostreams system thread)
+## Need to repeat all libevent deps?!?
+# libevent
+if (USE_BUNDLED_LIBEVENT)
+	hunter_add_package(Libevent)
+	find_package(Libevent CONFIG REQUIRED)
+else()
+	find_package(PkgConfig REQUIRED) 
+	pkg_check_modules(libevent_core REQUIRED IMPORTED_TARGET libevent_core)
+	if (WIN32)
+		pkg_check_modules(libevent_windows REQUIRED IMPORTED_TARGET libevent_windows)
+	else()
+		pkg_check_modules(libevent_pthreads REQUIRED IMPORTED_TARGET
+			libevent_pthreads)
+	endif()
 endif()
-find_package(Boost 1.70 COMPONENTS REQUIRED iostreams system thread)
-set_package_properties(Boost PROPERTIES
-	DESCRIPTION "Free peer-reviewed portable C++ source libraries"
-	URL "https://www.boost.org/"
-	TYPE REQUIRED
-	)
 
-add_library(matrix_client)
+# curl
+if (USE_BUNDLED_LIBCURL)
+	hunter_add_package(CURL)
+	find_package(CURL CONFIG REQUIRED)
+else()
+	find_package(PkgConfig REQUIRED) 
+	pkg_check_modules(libcurl REQUIRED IMPORTED_TARGET libcurl)
+endif()
+
+# spdlog
+if(USE_BUNDLED_SPDLOG)
+	hunter_add_package(spdlog)
+endif()
+find_package(spdlog 1.0.0 CONFIG REQUIRED)
+
+if(USE_BUNDLED_COEURL)
+	include(FetchContent)
+	FetchContent_Declare(
+		coeurl
+		GIT_REPOSITORY https://nheko.im/Nheko-Reborn/coeurl.git
+		GIT_TAG        417821a07cfe4429b08a2efed5e480a498087afd
+		)
+	FetchContent_MakeAvailable(coeurl)
+	target_link_libraries(matrix_client PUBLIC coeurl::coeurl)
+elseif(coeurl_DIR)
+	find_package(coeurl CONFIG REQUIRED)
+	target_link_libraries(matrix_client PUBLIC coeurl::coeurl)
+else()
+	find_package(PkgConfig REQUIRED)
+	pkg_check_modules(coeurl REQUIRED IMPORTED_TARGET coeurl)
+	target_link_libraries(matrix_client PUBLIC PkgConfig::coeurl)
+endif()
+
 
 target_sources(matrix_client
 	PRIVATE
 	lib/http/client.cpp
-	lib/http/session.cpp
 	lib/crypto/client.cpp
 	lib/crypto/encoding.cpp
 	lib/crypto/types.cpp
@@ -210,9 +254,6 @@ target_include_directories(
 	$<INSTALL_INTERFACE:include>)
 target_link_libraries(matrix_client
 	PUBLIC
-	Boost::iostreams
-	Boost::system
-	Boost::thread
 	OpenSSL::Crypto
 	OpenSSL::SSL
 	Olm::Olm

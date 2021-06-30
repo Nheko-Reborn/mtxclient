@@ -5,23 +5,26 @@ mtxclient
 [![codecov](https://codecov.io/gh/Nheko-Reborn/mtxclient/branch/master/graph/badge.svg)](https://codecov.io/gh/Nheko-Reborn/mtxclient)
 [![experimental](https://img.shields.io/badge/stability-experimental-orange.svg)](http://github.com/badges/stability-badges)
 
-Client API library for the Matrix protocol, built on top of Boost.Asio.
+Client API library for the Matrix protocol.
 
 ## Build instructions
 
 ### Dependencies
 
-- Boost 1.70 (includes Boost.Beast and makes the strand interface usable)
+- Coeurl (A C++ wrapper around curl.)
 - OpenSSL
 - C++ 17 compiler
-- CMake 3.15 or greater (lower versions can work, but they tend to mess up linking the right boost libraries)
+- CMake 3.15 or greater (lower versions can work, but not all build system options may work.)
 - Google Test (for testing)
 
 If you are missing some or all of those above dependencies, you can add `-DHUNTER_ENABLED=ON` to the cmake configure command to use bundled dependencies. You can finetune them with the following variables. They default to ON, if Hunter is enabled and to OFF otherwise.
 
 | cmake flag          | description |
 |---------------------|-------------|
-| USE_BUNDLED_BOOST   | Use the bundled version of Boost. |
+| USE_BUNDLED_COEURL  | Use the bundled version of coeurl. |
+| USE_BUNDLED_LIBEVENT| Use the bundled version of libevent (coeurl dependency). |
+| USE_BUNDLED_LIBCURL | Use the bundled version of curl (coeurl dependency). |
+| USE_BUNDLED_COEURL  | Use the bundled version of coeurl. |
 | USE_BUNDLED_SPDLOG  | Use the bundled version of spdlog. |
 | USE_BUNDLED_OLM     | Use the bundled version of libolm. |
 | USE_BUNDLED_GTEST   | Use the bundled version of Google Test. |

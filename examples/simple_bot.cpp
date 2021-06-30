@@ -1,4 +1,4 @@
-#include <boost/algorithm/string/predicate.hpp>
+#include <unistd.h>
 
 #include <iostream>
 #include <variant>
@@ -30,12 +30,12 @@ std::shared_ptr<Client> client = nullptr;
 void
 print_errors(RequestErr err)
 {
-        if (err->status_code != boost::beast::http::status::unknown)
+        if (err->status_code)
                 cout << err->status_code << "\n";
         if (!err->matrix_error.error.empty())
                 cout << err->matrix_error.error << "\n";
         if (err->error_code)
-                cout << err->error_code.message() << "\n";
+                cout << err->error_code << "\n";
 }
 
 // Check if the given event has a textual representation.
@@ -126,7 +126,7 @@ parse_messages(const mtx::responses::Sync &res, bool parse_repeat_cmd = false)
                                 continue;
 
                         auto body = get_body(e);
-                        if (!boost::starts_with(body, repeat_cmd))
+                        if (body.find(repeat_cmd) != 0)
                                 continue;
 
                         auto word = std::string(body.begin() + repeat_cmd.size(), body.end());
@@ -179,7 +179,7 @@ initial_sync_handler(const mtx::responses::Sync &res, RequestErr err)
                 cout << "error during initial sync:\n";
                 print_errors(err);
 
-                if (err->status_code != boost::beast::http::status::ok) {
+                if (err->status_code != 200) {
                         cout << "retrying initial sync ...\n";
                         opts.timeout = 0;
                         client->sync(opts, &initial_sync_handler);

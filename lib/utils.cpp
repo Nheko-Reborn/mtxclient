@@ -1,20 +1,11 @@
 #include "mtxclient/utils.hpp"
 
-#include <cctype>
+#include <algorithm>
 #include <iomanip>
 #include <random>
 #include <sstream>
 #include <string>
 #include <utility>
-
-#include <boost/algorithm/string.hpp>
-#include <boost/iostreams/copy.hpp>
-#include <boost/iostreams/detail/error.hpp>
-#include <boost/iostreams/detail/forward.hpp>
-#include <boost/iostreams/filter/gzip.hpp>
-#include <boost/iostreams/filter/zlib.hpp>
-#include <boost/iostreams/filtering_stream.hpp>
-#include <boost/iostreams/traits.hpp>
 
 mtx::client::utils::MxcUrl
 mtx::client::utils::parse_mxc_url(const std::string &url)
@@ -28,7 +19,13 @@ mtx::client::utils::parse_mxc_url(const std::string &url)
         auto str_left = url.substr(6);
 
         std::vector<std::string> parts;
-        boost::split(parts, str_left, [](char c) { return c == '/'; });
+
+        size_t pos = 0;
+        while ((pos = str_left.find('/')) != std::string_view::npos) {
+                parts.push_back(std::string(str_left.substr(0, pos)));
+                str_left = str_left.substr(pos + 1);
+        }
+        parts.push_back(std::string(str_left));
 
         if (parts.size() != 2) {
                 res.server = parts.at(0);
@@ -89,40 +86,6 @@ mtx::client::utils::query_params(const std::map<std::string, std::string> &param
                 data += "&" + pb->first + "=" + url_encode(pb->second);
 
         return data;
-}
-
-std::string
-mtx::client::utils::decompress(const boost::iostreams::array_source &src,
-                               const std::string &type) noexcept
-{
-        try {
-                boost::iostreams::filtering_istream is;
-                is.set_auto_close(true);
-
-                std::stringstream decompressed;
-
-                if (type == "deflate")
-                        is.push(boost::iostreams::zlib_decompressor{});
-                else if (type == "gzip")
-                        is.push(boost::iostreams::gzip_decompressor{});
-
-                is.push(src);
-                boost::iostreams::copy(is, decompressed);
-
-                return decompressed.str();
-        } catch (boost::iostreams::gzip_error &) {
-        } catch (boost::iostreams::zlib_error &) {
-        }
-
-        boost::iostreams::filtering_istream is;
-        is.set_auto_close(true);
-
-        std::stringstream decompressed;
-
-        is.push(src);
-        boost::iostreams::copy(is, decompressed);
-
-        return decompressed.str();
 }
 
 std::string

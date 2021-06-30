@@ -2,6 +2,8 @@
 #include <iostream>
 #include <variant>
 
+#include <unistd.h>
+
 #include "mtx.hpp"
 #include "mtxclient/crypto/client.hpp"
 #include "mtxclient/crypto/types.hpp"
@@ -36,8 +38,8 @@ print_errors(RequestErr err)
         if (!err->matrix_error.error.empty())
                 cerr << err->matrix_error.error;
         if (err->error_code)
-                cerr << err->error_code.message();
-        if (err->status_code != boost::beast::http::status::unknown)
+                cerr << err->error_code;
+        if (err->status_code)
                 cerr << err->status_code;
         cerr << "\n";
 }

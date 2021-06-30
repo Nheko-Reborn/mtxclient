@@ -1,351 +1,153 @@
-#include "mtxclient/http/asio_overrides.hpp"
-
-#include "mtx/log.hpp"
 #include "mtxclient/http/client.hpp"
+#include "mtx/log.hpp"
 #include "mtxclient/http/client_impl.hpp"
-
-#if defined(__APPLE__)
-#include <CoreFoundation/CFData.h>
-#include <Security/SecBase.h>
-#include <Security/SecCertificate.h>
-#include <Security/SecPolicy.h>
-#include <Security/SecTrust.h>
-#endif
 
 #include <mutex>
 #include <thread>
 
 #include <nlohmann/json.hpp>
 
-#include <boost/algorithm/string.hpp>
-#include <boost/asio/ssl.hpp>
-#include <boost/asio/ssl/context.hpp>
-#include <boost/beast/http/message.hpp>
-#include <boost/iostreams/stream.hpp>
-#include <boost/signals2/signal.hpp>
-#include <boost/signals2/signal_type.hpp>
-#include <boost/thread/thread.hpp>
-#include <boost/utility/typed_in_place_factory.hpp>
+#include <coeurl/client.hpp>
+#include <coeurl/request.hpp>
 
-#include "mtxclient/http/session.hpp"
 #include "mtxclient/utils.hpp"
 
 #include "mtx/requests.hpp"
 #include "mtx/responses.hpp"
 
-#ifdef WIN32
-#include <openssl/x509.h>
-#include <wincrypt.h>
-
-void
-load_windows_certificates(boost::asio::ssl::context &ssl_ctx_)
-{
-        HCERTSTORE store = CertOpenSystemStoreA(NULL, "ROOT");
-        if (!store)
-                return;
-
-        PCCERT_CONTEXT ctx = nullptr;
-
-        // server authentication usage, see http://www.oid-info.com/get/1.3.6.1.5.5.7.3.1
-        char *usages[] = {szOID_PKIX_KP_SERVER_AUTH};
-        CERT_ENHKEY_USAGE filter{std::size(usages), usages};
-        while (ctx = CertFindCertificateInStore(store,
-                                                X509_ASN_ENCODING,
-                                                CERT_FIND_OPTIONAL_ENHKEY_USAGE_FLAG,
-                                                CERT_FIND_ENHKEY_USAGE,
-                                                &filter,
-                                                ctx)) {
-                if (!(ctx->dwCertEncodingType & X509_ASN_ENCODING))
-                        continue;
-
-                const unsigned char *encodedCert = ctx->pbCertEncoded;
-                X509 *x509 = d2i_X509(nullptr, &encodedCert, ctx->cbCertEncoded);
-                if (x509) {
-                        if (1 == X509_STORE_add_cert(
-                                   SSL_CTX_get_cert_store(ssl_ctx_.native_handle()), x509)) {
-                        }
-                        X509_free(x509);
-                }
-        }
-        CertCloseStore(store, 0);
-}
-#endif
-
 using namespace mtx::http;
-using namespace boost::beast;
 
 namespace mtx::http {
 struct ClientPrivate
 {
-        boost::asio::io_context ioc_;
-        //! Used to prevent the event loop from shutting down.
-        boost::asio::executor_work_guard<boost::asio::io_context::executor_type> work_{
-          ioc_.get_executor()};
-        //! Worker threads for the requests.
-        boost::thread_group thread_group_;
-        //! SSL context for requests.
-        boost::asio::ssl::context ssl_ctx_{boost::asio::ssl::context::tls_client};
-        //! All the active sessions will shutdown the connection.
-        boost::signals2::signal<void()> shutdown_signal;
+        coeurl::Client client;
 };
-
-#if defined(__APPLE__)
-
-// cf_ref RAII code taken from Microsoft cpprestsdk (MIT licensed):
-// https://github.com/microsoft/cpprestsdk/blob/7fbb08c491f9c8888cc0f3d86962acb3af672772/Release/src/http/client/x509_cert_utilities.cpp#L290
-
-// Simple RAII pattern wrapper to perform CFRelease on objects.
-template<typename T>
-class cf_ref
-{
-public:
-        cf_ref(T v)
-          : value(v)
-        {
-                static_assert(sizeof(cf_ref<T>) == sizeof(T),
-                              "Code assumes just a wrapper, see usage in CFArrayCreate below.");
-        }
-        cf_ref()
-          : value(nullptr)
-        {}
-        cf_ref(cf_ref &&other)
-          : value(other.value)
-        {
-                other.value = nullptr;
-        }
-
-        ~cf_ref()
-        {
-                if (value != nullptr) {
-                        CFRelease(value);
-                }
-        }
-
-        T &get() { return value; }
-
-private:
-        cf_ref(const cf_ref &);
-        cf_ref &operator=(const cf_ref &);
-        T value;
-};
-
-void
-import_apple_keychain(boost::asio::ssl::context &ssl_ctx_)
-{
-        cf_ref<CFArrayRef> result;
-        OSStatus osStatus;
-
-        // Copy macOS root certificates into CFArray
-        if ((osStatus = SecTrustCopyAnchorCertificates(&result.get())) != 0) {
-                mtx::utils::log::log_error("Error enumerating macOS certificates.");
-                return;
-        }
-
-        for (CFIndex i = 0; i < CFArrayGetCount(result.get()); i++) {
-                SecCertificateRef cert = (SecCertificateRef)CFArrayGetValueAtIndex(result.get(), i);
-                cf_ref<CFDataRef> rawDataRef = SecCertificateCopyData(cert);
-                if (rawDataRef.get() == nullptr) {
-                        mtx::utils::log::log_error("Error enumerating macOS certificate");
-                        continue;
-                }
-                const uint8_t *rawDataPtr = CFDataGetBytePtr(rawDataRef.get());
-
-                // Parse an openssl X509 object from each returned certificate
-                X509 *x509Cert = d2i_X509(nullptr, &rawDataPtr, CFDataGetLength(rawDataRef.get()));
-                if (!x509Cert) {
-                        auto errMsg = std::string(ERR_reason_error_string(ERR_peek_last_error()));
-                        mtx::utils::log::log_error(
-                          "Error parsing X509 Certificate from system keychain: " + errMsg);
-                        continue;
-                }
-                // Add the parsed X509 object to the X509_STORE verification store
-                const auto addStatus =
-                  X509_STORE_add_cert(SSL_CTX_get_cert_store(ssl_ctx_.native_handle()), x509Cert);
-                X509_free(x509Cert);
-                if (addStatus != 1) {
-                        mtx::utils::log::log_error("Error loading system certificate into OpenSSL");
-                        continue;
-                }
-        }
-}
-#endif
 
 }
 
 Client::Client(const std::string &server, uint16_t port)
-  : server_{server}
-  , port_{port}
-  , p{new ClientPrivate}
+  : p{new ClientPrivate}
 {
-        using namespace boost::asio;
-        const auto threads_num = std::min(8U, std::max(1U, std::thread::hardware_concurrency()));
+        set_server(server);
+        set_port(port);
 
-        using boost::asio::ssl::context;
-        p->ssl_ctx_.set_options(context::default_workarounds | context::no_sslv2 |
-                                context::no_sslv3 | context::no_tlsv1 | context::no_tlsv1_1);
-#ifdef WIN32
-        load_windows_certificates(p->ssl_ctx_);
-#elif __APPLE__
-        import_apple_keychain(p->ssl_ctx_);
-#else
-        p->ssl_ctx_.set_default_verify_paths();
-#endif
-
-        verify_certificates(true);
-        p->ssl_ctx_.set_verify_callback(ssl::rfc2818_verification(server));
-
-        for (unsigned int i = 0; i < threads_num; ++i)
-                p->thread_group_.add_thread(new boost::thread([this]() { p->ioc_.run(); }));
+        p->client.set_verify_peer(true);
 }
 
 // call destuctor of work queue and ios first!
 Client::~Client() { p.reset(); }
 
-std::shared_ptr<Session>
-Client::create_session(TypeErasedCallback type_erased_cb)
-{
-        auto session = std::make_shared<Session>(
-          boost::asio::make_strand(p->ioc_),
-          p->ssl_ctx_,
-          server_,
-          port_,
-          client::utils::random_token(),
-          [type_erased_cb](
-            RequestID,
-            const boost::beast::http::response<boost::beast::http::string_body> &response,
-            const boost::system::error_code &err_code) {
-                  const auto header = response.base();
-
-                  if (err_code) {
-                          return type_erased_cb(header, "", err_code, {});
-                  }
-
-                  // Decompress the response.
-                  const auto body = client::utils::decompress(
-                    boost::iostreams::array_source{response.body().data(), response.body().size()},
-                    header["Content-Encoding"].to_string());
-
-                  type_erased_cb(header, body, err_code, response.result());
-          },
-          [type_erased_cb](RequestID, const boost::system::error_code ec) {
-                  type_erased_cb(std::nullopt, "", ec, {});
-          });
-        if (session)
-                p->shutdown_signal.connect(
-                  boost::signals2::signal<void()>::slot_type(&Session::terminate, session.get())
-                    .track_foreign(session));
-
-        return session;
-}
-
 void
 Client::shutdown()
 {
-        p->shutdown_signal();
+        p->client.shutdown();
+}
+
+coeurl::Headers
+mtx::http::Client::prepare_headers(bool requires_auth)
+{
+        coeurl::Headers headers;
+        headers["User-Agent"] = "mtxclient v0.5.1";
+
+        if (requires_auth && !access_token_.empty())
+                headers["Authorization"] = "Bearer " + access_token();
+
+        return headers;
+}
+
+std::string
+mtx::http::Client::endpoint_to_url(const std::string &endpoint, const char *endpoint_namespace)
+{
+        return protocol_ + "://" + server_ + ":" + std::to_string(port_) + endpoint_namespace +
+               endpoint;
 }
 
 void
 mtx::http::Client::post(const std::string &endpoint,
-                        const nlohmann::json &req,
+                        const std::string &req,
                         mtx::http::TypeErasedCallback cb,
                         bool requires_auth,
                         const std::string &content_type)
 {
-        auto session = create_session(cb);
-
-        if (!session)
-                return;
-
-        setup_auth(session.get(), requires_auth);
-        setup_headers<boost::beast::http::verb::post>(session.get(), req, endpoint, content_type);
-
-        session->run();
+        p->client.post(
+          endpoint_to_url(endpoint),
+          req,
+          content_type,
+          [cb](const coeurl::Request &r) {
+                  cb(r.response_headers(), r.response(), r.error_code(), r.response_code());
+          },
+          prepare_headers(requires_auth));
 }
 
 void
 mtx::http::Client::delete_(const std::string &endpoint, ErrCallback cb, bool requires_auth)
 {
-        auto type_erased_cb = [cb](HeaderFields,
-                                   const std::string &body,
-                                   const boost::system::error_code &err_code,
-                                   boost::beast::http::status status_code) {
-                mtx::http::ClientError client_error;
+        p->client.delete_(
+          endpoint_to_url(endpoint),
+          [cb](const coeurl::Request &r) {
+                  mtx::http::ClientError client_error;
+                  if (r.error_code()) {
+                          client_error.error_code = r.error_code();
+                          return cb(client_error);
+                  }
 
-                if (err_code) {
-                        client_error.error_code = err_code;
-                        return cb(client_error);
-                }
+                  client_error.status_code = r.response_code();
 
-                client_error.status_code = status_code;
+                  // We only count 2xx status codes as success.
+                  if (client_error.status_code < 200 || client_error.status_code >= 300) {
+                          // The homeserver should return an error struct.
+                          try {
+                                  nlohmann::json json_error       = json::parse(r.response());
+                                  mtx::errors::Error matrix_error = json_error;
 
-                // We only count 2xx status codes as success.
-                if (static_cast<int>(status_code) < 200 || static_cast<int>(status_code) >= 300) {
-                        // The homeserver should return an error struct.
-                        try {
-                                nlohmann::json json_error       = json::parse(body);
-                                mtx::errors::Error matrix_error = json_error;
-
-                                client_error.matrix_error = matrix_error;
-                        } catch (const nlohmann::json::exception &e) {
-                                client_error.parse_error = std::string(e.what()) + ": " + body;
-                        }
-                        return cb(client_error);
-                }
-                return cb({});
-        };
-
-        auto session = create_session(type_erased_cb);
-
-        if (!session)
-                return;
-
-        setup_auth(session.get(), requires_auth);
-        setup_headers<boost::beast::http::verb::delete_>(session.get(), "", endpoint, "");
-
-        session->run();
+                                  client_error.matrix_error = matrix_error;
+                          } catch (const nlohmann::json::exception &e) {
+                                  client_error.parse_error =
+                                    std::string(e.what()) + ": " + std::string(r.response());
+                          }
+                          return cb(client_error);
+                  }
+                  return cb({});
+          },
+          prepare_headers(requires_auth));
 }
 
 void
 mtx::http::Client::put(const std::string &endpoint,
-                       const nlohmann::json &req,
+                       const std::string &req,
                        mtx::http::TypeErasedCallback cb,
                        bool requires_auth)
 {
-        auto session = create_session(cb);
-
-        if (!session)
-                return;
-
-        setup_auth(session.get(), requires_auth);
-        setup_headers<boost::beast::http::verb::put>(
-          session.get(), req, endpoint, "application/json");
-
-        session->run();
+        p->client.put(
+          endpoint_to_url(endpoint),
+          req,
+          "application/json",
+          [cb](const coeurl::Request &r) {
+                  cb(r.response_headers(), r.response(), r.error_code(), r.response_code());
+          },
+          prepare_headers(requires_auth));
 }
 
 void
 mtx::http::Client::get(const std::string &endpoint,
                        mtx::http::TypeErasedCallback cb,
                        bool requires_auth,
-                       const std::string &endpoint_namespace)
+                       const std::string &endpoint_namespace,
+                       int num_redirects)
 {
-        auto session = create_session(cb);
-
-        if (!session)
-                return;
-
-        setup_auth(session.get(), requires_auth);
-        setup_headers<boost::beast::http::verb::get>(
-          session.get(), client::utils::serialize(std::string{}), endpoint, "", endpoint_namespace);
-
-        session->run();
+        p->client.get(
+          endpoint_to_url(endpoint, endpoint_namespace.c_str()),
+          [cb](const coeurl::Request &r) {
+                  cb(r.response_headers(), r.response(), r.error_code(), r.response_code());
+          },
+          prepare_headers(requires_auth),
+          num_redirects);
 }
 
 void
 Client::verify_certificates(bool enabled)
 {
-        using namespace boost::asio;
-        p->ssl_ctx_.set_verify_mode(enabled ? ssl::verify_peer : ssl::verify_none);
+        p->client.set_verify_peer(enabled);
 }
 
 void
@@ -353,6 +155,7 @@ Client::set_server(const std::string &server)
 {
         std::string_view server_name = server;
         int port                     = 443;
+        this->protocol_              = "https";
         // Remove https prefix, if it exists
         if (server_name.substr(0, 8) == "https://") {
                 server_name.remove_prefix(8);
@@ -360,51 +163,31 @@ Client::set_server(const std::string &server)
         }
         if (server_name.substr(0, 7) == "http://") {
                 server_name.remove_prefix(7);
-                port = 80;
+                port            = 80;
+                this->protocol_ = "http";
         }
         if (server_name.size() > 0 && server_name.back() == '/')
                 server_name.remove_suffix(1);
 
-        // Check if the input also contains the port.
-        std::vector<std::string> parts;
-        boost::split(parts, server_name, [](char c) { return c == ':'; });
+        if (std::count(server_name.begin(), server_name.end(), ':') == 1) {
+                auto colon_offset = server_name.find(':');
+                server_           = std::string(server_name.substr(0, colon_offset));
 
-        if (parts.size() == 2 && mtx::client::utils::is_number(parts.at(1))) {
-                server_ = parts.at(0);
-                port_   = std::stoi(parts.at(1));
-        } else {
-                server_ = server_name;
-                port_   = port;
+                auto tmp = std::string(server_name.substr(colon_offset + 1));
+                if (mtx::client::utils::is_number(tmp)) {
+                        port_ = std::stoi(tmp);
+                        return;
+                }
         }
-        p->ssl_ctx_.set_verify_callback(
-          boost::asio::ssl::rfc2818_verification(std::string(server_)));
+
+        server_ = std::string(server_name);
+        port_   = port;
 }
 
 void
 Client::close(bool force)
 {
-        // We close all open connections.
-        if (force) {
-                shutdown();
-                p->ioc_.stop();
-        }
-
-        // Destroy work object. This allows the I/O thread to
-        // exit the event loop when there are no more pending
-        // asynchronous operations.
-        p->work_.reset();
-
-        // Wait for the worker threads to exit.
-        p->thread_group_.join_all();
-}
-
-void
-Client::setup_auth(Session *session, bool auth)
-{
-        const auto token = access_token();
-
-        if (auth && !token.empty())
-                session->request.set(boost::beast::http::field::authorization, "Bearer " + token);
+        p->client.close(force);
 }
 
 //
@@ -469,7 +252,7 @@ Client::get_login(Callback<mtx::responses::LoginFlows> cb)
 std::string
 Client::login_sso_redirect(std::string redirectUrl)
 {
-        return "https://" + server() + ":" + std::to_string(port()) +
+        return protocol_ + "://" + server() + ":" + std::to_string(port()) +
                "/_matrix/client/r0/login/sso/redirect?" +
                mtx::client::utils::query_params({{"redirectUrl", redirectUrl}});
 }
@@ -477,45 +260,13 @@ Client::login_sso_redirect(std::string redirectUrl)
 void
 Client::well_known(Callback<mtx::responses::WellKnown> callback)
 {
-        struct DoLookup
-        {
-                void operator()(const mtx::responses::WellKnown &res,
-                                HeaderFields headers,
-                                RequestErr err)
-                {
-                        if (err &&
-                            (err->status_code == boost::beast::http::status::found ||
-                             err->status_code == boost::beast::http::status::moved_permanently) &&
-                            numRedirects < 30 && headers &&
-                            headers->count(boost::beast::http::field::location)) {
-                                numRedirects++;
-                                auto server = headers.value()[boost::beast::http::field::location];
-                                size_t start_search = 0;
-                                if (server.starts_with("https://"))
-                                        start_search = 8;
-                                else if (server.starts_with("http://"))
-                                        start_search = 7;
-
-                                client->set_server(std::string(
-                                  server.substr(0, server.find_first_of('/', start_search))));
-
-                                client->get<mtx::responses::WellKnown>(
-                                  "/matrix/client", std::move(*this), false, "/.well-known");
-                                return;
-                        }
-
-                        callback(res, err);
-                }
-
-                Callback<mtx::responses::WellKnown> callback;
-                int numRedirects = 0;
-                Client *client   = nullptr;
-        } func;
-        func.numRedirects = 0;
-        func.callback     = std::move(callback);
-        func.client       = this;
-
-        get<mtx::responses::WellKnown>("/matrix/client", std::move(func), false, "/.well-known");
+        get<mtx::responses::WellKnown>(
+          "/matrix/client",
+          [cb = std::move(callback)](
+            const mtx::responses::WellKnown &res, HeaderFields, RequestErr err) { cb(res, err); },
+          false,
+          "/.well-known",
+          30);
 }
 
 void
@@ -964,14 +715,21 @@ Client::download(const std::string &server,
 
                   if (fields) {
                           if (fields->find("Content-Type") != fields->end())
-                                  content_type = fields->at("Content-Type").to_string();
+                                  content_type = fields->at("Content-Type");
                           if (fields->find("Content-Disposition") != fields->end()) {
-                                  auto value = fields->at("Content-Disposition").to_string();
+                                  auto value = fields->at("Content-Disposition");
 
-                                  std::vector<std::string> results;
-                                  boost::split(results, value, [](char c) { return c == '='; });
-
-                                  original_filename = results.back();
+                                  if (auto pos = value.find("filename"); pos != std::string::npos) {
+                                          if (auto start = value.find('"', pos);
+                                              start != std::string::npos) {
+                                                  auto end = value.find('"', start + 1);
+                                                  original_filename =
+                                                    value.substr(start + 1, end - start - 2);
+                                          } else if (start = value.find('=');
+                                                     start != std::string::npos) {
+                                                  original_filename = value.substr(start + 1);
+                                          }
+                                  }
                           }
                   }
 

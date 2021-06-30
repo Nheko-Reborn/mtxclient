@@ -1,7 +1,5 @@
 #include <atomic>
 
-#include <boost/algorithm/string.hpp>
-
 #include <gtest/gtest.h>
 
 #include <nlohmann/json.hpp>
@@ -497,40 +495,37 @@ TEST(Encryption, KeyChanges)
                   // Carl syncs to get the first next_batch token.
                   SyncOpts opts;
                   opts.timeout = 0;
-                  carl->sync(
-                    opts, [carl, carl_olm](const mtx::responses::Sync &res, RequestErr err) {
-                            check_error(err);
-                            const auto next_batch_token = res.next_batch;
+                  carl->sync(opts,
+                             [carl, carl_olm](const mtx::responses::Sync &res, RequestErr err) {
+                                     check_error(err);
+                                     const auto next_batch_token = res.next_batch;
 
-                            auto key_req = ::generate_keys(carl_olm);
+                                     auto key_req = ::generate_keys(carl_olm);
 
-                            atomic_bool keys_uploaded(false);
+                                     // Changes his keys.
+                                     carl->upload_keys(
+                                       key_req,
+                                       [carl, next_batch_token](const mtx::responses::UploadKeys &,
+                                                                RequestErr err) {
+                                               check_error(err);
 
-                            // Changes his keys.
-                            carl->upload_keys(
-                              key_req,
-                              [&keys_uploaded](const mtx::responses::UploadKeys &, RequestErr err) {
-                                      check_error(err);
-                                      keys_uploaded = true;
-                              });
+                                               // The key changes should contain his username
+                                               // because of the key uploading.
+                                               carl->key_changes(
+                                                 next_batch_token,
+                                                 "",
+                                                 [carl](const mtx::responses::KeyChanges &res,
+                                                        RequestErr err) {
+                                                         check_error(err);
 
-                            while (!keys_uploaded)
-                                    sleep();
+                                                         EXPECT_EQ(res.changed.size(), 1);
+                                                         EXPECT_EQ(res.left.size(), 0);
 
-                            // The key changes should contain his username
-                            // because of the key uploading.
-                            carl->key_changes(
-                              next_batch_token,
-                              "",
-                              [carl](const mtx::responses::KeyChanges &res, RequestErr err) {
-                                      check_error(err);
-
-                                      EXPECT_EQ(res.changed.size(), 1);
-                                      EXPECT_EQ(res.left.size(), 0);
-
-                                      EXPECT_EQ(res.changed.at(0), carl->user_id().to_string());
-                              });
-                    });
+                                                         EXPECT_EQ(res.changed.at(0),
+                                                                   carl->user_id().to_string());
+                                                 });
+                                       });
+                             });
           });
 
         carl->close();
