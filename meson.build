@@ -107,6 +107,8 @@ matrix_client_dep = declare_dependency(
   dependencies: deps,
   include_directories: inc)
 
+meson.override_dependency('mtxclient', matrix_client_dep)
+
 pkg = import('pkgconfig')
 pkg.generate(matrix_client,
   libraries : [matrix_client],
