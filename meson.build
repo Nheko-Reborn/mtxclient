@@ -128,10 +128,10 @@ cmake.configure_package_config_file(
   input: 'cmake/MatrixClientConfig.cmake.in',
   configuration: conf)
 
-if get_option('examples').enabled()
+if get_option('examples')
   subdir('examples')
 endif
 
-if get_option('tests').enabled()
+if get_option('tests')
   subdir('tests')
 endif

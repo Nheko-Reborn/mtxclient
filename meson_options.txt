@@ -1,2 +1,2 @@
-option('examples', type : 'feature', value : 'enabled')
-option('tests', type : 'feature', value : 'enabled')
+option('examples', type : 'boolean', value : false)
+option('tests', type : 'boolean', value : false)
