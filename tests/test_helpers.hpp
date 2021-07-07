@@ -1,6 +1,7 @@
 #pragma once
 
 #include "gtest/gtest.h"
+#include <cstdlib>
 #include <iostream>
 #include <limits>
 #include <random>
@@ -89,4 +90,15 @@ get_event_ids(const std::vector<Collection> &events)
                 ids.push_back(std::visit([](auto msg) { return msg.event_id; }, e));
 
         return ids;
+}
+
+inline std::string
+fixture_prefix()
+{
+        auto var = std::getenv("FIXTURE_PREFIX");
+
+        if (var)
+                return var;
+        else
+                return ".";
 }

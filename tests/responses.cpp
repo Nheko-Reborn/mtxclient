@@ -7,6 +7,8 @@
 
 #include <mtx.hpp>
 
+#include "test_helpers.hpp"
+
 using json = nlohmann::json;
 
 using namespace mtx::responses;
@@ -323,7 +325,7 @@ TEST(Responses, InvitedRoom)
 
 TEST(Responses, Sync)
 {
-        std::ifstream file("./fixtures/responses/sync.json");
+        std::ifstream file(fixture_prefix() + "/fixtures/responses/sync.json");
 
         json data1;
         file >> data1;
@@ -361,7 +363,7 @@ TEST(Responses, Sync)
 
 TEST(Responses, SyncWithEncryption)
 {
-        std::ifstream file("./fixtures/responses/sync_with_crypto.json");
+        std::ifstream file(fixture_prefix() + "/fixtures/responses/sync_with_crypto.json");
 
         json data;
         file >> data;
