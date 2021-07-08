@@ -17,6 +17,7 @@ include("cmake/HunterGate.cmake")
 HunterGate(
     URL "https://github.com/cpp-pm/hunter/archive/v0.23.305.tar.gz"
     SHA1 "fc8d7a6dac2fa23681847b3872d88d3839b657b0"
+    LOCAL
 )
 
 option(USE_BUNDLED_SPDLOG "Use the bundled version of spdlog."
@@ -161,7 +162,7 @@ if(USE_BUNDLED_COEURL)
 	FetchContent_Declare(
 		coeurl
 		GIT_REPOSITORY https://nheko.im/Nheko-Reborn/coeurl.git
-		GIT_TAG        417821a07cfe4429b08a2efed5e480a498087afd
+		GIT_TAG        e9010d1ce14e7163d1cb5407ed27b23303781796
 		)
 	FetchContent_MakeAvailable(coeurl)
 	target_link_libraries(matrix_client PUBLIC coeurl::coeurl)
