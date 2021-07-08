@@ -3,7 +3,7 @@
 version: 0.5.1-{build}
 
 configuration: Release
-image: Visual Studio 2017
+image: Visual Studio 2019
 platform: x64
 
 cache: 
@@ -16,11 +16,11 @@ build:
 install:
     - set PATH=%PATH%;C:\mingw-w64\x86_64-7.2.0-posix-seh-rt_v5-rev1\mingw64\bin
     - mingw32-make.exe --version
-    - call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat"
+    - call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvarsall.bat" x64
 
 build_script:
     - cmake --version
 
-    - cmake -G "Visual Studio 15 2017 Win64" -H. -Bbuild -DHUNTER_ENABLED=ON -DHUNTER_ROOT="C:\hunter"
+    - cmake -G "Visual Studio 16 2019" -H. -Bbuild -DHUNTER_ENABLED=ON -DHUNTER_ROOT="C:\hunter"
       -DCMAKE_BUILD_TYPE=Release -DHUNTER_CONFIGURATION_TYPES=Release -DUSE_BUNDLED_GTEST=OFF -DBUILD_LIB_TESTS=OFF -DBUILD_LIB_EXAMPLES=OFF
     - cmake --build build --config Release
