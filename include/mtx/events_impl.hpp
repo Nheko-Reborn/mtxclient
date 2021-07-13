@@ -2,6 +2,7 @@
 
 #include <nlohmann/json.hpp>
 
+#include "mtx/events/encrypted.hpp"
 #include "mtx/events/unknown.hpp"
 
 namespace mtx::events {
@@ -33,7 +34,8 @@ template<class Content>
 [[gnu::used, llvm::used]] void
 from_json(const json &obj, Event<Content> &event)
 {
-        if (obj.at("content").contains("m.new_content")) {
+        if (!std::is_same_v<Content, mtx::events::msg::Encrypted> &&
+            obj.at("content").contains("m.new_content")) {
                 auto new_content = obj.at("content").at("m.new_content");
 
                 if (obj.at("content").contains("m.relates_to"))
