@@ -1092,7 +1092,7 @@ TEST(StateEvents, ImagePack)
     "display_name": "Awesome Pack",
     "avatar_url": "mxc://example.org/asdjfasd",
     "usage": ["emoticon"],
-    "license": "huh"
+    "attribution": "huh"
   }
 },
           "type": "im.ponies.room_emotes",
@@ -1110,7 +1110,7 @@ TEST(StateEvents, ImagePack)
         EXPECT_EQ(event.state_key, "my-pack");
         EXPECT_EQ(event.content.pack.has_value(), true);
         EXPECT_EQ(event.content.pack->display_name, "Awesome Pack");
-        EXPECT_EQ(event.content.pack->license, "huh");
+        EXPECT_EQ(event.content.pack->attribution, "huh");
         EXPECT_EQ(event.content.pack->avatar_url, "mxc://example.org/asdjfasd");
         EXPECT_EQ(event.content.pack->is_emoji(), true);
         EXPECT_EQ(event.content.pack->is_sticker(), false);
@@ -1664,7 +1664,7 @@ TEST(RoomAccountData, ImagePack)
     "display_name": "Awesome Pack",
     "avatar_url": "mxc://example.org/asdjfasd",
     "usage": ["emoticon"],
-    "license": "huh"
+    "attribution": "huh"
   }
 },
           "type": "im.ponies.user_emotes"
@@ -1675,7 +1675,7 @@ TEST(RoomAccountData, ImagePack)
         EXPECT_EQ(event.type, ns::EventType::ImagePackInAccountData);
         EXPECT_EQ(event.content.pack.has_value(), true);
         EXPECT_EQ(event.content.pack->display_name, "Awesome Pack");
-        EXPECT_EQ(event.content.pack->license, "huh");
+        EXPECT_EQ(event.content.pack->attribution, "huh");
         EXPECT_EQ(event.content.pack->avatar_url, "mxc://example.org/asdjfasd");
         EXPECT_EQ(event.content.pack->is_emoji(), true);
         EXPECT_EQ(event.content.pack->is_sticker(), false);

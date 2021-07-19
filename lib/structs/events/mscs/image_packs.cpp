@@ -28,7 +28,7 @@ from_json(const nlohmann::json &obj, ImagePack::PackDescription &content)
 {
         content.avatar_url   = obj.value("avatar_url", "");
         content.display_name = obj.value("display_name", "");
-        content.license      = obj.value("license", "");
+        content.attribution  = obj.value("attribution", "");
 
         if (obj.contains("usage")) {
                 for (const auto &e : obj.at("usage")) {
@@ -72,8 +72,8 @@ to_json(nlohmann::json &obj, const ImagePack::PackDescription &content)
                 obj["avatar_url"] = content.avatar_url;
         if (!content.display_name.empty())
                 obj["display_name"] = content.display_name;
-        if (!content.license.empty())
-                obj["license"] = content.license;
+        if (!content.attribution.empty())
+                obj["attribution"] = content.attribution;
 
         if (content.usage.test(PackUsage::Sticker))
                 obj["usage"].push_back("sticker");

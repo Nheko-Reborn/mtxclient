@@ -63,8 +63,8 @@ struct ImagePack
                 std::string display_name;
                 //! An optional avatar/preview of the pack.
                 std::string avatar_url;
-                //! The license of this pack, if any.
-                std::string license;
+                //! Attribution for this pack, i.e. where it is from originally.
+                std::string attribution;
 
                 //! What the images are used for. Indexed by PackUsage
                 std::bitset<2> usage;
