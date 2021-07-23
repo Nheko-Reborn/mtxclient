@@ -40,6 +40,8 @@ constexpr std::string_view sso = "m.login.sso"; // needed for /login at least
 constexpr std::string_view dummy = "m.login.dummy";
 //! Authentication by accepting a set of terms like a privacy policy.
 constexpr std::string_view terms = "m.login.terms"; // see MSC1692
+//! Authentication using a registration token. See MSC3231.
+constexpr std::string_view registration_token = "org.matrix.msc3231.login.registration_token";
 }
 
 //! A list of auth types
@@ -181,6 +183,13 @@ struct MSISDN
         std::vector<ThreePIDCred> threepidCreds;
 };
 
+//! Registration token authentication stage.
+struct RegistrationToken
+{
+        //! The registration token to use
+        std::string token;
+};
+
 //! OAuth2, client retries with the session only, so I'm guessing this is empty?
 struct OAuth2
 {};
@@ -214,6 +223,7 @@ struct Auth
                      auth::Terms,
                      auth::SSO,
                      auth::Dummy,
+                     auth::RegistrationToken,
                      auth::Fallback>
           content;
 };
