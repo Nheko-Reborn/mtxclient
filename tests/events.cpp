@@ -1717,6 +1717,12 @@ TEST(RoomAccountData, ImagePackRooms)
                     "de.sorunome.mx-puppet-bridge.discord"),
                   1);
         EXPECT_EQ(json(event)["content"]["rooms"].size(), 2);
+
+        ns::msc2545::ImagePackRooms empty = {};
+        EXPECT_EQ(json(empty).dump(), "{\"rooms\":{}}");
+
+        ns::msc2545::ImagePackRooms empty2 = json::object();
+        EXPECT_TRUE(empty2.rooms.empty());
 }
 
 TEST(Presence, Presence)

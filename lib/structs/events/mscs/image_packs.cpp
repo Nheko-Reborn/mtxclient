@@ -92,15 +92,18 @@ to_json(nlohmann::json &obj, const ImagePack &content)
 void
 from_json(const nlohmann::json &obj, ImagePackRooms &content)
 {
-        for (const auto &[roomid, packs] : obj["rooms"].items()) {
-                for (const auto &[packid, body] : packs.items()) {
-                        content.rooms[roomid][packid] = body.dump();
+        if (obj.contains("rooms")) {
+                for (const auto &[roomid, packs] : obj["rooms"].items()) {
+                        for (const auto &[packid, body] : packs.items()) {
+                                content.rooms[roomid][packid] = body.dump();
+                        }
                 }
         }
 }
 void
 to_json(nlohmann::json &obj, const ImagePackRooms &content)
 {
+        obj["rooms"] = nlohmann::json::object();
         for (const auto &[roomid, packs] : content.rooms) {
                 for (const auto &[packid, body] : packs) {
                         if (body.empty())
