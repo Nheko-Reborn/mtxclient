@@ -72,6 +72,7 @@ MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::StrippedEvent, states::Tombstone)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::StrippedEvent, states::Topic)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::StrippedEvent, states::space::Child)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::StrippedEvent, states::space::Parent)
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::StrippedEvent, msg::Redacted)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::StrippedEvent, Unknown)
 
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::DeviceEvent, msgs::Encrypted)

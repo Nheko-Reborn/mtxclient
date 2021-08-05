@@ -80,6 +80,11 @@ parse_room_account_data_events(
         for (const auto &e : events) {
                 const auto type = mtx::events::getEventType(e);
 
+                // if (!e.contains("content") || e["content"].empty()) {
+                //        container.emplace_back(events::AccountDataEvent<events::msg::Redacted>(e));
+                //        break;
+                //}
+
                 switch (type) {
                 case events::EventType::Tag: {
                         try {
@@ -208,6 +213,15 @@ parse_timeline_events(const json &events,
 
         for (const auto &e : events) {
                 const auto type = mtx::events::getEventType(e);
+
+                if (!e.contains("content") || e["content"].empty()) {
+                        if (e.contains("state_key"))
+                                container.emplace_back(
+                                  events::StateEvent<events::msg::Redacted>(e));
+                        else
+                                container.emplace_back(events::RoomEvent<events::msg::Redacted>(e));
+                        break;
+                }
 
                 switch (type) {
                 case events::EventType::Reaction: {
@@ -832,6 +846,11 @@ parse_state_events(const json &events,
         for (const auto &e : events) {
                 const auto type = mtx::events::getEventType(e);
 
+                if (!e.contains("content") || e["content"].empty()) {
+                        container.emplace_back(events::StateEvent<events::msg::Redacted>(e));
+                        break;
+                }
+
                 switch (type) {
                 case events::EventType::RoomAliases: {
                         try {
@@ -1034,6 +1053,11 @@ parse_stripped_events(const json &events,
 
         for (const auto &e : events) {
                 const auto type = mtx::events::getEventType(e);
+
+                if (!e.contains("content") || e["content"].empty()) {
+                        container.emplace_back(events::StrippedEvent<events::msg::Redacted>(e));
+                        break;
+                }
 
                 switch (type) {
                 case events::EventType::RoomAliases: {

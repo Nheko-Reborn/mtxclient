@@ -119,6 +119,7 @@ using StrippedEvents = std::variant<events::StrippedEvent<states::Aliases>,
                                     events::StrippedEvent<states::space::Parent>,
                                     events::StrippedEvent<states::Tombstone>,
                                     events::StrippedEvent<states::Topic>,
+                                    events::StrippedEvent<msg::Redacted>,
                                     events::StrippedEvent<Unknown>>;
 
 //! Collection of @p StateEvent and @p RoomEvent. Those events would be
@@ -140,6 +141,7 @@ using TimelineEvents = std::variant<events::StateEvent<states::Aliases>,
                                     events::StateEvent<states::Tombstone>,
                                     events::StateEvent<states::Topic>,
                                     events::StateEvent<msc2545::ImagePack>,
+                                    events::StateEvent<msgs::Redacted>,
                                     events::EncryptedEvent<msgs::Encrypted>,
                                     events::RedactionEvent<msgs::Redaction>,
                                     events::Sticker,
