@@ -890,6 +890,20 @@ Client::registration(const std::string &user,
 }
 
 void
+Client::send_state_event(const std::string &room_id,
+                         const std::string &event_type,
+                         const std::string &state_key,
+                         const nlohmann::json &payload,
+                         Callback<mtx::responses::EventId> callback)
+{
+        const auto api_path = "/client/r0/rooms/" + mtx::client::utils::url_encode(room_id) +
+                              "/state/" + mtx::client::utils::url_encode(event_type) + "/" +
+                              mtx::client::utils::url_encode(state_key);
+
+        put<nlohmann::json, mtx::responses::EventId>(api_path, payload, callback);
+}
+
+void
 Client::send_to_device(const std::string &event_type,
                        const std::string &txn_id,
                        const nlohmann::json &body,

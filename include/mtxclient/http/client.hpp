@@ -476,6 +476,11 @@ public:
                                const Payload &payload,
                                Callback<mtx::responses::EventId> cb);
         //! Send a state event by providing the state key.
+        void send_state_event(const std::string &room_id,
+                              const std::string &event_type,
+                              const std::string &state_key,
+                              const nlohmann::json &payload,
+                              Callback<mtx::responses::EventId> callback);
         template<class Payload>
         void send_state_event(const std::string &room_id,
                               const std::string &state_key,

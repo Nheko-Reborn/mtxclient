@@ -22,17 +22,17 @@ namespace msg {
 //! Content of `m.room.message` with msgtype `m.image`.
 struct Image
 {
-        // A textual representation of the image. This could be
-        // the alt text of the image, the filename of the image,
-        // or some kind of content description for accessibility e.g. 'image attachment
+        //! A textual representation of the image. This could be
+        //! the alt text of the image, the filename of the image,
+        //! or some kind of content description for accessibility e.g. 'image attachment
         std::string body;
-        // Must be 'm.image'.
+        //! Must be 'm.image'.
         std::string msgtype;
-        // The Matrix URL to the image.
+        //! The Matrix URL to the image.
         std::string url;
-        // Metadata about the image referred to in `url`.
+        //! Metadata about the image referred to in `url`.
         mtx::common::ImageInfo info;
-        // Encryption members. If present, they replace url.
+        //! Encryption members. If present, they replace url.
         std::optional<crypto::EncryptedFile> file;
         //! Relates to for rich replies
         mtx::common::Relations relations;
@@ -41,15 +41,15 @@ struct Image
 //! Content of `m.sticker`.
 struct StickerImage
 {
-        // A textual representation of the image. This could be
-        // the alt text of the image, the filename of the image,
-        // or some kind of content description for accessibility e.g. 'image attachment
+        //! A textual representation of the image. This could be
+        //! the alt text of the image, the filename of the image,
+        //! or some kind of content description for accessibility e.g. 'image attachment
         std::string body;
-        // The Matrix URL to the image.
+        //! The Matrix URL to the image.
         std::string url;
-        // Metadata about the image referred to in `url`.
+        //! Metadata about the image referred to in `url`.
         mtx::common::ImageInfo info;
-        // Encryption members. If present, they replace url.
+        //! Encryption members. If present, they replace url.
         std::optional<crypto::EncryptedFile> file;
         //! Relates to for rich replies
         mtx::common::Relations relations;

@@ -143,6 +143,27 @@ from_json(const nlohmann::json &obj, VideoInfo &info);
 void
 to_json(nlohmann::json &obj, const VideoInfo &info);
 
+//! Location metadata
+struct LocationInfo
+{
+        //! The URL to an image thumbnail of the video clip.
+        std::string thumbnail_url;
+        //! Metadata about the image referred to in @p thumbnail_url.
+        ThumbnailInfo thumbnail_info;
+        //! Encryption members. If present, they replace thumbnail_url.
+        std::optional<crypto::EncryptedFile> thumbnail_file;
+        //! experimental blurhash, see MSC2448
+        std::string blurhash;
+};
+
+//! Deserialization method needed by @p nlohmann::json.
+void
+from_json(const nlohmann::json &obj, ThumbnailInfo &info);
+
+//! Serialization method needed by @p nlohmann::json.
+void
+to_json(nlohmann::json &obj, const ThumbnailInfo &info);
+
 //! Definition of rel_type for relations.
 enum class RelationType
 {
