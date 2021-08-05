@@ -215,11 +215,16 @@ parse_timeline_events(const json &events,
                 const auto type = mtx::events::getEventType(e);
 
                 if (!e.contains("content") || e["content"].empty()) {
-                        if (e.contains("state_key"))
-                                container.emplace_back(
-                                  events::StateEvent<events::msg::Redacted>(e));
-                        else
-                                container.emplace_back(events::RoomEvent<events::msg::Redacted>(e));
+                        try {
+                                if (e.contains("state_key"))
+                                        container.emplace_back(
+                                          events::StateEvent<events::msg::Redacted>(e));
+                                else
+                                        container.emplace_back(
+                                          events::RoomEvent<events::msg::Redacted>(e));
+                        } catch (json::exception &err) {
+                                log_error(err, e);
+                        }
                         break;
                 }
 
@@ -847,7 +852,12 @@ parse_state_events(const json &events,
                 const auto type = mtx::events::getEventType(e);
 
                 if (!e.contains("content") || e["content"].empty()) {
-                        container.emplace_back(events::StateEvent<events::msg::Redacted>(e));
+                        try {
+                                container.emplace_back(
+                                  events::StateEvent<events::msg::Redacted>(e));
+                        } catch (json::exception &err) {
+                                log_error(err, e);
+                        }
                         break;
                 }
 
@@ -1055,7 +1065,12 @@ parse_stripped_events(const json &events,
                 const auto type = mtx::events::getEventType(e);
 
                 if (!e.contains("content") || e["content"].empty()) {
-                        container.emplace_back(events::StrippedEvent<events::msg::Redacted>(e));
+                        try {
+                                container.emplace_back(
+                                  events::StrippedEvent<events::msg::Redacted>(e));
+                        } catch (json::exception &err) {
+                                log_error(err, e);
+                        }
                         break;
                 }
 
