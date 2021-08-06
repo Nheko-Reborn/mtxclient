@@ -214,7 +214,8 @@ parse_timeline_events(const json &events,
         for (const auto &e : events) {
                 const auto type = mtx::events::getEventType(e);
 
-                if (!e.contains("content") || e["content"].empty()) {
+                if (type != events::EventType::RoomRedaction &&
+                    (!e.contains("content") || e["content"].empty())) {
                         try {
                                 if (e.contains("state_key"))
                                         container.emplace_back(
@@ -225,9 +226,7 @@ parse_timeline_events(const json &events,
                         } catch (json::exception &err) {
                                 log_error(err, e);
                         }
-                }
-
-                else {
+                } else {
                         switch (type) {
                         case events::EventType::Reaction: {
                                 try {
@@ -858,7 +857,8 @@ parse_state_events(const json &events,
         for (const auto &e : events) {
                 const auto type = mtx::events::getEventType(e);
 
-                if (!e.contains("content") || e["content"].empty()) {
+                if (type != events::EventType::RoomRedaction &&
+                    (!e.contains("content") || e["content"].empty())) {
                         try {
                                 container.emplace_back(
                                   events::StateEvent<events::msg::Redacted>(e));
@@ -1076,7 +1076,8 @@ parse_stripped_events(const json &events,
         for (const auto &e : events) {
                 const auto type = mtx::events::getEventType(e);
 
-                if (!e.contains("content") || e["content"].empty()) {
+                if (type != events::EventType::RoomRedaction &&
+                    (!e.contains("content") || e["content"].empty())) {
                         try {
                                 container.emplace_back(
                                   events::StrippedEvent<events::msg::Redacted>(e));

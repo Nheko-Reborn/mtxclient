@@ -658,6 +658,47 @@ TEST(Responses, Messages)
         EXPECT_EQ(third_event.type, mtx::events::EventType::RoomName);
         EXPECT_EQ(third_event.event_id, "$1444812213350496Ccccc:example.com");
         EXPECT_EQ(third_event.sender, "@bob:example.com");
+
+        json redactions = R"({
+	"start": "t47429-4392820_219380_26003_2265",
+	"end": "t47409-4357353_219380_26003_2265",
+	"chunk": [{
+    "content": {
+        "reason": "Spamming"
+    },
+    "event_id": "$143273582443PhrSn:example.org",
+    "origin_server_ts": 1432735824653,
+    "redacts": "$fukweghifu23:localhost",
+    "room_id": "!jEsUZKDJdhlrceRyVU:example.org",
+    "sender": "@example:example.org",
+    "type": "m.room.redaction",
+    "unsigned": {
+        "age": 1234
+    }
+},
+{
+    "content": {
+        "reason": "Spamming"
+    },
+    "event_id": "$143273582443PhrSn:example.org",
+    "origin_server_ts": 1432735824653,
+    "redacts": "$fukweghifu23:localhost",
+    "room_id": "!jEsUZKDJdhlrceRyVU:example.org",
+    "sender": "@example:example.org",
+    "type": "m.room.redaction",
+    "unsigned": {
+        "age": 1234
+    }
+}
+	]})"_json;
+
+        messages = redactions;
+
+        ASSERT_EQ(messages.chunk.size(), 2);
+        auto redaction = std::get<RedactionEvent<msg::Redaction>>(messages.chunk[0]);
+        EXPECT_EQ(redaction.type, mtx::events::EventType::RoomRedaction);
+        redaction = std::get<RedactionEvent<msg::Redaction>>(messages.chunk[1]);
+        EXPECT_EQ(redaction.type, mtx::events::EventType::RoomRedaction);
 }
 
 TEST(Responses, EphemeralTyping)
