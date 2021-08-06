@@ -605,9 +605,9 @@ TEST(Responses, Messages)
         EXPECT_EQ(third_event.event_id, "$1444812213350496Ccccc:example.com");
         EXPECT_EQ(third_event.sender, "@bob:example.com");
 
-        // Two of the events are malformed and should be dropped.
-        // 1. Missing "type" key.
-        // 2. Content is null.
+        // Two of the events are malformed
+        // 1. Missing "type" key and should be dropped.
+        // 2. Content is null and should be parsed as redacted.
         json malformed_data = R"({
 	"start": "t47429-4392820_219380_26003_2265",
 	"end": "t47409-4357353_219380_26003_2265",
@@ -649,9 +649,11 @@ TEST(Responses, Messages)
         messages = malformed_data;
         EXPECT_EQ(messages.start, "t47429-4392820_219380_26003_2265");
         EXPECT_EQ(messages.end, "t47409-4357353_219380_26003_2265");
-        EXPECT_EQ(messages.chunk.size(), 1);
+        ASSERT_EQ(messages.chunk.size(), 2);
 
-        third_event = std::get<StateEvent<Name>>(messages.chunk[0]);
+        EXPECT_TRUE(std::holds_alternative<RoomEvent<msg::Redacted>>(messages.chunk[0]));
+
+        third_event = std::get<StateEvent<Name>>(messages.chunk[1]);
         EXPECT_EQ(third_event.content.name, "New room name");
         EXPECT_EQ(third_event.type, mtx::events::EventType::RoomName);
         EXPECT_EQ(third_event.event_id, "$1444812213350496Ccccc:example.com");
