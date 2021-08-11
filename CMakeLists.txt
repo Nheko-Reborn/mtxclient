@@ -162,7 +162,7 @@ if(USE_BUNDLED_COEURL)
 	FetchContent_Declare(
 		coeurl
 		GIT_REPOSITORY https://nheko.im/Nheko-Reborn/coeurl.git
-		GIT_TAG        e741ced9b2bcf14069e17d466aaef58b277b481d
+		GIT_TAG        18470f1c3570f652f79de8e2fbe3eef4238c4171
 		)
 	FetchContent_MakeAvailable(coeurl)
 	target_link_libraries(matrix_client PUBLIC coeurl::coeurl)
