@@ -32,6 +32,7 @@ Client::Client(const std::string &server, uint16_t port)
         set_port(port);
 
         p->client.set_verify_peer(true);
+        p->client.connection_timeout(60);
 }
 
 // call destuctor of work queue and ios first!
