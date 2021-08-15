@@ -891,6 +891,21 @@ Client::registration(const std::string &user,
 }
 
 void
+Client::registration_token_validity(const std::string token,
+                                    Callback<mtx::responses::RegistrationTokenValidity> cb)
+{
+        const auto api_path = "/client/unstable/org.matrix.msc3231/register/"
+                              "org.matrix.msc3231.login.registration_token/validity?" +
+                              mtx::client::utils::query_params({{"token", token}});
+
+        get<mtx::responses::RegistrationTokenValidity>(
+          api_path,
+          [cb](const mtx::responses::RegistrationTokenValidity &res, HeaderFields, RequestErr err) {
+                  cb(res, err);
+          });
+}
+
+void
 Client::send_state_event(const std::string &room_id,
                          const std::string &event_type,
                          const std::string &state_key,

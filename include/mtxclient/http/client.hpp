@@ -70,6 +70,7 @@ struct Notifications;
 struct Profile;
 struct QueryKeys;
 struct Register;
+struct RegistrationTokenValidity;
 struct Sync;
 struct TurnServer;
 struct UploadKeys;
@@ -240,6 +241,10 @@ public:
                           const std::string &pass,
                           const user_interactive::Auth &auth,
                           Callback<mtx::responses::Register> cb);
+
+        //! Check the validity of a registration token
+        void registration_token_validity(const std::string token,
+                                         Callback<mtx::responses::RegistrationTokenValidity> cb);
 
         //! Paginate through the list of events that the user has been,
         //! or would have been notified about.
