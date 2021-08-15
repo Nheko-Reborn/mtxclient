@@ -177,10 +177,12 @@ export_backup(const mtx::secret_storage::AesHmacSha2KeyDescription &keyDesc,
                                   session.forwarding_curve25519_key_chain;
 
                                 exported_sessions.push_back(std::move(export_session));
-                        } catch (mtx::crypto::olm_exception &e) {
-                                cerr << e.what() << "\n";
-                                return;
+                        } catch (std::exception &e) {
+                                cerr << "Failed to decrypt session " << room_id << ":" << session_id
+                                     << ":" << e.what() << "\n";
+                                continue;
                         }
+                        cerr << "Decrypted session " << room_id << ":" << session_id << "\n";
                 }
         }
 

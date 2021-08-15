@@ -182,7 +182,11 @@ AES_CTR_256_Encrypt(const std::string plaintext, const BinaryBuf aes256Key, Bina
 
         uint8_t *iv_data = iv.data();
         // need to set bit 63 to 0
-        iv_data[63 % 8] &= ~(1UL << (63 / 8));
+        // Element and everyone else seems to be counting bytes from the back, i.e. iv_data[15] is
+        // the last byte. So we need to clear byte 15 - 63%8 = 15 - 7 = 8, the highest bit, 1 << 7
+        // see:
+        // https://github.com/matrix-org/matrix-js-sdk/blob/529fe93ab14b93c515e9ab0d0277c1942a5d73c5/src/crypto/aes.ts#L144
+        iv_data[15 - 63 % 8] &= ~(1UL << (63 / 8));
         //*iv_data &= ~(1UL << (63));
 
         /* Create and initialise the context */
@@ -386,7 +390,7 @@ encrypt_file(const std::string &plaintext)
         // iv has to be 16 bytes, key 32!
         BinaryBuf key = create_buffer(32);
         BinaryBuf iv  = create_buffer(16);
-        iv[63 % 8] &= ~(1UL << (63 / 8));
+        iv[15 - 63 % 8] &= ~(1UL << (63 / 8));
 
         BinaryBuf cyphertext = AES_CTR_256_Encrypt(plaintext, key, iv);
 
