@@ -151,8 +151,9 @@ from_json(const nlohmann::json &obj, SessionData &data)
           obj.at("forwarding_curve25519_key_chain")
             .get<decltype(data.forwarding_curve25519_key_chain)>();
         data.sender_key = obj.at("sender_key");
+        // required, but some clients don't send it
         data.sender_claimed_keys =
-          obj.at("sender_claimed_keys").get<decltype(data.sender_claimed_keys)>();
+          obj.value("sender_claimed_keys", std::map<std::string, std::string>());
         data.session_key = obj.at("session_key");
 }
 }
