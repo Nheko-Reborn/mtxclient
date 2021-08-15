@@ -15,5 +15,11 @@ from_json(const json &obj, Register &response)
         response.access_token = obj.at("access_token").get<std::string>();
         response.device_id    = obj.at("device_id").get<std::string>();
 }
+
+void
+from_json(const nlohmann::json &obj, RegistrationTokenValidity &response)
+{
+        response.valid = obj.at("valid").get<bool>();
+}
 }
 }

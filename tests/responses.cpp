@@ -476,6 +476,14 @@ TEST(Responses, WellKnown)
         EXPECT_EQ(wellknown.identity_server->base_url, "https://identity.example.com");
 }
 
+TEST(Responses, RegistrationTokenValidity)
+{
+        json data = R"({"valid" : true})"_json;
+
+        RegistrationTokenValidity validity = data;
+        EXPECT_EQ(validity.valid, true);
+}
+
 TEST(Responses, CreateRoom)
 {
         json data = R"({"room_id" : "!sefiuhWgwghwWgh:example.com"})"_json;
