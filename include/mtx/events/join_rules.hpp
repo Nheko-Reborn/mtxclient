@@ -37,11 +37,37 @@ joinRuleToString(const JoinRule &rule);
 JoinRule
 stringToJoinRule(const std::string &rule);
 
+enum class JoinAllowanceType
+{
+        RoomMembership,
+        Unknown,
+};
+
+//! An additional rule specifying what users are allowed to join.
+struct JoinAllowance
+{
+        //! "m.room_membership" to describe that we are allowing access via room membership. Future
+        //! MSCs may define other types.
+        JoinAllowanceType type;
+        //! The room ID to check the membership of.
+        std::string room_id;
+};
+
+void
+from_json(const nlohmann::json &obj, JoinAllowance &join_rules);
+
+void
+to_json(nlohmann::json &obj, const JoinAllowance &join_rules);
+
 //! Content of the `m.room.join_rules` state event.
 struct JoinRules
 {
         //! The type of rules used for users wishing to join this room.
         JoinRule join_rule;
+
+        //! A list of rooms to join via. Might be extended to other join types in the future.
+        //! Only relevant in combination with restricted joinrules atm.
+        std::vector<JoinAllowance> allow;
 };
 
 void

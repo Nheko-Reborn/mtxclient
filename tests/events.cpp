@@ -493,6 +493,36 @@ TEST(StateEvents, JoinRules)
         })"_json;
 
         EXPECT_EQ(data, json(ns::StateEvent<ns::state::JoinRules>(data)));
+
+        data = R"({
+          "type": "m.room.join_rules",
+          "state_key": "",
+          "sender": "@mujx:matrix.org",
+          "event_id": "$15067619241414401ASocy:matrix.org",
+          "origin_server_ts": 1506761924018,
+          "content": {
+              "join_rule": "restricted",
+              "allow": [
+                  {
+                      "type": "m.room_membership",
+                      "room_id": "!mods:example.org"
+                  },
+                  {
+                      "type": "m.room_membership",
+                      "room_id": "!users:example.org"
+                  }
+              ]
+          }
+      })"_json;
+
+        ns::StateEvent<ns::state::JoinRules> event2 = data;
+        ASSERT_EQ(event2.content.allow.size(), 2);
+        ASSERT_EQ(event2.content.allow[0].type,
+                  mtx::events::state::JoinAllowanceType::RoomMembership);
+        ASSERT_EQ(event2.content.allow[0].room_id, "!mods:example.org");
+        ASSERT_EQ(event2.content.allow[1].type,
+                  mtx::events::state::JoinAllowanceType::RoomMembership);
+        ASSERT_EQ(event2.content.allow[1].room_id, "!users:example.org");
 }
 
 TEST(StateEvents, Member)
