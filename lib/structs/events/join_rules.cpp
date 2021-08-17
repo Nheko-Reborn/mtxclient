@@ -21,6 +21,8 @@ joinRuleToString(const JoinRule &rule)
                 return "knock";
         case JoinRule::Private:
                 return "private";
+        case JoinRule::Restricted:
+                return "restricted";
         }
 
         return "";
@@ -35,6 +37,8 @@ stringToJoinRule(const std::string &rule)
                 return JoinRule::Invite;
         else if (rule == "knock")
                 return JoinRule::Knock;
+        else if (rule == "restricted")
+                return JoinRule::Restricted;
 
         return JoinRule::Private;
 }

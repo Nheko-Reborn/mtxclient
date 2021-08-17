@@ -22,10 +22,13 @@ enum class JoinRule
         //! A user who wishes to join the room must first receive
         //! an invite to the room from someone already inside of the room.
         Invite,
-        //! Reserved but not yet implemented by the Matrix specification.
+        //! the same as invite, except anyone can knock. See MSC2403.
         Knock,
         //! Reserved but not yet implemented by the Matrix specification.
         Private,
+        //! the same as invite, except users may also join if they are a member of a room listed in
+        //! the allow rules.
+        Restricted,
 };
 
 std::string

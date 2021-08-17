@@ -51,6 +51,9 @@ struct Member
         //! reason for the membership change, empty in most cases
         std::string reason;
 
+        //! In a restricted room, on what user was used to authorize the join.
+        std::string join_authorised_via_users_server;
+
         /* ThirdPartyInvite third_party_invite; */
 };
 

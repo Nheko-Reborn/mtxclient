@@ -59,6 +59,10 @@ from_json(const json &obj, Member &member)
 
         if (obj.find("reason") != obj.end())
                 member.reason = obj.at("reason").get<std::string>();
+
+        if (obj.contains("join_authorised_via_users_server"))
+                member.join_authorised_via_users_server =
+                  obj.at("join_authorised_via_users_server").get<std::string>();
 }
 
 void
@@ -68,7 +72,12 @@ to_json(json &obj, const Member &member)
         obj["avatar_url"]  = member.avatar_url;
         obj["displayname"] = member.display_name;
         obj["is_direct"]   = member.is_direct;
-        obj["reason"]      = member.reason;
+
+        if (!member.reason.empty())
+                obj["reason"] = member.reason;
+
+        if (!member.join_authorised_via_users_server.empty())
+                obj["join_authorised_via_users_server"] = member.join_authorised_via_users_server;
 }
 
 } // namespace state
