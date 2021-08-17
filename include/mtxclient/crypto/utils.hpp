@@ -91,6 +91,10 @@ AES_CTR_256_Encrypt(const std::string plaintext, const BinaryBuf aes256Key, Bina
 BinaryBuf
 AES_CTR_256_Decrypt(const std::string ciphertext, const BinaryBuf aes256Key, BinaryBuf iv);
 
+//! returns base64 encoded pubkey
+std::string
+CURVE25519_public_key_from_private(const BinaryBuf &privateKey);
+
 // copies ciphertext, as decryption modifies it.
 std::string
 CURVE25519_AES_SHA2_Decrypt(std::string base64_ciphertext,

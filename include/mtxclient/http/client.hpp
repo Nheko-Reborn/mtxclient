@@ -590,13 +590,17 @@ public:
         void backup_version(Callback<mtx::responses::backup::BackupVersion> cb);
         void backup_version(const std::string &version,
                             Callback<mtx::responses::backup::BackupVersion> cb);
-        void room_keys(std::string version, Callback<mtx::responses::backup::KeysBackup> cb);
-        void room_keys(std::string version,
-                       const std::string room_id,
+        void update_backup_version(const std::string &version,
+                                   const mtx::responses::backup::BackupVersion &data,
+                                   ErrCallback cb);
+
+        void room_keys(const std::string &version, Callback<mtx::responses::backup::KeysBackup> cb);
+        void room_keys(const std::string &version,
+                       const std::string &room_id,
                        Callback<mtx::responses::backup::RoomKeysBackup> cb);
-        void room_keys(std::string version,
-                       const std::string room_id,
-                       const std::string session_id,
+        void room_keys(const std::string &version,
+                       const std::string &room_id,
+                       const std::string &session_id,
                        Callback<mtx::responses::backup::SessionBackup> cb);
 
         //

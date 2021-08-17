@@ -1125,8 +1125,17 @@ Client::backup_version(const std::string &version,
                   cb(res, err);
           });
 }
+
 void
-Client::room_keys(std::string version, Callback<mtx::responses::backup::KeysBackup> cb)
+Client::update_backup_version(const std::string &version,
+                              const mtx::responses::backup::BackupVersion &data,
+                              ErrCallback cb)
+{
+        put<mtx::responses::backup::BackupVersion>(
+          "/client/r0/room_keys/version/" + mtx::client::utils::url_encode(version), data, cb);
+}
+void
+Client::room_keys(const std::string &version, Callback<mtx::responses::backup::KeysBackup> cb)
 {
         get<mtx::responses::backup::KeysBackup>(
           "/client/r0/room_keys/keys?" + mtx::client::utils::query_params({{"version", version}}),
@@ -1135,8 +1144,8 @@ Client::room_keys(std::string version, Callback<mtx::responses::backup::KeysBack
           });
 }
 void
-Client::room_keys(std::string version,
-                  const std::string room_id,
+Client::room_keys(const std::string &version,
+                  const std::string &room_id,
                   Callback<mtx::responses::backup::RoomKeysBackup> cb)
 {
         get<mtx::responses::backup::RoomKeysBackup>(
@@ -1147,9 +1156,9 @@ Client::room_keys(std::string version,
           });
 }
 void
-Client::room_keys(std::string version,
-                  const std::string room_id,
-                  const std::string session_id,
+Client::room_keys(const std::string &version,
+                  const std::string &room_id,
+                  const std::string &session_id,
                   Callback<mtx::responses::backup::SessionBackup> cb)
 {
         get<mtx::responses::backup::SessionBackup>(

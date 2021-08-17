@@ -279,6 +279,19 @@ AES_CTR_256_Decrypt(const std::string ciphertext, const BinaryBuf aes256Key, Bin
 }
 
 std::string
+CURVE25519_public_key_from_private(const BinaryBuf &privateKey)
+{
+        auto ctx = create_olm_object<PkDecryptionObject>();
+
+        BinaryBuf pubkey(::olm_pk_key_length());
+
+        ::olm_pk_key_from_private(
+          ctx.get(), pubkey.data(), pubkey.size(), privateKey.data(), privateKey.size());
+
+        return to_string(pubkey);
+}
+
+std::string
 CURVE25519_AES_SHA2_Decrypt(std::string base64_ciphertext,
                             const BinaryBuf &privateKey,
                             const std::string &ephemeral,
