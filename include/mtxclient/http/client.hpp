@@ -338,6 +338,12 @@ public:
                        Callback<mtx::responses::RoomId> cb);
         //! Leave a room by its room_id.
         void leave_room(const std::string &room_id, Callback<mtx::responses::Empty> cb);
+        //! Knock on a room.
+        void knock_room(const std::string &room_id,
+                        const std::vector<std::string> &via,
+                        Callback<mtx::responses::RoomId> cb,
+                        const std::string &reason = "");
+
         //! Invite a user to a room.
         void invite_user(const std::string &room_id,
                          const std::string &user_id,

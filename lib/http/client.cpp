@@ -542,6 +542,29 @@ Client::join_room(const std::string &room,
 }
 
 void
+Client::knock_room(const std::string &room,
+                   const std::vector<std::string> &via,
+                   Callback<mtx::responses::RoomId> cb,
+                   const std::string &reason)
+{
+        using mtx::client::utils::url_encode;
+        std::string query;
+        if (!via.empty()) {
+                query = "?server_name=" + url_encode(via[0]);
+                for (size_t i = 1; i < via.size(); i++) {
+                        query += "&server_name=" + url_encode(via[i]);
+                }
+        }
+        auto api_path = "/client/r0/knock/" + url_encode(room) + query;
+
+        auto body = nlohmann::json::object();
+        if (!reason.empty())
+                body["reason"] = reason;
+
+        post<std::string, mtx::responses::RoomId>(api_path, body.dump(), cb);
+}
+
+void
 Client::leave_room(const std::string &room_id, Callback<mtx::responses::Empty> callback)
 {
         auto api_path = "/client/r0/rooms/" + mtx::client::utils::url_encode(room_id) + "/leave";
