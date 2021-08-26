@@ -282,6 +282,26 @@ TEST(Encryption, EncryptedFile)
                                                                    ev.content.file.value())));
 }
 
+TEST(Encryption, PkEncryptionDecryption)
+{
+        mtx::responses::backup::SessionData d;
+        d.algorithm   = "m.megolm.v1.aes-sha2";
+        d.sender_key  = "sender_key";
+        d.session_key = "session_key";
+
+        auto privKey = mtx::crypto::create_buffer(256 / 8);
+
+        auto publicKey = mtx::crypto::CURVE25519_public_key_from_private(privKey);
+        auto encrypted = mtx::crypto::encrypt_session(d, publicKey);
+        auto decrypted = mtx::crypto::decrypt_session(encrypted, privKey);
+
+        EXPECT_EQ(d.algorithm, decrypted.algorithm);
+        EXPECT_EQ(d.forwarding_curve25519_key_chain, decrypted.forwarding_curve25519_key_chain);
+        EXPECT_EQ(d.sender_claimed_keys, decrypted.sender_claimed_keys);
+        EXPECT_EQ(d.sender_key, decrypted.sender_key);
+        EXPECT_EQ(d.session_key, decrypted.session_key);
+}
+
 TEST(SecretStorage, Secret)
 {
         json j = R"({

@@ -91,6 +91,17 @@ AES_CTR_256_Encrypt(const std::string plaintext, const BinaryBuf aes256Key, Bina
 BinaryBuf
 AES_CTR_256_Decrypt(const std::string ciphertext, const BinaryBuf aes256Key, BinaryBuf iv);
 
+//! Base64 encoded CURVE25519_AES_SHA2 encrypted text, including the mac and ephemeral key
+struct CURVE25519_AES_SHA2_Encrypted
+{
+        //! base64 encoded
+        std::string ciphertext, mac, ephemeral;
+};
+
+//! encypts a plaintext payload using CURVE25519_AES_SHA2
+CURVE25519_AES_SHA2_Encrypted
+CURVE25519_AES_SHA2_Encrypt(const std::string &plaintext, const std::string &base64_publicKey);
+
 //! returns base64 encoded pubkey
 std::string
 CURVE25519_public_key_from_private(const BinaryBuf &privateKey);
@@ -101,6 +112,10 @@ CURVE25519_AES_SHA2_Decrypt(std::string base64_ciphertext,
                             const BinaryBuf &privateKey,
                             const std::string &ephemeral,
                             const std::string &mac);
+
+//! encrypt a session for online key backup
+mtx::responses::backup::EncryptedSessionData
+encrypt_session(const mtx::responses::backup::SessionData &data, const std::string publicKey);
 
 //! Decrypt a session retrieved from online key backup.
 mtx::responses::backup::SessionData

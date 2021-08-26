@@ -608,6 +608,18 @@ public:
                        const std::string &room_id,
                        const std::string &session_id,
                        Callback<mtx::responses::backup::SessionBackup> cb);
+        void put_room_keys(const std::string &version,
+                           const mtx::responses::backup::KeysBackup &keys,
+                           ErrCallback cb);
+        void put_room_keys(const std::string &version,
+                           const std::string &room_id,
+                           const mtx::responses::backup::RoomKeysBackup &keys,
+                           ErrCallback cb);
+        void put_room_keys(const std::string &version,
+                           const std::string &room_id,
+                           const std::string &session_id,
+                           const mtx::responses::backup::SessionBackup &keys,
+                           ErrCallback cb);
 
         //
         // Secret storage endpoints

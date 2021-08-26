@@ -44,6 +44,11 @@ struct OlmDeleter
                 olm_clear_pk_decryption(ptr);
                 delete[](reinterpret_cast<uint8_t *>(ptr));
         }
+        void operator()(OlmPkEncryption *ptr)
+        {
+                olm_clear_pk_encryption(ptr);
+                delete[](reinterpret_cast<uint8_t *>(ptr));
+        }
         void operator()(OlmPkSigning *ptr)
         {
                 olm_clear_pk_signing(ptr);
@@ -96,6 +101,17 @@ struct PkDecryptionObject
         static olm_type *allocate()
         {
                 return olm_pk_decryption(new uint8_t[olm_pk_decryption_size()]);
+        }
+};
+
+//! Wrapper for the olm object to do Private Key Decryption.
+struct PkEncryptionObject
+{
+        using olm_type = OlmPkEncryption;
+
+        static olm_type *allocate()
+        {
+                return olm_pk_encryption(new uint8_t[olm_pk_encryption_size()]);
         }
 };
 

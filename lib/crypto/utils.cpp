@@ -9,6 +9,8 @@
 #include <openssl/rand.h>
 #include <openssl/sha.h>
 
+#include <olm/pk.h>
+
 #include <algorithm>
 #include <iomanip>
 #include <iostream>
@@ -291,6 +293,40 @@ CURVE25519_public_key_from_private(const BinaryBuf &privateKey)
         return to_string(pubkey);
 }
 
+CURVE25519_AES_SHA2_Encrypted
+CURVE25519_AES_SHA2_Encrypt(const std::string &plaintext, const std::string &base64_publicKey)
+{
+        auto ctx = create_olm_object<PkEncryptionObject>();
+
+        ::olm_pk_encryption_set_recipient_key(
+          ctx.get(), base64_publicKey.data(), base64_publicKey.size());
+
+        BinaryBuf ephemeral(::olm_pk_key_length());
+        BinaryBuf mac(::olm_pk_mac_length(ctx.get()));
+        BinaryBuf ciphertext(::olm_pk_ciphertext_length(ctx.get(), plaintext.size()));
+        BinaryBuf randomBuf = create_buffer(::olm_pk_encrypt_random_length(ctx.get()));
+        auto encrypted_size = ::olm_pk_encrypt(ctx.get(),
+                                               plaintext.data(),
+                                               plaintext.size(),
+                                               ciphertext.data(),
+                                               ciphertext.size(),
+                                               mac.data(),
+                                               mac.size(),
+                                               ephemeral.data(),
+                                               ephemeral.size(),
+                                               randomBuf.data(),
+                                               randomBuf.size());
+
+        if (encrypted_size != olm_error()) {
+                CURVE25519_AES_SHA2_Encrypted val;
+                val.ciphertext = to_string(ciphertext);
+                val.mac        = to_string(mac);
+                val.ephemeral  = to_string(ephemeral);
+                return val;
+        } else
+                throw olm_exception(__func__, ctx.get());
+}
+
 std::string
 CURVE25519_AES_SHA2_Decrypt(std::string base64_ciphertext,
                             const BinaryBuf &privateKey,
@@ -321,6 +357,19 @@ CURVE25519_AES_SHA2_Decrypt(std::string base64_ciphertext,
                 return plaintext;
         } else
                 throw olm_exception(__func__, ctx.get());
+}
+
+mtx::responses::backup::EncryptedSessionData
+encrypt_session(const mtx::responses::backup::SessionData &data, const std::string publicKey)
+{
+        mtx::responses::backup::EncryptedSessionData d;
+
+        auto temp    = CURVE25519_AES_SHA2_Encrypt(nlohmann::json(data).dump(), publicKey);
+        d.ciphertext = std::move(temp.ciphertext);
+        d.mac        = std::move(temp.mac);
+        d.ephemeral  = std::move(temp.ephemeral);
+
+        return d;
 }
 
 mtx::responses::backup::SessionData

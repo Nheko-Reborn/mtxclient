@@ -73,6 +73,10 @@ public:
           : olm_exception(std::move(func), std::string(olm_pk_decryption_last_error(s)))
         {}
 
+        olm_exception(std::string func, OlmPkEncryption *s)
+          : olm_exception(std::move(func), std::string(olm_pk_encryption_last_error(s)))
+        {}
+
         olm_exception(std::string func, OlmPkSigning *s)
           : olm_exception(std::move(func), std::string(olm_pk_signing_last_error(s)))
         {}

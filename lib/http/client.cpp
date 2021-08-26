@@ -1193,6 +1193,40 @@ Client::room_keys(const std::string &version,
           });
 }
 
+void
+Client::put_room_keys(const std::string &version,
+                      const mtx::responses::backup::KeysBackup &keys,
+                      ErrCallback cb)
+{
+        put("/client/r0/room_keys/keys?" + mtx::client::utils::query_params({{"version", version}}),
+            keys,
+            cb);
+}
+void
+Client::put_room_keys(const std::string &version,
+                      const std::string &room_id,
+                      const mtx::responses::backup::RoomKeysBackup &keys,
+                      ErrCallback cb)
+{
+        put("/client/r0/room_keys/keys/" + mtx::client::utils::url_encode(room_id) + "?" +
+              mtx::client::utils::query_params({{"version", version}}),
+            keys,
+            cb);
+}
+void
+Client::put_room_keys(const std::string &version,
+                      const std::string &room_id,
+                      const std::string &session_id,
+                      const mtx::responses::backup::SessionBackup &keys,
+                      ErrCallback cb)
+{
+        put("/client/r0/room_keys/keys/" + mtx::client::utils::url_encode(room_id) + "/" +
+              mtx::client::utils::url_encode(session_id) + "?" +
+              mtx::client::utils::query_params({{"version", version}}),
+            keys,
+            cb);
+}
+
 //! Retrieve a specific secret
 void
 Client::secret_storage_secret(const std::string &secret_id,
