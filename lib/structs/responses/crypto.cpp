@@ -15,14 +15,22 @@ from_json(const nlohmann::json &obj, UploadKeys &response)
 void
 from_json(const nlohmann::json &obj, QueryKeys &response)
 {
-        response.failures    = obj.at("failures").get<std::map<std::string, nlohmann::json>>();
-        response.device_keys = obj.at("device_keys").get<std::map<std::string, DeviceToKeysMap>>();
-        response.master_keys =
-          obj.at("master_keys").get<std::map<std::string, mtx::crypto::CrossSigningKeys>>();
-        response.user_signing_keys =
-          obj.at("user_signing_keys").get<std::map<std::string, mtx::crypto::CrossSigningKeys>>();
-        response.self_signing_keys =
-          obj.at("self_signing_keys").get<std::map<std::string, mtx::crypto::CrossSigningKeys>>();
+        if (obj.contains("failures"))
+                response.failures = obj.at("failures").get<std::map<std::string, nlohmann::json>>();
+        if (obj.contains("device_keys"))
+                response.device_keys =
+                  obj.at("device_keys").get<std::map<std::string, DeviceToKeysMap>>();
+        if (obj.contains("master_keys"))
+                response.master_keys =
+                  obj.at("master_keys").get<std::map<std::string, mtx::crypto::CrossSigningKeys>>();
+        if (obj.contains("user_signing_keys"))
+                response.user_signing_keys =
+                  obj.at("user_signing_keys")
+                    .get<std::map<std::string, mtx::crypto::CrossSigningKeys>>();
+        if (obj.contains("self_signing_keys"))
+                response.self_signing_keys =
+                  obj.at("self_signing_keys")
+                    .get<std::map<std::string, mtx::crypto::CrossSigningKeys>>();
 }
 
 void
@@ -45,17 +53,21 @@ from_json(const nlohmann::json &obj, KeySignaturesUpload &response)
 void
 from_json(const nlohmann::json &obj, ClaimKeys &response)
 {
-        response.failures = obj.at("failures").get<std::map<std::string, nlohmann::json>>();
-        response.one_time_keys =
-          obj.at("one_time_keys")
-            .get<std::map<std::string, std::map<std::string, nlohmann::json>>>();
+        if (obj.contains("failures"))
+                response.failures = obj.at("failures").get<std::map<std::string, nlohmann::json>>();
+        if (obj.contains("one_time_keys"))
+                response.one_time_keys =
+                  obj.at("one_time_keys")
+                    .get<std::map<std::string, std::map<std::string, nlohmann::json>>>();
 }
 
 void
 from_json(const nlohmann::json &obj, KeyChanges &response)
 {
-        response.changed = obj.at("changed").get<std::vector<std::string>>();
-        response.left    = obj.at("left").get<std::vector<std::string>>();
+        if (obj.contains("changed"))
+                response.changed = obj.at("changed").get<std::vector<std::string>>();
+        if (obj.contains("left"))
+                response.left = obj.at("left").get<std::vector<std::string>>();
 }
 
 namespace backup {

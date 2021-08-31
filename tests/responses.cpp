@@ -951,6 +951,14 @@ TEST(Responses, QueryKeys)
         EXPECT_EQ(master_keys.signatures["@alice:example.org"].size(), 1);
         EXPECT_EQ(self_signing_keys.signatures["@alice:example.org"].size(), 1);
         EXPECT_EQ(user_signing_keys.signatures["@alice:example.org"].size(), 1);
+
+        json data2     = R"({})"_json;
+        QueryKeys res2 = data2;
+        EXPECT_TRUE(res2.failures.empty());
+        EXPECT_TRUE(res2.device_keys.empty());
+        EXPECT_TRUE(res2.user_signing_keys.empty());
+        EXPECT_TRUE(res2.self_signing_keys.empty());
+        EXPECT_TRUE(res2.master_keys.empty());
 }
 
 TEST(Crypto, KeyChanges)
