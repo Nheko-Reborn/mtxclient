@@ -776,7 +776,7 @@ mtx::crypto::encrypt_exported_sessions(const mtx::crypto::ExportedSessionKeys &k
         const auto plaintext = json(keys).dump();
 
         auto nonce = create_buffer(AES_BLOCK_SIZE);
-        nonce[63 / 8] &= ~(1UL << (63 % 8));
+        nonce[15 - 63 % 8] &= ~(1UL << (63 / 8));
 
         auto salt = create_buffer(pwhash_SALTBYTES);
 
