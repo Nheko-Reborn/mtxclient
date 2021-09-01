@@ -10,6 +10,7 @@
 #endif
 
 #include <string>
+#include <string_view>
 
 namespace mtx {
 namespace events {
@@ -30,6 +31,12 @@ constexpr power_level_t User = 0;
 constexpr power_level_t Moderator = 50;
 //! The power level usually associated with admins.
 constexpr power_level_t Admin = 100;
+
+//! different predefined keys for notification levels
+namespace notification_keys {
+//! The level required to trigger an @room notification. Defaults to 50 if unspecified.
+constexpr std::string_view room = "room";
+}
 
 /// @brief Content for the `m.room.power_levels` state event.
 ///
@@ -65,6 +72,16 @@ struct PowerLevels
                 return users.at(user_id);
         }
 
+        inline power_level_t notification_level(std::string_view notification_key) const
+        {
+                if (auto it = notifications.find(notification_key); it != notifications.end())
+                        return it->second;
+                else if (notification_key == notification_keys::room)
+                        return 50;
+                else // spec doesn't actually specify that?
+                        return 50;
+        }
+
         //! The level required to ban a user. Defaults to **50** if unspecified.
         power_level_t ban = Moderator;
         //! The level required to invite a user.
@@ -87,10 +104,13 @@ struct PowerLevels
         power_level_t state_default = Moderator;
         //! The level required to send specific event types.
         //! This is a mapping from event type to power level required.
-        std::map<std::string, power_level_t> events;
+        std::map<std::string, power_level_t, std::less<>> events;
         //! The power levels for specific users.
         //! This is a mapping from user_id to power level for that user.
-        std::map<std::string, power_level_t> users;
+        std::map<std::string, power_level_t, std::less<>> users;
+        //! The power level requirements for specific notification types. This is a mapping from key
+        //! to power level for that notifications key.
+        std::map<std::string, power_level_t, std::less<>> notifications;
 };
 
 void
