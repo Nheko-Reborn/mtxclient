@@ -49,8 +49,8 @@ using Stages = std::vector<AuthType>;
 //! A flow composed of a list of stages
 struct Flow
 {
-        //! The stages to complete.
-        Stages stages;
+    //! The stages to complete.
+    Stages stages;
 };
 void
 from_json(const nlohmann::json &obj, Flow &flow);
@@ -58,8 +58,8 @@ from_json(const nlohmann::json &obj, Flow &flow);
 //! Parameters for oauth2.
 struct OAuth2Params
 {
-        //! The oauth uri
-        std::string uri;
+    //! The oauth uri
+    std::string uri;
 };
 void
 from_json(const nlohmann::json &obj, OAuth2Params &params);
@@ -67,8 +67,8 @@ from_json(const nlohmann::json &obj, OAuth2Params &params);
 //! The desciption of one policy in the terms and conditions.
 struct PolicyDescription
 {
-        std::string name; //!< language specific name
-        std::string url;  //!< language specific link
+    std::string name; //!< language specific name
+    std::string url;  //!< language specific link
 };
 void
 from_json(const nlohmann::json &obj, PolicyDescription &desc);
@@ -76,11 +76,11 @@ from_json(const nlohmann::json &obj, PolicyDescription &desc);
 //! A policy in the terms and conditions.
 struct Policy
 {
-        //! Version of this policy
-        std::string version;
-        /// @brief 2 letter language code to policy name and link, fallback to "en"
-        /// recommended, when language not available.
-        std::unordered_map<std::string, PolicyDescription> langToPolicy;
+    //! Version of this policy
+    std::string version;
+    /// @brief 2 letter language code to policy name and link, fallback to "en"
+    /// recommended, when language not available.
+    std::unordered_map<std::string, PolicyDescription> langToPolicy;
 };
 void
 from_json(const nlohmann::json &obj, Policy &policy);
@@ -88,8 +88,8 @@ from_json(const nlohmann::json &obj, Policy &policy);
 //! Parameters for the auth stage requiring you to accept terms and conditions.
 struct TermsParams
 {
-        //! The different policies by name.
-        std::unordered_map<std::string, Policy> policies;
+    //! The different policies by name.
+    std::unordered_map<std::string, Policy> policies;
 };
 void
 from_json(const nlohmann::json &obj, TermsParams &params);
@@ -100,17 +100,17 @@ using Params = std::variant<OAuth2Params, TermsParams, std::string>;
 //! The struct returned on requests failing with 401.
 struct Unauthorized
 {
-        // completed stages
-        Stages completed;
+    // completed stages
+    Stages completed;
 
-        // session key to provide to further auth stages
-        std::string session;
+    // session key to provide to further auth stages
+    std::string session;
 
-        // list of flows, which can be used to complete the UI auth
-        std::vector<Flow> flows;
+    // list of flows, which can be used to complete the UI auth
+    std::vector<Flow> flows;
 
-        // AuthType may be an undocumented string, not defined in auth_types
-        std::unordered_map<AuthType, Params> params;
+    // AuthType may be an undocumented string, not defined in auth_types
+    std::unordered_map<AuthType, Params> params;
 };
 void
 from_json(const nlohmann::json &obj, Unauthorized &unauthorized);
@@ -120,74 +120,74 @@ namespace auth {
 //! Password stage
 struct Password
 {
-        //! The password set by the user.
-        std::string password;
+    //! The password set by the user.
+    std::string password;
 
-        //! Types of identifiers.
-        enum IdType
-        {
-                UserId,      //!< Use the identifier_user
-                ThirdPartyId //!< use identifier_medium and identifier_address
-        };
-        //! If a user or third party identifier is used.
-        IdType identifier_type;
+    //! Types of identifiers.
+    enum IdType
+    {
+        UserId,      //!< Use the identifier_user
+        ThirdPartyId //!< use identifier_medium and identifier_address
+    };
+    //! If a user or third party identifier is used.
+    IdType identifier_type;
 
-        //! for user
-        std::string identifier_user;
+    //! for user
+    std::string identifier_user;
 
-        //! for third party
-        std::string identifier_medium;
-        std::string identifier_address;
+    //! for third party
+    std::string identifier_medium;
+    std::string identifier_address;
 };
 
 //! ReCaptcha stage.
 struct ReCaptcha
 {
-        //! The recaptcha response
-        std::string response;
+    //! The recaptcha response
+    std::string response;
 };
 
 //! Token stage.
 struct Token
 {
-        //! the obtained token
-        std::string token;
-        //! Client generated nonce
-        std::string txn_id;
+    //! the obtained token
+    std::string token;
+    //! Client generated nonce
+    std::string txn_id;
 };
 
 //! Third party identifier for Email or MSISDN stages
 struct ThreePIDCred
 {
-        //! identity server session id
-        std::string sid;
-        //! identity server client secret
-        std::string client_secret;
-        //! url of identity server authed with, e.g. 'matrix.org:8090'
-        std::string id_server;
-        //! access token previously registered with the identity server
-        std::string id_access_token;
+    //! identity server session id
+    std::string sid;
+    //! identity server client secret
+    std::string client_secret;
+    //! url of identity server authed with, e.g. 'matrix.org:8090'
+    std::string id_server;
+    //! access token previously registered with the identity server
+    std::string id_access_token;
 };
 
 //! Email authentication stage.
 struct EmailIdentity
 {
-        // The 3rd party ids
-        std::vector<ThreePIDCred> threepidCreds;
+    // The 3rd party ids
+    std::vector<ThreePIDCred> threepidCreds;
 };
 
 //! SMS authentication stage.
 struct MSISDN
 {
-        // The 3rd party ids
-        std::vector<ThreePIDCred> threepidCreds;
+    // The 3rd party ids
+    std::vector<ThreePIDCred> threepidCreds;
 };
 
 //! Registration token authentication stage.
 struct RegistrationToken
 {
-        //! The registration token to use
-        std::string token;
+    //! The registration token to use
+    std::string token;
 };
 
 //! OAuth2, client retries with the session only, so I'm guessing this is empty?
@@ -210,22 +210,22 @@ struct Fallback
 //! The auth request to complete a stage.
 struct Auth
 {
-        //! the session id
-        std::string session;
+    //! the session id
+    std::string session;
 
-        //! the content, depends on type
-        std::variant<auth::Password,
-                     auth::ReCaptcha,
-                     auth::Token,
-                     auth::EmailIdentity,
-                     auth::MSISDN,
-                     auth::OAuth2,
-                     auth::Terms,
-                     auth::SSO,
-                     auth::Dummy,
-                     auth::RegistrationToken,
-                     auth::Fallback>
-          content;
+    //! the content, depends on type
+    std::variant<auth::Password,
+                 auth::ReCaptcha,
+                 auth::Token,
+                 auth::EmailIdentity,
+                 auth::MSISDN,
+                 auth::OAuth2,
+                 auth::Terms,
+                 auth::SSO,
+                 auth::Dummy,
+                 auth::RegistrationToken,
+                 auth::Fallback>
+      content;
 };
 void
 to_json(nlohmann::json &obj, const Auth &auth);

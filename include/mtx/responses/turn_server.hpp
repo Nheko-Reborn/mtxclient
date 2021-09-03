@@ -20,17 +20,17 @@ namespace responses {
 //! This API provides credentials for the client to use when initiating calls.
 struct TurnServer
 {
-        //! The username to use.
-        std::string username;
+    //! The username to use.
+    std::string username;
 
-        //! The password to use.
-        std::string password;
+    //! The password to use.
+    std::string password;
 
-        //! A list of TURN URIs.
-        std::vector<std::string> uris;
+    //! A list of TURN URIs.
+    std::vector<std::string> uris;
 
-        //! The time-to-live in seconds.
-        uint32_t ttl;
+    //! The time-to-live in seconds.
+    uint32_t ttl;
 };
 
 void

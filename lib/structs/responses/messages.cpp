@@ -11,11 +11,11 @@ namespace responses {
 void
 from_json(const json &obj, Messages &messages)
 {
-        messages.start = obj.value("start", "");
-        messages.end   = obj.value("end", "");
+    messages.start = obj.value("start", "");
+    messages.end   = obj.value("end", "");
 
-        if (obj.contains("chunk"))
-                utils::parse_timeline_events(obj.at("chunk"), messages.chunk);
+    if (obj.contains("chunk"))
+        utils::parse_timeline_events(obj.at("chunk"), messages.chunk);
 }
 }
 }

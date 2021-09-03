@@ -16,116 +16,116 @@ namespace events {
 //! The type of an event.
 enum class EventType
 {
-        /// m.key.verification.cancel
-        KeyVerificationCancel,
-        /// m.key.verification.request
-        KeyVerificationRequest,
-        /// m.key.verification.start
-        KeyVerificationStart,
-        /// m.key.verification.accept
-        KeyVerificationAccept,
-        /// m.key.verification.key
-        KeyVerificationKey,
-        /// m.key.verification.mac
-        KeyVerificationMac,
-        /// m.key.verification.ready,
-        KeyVerificationReady,
-        /// m.key.verification.done,
-        KeyVerificationDone,
-        /// m.reaction,
-        Reaction,
-        /// m.room_key
-        RoomKey,
-        /// m.forwarded_room_key
-        ForwardedRoomKey,
-        /// m.room_key_request
-        RoomKeyRequest,
-        /// m.room.aliases
-        RoomAliases,
-        /// m.room.avatar
-        RoomAvatar,
-        /// m.room.canonical_alias
-        RoomCanonicalAlias,
-        /// m.room.create
-        RoomCreate,
-        /// m.room.encrypted.
-        RoomEncrypted,
-        /// m.room.encryption.
-        RoomEncryption,
-        /// m.room.guest_access
-        RoomGuestAccess,
-        /// m.room.history_visibility
-        RoomHistoryVisibility,
-        /// m.room.join_rules
-        RoomJoinRules,
-        /// m.room.member
-        RoomMember,
-        /// m.room.message
-        RoomMessage,
-        /// m.room.name
-        RoomName,
-        /// m.room.power_levels
-        RoomPowerLevels,
-        /// m.room.topic
-        RoomTopic,
-        /// m.room.redaction
-        RoomRedaction,
-        /// m.room.pinned_events
-        RoomPinnedEvents,
-        /// m.room.tombstone
-        RoomTombstone,
-        // m.sticker
-        Sticker,
-        // m.tag
-        Tag,
-        // m.presence
-        Presence,
-        // m.push_rules
-        PushRules,
+    /// m.key.verification.cancel
+    KeyVerificationCancel,
+    /// m.key.verification.request
+    KeyVerificationRequest,
+    /// m.key.verification.start
+    KeyVerificationStart,
+    /// m.key.verification.accept
+    KeyVerificationAccept,
+    /// m.key.verification.key
+    KeyVerificationKey,
+    /// m.key.verification.mac
+    KeyVerificationMac,
+    /// m.key.verification.ready,
+    KeyVerificationReady,
+    /// m.key.verification.done,
+    KeyVerificationDone,
+    /// m.reaction,
+    Reaction,
+    /// m.room_key
+    RoomKey,
+    /// m.forwarded_room_key
+    ForwardedRoomKey,
+    /// m.room_key_request
+    RoomKeyRequest,
+    /// m.room.aliases
+    RoomAliases,
+    /// m.room.avatar
+    RoomAvatar,
+    /// m.room.canonical_alias
+    RoomCanonicalAlias,
+    /// m.room.create
+    RoomCreate,
+    /// m.room.encrypted.
+    RoomEncrypted,
+    /// m.room.encryption.
+    RoomEncryption,
+    /// m.room.guest_access
+    RoomGuestAccess,
+    /// m.room.history_visibility
+    RoomHistoryVisibility,
+    /// m.room.join_rules
+    RoomJoinRules,
+    /// m.room.member
+    RoomMember,
+    /// m.room.message
+    RoomMessage,
+    /// m.room.name
+    RoomName,
+    /// m.room.power_levels
+    RoomPowerLevels,
+    /// m.room.topic
+    RoomTopic,
+    /// m.room.redaction
+    RoomRedaction,
+    /// m.room.pinned_events
+    RoomPinnedEvents,
+    /// m.room.tombstone
+    RoomTombstone,
+    // m.sticker
+    Sticker,
+    // m.tag
+    Tag,
+    // m.presence
+    Presence,
+    // m.push_rules
+    PushRules,
 
-        // m.space.child
-        SpaceChild,
-        // m.space.parent
-        SpaceParent,
+    // m.space.child
+    SpaceChild,
+    // m.space.parent
+    SpaceParent,
 
-        // m.call.invite
-        CallInvite,
-        // m.call.candidates
-        CallCandidates,
-        // m.call.answer
-        CallAnswer,
-        // m.call.hangup
-        CallHangUp,
+    // m.call.invite
+    CallInvite,
+    // m.call.candidates
+    CallCandidates,
+    // m.call.answer
+    CallAnswer,
+    // m.call.hangup
+    CallHangUp,
 
-        // m.secret.request
-        SecretRequest,
-        // m.secret.send
-        SecretSend,
+    // m.secret.request
+    SecretRequest,
+    // m.secret.send
+    SecretSend,
 
-        //! m.typing
-        Typing,
-        //! m.receipt
-        Receipt,
-        //! m.fully_read
-        FullyRead,
+    //! m.typing
+    Typing,
+    //! m.receipt
+    Receipt,
+    //! m.fully_read
+    FullyRead,
 
-        // custom events
-        // im.nheko.hidden_events
-        NhekoHiddenEvents,
+    // custom events
+    // im.nheko.hidden_events
+    NhekoHiddenEvents,
 
-        // MSCs
-        //! m.image_pack, currently im.ponies.room_emotes
-        ImagePackInRoom,
-        //! m.image_pack, currently im.ponies.user_emotes
-        ImagePackInAccountData,
-        //! m.image_pack.rooms, currently im.ponies.emote_rooms
-        ImagePackRooms,
+    // MSCs
+    //! m.image_pack, currently im.ponies.room_emotes
+    ImagePackInRoom,
+    //! m.image_pack, currently im.ponies.user_emotes
+    ImagePackInAccountData,
+    //! m.image_pack.rooms, currently im.ponies.emote_rooms
+    ImagePackRooms,
 
-        //! `m.dummy`, used in crypto for example
-        Dummy,
+    //! `m.dummy`, used in crypto for example
+    Dummy,
 
-        //! Unsupported event
-        Unsupported,
+    //! Unsupported event
+    Unsupported,
 };
 
 //! Turn an event into a string

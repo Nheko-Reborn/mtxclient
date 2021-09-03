@@ -9,7 +9,7 @@ namespace responses {
 void
 from_json(const nlohmann::json &obj, CreateRoom &response)
 {
-        response.room_id = obj.at("room_id").get<identifiers::Room>();
+    response.room_id = obj.at("room_id").get<identifiers::Room>();
 }
 }
 }

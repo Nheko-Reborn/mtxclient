@@ -20,16 +20,16 @@ namespace msg {
 //! Content of `m.room.message` with msgtype `m.emote`.
 struct Emote
 {
-        // The emote action to perform.
-        std::string body;
-        // Must be 'm.emote'.
-        std::string msgtype;
-        //! We only handle org.matrix.custom.html.
-        std::string format;
-        //! HTML formatted message.
-        std::string formatted_body;
-        //! Relates to for rich replies
-        mtx::common::Relations relations;
+    // The emote action to perform.
+    std::string body;
+    // Must be 'm.emote'.
+    std::string msgtype;
+    //! We only handle org.matrix.custom.html.
+    std::string format;
+    //! HTML formatted message.
+    std::string formatted_body;
+    //! Relates to for rich replies
+    mtx::common::Relations relations;
 };
 
 void

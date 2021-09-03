@@ -11,14 +11,14 @@ namespace http {
 //! Compound type that includes matrix & network related errors.
 struct ClientError
 {
-        //! Matrix client api related error.
-        mtx::errors::Error matrix_error;
-        //! Error code if a network related error occured.
-        int error_code;
-        //! Status code of the associated http response.
-        int status_code;
-        //! Parsing response error.
-        std::string parse_error;
+    //! Matrix client api related error.
+    mtx::errors::Error matrix_error;
+    //! Error code if a network related error occured.
+    int error_code;
+    //! Status code of the associated http response.
+    int status_code;
+    //! Parsing response error.
+    std::string parse_error;
 };
 } // namespace http
 } // namespace mtx

@@ -21,17 +21,17 @@ namespace msg {
 //! Content of `m.room.message` with msgtype `m.image`.
 struct Location
 {
-        //! Required. A description of the location e.g. 'Big Ben, London, UK', or some kind of
-        //! content description for accessibility e.g. 'location attachment'.
-        std::string body;
-        // Must be 'm.location'.
-        std::string msgtype;
-        //! Required. A geo URI representing this location.
-        std::string geo_uri;
-        //! A thumbnail for this location.
-        mtx::common::LocationInfo info;
-        //! Relates to for rich replies
-        mtx::common::Relations relations;
+    //! Required. A description of the location e.g. 'Big Ben, London, UK', or some kind of
+    //! content description for accessibility e.g. 'location attachment'.
+    std::string body;
+    // Must be 'm.location'.
+    std::string msgtype;
+    //! Required. A geo URI representing this location.
+    std::string geo_uri;
+    //! A thumbnail for this location.
+    mtx::common::LocationInfo info;
+    //! Relates to for rich replies
+    mtx::common::Relations relations;
 };
 
 void

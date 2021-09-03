@@ -10,16 +10,16 @@ namespace events {
 void
 from_json(const json &obj, Unknown &event)
 {
-        event.content = obj.dump();
+    event.content = obj.dump();
 }
 
 void
 to_json(json &obj, const Unknown &event)
 {
-        try {
-                obj = json::parse(event.content);
-        } catch (...) {
-        }
+    try {
+        obj = json::parse(event.content);
+    } catch (...) {
+    }
 }
 
 } // namespace events

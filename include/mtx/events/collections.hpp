@@ -176,7 +176,7 @@ using EphemeralEvents = std::variant<events::EphemeralEvent<ephemeral::Typing>,
 //! A wapper around TimelineEvent, that produces less noisy compiler errors.
 struct TimelineEvent
 {
-        TimelineEvents data;
+    TimelineEvents data;
 };
 
 void

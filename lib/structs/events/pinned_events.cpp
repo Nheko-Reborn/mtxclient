@@ -12,13 +12,13 @@ namespace state {
 void
 from_json(const json &obj, PinnedEvents &event)
 {
-        event.pinned = obj.at("pinned").get<std::vector<std::string>>();
+    event.pinned = obj.at("pinned").get<std::vector<std::string>>();
 }
 
 void
 to_json(json &obj, const PinnedEvents &event)
 {
-        obj["pinned"] = event.pinned;
+    obj["pinned"] = event.pinned;
 }
 
 } // namespace state

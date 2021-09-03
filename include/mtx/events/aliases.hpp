@@ -25,8 +25,8 @@ namespace state {
 //! the `m.room.aliases` events, one for each homeserver.
 struct Aliases
 {
-        //! A list of room aliases.
-        std::vector<std::string> aliases;
+    //! A list of room aliases.
+    std::vector<std::string> aliases;
 };
 
 //! Deserialization method needed by @p nlohmann::json.

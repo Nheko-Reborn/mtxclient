@@ -45,72 +45,72 @@ constexpr std::string_view room = "room";
 /// levels of each user in the room.
 struct PowerLevels
 {
-        //! Returns the power_level for a given event type.
-        inline power_level_t event_level(const std::string &event_type) const
-        {
-                if (events.find(event_type) == events.end())
-                        return events_default;
+    //! Returns the power_level for a given event type.
+    inline power_level_t event_level(const std::string &event_type) const
+    {
+        if (events.find(event_type) == events.end())
+            return events_default;
 
-                return events.at(event_type);
-        }
+        return events.at(event_type);
+    }
 
-        //! Returns the power_level for a given event type.
-        inline power_level_t state_level(const std::string &event_type) const
-        {
-                if (events.find(event_type) == events.end())
-                        return state_default;
+    //! Returns the power_level for a given event type.
+    inline power_level_t state_level(const std::string &event_type) const
+    {
+        if (events.find(event_type) == events.end())
+            return state_default;
 
-                return events.at(event_type);
-        }
+        return events.at(event_type);
+    }
 
-        //! Returns the power_level for a given user id.
-        inline power_level_t user_level(const std::string &user_id) const
-        {
-                if (users.find(user_id) == users.end())
-                        return users_default;
+    //! Returns the power_level for a given user id.
+    inline power_level_t user_level(const std::string &user_id) const
+    {
+        if (users.find(user_id) == users.end())
+            return users_default;
 
-                return users.at(user_id);
-        }
+        return users.at(user_id);
+    }
 
-        inline power_level_t notification_level(std::string_view notification_key) const
-        {
-                if (auto it = notifications.find(notification_key); it != notifications.end())
-                        return it->second;
-                else if (notification_key == notification_keys::room)
-                        return 50;
-                else // spec doesn't actually specify that?
-                        return 50;
-        }
+    inline power_level_t notification_level(std::string_view notification_key) const
+    {
+        if (auto it = notifications.find(notification_key); it != notifications.end())
+            return it->second;
+        else if (notification_key == notification_keys::room)
+            return 50;
+        else // spec doesn't actually specify that?
+            return 50;
+    }
 
-        //! The level required to ban a user. Defaults to **50** if unspecified.
-        power_level_t ban = Moderator;
-        //! The level required to invite a user.
-        //! Defaults to **50** if unspecified.
-        power_level_t invite = Moderator;
-        //! The level required to kick a user.
-        //! Defaults to **50** if unspecified.
-        power_level_t kick = Moderator;
-        //! The level required to redact an event.
-        //! Defaults to **50** if unspecified.
-        power_level_t redact = Moderator;
-        //! The default level required to send message events.
-        //! Defaults to **0** if unspecified.
-        power_level_t events_default = User;
-        //! The default power level for every user in the room,
-        //! unless their user_id is mentioned in the users key.
-        //! Defaults to **0** if unspecified.
-        power_level_t users_default = User;
-        //! The default level required to send state events.
-        power_level_t state_default = Moderator;
-        //! The level required to send specific event types.
-        //! This is a mapping from event type to power level required.
-        std::map<std::string, power_level_t, std::less<>> events;
-        //! The power levels for specific users.
-        //! This is a mapping from user_id to power level for that user.
-        std::map<std::string, power_level_t, std::less<>> users;
-        //! The power level requirements for specific notification types. This is a mapping from key
-        //! to power level for that notifications key.
-        std::map<std::string, power_level_t, std::less<>> notifications;
+    //! The level required to ban a user. Defaults to **50** if unspecified.
+    power_level_t ban = Moderator;
+    //! The level required to invite a user.
+    //! Defaults to **50** if unspecified.
+    power_level_t invite = Moderator;
+    //! The level required to kick a user.
+    //! Defaults to **50** if unspecified.
+    power_level_t kick = Moderator;
+    //! The level required to redact an event.
+    //! Defaults to **50** if unspecified.
+    power_level_t redact = Moderator;
+    //! The default level required to send message events.
+    //! Defaults to **0** if unspecified.
+    power_level_t events_default = User;
+    //! The default power level for every user in the room,
+    //! unless their user_id is mentioned in the users key.
+    //! Defaults to **0** if unspecified.
+    power_level_t users_default = User;
+    //! The default level required to send state events.
+    power_level_t state_default = Moderator;
+    //! The level required to send specific event types.
+    //! This is a mapping from event type to power level required.
+    std::map<std::string, power_level_t, std::less<>> events;
+    //! The power levels for specific users.
+    //! This is a mapping from user_id to power level for that user.
+    std::map<std::string, power_level_t, std::less<>> users;
+    //! The power level requirements for specific notification types. This is a mapping from key
+    //! to power level for that notifications key.
+    std::map<std::string, power_level_t, std::less<>> notifications;
 };
 
 void

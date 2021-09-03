@@ -16,8 +16,8 @@ namespace responses {
 //! Response from the `POST /_matrix/client/r0/createRoom` endpoint.
 struct CreateRoom
 {
-        //! The room ID of the newly created room.
-        mtx::identifiers::Room room_id;
+    //! The room ID of the newly created room.
+    mtx::identifiers::Room room_id;
 };
 
 void

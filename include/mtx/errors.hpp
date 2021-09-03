@@ -11,13 +11,13 @@ namespace errors {
 //! Represents a Matrix related error.
 struct Error
 {
-        //! Error code.
-        ErrorCode errcode = {};
-        //! Human readable version of the error.
-        std::string error;
+    //! Error code.
+    ErrorCode errcode = {};
+    //! Human readable version of the error.
+    std::string error;
 
-        //! Auth flows in case of 401
-        user_interactive::Unauthorized unauthorized;
+    //! Auth flows in case of 401
+    user_interactive::Unauthorized unauthorized;
 };
 
 void

@@ -21,16 +21,16 @@ namespace msg {
 //! Content of `m.room.message` with msgtype `m.text`.
 struct Text
 {
-        //! The body of the message.
-        std::string body;
-        //! Must be 'm.text'.
-        std::string msgtype;
-        //! We only handle org.matrix.custom.html.
-        std::string format;
-        //! HTML formatted message.
-        std::string formatted_body;
-        //! Relates to for rich replies
-        mtx::common::Relations relations;
+    //! The body of the message.
+    std::string body;
+    //! Must be 'm.text'.
+    std::string msgtype;
+    //! We only handle org.matrix.custom.html.
+    std::string format;
+    //! HTML formatted message.
+    std::string formatted_body;
+    //! Relates to for rich replies
+    mtx::common::Relations relations;
 };
 
 void

@@ -18,8 +18,8 @@ namespace state {
 //! The different access states for a room.
 enum class AccessState
 {
-        CanJoin,   //! Joining is allowd (for guests)
-        Forbidden, //! Guests can't join.
+    CanJoin,   //! Joining is allowd (for guests)
+    Forbidden, //! Guests can't join.
 };
 
 //! Converts @p AccessState to @p std::string for serialization.
@@ -33,8 +33,8 @@ stringToAccessState(const std::string &state);
 //! Content of the `m.room.guest_access` state event.
 struct GuestAccess
 {
-        //! Whether guests can join the room.
-        AccessState guest_access = AccessState::Forbidden;
+    //! Whether guests can join the room.
+    AccessState guest_access = AccessState::Forbidden;
 };
 
 void

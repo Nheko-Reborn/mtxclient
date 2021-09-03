@@ -12,15 +12,15 @@ namespace msg {
 void
 from_json(const json &obj, Reaction &content)
 {
-        content.relations = common::parse_relations(obj);
+    content.relations = common::parse_relations(obj);
 }
 
 void
 to_json(json &obj, const Reaction &content)
 {
-        obj = nlohmann::json::object();
+    obj = nlohmann::json::object();
 
-        common::apply_relations(obj, content.relations);
+    common::apply_relations(obj, content.relations);
 }
 
 } // namespace msg

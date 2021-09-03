@@ -22,12 +22,12 @@ namespace responses {
 //! It uses pagination query parameters to paginate history in the room.
 struct Messages
 {
-        //! The token the pagination starts from.
-        std::string start;
-        //! The token the pagination ends at.
-        std::string end;
-        //! A list of room events.
-        std::vector<mtx::events::collections::TimelineEvents> chunk;
+    //! The token the pagination starts from.
+    std::string start;
+    //! The token the pagination ends at.
+    std::string end;
+    //! A list of room events.
+    std::vector<mtx::events::collections::TimelineEvents> chunk;
 };
 
 void
