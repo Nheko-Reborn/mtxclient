@@ -19,9 +19,9 @@ namespace account_data {
 //! The content of a tag.
 struct Tag
 {
-        //! A number in a range [0,1] describing a relative position of the room under
-        //! the given tag.
-        std::optional<double> order;
+    //! A number in a range [0,1] describing a relative position of the room under
+    //! the given tag.
+    std::optional<double> order;
 };
 void
 from_json(const nlohmann::json &obj, Tag &content);
@@ -33,8 +33,8 @@ to_json(nlohmann::json &obj, const Tag &content);
 //! A tag is a short string a client can attach to a room for sorting or advanced functionality.
 struct Tags
 {
-        //! The tags on the room and their contents.
-        std::map<std::string, Tag> tags;
+    //! The tags on the room and their contents.
+    std::map<std::string, Tag> tags;
 };
 
 void

@@ -16,8 +16,8 @@ namespace responses {
 //! The info about this server.
 struct ServerInformation
 {
-        //! Required. The base URL for client-server connections.
-        std::string base_url;
+    //! Required. The base URL for client-server connections.
+    std::string base_url;
 };
 
 //! Response from the `GET /.well-known/matrix/client` endpoint.
@@ -26,10 +26,10 @@ struct ServerInformation
 //! Gets discovery information about the domain
 struct WellKnown
 {
-        //! Required. Used by clients to discover homeserver information.
-        ServerInformation homeserver;
-        //! Used by clients to discover identity server information.
-        std::optional<ServerInformation> identity_server;
+    //! Required. Used by clients to discover homeserver information.
+    ServerInformation homeserver;
+    //! Used by clients to discover identity server information.
+    std::optional<ServerInformation> identity_server;
 };
 
 void

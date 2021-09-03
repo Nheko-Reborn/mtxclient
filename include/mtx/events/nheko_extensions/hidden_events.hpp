@@ -21,8 +21,8 @@ namespace nheko_extensions {
 //! Custom event to hide certain event types in nheko
 struct HiddenEvents
 {
-        //! The hidden event types
-        std::vector<EventType> hidden_event_types;
+    //! The hidden event types
+    std::vector<EventType> hidden_event_types;
 };
 
 void

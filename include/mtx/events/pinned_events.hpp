@@ -18,8 +18,8 @@ namespace state {
 //! `m.room.pinned_events` state event.
 struct PinnedEvents
 {
-        //! The ids of the pinned events.
-        std::vector<std::string> pinned;
+    //! The ids of the pinned events.
+    std::vector<std::string> pinned;
 };
 
 void

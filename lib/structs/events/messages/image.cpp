@@ -14,63 +14,63 @@ namespace msg {
 void
 from_json(const json &obj, Image &content)
 {
-        content.body    = obj.value("body", "");
-        content.msgtype = obj.at("msgtype");
+    content.body    = obj.value("body", "");
+    content.msgtype = obj.at("msgtype");
 
-        content.url = obj.value("url", "");
+    content.url = obj.value("url", "");
 
-        if (obj.find("info") != obj.end())
-                content.info = obj.at("info").get<common::ImageInfo>();
+    if (obj.find("info") != obj.end())
+        content.info = obj.at("info").get<common::ImageInfo>();
 
-        if (obj.find("file") != obj.end())
-                content.file = obj.at("file").get<crypto::EncryptedFile>();
+    if (obj.find("file") != obj.end())
+        content.file = obj.at("file").get<crypto::EncryptedFile>();
 
-        content.relations = common::parse_relations(obj);
+    content.relations = common::parse_relations(obj);
 }
 
 void
 to_json(json &obj, const Image &content)
 {
-        obj["msgtype"] = "m.image";
-        obj["body"]    = content.body;
-        obj["info"]    = content.info;
+    obj["msgtype"] = "m.image";
+    obj["body"]    = content.body;
+    obj["info"]    = content.info;
 
-        if (content.file)
-                obj["file"] = content.file.value();
-        else
-                obj["url"] = content.url;
+    if (content.file)
+        obj["file"] = content.file.value();
+    else
+        obj["url"] = content.url;
 
-        common::apply_relations(obj, content.relations);
+    common::apply_relations(obj, content.relations);
 }
 
 void
 from_json(const json &obj, StickerImage &content)
 {
-        content.body = obj.value("body", "");
+    content.body = obj.value("body", "");
 
-        content.url = obj.value("url", "");
+    content.url = obj.value("url", "");
 
-        if (obj.find("info") != obj.end())
-                content.info = obj.at("info").get<common::ImageInfo>();
+    if (obj.find("info") != obj.end())
+        content.info = obj.at("info").get<common::ImageInfo>();
 
-        if (obj.find("file") != obj.end())
-                content.file = obj.at("file").get<crypto::EncryptedFile>();
+    if (obj.find("file") != obj.end())
+        content.file = obj.at("file").get<crypto::EncryptedFile>();
 
-        content.relations = common::parse_relations(obj);
+    content.relations = common::parse_relations(obj);
 }
 
 void
 to_json(json &obj, const StickerImage &content)
 {
-        obj["body"] = content.body;
-        obj["info"] = content.info;
+    obj["body"] = content.body;
+    obj["info"] = content.info;
 
-        if (content.file)
-                obj["file"] = content.file.value();
-        else
-                obj["url"] = content.url;
+    if (content.file)
+        obj["file"] = content.file.value();
+    else
+        obj["url"] = content.url;
 
-        common::apply_relations(obj, content.relations);
+    common::apply_relations(obj, content.relations);
 }
 
 } // namespace msg

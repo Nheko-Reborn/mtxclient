@@ -17,10 +17,10 @@ namespace state {
 //! The predecessor of this room.
 struct PreviousRoom
 {
-        //! Required. The ID of the old room.
-        std::string room_id;
-        //! Required. The event ID of the last known event in the old room.
-        std::string event_id;
+    //! Required. The ID of the old room.
+    std::string room_id;
+    //! Required. The event ID of the last known event in the old room.
+    std::string event_id;
 };
 
 //! Definitions of different room types.
@@ -35,21 +35,21 @@ constexpr std::string_view space = "m.space";
 //! It acts as the root of all other events.
 struct Create
 {
-        //! The `user_id` of the room creator. This is set by the homeserver.
-        std::string creator;
+    //! The `user_id` of the room creator. This is set by the homeserver.
+    std::string creator;
 
-        //! The room type, for example `m.space` for spaces.
-        std::optional<std::string> type;
+    //! The room type, for example `m.space` for spaces.
+    std::optional<std::string> type;
 
-        //! Whether users on other servers can join this room.
-        //! Defaults to **true** if key does not exist.
-        bool federate = true;
+    //! Whether users on other servers can join this room.
+    //! Defaults to **true** if key does not exist.
+    bool federate = true;
 
-        //! The version of the room. Defaults to "1" if the key does not exist.
-        std::string room_version = "1";
+    //! The version of the room. Defaults to "1" if the key does not exist.
+    std::string room_version = "1";
 
-        //! A reference to the room this room replaces, if the previous room was upgraded.
-        std::optional<PreviousRoom> predecessor;
+    //! A reference to the room this room replaces, if the previous room was upgraded.
+    std::optional<PreviousRoom> predecessor;
 };
 
 void

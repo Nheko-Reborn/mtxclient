@@ -18,15 +18,15 @@ namespace state {
 //! A client can enable encryption to a room by sending this event.
 struct Encryption
 {
-        //! Defines which encryption algorithm should be used for encryption.
-        //! Currently only m.megolm.v1-aes-sha2 is permitted.
-        std::string algorithm = "m.megolm.v1.aes-sha2";
-        //! How long the session should be used before changing it. 604800000 (a week) is the
-        //! recommended default.
-        uint64_t rotation_period_ms = 604800000;
-        //! How many messages should be sent before changing the session. 100 is the recommended
-        //! default.
-        uint64_t rotation_period_msgs = 100;
+    //! Defines which encryption algorithm should be used for encryption.
+    //! Currently only m.megolm.v1-aes-sha2 is permitted.
+    std::string algorithm = "m.megolm.v1.aes-sha2";
+    //! How long the session should be used before changing it. 604800000 (a week) is the
+    //! recommended default.
+    uint64_t rotation_period_ms = 604800000;
+    //! How many messages should be sent before changing the session. 100 is the recommended
+    //! default.
+    uint64_t rotation_period_msgs = 100;
 };
 
 void

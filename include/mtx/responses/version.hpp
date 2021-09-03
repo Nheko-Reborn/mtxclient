@@ -17,8 +17,8 @@ namespace responses {
 //! Gets the versions of the specification supported by the server.
 struct Versions
 {
-        //! The supported versions.
-        std::vector<std::string> versions;
+    //! The supported versions.
+    std::vector<std::string> versions;
 };
 
 void

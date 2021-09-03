@@ -20,8 +20,8 @@ namespace responses {
 //! An event id returned by the API.
 struct EventId
 {
-        //! The event id.
-        mtx::identifiers::Event event_id;
+    //! The event id.
+    mtx::identifiers::Event event_id;
 };
 
 void
@@ -30,8 +30,8 @@ from_json(const nlohmann::json &obj, EventId &response);
 //! A group id returned by the API.
 struct GroupId
 {
-        //! The group id.
-        std::string group_id;
+    //! The group id.
+    std::string group_id;
 };
 
 void
@@ -40,8 +40,8 @@ from_json(const nlohmann::json &obj, GroupId &response);
 //! A room id returned by the API.
 struct RoomId
 {
-        //! The room id.
-        std::string room_id;
+    //! The room id.
+    std::string room_id;
 };
 
 void
@@ -50,8 +50,8 @@ from_json(const nlohmann::json &obj, RoomId &response);
 //! A filter id returned by the API.
 struct FilterId
 {
-        //! The filter id.
-        std::string filter_id;
+    //! The filter id.
+    std::string filter_id;
 };
 
 void

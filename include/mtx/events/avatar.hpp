@@ -21,10 +21,10 @@ namespace state {
 //! This can be displayed alongside the room information.
 struct Avatar
 {
-        //! Metadata about the image referred to in @p url.
-        mtx::common::ImageInfo image_info;
-        //! The URL to the image.
-        std::string url;
+    //! Metadata about the image referred to in @p url.
+    mtx::common::ImageInfo image_info;
+    //! The URL to the image.
+    std::string url;
 };
 
 //! Deserialization method needed by @p nlohmann::json.

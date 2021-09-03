@@ -9,7 +9,7 @@ namespace ns = mtx::events;
 
 TEST(Events, Redaction)
 {
-        json data = R"({
+    json data = R"({
 	  "unsigned": {
             "age": 146
 	  },
@@ -24,22 +24,22 @@ TEST(Events, Redaction)
           "type": "m.room.redaction"
         })"_json;
 
-        ns::RedactionEvent<ns::msg::Redaction> event = data;
+    ns::RedactionEvent<ns::msg::Redaction> event = data;
 
-        EXPECT_EQ(event.type, ns::EventType::RoomRedaction);
-        EXPECT_EQ(event.event_id, "$143273582443PhrSn:localhost");
-        EXPECT_EQ(event.room_id, "!jEsUZKDJdhlrceRyVU:localhost");
-        EXPECT_EQ(event.sender, "@example:localhost");
-        EXPECT_EQ(event.origin_server_ts, 1432735824653L);
-        EXPECT_EQ(event.unsigned_data.age, 146);
-        EXPECT_EQ(event.redacts, "$1521361675759563UDexf:matrix.org");
+    EXPECT_EQ(event.type, ns::EventType::RoomRedaction);
+    EXPECT_EQ(event.event_id, "$143273582443PhrSn:localhost");
+    EXPECT_EQ(event.room_id, "!jEsUZKDJdhlrceRyVU:localhost");
+    EXPECT_EQ(event.sender, "@example:localhost");
+    EXPECT_EQ(event.origin_server_ts, 1432735824653L);
+    EXPECT_EQ(event.unsigned_data.age, 146);
+    EXPECT_EQ(event.redacts, "$1521361675759563UDexf:matrix.org");
 
-        EXPECT_EQ(event.content.reason, "No reason");
+    EXPECT_EQ(event.content.reason, "No reason");
 }
 
 TEST(Events, Redacted)
 {
-        json data = R"({
+    json data = R"({
 	  "unsigned": {
             "age": 146
 	  },
@@ -53,11 +53,11 @@ TEST(Events, Redacted)
           "type": "m.room.redaction"
         })"_json;
 
-        mtx::events::collections::TimelineEvent event = data;
+    mtx::events::collections::TimelineEvent event = data;
 
-        ASSERT_TRUE(std::holds_alternative<ns::RoomEvent<ns::msg::Redacted>>(event.data));
+    ASSERT_TRUE(std::holds_alternative<ns::RoomEvent<ns::msg::Redacted>>(event.data));
 
-        json data2 = R"({
+    json data2 = R"({
 		"content": {
 			"membership": "join"
 		},
@@ -82,40 +82,40 @@ TEST(Events, Redacted)
 		"event_id": "$redacted_id_2"
 	})"_json;
 
-        event = data2;
-        ASSERT_TRUE(std::holds_alternative<ns::StateEvent<ns::state::Member>>(event.data));
-        ASSERT_TRUE(std::get<ns::StateEvent<ns::state::Member>>(event.data)
-                      .unsigned_data.redacted_because.has_value());
-        ASSERT_EQ(std::get<ns::StateEvent<ns::state::Member>>(event.data)
-                    .unsigned_data.redacted_because->sender,
-                  "@redacted_user_2:example.com");
+    event = data2;
+    ASSERT_TRUE(std::holds_alternative<ns::StateEvent<ns::state::Member>>(event.data));
+    ASSERT_TRUE(std::get<ns::StateEvent<ns::state::Member>>(event.data)
+                  .unsigned_data.redacted_because.has_value());
+    ASSERT_EQ(std::get<ns::StateEvent<ns::state::Member>>(event.data)
+                .unsigned_data.redacted_because->sender,
+              "@redacted_user_2:example.com");
 }
 
 TEST(Events, Conversions)
 {
-        EXPECT_EQ("m.room.aliases", ns::to_string(ns::EventType::RoomAliases));
-        EXPECT_EQ("m.room.avatar", ns::to_string(ns::EventType::RoomAvatar));
-        EXPECT_EQ("m.room.canonical_alias", ns::to_string(ns::EventType::RoomCanonicalAlias));
-        EXPECT_EQ("m.room.create", ns::to_string(ns::EventType::RoomCreate));
-        EXPECT_EQ("m.room.guest_access", ns::to_string(ns::EventType::RoomGuestAccess));
-        EXPECT_EQ("m.room.history_visibility", ns::to_string(ns::EventType::RoomHistoryVisibility));
-        EXPECT_EQ("m.room.join_rules", ns::to_string(ns::EventType::RoomJoinRules));
-        EXPECT_EQ("m.room.member", ns::to_string(ns::EventType::RoomMember));
-        EXPECT_EQ("m.room.message", ns::to_string(ns::EventType::RoomMessage));
-        EXPECT_EQ("m.room.name", ns::to_string(ns::EventType::RoomName));
-        EXPECT_EQ("m.room.power_levels", ns::to_string(ns::EventType::RoomPowerLevels));
-        EXPECT_EQ("m.room.topic", ns::to_string(ns::EventType::RoomTopic));
-        EXPECT_EQ("m.room.tombstone", ns::to_string(ns::EventType::RoomTombstone));
-        EXPECT_EQ("m.room.redaction", ns::to_string(ns::EventType::RoomRedaction));
-        EXPECT_EQ("m.room.pinned_events", ns::to_string(ns::EventType::RoomPinnedEvents));
-        EXPECT_EQ("m.space.child", ns::to_string(ns::EventType::SpaceChild));
-        EXPECT_EQ("m.space.parent", ns::to_string(ns::EventType::SpaceParent));
-        EXPECT_EQ("m.tag", ns::to_string(ns::EventType::Tag));
+    EXPECT_EQ("m.room.aliases", ns::to_string(ns::EventType::RoomAliases));
+    EXPECT_EQ("m.room.avatar", ns::to_string(ns::EventType::RoomAvatar));
+    EXPECT_EQ("m.room.canonical_alias", ns::to_string(ns::EventType::RoomCanonicalAlias));
+    EXPECT_EQ("m.room.create", ns::to_string(ns::EventType::RoomCreate));
+    EXPECT_EQ("m.room.guest_access", ns::to_string(ns::EventType::RoomGuestAccess));
+    EXPECT_EQ("m.room.history_visibility", ns::to_string(ns::EventType::RoomHistoryVisibility));
+    EXPECT_EQ("m.room.join_rules", ns::to_string(ns::EventType::RoomJoinRules));
+    EXPECT_EQ("m.room.member", ns::to_string(ns::EventType::RoomMember));
+    EXPECT_EQ("m.room.message", ns::to_string(ns::EventType::RoomMessage));
+    EXPECT_EQ("m.room.name", ns::to_string(ns::EventType::RoomName));
+    EXPECT_EQ("m.room.power_levels", ns::to_string(ns::EventType::RoomPowerLevels));
+    EXPECT_EQ("m.room.topic", ns::to_string(ns::EventType::RoomTopic));
+    EXPECT_EQ("m.room.tombstone", ns::to_string(ns::EventType::RoomTombstone));
+    EXPECT_EQ("m.room.redaction", ns::to_string(ns::EventType::RoomRedaction));
+    EXPECT_EQ("m.room.pinned_events", ns::to_string(ns::EventType::RoomPinnedEvents));
+    EXPECT_EQ("m.space.child", ns::to_string(ns::EventType::SpaceChild));
+    EXPECT_EQ("m.space.parent", ns::to_string(ns::EventType::SpaceParent));
+    EXPECT_EQ("m.tag", ns::to_string(ns::EventType::Tag));
 }
 
 TEST(StateEvents, Aliases)
 {
-        json data = R"({
+    json data = R"({
 	  "unsigned": {
 	    "age": 242352,
 	    "transaction_id": "txnid"
@@ -134,24 +134,24 @@ TEST(StateEvents, Aliases)
 	  "type": "m.room.aliases"
 	})"_json;
 
-        ns::StateEvent<ns::state::Aliases> aliases = data;
+    ns::StateEvent<ns::state::Aliases> aliases = data;
 
-        EXPECT_EQ(aliases.type, ns::EventType::RoomAliases);
-        EXPECT_EQ(aliases.event_id, "$WLGTSEFSEF:localhost");
-        EXPECT_EQ(aliases.room_id, "!Cuyf34gef24t:localhost");
-        EXPECT_EQ(aliases.sender, "@example:localhost");
-        EXPECT_EQ(aliases.unsigned_data.age, 242352);
-        EXPECT_EQ(aliases.unsigned_data.transaction_id, "txnid");
-        EXPECT_EQ(aliases.origin_server_ts, 1431961217939L);
-        EXPECT_EQ(aliases.state_key, "localhost");
-        EXPECT_EQ(aliases.content.aliases.size(), 2);
-        EXPECT_EQ(aliases.content.aliases[0], "#somewhere:localhost");
-        EXPECT_EQ(aliases.content.aliases[1], "#another:localhost");
+    EXPECT_EQ(aliases.type, ns::EventType::RoomAliases);
+    EXPECT_EQ(aliases.event_id, "$WLGTSEFSEF:localhost");
+    EXPECT_EQ(aliases.room_id, "!Cuyf34gef24t:localhost");
+    EXPECT_EQ(aliases.sender, "@example:localhost");
+    EXPECT_EQ(aliases.unsigned_data.age, 242352);
+    EXPECT_EQ(aliases.unsigned_data.transaction_id, "txnid");
+    EXPECT_EQ(aliases.origin_server_ts, 1431961217939L);
+    EXPECT_EQ(aliases.state_key, "localhost");
+    EXPECT_EQ(aliases.content.aliases.size(), 2);
+    EXPECT_EQ(aliases.content.aliases[0], "#somewhere:localhost");
+    EXPECT_EQ(aliases.content.aliases[1], "#another:localhost");
 }
 
 TEST(StateEvents, Avatar)
 {
-        json data = R"({
+    json data = R"({
           "origin_server_ts": 1506762071625,
           "sender": "@mujx:matrix.org",
           "event_id": "$15067620711415511reUFC:matrix.org",
@@ -168,21 +168,21 @@ TEST(StateEvents, Avatar)
           "type": "m.room.avatar"
         })"_json;
 
-        ns::StateEvent<ns::state::Avatar> event = data;
+    ns::StateEvent<ns::state::Avatar> event = data;
 
-        EXPECT_EQ(event.type, ns::EventType::RoomAvatar);
-        EXPECT_EQ(event.event_id, "$15067620711415511reUFC:matrix.org");
-        EXPECT_EQ(event.room_id, "!VaMCVKSVcyPtXbcMXh:matrix.org");
-        EXPECT_EQ(event.sender, "@mujx:matrix.org");
-        EXPECT_EQ(event.unsigned_data.age, 3717700323);
-        EXPECT_EQ(event.origin_server_ts, 1506762071625L);
-        EXPECT_EQ(event.state_key, "");
-        EXPECT_EQ(event.content.url, "mxc://matrix.org/EPKcIsAPzREMrvZIjrIuJnEl");
+    EXPECT_EQ(event.type, ns::EventType::RoomAvatar);
+    EXPECT_EQ(event.event_id, "$15067620711415511reUFC:matrix.org");
+    EXPECT_EQ(event.room_id, "!VaMCVKSVcyPtXbcMXh:matrix.org");
+    EXPECT_EQ(event.sender, "@mujx:matrix.org");
+    EXPECT_EQ(event.unsigned_data.age, 3717700323);
+    EXPECT_EQ(event.origin_server_ts, 1506762071625L);
+    EXPECT_EQ(event.state_key, "");
+    EXPECT_EQ(event.content.url, "mxc://matrix.org/EPKcIsAPzREMrvZIjrIuJnEl");
 }
 
 TEST(StateEvents, CanonicalAlias)
 {
-        json data = R"({
+    json data = R"({
     "content": {
         "alias": "#somewhere:localhost",
         "alt_aliases": [
@@ -201,24 +201,24 @@ TEST(StateEvents, CanonicalAlias)
     }
 })"_json;
 
-        ns::StateEvent<ns::state::CanonicalAlias> event = data;
+    ns::StateEvent<ns::state::CanonicalAlias> event = data;
 
-        EXPECT_EQ(event.type, ns::EventType::RoomCanonicalAlias);
-        EXPECT_EQ(event.event_id, "$143273582443PhrSn:example.org");
-        EXPECT_EQ(event.room_id, "!jEsUZKDJdhlrceRyVU:example.org");
-        EXPECT_EQ(event.sender, "@example:example.org");
-        EXPECT_EQ(event.unsigned_data.age, 1234);
-        EXPECT_EQ(event.origin_server_ts, 1432735824653L);
-        EXPECT_EQ(event.state_key, "");
-        EXPECT_EQ(event.content.alias, "#somewhere:localhost");
-        ASSERT_EQ(event.content.alt_aliases.size(), 2);
-        EXPECT_EQ(event.content.alt_aliases.at(0), "#somewhere:example.org");
-        EXPECT_EQ(event.content.alt_aliases.at(1), "#myroom:example.com");
+    EXPECT_EQ(event.type, ns::EventType::RoomCanonicalAlias);
+    EXPECT_EQ(event.event_id, "$143273582443PhrSn:example.org");
+    EXPECT_EQ(event.room_id, "!jEsUZKDJdhlrceRyVU:example.org");
+    EXPECT_EQ(event.sender, "@example:example.org");
+    EXPECT_EQ(event.unsigned_data.age, 1234);
+    EXPECT_EQ(event.origin_server_ts, 1432735824653L);
+    EXPECT_EQ(event.state_key, "");
+    EXPECT_EQ(event.content.alias, "#somewhere:localhost");
+    ASSERT_EQ(event.content.alt_aliases.size(), 2);
+    EXPECT_EQ(event.content.alt_aliases.at(0), "#somewhere:example.org");
+    EXPECT_EQ(event.content.alt_aliases.at(1), "#myroom:example.com");
 }
 
 TEST(StateEvents, Create)
 {
-        json data = R"({
+    json data = R"({
           "origin_server_ts": 1506761923948,
           "sender": "@mujx:matrix.org",
           "event_id": "$15067619231414398jhvQC:matrix.org",
@@ -232,17 +232,17 @@ TEST(StateEvents, Create)
           "type": "m.room.create"
         })"_json;
 
-        ns::StateEvent<ns::state::Create> event = data;
+    ns::StateEvent<ns::state::Create> event = data;
 
-        EXPECT_EQ(event.type, ns::EventType::RoomCreate);
-        EXPECT_EQ(event.event_id, "$15067619231414398jhvQC:matrix.org");
-        EXPECT_EQ(event.sender, "@mujx:matrix.org");
-        EXPECT_EQ(event.unsigned_data.age, 3715756343L);
-        EXPECT_EQ(event.origin_server_ts, 1506761923948L);
-        EXPECT_EQ(event.state_key, "");
-        EXPECT_EQ(event.content.creator, "@mujx:matrix.org");
+    EXPECT_EQ(event.type, ns::EventType::RoomCreate);
+    EXPECT_EQ(event.event_id, "$15067619231414398jhvQC:matrix.org");
+    EXPECT_EQ(event.sender, "@mujx:matrix.org");
+    EXPECT_EQ(event.unsigned_data.age, 3715756343L);
+    EXPECT_EQ(event.origin_server_ts, 1506761923948L);
+    EXPECT_EQ(event.state_key, "");
+    EXPECT_EQ(event.content.creator, "@mujx:matrix.org");
 
-        json example_from_spec = R"({
+    json example_from_spec = R"({
             "content": {
                 "creator": "@example:example.org",
                 "m.federate": true,
@@ -263,24 +263,24 @@ TEST(StateEvents, Create)
             }
         })"_json;
 
-        event = example_from_spec;
+    event = example_from_spec;
 
-        EXPECT_EQ(event.type, ns::EventType::RoomCreate);
-        EXPECT_EQ(event.event_id, "$143273582443PhrSn:example.org");
-        EXPECT_EQ(event.sender, "@example:example.org");
-        EXPECT_EQ(event.unsigned_data.age, 1234);
-        EXPECT_EQ(event.origin_server_ts, 1432735824653L);
-        EXPECT_EQ(event.state_key, "");
-        EXPECT_EQ(event.content.creator, "@example:example.org");
-        EXPECT_EQ(event.content.federate, true);
-        EXPECT_EQ(event.content.room_version, "1");
-        EXPECT_EQ(event.content.predecessor->room_id, "!oldroom:example.org");
-        EXPECT_EQ(event.content.predecessor->event_id, "$something:example.org");
+    EXPECT_EQ(event.type, ns::EventType::RoomCreate);
+    EXPECT_EQ(event.event_id, "$143273582443PhrSn:example.org");
+    EXPECT_EQ(event.sender, "@example:example.org");
+    EXPECT_EQ(event.unsigned_data.age, 1234);
+    EXPECT_EQ(event.origin_server_ts, 1432735824653L);
+    EXPECT_EQ(event.state_key, "");
+    EXPECT_EQ(event.content.creator, "@example:example.org");
+    EXPECT_EQ(event.content.federate, true);
+    EXPECT_EQ(event.content.room_version, "1");
+    EXPECT_EQ(event.content.predecessor->room_id, "!oldroom:example.org");
+    EXPECT_EQ(event.content.predecessor->event_id, "$something:example.org");
 }
 
 TEST(StateEvents, CreateWithType)
 {
-        json data = R"({
+    json data = R"({
           "origin_server_ts": 1506761923948,
           "sender": "@mujx:matrix.org",
           "event_id": "$15067619231414398jhvQC:matrix.org",
@@ -295,19 +295,19 @@ TEST(StateEvents, CreateWithType)
           "type": "m.room.create"
         })"_json;
 
-        ns::StateEvent<ns::state::Create> event = data;
+    ns::StateEvent<ns::state::Create> event = data;
 
-        EXPECT_EQ(event.type, ns::EventType::RoomCreate);
-        EXPECT_EQ(event.event_id, "$15067619231414398jhvQC:matrix.org");
-        EXPECT_EQ(event.sender, "@mujx:matrix.org");
-        EXPECT_EQ(event.unsigned_data.age, 3715756343L);
-        EXPECT_EQ(event.origin_server_ts, 1506761923948L);
-        EXPECT_EQ(event.state_key, "");
-        EXPECT_EQ(event.content.creator, "@mujx:matrix.org");
-        EXPECT_TRUE(event.content.type.has_value());
-        EXPECT_EQ(event.content.type.value(), ns::state::room_type::space);
+    EXPECT_EQ(event.type, ns::EventType::RoomCreate);
+    EXPECT_EQ(event.event_id, "$15067619231414398jhvQC:matrix.org");
+    EXPECT_EQ(event.sender, "@mujx:matrix.org");
+    EXPECT_EQ(event.unsigned_data.age, 3715756343L);
+    EXPECT_EQ(event.origin_server_ts, 1506761923948L);
+    EXPECT_EQ(event.state_key, "");
+    EXPECT_EQ(event.content.creator, "@mujx:matrix.org");
+    EXPECT_TRUE(event.content.type.has_value());
+    EXPECT_EQ(event.content.type.value(), ns::state::room_type::space);
 
-        json example_from_spec = R"({
+    json example_from_spec = R"({
   "content": {
     "creator": "@deepbluev7:neko.dev",
     "room_version": "6",
@@ -324,15 +324,15 @@ TEST(StateEvents, CreateWithType)
   "room_id": "!KLPDfgYGHhdZWLbUwD:neko.dev"
 })"_json;
 
-        event = example_from_spec;
+    event = example_from_spec;
 
-        EXPECT_TRUE(event.content.type.has_value());
-        EXPECT_EQ(event.content.type.value(), ns::state::room_type::space);
+    EXPECT_TRUE(event.content.type.has_value());
+    EXPECT_EQ(event.content.type.value(), ns::state::room_type::space);
 }
 
 TEST(StateEvents, GuestAccess)
 {
-        json data = R"({
+    json data = R"({
           "origin_server_ts": 1506761923948,
           "sender": "@mujx:matrix.org",
           "event_id": "$15067619231414398jhvQC:matrix.org",
@@ -346,20 +346,20 @@ TEST(StateEvents, GuestAccess)
           "type": "m.room.guest_access"
         })"_json;
 
-        ns::StateEvent<ns::state::GuestAccess> event = data;
+    ns::StateEvent<ns::state::GuestAccess> event = data;
 
-        EXPECT_EQ(event.type, ns::EventType::RoomGuestAccess);
-        EXPECT_EQ(event.event_id, "$15067619231414398jhvQC:matrix.org");
-        EXPECT_EQ(event.sender, "@mujx:matrix.org");
-        EXPECT_EQ(event.unsigned_data.age, 3715756343L);
-        EXPECT_EQ(event.origin_server_ts, 1506761923948L);
-        EXPECT_EQ(event.state_key, "");
-        EXPECT_EQ(event.content.guest_access, mtx::events::state::AccessState::CanJoin);
+    EXPECT_EQ(event.type, ns::EventType::RoomGuestAccess);
+    EXPECT_EQ(event.event_id, "$15067619231414398jhvQC:matrix.org");
+    EXPECT_EQ(event.sender, "@mujx:matrix.org");
+    EXPECT_EQ(event.unsigned_data.age, 3715756343L);
+    EXPECT_EQ(event.origin_server_ts, 1506761923948L);
+    EXPECT_EQ(event.state_key, "");
+    EXPECT_EQ(event.content.guest_access, mtx::events::state::AccessState::CanJoin);
 }
 
 TEST(StateEvents, HistoryVisibility)
 {
-        json data = R"({
+    json data = R"({
 	  "origin_server_ts": 1510473133072,
 	  "sender": "@nheko_test:matrix.org",
 	  "event_id": "$15104731332646268uOFJp:matrix.org",
@@ -374,18 +374,18 @@ TEST(StateEvents, HistoryVisibility)
 	  "room_id": "!lfoDRlNFWlvOnvkBwQ:matrix.org"
 	})"_json;
 
-        ns::StateEvent<ns::state::HistoryVisibility> event = data;
+    ns::StateEvent<ns::state::HistoryVisibility> event = data;
 
-        EXPECT_EQ(event.type, ns::EventType::RoomHistoryVisibility);
-        EXPECT_EQ(event.event_id, "$15104731332646268uOFJp:matrix.org");
-        EXPECT_EQ(event.room_id, "!lfoDRlNFWlvOnvkBwQ:matrix.org");
-        EXPECT_EQ(event.sender, "@nheko_test:matrix.org");
-        EXPECT_EQ(event.origin_server_ts, 1510473133072L);
-        EXPECT_EQ(event.unsigned_data.age, 140);
-        EXPECT_EQ(event.state_key, "");
-        EXPECT_EQ(event.content.history_visibility, ns::state::Visibility::Shared);
+    EXPECT_EQ(event.type, ns::EventType::RoomHistoryVisibility);
+    EXPECT_EQ(event.event_id, "$15104731332646268uOFJp:matrix.org");
+    EXPECT_EQ(event.room_id, "!lfoDRlNFWlvOnvkBwQ:matrix.org");
+    EXPECT_EQ(event.sender, "@nheko_test:matrix.org");
+    EXPECT_EQ(event.origin_server_ts, 1510473133072L);
+    EXPECT_EQ(event.unsigned_data.age, 140);
+    EXPECT_EQ(event.state_key, "");
+    EXPECT_EQ(event.content.history_visibility, ns::state::Visibility::Shared);
 
-        json data2 = R"({
+    json data2 = R"({
           "origin_server_ts": 1510476778190,
           "sender": "@nheko_test:matrix.org",
           "event_id": "$15104767782674661tXoeB:matrix.org",
@@ -405,22 +405,22 @@ TEST(StateEvents, HistoryVisibility)
           "room_id": "!lfoDRlNFWlvOnvkBwQ:matrix.org"
         })"_json;
 
-        ns::StateEvent<ns::state::HistoryVisibility> event2 = data2;
+    ns::StateEvent<ns::state::HistoryVisibility> event2 = data2;
 
-        EXPECT_EQ(event2.type, ns::EventType::RoomHistoryVisibility);
-        EXPECT_EQ(event2.event_id, "$15104767782674661tXoeB:matrix.org");
-        EXPECT_EQ(event2.room_id, "!lfoDRlNFWlvOnvkBwQ:matrix.org");
-        EXPECT_EQ(event2.sender, "@nheko_test:matrix.org");
-        EXPECT_EQ(event2.origin_server_ts, 1510476778190L);
-        EXPECT_EQ(event2.unsigned_data.age, 48);
-        EXPECT_EQ(event2.unsigned_data.replaces_state, "$15104731332646268uOFJp:matrix.org");
-        EXPECT_EQ(event2.state_key, "");
-        EXPECT_EQ(event2.content.history_visibility, ns::state::Visibility::Invited);
+    EXPECT_EQ(event2.type, ns::EventType::RoomHistoryVisibility);
+    EXPECT_EQ(event2.event_id, "$15104767782674661tXoeB:matrix.org");
+    EXPECT_EQ(event2.room_id, "!lfoDRlNFWlvOnvkBwQ:matrix.org");
+    EXPECT_EQ(event2.sender, "@nheko_test:matrix.org");
+    EXPECT_EQ(event2.origin_server_ts, 1510476778190L);
+    EXPECT_EQ(event2.unsigned_data.age, 48);
+    EXPECT_EQ(event2.unsigned_data.replaces_state, "$15104731332646268uOFJp:matrix.org");
+    EXPECT_EQ(event2.state_key, "");
+    EXPECT_EQ(event2.content.history_visibility, ns::state::Visibility::Invited);
 }
 
 TEST(StateEvents, JoinRules)
 {
-        json data = R"({
+    json data = R"({
           "origin_server_ts": 1506761924018,
           "sender": "@mujx:matrix.org",
           "event_id": "$15067619241414401ASocy:matrix.org",
@@ -434,19 +434,19 @@ TEST(StateEvents, JoinRules)
           "type": "m.room.join_rules"
         })"_json;
 
-        ns::StateEvent<ns::state::JoinRules> event = data;
+    ns::StateEvent<ns::state::JoinRules> event = data;
 
-        EXPECT_EQ(event.type, ns::EventType::RoomJoinRules);
-        EXPECT_EQ(event.event_id, "$15067619241414401ASocy:matrix.org");
-        EXPECT_EQ(event.sender, "@mujx:matrix.org");
-        EXPECT_EQ(event.unsigned_data.age, 3715756273);
-        EXPECT_EQ(event.origin_server_ts, 1506761924018L);
-        EXPECT_EQ(event.state_key, "");
-        EXPECT_EQ(event.content.join_rule, ns::state::JoinRule::Invite);
+    EXPECT_EQ(event.type, ns::EventType::RoomJoinRules);
+    EXPECT_EQ(event.event_id, "$15067619241414401ASocy:matrix.org");
+    EXPECT_EQ(event.sender, "@mujx:matrix.org");
+    EXPECT_EQ(event.unsigned_data.age, 3715756273);
+    EXPECT_EQ(event.origin_server_ts, 1506761924018L);
+    EXPECT_EQ(event.state_key, "");
+    EXPECT_EQ(event.content.join_rule, ns::state::JoinRule::Invite);
 
-        EXPECT_EQ(data, json(event));
+    EXPECT_EQ(data, json(event));
 
-        data = R"({
+    data = R"({
           "origin_server_ts": 1506761924018,
           "sender": "@mujx:matrix.org",
           "event_id": "$15067619241414401ASocy:matrix.org",
@@ -460,9 +460,9 @@ TEST(StateEvents, JoinRules)
           "type": "m.room.join_rules"
         })"_json;
 
-        EXPECT_EQ(data, json(ns::StateEvent<ns::state::JoinRules>(data)));
+    EXPECT_EQ(data, json(ns::StateEvent<ns::state::JoinRules>(data)));
 
-        data = R"({
+    data = R"({
           "origin_server_ts": 1506761924018,
           "sender": "@mujx:matrix.org",
           "event_id": "$15067619241414401ASocy:matrix.org",
@@ -476,9 +476,9 @@ TEST(StateEvents, JoinRules)
           "type": "m.room.join_rules"
         })"_json;
 
-        EXPECT_EQ(data, json(ns::StateEvent<ns::state::JoinRules>(data)));
+    EXPECT_EQ(data, json(ns::StateEvent<ns::state::JoinRules>(data)));
 
-        data = R"({
+    data = R"({
           "origin_server_ts": 1506761924018,
           "sender": "@mujx:matrix.org",
           "event_id": "$15067619241414401ASocy:matrix.org",
@@ -492,9 +492,9 @@ TEST(StateEvents, JoinRules)
           "type": "m.room.join_rules"
         })"_json;
 
-        EXPECT_EQ(data, json(ns::StateEvent<ns::state::JoinRules>(data)));
+    EXPECT_EQ(data, json(ns::StateEvent<ns::state::JoinRules>(data)));
 
-        data = R"({
+    data = R"({
           "type": "m.room.join_rules",
           "state_key": "",
           "sender": "@mujx:matrix.org",
@@ -515,19 +515,17 @@ TEST(StateEvents, JoinRules)
           }
       })"_json;
 
-        ns::StateEvent<ns::state::JoinRules> event2 = data;
-        ASSERT_EQ(event2.content.allow.size(), 2);
-        ASSERT_EQ(event2.content.allow[0].type,
-                  mtx::events::state::JoinAllowanceType::RoomMembership);
-        ASSERT_EQ(event2.content.allow[0].room_id, "!mods:example.org");
-        ASSERT_EQ(event2.content.allow[1].type,
-                  mtx::events::state::JoinAllowanceType::RoomMembership);
-        ASSERT_EQ(event2.content.allow[1].room_id, "!users:example.org");
+    ns::StateEvent<ns::state::JoinRules> event2 = data;
+    ASSERT_EQ(event2.content.allow.size(), 2);
+    ASSERT_EQ(event2.content.allow[0].type, mtx::events::state::JoinAllowanceType::RoomMembership);
+    ASSERT_EQ(event2.content.allow[0].room_id, "!mods:example.org");
+    ASSERT_EQ(event2.content.allow[1].type, mtx::events::state::JoinAllowanceType::RoomMembership);
+    ASSERT_EQ(event2.content.allow[1].room_id, "!users:example.org");
 }
 
 TEST(StateEvents, Member)
 {
-        json data = R"({
+    json data = R"({
           "origin_server_ts": 1510473132947,
           "sender": "@nheko_test:matrix.org",
           "event_id": "$15104731322646264oUPqj:matrix.org",
@@ -545,20 +543,20 @@ TEST(StateEvents, Member)
           "room_id": "!lfoDRlNFWlvOnvkBwQ:matrix.org"
 	})"_json;
 
-        ns::StateEvent<ns::state::Member> event = data;
+    ns::StateEvent<ns::state::Member> event = data;
 
-        EXPECT_EQ(event.type, ns::EventType::RoomMember);
-        EXPECT_EQ(event.event_id, "$15104731322646264oUPqj:matrix.org");
-        EXPECT_EQ(event.room_id, "!lfoDRlNFWlvOnvkBwQ:matrix.org");
-        EXPECT_EQ(event.sender, "@nheko_test:matrix.org");
-        EXPECT_EQ(event.origin_server_ts, 1510473132947L);
-        EXPECT_EQ(event.unsigned_data.age, 72);
-        EXPECT_EQ(event.state_key, "@nheko_test:matrix.org");
-        EXPECT_EQ(event.content.membership, ns::state::Membership::Join);
-        EXPECT_EQ(event.content.display_name, "NhekoTest");
-        EXPECT_EQ(event.content.avatar_url, "mxc://matrix.org/JKiSOBDDxCHxmaLAgoQwSAHa");
+    EXPECT_EQ(event.type, ns::EventType::RoomMember);
+    EXPECT_EQ(event.event_id, "$15104731322646264oUPqj:matrix.org");
+    EXPECT_EQ(event.room_id, "!lfoDRlNFWlvOnvkBwQ:matrix.org");
+    EXPECT_EQ(event.sender, "@nheko_test:matrix.org");
+    EXPECT_EQ(event.origin_server_ts, 1510473132947L);
+    EXPECT_EQ(event.unsigned_data.age, 72);
+    EXPECT_EQ(event.state_key, "@nheko_test:matrix.org");
+    EXPECT_EQ(event.content.membership, ns::state::Membership::Join);
+    EXPECT_EQ(event.content.display_name, "NhekoTest");
+    EXPECT_EQ(event.content.avatar_url, "mxc://matrix.org/JKiSOBDDxCHxmaLAgoQwSAHa");
 
-        json data2 = R"({
+    json data2 = R"({
           "prev_content": {
             "membership": "join",
             "avatar_url": "mxc://matrix.org/IvqcnGakfvwwKeZxbJWhblFp",
@@ -591,25 +589,25 @@ TEST(StateEvents, Member)
           "type": "m.room.member"
         })"_json;
 
-        ns::StateEvent<ns::state::Member> event2 = data2;
+    ns::StateEvent<ns::state::Member> event2 = data2;
 
-        EXPECT_EQ(event2.type, ns::EventType::RoomMember);
-        EXPECT_EQ(event2.event_id, "$15092141005099019aHvYG:matrix.org");
-        EXPECT_EQ(event2.room_id, "!VaMCVKSVcyPtXbcMXh:matrix.org");
-        EXPECT_EQ(event2.sender, "@nheko_test:matrix.org");
-        EXPECT_EQ(event2.origin_server_ts, 1509214100884L);
-        EXPECT_EQ(event2.unsigned_data.replaces_state, "$15092124385075888YpYOh:matrix.org");
-        EXPECT_EQ(event2.unsigned_data.age, 1259000688);
-        EXPECT_EQ(event2.unsigned_data.age, 1259000688);
-        EXPECT_EQ(event2.state_key, "@nheko_test:matrix.org");
-        EXPECT_EQ(event2.content.membership, ns::state::Membership::Join);
-        EXPECT_EQ(event2.content.display_name, "NhekoTest");
-        EXPECT_EQ(event2.content.avatar_url, "mxc://matrix.org/JKiSOBDDxCHxmaLAgoQwSAHa");
+    EXPECT_EQ(event2.type, ns::EventType::RoomMember);
+    EXPECT_EQ(event2.event_id, "$15092141005099019aHvYG:matrix.org");
+    EXPECT_EQ(event2.room_id, "!VaMCVKSVcyPtXbcMXh:matrix.org");
+    EXPECT_EQ(event2.sender, "@nheko_test:matrix.org");
+    EXPECT_EQ(event2.origin_server_ts, 1509214100884L);
+    EXPECT_EQ(event2.unsigned_data.replaces_state, "$15092124385075888YpYOh:matrix.org");
+    EXPECT_EQ(event2.unsigned_data.age, 1259000688);
+    EXPECT_EQ(event2.unsigned_data.age, 1259000688);
+    EXPECT_EQ(event2.state_key, "@nheko_test:matrix.org");
+    EXPECT_EQ(event2.content.membership, ns::state::Membership::Join);
+    EXPECT_EQ(event2.content.display_name, "NhekoTest");
+    EXPECT_EQ(event2.content.avatar_url, "mxc://matrix.org/JKiSOBDDxCHxmaLAgoQwSAHa");
 }
 
 TEST(StateEvents, Name)
 {
-        json data = R"({
+    json data = R"({
           "origin_server_ts": 1510473133142,
           "sender": "@nheko_test:matrix.org",
           "event_id": "$15104731332646270uaKBS:matrix.org",
@@ -624,21 +622,21 @@ TEST(StateEvents, Name)
           "room_id": "!lfoDRlNFWlvOnvkBwQ:matrix.org"
         })"_json;
 
-        ns::StateEvent<ns::state::Name> event = data;
+    ns::StateEvent<ns::state::Name> event = data;
 
-        EXPECT_EQ(event.type, ns::EventType::RoomName);
-        EXPECT_EQ(event.event_id, "$15104731332646270uaKBS:matrix.org");
-        EXPECT_EQ(event.room_id, "!lfoDRlNFWlvOnvkBwQ:matrix.org");
-        EXPECT_EQ(event.sender, "@nheko_test:matrix.org");
-        EXPECT_EQ(event.origin_server_ts, 1510473133142L);
-        EXPECT_EQ(event.unsigned_data.age, 70);
-        EXPECT_EQ(event.state_key, "");
-        EXPECT_EQ(event.content.name, "Random name");
+    EXPECT_EQ(event.type, ns::EventType::RoomName);
+    EXPECT_EQ(event.event_id, "$15104731332646270uaKBS:matrix.org");
+    EXPECT_EQ(event.room_id, "!lfoDRlNFWlvOnvkBwQ:matrix.org");
+    EXPECT_EQ(event.sender, "@nheko_test:matrix.org");
+    EXPECT_EQ(event.origin_server_ts, 1510473133142L);
+    EXPECT_EQ(event.unsigned_data.age, 70);
+    EXPECT_EQ(event.state_key, "");
+    EXPECT_EQ(event.content.name, "Random name");
 }
 
 TEST(StateEvents, PinnedEvents)
 {
-        json data = R"({
+    json data = R"({
 	  "unsigned": {
             "age": 242352
 	  },
@@ -656,24 +654,24 @@ TEST(StateEvents, PinnedEvents)
           "type": "m.room.pinned_events"
         })"_json;
 
-        ns::StateEvent<ns::state::PinnedEvents> event = data;
+    ns::StateEvent<ns::state::PinnedEvents> event = data;
 
-        EXPECT_EQ(event.type, ns::EventType::RoomPinnedEvents);
-        EXPECT_EQ(event.event_id, "$WLGTSEFSEF:localhost");
-        EXPECT_EQ(event.sender, "@example:localhost");
-        EXPECT_EQ(event.origin_server_ts, 1431961217939L);
-        EXPECT_EQ(event.unsigned_data.age, 242352);
-        EXPECT_EQ(event.state_key, "");
+    EXPECT_EQ(event.type, ns::EventType::RoomPinnedEvents);
+    EXPECT_EQ(event.event_id, "$WLGTSEFSEF:localhost");
+    EXPECT_EQ(event.sender, "@example:localhost");
+    EXPECT_EQ(event.origin_server_ts, 1431961217939L);
+    EXPECT_EQ(event.unsigned_data.age, 242352);
+    EXPECT_EQ(event.state_key, "");
 
-        EXPECT_EQ(event.content.pinned.size(), 3);
-        EXPECT_EQ(event.content.pinned[0], "$one:localhost");
-        EXPECT_EQ(event.content.pinned[1], "$two:localhost");
-        EXPECT_EQ(event.content.pinned[2], "$three:localhost");
+    EXPECT_EQ(event.content.pinned.size(), 3);
+    EXPECT_EQ(event.content.pinned[0], "$one:localhost");
+    EXPECT_EQ(event.content.pinned[1], "$two:localhost");
+    EXPECT_EQ(event.content.pinned[2], "$three:localhost");
 }
 
 TEST(StateEvents, PowerLevels)
 {
-        json data = R"({
+    json data = R"({
           "origin_server_ts": 1506761923995,
           "sender": "@mujx:matrix.org",
           "event_id": "$15067619231414400iQDgf:matrix.org",
@@ -703,47 +701,47 @@ TEST(StateEvents, PowerLevels)
           "type": "m.room.power_levels"
 	})"_json;
 
-        ns::StateEvent<ns::state::PowerLevels> event = data;
+    ns::StateEvent<ns::state::PowerLevels> event = data;
 
-        EXPECT_EQ(event.type, ns::EventType::RoomPowerLevels);
-        EXPECT_EQ(event.event_id, "$15067619231414400iQDgf:matrix.org");
-        EXPECT_EQ(event.sender, "@mujx:matrix.org");
-        EXPECT_EQ(event.origin_server_ts, 1506761923995);
-        EXPECT_EQ(event.unsigned_data.age, 3715756296);
-        EXPECT_EQ(event.state_key, "");
+    EXPECT_EQ(event.type, ns::EventType::RoomPowerLevels);
+    EXPECT_EQ(event.event_id, "$15067619231414400iQDgf:matrix.org");
+    EXPECT_EQ(event.sender, "@mujx:matrix.org");
+    EXPECT_EQ(event.origin_server_ts, 1506761923995);
+    EXPECT_EQ(event.unsigned_data.age, 3715756296);
+    EXPECT_EQ(event.state_key, "");
 
-        EXPECT_EQ(event.content.kick, 50);
-        EXPECT_EQ(event.content.ban, 50);
-        EXPECT_EQ(event.content.invite, 0);
-        EXPECT_EQ(event.content.redact, 50);
-        EXPECT_EQ(event.content.events_default, 0);
-        EXPECT_EQ(event.content.users_default, 0);
-        EXPECT_EQ(event.content.state_default, 50);
+    EXPECT_EQ(event.content.kick, 50);
+    EXPECT_EQ(event.content.ban, 50);
+    EXPECT_EQ(event.content.invite, 0);
+    EXPECT_EQ(event.content.redact, 50);
+    EXPECT_EQ(event.content.events_default, 0);
+    EXPECT_EQ(event.content.users_default, 0);
+    EXPECT_EQ(event.content.state_default, 50);
 
-        EXPECT_EQ(event.content.events.size(), 5);
-        EXPECT_EQ(event.content.events["m.room.name"], 50);
-        EXPECT_EQ(event.content.events["m.room.avatar"], 29);
-        EXPECT_EQ(event.content.events["m.room.canonical_alias"], 50);
-        EXPECT_EQ(event.content.events["m.room.history_visibility"], 120);
-        EXPECT_EQ(event.content.events["m.room.power_levels"], 109);
+    EXPECT_EQ(event.content.events.size(), 5);
+    EXPECT_EQ(event.content.events["m.room.name"], 50);
+    EXPECT_EQ(event.content.events["m.room.avatar"], 29);
+    EXPECT_EQ(event.content.events["m.room.canonical_alias"], 50);
+    EXPECT_EQ(event.content.events["m.room.history_visibility"], 120);
+    EXPECT_EQ(event.content.events["m.room.power_levels"], 109);
 
-        EXPECT_EQ(event.content.users.size(), 1);
-        EXPECT_EQ(event.content.users["@mujx:matrix.org"], 30);
+    EXPECT_EQ(event.content.users.size(), 1);
+    EXPECT_EQ(event.content.users["@mujx:matrix.org"], 30);
 
-        EXPECT_EQ(event.content.event_level("m.room.name"), 50);
-        EXPECT_EQ(event.content.event_level("m.room.avatar"), 29);
-        EXPECT_EQ(event.content.event_level("m.room.canonical_alias"), 50);
-        EXPECT_EQ(event.content.event_level("m.room.history_visibility"), 120);
-        EXPECT_EQ(event.content.event_level("m.room.power_levels"), 109);
-        EXPECT_EQ(event.content.event_level("m.custom.event"), event.content.events_default);
+    EXPECT_EQ(event.content.event_level("m.room.name"), 50);
+    EXPECT_EQ(event.content.event_level("m.room.avatar"), 29);
+    EXPECT_EQ(event.content.event_level("m.room.canonical_alias"), 50);
+    EXPECT_EQ(event.content.event_level("m.room.history_visibility"), 120);
+    EXPECT_EQ(event.content.event_level("m.room.power_levels"), 109);
+    EXPECT_EQ(event.content.event_level("m.custom.event"), event.content.events_default);
 
-        EXPECT_EQ(event.content.user_level("@mujx:matrix.org"), 30);
-        EXPECT_EQ(event.content.user_level("@not:matrix.org"), event.content.users_default);
+    EXPECT_EQ(event.content.user_level("@mujx:matrix.org"), 30);
+    EXPECT_EQ(event.content.user_level("@not:matrix.org"), event.content.users_default);
 }
 
 TEST(StateEvents, Tombstone)
 {
-        json data = R"({
+    json data = R"({
             "content": {
                 "body": "This room has been replaced",
                 "replacement_room": "!newroom:example.org"
@@ -759,22 +757,22 @@ TEST(StateEvents, Tombstone)
             }
         })"_json;
 
-        ns::StateEvent<ns::state::Tombstone> event = data;
+    ns::StateEvent<ns::state::Tombstone> event = data;
 
-        EXPECT_EQ(event.type, ns::EventType::RoomTombstone);
-        EXPECT_EQ(event.event_id, "$143273582443PhrSn:example.org");
-        EXPECT_EQ(event.room_id, "!jEsUZKDJdhlrceRyVU:example.org");
-        EXPECT_EQ(event.sender, "@example:example.org");
-        EXPECT_EQ(event.origin_server_ts, 1432735824653);
-        EXPECT_EQ(event.unsigned_data.age, 1234);
-        EXPECT_EQ(event.state_key, "");
-        EXPECT_EQ(event.content.body, "This room has been replaced");
-        EXPECT_EQ(event.content.replacement_room, "!newroom:example.org");
+    EXPECT_EQ(event.type, ns::EventType::RoomTombstone);
+    EXPECT_EQ(event.event_id, "$143273582443PhrSn:example.org");
+    EXPECT_EQ(event.room_id, "!jEsUZKDJdhlrceRyVU:example.org");
+    EXPECT_EQ(event.sender, "@example:example.org");
+    EXPECT_EQ(event.origin_server_ts, 1432735824653);
+    EXPECT_EQ(event.unsigned_data.age, 1234);
+    EXPECT_EQ(event.state_key, "");
+    EXPECT_EQ(event.content.body, "This room has been replaced");
+    EXPECT_EQ(event.content.replacement_room, "!newroom:example.org");
 }
 
 TEST(StateEvents, Topic)
 {
-        json data = R"({
+    json data = R"({
           "origin_server_ts": 1510476064445,
           "sender": "@nheko_test:matrix.org",
           "event_id": "$15104760642668662QICBu:matrix.org",
@@ -789,21 +787,21 @@ TEST(StateEvents, Topic)
           "room_id": "!lfoDRlNFWlvOnvkBwQ:matrix.org"
         })"_json;
 
-        ns::StateEvent<ns::state::Topic> event = data;
+    ns::StateEvent<ns::state::Topic> event = data;
 
-        EXPECT_EQ(event.type, ns::EventType::RoomTopic);
-        EXPECT_EQ(event.event_id, "$15104760642668662QICBu:matrix.org");
-        EXPECT_EQ(event.room_id, "!lfoDRlNFWlvOnvkBwQ:matrix.org");
-        EXPECT_EQ(event.sender, "@nheko_test:matrix.org");
-        EXPECT_EQ(event.origin_server_ts, 1510476064445);
-        EXPECT_EQ(event.unsigned_data.age, 37);
-        EXPECT_EQ(event.state_key, "");
-        EXPECT_EQ(event.content.topic, "Test topic");
+    EXPECT_EQ(event.type, ns::EventType::RoomTopic);
+    EXPECT_EQ(event.event_id, "$15104760642668662QICBu:matrix.org");
+    EXPECT_EQ(event.room_id, "!lfoDRlNFWlvOnvkBwQ:matrix.org");
+    EXPECT_EQ(event.sender, "@nheko_test:matrix.org");
+    EXPECT_EQ(event.origin_server_ts, 1510476064445);
+    EXPECT_EQ(event.unsigned_data.age, 37);
+    EXPECT_EQ(event.state_key, "");
+    EXPECT_EQ(event.content.topic, "Test topic");
 }
 
 TEST(StateEvents, SpaceChild)
 {
-        json data = R"({
+    json data = R"({
           "origin_server_ts": 1510476064445,
           "sender": "@nheko_test:matrix.org",
           "event_id": "$15104760642668662QICBu:matrix.org",
@@ -815,19 +813,19 @@ TEST(StateEvents, SpaceChild)
 }
         )"_json;
 
-        ns::StateEvent<ns::state::space::Child> event = data;
+    ns::StateEvent<ns::state::space::Child> event = data;
 
-        EXPECT_EQ(event.type, ns::EventType::SpaceChild);
-        EXPECT_EQ(event.event_id, "$15104760642668662QICBu:matrix.org");
-        EXPECT_EQ(event.sender, "@nheko_test:matrix.org");
-        EXPECT_EQ(event.origin_server_ts, 1510476064445);
-        EXPECT_EQ(event.state_key, "!abcd:example.com");
-        ASSERT_TRUE(event.content.via.has_value());
-        std::vector<std::string> via{"example.com", "test.org"};
-        EXPECT_EQ(event.content.via, via);
-        EXPECT_FALSE(event.content.order.has_value());
+    EXPECT_EQ(event.type, ns::EventType::SpaceChild);
+    EXPECT_EQ(event.event_id, "$15104760642668662QICBu:matrix.org");
+    EXPECT_EQ(event.sender, "@nheko_test:matrix.org");
+    EXPECT_EQ(event.origin_server_ts, 1510476064445);
+    EXPECT_EQ(event.state_key, "!abcd:example.com");
+    ASSERT_TRUE(event.content.via.has_value());
+    std::vector<std::string> via{"example.com", "test.org"};
+    EXPECT_EQ(event.content.via, via);
+    EXPECT_FALSE(event.content.order.has_value());
 
-        data = R"({
+    data = R"({
           "origin_server_ts": 1510476064445,
           "sender": "@nheko_test:matrix.org",
           "event_id": "$15104760642668662QICBu:matrix.org",
@@ -840,20 +838,20 @@ TEST(StateEvents, SpaceChild)
 }
         )"_json;
 
-        event = data;
+    event = data;
 
-        EXPECT_EQ(event.type, ns::EventType::SpaceChild);
-        EXPECT_EQ(event.event_id, "$15104760642668662QICBu:matrix.org");
-        EXPECT_EQ(event.sender, "@nheko_test:matrix.org");
-        EXPECT_EQ(event.origin_server_ts, 1510476064445);
-        EXPECT_EQ(event.state_key, "!efgh:example.com");
-        ASSERT_TRUE(event.content.via.has_value());
-        std::vector<std::string> via2{"example.com"};
-        EXPECT_EQ(event.content.via, via2);
-        ASSERT_TRUE(event.content.order.has_value());
-        ASSERT_EQ(event.content.order, "abcd");
+    EXPECT_EQ(event.type, ns::EventType::SpaceChild);
+    EXPECT_EQ(event.event_id, "$15104760642668662QICBu:matrix.org");
+    EXPECT_EQ(event.sender, "@nheko_test:matrix.org");
+    EXPECT_EQ(event.origin_server_ts, 1510476064445);
+    EXPECT_EQ(event.state_key, "!efgh:example.com");
+    ASSERT_TRUE(event.content.via.has_value());
+    std::vector<std::string> via2{"example.com"};
+    EXPECT_EQ(event.content.via, via2);
+    ASSERT_TRUE(event.content.order.has_value());
+    ASSERT_EQ(event.content.order, "abcd");
 
-        data = R"({
+    data = R"({
           "origin_server_ts": 1510476064445,
           "sender": "@nheko_test:matrix.org",
           "event_id": "$15104760642668662QICBu:matrix.org",
@@ -863,17 +861,17 @@ TEST(StateEvents, SpaceChild)
 }
         )"_json;
 
-        event = data;
+    event = data;
 
-        EXPECT_EQ(event.type, ns::EventType::SpaceChild);
-        EXPECT_EQ(event.event_id, "$15104760642668662QICBu:matrix.org");
-        EXPECT_EQ(event.sender, "@nheko_test:matrix.org");
-        EXPECT_EQ(event.origin_server_ts, 1510476064445);
-        EXPECT_EQ(event.state_key, "!jklm:example.com");
-        ASSERT_FALSE(event.content.via.has_value());
-        ASSERT_FALSE(event.content.order.has_value());
+    EXPECT_EQ(event.type, ns::EventType::SpaceChild);
+    EXPECT_EQ(event.event_id, "$15104760642668662QICBu:matrix.org");
+    EXPECT_EQ(event.sender, "@nheko_test:matrix.org");
+    EXPECT_EQ(event.origin_server_ts, 1510476064445);
+    EXPECT_EQ(event.state_key, "!jklm:example.com");
+    ASSERT_FALSE(event.content.via.has_value());
+    ASSERT_FALSE(event.content.order.has_value());
 
-        data = R"({
+    data = R"({
           "origin_server_ts": 1510476064445,
           "sender": "@nheko_test:matrix.org",
           "event_id": "$15104760642668662QICBu:matrix.org",
@@ -886,17 +884,17 @@ TEST(StateEvents, SpaceChild)
 }
         )"_json;
 
-        event = data;
+    event = data;
 
-        EXPECT_EQ(event.type, ns::EventType::SpaceChild);
-        EXPECT_EQ(event.event_id, "$15104760642668662QICBu:matrix.org");
-        EXPECT_EQ(event.sender, "@nheko_test:matrix.org");
-        EXPECT_EQ(event.origin_server_ts, 1510476064445);
-        EXPECT_EQ(event.state_key, "!efgh:example.com");
-        EXPECT_TRUE(event.content.via.has_value());
-        ASSERT_FALSE(event.content.order.has_value());
+    EXPECT_EQ(event.type, ns::EventType::SpaceChild);
+    EXPECT_EQ(event.event_id, "$15104760642668662QICBu:matrix.org");
+    EXPECT_EQ(event.sender, "@nheko_test:matrix.org");
+    EXPECT_EQ(event.origin_server_ts, 1510476064445);
+    EXPECT_EQ(event.state_key, "!efgh:example.com");
+    EXPECT_TRUE(event.content.via.has_value());
+    ASSERT_FALSE(event.content.order.has_value());
 
-        data = R"({
+    data = R"({
           "origin_server_ts": 1510476064445,
           "sender": "@nheko_test:matrix.org",
           "event_id": "$15104760642668662QICBu:matrix.org",
@@ -909,11 +907,11 @@ TEST(StateEvents, SpaceChild)
 }
         )"_json;
 
-        event = data;
+    event = data;
 
-        EXPECT_FALSE(event.content.via.has_value());
+    EXPECT_FALSE(event.content.via.has_value());
 
-        data = R"({
+    data = R"({
           "origin_server_ts": 1510476064445,
           "sender": "@nheko_test:matrix.org",
           "event_id": "$15104760642668662QICBu:matrix.org",
@@ -926,10 +924,10 @@ TEST(StateEvents, SpaceChild)
 }
         )"_json;
 
-        event = data;
+    event = data;
 
-        EXPECT_FALSE(event.content.via.has_value());
-        data = R"({
+    EXPECT_FALSE(event.content.via.has_value());
+    data = R"({
           "origin_server_ts": 1510476064445,
           "sender": "@nheko_test:matrix.org",
           "event_id": "$15104760642668662QICBu:matrix.org",
@@ -942,11 +940,11 @@ TEST(StateEvents, SpaceChild)
 }
         )"_json;
 
-        event = data;
+    event = data;
 
-        EXPECT_FALSE(event.content.via.has_value());
+    EXPECT_FALSE(event.content.via.has_value());
 
-        data = R"({
+    data = R"({
           "origin_server_ts": 1510476064445,
           "sender": "@nheko_test:matrix.org",
           "event_id": "$15104760642668662QICBu:matrix.org",
@@ -958,13 +956,13 @@ TEST(StateEvents, SpaceChild)
 }
         )"_json;
 
-        event = data;
+    event = data;
 
-        EXPECT_FALSE(event.content.via.has_value());
+    EXPECT_FALSE(event.content.via.has_value());
 }
 TEST(StateEvents, SpaceParent)
 {
-        json data = R"({
+    json data = R"({
           "origin_server_ts": 1510476064445,
           "sender": "@nheko_test:matrix.org",
           "event_id": "$15104760642668662QICBu:matrix.org",
@@ -976,19 +974,19 @@ TEST(StateEvents, SpaceParent)
           }
         })"_json;
 
-        ns::StateEvent<ns::state::space::Parent> event = data;
+    ns::StateEvent<ns::state::space::Parent> event = data;
 
-        EXPECT_EQ(event.type, ns::EventType::SpaceParent);
-        EXPECT_EQ(event.event_id, "$15104760642668662QICBu:matrix.org");
-        EXPECT_EQ(event.sender, "@nheko_test:matrix.org");
-        EXPECT_EQ(event.origin_server_ts, 1510476064445);
-        EXPECT_EQ(event.state_key, "!space:example.com");
-        ASSERT_TRUE(event.content.via.has_value());
-        std::vector<std::string> via{"example.com"};
-        EXPECT_EQ(event.content.via, via);
-        EXPECT_TRUE(event.content.canonical);
+    EXPECT_EQ(event.type, ns::EventType::SpaceParent);
+    EXPECT_EQ(event.event_id, "$15104760642668662QICBu:matrix.org");
+    EXPECT_EQ(event.sender, "@nheko_test:matrix.org");
+    EXPECT_EQ(event.origin_server_ts, 1510476064445);
+    EXPECT_EQ(event.state_key, "!space:example.com");
+    ASSERT_TRUE(event.content.via.has_value());
+    std::vector<std::string> via{"example.com"};
+    EXPECT_EQ(event.content.via, via);
+    EXPECT_TRUE(event.content.canonical);
 
-        data = R"({
+    data = R"({
           "origin_server_ts": 1510476064445,
           "sender": "@nheko_test:matrix.org",
           "event_id": "$15104760642668662QICBu:matrix.org",
@@ -999,17 +997,17 @@ TEST(StateEvents, SpaceParent)
           }
         })"_json;
 
-        event = data;
+    event = data;
 
-        EXPECT_EQ(event.type, ns::EventType::SpaceParent);
-        EXPECT_EQ(event.event_id, "$15104760642668662QICBu:matrix.org");
-        EXPECT_EQ(event.sender, "@nheko_test:matrix.org");
-        EXPECT_EQ(event.origin_server_ts, 1510476064445);
-        EXPECT_EQ(event.state_key, "!space:example.com");
-        EXPECT_TRUE(event.content.via.has_value());
-        EXPECT_FALSE(event.content.canonical);
+    EXPECT_EQ(event.type, ns::EventType::SpaceParent);
+    EXPECT_EQ(event.event_id, "$15104760642668662QICBu:matrix.org");
+    EXPECT_EQ(event.sender, "@nheko_test:matrix.org");
+    EXPECT_EQ(event.origin_server_ts, 1510476064445);
+    EXPECT_EQ(event.state_key, "!space:example.com");
+    EXPECT_TRUE(event.content.via.has_value());
+    EXPECT_FALSE(event.content.canonical);
 
-        data = R"({
+    data = R"({
           "origin_server_ts": 1510476064445,
           "sender": "@nheko_test:matrix.org",
           "event_id": "$15104760642668662QICBu:matrix.org",
@@ -1021,17 +1019,17 @@ TEST(StateEvents, SpaceParent)
           }
         })"_json;
 
-        event = data;
+    event = data;
 
-        EXPECT_EQ(event.type, ns::EventType::SpaceParent);
-        EXPECT_EQ(event.event_id, "$15104760642668662QICBu:matrix.org");
-        EXPECT_EQ(event.sender, "@nheko_test:matrix.org");
-        EXPECT_EQ(event.origin_server_ts, 1510476064445);
-        EXPECT_EQ(event.state_key, "!space:example.com");
-        EXPECT_FALSE(event.content.via.has_value());
-        EXPECT_TRUE(event.content.canonical);
+    EXPECT_EQ(event.type, ns::EventType::SpaceParent);
+    EXPECT_EQ(event.event_id, "$15104760642668662QICBu:matrix.org");
+    EXPECT_EQ(event.sender, "@nheko_test:matrix.org");
+    EXPECT_EQ(event.origin_server_ts, 1510476064445);
+    EXPECT_EQ(event.state_key, "!space:example.com");
+    EXPECT_FALSE(event.content.via.has_value());
+    EXPECT_TRUE(event.content.canonical);
 
-        data = R"({
+    data = R"({
           "origin_server_ts": 1510476064445,
           "sender": "@nheko_test:matrix.org",
           "event_id": "$15104760642668662QICBu:matrix.org",
@@ -1043,17 +1041,17 @@ TEST(StateEvents, SpaceParent)
           }
         })"_json;
 
-        event = data;
+    event = data;
 
-        EXPECT_EQ(event.type, ns::EventType::SpaceParent);
-        EXPECT_EQ(event.event_id, "$15104760642668662QICBu:matrix.org");
-        EXPECT_EQ(event.sender, "@nheko_test:matrix.org");
-        EXPECT_EQ(event.origin_server_ts, 1510476064445);
-        EXPECT_EQ(event.state_key, "!space:example.com");
-        EXPECT_FALSE(event.content.via.has_value());
-        EXPECT_TRUE(event.content.canonical);
+    EXPECT_EQ(event.type, ns::EventType::SpaceParent);
+    EXPECT_EQ(event.event_id, "$15104760642668662QICBu:matrix.org");
+    EXPECT_EQ(event.sender, "@nheko_test:matrix.org");
+    EXPECT_EQ(event.origin_server_ts, 1510476064445);
+    EXPECT_EQ(event.state_key, "!space:example.com");
+    EXPECT_FALSE(event.content.via.has_value());
+    EXPECT_TRUE(event.content.canonical);
 
-        data = R"({
+    data = R"({
           "origin_server_ts": 1510476064445,
           "sender": "@nheko_test:matrix.org",
           "event_id": "$15104760642668662QICBu:matrix.org",
@@ -1065,16 +1063,16 @@ TEST(StateEvents, SpaceParent)
           }
         })"_json;
 
-        event = data;
+    event = data;
 
-        EXPECT_EQ(event.type, ns::EventType::SpaceParent);
-        EXPECT_EQ(event.event_id, "$15104760642668662QICBu:matrix.org");
-        EXPECT_EQ(event.sender, "@nheko_test:matrix.org");
-        EXPECT_EQ(event.origin_server_ts, 1510476064445);
-        EXPECT_EQ(event.state_key, "!space:example.com");
-        EXPECT_FALSE(event.content.via.has_value());
-        EXPECT_TRUE(event.content.canonical);
-        data = R"({
+    EXPECT_EQ(event.type, ns::EventType::SpaceParent);
+    EXPECT_EQ(event.event_id, "$15104760642668662QICBu:matrix.org");
+    EXPECT_EQ(event.sender, "@nheko_test:matrix.org");
+    EXPECT_EQ(event.origin_server_ts, 1510476064445);
+    EXPECT_EQ(event.state_key, "!space:example.com");
+    EXPECT_FALSE(event.content.via.has_value());
+    EXPECT_TRUE(event.content.canonical);
+    data = R"({
           "origin_server_ts": 1510476064445,
           "sender": "@nheko_test:matrix.org",
           "event_id": "$15104760642668662QICBu:matrix.org",
@@ -1086,20 +1084,20 @@ TEST(StateEvents, SpaceParent)
           }
         })"_json;
 
-        event = data;
+    event = data;
 
-        EXPECT_EQ(event.type, ns::EventType::SpaceParent);
-        EXPECT_EQ(event.event_id, "$15104760642668662QICBu:matrix.org");
-        EXPECT_EQ(event.sender, "@nheko_test:matrix.org");
-        EXPECT_EQ(event.origin_server_ts, 1510476064445);
-        EXPECT_EQ(event.state_key, "!space:example.com");
-        EXPECT_FALSE(event.content.via.has_value());
-        EXPECT_TRUE(event.content.canonical);
+    EXPECT_EQ(event.type, ns::EventType::SpaceParent);
+    EXPECT_EQ(event.event_id, "$15104760642668662QICBu:matrix.org");
+    EXPECT_EQ(event.sender, "@nheko_test:matrix.org");
+    EXPECT_EQ(event.origin_server_ts, 1510476064445);
+    EXPECT_EQ(event.state_key, "!space:example.com");
+    EXPECT_FALSE(event.content.via.has_value());
+    EXPECT_TRUE(event.content.canonical);
 }
 
 TEST(StateEvents, ImagePack)
 {
-        json data = R"({
+    json data = R"({
           "origin_server_ts": 1510476064445,
           "sender": "@nheko_test:matrix.org",
           "event_id": "$15104760642668662QICBu:matrix.org",
@@ -1129,35 +1127,35 @@ TEST(StateEvents, ImagePack)
           "room_id": "!lfoDRlNFWlvOnvkBwQ:matrix.org"
         })"_json;
 
-        ns::StateEvent<ns::msc2545::ImagePack> event = data;
+    ns::StateEvent<ns::msc2545::ImagePack> event = data;
 
-        EXPECT_EQ(event.type, ns::EventType::ImagePackInRoom);
-        EXPECT_EQ(event.event_id, "$15104760642668662QICBu:matrix.org");
-        EXPECT_EQ(event.room_id, "!lfoDRlNFWlvOnvkBwQ:matrix.org");
-        EXPECT_EQ(event.sender, "@nheko_test:matrix.org");
-        EXPECT_EQ(event.origin_server_ts, 1510476064445);
-        EXPECT_EQ(event.unsigned_data.age, 37);
-        EXPECT_EQ(event.state_key, "my-pack");
-        EXPECT_EQ(event.content.pack.has_value(), true);
-        EXPECT_EQ(event.content.pack->display_name, "Awesome Pack");
-        EXPECT_EQ(event.content.pack->attribution, "huh");
-        EXPECT_EQ(event.content.pack->avatar_url, "mxc://example.org/asdjfasd");
-        EXPECT_EQ(event.content.pack->is_emoji(), true);
-        EXPECT_EQ(event.content.pack->is_sticker(), false);
-        ASSERT_EQ(event.content.images.size(), 2);
-        EXPECT_EQ(event.content.images["emote"].url, "mxc://example.org/blah");
-        EXPECT_EQ(event.content.images["emote"].overrides_usage(), false);
-        EXPECT_EQ(event.content.images["sticker"].url, "mxc://example.org/sticker");
-        EXPECT_EQ(event.content.images["sticker"].body, "stcikerly");
-        EXPECT_EQ(event.content.images["sticker"].is_sticker(), true);
-        EXPECT_EQ(event.content.images["sticker"].is_emoji(), false);
-        EXPECT_EQ(event.content.images["sticker"].overrides_usage(), true);
-        EXPECT_EQ(json(event)["content"]["images"].size(), 2);
+    EXPECT_EQ(event.type, ns::EventType::ImagePackInRoom);
+    EXPECT_EQ(event.event_id, "$15104760642668662QICBu:matrix.org");
+    EXPECT_EQ(event.room_id, "!lfoDRlNFWlvOnvkBwQ:matrix.org");
+    EXPECT_EQ(event.sender, "@nheko_test:matrix.org");
+    EXPECT_EQ(event.origin_server_ts, 1510476064445);
+    EXPECT_EQ(event.unsigned_data.age, 37);
+    EXPECT_EQ(event.state_key, "my-pack");
+    EXPECT_EQ(event.content.pack.has_value(), true);
+    EXPECT_EQ(event.content.pack->display_name, "Awesome Pack");
+    EXPECT_EQ(event.content.pack->attribution, "huh");
+    EXPECT_EQ(event.content.pack->avatar_url, "mxc://example.org/asdjfasd");
+    EXPECT_EQ(event.content.pack->is_emoji(), true);
+    EXPECT_EQ(event.content.pack->is_sticker(), false);
+    ASSERT_EQ(event.content.images.size(), 2);
+    EXPECT_EQ(event.content.images["emote"].url, "mxc://example.org/blah");
+    EXPECT_EQ(event.content.images["emote"].overrides_usage(), false);
+    EXPECT_EQ(event.content.images["sticker"].url, "mxc://example.org/sticker");
+    EXPECT_EQ(event.content.images["sticker"].body, "stcikerly");
+    EXPECT_EQ(event.content.images["sticker"].is_sticker(), true);
+    EXPECT_EQ(event.content.images["sticker"].is_emoji(), false);
+    EXPECT_EQ(event.content.images["sticker"].overrides_usage(), true);
+    EXPECT_EQ(json(event)["content"]["images"].size(), 2);
 }
 
 TEST(RoomEvents, OlmEncrypted)
 {
-        json data = R"({
+    json data = R"({
           "content": {
             "algorithm": "m.olm.v1.curve25519-aes-sha2",
             "ciphertext": {
@@ -1179,40 +1177,39 @@ TEST(RoomEvents, OlmEncrypted)
           }
         })"_json;
 
-        ns::EncryptedEvent<ns::msg::OlmEncrypted> event = data;
-        const auto key                                  = event.content.ciphertext.begin()->first;
+    ns::EncryptedEvent<ns::msg::OlmEncrypted> event = data;
+    const auto key                                  = event.content.ciphertext.begin()->first;
 
-        EXPECT_EQ(event.type, ns::EventType::RoomEncrypted);
-        EXPECT_EQ(event.event_id, "$143273582443PhrSn:localhost");
-        EXPECT_EQ(event.room_id, "!jEsUZKDJdhlrceRyVU:localhost");
-        EXPECT_EQ(event.sender, "@example:localhost");
-        EXPECT_EQ(event.origin_server_ts, 1432735824653L);
-        EXPECT_EQ(event.unsigned_data.age, 146);
-        EXPECT_EQ(event.content.algorithm, "m.olm.v1.curve25519-aes-sha2");
-        EXPECT_EQ(event.content.ciphertext.at(key).type, 0);
-        EXPECT_EQ(event.content.ciphertext.at(key).body,
-                  "AwogkcAq9+r4YNvCwvBXmipeM30ZVhVDYBWPZ.......69/rEhCK38SIILvCA5NvEH");
-        EXPECT_EQ(event.content.sender_key, "IlRMeOPX2e0MurIyfWEucYBRVOEEUMrOHqn/8mLqMjA");
+    EXPECT_EQ(event.type, ns::EventType::RoomEncrypted);
+    EXPECT_EQ(event.event_id, "$143273582443PhrSn:localhost");
+    EXPECT_EQ(event.room_id, "!jEsUZKDJdhlrceRyVU:localhost");
+    EXPECT_EQ(event.sender, "@example:localhost");
+    EXPECT_EQ(event.origin_server_ts, 1432735824653L);
+    EXPECT_EQ(event.unsigned_data.age, 146);
+    EXPECT_EQ(event.content.algorithm, "m.olm.v1.curve25519-aes-sha2");
+    EXPECT_EQ(event.content.ciphertext.at(key).type, 0);
+    EXPECT_EQ(event.content.ciphertext.at(key).body,
+              "AwogkcAq9+r4YNvCwvBXmipeM30ZVhVDYBWPZ.......69/rEhCK38SIILvCA5NvEH");
+    EXPECT_EQ(event.content.sender_key, "IlRMeOPX2e0MurIyfWEucYBRVOEEUMrOHqn/8mLqMjA");
 
-        ns::msg::OlmEncrypted e1;
-        e1.algorithm  = "m.olm.v1.curve25519-aes-sha2";
-        e1.ciphertext = {
-          {"1OaiUJ7OfIEGAtnMQyTPFi9Ou6LD5UjSZ4eMk6WzI3E",
-           {"AwogkcAq9+r4YNvCwvBXmipeM30ZVhVDYBWPZ.......69/rEhCK38SIILvCA5NvEH", 0}}};
-        e1.sender_key = "IlRMeOPX2e0MurIyfWEucYBRVOEEUMrOHqn/8mLqMjA";
+    ns::msg::OlmEncrypted e1;
+    e1.algorithm  = "m.olm.v1.curve25519-aes-sha2";
+    e1.ciphertext = {{"1OaiUJ7OfIEGAtnMQyTPFi9Ou6LD5UjSZ4eMk6WzI3E",
+                      {"AwogkcAq9+r4YNvCwvBXmipeM30ZVhVDYBWPZ.......69/rEhCK38SIILvCA5NvEH", 0}}};
+    e1.sender_key = "IlRMeOPX2e0MurIyfWEucYBRVOEEUMrOHqn/8mLqMjA";
 
-        json j = e1;
-        ASSERT_EQ(
-          j.dump(),
-          "{\"algorithm\":\"m.olm.v1.curve25519-aes-sha2\","
-          "\"ciphertext\":{\"1OaiUJ7OfIEGAtnMQyTPFi9Ou6LD5UjSZ4eMk6WzI3E\":{\"body\":\"AwogkcAq9+"
-          "r4YNvCwvBXmipeM30ZVhVDYBWPZ.......69/rEhCK38SIILvCA5NvEH\",\"type\":0}},"
-          "\"sender_key\":\"IlRMeOPX2e0MurIyfWEucYBRVOEEUMrOHqn/8mLqMjA\"}");
+    json j = e1;
+    ASSERT_EQ(
+      j.dump(),
+      "{\"algorithm\":\"m.olm.v1.curve25519-aes-sha2\","
+      "\"ciphertext\":{\"1OaiUJ7OfIEGAtnMQyTPFi9Ou6LD5UjSZ4eMk6WzI3E\":{\"body\":\"AwogkcAq9+"
+      "r4YNvCwvBXmipeM30ZVhVDYBWPZ.......69/rEhCK38SIILvCA5NvEH\",\"type\":0}},"
+      "\"sender_key\":\"IlRMeOPX2e0MurIyfWEucYBRVOEEUMrOHqn/8mLqMjA\"}");
 }
 
 TEST(RoomEvents, Encrypted)
 {
-        json data = R"({
+    json data = R"({
           "content": {
             "algorithm": "m.megolm.v1.aes-sha2",
             "ciphertext": "AwgAEnACgAkLmt6qF84IK++J7UDH2Za1YVchHyprqTqsg2yyOwAtHaZTwyNg37afzg8f3r9IsN9r4RNFg7MaZencUJe4qvELiDiopUjy5wYVDAtqdBzer5bWRD9ldxp1FLgbQvBcjkkywYjCsmsq6+hArLd9oAQZnGKn/qLsK+5uNX3PaWzDRC9wZPQvWYYPCTov3jCwXKTPsLKIiTrcCXDqMvnn8m+T3zF/I2zqxg158tnUwWWIw51UO",
@@ -1231,51 +1228,50 @@ TEST(RoomEvents, Encrypted)
           }
         })"_json;
 
-        ns::EncryptedEvent<ns::msg::Encrypted> event = data;
+    ns::EncryptedEvent<ns::msg::Encrypted> event = data;
 
-        EXPECT_EQ(event.type, ns::EventType::RoomEncrypted);
-        EXPECT_EQ(event.event_id, "$143273582443PhrSn:localhost");
-        EXPECT_EQ(event.room_id, "!jEsUZKDJdhlrceRyVU:localhost");
-        EXPECT_EQ(event.sender, "@example:localhost");
-        EXPECT_EQ(event.origin_server_ts, 1432735824653L);
-        EXPECT_EQ(event.unsigned_data.age, 146);
-        EXPECT_EQ(event.content.algorithm, "m.megolm.v1.aes-sha2");
-        EXPECT_EQ(
-          event.content.ciphertext,
-          "AwgAEnACgAkLmt6qF84IK++"
-          "J7UDH2Za1YVchHyprqTqsg2yyOwAtHaZTwyNg37afzg8f3r9IsN9r4RNFg7MaZencUJe4qvELiDiopUjy5wYVDAt"
-          "qdBzer5bWRD9ldxp1FLgbQvBcjkkywYjCsmsq6+hArLd9oAQZnGKn/"
-          "qLsK+5uNX3PaWzDRC9wZPQvWYYPCTov3jCwXKTPsLKIiTrcCXDqMvnn8m+T3zF/I2zqxg158tnUwWWIw51UO");
-        EXPECT_EQ(event.content.device_id, "RJYKSTBOIE");
-        EXPECT_EQ(event.content.sender_key, "IlRMeOPX2e0MurIyfWEucYBRVOEEUMrOHqn/8mLqMjA");
-        EXPECT_EQ(event.content.session_id, "X3lUlvLELLYxeTx4yOVu6UDpasGEVO0Jbu+QFnm0cKQ");
+    EXPECT_EQ(event.type, ns::EventType::RoomEncrypted);
+    EXPECT_EQ(event.event_id, "$143273582443PhrSn:localhost");
+    EXPECT_EQ(event.room_id, "!jEsUZKDJdhlrceRyVU:localhost");
+    EXPECT_EQ(event.sender, "@example:localhost");
+    EXPECT_EQ(event.origin_server_ts, 1432735824653L);
+    EXPECT_EQ(event.unsigned_data.age, 146);
+    EXPECT_EQ(event.content.algorithm, "m.megolm.v1.aes-sha2");
+    EXPECT_EQ(
+      event.content.ciphertext,
+      "AwgAEnACgAkLmt6qF84IK++"
+      "J7UDH2Za1YVchHyprqTqsg2yyOwAtHaZTwyNg37afzg8f3r9IsN9r4RNFg7MaZencUJe4qvELiDiopUjy5wYVDAt"
+      "qdBzer5bWRD9ldxp1FLgbQvBcjkkywYjCsmsq6+hArLd9oAQZnGKn/"
+      "qLsK+5uNX3PaWzDRC9wZPQvWYYPCTov3jCwXKTPsLKIiTrcCXDqMvnn8m+T3zF/I2zqxg158tnUwWWIw51UO");
+    EXPECT_EQ(event.content.device_id, "RJYKSTBOIE");
+    EXPECT_EQ(event.content.sender_key, "IlRMeOPX2e0MurIyfWEucYBRVOEEUMrOHqn/8mLqMjA");
+    EXPECT_EQ(event.content.session_id, "X3lUlvLELLYxeTx4yOVu6UDpasGEVO0Jbu+QFnm0cKQ");
 
-        ns::msg::Encrypted e1;
-        e1.algorithm  = "m.megolm.v1.aes-sha2";
-        e1.ciphertext = "AwgAEoABgw1DG6mgKwvrAJU+V7jPu3poEaujNWPnMtIO6+1kFHzEcK6vbYpbg/WlPq/"
-                        "B23wqKWJ3DIaBsV305VdpisGK7dMN5WgnnTp9JhtztxpCuXnX92rWFBUFM9+"
-                        "PC5xVJExVBm1qwv8xgWjD5NFqfcVsZ3jLGbGiftPHairq8bxPxTsjrblMHLpXyXLhK6A7YGTey"
-                        "okcrdXS+IQ4Apq1RLP+kw5RF6M8a/aK3UhUlSAf7OLjaj/03qEwE3TGNaBbLBdOxzoGpxNfQ8";
-        e1.device_id  = "YEGDJGLQTZ";
-        e1.sender_key = "FyYq6RrnjvsIw0XLGF1jHYlorPgDmJQd15lMJw3D7QI";
-        e1.session_id = "/bHcdWPHsJLFd8dkyvG0n7q/RTDmfBIc+gC4laHJCQQ";
+    ns::msg::Encrypted e1;
+    e1.algorithm  = "m.megolm.v1.aes-sha2";
+    e1.ciphertext = "AwgAEoABgw1DG6mgKwvrAJU+V7jPu3poEaujNWPnMtIO6+1kFHzEcK6vbYpbg/WlPq/"
+                    "B23wqKWJ3DIaBsV305VdpisGK7dMN5WgnnTp9JhtztxpCuXnX92rWFBUFM9+"
+                    "PC5xVJExVBm1qwv8xgWjD5NFqfcVsZ3jLGbGiftPHairq8bxPxTsjrblMHLpXyXLhK6A7YGTey"
+                    "okcrdXS+IQ4Apq1RLP+kw5RF6M8a/aK3UhUlSAf7OLjaj/03qEwE3TGNaBbLBdOxzoGpxNfQ8";
+    e1.device_id  = "YEGDJGLQTZ";
+    e1.sender_key = "FyYq6RrnjvsIw0XLGF1jHYlorPgDmJQd15lMJw3D7QI";
+    e1.session_id = "/bHcdWPHsJLFd8dkyvG0n7q/RTDmfBIc+gC4laHJCQQ";
 
-        json j = e1;
-        ASSERT_EQ(
-          j.dump(),
-          "{\"algorithm\":\"m.megolm.v1.aes-sha2\","
-          "\"ciphertext\":\"AwgAEoABgw1DG6mgKwvrAJU+V7jPu3poEaujNWPnMtIO6+1kFHzEcK6vbYpbg/"
-          "WlPq/B23wqKWJ3DIaBsV305VdpisGK7dMN5WgnnTp9JhtztxpCuXnX92rWFBUFM9"
-          "+PC5xVJExVBm1qwv8xgWjD5NFqfcVsZ3jLGbGiftPHairq8bxPxTsjrblMHLpXyXLhK6A7YGTeyokcrdXS"
-          "+IQ4Apq1RLP+kw5RF6M8a/aK3UhUlSAf7OLjaj/03qEwE3TGNaBbLBdOxzoGpxNfQ8\","
-          "\"device_id\":\"YEGDJGLQTZ\","
-          "\"sender_key\":\"FyYq6RrnjvsIw0XLGF1jHYlorPgDmJQd15lMJw3D7QI\","
-          "\"session_id\":\"/bHcdWPHsJLFd8dkyvG0n7q/RTDmfBIc+gC4laHJCQQ\"}");
+    json j = e1;
+    ASSERT_EQ(j.dump(),
+              "{\"algorithm\":\"m.megolm.v1.aes-sha2\","
+              "\"ciphertext\":\"AwgAEoABgw1DG6mgKwvrAJU+V7jPu3poEaujNWPnMtIO6+1kFHzEcK6vbYpbg/"
+              "WlPq/B23wqKWJ3DIaBsV305VdpisGK7dMN5WgnnTp9JhtztxpCuXnX92rWFBUFM9"
+              "+PC5xVJExVBm1qwv8xgWjD5NFqfcVsZ3jLGbGiftPHairq8bxPxTsjrblMHLpXyXLhK6A7YGTeyokcrdXS"
+              "+IQ4Apq1RLP+kw5RF6M8a/aK3UhUlSAf7OLjaj/03qEwE3TGNaBbLBdOxzoGpxNfQ8\","
+              "\"device_id\":\"YEGDJGLQTZ\","
+              "\"sender_key\":\"FyYq6RrnjvsIw0XLGF1jHYlorPgDmJQd15lMJw3D7QI\","
+              "\"session_id\":\"/bHcdWPHsJLFd8dkyvG0n7q/RTDmfBIc+gC4laHJCQQ\"}");
 }
 
 TEST(Ephemeral, Typing)
 {
-        json j = R"( {
+    json j = R"( {
     "content": {
         "user_ids": [
             "@alice:matrix.org",
@@ -1286,18 +1282,18 @@ TEST(Ephemeral, Typing)
     "type": "m.typing"
 })"_json;
 
-        ns::EphemeralEvent<ns::ephemeral::Typing> event = j;
+    ns::EphemeralEvent<ns::ephemeral::Typing> event = j;
 
-        EXPECT_EQ(event.room_id, "!jEsUZKDJdhlrceRyVU:example.org");
-        EXPECT_EQ(event.type, ns::EventType::Typing);
-        EXPECT_EQ(event.content.user_ids.at(0), "@alice:matrix.org");
-        EXPECT_EQ(event.content.user_ids.at(1), "@bob:example.com");
-        EXPECT_EQ(j.dump(), json(event).dump());
+    EXPECT_EQ(event.room_id, "!jEsUZKDJdhlrceRyVU:example.org");
+    EXPECT_EQ(event.type, ns::EventType::Typing);
+    EXPECT_EQ(event.content.user_ids.at(0), "@alice:matrix.org");
+    EXPECT_EQ(event.content.user_ids.at(1), "@bob:example.com");
+    EXPECT_EQ(j.dump(), json(event).dump());
 }
 
 TEST(Ephemeral, Receipt)
 {
-        json j = R"({
+    json j = R"({
     "content": {
         "$1435641916114394fHBLK:matrix.org": {
             "m.read": {
@@ -1311,20 +1307,19 @@ TEST(Ephemeral, Receipt)
     "type": "m.receipt"
 })"_json;
 
-        ns::EphemeralEvent<ns::ephemeral::Receipt> event = j;
+    ns::EphemeralEvent<ns::ephemeral::Receipt> event = j;
 
-        EXPECT_EQ(event.room_id, "!jEsUZKDJdhlrceRyVU:example.org");
-        EXPECT_EQ(event.type, ns::EventType::Receipt);
-        EXPECT_EQ(event.content.receipts.at("$1435641916114394fHBLK:matrix.org")
-                    .users.at("@rikj:jki.re")
-                    .ts,
-                  1436451550453);
-        EXPECT_EQ(j.dump(), json(event).dump());
+    EXPECT_EQ(event.room_id, "!jEsUZKDJdhlrceRyVU:example.org");
+    EXPECT_EQ(event.type, ns::EventType::Receipt);
+    EXPECT_EQ(
+      event.content.receipts.at("$1435641916114394fHBLK:matrix.org").users.at("@rikj:jki.re").ts,
+      1436451550453);
+    EXPECT_EQ(j.dump(), json(event).dump());
 }
 
 TEST(Ephemeral, FullyRead)
 {
-        json j = R"({
+    json j = R"({
             "content": {
             "event_id": "$someplace:example.org"
           },
@@ -1332,17 +1327,17 @@ TEST(Ephemeral, FullyRead)
           "type": "m.fully_read"
         })"_json;
 
-        ns::AccountDataEvent<ns::account_data::FullyRead> event = j;
+    ns::AccountDataEvent<ns::account_data::FullyRead> event = j;
 
-        EXPECT_EQ(event.room_id, "!somewhere:example.org");
-        EXPECT_EQ(event.type, ns::EventType::FullyRead);
-        EXPECT_EQ(event.content.event_id, "$someplace:example.org");
-        EXPECT_EQ(j.dump(), json(event).dump());
+    EXPECT_EQ(event.room_id, "!somewhere:example.org");
+    EXPECT_EQ(event.type, ns::EventType::FullyRead);
+    EXPECT_EQ(event.content.event_id, "$someplace:example.org");
+    EXPECT_EQ(j.dump(), json(event).dump());
 }
 
 TEST(ToDevice, KeyVerificationRequest)
 {
-        json request_data = R"({
+    json request_data = R"({
     "content": {
         "from_device": "AliceDevice2",
         "methods": [
@@ -1355,19 +1350,19 @@ TEST(ToDevice, KeyVerificationRequest)
     "type": "m.key.verification.request"
 })"_json;
 
-        ns::Event<ns::msg::KeyVerificationRequest> event = request_data;
-        auto keyEvent                                    = event.content;
-        EXPECT_EQ(keyEvent.from_device, "AliceDevice2");
-        EXPECT_EQ(event.type, mtx::events::EventType::KeyVerificationRequest);
-        EXPECT_EQ(keyEvent.transaction_id, "S0meUniqueAndOpaqueString");
-        EXPECT_EQ(keyEvent.methods[0], ns::msg::VerificationMethods::SASv1);
-        EXPECT_EQ(keyEvent.timestamp, 1559598944869);
-        EXPECT_EQ(request_data.dump(), json(event).dump());
+    ns::Event<ns::msg::KeyVerificationRequest> event = request_data;
+    auto keyEvent                                    = event.content;
+    EXPECT_EQ(keyEvent.from_device, "AliceDevice2");
+    EXPECT_EQ(event.type, mtx::events::EventType::KeyVerificationRequest);
+    EXPECT_EQ(keyEvent.transaction_id, "S0meUniqueAndOpaqueString");
+    EXPECT_EQ(keyEvent.methods[0], ns::msg::VerificationMethods::SASv1);
+    EXPECT_EQ(keyEvent.timestamp, 1559598944869);
+    EXPECT_EQ(request_data.dump(), json(event).dump());
 }
 
 TEST(ToDevice, KeyVerificationStart)
 {
-        json request_data = R"({
+    json request_data = R"({
     "content": {
         "from_device": "BobDevice1",
         "hashes": [
@@ -1391,25 +1386,25 @@ TEST(ToDevice, KeyVerificationStart)
     "type": "m.key.verification.start"
 })"_json;
 
-        ns::Event<ns::msg::KeyVerificationStart> event = request_data;
-        auto keyEvent                                  = event.content;
-        EXPECT_EQ(keyEvent.from_device, "BobDevice1");
-        EXPECT_EQ(keyEvent.hashes[0], "sha256");
-        EXPECT_EQ(keyEvent.key_agreement_protocols[0], "curve25519");
-        EXPECT_EQ(keyEvent.message_authentication_codes[0], "hkdf-hmac-sha256");
-        EXPECT_EQ(keyEvent.short_authentication_string[0], ns::msg::SASMethods::Decimal);
-        EXPECT_EQ(keyEvent.short_authentication_string[1], ns::msg::SASMethods::Emoji);
-        EXPECT_EQ(keyEvent.short_authentication_string[2], ns::msg::SASMethods::Unsupported);
-        EXPECT_EQ(event.type, mtx::events::EventType::KeyVerificationStart);
-        EXPECT_EQ(keyEvent.transaction_id, "S0meUniqueAndOpaqueString");
-        EXPECT_EQ(keyEvent.method, ns::msg::VerificationMethods::SASv1);
-        // The incoming and outgoing JSON will not match due to the Unsupported SASMethod in the
-        // request_data, so no point in comparing the dump of both for equality.
+    ns::Event<ns::msg::KeyVerificationStart> event = request_data;
+    auto keyEvent                                  = event.content;
+    EXPECT_EQ(keyEvent.from_device, "BobDevice1");
+    EXPECT_EQ(keyEvent.hashes[0], "sha256");
+    EXPECT_EQ(keyEvent.key_agreement_protocols[0], "curve25519");
+    EXPECT_EQ(keyEvent.message_authentication_codes[0], "hkdf-hmac-sha256");
+    EXPECT_EQ(keyEvent.short_authentication_string[0], ns::msg::SASMethods::Decimal);
+    EXPECT_EQ(keyEvent.short_authentication_string[1], ns::msg::SASMethods::Emoji);
+    EXPECT_EQ(keyEvent.short_authentication_string[2], ns::msg::SASMethods::Unsupported);
+    EXPECT_EQ(event.type, mtx::events::EventType::KeyVerificationStart);
+    EXPECT_EQ(keyEvent.transaction_id, "S0meUniqueAndOpaqueString");
+    EXPECT_EQ(keyEvent.method, ns::msg::VerificationMethods::SASv1);
+    // The incoming and outgoing JSON will not match due to the Unsupported SASMethod in the
+    // request_data, so no point in comparing the dump of both for equality.
 }
 
 TEST(ToDevice, KeyVerificationAccept)
 {
-        json request_data = R"({
+    json request_data = R"({
     "content": {
         "commitment": "fQpGIW1Snz+pwLZu6sTy2aHy/DYWWTspTJRPyNp0PKkymfIsNffysMl6ObMMFdIJhk6g6pwlIqZ54rxo8SLmAg",
         "hash": "sha256",
@@ -1426,24 +1421,24 @@ TEST(ToDevice, KeyVerificationAccept)
     "type": "m.key.verification.accept"
 })"_json;
 
-        ns::Event<ns::msg::KeyVerificationAccept> event = request_data;
-        auto keyEvent                                   = event.content;
-        EXPECT_EQ(event.type, mtx::events::EventType::KeyVerificationAccept);
-        EXPECT_EQ(
-          keyEvent.commitment,
-          "fQpGIW1Snz+pwLZu6sTy2aHy/DYWWTspTJRPyNp0PKkymfIsNffysMl6ObMMFdIJhk6g6pwlIqZ54rxo8SLmAg");
-        EXPECT_EQ(keyEvent.hash, "sha256");
-        EXPECT_EQ(keyEvent.key_agreement_protocol, "curve25519");
-        EXPECT_EQ(keyEvent.message_authentication_code, "hkdf-hmac-sha256");
-        EXPECT_EQ(keyEvent.short_authentication_string[0], ns::msg::SASMethods::Decimal);
-        EXPECT_EQ(keyEvent.short_authentication_string[1], ns::msg::SASMethods::Emoji);
-        EXPECT_EQ(keyEvent.transaction_id, "S0meUniqueAndOpaqueString");
-        EXPECT_EQ(request_data.dump(), json(event).dump());
+    ns::Event<ns::msg::KeyVerificationAccept> event = request_data;
+    auto keyEvent                                   = event.content;
+    EXPECT_EQ(event.type, mtx::events::EventType::KeyVerificationAccept);
+    EXPECT_EQ(
+      keyEvent.commitment,
+      "fQpGIW1Snz+pwLZu6sTy2aHy/DYWWTspTJRPyNp0PKkymfIsNffysMl6ObMMFdIJhk6g6pwlIqZ54rxo8SLmAg");
+    EXPECT_EQ(keyEvent.hash, "sha256");
+    EXPECT_EQ(keyEvent.key_agreement_protocol, "curve25519");
+    EXPECT_EQ(keyEvent.message_authentication_code, "hkdf-hmac-sha256");
+    EXPECT_EQ(keyEvent.short_authentication_string[0], ns::msg::SASMethods::Decimal);
+    EXPECT_EQ(keyEvent.short_authentication_string[1], ns::msg::SASMethods::Emoji);
+    EXPECT_EQ(keyEvent.transaction_id, "S0meUniqueAndOpaqueString");
+    EXPECT_EQ(request_data.dump(), json(event).dump());
 }
 
 TEST(ToDevice, KeyVerificationReady)
 {
-        json request_data = R"({
+    json request_data = R"({
     "content": {
       "from_device":"@alice:localhost",
       "methods":["m.sas.v1"],
@@ -1453,18 +1448,18 @@ TEST(ToDevice, KeyVerificationReady)
     "type": "m.key.verification.ready"
 })"_json;
 
-        ns::Event<ns::msg::KeyVerificationReady> event = request_data;
-        auto keyEvent                                  = event.content;
-        EXPECT_EQ(event.sender, "test_user");
-        EXPECT_EQ(event.type, mtx::events::EventType::KeyVerificationReady);
-        EXPECT_EQ(keyEvent.from_device, "@alice:localhost");
-        EXPECT_EQ(keyEvent.transaction_id, "S0meUniqueAndOpaqueString");
-        EXPECT_EQ(keyEvent.methods[0], ns::msg::VerificationMethods::SASv1);
+    ns::Event<ns::msg::KeyVerificationReady> event = request_data;
+    auto keyEvent                                  = event.content;
+    EXPECT_EQ(event.sender, "test_user");
+    EXPECT_EQ(event.type, mtx::events::EventType::KeyVerificationReady);
+    EXPECT_EQ(keyEvent.from_device, "@alice:localhost");
+    EXPECT_EQ(keyEvent.transaction_id, "S0meUniqueAndOpaqueString");
+    EXPECT_EQ(keyEvent.methods[0], ns::msg::VerificationMethods::SASv1);
 }
 
 TEST(ToDevice, KeyVerificationDone)
 {
-        json request_data = R"({
+    json request_data = R"({
     "content": {
       "transaction_id": "S0meUniqueAndOpaqueString"
     },
@@ -1472,16 +1467,16 @@ TEST(ToDevice, KeyVerificationDone)
     "type": "m.key.verification.done"
 })"_json;
 
-        ns::Event<ns::msg::KeyVerificationDone> event = request_data;
-        auto keyEvent                                 = event.content;
-        EXPECT_EQ(event.sender, "test_user");
-        EXPECT_EQ(event.type, mtx::events::EventType::KeyVerificationDone);
-        EXPECT_EQ(keyEvent.transaction_id, "S0meUniqueAndOpaqueString");
+    ns::Event<ns::msg::KeyVerificationDone> event = request_data;
+    auto keyEvent                                 = event.content;
+    EXPECT_EQ(event.sender, "test_user");
+    EXPECT_EQ(event.type, mtx::events::EventType::KeyVerificationDone);
+    EXPECT_EQ(keyEvent.transaction_id, "S0meUniqueAndOpaqueString");
 }
 
 TEST(ToDevice, KeyVerificationCancel)
 {
-        json request_data = R"({
+    json request_data = R"({
     "content": {
         "code": "m.user",
         "reason": "User rejected the key verification request",
@@ -1491,18 +1486,18 @@ TEST(ToDevice, KeyVerificationCancel)
     "type": "m.key.verification.cancel"
 })"_json;
 
-        ns::Event<ns::msg::KeyVerificationCancel> event = request_data;
-        auto keyEvent                                   = event.content;
-        EXPECT_EQ(event.type, mtx::events::EventType::KeyVerificationCancel);
-        EXPECT_EQ(keyEvent.code, "m.user");
-        EXPECT_EQ(keyEvent.reason, "User rejected the key verification request");
-        EXPECT_EQ(keyEvent.transaction_id, "S0meUniqueAndOpaqueString");
-        EXPECT_EQ(request_data.dump(), json(event).dump());
+    ns::Event<ns::msg::KeyVerificationCancel> event = request_data;
+    auto keyEvent                                   = event.content;
+    EXPECT_EQ(event.type, mtx::events::EventType::KeyVerificationCancel);
+    EXPECT_EQ(keyEvent.code, "m.user");
+    EXPECT_EQ(keyEvent.reason, "User rejected the key verification request");
+    EXPECT_EQ(keyEvent.transaction_id, "S0meUniqueAndOpaqueString");
+    EXPECT_EQ(request_data.dump(), json(event).dump());
 }
 
 TEST(ToDevice, KeyVerificationKey)
 {
-        json request_data = R"({
+    json request_data = R"({
     "content": {
         "key": "fQpGIW1Snz+pwLZu6sTy2aHy/DYWWTspTJRPyNp0PKkymfIsNffysMl6ObMMFdIJhk6g6pwlIqZ54rxo8SLmAg",
         "transaction_id": "S0meUniqueAndOpaqueString"
@@ -1511,19 +1506,19 @@ TEST(ToDevice, KeyVerificationKey)
     "type": "m.key.verification.key"
 })"_json;
 
-        ns::Event<ns::msg::KeyVerificationKey> event = request_data;
-        auto keyEvent                                = event.content;
-        EXPECT_EQ(event.type, mtx::events::EventType::KeyVerificationKey);
-        EXPECT_EQ(
-          keyEvent.key,
-          "fQpGIW1Snz+pwLZu6sTy2aHy/DYWWTspTJRPyNp0PKkymfIsNffysMl6ObMMFdIJhk6g6pwlIqZ54rxo8SLmAg");
-        EXPECT_EQ(keyEvent.transaction_id, "S0meUniqueAndOpaqueString");
-        EXPECT_EQ(request_data.dump(), json(event).dump());
+    ns::Event<ns::msg::KeyVerificationKey> event = request_data;
+    auto keyEvent                                = event.content;
+    EXPECT_EQ(event.type, mtx::events::EventType::KeyVerificationKey);
+    EXPECT_EQ(
+      keyEvent.key,
+      "fQpGIW1Snz+pwLZu6sTy2aHy/DYWWTspTJRPyNp0PKkymfIsNffysMl6ObMMFdIJhk6g6pwlIqZ54rxo8SLmAg");
+    EXPECT_EQ(keyEvent.transaction_id, "S0meUniqueAndOpaqueString");
+    EXPECT_EQ(request_data.dump(), json(event).dump());
 }
 
 TEST(ToDevice, KeyVerificationMac)
 {
-        json request_data = R"({
+    json request_data = R"({
     "content": {
         "keys": "2Wptgo4CwmLo/Y8B8qinxApKaCkBG2fjTWB7AbP5Uy+aIbygsSdLOFzvdDjww8zUVKCmI02eP9xtyJxc/cLiBA",
         "mac": {
@@ -1535,23 +1530,23 @@ TEST(ToDevice, KeyVerificationMac)
     "type": "m.key.verification.mac"
 })"_json;
 
-        ns::Event<ns::msg::KeyVerificationMac> event = request_data;
-        auto keyEvent                                = event.content;
-        EXPECT_EQ(event.type, mtx::events::EventType::KeyVerificationMac);
-        EXPECT_EQ(
-          keyEvent.keys,
-          "2Wptgo4CwmLo/Y8B8qinxApKaCkBG2fjTWB7AbP5Uy+aIbygsSdLOFzvdDjww8zUVKCmI02eP9xtyJxc/cLiBA");
-        EXPECT_EQ(keyEvent.mac.count("ed25519:ABCDEF"), 1);
-        EXPECT_EQ(
-          keyEvent.mac.at("ed25519:ABCDEF"),
-          "fQpGIW1Snz+pwLZu6sTy2aHy/DYWWTspTJRPyNp0PKkymfIsNffysMl6ObMMFdIJhk6g6pwlIqZ54rxo8SLmAg");
-        EXPECT_EQ(keyEvent.transaction_id, "S0meUniqueAndOpaqueString");
-        EXPECT_EQ(request_data.dump(), json(event).dump());
+    ns::Event<ns::msg::KeyVerificationMac> event = request_data;
+    auto keyEvent                                = event.content;
+    EXPECT_EQ(event.type, mtx::events::EventType::KeyVerificationMac);
+    EXPECT_EQ(
+      keyEvent.keys,
+      "2Wptgo4CwmLo/Y8B8qinxApKaCkBG2fjTWB7AbP5Uy+aIbygsSdLOFzvdDjww8zUVKCmI02eP9xtyJxc/cLiBA");
+    EXPECT_EQ(keyEvent.mac.count("ed25519:ABCDEF"), 1);
+    EXPECT_EQ(
+      keyEvent.mac.at("ed25519:ABCDEF"),
+      "fQpGIW1Snz+pwLZu6sTy2aHy/DYWWTspTJRPyNp0PKkymfIsNffysMl6ObMMFdIJhk6g6pwlIqZ54rxo8SLmAg");
+    EXPECT_EQ(keyEvent.transaction_id, "S0meUniqueAndOpaqueString");
+    EXPECT_EQ(request_data.dump(), json(event).dump());
 }
 
 TEST(ToDevice, KeyRequest)
 {
-        json request_data = R"({
+    json request_data = R"({
 	"content": {
 	  "action": "request",
 	  "body": {
@@ -1566,22 +1561,22 @@ TEST(ToDevice, KeyRequest)
         "sender": "@mujx:matrix.org",
         "type": "m.room_key_request"
 	})"_json;
-        mtx::events::DeviceEvent<ns::msg::KeyRequest> event(request_data);
-        EXPECT_EQ(event.sender, "@mujx:matrix.org");
-        EXPECT_EQ(event.type, mtx::events::EventType::RoomKeyRequest);
-        EXPECT_EQ(event.content.action, ns::msg::RequestAction::Request);
-        EXPECT_EQ(event.content.algorithm, "m.megolm.v1.aes-sha2");
-        EXPECT_EQ(event.content.room_id, "!iapLxlpZgOzqGnWkXR:matrix.org");
-        EXPECT_EQ(event.content.sender_key, "9im1n0bSYQpnF700sXJqAAYiqGgkyRqMZRdobj0kymY");
-        EXPECT_EQ(event.content.session_id, "oGj6sEDraRDf+NdmvZTI7urDJk/Z+i7TX2KFLbfMGlE");
-        EXPECT_EQ(event.content.request_id, "m1529936829480.0");
-        EXPECT_EQ(event.content.requesting_device_id, "GGUBYESVPI");
-        EXPECT_EQ(request_data.dump(), json(event).dump());
+    mtx::events::DeviceEvent<ns::msg::KeyRequest> event(request_data);
+    EXPECT_EQ(event.sender, "@mujx:matrix.org");
+    EXPECT_EQ(event.type, mtx::events::EventType::RoomKeyRequest);
+    EXPECT_EQ(event.content.action, ns::msg::RequestAction::Request);
+    EXPECT_EQ(event.content.algorithm, "m.megolm.v1.aes-sha2");
+    EXPECT_EQ(event.content.room_id, "!iapLxlpZgOzqGnWkXR:matrix.org");
+    EXPECT_EQ(event.content.sender_key, "9im1n0bSYQpnF700sXJqAAYiqGgkyRqMZRdobj0kymY");
+    EXPECT_EQ(event.content.session_id, "oGj6sEDraRDf+NdmvZTI7urDJk/Z+i7TX2KFLbfMGlE");
+    EXPECT_EQ(event.content.request_id, "m1529936829480.0");
+    EXPECT_EQ(event.content.requesting_device_id, "GGUBYESVPI");
+    EXPECT_EQ(request_data.dump(), json(event).dump());
 }
 
 TEST(ToDevice, KeyCancellation)
 {
-        json cancellation_data = R"({
+    json cancellation_data = R"({
 	  "content": {
             "action": "request_cancellation",
             "request_id": "m1529936829480.0",
@@ -1591,19 +1586,19 @@ TEST(ToDevice, KeyCancellation)
           "type": "m.room_key_request"
 	})"_json;
 
-        mtx::events::DeviceEvent<ns::msg::KeyRequest> event(cancellation_data);
-        EXPECT_EQ(event.sender, "@mujx:matrix.org");
-        EXPECT_EQ(event.type, mtx::events::EventType::RoomKeyRequest);
-        EXPECT_EQ(event.content.action, ns::msg::RequestAction::Cancellation);
-        EXPECT_EQ(event.content.request_id, "m1529936829480.0");
-        EXPECT_EQ(event.content.requesting_device_id, "GGUBYESVPI");
+    mtx::events::DeviceEvent<ns::msg::KeyRequest> event(cancellation_data);
+    EXPECT_EQ(event.sender, "@mujx:matrix.org");
+    EXPECT_EQ(event.type, mtx::events::EventType::RoomKeyRequest);
+    EXPECT_EQ(event.content.action, ns::msg::RequestAction::Cancellation);
+    EXPECT_EQ(event.content.request_id, "m1529936829480.0");
+    EXPECT_EQ(event.content.requesting_device_id, "GGUBYESVPI");
 
-        EXPECT_EQ(cancellation_data.dump(), json(event).dump());
+    EXPECT_EQ(cancellation_data.dump(), json(event).dump());
 }
 
 TEST(Collection, Events)
 {
-        json data = R"({
+    json data = R"({
 	  "unsigned": {
 	    "age": 242352,
 	    "transaction_id": "txnid"
@@ -1622,14 +1617,14 @@ TEST(Collection, Events)
 	  "type": "m.room.aliases"
 	})"_json;
 
-        mtx::events::collections::TimelineEvent event = data;
+    mtx::events::collections::TimelineEvent event = data;
 
-        ASSERT_TRUE(std::get_if<ns::StateEvent<ns::state::Aliases>>(&event.data) != nullptr);
+    ASSERT_TRUE(std::get_if<ns::StateEvent<ns::state::Aliases>>(&event.data) != nullptr);
 }
 
 TEST(RoomAccountData, Tags)
 {
-        json data = R"({
+    json data = R"({
           "content": {
               "tags": {
                 "m.favourite": {
@@ -1646,19 +1641,19 @@ TEST(RoomAccountData, Tags)
           "type": "m.tag"
         })"_json;
 
-        ns::AccountDataEvent<ns::account_data::Tags> event = data;
+    ns::AccountDataEvent<ns::account_data::Tags> event = data;
 
-        EXPECT_EQ(event.type, ns::EventType::Tag);
-        EXPECT_EQ(event.content.tags.size(), 3);
-        EXPECT_EQ(event.content.tags.at("m.favourite").order, 1);
-        EXPECT_EQ(event.content.tags.at("u.Project1").order, 0);
-        // NOTE(Nico): We are currently not parsing arbitrary attached json data (anymore).
-        EXPECT_EQ(event.content.tags.at("com.example.nheko.text").order, std::nullopt);
+    EXPECT_EQ(event.type, ns::EventType::Tag);
+    EXPECT_EQ(event.content.tags.size(), 3);
+    EXPECT_EQ(event.content.tags.at("m.favourite").order, 1);
+    EXPECT_EQ(event.content.tags.at("u.Project1").order, 0);
+    // NOTE(Nico): We are currently not parsing arbitrary attached json data (anymore).
+    EXPECT_EQ(event.content.tags.at("com.example.nheko.text").order, std::nullopt);
 }
 
 TEST(RoomAccountData, NhekoHiddenEvents)
 {
-        json data = R"({
+    json data = R"({
           "content": {
               "hidden_event_types": [
 	          "m.reaction",
@@ -1668,17 +1663,17 @@ TEST(RoomAccountData, NhekoHiddenEvents)
           "type": "im.nheko.hidden_events"
         })"_json;
 
-        ns::AccountDataEvent<ns::account_data::nheko_extensions::HiddenEvents> event = data;
+    ns::AccountDataEvent<ns::account_data::nheko_extensions::HiddenEvents> event = data;
 
-        EXPECT_EQ(event.type, ns::EventType::NhekoHiddenEvents);
-        EXPECT_EQ(event.content.hidden_event_types.size(), 2);
-        EXPECT_EQ(event.content.hidden_event_types[0], ns::EventType::Reaction);
-        EXPECT_EQ(event.content.hidden_event_types[1], ns::EventType::RoomMember);
+    EXPECT_EQ(event.type, ns::EventType::NhekoHiddenEvents);
+    EXPECT_EQ(event.content.hidden_event_types.size(), 2);
+    EXPECT_EQ(event.content.hidden_event_types[0], ns::EventType::Reaction);
+    EXPECT_EQ(event.content.hidden_event_types[1], ns::EventType::RoomMember);
 }
 
 TEST(RoomAccountData, ImagePack)
 {
-        json data = R"({
+    json data = R"({
           "content": {
   "images": {
     "emote": {
@@ -1700,29 +1695,29 @@ TEST(RoomAccountData, ImagePack)
           "type": "im.ponies.user_emotes"
         })"_json;
 
-        ns::AccountDataEvent<ns::msc2545::ImagePack> event = data;
+    ns::AccountDataEvent<ns::msc2545::ImagePack> event = data;
 
-        EXPECT_EQ(event.type, ns::EventType::ImagePackInAccountData);
-        EXPECT_EQ(event.content.pack.has_value(), true);
-        EXPECT_EQ(event.content.pack->display_name, "Awesome Pack");
-        EXPECT_EQ(event.content.pack->attribution, "huh");
-        EXPECT_EQ(event.content.pack->avatar_url, "mxc://example.org/asdjfasd");
-        EXPECT_EQ(event.content.pack->is_emoji(), true);
-        EXPECT_EQ(event.content.pack->is_sticker(), false);
-        ASSERT_EQ(event.content.images.size(), 2);
-        EXPECT_EQ(event.content.images["emote"].url, "mxc://example.org/blah");
-        EXPECT_EQ(event.content.images["emote"].overrides_usage(), false);
-        EXPECT_EQ(event.content.images["sticker"].url, "mxc://example.org/sticker");
-        EXPECT_EQ(event.content.images["sticker"].body, "stcikerly");
-        EXPECT_EQ(event.content.images["sticker"].is_sticker(), true);
-        EXPECT_EQ(event.content.images["sticker"].is_emoji(), false);
-        EXPECT_EQ(event.content.images["sticker"].overrides_usage(), true);
-        EXPECT_EQ(json(event)["content"]["images"].size(), 2);
+    EXPECT_EQ(event.type, ns::EventType::ImagePackInAccountData);
+    EXPECT_EQ(event.content.pack.has_value(), true);
+    EXPECT_EQ(event.content.pack->display_name, "Awesome Pack");
+    EXPECT_EQ(event.content.pack->attribution, "huh");
+    EXPECT_EQ(event.content.pack->avatar_url, "mxc://example.org/asdjfasd");
+    EXPECT_EQ(event.content.pack->is_emoji(), true);
+    EXPECT_EQ(event.content.pack->is_sticker(), false);
+    ASSERT_EQ(event.content.images.size(), 2);
+    EXPECT_EQ(event.content.images["emote"].url, "mxc://example.org/blah");
+    EXPECT_EQ(event.content.images["emote"].overrides_usage(), false);
+    EXPECT_EQ(event.content.images["sticker"].url, "mxc://example.org/sticker");
+    EXPECT_EQ(event.content.images["sticker"].body, "stcikerly");
+    EXPECT_EQ(event.content.images["sticker"].is_sticker(), true);
+    EXPECT_EQ(event.content.images["sticker"].is_emoji(), false);
+    EXPECT_EQ(event.content.images["sticker"].overrides_usage(), true);
+    EXPECT_EQ(json(event)["content"]["images"].size(), 2);
 }
 
 TEST(RoomAccountData, ImagePackRooms)
 {
-        json data = R"({
+    json data = R"({
           "content": {
   "rooms": {
     "!someroom:example.org": {
@@ -1737,27 +1732,27 @@ TEST(RoomAccountData, ImagePackRooms)
           "type": "im.ponies.emote_rooms"
         })"_json;
 
-        ns::AccountDataEvent<ns::msc2545::ImagePackRooms> event = data;
+    ns::AccountDataEvent<ns::msc2545::ImagePackRooms> event = data;
 
-        EXPECT_EQ(event.type, ns::EventType::ImagePackRooms);
-        EXPECT_EQ(event.content.rooms.size(), 2);
-        EXPECT_EQ(event.content.rooms["!someroom:example.org"].size(), 2);
-        EXPECT_EQ(event.content.rooms["!someroom:example.org"].count(""), 1);
-        EXPECT_EQ(event.content.rooms["!someroom:example.org"].count(
-                    "de.sorunome.mx-puppet-bridge.discord"),
-                  1);
-        EXPECT_EQ(json(event)["content"]["rooms"].size(), 2);
+    EXPECT_EQ(event.type, ns::EventType::ImagePackRooms);
+    EXPECT_EQ(event.content.rooms.size(), 2);
+    EXPECT_EQ(event.content.rooms["!someroom:example.org"].size(), 2);
+    EXPECT_EQ(event.content.rooms["!someroom:example.org"].count(""), 1);
+    EXPECT_EQ(
+      event.content.rooms["!someroom:example.org"].count("de.sorunome.mx-puppet-bridge.discord"),
+      1);
+    EXPECT_EQ(json(event)["content"]["rooms"].size(), 2);
 
-        ns::msc2545::ImagePackRooms empty = {};
-        EXPECT_EQ(json(empty).dump(), "{\"rooms\":{}}");
+    ns::msc2545::ImagePackRooms empty = {};
+    EXPECT_EQ(json(empty).dump(), "{\"rooms\":{}}");
 
-        ns::msc2545::ImagePackRooms empty2 = json::object();
-        EXPECT_TRUE(empty2.rooms.empty());
+    ns::msc2545::ImagePackRooms empty2 = json::object();
+    EXPECT_TRUE(empty2.rooms.empty());
 }
 
 TEST(Presence, Presence)
 {
-        json data = R"({
+    json data = R"({
 	    "content": {
 		"avatar_url": "mxc://localhost:wefuiwegh8742w",
 		"currently_active": true,
@@ -1769,14 +1764,14 @@ TEST(Presence, Presence)
 	    "type": "m.presence"
 	})"_json;
 
-        ns::Event<ns::presence::Presence> event = data;
+    ns::Event<ns::presence::Presence> event = data;
 
-        EXPECT_EQ(event.type, ns::EventType::Presence);
-        EXPECT_EQ(event.sender, "@example:localhost");
-        EXPECT_EQ(event.content.avatar_url, "mxc://localhost:wefuiwegh8742w");
-        EXPECT_EQ(event.content.currently_active, true);
-        EXPECT_EQ(event.content.last_active_ago, 2478593);
-        EXPECT_EQ(event.content.presence, mtx::presence::online);
-        EXPECT_EQ(event.content.status_msg, "Making cupcakes");
-        EXPECT_EQ(data, json(event));
+    EXPECT_EQ(event.type, ns::EventType::Presence);
+    EXPECT_EQ(event.sender, "@example:localhost");
+    EXPECT_EQ(event.content.avatar_url, "mxc://localhost:wefuiwegh8742w");
+    EXPECT_EQ(event.content.currently_active, true);
+    EXPECT_EQ(event.content.last_active_ago, 2478593);
+    EXPECT_EQ(event.content.presence, mtx::presence::online);
+    EXPECT_EQ(event.content.status_msg, "Making cupcakes");
+    EXPECT_EQ(data, json(event));
 }

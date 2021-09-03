@@ -24,8 +24,8 @@ namespace account_data {
 /// last event of the second section.
 struct FullyRead
 {
-        //! Required. The event the user's read marker is located at in the room.
-        std::string event_id;
+    //! Required. The event the user's read marker is located at in the room.
+    std::string event_id;
 };
 
 //! Deserialization method needed by @p nlohmann::json.

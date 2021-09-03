@@ -19,9 +19,9 @@ namespace presence {
 //! The current presence state.
 enum PresenceState
 {
-        online,      //!< The user is online.
-        offline,     //!< The user is offline.
-        unavailable, //!< The user is online, but currently not available.
+    online,      //!< The user is online.
+    offline,     //!< The user is offline.
+    unavailable, //!< The user is online, but currently not available.
 };
 
 std::string
@@ -35,14 +35,14 @@ namespace presence {
 //! The `m.presence` ephemeral event.
 struct Presence
 {
-        std::string avatar_url;  //! The current avatar URL for this user, if any.
-        std::string displayname; //! The current display name for this user, if any.
-        uint64_t
-          last_active_ago; //! The last time since this used performed some action, in milliseconds.
-        mtx::presence::PresenceState presence; //! Required. The presence state for this user. One
-                                               //! of: ["online", "offline", "unavailable"]
-        bool currently_active;                 //! Whether the user is currently active
-        std::string status_msg; //! An optional description to accompany the presence.
+    std::string avatar_url;  //! The current avatar URL for this user, if any.
+    std::string displayname; //! The current display name for this user, if any.
+    uint64_t
+      last_active_ago; //! The last time since this used performed some action, in milliseconds.
+    mtx::presence::PresenceState presence; //! Required. The presence state for this user. One
+                                           //! of: ["online", "offline", "unavailable"]
+    bool currently_active;                 //! Whether the user is currently active
+    std::string status_msg;                //! An optional description to accompany the presence.
 };
 
 void

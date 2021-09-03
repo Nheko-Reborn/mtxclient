@@ -20,8 +20,8 @@ namespace state {
 /// A topic is a short message detailing what is currently being discussed in the room.
 struct Topic
 {
-        //! The topic text.
-        std::string topic;
+    //! The topic text.
+    std::string topic;
 };
 
 void

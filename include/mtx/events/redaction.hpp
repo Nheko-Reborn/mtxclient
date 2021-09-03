@@ -18,8 +18,8 @@ namespace msg {
 //! Content for the `m.room.redaction` state event.
 struct Redaction
 {
-        //! The reason for the redaction, if any.
-        std::string reason;
+    //! The reason for the redaction, if any.
+    std::string reason;
 };
 
 void

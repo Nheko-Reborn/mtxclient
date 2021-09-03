@@ -11,13 +11,13 @@ namespace state {
 void
 from_json(const json &obj, Aliases &content)
 {
-        content.aliases = obj.at("aliases").get<std::vector<std::string>>();
+    content.aliases = obj.at("aliases").get<std::vector<std::string>>();
 }
 
 void
 to_json(json &obj, const Aliases &content)
 {
-        obj["aliases"] = content.aliases;
+    obj["aliases"] = content.aliases;
 }
 
 } // namespace state

@@ -15,10 +15,10 @@ namespace utils {
 //! Representation of Matrix Content (MXC) URIs.
 struct MxcUrl
 {
-        //! The name of the homeserver where the content originated.
-        std::string server;
-        //! An opaque ID which identifies the content.
-        std::string media_id;
+    //! The name of the homeserver where the content originated.
+    std::string server;
+    //! An opaque ID which identifies the content.
+    std::string media_id;
 };
 
 //! Parse a matrix content URI into its server & media_id components.

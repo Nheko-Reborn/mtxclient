@@ -20,10 +20,10 @@ namespace responses {
 //! This API may return keys which are not limited to *displayname* or *avatar_url*.
 struct Profile
 {
-        //! The user's avatar URL if they have set one, otherwise not present.
-        std::string avatar_url;
-        //! The user's display name if they have set one, otherwise not present.
-        std::string display_name;
+    //! The user's avatar URL if they have set one, otherwise not present.
+    std::string avatar_url;
+    //! The user's display name if they have set one, otherwise not present.
+    std::string display_name;
 };
 
 void
@@ -32,7 +32,7 @@ from_json(const nlohmann::json &obj, Profile &profile);
 //! Response from the `GET /_matrix/client/r0/profile/{userId}/avatar_url` endpoint.
 struct AvatarUrl
 {
-        std::string avatar_url;
+    std::string avatar_url;
 };
 
 void

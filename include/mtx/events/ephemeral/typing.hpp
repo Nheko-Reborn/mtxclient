@@ -24,8 +24,8 @@ namespace ephemeral {
 /// form part of the Event Graph but still have a room_id key.
 struct Typing
 {
-        //! Required. The list of user IDs typing in this room, if any.
-        std::vector<std::string> user_ids;
+    //! Required. The list of user IDs typing in this room, if any.
+    std::vector<std::string> user_ids;
 };
 
 //! Deserialization method needed by @p nlohmann::json.

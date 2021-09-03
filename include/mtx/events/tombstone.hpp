@@ -20,10 +20,10 @@ namespace state {
 //! that clients should go there.
 struct Tombstone
 {
-        //! Required. A server-defined message.
-        std::string body;
-        //! Required. The new room the client should be visiting.
-        std::string replacement_room;
+    //! Required. A server-defined message.
+    std::string body;
+    //! Required. The new room the client should be visiting.
+    std::string replacement_room;
 };
 
 //! Deserialization method needed by @p nlohmann::json.

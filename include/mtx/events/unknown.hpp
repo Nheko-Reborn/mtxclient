@@ -17,10 +17,10 @@ namespace events {
 //! Placeholder event for if an event is unsupported
 struct Unknown
 {
-        //! The original content
-        std::string content;
-        //! The original type
-        std::string type;
+    //! The original content
+    std::string content;
+    //! The original type
+    std::string type;
 };
 
 void

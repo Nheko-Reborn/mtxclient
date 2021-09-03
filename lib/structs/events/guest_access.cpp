@@ -12,31 +12,31 @@ namespace state {
 std::string
 accessStateToString(AccessState state)
 {
-        if (state == AccessState::CanJoin)
-                return "can_join";
+    if (state == AccessState::CanJoin)
+        return "can_join";
 
-        return "forbidden";
+    return "forbidden";
 }
 
 AccessState
 stringToAccessState(const std::string &state)
 {
-        if (state == "can_join")
-                return AccessState::CanJoin;
+    if (state == "can_join")
+        return AccessState::CanJoin;
 
-        return AccessState::Forbidden;
+    return AccessState::Forbidden;
 }
 
 void
 from_json(const json &obj, GuestAccess &guest_access)
 {
-        guest_access.guest_access = stringToAccessState(obj.at("guest_access").get<std::string>());
+    guest_access.guest_access = stringToAccessState(obj.at("guest_access").get<std::string>());
 }
 
 void
 to_json(json &obj, const GuestAccess &guest_access)
 {
-        obj["guest_access"] = accessStateToString(guest_access.guest_access);
+    obj["guest_access"] = accessStateToString(guest_access.guest_access);
 }
 
 } // namespace state

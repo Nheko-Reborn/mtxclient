@@ -17,15 +17,15 @@ namespace crypto {
 class crypto_exception : public std::exception
 {
 public:
-        crypto_exception(std::string func, const char *msg)
-          : msg_(func + ": " + std::string(msg))
-        {}
+    crypto_exception(std::string func, const char *msg)
+      : msg_(func + ": " + std::string(msg))
+    {}
 
-        //! Describes the error
-        const char *what() const noexcept override { return msg_.c_str(); }
+    //! Describes the error
+    const char *what() const noexcept override { return msg_.c_str(); }
 
 private:
-        std::string msg_;
+    std::string msg_;
 };
 
 //! Data representation used to interact with libolm. It's a contiguous buffer of bytes.
@@ -42,15 +42,15 @@ create_buffer(std::size_t nbytes);
 inline BinaryBuf
 to_binary_buf(const std::string &str)
 {
-        return BinaryBuf(reinterpret_cast<const uint8_t *>(str.data()),
-                         reinterpret_cast<const uint8_t *>(str.data()) + str.size());
+    return BinaryBuf(reinterpret_cast<const uint8_t *>(str.data()),
+                     reinterpret_cast<const uint8_t *>(str.data()) + str.size());
 }
 
 //! Convert a binary buffer to a string.
 inline std::string
 to_string(const BinaryBuf &buf)
 {
-        return std::string(reinterpret_cast<const char *>(buf.data()), buf.size());
+    return std::string(reinterpret_cast<const char *>(buf.data()), buf.size());
 }
 
 //! Simple wrapper around the OpenSSL PKCS5_PBKDF2_HMAC function
@@ -80,7 +80,7 @@ decrypt(const mtx::secret_storage::AesHmacSha2EncryptedData &data,
 //! HKDF key derivation with SHA256 digest
 struct HkdfKeys
 {
-        BinaryBuf aes, mac;
+    BinaryBuf aes, mac;
 };
 HkdfKeys
 HKDF_SHA256(const BinaryBuf &key, const BinaryBuf &salt, const BinaryBuf &info);
@@ -94,8 +94,8 @@ AES_CTR_256_Decrypt(const std::string ciphertext, const BinaryBuf aes256Key, Bin
 //! Base64 encoded CURVE25519_AES_SHA2 encrypted text, including the mac and ephemeral key
 struct CURVE25519_AES_SHA2_Encrypted
 {
-        //! base64 encoded
-        std::string ciphertext, mac, ephemeral;
+    //! base64 encoded
+    std::string ciphertext, mac, ephemeral;
 };
 
 //! encypts a plaintext payload using CURVE25519_AES_SHA2

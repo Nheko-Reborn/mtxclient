@@ -9,7 +9,7 @@ using namespace mtx::events;
 
 TEST(RoomEvents, Reaction)
 {
-        json data = R"({
+    json data = R"({
   "type": "m.reaction",
   "room_id": "!CYvyeleADEeDAsndMom:localhost",
   "sender": "@example:localhost",
@@ -27,26 +27,26 @@ TEST(RoomEvents, Reaction)
   "event_id": "$ujXAq1WXebS-vcpA4yBIZPvCeqGvnrMFP1c1qn8_wJump"
   })"_json;
 
-        RoomEvent<msg::Reaction> event = data;
+    RoomEvent<msg::Reaction> event = data;
 
-        EXPECT_EQ(event.type, EventType::Reaction);
-        EXPECT_EQ(event.event_id, "$ujXAq1WXebS-vcpA4yBIZPvCeqGvnrMFP1c1qn8_wJump");
-        EXPECT_EQ(event.room_id, "!CYvyeleADEeDAsndMom:localhost");
-        EXPECT_EQ(event.sender, "@example:localhost");
-        EXPECT_EQ(event.origin_server_ts, 1588536414112L);
-        EXPECT_EQ(event.unsigned_data.age, 1905609L);
-        EXPECT_EQ(event.content.relations.relations.at(0).event_id,
-                  "$oGKg0tfsnDamWPsGxUptGLWR5b8Xq6QNFFsysQNSnake");
-        EXPECT_EQ(event.content.relations.relations.at(0).key, "👀");
-        EXPECT_EQ(event.content.relations.relations.at(0).rel_type,
-                  mtx::common::RelationType::Annotation);
+    EXPECT_EQ(event.type, EventType::Reaction);
+    EXPECT_EQ(event.event_id, "$ujXAq1WXebS-vcpA4yBIZPvCeqGvnrMFP1c1qn8_wJump");
+    EXPECT_EQ(event.room_id, "!CYvyeleADEeDAsndMom:localhost");
+    EXPECT_EQ(event.sender, "@example:localhost");
+    EXPECT_EQ(event.origin_server_ts, 1588536414112L);
+    EXPECT_EQ(event.unsigned_data.age, 1905609L);
+    EXPECT_EQ(event.content.relations.relations.at(0).event_id,
+              "$oGKg0tfsnDamWPsGxUptGLWR5b8Xq6QNFFsysQNSnake");
+    EXPECT_EQ(event.content.relations.relations.at(0).key, "👀");
+    EXPECT_EQ(event.content.relations.relations.at(0).rel_type,
+              mtx::common::RelationType::Annotation);
 
-        EXPECT_EQ(data.dump(), json(event).dump());
+    EXPECT_EQ(data.dump(), json(event).dump());
 }
 
 TEST(RoomEvents, Redacted)
 {
-        json data = R"({
+    json data = R"({
 	  "unsigned": {
             "age": 146,
 	    "redacted_by": "$152135702813129HltcO:matrix.org"
@@ -59,20 +59,20 @@ TEST(RoomEvents, Redacted)
           "type": "m.room.message"
         })"_json;
 
-        RoomEvent<msg::Redacted> event = data;
+    RoomEvent<msg::Redacted> event = data;
 
-        EXPECT_EQ(event.type, EventType::RoomMessage);
-        EXPECT_EQ(event.event_id, "$143273582443PhrSn:localhost");
-        EXPECT_EQ(event.room_id, "!jEsUZKDJdhlrceRyVU:localhost");
-        EXPECT_EQ(event.sender, "@example:localhost");
-        EXPECT_EQ(event.origin_server_ts, 1432735824653L);
-        EXPECT_EQ(event.unsigned_data.age, 146);
-        EXPECT_EQ(event.unsigned_data.redacted_by, "$152135702813129HltcO:matrix.org");
+    EXPECT_EQ(event.type, EventType::RoomMessage);
+    EXPECT_EQ(event.event_id, "$143273582443PhrSn:localhost");
+    EXPECT_EQ(event.room_id, "!jEsUZKDJdhlrceRyVU:localhost");
+    EXPECT_EQ(event.sender, "@example:localhost");
+    EXPECT_EQ(event.origin_server_ts, 1432735824653L);
+    EXPECT_EQ(event.unsigned_data.age, 146);
+    EXPECT_EQ(event.unsigned_data.redacted_by, "$152135702813129HltcO:matrix.org");
 }
 
 TEST(RoomEvents, AudioMessage)
 {
-        json data = R"({
+    json data = R"({
 	  "unsigned": {
             "age": 146
 	  },
@@ -98,30 +98,30 @@ TEST(RoomEvents, AudioMessage)
           "type": "m.room.message"
         })"_json;
 
-        RoomEvent<msg::Audio> event = data;
+    RoomEvent<msg::Audio> event = data;
 
-        EXPECT_EQ(event.type, EventType::RoomMessage);
-        EXPECT_EQ(event.event_id, "$143273582443PhrSn:localhost");
-        EXPECT_EQ(event.room_id, "!jEsUZKDJdhlrceRyVU:localhost");
-        EXPECT_EQ(event.sender, "@example:localhost");
-        EXPECT_EQ(event.origin_server_ts, 1432735824653L);
-        EXPECT_EQ(event.unsigned_data.age, 146);
+    EXPECT_EQ(event.type, EventType::RoomMessage);
+    EXPECT_EQ(event.event_id, "$143273582443PhrSn:localhost");
+    EXPECT_EQ(event.room_id, "!jEsUZKDJdhlrceRyVU:localhost");
+    EXPECT_EQ(event.sender, "@example:localhost");
+    EXPECT_EQ(event.origin_server_ts, 1432735824653L);
+    EXPECT_EQ(event.unsigned_data.age, 146);
 
-        EXPECT_EQ(event.content.body, "Bee Gees - Stayin' Alive");
-        EXPECT_EQ(event.content.msgtype, "m.audio");
-        EXPECT_EQ(event.content.url, "mxc://localhost/ffed755USFFxlgbQYZGtryd");
-        EXPECT_EQ(event.content.info.mimetype, "audio/mpeg");
-        EXPECT_EQ(event.content.info.size, 1563685);
-        EXPECT_EQ(event.content.info.duration, 2140786);
-        EXPECT_EQ(event.content.relations.reply_to().value(),
-                  "$6GKhAfJOcwNd69lgSizdcTob8z2pWQgBOZPrnsWMA1E");
-        EXPECT_EQ(event.content.relations.relations.at(0).rel_type,
-                  mtx::common::RelationType::InReplyTo);
+    EXPECT_EQ(event.content.body, "Bee Gees - Stayin' Alive");
+    EXPECT_EQ(event.content.msgtype, "m.audio");
+    EXPECT_EQ(event.content.url, "mxc://localhost/ffed755USFFxlgbQYZGtryd");
+    EXPECT_EQ(event.content.info.mimetype, "audio/mpeg");
+    EXPECT_EQ(event.content.info.size, 1563685);
+    EXPECT_EQ(event.content.info.duration, 2140786);
+    EXPECT_EQ(event.content.relations.reply_to().value(),
+              "$6GKhAfJOcwNd69lgSizdcTob8z2pWQgBOZPrnsWMA1E");
+    EXPECT_EQ(event.content.relations.relations.at(0).rel_type,
+              mtx::common::RelationType::InReplyTo);
 }
 
 TEST(RoomEvents, EmoteMessage)
 {
-        json data = R"({
+    json data = R"({
           "origin_server_ts": 1509878682149,
           "sender": "@mujx:matrix.org",
           "event_id": "$15098786822025533uttji:matrix.org",
@@ -141,25 +141,25 @@ TEST(RoomEvents, EmoteMessage)
           "room_id": "!VaMCVKSVcyPtXbcMXh:matrix.org"
         })"_json;
 
-        RoomEvent<msg::Emote> event = data;
+    RoomEvent<msg::Emote> event = data;
 
-        EXPECT_EQ(event.type, EventType::RoomMessage);
-        EXPECT_EQ(event.event_id, "$15098786822025533uttji:matrix.org");
-        EXPECT_EQ(event.room_id, "!VaMCVKSVcyPtXbcMXh:matrix.org");
-        EXPECT_EQ(event.sender, "@mujx:matrix.org");
-        EXPECT_EQ(event.origin_server_ts, 1509878682149L);
-        EXPECT_EQ(event.unsigned_data.age, 626351821);
-        EXPECT_EQ(event.content.body, "tests");
-        EXPECT_EQ(event.content.msgtype, "m.emote");
-        EXPECT_EQ(event.content.relations.relations.at(0).event_id,
-                  "$6GKhAfJOcwNd69lgSizdcTob8z2pWQgBOZPrnsWMA1E");
-        EXPECT_EQ(event.content.relations.relations.at(0).rel_type,
-                  mtx::common::RelationType::InReplyTo);
+    EXPECT_EQ(event.type, EventType::RoomMessage);
+    EXPECT_EQ(event.event_id, "$15098786822025533uttji:matrix.org");
+    EXPECT_EQ(event.room_id, "!VaMCVKSVcyPtXbcMXh:matrix.org");
+    EXPECT_EQ(event.sender, "@mujx:matrix.org");
+    EXPECT_EQ(event.origin_server_ts, 1509878682149L);
+    EXPECT_EQ(event.unsigned_data.age, 626351821);
+    EXPECT_EQ(event.content.body, "tests");
+    EXPECT_EQ(event.content.msgtype, "m.emote");
+    EXPECT_EQ(event.content.relations.relations.at(0).event_id,
+              "$6GKhAfJOcwNd69lgSizdcTob8z2pWQgBOZPrnsWMA1E");
+    EXPECT_EQ(event.content.relations.relations.at(0).rel_type,
+              mtx::common::RelationType::InReplyTo);
 }
 
 TEST(RoomEvents, FileMessage)
 {
-        json data = R"({
+    json data = R"({
           "origin_server_ts": 1510485607737,
           "sender": "@nheko_test:matrix.org",
           "event_id": "$15104856072749611ERqhw:matrix.org",
@@ -192,39 +192,39 @@ TEST(RoomEvents, FileMessage)
           "room_id": "!lfoDRlNFWlvOnvkBwQ:matrix.org"
         })"_json;
 
-        RoomEvent<msg::File> event = data;
+    RoomEvent<msg::File> event = data;
 
-        EXPECT_EQ(event.type, EventType::RoomMessage);
-        EXPECT_EQ(event.event_id, "$15104856072749611ERqhw:matrix.org");
-        EXPECT_EQ(event.room_id, "!lfoDRlNFWlvOnvkBwQ:matrix.org");
-        EXPECT_EQ(event.sender, "@nheko_test:matrix.org");
-        EXPECT_EQ(event.origin_server_ts, 1510485607737L);
-        EXPECT_EQ(event.unsigned_data.age, 31);
-        EXPECT_EQ(event.unsigned_data.transaction_id, "m1510485607454.1");
+    EXPECT_EQ(event.type, EventType::RoomMessage);
+    EXPECT_EQ(event.event_id, "$15104856072749611ERqhw:matrix.org");
+    EXPECT_EQ(event.room_id, "!lfoDRlNFWlvOnvkBwQ:matrix.org");
+    EXPECT_EQ(event.sender, "@nheko_test:matrix.org");
+    EXPECT_EQ(event.origin_server_ts, 1510485607737L);
+    EXPECT_EQ(event.unsigned_data.age, 31);
+    EXPECT_EQ(event.unsigned_data.transaction_id, "m1510485607454.1");
 
-        EXPECT_EQ(event.content.body, "optimize.pdf");
-        EXPECT_EQ(event.content.msgtype, "m.file");
-        EXPECT_EQ(event.content.url, "mxc://matrix.org/XpxykZBESCSQnYkLKbbIKnVn");
-        EXPECT_EQ(event.content.info.mimetype, "application/pdf");
-        EXPECT_EQ(event.content.info.size, 40565);
-        EXPECT_EQ(event.content.relations.relations.at(0).event_id,
-                  "$6GKhAfJOcwNd69lgSizdcTob8z2pWQgBOZPrnsWMA1E");
-        EXPECT_EQ(event.content.relations.relations.at(0).rel_type,
-                  mtx::common::RelationType::InReplyTo);
+    EXPECT_EQ(event.content.body, "optimize.pdf");
+    EXPECT_EQ(event.content.msgtype, "m.file");
+    EXPECT_EQ(event.content.url, "mxc://matrix.org/XpxykZBESCSQnYkLKbbIKnVn");
+    EXPECT_EQ(event.content.info.mimetype, "application/pdf");
+    EXPECT_EQ(event.content.info.size, 40565);
+    EXPECT_EQ(event.content.relations.relations.at(0).event_id,
+              "$6GKhAfJOcwNd69lgSizdcTob8z2pWQgBOZPrnsWMA1E");
+    EXPECT_EQ(event.content.relations.relations.at(0).rel_type,
+              mtx::common::RelationType::InReplyTo);
 
-        json withThumb = event;
-        EXPECT_EQ(withThumb["content"]["info"].count("thumbnail_url"), 1);
-        EXPECT_EQ(withThumb["content"]["info"].count("thumbnail_info"), 1);
+    json withThumb = event;
+    EXPECT_EQ(withThumb["content"]["info"].count("thumbnail_url"), 1);
+    EXPECT_EQ(withThumb["content"]["info"].count("thumbnail_info"), 1);
 
-        event.content.info.thumbnail_url = "";
-        json withoutThumb                = event;
-        EXPECT_EQ(withoutThumb["content"]["info"].count("thumbnail_url"), 0);
-        EXPECT_EQ(withoutThumb["content"]["info"].count("thumbnail_info"), 0);
+    event.content.info.thumbnail_url = "";
+    json withoutThumb                = event;
+    EXPECT_EQ(withoutThumb["content"]["info"].count("thumbnail_url"), 0);
+    EXPECT_EQ(withoutThumb["content"]["info"].count("thumbnail_info"), 0);
 }
 
 TEST(RoomEvents, EncryptedImageMessage)
 {
-        json data                   = R"(
+    json data                   = R"(
 {
   "content": {
     "body": "something-important.jpg",
@@ -283,28 +283,28 @@ TEST(RoomEvents, EncryptedImageMessage)
       "age": 1234
   }
 })"_json;
-        RoomEvent<msg::Image> event = data;
+    RoomEvent<msg::Image> event = data;
 
-        EXPECT_EQ(event.type, EventType::RoomMessage);
-        EXPECT_EQ(event.event_id, "$143273582443PhrSn:example.org");
-        EXPECT_EQ(event.room_id, "!jEsUZKDJdhlrceRyVU:example.org");
-        EXPECT_EQ(event.sender, "@example:example.org");
-        EXPECT_EQ(event.origin_server_ts, 1432735824653L);
-        EXPECT_EQ(event.unsigned_data.age, 1234);
+    EXPECT_EQ(event.type, EventType::RoomMessage);
+    EXPECT_EQ(event.event_id, "$143273582443PhrSn:example.org");
+    EXPECT_EQ(event.room_id, "!jEsUZKDJdhlrceRyVU:example.org");
+    EXPECT_EQ(event.sender, "@example:example.org");
+    EXPECT_EQ(event.origin_server_ts, 1432735824653L);
+    EXPECT_EQ(event.unsigned_data.age, 1234);
 
-        EXPECT_EQ(event.content.body, "something-important.jpg");
-        EXPECT_EQ(event.content.msgtype, "m.image");
-        EXPECT_EQ(event.content.url, "");
-        EXPECT_EQ(event.content.info.mimetype, "image/jpeg");
-        EXPECT_EQ(event.content.info.size, 422018);
-        EXPECT_EQ(event.content.file.value().url, "mxc://example.org/FHyPlCeYUSFFxlgbQYZmoEoe");
-        EXPECT_EQ(event.content.info.thumbnail_file.value().url,
-                  "mxc://example.org/pmVJxyxGlmxHposwVSlOaEOv");
+    EXPECT_EQ(event.content.body, "something-important.jpg");
+    EXPECT_EQ(event.content.msgtype, "m.image");
+    EXPECT_EQ(event.content.url, "");
+    EXPECT_EQ(event.content.info.mimetype, "image/jpeg");
+    EXPECT_EQ(event.content.info.size, 422018);
+    EXPECT_EQ(event.content.file.value().url, "mxc://example.org/FHyPlCeYUSFFxlgbQYZmoEoe");
+    EXPECT_EQ(event.content.info.thumbnail_file.value().url,
+              "mxc://example.org/pmVJxyxGlmxHposwVSlOaEOv");
 }
 
 TEST(RoomEvents, ImageMessage)
 {
-        json data = R"({
+    json data = R"({
           "origin_server_ts": 1510504294993,
           "sender": "@max:kamax.io",
           "event_id": "$15105042942524OGmZm:kamax.io",
@@ -338,40 +338,40 @@ TEST(RoomEvents, ImageMessage)
           "room_id": "!cURbafjkfsMDVwdRDQ:matrix.org"
         })"_json;
 
-        RoomEvent<msg::Image> event = data;
+    RoomEvent<msg::Image> event = data;
 
-        EXPECT_EQ(event.type, EventType::RoomMessage);
-        EXPECT_EQ(event.event_id, "$15105042942524OGmZm:kamax.io");
-        EXPECT_EQ(event.room_id, "!cURbafjkfsMDVwdRDQ:matrix.org");
-        EXPECT_EQ(event.sender, "@max:kamax.io");
-        EXPECT_EQ(event.origin_server_ts, 1510504294993L);
-        EXPECT_EQ(event.unsigned_data.age, 738977);
+    EXPECT_EQ(event.type, EventType::RoomMessage);
+    EXPECT_EQ(event.event_id, "$15105042942524OGmZm:kamax.io");
+    EXPECT_EQ(event.room_id, "!cURbafjkfsMDVwdRDQ:matrix.org");
+    EXPECT_EQ(event.sender, "@max:kamax.io");
+    EXPECT_EQ(event.origin_server_ts, 1510504294993L);
+    EXPECT_EQ(event.unsigned_data.age, 738977);
 
-        EXPECT_EQ(event.content.body, "image.png");
-        EXPECT_EQ(event.content.info.mimetype, "image/png");
-        EXPECT_EQ(event.content.info.h, 302);
-        EXPECT_EQ(event.content.info.w, 474);
-        EXPECT_EQ(event.content.info.size, 32573);
-        EXPECT_EQ(event.content.info.thumbnail_url, "mxc://kamax.io/IlTRDmpGMPkiwlyYUpHXSqjH");
-        EXPECT_EQ(event.content.info.thumbnail_info.mimetype, "image/png");
-        EXPECT_EQ(event.content.info.thumbnail_info.w, 474);
-        EXPECT_EQ(event.content.info.thumbnail_info.h, 302);
-        EXPECT_EQ(event.content.info.thumbnail_info.size, 33504);
-        EXPECT_EQ(event.content.relations.relations.at(0).event_id,
-                  "$6GKhAfJOcwNd69lgSizdcTob8z2pWQgBOZPrnsWMA1E");
-        EXPECT_EQ(event.content.relations.relations.at(0).rel_type,
-                  mtx::common::RelationType::InReplyTo);
+    EXPECT_EQ(event.content.body, "image.png");
+    EXPECT_EQ(event.content.info.mimetype, "image/png");
+    EXPECT_EQ(event.content.info.h, 302);
+    EXPECT_EQ(event.content.info.w, 474);
+    EXPECT_EQ(event.content.info.size, 32573);
+    EXPECT_EQ(event.content.info.thumbnail_url, "mxc://kamax.io/IlTRDmpGMPkiwlyYUpHXSqjH");
+    EXPECT_EQ(event.content.info.thumbnail_info.mimetype, "image/png");
+    EXPECT_EQ(event.content.info.thumbnail_info.w, 474);
+    EXPECT_EQ(event.content.info.thumbnail_info.h, 302);
+    EXPECT_EQ(event.content.info.thumbnail_info.size, 33504);
+    EXPECT_EQ(event.content.relations.relations.at(0).event_id,
+              "$6GKhAfJOcwNd69lgSizdcTob8z2pWQgBOZPrnsWMA1E");
+    EXPECT_EQ(event.content.relations.relations.at(0).rel_type,
+              mtx::common::RelationType::InReplyTo);
 
-        json withThumb = event;
-        EXPECT_EQ(withThumb["content"]["info"].count("thumbnail_url"), 1);
-        EXPECT_EQ(withThumb["content"]["info"].count("thumbnail_info"), 1);
+    json withThumb = event;
+    EXPECT_EQ(withThumb["content"]["info"].count("thumbnail_url"), 1);
+    EXPECT_EQ(withThumb["content"]["info"].count("thumbnail_info"), 1);
 
-        event.content.info.thumbnail_url = "";
-        json withoutThumb                = event;
-        EXPECT_EQ(withoutThumb["content"]["info"].count("thumbnail_url"), 0);
-        EXPECT_EQ(withoutThumb["content"]["info"].count("thumbnail_info"), 0);
+    event.content.info.thumbnail_url = "";
+    json withoutThumb                = event;
+    EXPECT_EQ(withoutThumb["content"]["info"].count("thumbnail_url"), 0);
+    EXPECT_EQ(withoutThumb["content"]["info"].count("thumbnail_info"), 0);
 
-        data = R"({
+    data = R"({
           "origin_server_ts": 1510504294993,
           "sender": "@max:kamax.io",
           "event_id": "$15105042942524OGmZm:kamax.io",
@@ -405,36 +405,36 @@ TEST(RoomEvents, ImageMessage)
           "room_id": "!cURbafjkfsMDVwdRDQ:matrix.org"
         })"_json;
 
-        event = data;
+    event = data;
 
-        EXPECT_EQ(event.type, EventType::RoomMessage);
-        EXPECT_EQ(event.event_id, "$15105042942524OGmZm:kamax.io");
-        EXPECT_EQ(event.room_id, "!cURbafjkfsMDVwdRDQ:matrix.org");
-        EXPECT_EQ(event.sender, "@max:kamax.io");
-        EXPECT_EQ(event.origin_server_ts, 1510504294993L);
-        EXPECT_EQ(event.unsigned_data.age, 738977);
+    EXPECT_EQ(event.type, EventType::RoomMessage);
+    EXPECT_EQ(event.event_id, "$15105042942524OGmZm:kamax.io");
+    EXPECT_EQ(event.room_id, "!cURbafjkfsMDVwdRDQ:matrix.org");
+    EXPECT_EQ(event.sender, "@max:kamax.io");
+    EXPECT_EQ(event.origin_server_ts, 1510504294993L);
+    EXPECT_EQ(event.unsigned_data.age, 738977);
 
-        EXPECT_EQ(event.content.body, "image.png");
-        EXPECT_EQ(event.content.info.mimetype, "image/png");
-        EXPECT_EQ(event.content.info.h, 0);
-        EXPECT_EQ(event.content.info.w, 0);
-        EXPECT_EQ(event.content.info.size, 0);
-        EXPECT_EQ(event.content.info.thumbnail_url, "mxc://kamax.io/IlTRDmpGMPkiwlyYUpHXSqjH");
-        EXPECT_EQ(event.content.info.thumbnail_info.mimetype, "image/png");
-        EXPECT_EQ(event.content.info.thumbnail_info.w, 0);
-        EXPECT_EQ(event.content.info.thumbnail_info.h, 0);
-        EXPECT_EQ(event.content.info.thumbnail_info.size, 0);
-        EXPECT_EQ(event.content.relations.relations.at(0).event_id,
-                  "$6GKhAfJOcwNd69lgSizdcTob8z2pWQgBOZPrnsWMA1E");
-        EXPECT_EQ(event.content.relations.relations.at(0).rel_type,
-                  mtx::common::RelationType::InReplyTo);
+    EXPECT_EQ(event.content.body, "image.png");
+    EXPECT_EQ(event.content.info.mimetype, "image/png");
+    EXPECT_EQ(event.content.info.h, 0);
+    EXPECT_EQ(event.content.info.w, 0);
+    EXPECT_EQ(event.content.info.size, 0);
+    EXPECT_EQ(event.content.info.thumbnail_url, "mxc://kamax.io/IlTRDmpGMPkiwlyYUpHXSqjH");
+    EXPECT_EQ(event.content.info.thumbnail_info.mimetype, "image/png");
+    EXPECT_EQ(event.content.info.thumbnail_info.w, 0);
+    EXPECT_EQ(event.content.info.thumbnail_info.h, 0);
+    EXPECT_EQ(event.content.info.thumbnail_info.size, 0);
+    EXPECT_EQ(event.content.relations.relations.at(0).event_id,
+              "$6GKhAfJOcwNd69lgSizdcTob8z2pWQgBOZPrnsWMA1E");
+    EXPECT_EQ(event.content.relations.relations.at(0).rel_type,
+              mtx::common::RelationType::InReplyTo);
 }
 
 TEST(RoomEvents, LocationMessage) {}
 
 TEST(RoomEvents, NoticeMessage)
 {
-        json data = R"({
+    json data = R"({
           "origin_server_ts": 1510435865515,
           "sender": "@_neb_github:matrix.org",
           "event_id": "$15104358652239178iCnZy:matrix.org",
@@ -454,26 +454,26 @@ TEST(RoomEvents, NoticeMessage)
           "room_id": "!BPvgRcBVHzyFSlYkrg:matrix.org"
         })"_json;
 
-        RoomEvent<msg::Notice> event = data;
+    RoomEvent<msg::Notice> event = data;
 
-        EXPECT_EQ(event.type, EventType::RoomMessage);
-        EXPECT_EQ(event.event_id, "$15104358652239178iCnZy:matrix.org");
-        EXPECT_EQ(event.room_id, "!BPvgRcBVHzyFSlYkrg:matrix.org");
-        EXPECT_EQ(event.sender, "@_neb_github:matrix.org");
-        EXPECT_EQ(event.origin_server_ts, 1510435865515L);
-        EXPECT_EQ(event.unsigned_data.age, 69168455);
-        EXPECT_EQ(event.content.body,
-                  "https://github.com/postmarketOS/pmbootstrap/issues/900 : Package nheko");
-        EXPECT_EQ(event.content.msgtype, "m.notice");
-        EXPECT_EQ(event.content.relations.relations.at(0).event_id,
-                  "$6GKhAfJOcwNd69lgSizdcTob8z2pWQgBOZPrnsWMA1E");
-        EXPECT_EQ(event.content.relations.relations.at(0).rel_type,
-                  mtx::common::RelationType::InReplyTo);
+    EXPECT_EQ(event.type, EventType::RoomMessage);
+    EXPECT_EQ(event.event_id, "$15104358652239178iCnZy:matrix.org");
+    EXPECT_EQ(event.room_id, "!BPvgRcBVHzyFSlYkrg:matrix.org");
+    EXPECT_EQ(event.sender, "@_neb_github:matrix.org");
+    EXPECT_EQ(event.origin_server_ts, 1510435865515L);
+    EXPECT_EQ(event.unsigned_data.age, 69168455);
+    EXPECT_EQ(event.content.body,
+              "https://github.com/postmarketOS/pmbootstrap/issues/900 : Package nheko");
+    EXPECT_EQ(event.content.msgtype, "m.notice");
+    EXPECT_EQ(event.content.relations.relations.at(0).event_id,
+              "$6GKhAfJOcwNd69lgSizdcTob8z2pWQgBOZPrnsWMA1E");
+    EXPECT_EQ(event.content.relations.relations.at(0).rel_type,
+              mtx::common::RelationType::InReplyTo);
 }
 
 TEST(RoomEvents, TextMessage)
 {
-        json data = R"({
+    json data = R"({
           "origin_server_ts": 1510489356530,
           "sender": "@nheko_test:matrix.org",
           "event_id": "$15104893562785758wEgEU:matrix.org",
@@ -494,29 +494,29 @@ TEST(RoomEvents, TextMessage)
           "room_id": "!lfoDRlNFWlvOnvkBwQ:matrix.org"
          })"_json;
 
-        RoomEvent<msg::Text> event = data;
+    RoomEvent<msg::Text> event = data;
 
-        EXPECT_EQ(event.type, EventType::RoomMessage);
-        EXPECT_EQ(event.event_id, "$15104893562785758wEgEU:matrix.org");
-        EXPECT_EQ(event.room_id, "!lfoDRlNFWlvOnvkBwQ:matrix.org");
-        EXPECT_EQ(event.sender, "@nheko_test:matrix.org");
-        EXPECT_EQ(event.origin_server_ts, 1510489356530L);
-        EXPECT_EQ(event.unsigned_data.age, 2225);
-        EXPECT_EQ(event.unsigned_data.transaction_id, "m1510489356267.2");
+    EXPECT_EQ(event.type, EventType::RoomMessage);
+    EXPECT_EQ(event.event_id, "$15104893562785758wEgEU:matrix.org");
+    EXPECT_EQ(event.room_id, "!lfoDRlNFWlvOnvkBwQ:matrix.org");
+    EXPECT_EQ(event.sender, "@nheko_test:matrix.org");
+    EXPECT_EQ(event.origin_server_ts, 1510489356530L);
+    EXPECT_EQ(event.unsigned_data.age, 2225);
+    EXPECT_EQ(event.unsigned_data.transaction_id, "m1510489356267.2");
 
-        EXPECT_EQ(event.content.body, "hey there");
-        EXPECT_EQ(event.content.msgtype, "m.text");
-        EXPECT_EQ(event.content.relations.relations.at(0).event_id,
-                  "$6GKhAfJOcwNd69lgSizdcTob8z2pWQgBOZPrnsWMA1E");
-        EXPECT_EQ(event.content.relations.relations.at(0).rel_type,
-                  mtx::common::RelationType::InReplyTo);
+    EXPECT_EQ(event.content.body, "hey there");
+    EXPECT_EQ(event.content.msgtype, "m.text");
+    EXPECT_EQ(event.content.relations.relations.at(0).event_id,
+              "$6GKhAfJOcwNd69lgSizdcTob8z2pWQgBOZPrnsWMA1E");
+    EXPECT_EQ(event.content.relations.relations.at(0).rel_type,
+              mtx::common::RelationType::InReplyTo);
 
-        EXPECT_EQ(data.dump(), json(event).dump());
+    EXPECT_EQ(data.dump(), json(event).dump());
 }
 
 TEST(RoomEvents, VideoMessage)
 {
-        json data = R"({
+    json data = R"({
 	  "unsigned": {
             "age": 146
 	  },
@@ -551,35 +551,35 @@ TEST(RoomEvents, VideoMessage)
           "type": "m.room.message"
         })"_json;
 
-        RoomEvent<msg::Video> event = data;
+    RoomEvent<msg::Video> event = data;
 
-        EXPECT_EQ(event.type, EventType::RoomMessage);
-        EXPECT_EQ(event.event_id, "$143273582443PhrSn:localhost");
-        EXPECT_EQ(event.room_id, "!jEsUZKDJdhlrceRyVU:localhost");
-        EXPECT_EQ(event.sender, "@example:localhost");
-        EXPECT_EQ(event.origin_server_ts, 1432735824653L);
-        EXPECT_EQ(event.unsigned_data.age, 146);
+    EXPECT_EQ(event.type, EventType::RoomMessage);
+    EXPECT_EQ(event.event_id, "$143273582443PhrSn:localhost");
+    EXPECT_EQ(event.room_id, "!jEsUZKDJdhlrceRyVU:localhost");
+    EXPECT_EQ(event.sender, "@example:localhost");
+    EXPECT_EQ(event.origin_server_ts, 1432735824653L);
+    EXPECT_EQ(event.unsigned_data.age, 146);
 
-        EXPECT_EQ(event.content.body, "Gangnam Style");
-        EXPECT_EQ(event.content.msgtype, "m.video");
-        EXPECT_EQ(event.content.url, "mxc://localhost/ffed755USFFxlgbQYZGtryd");
-        EXPECT_EQ(event.content.info.mimetype, "video/mp4");
-        EXPECT_EQ(event.content.info.w, 480);
-        EXPECT_EQ(event.content.info.h, 320);
-        EXPECT_EQ(event.content.info.size, 1563685);
-        EXPECT_EQ(event.content.info.duration, 2140786);
-        EXPECT_EQ(event.content.info.thumbnail_info.h, 300);
-        EXPECT_EQ(event.content.info.thumbnail_info.w, 310);
-        EXPECT_EQ(event.content.info.thumbnail_info.size, 46144);
-        EXPECT_EQ(event.content.relations.relations.at(0).event_id,
-                  "$6GKhAfJOcwNd69lgSizdcTob8z2pWQgBOZPrnsWMA1E");
-        EXPECT_EQ(event.content.relations.relations.at(0).rel_type,
-                  mtx::common::RelationType::InReplyTo);
+    EXPECT_EQ(event.content.body, "Gangnam Style");
+    EXPECT_EQ(event.content.msgtype, "m.video");
+    EXPECT_EQ(event.content.url, "mxc://localhost/ffed755USFFxlgbQYZGtryd");
+    EXPECT_EQ(event.content.info.mimetype, "video/mp4");
+    EXPECT_EQ(event.content.info.w, 480);
+    EXPECT_EQ(event.content.info.h, 320);
+    EXPECT_EQ(event.content.info.size, 1563685);
+    EXPECT_EQ(event.content.info.duration, 2140786);
+    EXPECT_EQ(event.content.info.thumbnail_info.h, 300);
+    EXPECT_EQ(event.content.info.thumbnail_info.w, 310);
+    EXPECT_EQ(event.content.info.thumbnail_info.size, 46144);
+    EXPECT_EQ(event.content.relations.relations.at(0).event_id,
+              "$6GKhAfJOcwNd69lgSizdcTob8z2pWQgBOZPrnsWMA1E");
+    EXPECT_EQ(event.content.relations.relations.at(0).rel_type,
+              mtx::common::RelationType::InReplyTo);
 }
 
 TEST(RoomEvents, Sticker)
 {
-        json data = R"({
+    json data = R"({
           "age": 242352,
           "content": {
             "body": "Landing",
@@ -610,21 +610,21 @@ TEST(RoomEvents, Sticker)
           "type": "m.sticker"
 	})"_json;
 
-        Sticker event = data;
+    Sticker event = data;
 
-        EXPECT_EQ(event.type, EventType::Sticker);
-        EXPECT_EQ(event.event_id, "$WLGTSEFSEF:localhost");
-        EXPECT_EQ(event.content.body, "Landing");
-        EXPECT_EQ(event.content.url, "mxc://matrix.org/sHhqkFCvSkFwtmvtETOtKnLP");
-        EXPECT_EQ(event.content.info.w, 140);
-        EXPECT_EQ(event.content.info.h, 200);
-        EXPECT_EQ(event.content.info.size, 73602);
-        EXPECT_EQ(event.content.relations.relations.at(0).event_id,
-                  "$6GKhAfJOcwNd69lgSizdcTob8z2pWQgBOZPrnsWMA1E");
-        EXPECT_EQ(event.content.relations.relations.at(0).rel_type,
-                  mtx::common::RelationType::InReplyTo);
+    EXPECT_EQ(event.type, EventType::Sticker);
+    EXPECT_EQ(event.event_id, "$WLGTSEFSEF:localhost");
+    EXPECT_EQ(event.content.body, "Landing");
+    EXPECT_EQ(event.content.url, "mxc://matrix.org/sHhqkFCvSkFwtmvtETOtKnLP");
+    EXPECT_EQ(event.content.info.w, 140);
+    EXPECT_EQ(event.content.info.h, 200);
+    EXPECT_EQ(event.content.info.size, 73602);
+    EXPECT_EQ(event.content.relations.relations.at(0).event_id,
+              "$6GKhAfJOcwNd69lgSizdcTob8z2pWQgBOZPrnsWMA1E");
+    EXPECT_EQ(event.content.relations.relations.at(0).rel_type,
+              mtx::common::RelationType::InReplyTo);
 
-        json data2     = R"({
+    json data2     = R"({
 	  "type": "m.sticker",
 	  "sender": "masked",
 	  "content": {
@@ -644,18 +644,18 @@ TEST(RoomEvents, Sticker)
 	  "event_id": "masked",
 	  "room_id": "!masked:devture.com"
 	})"_json;
-        Sticker event2 = data2;
-        EXPECT_EQ(event2.type, EventType::Sticker);
-        EXPECT_EQ(event2.content.body, "");
-        EXPECT_EQ(event2.content.url, "mxc://devture.com/OCPxxxxxxxxxxxxxxxx");
-        EXPECT_EQ(event2.content.info.w, 240);
-        EXPECT_EQ(event2.content.info.h, 240);
-        EXPECT_EQ(event2.content.info.size, 16901);
+    Sticker event2 = data2;
+    EXPECT_EQ(event2.type, EventType::Sticker);
+    EXPECT_EQ(event2.content.body, "");
+    EXPECT_EQ(event2.content.url, "mxc://devture.com/OCPxxxxxxxxxxxxxxxx");
+    EXPECT_EQ(event2.content.info.w, 240);
+    EXPECT_EQ(event2.content.info.h, 240);
+    EXPECT_EQ(event2.content.info.size, 16901);
 }
 
 TEST(FormattedMessages, Deserialization)
 {
-        json notice_data = R"({
+    json notice_data = R"({
           "origin_server_ts": 1510435865515,
           "sender": "@_neb_github:matrix.org",
           "event_id": "$15104358652239178iCnZy:matrix.org",
@@ -669,14 +669,14 @@ TEST(FormattedMessages, Deserialization)
           "room_id": "!BPvgRcBVHzyFSlYkrg:matrix.org"
         })"_json;
 
-        RoomEvent<msg::Notice> notice = notice_data;
+    RoomEvent<msg::Notice> notice = notice_data;
 
-        EXPECT_EQ(notice.type, EventType::RoomMessage);
-        EXPECT_EQ(notice.content.msgtype, "m.notice");
-        EXPECT_EQ(notice.content.format, "org.matrix.custom.html");
-        EXPECT_EQ(notice.content.formatted_body, "<h1> Hello World! </h1>");
+    EXPECT_EQ(notice.type, EventType::RoomMessage);
+    EXPECT_EQ(notice.content.msgtype, "m.notice");
+    EXPECT_EQ(notice.content.format, "org.matrix.custom.html");
+    EXPECT_EQ(notice.content.formatted_body, "<h1> Hello World! </h1>");
 
-        json text_data = R"({
+    json text_data = R"({
           "origin_server_ts": 1510489356530,
           "sender": "@nheko_test:matrix.org",
           "event_id": "$15104893562785758wEgEU:matrix.org",
@@ -690,13 +690,13 @@ TEST(FormattedMessages, Deserialization)
           "room_id": "!lfoDRlNFWlvOnvkBwQ:matrix.org"
          })"_json;
 
-        RoomEvent<msg::Text> text = text_data;
+    RoomEvent<msg::Text> text = text_data;
 
-        EXPECT_EQ(text.content.msgtype, "m.text");
-        EXPECT_EQ(text.content.format, "org.matrix.custom.html");
-        EXPECT_EQ(text.content.formatted_body, "<h1> Hello World! </h1>");
+    EXPECT_EQ(text.content.msgtype, "m.text");
+    EXPECT_EQ(text.content.format, "org.matrix.custom.html");
+    EXPECT_EQ(text.content.formatted_body, "<h1> Hello World! </h1>");
 
-        json emote_data = R"({
+    json emote_data = R"({
           "origin_server_ts": 1509878682149,
           "sender": "@mujx:matrix.org",
           "event_id": "$15098786822025533uttji:matrix.org",
@@ -710,16 +710,16 @@ TEST(FormattedMessages, Deserialization)
           "room_id": "!VaMCVKSVcyPtXbcMXh:matrix.org"
         })"_json;
 
-        RoomEvent<msg::Emote> emote = emote_data;
+    RoomEvent<msg::Emote> emote = emote_data;
 
-        EXPECT_EQ(emote.content.msgtype, "m.emote");
-        EXPECT_EQ(emote.content.format, "org.matrix.custom.html");
-        EXPECT_EQ(emote.content.formatted_body, "<h1> Hello World! </h1>");
+    EXPECT_EQ(emote.content.msgtype, "m.emote");
+    EXPECT_EQ(emote.content.format, "org.matrix.custom.html");
+    EXPECT_EQ(emote.content.formatted_body, "<h1> Hello World! </h1>");
 }
 
 TEST(RoomEvents, Encrypted)
 {
-        json data = R"({
+    json data = R"({
 	    "content": {
 		"algorithm": "m.megolm.v1.aes-sha2",
 		"ciphertext": "AwgAEnACgAkLmt6qF84IK++J7UDH2Za1YVchHyprqTqsg...",
@@ -742,36 +742,36 @@ TEST(RoomEvents, Encrypted)
 	    }
 	})"_json;
 
-        RoomEvent<msg::Encrypted> event = data;
+    RoomEvent<msg::Encrypted> event = data;
 
-        std::cout << "*****" << std::endl;
-        std::cout << data.dump(2) << std::endl;
-        std::cout << "*****" << std::endl;
-        std::cout << json(event).dump(2) << std::endl;
-        std::cout << "*****" << std::endl;
+    std::cout << "*****" << std::endl;
+    std::cout << data.dump(2) << std::endl;
+    std::cout << "*****" << std::endl;
+    std::cout << json(event).dump(2) << std::endl;
+    std::cout << "*****" << std::endl;
 
-        EXPECT_EQ(event.type, EventType::RoomEncrypted);
-        EXPECT_EQ(event.event_id, "$143273582443PhrSn:example.org");
-        EXPECT_EQ(event.room_id, "!jEsUZKDJdhlrceRyVU:example.org");
-        EXPECT_EQ(event.sender, "@example:example.org");
-        EXPECT_EQ(event.origin_server_ts, 1432735824653L);
-        EXPECT_EQ(event.unsigned_data.age, 1234);
-        EXPECT_EQ(event.content.algorithm, "m.megolm.v1.aes-sha2");
-        EXPECT_EQ(event.content.ciphertext, "AwgAEnACgAkLmt6qF84IK++J7UDH2Za1YVchHyprqTqsg...");
-        EXPECT_EQ(event.content.device_id, "RJYKSTBOIE");
-        EXPECT_EQ(event.content.sender_key, "IlRMeOPX2e0MurIyfWEucYBRVOEEUMrOHqn/8mLqMjA");
-        EXPECT_EQ(event.content.session_id, "X3lUlvLELLYxeTx4yOVu6UDpasGEVO0Jbu+QFnm0cKQ");
-        EXPECT_EQ(event.content.relations.relations.at(0).event_id,
-                  "$6GKhAfJOcwNd69lgSizdcTob8z2pWQgBOZPrnsWMA1E");
-        EXPECT_EQ(event.content.relations.relations.at(0).rel_type,
-                  mtx::common::RelationType::InReplyTo);
+    EXPECT_EQ(event.type, EventType::RoomEncrypted);
+    EXPECT_EQ(event.event_id, "$143273582443PhrSn:example.org");
+    EXPECT_EQ(event.room_id, "!jEsUZKDJdhlrceRyVU:example.org");
+    EXPECT_EQ(event.sender, "@example:example.org");
+    EXPECT_EQ(event.origin_server_ts, 1432735824653L);
+    EXPECT_EQ(event.unsigned_data.age, 1234);
+    EXPECT_EQ(event.content.algorithm, "m.megolm.v1.aes-sha2");
+    EXPECT_EQ(event.content.ciphertext, "AwgAEnACgAkLmt6qF84IK++J7UDH2Za1YVchHyprqTqsg...");
+    EXPECT_EQ(event.content.device_id, "RJYKSTBOIE");
+    EXPECT_EQ(event.content.sender_key, "IlRMeOPX2e0MurIyfWEucYBRVOEEUMrOHqn/8mLqMjA");
+    EXPECT_EQ(event.content.session_id, "X3lUlvLELLYxeTx4yOVu6UDpasGEVO0Jbu+QFnm0cKQ");
+    EXPECT_EQ(event.content.relations.relations.at(0).event_id,
+              "$6GKhAfJOcwNd69lgSizdcTob8z2pWQgBOZPrnsWMA1E");
+    EXPECT_EQ(event.content.relations.relations.at(0).rel_type,
+              mtx::common::RelationType::InReplyTo);
 
-        EXPECT_EQ(data, json(event));
+    EXPECT_EQ(data, json(event));
 }
 
 TEST(RoomEvents, CallInvite)
 {
-        nlohmann::json data = R"({
+    nlohmann::json data = R"({
           "content": {
             "call_id": "c1591052749788",
             "offer": {
@@ -791,25 +791,25 @@ TEST(RoomEvents, CallInvite)
           }
         })"_json;
 
-        RoomEvent<msg::CallInvite> event = data;
+    RoomEvent<msg::CallInvite> event = data;
 
-        EXPECT_EQ(event.event_id, "$143273582443PhrSn:example.org");
-        EXPECT_EQ(event.origin_server_ts, 1432735824653L);
-        EXPECT_EQ(event.room_id, "!jEsUZKDJdhlrceRyVU:example.org");
-        EXPECT_EQ(event.sender, "@example:example.org");
-        EXPECT_EQ(event.type, EventType::CallInvite);
-        EXPECT_EQ(event.unsigned_data.age, 1234);
-        EXPECT_EQ(event.content.call_id, "c1591052749788");
-        EXPECT_EQ(event.content.sdp, "v=0\r\no=- 6584580628695956864 2 IN IP4 127.0.0.1[...]");
-        EXPECT_EQ(event.content.version, "0");
-        EXPECT_EQ(event.content.lifetime, 120000);
+    EXPECT_EQ(event.event_id, "$143273582443PhrSn:example.org");
+    EXPECT_EQ(event.origin_server_ts, 1432735824653L);
+    EXPECT_EQ(event.room_id, "!jEsUZKDJdhlrceRyVU:example.org");
+    EXPECT_EQ(event.sender, "@example:example.org");
+    EXPECT_EQ(event.type, EventType::CallInvite);
+    EXPECT_EQ(event.unsigned_data.age, 1234);
+    EXPECT_EQ(event.content.call_id, "c1591052749788");
+    EXPECT_EQ(event.content.sdp, "v=0\r\no=- 6584580628695956864 2 IN IP4 127.0.0.1[...]");
+    EXPECT_EQ(event.content.version, "0");
+    EXPECT_EQ(event.content.lifetime, 120000);
 
-        EXPECT_EQ(data, json(event));
+    EXPECT_EQ(data, json(event));
 }
 
 TEST(RoomEvents, CallCandidates)
 {
-        nlohmann::json data = R"({
+    nlohmann::json data = R"({
           "content": {
             "call_id": "c1591052749788",
             "candidates": [
@@ -831,27 +831,27 @@ TEST(RoomEvents, CallCandidates)
           }
         })"_json;
 
-        RoomEvent<msg::CallCandidates> event = data;
+    RoomEvent<msg::CallCandidates> event = data;
 
-        EXPECT_EQ(event.event_id, "$143273582443PhrSn:example.org");
-        EXPECT_EQ(event.origin_server_ts, 1432735824653L);
-        EXPECT_EQ(event.room_id, "!jEsUZKDJdhlrceRyVU:example.org");
-        EXPECT_EQ(event.sender, "@example:example.org");
-        EXPECT_EQ(event.type, EventType::CallCandidates);
-        EXPECT_EQ(event.unsigned_data.age, 1234);
-        EXPECT_EQ(event.content.call_id, "c1591052749788");
-        EXPECT_EQ(event.content.candidates[0].sdpMid, "audio");
-        EXPECT_EQ(event.content.candidates[0].sdpMLineIndex, 0);
-        EXPECT_EQ(event.content.candidates[0].candidate,
-                  "candidate:863018703 1 udp 2122260223 10.9.64.156 43670 typ host generation 0");
-        EXPECT_EQ(event.content.version, "0");
+    EXPECT_EQ(event.event_id, "$143273582443PhrSn:example.org");
+    EXPECT_EQ(event.origin_server_ts, 1432735824653L);
+    EXPECT_EQ(event.room_id, "!jEsUZKDJdhlrceRyVU:example.org");
+    EXPECT_EQ(event.sender, "@example:example.org");
+    EXPECT_EQ(event.type, EventType::CallCandidates);
+    EXPECT_EQ(event.unsigned_data.age, 1234);
+    EXPECT_EQ(event.content.call_id, "c1591052749788");
+    EXPECT_EQ(event.content.candidates[0].sdpMid, "audio");
+    EXPECT_EQ(event.content.candidates[0].sdpMLineIndex, 0);
+    EXPECT_EQ(event.content.candidates[0].candidate,
+              "candidate:863018703 1 udp 2122260223 10.9.64.156 43670 typ host generation 0");
+    EXPECT_EQ(event.content.version, "0");
 
-        EXPECT_EQ(data, json(event));
+    EXPECT_EQ(data, json(event));
 }
 
 TEST(RoomEvents, CallAnswer)
 {
-        nlohmann::json data = R"({
+    nlohmann::json data = R"({
           "content": {
             "call_id": "c1591052749788",
             "answer": {
@@ -870,24 +870,24 @@ TEST(RoomEvents, CallAnswer)
           }
         })"_json;
 
-        RoomEvent<msg::CallAnswer> event = data;
+    RoomEvent<msg::CallAnswer> event = data;
 
-        EXPECT_EQ(event.event_id, "$143273582443PhrSn:example.org");
-        EXPECT_EQ(event.origin_server_ts, 1432735824653L);
-        EXPECT_EQ(event.room_id, "!jEsUZKDJdhlrceRyVU:example.org");
-        EXPECT_EQ(event.sender, "@example:example.org");
-        EXPECT_EQ(event.type, EventType::CallAnswer);
-        EXPECT_EQ(event.unsigned_data.age, 1234);
-        EXPECT_EQ(event.content.call_id, "c1591052749788");
-        EXPECT_EQ(event.content.sdp, "v=0\r\no=- 6584580628695956864 2 IN IP4 127.0.0.1[...]");
-        EXPECT_EQ(event.content.version, "0");
+    EXPECT_EQ(event.event_id, "$143273582443PhrSn:example.org");
+    EXPECT_EQ(event.origin_server_ts, 1432735824653L);
+    EXPECT_EQ(event.room_id, "!jEsUZKDJdhlrceRyVU:example.org");
+    EXPECT_EQ(event.sender, "@example:example.org");
+    EXPECT_EQ(event.type, EventType::CallAnswer);
+    EXPECT_EQ(event.unsigned_data.age, 1234);
+    EXPECT_EQ(event.content.call_id, "c1591052749788");
+    EXPECT_EQ(event.content.sdp, "v=0\r\no=- 6584580628695956864 2 IN IP4 127.0.0.1[...]");
+    EXPECT_EQ(event.content.version, "0");
 
-        EXPECT_EQ(data, json(event));
+    EXPECT_EQ(data, json(event));
 }
 
 TEST(RoomEvents, CallHangUp)
 {
-        nlohmann::json data = R"({
+    nlohmann::json data = R"({
           "content": {
             "call_id": "c1591052749788",
             "version": 0,
@@ -903,17 +903,17 @@ TEST(RoomEvents, CallHangUp)
           }
         })"_json;
 
-        RoomEvent<msg::CallHangUp> event = data;
+    RoomEvent<msg::CallHangUp> event = data;
 
-        EXPECT_EQ(event.event_id, "$143273582443PhrSn:example.org");
-        EXPECT_EQ(event.origin_server_ts, 1432735824653L);
-        EXPECT_EQ(event.room_id, "!jEsUZKDJdhlrceRyVU:example.org");
-        EXPECT_EQ(event.sender, "@example:example.org");
-        EXPECT_EQ(event.type, EventType::CallHangUp);
-        EXPECT_EQ(event.unsigned_data.age, 1234);
-        EXPECT_EQ(event.content.call_id, "c1591052749788");
-        EXPECT_EQ(event.content.version, "0");
-        EXPECT_EQ(event.content.reason, msg::CallHangUp::Reason::InviteTimeOut);
+    EXPECT_EQ(event.event_id, "$143273582443PhrSn:example.org");
+    EXPECT_EQ(event.origin_server_ts, 1432735824653L);
+    EXPECT_EQ(event.room_id, "!jEsUZKDJdhlrceRyVU:example.org");
+    EXPECT_EQ(event.sender, "@example:example.org");
+    EXPECT_EQ(event.type, EventType::CallHangUp);
+    EXPECT_EQ(event.unsigned_data.age, 1234);
+    EXPECT_EQ(event.content.call_id, "c1591052749788");
+    EXPECT_EQ(event.content.version, "0");
+    EXPECT_EQ(event.content.reason, msg::CallHangUp::Reason::InviteTimeOut);
 
-        EXPECT_EQ(data, json(event));
+    EXPECT_EQ(data, json(event));
 }

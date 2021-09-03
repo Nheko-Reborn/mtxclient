@@ -26,19 +26,19 @@ namespace space {
 /// parent room - only the m.room.power_levels event is inspected.)
 struct Parent
 {
-        /// @brief Servers to join the parent space via.
-        ///
-        /// Needs to contain at least one server.
-        std::optional<std::vector<std::string>> via;
-        /// @brief Determines whether this is the main parent for the space.
-        ///
-        /// When a user joins a room with a canonical parent, clients may switch to view the room in
-        /// the context of that space, peeking into it in order to find other rooms and group them
-        /// together. In practice, well behaved rooms should only have one canonical parent, but
-        /// given this is not enforced: if multiple are present the client should select the one
-        /// with the lowest room ID, as determined via a lexicographic ordering of the Unicode
-        /// code-points.
-        bool canonical = false;
+    /// @brief Servers to join the parent space via.
+    ///
+    /// Needs to contain at least one server.
+    std::optional<std::vector<std::string>> via;
+    /// @brief Determines whether this is the main parent for the space.
+    ///
+    /// When a user joins a room with a canonical parent, clients may switch to view the room in
+    /// the context of that space, peeking into it in order to find other rooms and group them
+    /// together. In practice, well behaved rooms should only have one canonical parent, but
+    /// given this is not enforced: if multiple are present the client should select the one
+    /// with the lowest room ID, as determined via a lexicographic ordering of the Unicode
+    /// code-points.
+    bool canonical = false;
 };
 
 void
@@ -54,20 +54,20 @@ to_json(nlohmann::json &obj, const Parent &child);
 /// via key which gives a list of candidate servers that can be used to join the room.
 struct Child
 {
-        /// @brief Servers to join the child room/space via.
-        ///
-        /// Needs to contain at least one server.
-        std::optional<std::vector<std::string>> via;
-        /// @brief A string which is used to provide a default ordering of siblings in the room
-        /// list.
-        ///
-        /// Rooms are sorted based on a lexicographic ordering of the Unicode codepoints of the
-        /// characters in order values. Rooms with no order come last, in ascending numeric order of
-        /// the origin_server_ts of their m.room.create events, or ascending lexicographic order of
-        /// their room_ids in case of equal origin_server_ts. orders which are not strings, or do
-        /// not consist solely of ascii characters in the range \x20 (space) to \x7E (~), or consist
-        /// of more than 50 characters, are forbidden and the field should be ignored if received.
-        std::optional<std::string> order;
+    /// @brief Servers to join the child room/space via.
+    ///
+    /// Needs to contain at least one server.
+    std::optional<std::vector<std::string>> via;
+    /// @brief A string which is used to provide a default ordering of siblings in the room
+    /// list.
+    ///
+    /// Rooms are sorted based on a lexicographic ordering of the Unicode codepoints of the
+    /// characters in order values. Rooms with no order come last, in ascending numeric order of
+    /// the origin_server_ts of their m.room.create events, or ascending lexicographic order of
+    /// their room_ids in case of equal origin_server_ts. orders which are not strings, or do
+    /// not consist solely of ascii characters in the range \x20 (space) to \x7E (~), or consist
+    /// of more than 50 characters, are forbidden and the field should be ignored if received.
+    std::optional<std::string> order;
 };
 
 void

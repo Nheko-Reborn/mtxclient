@@ -20,8 +20,8 @@ namespace state {
 //! Content of the `m.room.name` event.
 struct Name
 {
-        //! The name of the room.
-        std::string name;
+    //! The name of the room.
+    std::string name;
 };
 
 void
