@@ -68,6 +68,9 @@ TEST(Encryption, UploadIdentityKeys)
 {
     auto alice       = make_test_client();
     auto olm_account = std::make_shared<mtx::crypto::OlmClient>();
+
+    EXPECT_THROW(olm_account->identity_keys(), olm_exception);
+
     olm_account->create_new_account();
 
     alice->login(

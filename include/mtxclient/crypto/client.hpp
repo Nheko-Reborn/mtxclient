@@ -62,7 +62,8 @@ public:
     {}
 
     olm_exception(std::string func, OlmAccount *acc)
-      : olm_exception(std::move(func), std::string(olm_account_last_error(acc)))
+      : olm_exception(std::move(func),
+                      std::string(acc ? olm_account_last_error(acc) : "account == nullptr"))
     {}
 
     olm_exception(std::string func, OlmUtility *util)

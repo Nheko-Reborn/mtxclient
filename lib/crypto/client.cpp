@@ -69,6 +69,9 @@ OlmClient::restore_account(const std::string &saved_data, const std::string &key
 mtx::crypto::IdentityKeys
 OlmClient::identity_keys() const
 {
+    if (!account_)
+        throw olm_exception("identity_keys", account_.get());
+
     auto tmp_buf = create_buffer(olm_account_identity_keys_length(account_.get()));
     auto ret = olm_account_identity_keys(account_.get(), (void *)tmp_buf.data(), tmp_buf.size());
 
