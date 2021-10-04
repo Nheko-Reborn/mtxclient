@@ -252,12 +252,16 @@ OlmClient::decrypt_group_message(OlmInboundGroupSession *session,
                                  const std::string &message,
                                  uint32_t message_index)
 {
-    // TODO handle errors
+    if (!session)
+        throw olm_exception("decrypt_group_message", session);
+
     auto tmp_msg = create_buffer(message.size());
     std::copy(message.begin(), message.end(), tmp_msg.begin());
 
     auto plaintext_len =
       olm_group_decrypt_max_plaintext_length(session, tmp_msg.data(), tmp_msg.size());
+    if (plaintext_len == olm_error())
+        throw olm_exception("olm_group_decrypt_max_plaintext_length: invalid ciphertext", session);
     auto plaintext = create_buffer(plaintext_len);
 
     tmp_msg = create_buffer(message.size());

@@ -1185,6 +1185,10 @@ TEST(Encryption, PickleMegolmSessions)
               std::string((char *)restored_plaintext.data.data(), restored_plaintext.data.size()));
 
     EXPECT_EQ(std::string((char *)plaintext.data.data(), plaintext.data.size()), SECRET);
+
+    EXPECT_THROW(alice->decrypt_group_message(inbound_session.get(), ""), olm_exception);
+    EXPECT_THROW(alice->decrypt_group_message(nullptr, ""), olm_exception);
+    EXPECT_THROW(alice->decrypt_group_message(nullptr, ciphertext), olm_exception);
 }
 
 TEST(ExportSessions, InboundMegolmSessions)
