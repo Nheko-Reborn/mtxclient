@@ -1,4 +1,4 @@
-gtest_dep = dependency('gtest', main : true, required : true)
+gtest_dep = dependency('gtest', main : true, fallback : ['gtest', 'gtest_main_dep'], required : true)
 
 client_api = executable('client_api', 'client_api.cpp', dependencies: [matrix_client_dep, gtest_dep])
 media_api = executable('media_api', 'media_api.cpp', dependencies: [matrix_client_dep, gtest_dep])
