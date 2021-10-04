@@ -13,9 +13,28 @@ coeurl_dep = dependency('coeurl', required: true)
 thread_dep = dependency('threads', required: true)
 openssl_dep = dependency('openssl', version: '>=1.1', required: true)
 
-olm_dep = dependency('Olm', method: 'cmake', fallback: ['olm-wrap', 'olm_dep'], required: true)
-
 json_dep = dependency('nlohmann_json', version: '>=3.2.0', required: true)
+
+olm_dep = dependency('Olm', method: 'cmake', required: get_option('wrap_mode') == 'nofallback')
+
+if (not olm_dep.found()
+  or get_option('wrap_mode') == 'forcefallback'
+  or 'Olm' in get_option('force_fallback_for'))
+		olm_options = cmake.subproject_options()
+    olm_options.add_cmake_defines({
+      'BUILD_SHARED_LIBS': false,
+      'OLM_TESTS': false,
+      })
+    if target_machine.system() != 'windows'
+        olm_options.add_cmake_defines({
+          'CMAKE_C_FLAGS':  '-fPIC',
+        })
+    endif
+    olm_options.set_override_option('werror', 'false')
+    olm_options.set_override_option('warning_level', '0')
+    olm_proj = cmake.subproject('Olm', options: olm_options)
+    olm_dep = olm_proj.dependency('olm')
+endif
 
 deps = [
   coeurl_dep,
