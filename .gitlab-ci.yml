@@ -112,6 +112,30 @@ build linux arm64:
     - job: "build synapse arm64"
       optional: true
 
+build linux meson wraps:
+  stage: build
+  image: alpine:latest
+  tags: [docker]
+  needs:
+    - job: "build synapse amd64"
+      optional: true
+  variables:
+    M_ARCH: x86_64
+    COVERAGE: "ON"
+  services: !reference [.build-linux, services]
+  before_script:
+    - echo 'https://dl-cdn.alpinelinux.org/alpine/edge/testing' >> /etc/apk/repositories
+    - apk update && apk add meson git python3 py3-pip py3-flask g++ cmake pkgconf openssl openssl-dev make
+  script:
+    - meson setup builddir -Dtests=true -Dexamples=true -Ddefault_library=static
+    - meson compile -C builddir
+    - MTXCLIENT_SERVER=synapse GTEST_OUTPUT=xml:junit-output/ ninja -C builddir test
+  artifacts:
+    reports:
+      junit: builddir/junit-output/*.xml
+    paths:
+      - builddir/junit-output/*.xml
+
 build-macos:
   stage: build
   tags: [macos]
