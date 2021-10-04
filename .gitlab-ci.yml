@@ -129,12 +129,12 @@ build linux meson wraps:
   script:
     - meson setup builddir -Dtests=true -Dexamples=true -Ddefault_library=static
     - meson compile -C builddir
-    - MTXCLIENT_SERVER=synapse GTEST_OUTPUT=xml:junit-output/ ninja -C builddir test
+    - MTXCLIENT_SERVER=synapse meson test -C builddir
   artifacts:
     reports:
-      junit: builddir/junit-output/*.xml
+      junit: builddir/*.xml
     paths:
-      - builddir/junit-output/*.xml
+      - builddir/*.xml
 
 build-macos:
   stage: build
