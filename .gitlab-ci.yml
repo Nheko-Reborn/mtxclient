@@ -125,7 +125,7 @@ build linux meson wraps:
   services: !reference [.build-linux, services]
   before_script:
     - echo 'https://dl-cdn.alpinelinux.org/alpine/edge/testing' >> /etc/apk/repositories
-    - apk update && apk add meson git python3 py3-pip py3-flask g++ cmake pkgconf openssl openssl-dev make
+    - apk update && apk add meson git g++ cmake pkgconf openssl openssl-dev make
   script:
     - meson setup builddir -Dtests=true -Dexamples=true -Ddefault_library=static
     - meson compile -C builddir
