@@ -669,6 +669,9 @@ public:
                                    const mtx::secret_storage::AesHmacSha2KeyDescription &desc,
                                    ErrCallback cb);
 
+    //! Set the default key for the secret storage
+    void set_secret_storage_default_key(const std::string &key_id, ErrCallback cb);
+
     //! Gets any TURN server URIs and authentication credentials
     void get_turn_server(Callback<mtx::responses::TurnServer> cb);
 

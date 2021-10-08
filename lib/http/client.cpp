@@ -1321,6 +1321,16 @@ Client::upload_secret_storage_key(const std::string &key_id,
 }
 
 void
+Client::set_secret_storage_default_key(const std::string &key_id, ErrCallback cb)
+{
+    nlohmann::json key = {{"key", key_id}};
+    put("/client/r0/user/" + mtx::client::utils::url_encode(user_id_.to_string()) +
+          "/account_data/m.secret_storage.default_key",
+        key,
+        cb);
+}
+
+void
 Client::enable_encryption(const std::string &room, Callback<mtx::responses::EventId> callback)
 {
     using namespace mtx::events;
