@@ -23,6 +23,11 @@ struct ClientPrivate
     coeurl::Client client;
 };
 
+void
+UIAHandler::next(const user_interactive::Auth &auth) const
+{
+    next_(*this, auth);
+}
 }
 
 Client::Client(const std::string &server, uint16_t port)
@@ -896,6 +901,34 @@ Client::registration(const std::string &user,
 }
 
 void
+Client::registration(const std::string &user,
+                     const std::string &pass,
+                     UIAHandler uia_handler,
+                     Callback<mtx::responses::Register> cb)
+{
+    nlohmann::json req = {{"username", user}, {"password", pass}};
+
+    uia_handler.next_ = [this, req, cb](const UIAHandler &h, const nlohmann::json &auth) {
+        auto request = req;
+        if (!auth.empty())
+            request["auth"] = auth;
+
+        post<nlohmann::json, mtx::responses::Register>(
+          "/client/r0/register",
+          request,
+          [cb, h](auto &r, RequestErr e) {
+              if (e && e->status_code == 401)
+                  h.prompt(h, e->matrix_error.unauthorized);
+              else
+                  cb(r, e);
+          },
+          false);
+    };
+
+    uia_handler.next_(uia_handler, {});
+}
+
+void
 Client::registration_token_validity(const std::string token,
                                     Callback<mtx::responses::RegistrationTokenValidity> cb)
 {
@@ -1067,6 +1100,30 @@ Client::keys_signatures_upload(const mtx::requests::KeySignaturesUpload &req,
 {
     post<mtx::requests::KeySignaturesUpload, mtx::responses::KeySignaturesUpload>(
       "/client/unstable/keys/signatures/upload", req, cb);
+}
+
+void
+Client::device_signing_upload(const mtx::requests::DeviceSigningUpload deviceKeys,
+                              UIAHandler uia_handler,
+                              ErrCallback cb)
+{
+    nlohmann::json req = deviceKeys;
+
+    uia_handler.next_ = [this, req, cb](const UIAHandler &h, const nlohmann::json &auth) {
+        auto request = req;
+        if (!auth.empty())
+            request["auth"] = auth;
+
+        post<nlohmann::json, mtx::responses::Empty>(
+          "/client/unstable/keys/device_signing/upload", request, [cb, h](auto &, RequestErr e) {
+              if (e && e->status_code == 401 && !e->matrix_error.unauthorized.flows.empty())
+                  h.prompt(h, e->matrix_error.unauthorized);
+              else
+                  cb(e);
+          });
+    };
+
+    uia_handler.next_(uia_handler, {});
 }
 
 void

@@ -206,6 +206,92 @@ OlmClient::create_upload_keys_request(const mtx::crypto::OneTimeKeys &one_time_k
     return req;
 }
 
+std::optional<OlmClient::CrossSigningSetup>
+OlmClient::create_crosssigning_keys()
+{
+    auto master       = PkSigning::new_key();
+    auto user_signing = PkSigning::new_key();
+    auto self_signing = PkSigning::new_key();
+
+    CrossSigningSetup setup{};
+    setup.private_master_key       = master.seed();
+    setup.private_user_signing_key = user_signing.seed();
+    setup.private_self_signing_key = self_signing.seed();
+
+    // master key
+    setup.master_key.usage                                  = {"master"};
+    setup.master_key.user_id                                = user_id_;
+    setup.master_key.keys["ed25519:" + master.public_key()] = master.public_key();
+
+    nlohmann::json master_j = setup.master_key;
+    master_j.erase("unsigned");
+    master_j.erase("signatures");
+    setup.master_key.signatures[user_id_]["ed25519:" + master.public_key()] =
+      master.sign(master_j.dump());
+    setup.master_key.signatures[user_id_]["ed25519:" + device_id_] = sign_message(master_j.dump());
+
+    // user_signing_key
+    setup.user_signing_key.usage                                        = {"user_signing"};
+    setup.user_signing_key.user_id                                      = user_id_;
+    setup.user_signing_key.keys["ed25519:" + user_signing.public_key()] = user_signing.public_key();
+
+    nlohmann::json user_signing_j = setup.user_signing_key;
+    user_signing_j.erase("unsigned");
+    user_signing_j.erase("signatures");
+    setup.user_signing_key.signatures[user_id_]["ed25519:" + user_signing.public_key()] =
+      user_signing.sign(user_signing_j.dump());
+    setup.user_signing_key.signatures[user_id_]["ed25519:" + master.public_key()] =
+      master.sign(user_signing_j.dump());
+
+    // self_signing_key
+    setup.self_signing_key.usage                                        = {"self_signing"};
+    setup.self_signing_key.user_id                                      = user_id_;
+    setup.self_signing_key.keys["ed25519:" + self_signing.public_key()] = self_signing.public_key();
+
+    nlohmann::json self_signing_j = setup.self_signing_key;
+    self_signing_j.erase("unsigned");
+    self_signing_j.erase("signatures");
+    setup.self_signing_key.signatures[user_id_]["ed25519:" + self_signing.public_key()] =
+      self_signing.sign(self_signing_j.dump());
+    setup.self_signing_key.signatures[user_id_]["ed25519:" + master.public_key()] =
+      master.sign(self_signing_j.dump());
+
+    return setup;
+}
+
+std::optional<OlmClient::SSSSSetup>
+OlmClient::create_ssss_key(const std::string &password)
+{
+    OlmClient::SSSSSetup setup{};
+
+    if (password.empty()) {
+        setup.privateKey = create_buffer(32);
+    } else {
+        mtx::secret_storage::PBKDF2 pbkdf2{};
+        pbkdf2.algorithm  = "m.pbkdf2";
+        pbkdf2.iterations = 500'000;
+        pbkdf2.bits       = 256; // 32 * 8
+        pbkdf2.salt       = bin2base64(to_string(create_buffer(32)));
+
+        setup.privateKey = mtx::crypto::PBKDF2_HMAC_SHA_512(
+          password, to_binary_buf(pbkdf2.salt), pbkdf2.iterations, pbkdf2.bits / 8);
+        setup.keyDescription.passphrase = pbkdf2;
+    }
+
+    setup.keyDescription.algorithm = "m.secret_storage.v1.aes-hmac-sha2";
+    setup.keyDescription.name = bin2base58(to_string(create_buffer(16))); // create a random name
+    setup.keyDescription.iv   = bin2base64(to_string(compatible_iv(create_buffer(32))));
+
+    auto testKeys = HKDF_SHA256(setup.privateKey, BinaryBuf(32, 0), BinaryBuf{});
+
+    auto encrypted = AES_CTR_256_Encrypt(
+      std::string(32, '\0'), testKeys.aes, to_binary_buf(base642bin(setup.keyDescription.iv)));
+
+    setup.keyDescription.mac = bin2base64(to_string(HMAC_SHA256(testKeys.mac, encrypted)));
+
+    return setup;
+}
+
 OutboundGroupSessionPtr
 OlmClient::init_outbound_group_session()
 {
@@ -562,9 +648,17 @@ SAS::calculate_mac(std::string input_data, std::string info)
 }
 
 PkSigning
+PkSigning::new_key()
+{
+    auto priv_seed = bin2base64(to_string(create_buffer(olm_pk_signing_seed_length())));
+    return from_seed(priv_seed);
+}
+
+PkSigning
 PkSigning::from_seed(std::string seed)
 {
     PkSigning s{};
+    s.seed_   = seed;
     s.signing = create_olm_object<PkSigningObject>();
 
     auto seed_ = base642bin(seed);

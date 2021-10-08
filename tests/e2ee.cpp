@@ -463,6 +463,70 @@ TEST(Encryption, ClaimMultipleDeviceKeys)
     alice3->close();
 }
 
+TEST(Encryption, UploadCrossSigningKeys)
+{
+    auto alice       = make_test_client();
+    auto olm_account = std::make_shared<mtx::crypto::OlmClient>();
+
+    EXPECT_THROW(olm_account->identity_keys(), olm_exception);
+
+    olm_account->create_new_account();
+
+    alice->login(
+      "alice", "secret", [](const mtx::responses::Login &, RequestErr err) { check_error(err); });
+
+    while (alice->access_token().empty())
+        sleep();
+
+    olm_account->set_user_id(alice->user_id().to_string());
+    olm_account->set_device_id(alice->device_id());
+
+    auto id_keys = olm_account->identity_keys();
+
+    ASSERT_TRUE(id_keys.curve25519.size() > 10);
+    ASSERT_TRUE(id_keys.curve25519.size() > 10);
+
+    mtx::crypto::OneTimeKeys unused;
+    auto request = olm_account->create_upload_keys_request(unused);
+
+    // Make the request with the signed identity keys.
+    alice->upload_keys(request, [](const mtx::responses::UploadKeys &res, RequestErr err) {
+        check_error(err);
+        EXPECT_EQ(res.one_time_key_counts.size(), 0);
+    });
+
+    atomic<bool> done = false;
+    auto xsign_keys   = olm_account->create_crosssigning_keys();
+    ASSERT_TRUE(xsign_keys.has_value());
+    mtx::requests::DeviceSigningUpload u;
+    u.master_key       = xsign_keys->master_key;
+    u.user_signing_key = xsign_keys->user_signing_key;
+    u.self_signing_key = xsign_keys->self_signing_key;
+    alice->device_signing_upload(
+      u,
+      mtx::http::UIAHandler([](const mtx::http::UIAHandler &h,
+                               const mtx::user_interactive::Unauthorized &unauthorized) {
+          ASSERT_EQ(unauthorized.flows.size(), 1);
+          ASSERT_EQ(unauthorized.flows[0].stages.size(), 1);
+          ASSERT_EQ(unauthorized.flows[0].stages[0], mtx::user_interactive::auth_types::password);
+
+          mtx::user_interactive::Auth auth;
+          auth.session = unauthorized.session;
+          mtx::user_interactive::auth::Password pass{};
+          pass.password        = "secret";
+          pass.identifier_user = "alice";
+          pass.identifier_type = mtx::user_interactive::auth::Password::IdType::UserId;
+          auth.content         = pass;
+          h.next(auth);
+      }),
+      [&done](RequestErr e) {
+          done = true;
+          check_error(e);
+      });
+
+    alice->close();
+}
+
 TEST(Encryption, KeyChanges)
 {
     auto carl     = make_test_client();

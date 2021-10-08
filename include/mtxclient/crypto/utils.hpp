@@ -53,6 +53,14 @@ to_string(const BinaryBuf &buf)
     return std::string(reinterpret_cast<const char *>(buf.data()), buf.size());
 }
 
+//! Sets bit 63 to 0 to be compatible with other AES implementations.
+BinaryBuf
+compatible_iv(BinaryBuf incompatible_iv);
+
+//! encodes a recovery key in base58 with parity and version tag,
+std::string
+key_to_recoverykey(const BinaryBuf &key);
+
 //! Simple wrapper around the OpenSSL PKCS5_PBKDF2_HMAC function
 BinaryBuf
 PBKDF2_HMAC_SHA_512(const std::string pass,

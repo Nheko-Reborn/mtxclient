@@ -281,6 +281,22 @@ struct KeySignaturesUpload
 void
 to_json(json &obj, const KeySignaturesUpload &req);
 
+//! Upload cross signing keys
+struct DeviceSigningUpload
+{
+    //! Optional. The user's master key.
+    std::optional<mtx::crypto::CrossSigningKeys> master_key;
+    //! Optional. The user's self-signing key. Must be signed by the accompanying master key, or by
+    //! the user's most recently uploaded master key if no master key is included in the request.
+    std::optional<mtx::crypto::CrossSigningKeys> self_signing_key;
+    //! Optional. The user's user-signing key. Must be signed by the accompanying master key, or by
+    //! the user's most recently uploaded master key if no master key is included in the request.
+    std::optional<mtx::crypto::CrossSigningKeys> user_signing_key;
+};
+
+void
+to_json(json &obj, const DeviceSigningUpload &req);
+
 struct PusherData
 {
     //! Required if `kind` is http. The URL to use to send notifications to.

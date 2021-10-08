@@ -184,6 +184,7 @@ TEST(Base58, EncodingDecoding)
     EXPECT_EQ(bin2base58("foob"), "3csAg9");
     EXPECT_EQ(bin2base58("fooba"), "CZJRhmz");
     EXPECT_EQ(bin2base58("foobar"), "t1Zv2yaZ");
+    EXPECT_FALSE(bin2base58(to_string(create_buffer(32))).empty());
 
     EXPECT_EQ("", base582bin(""));
     EXPECT_EQ("f", base582bin("2m"));
@@ -370,4 +371,27 @@ TEST(SecretStorage, SecretKey)
     ASSERT_EQ(desc.passphrase->bits, 512);
     ASSERT_EQ(desc.signatures["@alice:localhost"]["ed25519:adkfajfgaefkdahfzguerhtgduifghes"],
               "ksfjvkrfbnrtnwublrjkgnorthgnrdtjbiortbjdlbiutr");
+}
+
+TEST(SecretStorage, CreateSecretKey)
+{
+    auto ssss1 = mtx::crypto::OlmClient::create_ssss_key();
+    ASSERT_TRUE(ssss1.has_value());
+    EXPECT_FALSE(ssss1->keyDescription.passphrase.has_value());
+    EXPECT_EQ(ssss1->keyDescription.algorithm, "m.secret_storage.v1.aes-hmac-sha2");
+    EXPECT_GE(ssss1->keyDescription.iv.length(), 32);
+    EXPECT_EQ((ssss1->keyDescription.mac.length() - 1) * 3 / 4, 32);
+
+    EXPECT_EQ(key_from_recoverykey(key_to_recoverykey(ssss1->privateKey), ssss1->keyDescription),
+              ssss1->privateKey);
+
+    auto ssss2 = mtx::crypto::OlmClient::create_ssss_key("some passphrase");
+    ASSERT_TRUE(ssss2.has_value());
+    ASSERT_TRUE(ssss2->keyDescription.passphrase.has_value());
+    EXPECT_EQ(ssss2->keyDescription.algorithm, "m.secret_storage.v1.aes-hmac-sha2");
+    EXPECT_GE(ssss2->keyDescription.iv.length(), 32);
+    EXPECT_EQ((ssss2->keyDescription.mac.length() - 1) * 3 / 4, 32);
+
+    EXPECT_EQ(mtx::crypto::key_from_passphrase("some passphrase", ssss2->keyDescription),
+              ssss2->privateKey);
 }
