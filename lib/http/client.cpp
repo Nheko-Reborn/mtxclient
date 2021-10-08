@@ -1193,6 +1193,16 @@ Client::update_backup_version(const std::string &version,
     put<mtx::responses::backup::BackupVersion>(
       "/client/r0/room_keys/version/" + mtx::client::utils::url_encode(version), data, cb);
 }
+
+void
+Client::post_backup_version(const std::string &algorithm,
+                            const std::string &auth_data,
+                            Callback<mtx::responses::Version> cb)
+{
+    nlohmann::json req = {{"algorithm", algorithm},
+                          {"auth_data", nlohmann::json::parse(auth_data)}};
+    post<nlohmann::json, mtx::responses::Version>("/client/r0/room_keys/version", req, cb);
+}
 void
 Client::room_keys(const std::string &version, Callback<mtx::responses::backup::KeysBackup> cb)
 {

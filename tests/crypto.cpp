@@ -395,3 +395,28 @@ TEST(SecretStorage, CreateSecretKey)
     EXPECT_EQ(mtx::crypto::key_from_passphrase("some passphrase", ssss2->keyDescription),
               ssss2->privateKey);
 }
+
+TEST(SecretStorage, CreateOnlineKeyBackup)
+{
+    mtx::crypto::OlmClient account;
+    account.create_new_account();
+
+    auto cross = account.create_crosssigning_keys();
+    ASSERT_TRUE(cross.has_value());
+
+    auto okb = account.create_online_key_backup(cross->private_master_key);
+    ASSERT_TRUE(okb.has_value());
+
+    mtx::responses::backup::SessionData s;
+    s.algorithm   = mtx::crypto::MEGOLM_ALGO;
+    s.sender_key  = "abc";
+    s.session_key = "cde";
+
+    auto enc1 =
+      mtx::crypto::encrypt_session(s, json::parse(okb->backupVersion.auth_data)["public_key"]);
+    EXPECT_FALSE(enc1.ciphertext.empty());
+
+    auto enc2 = mtx::crypto::encrypt_session(
+      s, mtx::crypto::CURVE25519_public_key_from_private(okb->privateKey));
+    EXPECT_FALSE(enc2.ciphertext.empty());
+}

@@ -53,6 +53,12 @@ from_json(const nlohmann::json &obj, FilterId &response)
     response.filter_id = obj.at("filter_id");
 }
 
+void
+from_json(const nlohmann::json &obj, Version &response)
+{
+    response.version = obj.at("version");
+}
+
 namespace utils {
 
 void

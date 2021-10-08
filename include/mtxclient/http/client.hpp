@@ -58,6 +58,7 @@ struct CreateRoom;
 struct EventId;
 struct RoomId;
 struct FilterId;
+struct Version;
 struct GroupId;
 struct GroupProfile;
 struct JoinedGroups;
@@ -623,6 +624,9 @@ public:
     void update_backup_version(const std::string &version,
                                const mtx::responses::backup::BackupVersion &data,
                                ErrCallback cb);
+    void post_backup_version(const std::string &algorithm,
+                             const std::string &auth_data,
+                             Callback<mtx::responses::Version> cb);
 
     void room_keys(const std::string &version, Callback<mtx::responses::backup::KeysBackup> cb);
     void room_keys(const std::string &version,

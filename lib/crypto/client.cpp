@@ -259,6 +259,27 @@ OlmClient::create_crosssigning_keys()
     return setup;
 }
 
+std::optional<OlmClient::OnlineKeyBackupSetup>
+OlmClient::create_online_key_backup(const std::string &masterKey)
+{
+    OnlineKeyBackupSetup setup{};
+
+    auto key = create_buffer(olm_pk_private_key_length());
+    setup.privateKey = key;
+
+    json auth_data;
+    auth_data["public_key"] = bin2base64_unpadded(CURVE25519_public_key_from_private(key));
+    auto master             = PkSigning::from_seed(masterKey);
+
+    auto sig                = master.sign(auth_data.dump());
+    auth_data["signatures"][user_id_]["ed25519:" + master.public_key()] = sig;
+
+    setup.backupVersion.auth_data = auth_data.dump();
+    setup.backupVersion.algorithm = "m.megolm_backup.v1.curve25519-aes-sha2";
+
+    return setup;
+}
+
 std::optional<OlmClient::SSSSSetup>
 OlmClient::create_ssss_key(const std::string &password)
 {
