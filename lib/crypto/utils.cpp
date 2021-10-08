@@ -142,6 +142,22 @@ decrypt(const mtx::secret_storage::AesHmacSha2EncryptedData &data,
     return to_string(decryptedSecret);
 }
 
+mtx::secret_storage::AesHmacSha2EncryptedData
+encrypt(const std::string &data, BinaryBuf decryptionKey, const std::string key_name)
+{
+    mtx::secret_storage::AesHmacSha2EncryptedData encrypted{};
+    auto iv      = compatible_iv(create_buffer(16));
+    encrypted.iv = bin2base64(to_string(iv));
+
+    auto keys = HKDF_SHA256(decryptionKey, BinaryBuf(32, 0), to_binary_buf(key_name));
+
+    auto ciphertext      = AES_CTR_256_Encrypt(data, keys.aes, iv);
+    encrypted.ciphertext = bin2base64(to_string(ciphertext));
+    encrypted.mac        = bin2base64(to_string(HMAC_SHA256(keys.mac, ciphertext)));
+
+    return encrypted;
+}
+
 HkdfKeys
 HKDF_SHA256(const BinaryBuf &key, const BinaryBuf &salt, const BinaryBuf &info)
 {

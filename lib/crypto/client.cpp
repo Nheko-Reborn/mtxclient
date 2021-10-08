@@ -264,14 +264,14 @@ OlmClient::create_online_key_backup(const std::string &masterKey)
 {
     OnlineKeyBackupSetup setup{};
 
-    auto key = create_buffer(olm_pk_private_key_length());
+    auto key         = create_buffer(olm_pk_private_key_length());
     setup.privateKey = key;
 
     json auth_data;
     auth_data["public_key"] = bin2base64_unpadded(CURVE25519_public_key_from_private(key));
     auto master             = PkSigning::from_seed(masterKey);
 
-    auto sig                = master.sign(auth_data.dump());
+    auto sig = master.sign(auth_data.dump());
     auth_data["signatures"][user_id_]["ed25519:" + master.public_key()] = sig;
 
     setup.backupVersion.auth_data = auth_data.dump();

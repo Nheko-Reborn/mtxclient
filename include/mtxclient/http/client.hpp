@@ -660,6 +660,15 @@ public:
     void secret_storage_key(const std::string &key_id,
                             Callback<mtx::secret_storage::AesHmacSha2KeyDescription> cb);
 
+    //! Upload a specific secret
+    void upload_secret_storage_secret(const std::string &secret_id,
+                                      const mtx::secret_storage::Secret &secret,
+                                      ErrCallback cb);
+    //! Upload information about a key
+    void upload_secret_storage_key(const std::string &key_id,
+                                   const mtx::secret_storage::AesHmacSha2KeyDescription &desc,
+                                   ErrCallback cb);
+
     //! Gets any TURN server URIs and authentication credentials
     void get_turn_server(Callback<mtx::responses::TurnServer> cb);
 

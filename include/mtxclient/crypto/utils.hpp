@@ -85,6 +85,10 @@ decrypt(const mtx::secret_storage::AesHmacSha2EncryptedData &data,
         BinaryBuf decryptionKey,
         const std::string key_name);
 
+//! Encrypt a secret for SSSS
+mtx::secret_storage::AesHmacSha2EncryptedData
+encrypt(const std::string &data, BinaryBuf decryptionKey, const std::string key_name);
+
 //! HKDF key derivation with SHA256 digest
 struct HkdfKeys
 {

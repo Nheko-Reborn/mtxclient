@@ -495,7 +495,7 @@ TEST(Encryption, UploadCrossSigningKeys)
         EXPECT_EQ(res.one_time_key_counts.size(), 0);
     });
 
-    auto xsign_keys   = olm_account->create_crosssigning_keys();
+    auto xsign_keys = olm_account->create_crosssigning_keys();
     ASSERT_TRUE(xsign_keys.has_value());
     mtx::requests::DeviceSigningUpload u;
     u.master_key       = xsign_keys->master_key;
@@ -555,7 +555,7 @@ TEST(Encryption, UploadOnlineBackup)
         EXPECT_EQ(res.one_time_key_counts.size(), 0);
     });
 
-    auto xsign_keys   = olm_account->create_crosssigning_keys();
+    auto xsign_keys = olm_account->create_crosssigning_keys();
     ASSERT_TRUE(xsign_keys.has_value());
     mtx::requests::DeviceSigningUpload u;
     u.master_key       = xsign_keys->master_key;
