@@ -197,6 +197,17 @@ to_json(json &obj, const KeySignaturesUpload &req)
 }
 
 void
+to_json(json &obj, const DeviceSigningUpload &req)
+{
+    if (req.master_key)
+        obj["master_key"] = req.master_key.value();
+    if (req.self_signing_key)
+        obj["self_signing_key"] = req.self_signing_key.value();
+    if (req.user_signing_key)
+        obj["user_signing_key"] = req.user_signing_key.value();
+}
+
+void
 to_json(json &obj, const PusherData &data)
 {
     if (!data.url.empty()) {

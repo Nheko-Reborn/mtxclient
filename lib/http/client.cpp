@@ -23,6 +23,11 @@ struct ClientPrivate
     coeurl::Client client;
 };
 
+void
+UIAHandler::next(const user_interactive::Auth &auth) const
+{
+    next_(*this, auth);
+}
 }
 
 Client::Client(const std::string &server, uint16_t port)
@@ -896,6 +901,34 @@ Client::registration(const std::string &user,
 }
 
 void
+Client::registration(const std::string &user,
+                     const std::string &pass,
+                     UIAHandler uia_handler,
+                     Callback<mtx::responses::Register> cb)
+{
+    nlohmann::json req = {{"username", user}, {"password", pass}};
+
+    uia_handler.next_ = [this, req, cb](const UIAHandler &h, const nlohmann::json &auth) {
+        auto request = req;
+        if (!auth.empty())
+            request["auth"] = auth;
+
+        post<nlohmann::json, mtx::responses::Register>(
+          "/client/r0/register",
+          request,
+          [cb, h](auto &r, RequestErr e) {
+              if (e && e->status_code == 401)
+                  h.prompt(h, e->matrix_error.unauthorized);
+              else
+                  cb(r, e);
+          },
+          false);
+    };
+
+    uia_handler.next_(uia_handler, {});
+}
+
+void
 Client::registration_token_validity(const std::string token,
                                     Callback<mtx::responses::RegistrationTokenValidity> cb)
 {
@@ -1070,6 +1103,30 @@ Client::keys_signatures_upload(const mtx::requests::KeySignaturesUpload &req,
 }
 
 void
+Client::device_signing_upload(const mtx::requests::DeviceSigningUpload deviceKeys,
+                              UIAHandler uia_handler,
+                              ErrCallback cb)
+{
+    nlohmann::json req = deviceKeys;
+
+    uia_handler.next_ = [this, req, cb](const UIAHandler &h, const nlohmann::json &auth) {
+        auto request = req;
+        if (!auth.empty())
+            request["auth"] = auth;
+
+        post<nlohmann::json, mtx::responses::Empty>(
+          "/client/unstable/keys/device_signing/upload", request, [cb, h](auto &, RequestErr e) {
+              if (e && e->status_code == 401 && !e->matrix_error.unauthorized.flows.empty())
+                  h.prompt(h, e->matrix_error.unauthorized);
+              else
+                  cb(e);
+          });
+    };
+
+    uia_handler.next_(uia_handler, {});
+}
+
+void
 Client::query_keys(const mtx::requests::QueryKeys &req,
                    Callback<mtx::responses::QueryKeys> callback)
 {
@@ -1135,6 +1192,16 @@ Client::update_backup_version(const std::string &version,
 {
     put<mtx::responses::backup::BackupVersion>(
       "/client/r0/room_keys/version/" + mtx::client::utils::url_encode(version), data, cb);
+}
+
+void
+Client::post_backup_version(const std::string &algorithm,
+                            const std::string &auth_data,
+                            Callback<mtx::responses::Version> cb)
+{
+    nlohmann::json req = {{"algorithm", algorithm},
+                          {"auth_data", nlohmann::json::parse(auth_data)}};
+    post<nlohmann::json, mtx::responses::Version>("/client/r0/room_keys/version", req, cb);
 }
 void
 Client::room_keys(const std::string &version, Callback<mtx::responses::backup::KeysBackup> cb)
@@ -1227,6 +1294,40 @@ Client::secret_storage_key(const std::string &key_id,
       [cb](const mtx::secret_storage::AesHmacSha2KeyDescription &res,
            HeaderFields,
            RequestErr err) { cb(res, err); });
+}
+
+//! Upload a specific secret
+void
+Client::upload_secret_storage_secret(const std::string &secret_id,
+                                     const mtx::secret_storage::Secret &secret,
+                                     ErrCallback cb)
+{
+    put("/client/r0/user/" + mtx::client::utils::url_encode(user_id_.to_string()) +
+          "/account_data/" + mtx::client::utils::url_encode(secret_id),
+        secret,
+        cb);
+}
+
+//! Upload information about a key
+void
+Client::upload_secret_storage_key(const std::string &key_id,
+                                  const mtx::secret_storage::AesHmacSha2KeyDescription &desc,
+                                  ErrCallback cb)
+{
+    put("/client/r0/user/" + mtx::client::utils::url_encode(user_id_.to_string()) +
+          "/account_data/m.secret_storage.key." + mtx::client::utils::url_encode(key_id),
+        desc,
+        cb);
+}
+
+void
+Client::set_secret_storage_default_key(const std::string &key_id, ErrCallback cb)
+{
+    nlohmann::json key = {{"key", key_id}};
+    put("/client/r0/user/" + mtx::client::utils::url_encode(user_id_.to_string()) +
+          "/account_data/m.secret_storage.default_key",
+        key,
+        cb);
 }
 
 void

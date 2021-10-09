@@ -57,6 +57,15 @@ struct FilterId
 void
 from_json(const nlohmann::json &obj, FilterId &response);
 
+//! A new room version as returned by the room_keys/version API
+struct Version
+{
+    //! Required: The backup version. This is an opaque string.
+    std::string version;
+};
+
+void
+from_json(const nlohmann::json &obj, Version &response);
 //! Different helper for parsing responses.
 namespace utils {
 //! Multiple account_data events.

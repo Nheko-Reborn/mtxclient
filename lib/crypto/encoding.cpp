@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <array>
+#include <cassert>
 #include <string>
 #include <vector>
 
@@ -60,23 +61,25 @@ encode_base58(const std::array<char, 58> &alphabet, const std::string &input)
     if (input.empty())
         return "";
 
-    std::vector<uint8_t> digits(input.size() * 137 / 100 + 1);
+    std::vector<uint8_t> digits(input.size() * 138 / 100 + 1);
     std::size_t digitslen = 1;
-    for (uint32_t carry : input) {
+    for (uint8_t carry_ : input) {
+        uint32_t carry = static_cast<uint32_t>(carry_);
         for (size_t j = 0; j < digitslen; j++) {
-            carry += (uint32_t)(digits[j]) << 8;
+            carry += (uint32_t)(digits[j]) * 256;
             digits[j] = static_cast<uint8_t>(carry % 58);
             carry /= 58;
         }
         while (carry > 0) {
+            assert(digitslen < digits.size());
             digits[digitslen++] = static_cast<uint8_t>(carry % 58);
             carry /= 58;
         }
     }
-    std::size_t resultlen = 0;
     std::string result(digits.size(), ' ');
 
     // leading zero bytes
+    std::size_t resultlen = 0;
     for (; resultlen < input.length() && input[resultlen] == 0;)
         result[resultlen++] = '1';
 

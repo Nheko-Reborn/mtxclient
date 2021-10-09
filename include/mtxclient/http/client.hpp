@@ -58,6 +58,7 @@ struct CreateRoom;
 struct EventId;
 struct RoomId;
 struct FilterId;
+struct Version;
 struct GroupId;
 struct GroupProfile;
 struct JoinedGroups;
@@ -116,6 +117,30 @@ using Callback = std::function<void(const Response &, RequestErr)>;
 template<class Response>
 using HeadersCallback    = std::function<void(const Response &, HeaderFields, RequestErr)>;
 using TypeErasedCallback = std::function<void(HeaderFields, const std::string_view &, int, int)>;
+
+//! A helper to handle user interactive authentication. This will cache the request and call the
+//! prompt every time there is a new stage. Advance the flow by calling next().
+class UIAHandler
+{
+public:
+    //! The callback for when a new UIA stage needs to be completed
+    using UIAPrompt =
+      std::function<void(const UIAHandler &, const user_interactive::Unauthorized &)>;
+
+    //! Create a new UIA handler. Pass a callback for when a new stage needs to be completed.
+    UIAHandler(UIAPrompt prompt_)
+      : prompt(std::move(prompt_))
+    {}
+
+    void next(const user_interactive::Auth &auth) const;
+
+private:
+    UIAPrompt prompt;
+
+    std::function<void(const UIAHandler &, const nlohmann::json &)> next_;
+
+    friend class Client;
+};
 
 //! Sync configuration options.
 struct SyncOpts
@@ -240,6 +265,13 @@ public:
     void registration(const std::string &user,
                       const std::string &pass,
                       const user_interactive::Auth &auth,
+                      Callback<mtx::responses::Register> cb);
+
+    //! Register with an UIA handler so you don't need to repeat the request manually.
+    //! register failed with 401
+    void registration(const std::string &user,
+                      const std::string &pass,
+                      UIAHandler uia_handler,
                       Callback<mtx::responses::Register> cb);
 
     //! Check the validity of a registration token
@@ -564,6 +596,11 @@ public:
     void keys_signatures_upload(const mtx::requests::KeySignaturesUpload &req,
                                 Callback<mtx::responses::KeySignaturesUpload> cb);
 
+    //! Upload cross signing keys
+    void device_signing_upload(const mtx::requests::DeviceSigningUpload,
+                               UIAHandler uia_handler,
+                               ErrCallback cb);
+
     //! Returns the current devices and identity keys for the given users.
     void query_keys(const mtx::requests::QueryKeys &req, Callback<mtx::responses::QueryKeys> cb);
 
@@ -587,6 +624,9 @@ public:
     void update_backup_version(const std::string &version,
                                const mtx::responses::backup::BackupVersion &data,
                                ErrCallback cb);
+    void post_backup_version(const std::string &algorithm,
+                             const std::string &auth_data,
+                             Callback<mtx::responses::Version> cb);
 
     void room_keys(const std::string &version, Callback<mtx::responses::backup::KeysBackup> cb);
     void room_keys(const std::string &version,
@@ -619,6 +659,18 @@ public:
     //! Retrieve information about a key
     void secret_storage_key(const std::string &key_id,
                             Callback<mtx::secret_storage::AesHmacSha2KeyDescription> cb);
+
+    //! Upload a specific secret
+    void upload_secret_storage_secret(const std::string &secret_id,
+                                      const mtx::secret_storage::Secret &secret,
+                                      ErrCallback cb);
+    //! Upload information about a key
+    void upload_secret_storage_key(const std::string &key_id,
+                                   const mtx::secret_storage::AesHmacSha2KeyDescription &desc,
+                                   ErrCallback cb);
+
+    //! Set the default key for the secret storage
+    void set_secret_storage_default_key(const std::string &key_id, ErrCallback cb);
 
     //! Gets any TURN server URIs and authentication credentials
     void get_turn_server(Callback<mtx::responses::TurnServer> cb);

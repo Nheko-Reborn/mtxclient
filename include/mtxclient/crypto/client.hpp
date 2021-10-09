@@ -188,15 +188,22 @@ struct PkSigning
 {
     //! Construct from base64 key
     static PkSigning from_seed(std::string seed);
+    //! construct a new random key
+    static PkSigning new_key();
+
+    //! sign an arbitrary message
     std::string sign(const std::string &message);
 
     //! base64 public key
     std::string public_key() const { return public_key_; }
+    //! base64 private key (seed)
+    std::string seed() const { return seed_; }
 
 private:
     PkSigning() {}
     std::unique_ptr<OlmPkSigning, OlmDeleter> signing;
-    std::string public_key_;
+    std::string public_key_; // base64
+    std::string seed_;       // base64
 };
 
 //! Client for all the cryptography related functionality like olm accounts, session keys
@@ -215,6 +222,35 @@ public:
     using Base64String = std::string;
     //! A signed set of one time keys indexed by `<algorithm>:<key_id>`.
     using SignedOneTimeKeys = std::map<std::string, requests::SignedOneTimeKey>;
+
+    //! Data needed for bootstrapping crosssigning
+    struct CrossSigningSetup
+    {
+        //! The public key objects, signed and ready for upload.
+        CrossSigningKeys master_key, user_signing_key, self_signing_key;
+        //! The private keys to store in SSSS
+        std::string private_master_key, private_user_signing_key,
+          private_self_signing_key; // base64
+    };
+
+    //! Data needed to setup the online key backup
+    struct OnlineKeyBackupSetup
+    {
+        //! private key to decrypt sessions with.
+        mtx::crypto::BinaryBuf privateKey;
+        //! The backup version data including auth data to be sent to the server.
+        mtx::responses::backup::BackupVersion backupVersion;
+    };
+    //! Data needed to setup SSSS
+    struct SSSSSetup
+    {
+        //! Key to encrypt/decrypt secrets with.
+        mtx::crypto::BinaryBuf privateKey;
+        //! The key description to be stored in account data.
+        mtx::secret_storage::AesHmacSha2KeyDescription keyDescription;
+        //! The name of this key.
+        std::string key_name;
+    };
 
     //! Set the id of this device.
     void set_device_id(std::string device_id) { device_id_ = std::move(device_id); }
@@ -258,6 +294,15 @@ public:
     mtx::requests::UploadKeys create_upload_keys_request(const OneTimeKeys &keys);
     //! Prepare an empty /keys/upload request.
     mtx::requests::UploadKeys create_upload_keys_request();
+
+    //! Create the cross-signing keys (including signatures). Needs to be uploaded to the server
+    //! after this.
+    std::optional<CrossSigningSetup> create_crosssigning_keys();
+
+    //! Create a new online key backup. Needs to be uploaded to the server after this.
+    std::optional<OnlineKeyBackupSetup> create_online_key_backup(const std::string &masterKey);
+    //! Create a new SSSS storage key. Should be uploaded to account_data. The password is optional.
+    static std::optional<SSSSSetup> create_ssss_key(const std::string &password = "");
 
     //! Decrypt a message using megolm.
     GroupPlaintext decrypt_group_message(OlmInboundGroupSession *session,
