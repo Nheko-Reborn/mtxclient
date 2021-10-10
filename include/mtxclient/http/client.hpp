@@ -598,10 +598,13 @@ public:
                          const std::string &display_name,
                          ErrCallback callback);
 
-    /////! Rename device
-    // void rename_device(const mtx::requests::DeviceSigningUpload,
-    //                           UIAHandler uia_handler,
-    //                           ErrCallback cb);
+    //! Delete device
+    void delete_device(const std::string &device_id, UIAHandler uia_handler, ErrCallback cb);
+
+    //! Delete devices
+    void delete_devices(const std::vector<std::string> &device_ids,
+                        UIAHandler uia_handler,
+                        ErrCallback cb);
 
     //
     // Encryption related endpoints.

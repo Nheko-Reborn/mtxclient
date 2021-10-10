@@ -1115,6 +1115,56 @@ Client::set_device_name(const std::string &device_id,
       "/client/r0/devices/" + mtx::client::utils::url_encode(device_id), req, callback);
 }
 
+void
+Client::delete_device(const std::string &device_id, UIAHandler uia_handler, ErrCallback cb)
+{
+    nlohmann::json req;
+    req["devices"] = {device_id};
+
+    uia_handler.next_ = [this, req, cb](const UIAHandler &h, const nlohmann::json &auth) {
+        auto request = req;
+        if (!auth.empty())
+            request["auth"] = auth;
+
+        post<nlohmann::json, mtx::responses::Empty>(
+          "/client/r0/delete_devices", request, [cb, h](auto &, RequestErr e) {
+              if (e && e->status_code == 401 && !e->matrix_error.unauthorized.flows.empty())
+                  h.prompt(h, e->matrix_error.unauthorized);
+              else
+                  cb(e);
+          });
+    };
+
+    uia_handler.next_(uia_handler, {});
+}
+
+void
+Client::delete_devices(const std::vector<std::string> &device_ids,
+                       UIAHandler uia_handler,
+                       ErrCallback cb)
+{
+    nlohmann::json req;
+    for (auto it = device_ids.begin(); it != device_ids.end(); ++it) {
+        req["devices"].push_back(*it);
+    }
+
+    uia_handler.next_ = [this, req, cb](const UIAHandler &h, const nlohmann::json &auth) {
+        auto request = req;
+        if (!auth.empty())
+            request["auth"] = auth;
+
+        post<nlohmann::json, mtx::responses::Empty>(
+          "/client/r0/delete_devices", request, [cb, h](auto &, RequestErr e) {
+              if (e && e->status_code == 401 && !e->matrix_error.unauthorized.flows.empty())
+                  h.prompt(h, e->matrix_error.unauthorized);
+              else
+                  cb(e);
+          });
+    };
+
+    uia_handler.next_(uia_handler, {});
+}
+
 //
 // Encryption related endpoints
 //
