@@ -1427,25 +1427,27 @@ TEST(ClientAPI, NewSendToDevice)
 
     body2[bob->user_id()][bob->device_id()] = request2;
 
-    carl->send_to_device("m.room.key_request", body1, [bob](RequestErr err) { check_error(err); });
-
-    alice->send_to_device("m.room_key_request", body2, [bob](RequestErr err) {
+    carl->send_to_device("m.room.key_request", body1, [bob, alice, body2](RequestErr err) {
         check_error(err);
 
-        SyncOpts opts;
-        opts.timeout = 0;
-        bob->sync(opts, [](const mtx::responses::Sync &res, RequestErr err) {
+        alice->send_to_device("m.room_key_request", body2, [bob](RequestErr err) {
             check_error(err);
 
-            EXPECT_EQ(res.to_device.events.size(), 2);
-            auto event =
-              std::get<mtx::events::DeviceEvent<msgs::KeyRequest>>(res.to_device.events[0]);
+            SyncOpts opts;
+            opts.timeout = 0;
+            bob->sync(opts, [](const mtx::responses::Sync &res, RequestErr err) {
+                check_error(err);
+
+                EXPECT_EQ(res.to_device.events.size(), 2);
+                auto event =
+                  std::get<mtx::events::DeviceEvent<msgs::KeyRequest>>(res.to_device.events[0]);
+            });
         });
     });
 
+    carl->close();
     alice->close();
     bob->close();
-    carl->close();
 }
 
 TEST(ClientAPI, RetrieveSingleEvent)
