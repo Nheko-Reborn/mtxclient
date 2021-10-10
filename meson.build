@@ -97,6 +97,7 @@ src = [
 	'lib/structs/responses/common.cpp',
 	'lib/structs/responses/create_room.cpp',
 	'lib/structs/responses/crypto.cpp',
+	'lib/structs/responses/device.cpp',
 	'lib/structs/responses/empty.cpp',
 	'lib/structs/responses/groups.cpp',
 	'lib/structs/responses/login.cpp',

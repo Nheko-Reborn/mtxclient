@@ -1083,6 +1083,19 @@ Client::add_room_to_group(const std::string &room_id, const std::string &group_i
 }
 
 //
+// Device related endpoints
+//
+
+void
+Client::query_devices(Callback<mtx::responses::QueryDevices> cb)
+{
+    get<mtx::responses::QueryDevices>("/client/r0/devices",
+                                      [cb](const mtx::responses::QueryDevices &res,
+                                           HeaderFields,
+                                           RequestErr err) { cb(res, err); });
+}
+
+//
 // Encryption related endpoints
 //
 

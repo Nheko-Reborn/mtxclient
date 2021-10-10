@@ -79,6 +79,7 @@ struct Versions;
 struct WellKnown;
 struct PublicRoomVisibility;
 struct PublicRooms;
+struct QueryDevices;
 namespace backup {
 struct SessionBackup;
 struct RoomKeysBackup;
@@ -580,6 +581,18 @@ public:
                            nlohmann::json &req,
                            Callback<nlohmann::json> cb);
     void add_room_to_group(const std::string &room_id, const std::string &group_id, ErrCallback cb);
+
+    //
+    // Device related endpoints.
+    //
+
+    //! List devices
+    void query_devices(Callback<mtx::responses::QueryDevices> cb);
+
+    /////! Rename device
+    // void rename_device(const mtx::requests::DeviceSigningUpload,
+    //                           UIAHandler uia_handler,
+    //                           ErrCallback cb);
 
     //
     // Encryption related endpoints.
