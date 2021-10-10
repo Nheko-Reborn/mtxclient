@@ -268,7 +268,6 @@ public:
                       Callback<mtx::responses::Register> cb);
 
     //! Register with an UIA handler so you don't need to repeat the request manually.
-    //! register failed with 401
     void registration(const std::string &user,
                       const std::string &pass,
                       UIAHandler uia_handler,
