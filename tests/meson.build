@@ -3,6 +3,7 @@ gtest_dep = dependency('gtest', main : true, fallback : ['gtest', 'gtest_main_de
 client_api = executable('client_api', 'client_api.cpp', dependencies: [matrix_client_dep, gtest_dep])
 media_api = executable('media_api', 'media_api.cpp', dependencies: [matrix_client_dep, gtest_dep])
 e2ee = executable('e2ee', 'e2ee.cpp', dependencies: [matrix_client_dep, gtest_dep])
+device = executable('device', 'device.cpp', dependencies: [matrix_client_dep, gtest_dep])
 utils = executable('utils', 'utils.cpp', dependencies: [matrix_client_dep, gtest_dep])
 pushrules = executable('pushrules', 'pushrules.cpp', dependencies: [matrix_client_dep, gtest_dep])
 connection = executable('connection', 'connection.cpp', dependencies: [matrix_client_dep, gtest_dep])
@@ -18,6 +19,7 @@ test('connection', connection, protocol: 'gtest', suite: 'network', is_parallel:
 test('client_api', client_api, protocol: 'gtest', suite: 'network', is_parallel: false, timeout: 300)
 test('media_api', media_api, protocol: 'gtest', suite: 'network', is_parallel: false,env: ['FIXTURE_PREFIX='+meson.current_source_dir()])
 test('e2ee', e2ee, protocol: 'gtest', suite: 'network', is_parallel: false)
+test('device', device, protocol: 'gtest', suite: 'network', is_parallel: false)
 test('pushrules', pushrules, protocol: 'gtest', suite: 'network', is_parallel: false)
 
 test('crypto', crypto, protocol: 'gtest', suite: 'nonetwork')

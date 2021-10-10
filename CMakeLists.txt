@@ -383,6 +383,13 @@ if(BUILD_LIB_TESTS)
 		GTest::Main)
 	target_include_directories(e2ee PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 
+	add_executable(device tests/device.cpp)
+	target_link_libraries(device
+		MatrixClient::MatrixClient
+		GTest::GTest
+		GTest::Main)
+	target_include_directories(device PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+
 	add_executable(utils tests/utils.cpp)
 	target_link_libraries(utils
 		MatrixClient::MatrixClient
@@ -451,6 +458,7 @@ if(BUILD_LIB_TESTS)
 	add_test(ClientAPI client_api)
 	add_test(MediaAPI media_api)
 	add_test(Encryption e2ee)
+	add_test(Devices device)
 	add_test(Utilities utils)
 	add_test(Pushrules pushrules)
 	add_test(Identifiers identifiers)
