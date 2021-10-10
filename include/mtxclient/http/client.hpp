@@ -80,6 +80,7 @@ struct WellKnown;
 struct PublicRoomVisibility;
 struct PublicRooms;
 struct QueryDevices;
+struct Device;
 namespace backup {
 struct SessionBackup;
 struct RoomKeysBackup;
@@ -588,6 +589,14 @@ public:
 
     //! List devices
     void query_devices(Callback<mtx::responses::QueryDevices> cb);
+
+    //! Gets information on a single device, by device id.
+    void get_device(const std::string &device_id, Callback<mtx::responses::Device> cb);
+
+    //! Updates the display name of the given device id.
+    void set_device_name(const std::string &device_id,
+                         const std::string &display_name,
+                         ErrCallback callback);
 
     /////! Rename device
     // void rename_device(const mtx::requests::DeviceSigningUpload,

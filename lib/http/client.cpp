@@ -1095,6 +1095,26 @@ Client::query_devices(Callback<mtx::responses::QueryDevices> cb)
                                            RequestErr err) { cb(res, err); });
 }
 
+void
+Client::get_device(const std::string &device_id, Callback<mtx::responses::Device> cb)
+{
+    get<mtx::responses::Device>(
+      "/client/r0/devices/" + mtx::client::utils::url_encode(device_id),
+      [cb](const mtx::responses::Device &res, HeaderFields, RequestErr err) { cb(res, err); });
+}
+
+void
+Client::set_device_name(const std::string &device_id,
+                        const std::string &display_name,
+                        ErrCallback callback)
+{
+    mtx::requests::DeviceUpdate req;
+    req.display_name = display_name;
+
+    put<mtx::requests::DeviceUpdate>(
+      "/client/r0/devices/" + mtx::client::utils::url_encode(device_id), req, callback);
+}
+
 //
 // Encryption related endpoints
 //
