@@ -562,7 +562,7 @@ uint32_to_uint8(uint8_t b[4], uint32_t u32)
     b[3] = (uint8_t)u32;
     b[2] = (uint8_t)(u32 >>= 8);
     b[1] = (uint8_t)(u32 >>= 8);
-    b[0] = (uint8_t)(u32 >>= 8);
+    b[0] = (uint8_t)(u32 >> 8);
 }
 } // namespace crypto
 } // namespace mtx
