@@ -127,6 +127,7 @@ to_json(json &obj, const AvatarUrl &request);
 //! Request payload for the `PUT /_matrix/client/r0/profile/{userId}/displayname` endpoint.
 struct DisplayName
 {
+    //! The new display name for this device. If not given, the display name is unchanged.
     std::string displayname;
 };
 
@@ -157,6 +158,15 @@ struct TypingNotification
 
 void
 to_json(json &obj, const TypingNotification &request);
+
+//! Request payload for the `PUT /_matrix/client/r0/devices/{deviceId}` endpoint.
+struct DeviceUpdate
+{
+    std::string display_name;
+};
+
+void
+to_json(json &obj, const DeviceUpdate &request);
 
 //! Request payload for the `PUT /_matrix/client/r0/directory/list/room/{roomId}` endpoint
 struct PublicRoomVisibility

@@ -154,6 +154,12 @@ to_json(json &obj, const PublicRooms &request)
 }
 
 void
+to_json(json &obj, const DeviceUpdate &request)
+{
+    obj["display_name"] = request.display_name;
+}
+
+void
 to_json(json &obj, const SignedOneTimeKey &request)
 {
     obj["key"]        = request.key;

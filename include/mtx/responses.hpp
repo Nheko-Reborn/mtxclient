@@ -7,6 +7,7 @@
 
 #include "responses/create_room.hpp"
 #include "responses/crypto.hpp"
+#include "responses/device.hpp"
 #include "responses/empty.hpp"
 #include "responses/groups.hpp"
 #include "responses/login.hpp"

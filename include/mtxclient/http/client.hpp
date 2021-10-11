@@ -79,6 +79,8 @@ struct Versions;
 struct WellKnown;
 struct PublicRoomVisibility;
 struct PublicRooms;
+struct QueryDevices;
+struct Device;
 namespace backup {
 struct SessionBackup;
 struct RoomKeysBackup;
@@ -268,7 +270,6 @@ public:
                       Callback<mtx::responses::Register> cb);
 
     //! Register with an UIA handler so you don't need to repeat the request manually.
-    //! register failed with 401
     void registration(const std::string &user,
                       const std::string &pass,
                       UIAHandler uia_handler,
@@ -581,6 +582,29 @@ public:
                            nlohmann::json &req,
                            Callback<nlohmann::json> cb);
     void add_room_to_group(const std::string &room_id, const std::string &group_id, ErrCallback cb);
+
+    //
+    // Device related endpoints.
+    //
+
+    //! List devices
+    void query_devices(Callback<mtx::responses::QueryDevices> cb);
+
+    //! Gets information on a single device, by device id.
+    void get_device(const std::string &device_id, Callback<mtx::responses::Device> cb);
+
+    //! Updates the display name of the given device id.
+    void set_device_name(const std::string &device_id,
+                         const std::string &display_name,
+                         ErrCallback callback);
+
+    //! Delete device
+    void delete_device(const std::string &device_id, UIAHandler uia_handler, ErrCallback cb);
+
+    //! Delete devices
+    void delete_devices(const std::vector<std::string> &device_ids,
+                        UIAHandler uia_handler,
+                        ErrCallback cb);
 
     //
     // Encryption related endpoints.
