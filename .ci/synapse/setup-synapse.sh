@@ -13,10 +13,10 @@ mkdir /data2/db
 chown postgres /data2/db
 
 # Initialise & start the database
-su -c '/usr/lib/postgresql/11/bin/initdb -D /data2/db -E "UTF-8" --lc-collate="C" --lc-ctype="C" --username=postgres' postgres
-su -c '/usr/lib/postgresql/11/bin/pg_ctl -w -D /data2/db start' postgres
-su -c '/usr/lib/postgresql/11/bin/createuser synapse_user' postgres
-su -c '/usr/lib/postgresql/11/bin/createdb -O synapse_user synapse' postgres
+su -c '/usr/lib/postgresql/13/bin/initdb -D /data2/db -E "UTF-8" --lc-collate="C" --lc-ctype="C" --username=postgres' postgres
+su -c '/usr/lib/postgresql/13/bin/pg_ctl -w -D /data2/db start' postgres
+su -c '/usr/lib/postgresql/13/bin/createuser synapse_user' postgres
+su -c '/usr/lib/postgresql/13/bin/createdb -O synapse_user synapse' postgres
 
 sed -i 's,/data,/data2,g' /start.py
 sed -i 's,/data,/data2,g' /conf/homeserver.yaml
