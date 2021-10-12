@@ -1580,8 +1580,12 @@ TEST(Groups, Profiles)
 
           EXPECT_GE(res.group_id.size(), random_group_id.size());
 
+          // all of those keys need to be in the request on synapse
           json profile;
-          profile["name"] = "Name";
+          profile["name"]              = "Name";
+          profile["avatar_url"]        = "";
+          profile["short_description"] = "short";
+          profile["long_description"]  = "long";
           alice->set_group_profile(
             "+" + random_group_id + ":" + server_name(),
             profile,
