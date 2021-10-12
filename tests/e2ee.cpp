@@ -93,7 +93,8 @@ TEST(Encryption, UploadIdentityKeys)
     // Make the request with the signed identity keys.
     alice->upload_keys(request, [](const mtx::responses::UploadKeys &res, RequestErr err) {
         check_error(err);
-        EXPECT_EQ(res.one_time_key_counts.size(), 0);
+        for (const auto &e : res.one_time_key_counts)
+            EXPECT_EQ(e.second, 0);
     });
 
     alice->close();
@@ -126,7 +127,7 @@ TEST(Encryption, UploadOneTimeKeys)
 
     alice->upload_keys(req, [](const mtx::responses::UploadKeys &res, RequestErr err) {
         check_error(err);
-        EXPECT_EQ(res.one_time_key_counts.size(), 1);
+        ASSERT_TRUE(res.one_time_key_counts.find("curve25519") != res.one_time_key_counts.end());
         EXPECT_EQ(res.one_time_key_counts.at("curve25519"), 5);
     });
 
@@ -490,10 +491,8 @@ TEST(Encryption, UploadCrossSigningKeys)
     auto request = olm_account->create_upload_keys_request(unused);
 
     // Make the request with the signed identity keys.
-    alice->upload_keys(request, [](const mtx::responses::UploadKeys &res, RequestErr err) {
-        check_error(err);
-        EXPECT_EQ(res.one_time_key_counts.size(), 0);
-    });
+    alice->upload_keys(
+      request, [](const mtx::responses::UploadKeys &, RequestErr err) { check_error(err); });
 
     auto xsign_keys = olm_account->create_crosssigning_keys();
     ASSERT_TRUE(xsign_keys.has_value());
@@ -550,10 +549,8 @@ TEST(Encryption, UploadOnlineBackup)
     auto request = olm_account->create_upload_keys_request(unused);
 
     // Make the request with the signed identity keys.
-    alice->upload_keys(request, [](const mtx::responses::UploadKeys &res, RequestErr err) {
-        check_error(err);
-        EXPECT_EQ(res.one_time_key_counts.size(), 0);
-    });
+    alice->upload_keys(
+      request, [](const mtx::responses::UploadKeys &, RequestErr err) { check_error(err); });
 
     auto xsign_keys = olm_account->create_crosssigning_keys();
     ASSERT_TRUE(xsign_keys.has_value());
