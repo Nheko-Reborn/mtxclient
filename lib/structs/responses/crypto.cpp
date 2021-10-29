@@ -43,8 +43,8 @@ to_json(nlohmann::json &obj, const QueryKeys &response)
 void
 from_json(const nlohmann::json &obj, KeySignaturesUpload &response)
 {
-    if (!obj.empty())
-        response.errors = obj.get<decltype(response.errors)>();
+    if (obj.contains("failures"))
+        response.errors = obj.at("failures").get<decltype(response.errors)>();
 }
 
 void
