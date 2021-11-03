@@ -2,6 +2,7 @@
 #include "mtx/log.hpp"
 #include "mtxclient/http/client_impl.hpp"
 
+#include <iostream>
 #include <mutex>
 #include <thread>
 
@@ -917,9 +918,10 @@ Client::registration(const std::string &user,
           "/client/r0/register",
           request,
           [cb, h](auto &r, RequestErr e) {
-              if (e && e->status_code == 401)
+              if (e && e->status_code == 401) {
+                  std::cout << e->matrix_error.error << "\n";
                   h.prompt(h, e->matrix_error.unauthorized);
-              else
+              } else
                   cb(r, e);
           },
           false);
@@ -941,6 +943,50 @@ Client::registration_token_validity(const std::string token,
       [cb](const mtx::responses::RegistrationTokenValidity &res, HeaderFields, RequestErr err) {
           cb(res, err);
       });
+}
+
+void
+Client::register_email_request_token(const requests::RequestEmailToken &r,
+                                     Callback<mtx::responses::RequestToken> cb)
+{
+    post("/client/r0/register/email/requestToken", r, cb);
+}
+void
+Client::verify_email_request_token(const requests::RequestEmailToken &r,
+                                   Callback<mtx::responses::RequestToken> cb)
+{
+    post("/client/r0/account/password/email/requestToken", r, cb);
+}
+
+void
+Client::register_phone_request_token(const requests::RequestMSISDNToken &r,
+                                     Callback<mtx::responses::RequestToken> cb)
+{
+    post("/client/r0/register/msisdn/requestToken", r, cb);
+}
+void
+Client::verify_phone_request_token(const requests::RequestMSISDNToken &r,
+                                   Callback<mtx::responses::RequestToken> cb)
+{
+    post("/client/r0/account/password/msisdn/requestToken", r, cb);
+}
+
+void
+Client::validate_submit_token(const std::string &url,
+                              const requests::IdentitySubmitToken &r,
+                              Callback<mtx::responses::Success> cb)
+{
+    // some dancing to send to an arbitrary, server provided url
+    auto callback = prepare_callback<mtx::responses::Success>(
+      [cb](const mtx::responses::Success &res, HeaderFields, RequestErr err) { cb(res, err); });
+    p->client.post(
+      url,
+      json(r).dump(),
+      "application/json",
+      [callback](const coeurl::Request &r) {
+          callback(r.response_headers(), r.response(), r.error_code(), r.response_code());
+      },
+      prepare_headers(false));
 }
 
 void

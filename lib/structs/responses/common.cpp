@@ -59,6 +59,21 @@ from_json(const nlohmann::json &obj, Version &response)
     response.version = obj.at("version");
 }
 
+void
+from_json(const nlohmann::json &obj, Success &success)
+{
+    success.success = obj.at("success");
+}
+
+void
+from_json(const nlohmann::json &obj, RequestToken &r)
+{
+    r.sid = obj.at("sid");
+
+    if (obj.contains("submit_url"))
+        r.submit_url = obj.at("submit_url");
+}
+
 namespace utils {
 
 void

@@ -66,6 +66,34 @@ struct Version
 
 void
 from_json(const nlohmann::json &obj, Version &response);
+
+//! Some endpoints return this to indicate success in addition to the http code.
+struct Success
+{
+    //! Required. Whether the validation was successful or not.
+    bool success;
+};
+
+void
+from_json(const nlohmann::json &obj, Success &response);
+
+//! Responses to the `/requestToken` endpoints
+struct RequestToken
+{
+    //! Required. The session ID. Session IDs are opaque strings that must consist entirely of the
+    //! characters [0-9a-zA-Z.=_-]. Their length must not exceed 255 characters and they must not be
+    //! empty.
+    std::string sid;
+    //! An optional field containing a URL where the client must submit the validation token to,
+    //! with identical parameters to the Identity Service API's POST /validate/email/submitToken
+    //! endpoint (without the requirement for an access token). The homeserver must send this token
+    //! to the user (if applicable), who should then be prompted to provide it to the client.
+    std::string submit_url;
+};
+
+void
+from_json(const nlohmann::json &obj, RequestToken &response);
+
 //! Different helper for parsing responses.
 namespace utils {
 //! Multiple account_data events.

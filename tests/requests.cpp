@@ -225,58 +225,48 @@ TEST(Requests, UserInteractiveAuth)
   "session": "<session ID>"
 })"_json);
 
-    a.content = auth::EmailIdentity{{
-      {"<identity server session id>",
-       "<identity server client secret>",
-       "<url of identity server authed with, e.g. 'matrix.org:8090'>",
-       "<access token previously registered with the identity server>"},
-    }};
+    a.content =
+      auth::EmailIdentity{"<identity server session id>",
+                          "<identity server client secret>",
+                          "<url of identity server authed with, e.g. 'matrix.org:8090'>",
+                          "<access token previously registered with the identity server>"};
 
     EXPECT_EQ(nlohmann::json(a), R"({
   "type": "m.login.email.identity",
-  "threepidCreds": [
-    {
-      "sid": "<identity server session id>",
-      "client_secret": "<identity server client secret>",
-      "id_server": "<url of identity server authed with, e.g. 'matrix.org:8090'>",
-      "id_access_token": "<access token previously registered with the identity server>"
-    }
-  ],
+  "threepid_creds": {
+    "sid": "<identity server session id>",
+    "client_secret": "<identity server client secret>",
+    "id_server": "<url of identity server authed with, e.g. 'matrix.org:8090'>",
+    "id_access_token": "<access token previously registered with the identity server>"
+  },
   "session": "<session ID>"
 })"_json);
 
-    a.content = auth::MSISDN{{
-      {"<identity server session id>",
-       "<identity server client secret>",
-       "<url of identity server authed with, e.g. 'matrix.org:8090'>",
-       "<access token previously registered with the identity server>"},
-    }};
+    a.content = auth::MSISDN{"<identity server session id>",
+                             "<identity server client secret>",
+                             "<url of identity server authed with, e.g. 'matrix.org:8090'>",
+                             "<access token previously registered with the identity server>"};
 
     EXPECT_EQ(nlohmann::json(a), R"({
   "type": "m.login.msisdn",
-  "threepidCreds": [
-    {
-      "sid": "<identity server session id>",
-      "client_secret": "<identity server client secret>",
-      "id_server": "<url of identity server authed with, e.g. 'matrix.org:8090'>",
-      "id_access_token": "<access token previously registered with the identity server>"
-    }
-  ],
+  "threepid_creds": {
+    "sid": "<identity server session id>",
+    "client_secret": "<identity server client secret>",
+    "id_server": "<url of identity server authed with, e.g. 'matrix.org:8090'>",
+    "id_access_token": "<access token previously registered with the identity server>"
+  },
   "session": "<session ID>"
 })"_json);
 
-    a.content = auth::MSISDN{{
-      {"<identity server session id>", "<identity server client secret>", "", ""},
-    }};
+    a.content =
+      auth::MSISDN{"<identity server session id>", "<identity server client secret>", "", ""};
 
     EXPECT_EQ(nlohmann::json(a), R"({
   "type": "m.login.msisdn",
-  "threepidCreds": [
-    {
-      "sid": "<identity server session id>",
-      "client_secret": "<identity server client secret>"
-    }
-  ],
+  "threepid_creds": {
+    "sid": "<identity server session id>",
+    "client_secret": "<identity server client secret>"
+  },
   "session": "<session ID>"
 })"_json);
 

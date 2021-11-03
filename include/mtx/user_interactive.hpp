@@ -172,15 +172,17 @@ struct ThreePIDCred
 //! Email authentication stage.
 struct EmailIdentity
 {
-    // The 3rd party ids
-    std::vector<ThreePIDCred> threepidCreds;
+    //! The 3rd party id
+    //! See https://github.com/matrix-org/matrix-doc/pull/3471 for context.
+    ThreePIDCred threepidCred;
 };
 
 //! SMS authentication stage.
 struct MSISDN
 {
-    // The 3rd party ids
-    std::vector<ThreePIDCred> threepidCreds;
+    //! The 3rd party id
+    //! See https://github.com/matrix-org/matrix-doc/pull/3471 for context.
+    ThreePIDCred threepidCred;
 };
 
 //! Registration token authentication stage.

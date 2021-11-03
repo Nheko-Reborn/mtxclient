@@ -55,10 +55,9 @@ struct AvatarUrl;
 struct ClaimKeys;
 struct ContentURI;
 struct CreateRoom;
+struct Device;
 struct EventId;
-struct RoomId;
 struct FilterId;
-struct Version;
 struct GroupId;
 struct GroupProfile;
 struct JoinedGroups;
@@ -69,18 +68,21 @@ struct LoginFlows;
 struct Messages;
 struct Notifications;
 struct Profile;
-struct QueryKeys;
-struct Register;
-struct RegistrationTokenValidity;
-struct Sync;
-struct TurnServer;
-struct UploadKeys;
-struct Versions;
-struct WellKnown;
 struct PublicRoomVisibility;
 struct PublicRooms;
 struct QueryDevices;
-struct Device;
+struct QueryKeys;
+struct Register;
+struct RegistrationTokenValidity;
+struct RequestToken;
+struct RoomId;
+struct Success;
+struct Sync;
+struct TurnServer;
+struct UploadKeys;
+struct Version;
+struct Versions;
+struct WellKnown;
 namespace backup {
 struct SessionBackup;
 struct RoomKeysBackup;
@@ -278,6 +280,25 @@ public:
     //! Check the validity of a registration token
     void registration_token_validity(const std::string token,
                                      Callback<mtx::responses::RegistrationTokenValidity> cb);
+
+    //! Validate an unused email address.
+    void register_email_request_token(const requests::RequestEmailToken &r,
+                                      Callback<mtx::responses::RequestToken> cb);
+    //! Validate a used email address.
+    void verify_email_request_token(const requests::RequestEmailToken &r,
+                                    Callback<mtx::responses::RequestToken> cb);
+
+    //! Validate an unused phone number.
+    void register_phone_request_token(const requests::RequestMSISDNToken &r,
+                                      Callback<mtx::responses::RequestToken> cb);
+    //! Validate a used phone number.
+    void verify_phone_request_token(const requests::RequestMSISDNToken &r,
+                                    Callback<mtx::responses::RequestToken> cb);
+
+    //! Validate ownership of an email address/phone number.
+    void validate_submit_token(const std::string &url,
+                               const requests::IdentitySubmitToken &r,
+                               Callback<mtx::responses::Success>);
 
     //! Paginate through the list of events that the user has been,
     //! or would have been notified about.

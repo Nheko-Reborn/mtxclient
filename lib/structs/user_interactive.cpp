@@ -110,12 +110,12 @@ to_json(nlohmann::json &obj, const Auth &auth)
                      obj["txn_id"] = token.txn_id;
                  },
                  [&obj](const auth::EmailIdentity &id) {
-                     obj["type"]          = auth_types::email_identity;
-                     obj["threepidCreds"] = id.threepidCreds;
+                     obj["type"]           = auth_types::email_identity;
+                     obj["threepid_creds"] = id.threepidCred;
                  },
                  [&obj](const auth::MSISDN &id) {
-                     obj["type"]          = auth_types::msisdn;
-                     obj["threepidCreds"] = id.threepidCreds;
+                     obj["type"]           = auth_types::msisdn;
+                     obj["threepid_creds"] = id.threepidCred;
                  },
                  [&obj](const auth::RegistrationToken &registration_token) {
                      obj["type"]  = auth_types::registration_token;

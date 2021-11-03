@@ -85,6 +85,31 @@ to_json(json &obj, const Login &request)
 }
 
 void
+to_json(json &obj, const RequestEmailToken &request)
+{
+    obj["client_secret"] = request.client_secret;
+    obj["email"]         = request.email;
+    obj["send_attempt"]  = request.send_attempt;
+}
+
+void
+to_json(json &obj, const RequestMSISDNToken &request)
+{
+    obj["client_secret"] = request.client_secret;
+    obj["country"]       = request.country;
+    obj["phone_number"]  = request.phone_number;
+    obj["send_attempt"]  = request.send_attempt;
+}
+
+void
+to_json(json &obj, const IdentitySubmitToken &request)
+{
+    obj["sid"]           = request.sid;
+    obj["client_secret"] = request.client_secret;
+    obj["token"]         = request.token;
+}
+
+void
 to_json(json &obj, const AvatarUrl &request)
 {
     obj["avatar_url"] = request.avatar_url;
