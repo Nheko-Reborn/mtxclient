@@ -258,19 +258,6 @@ public:
     //! Call set_server with the returned homeserver url after this
     void well_known(Callback<mtx::responses::WellKnown> cb);
 
-    //! Register
-    //! If this fails with 401, continue with the flows returned in the error struct
-    void registration(const std::string &user,
-                      const std::string &pass,
-                      Callback<mtx::responses::Register> cb);
-
-    //! Register and additionally provide an auth dict. This needs to be called, if the initial
-    //! register failed with 401
-    void registration(const std::string &user,
-                      const std::string &pass,
-                      const user_interactive::Auth &auth,
-                      Callback<mtx::responses::Register> cb);
-
     //! Register with an UIA handler so you don't need to repeat the request manually.
     void registration(const std::string &user,
                       const std::string &pass,

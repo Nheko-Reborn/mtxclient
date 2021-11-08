@@ -24,10 +24,16 @@ TEST(ClientAPI, Register)
 {
     auto user = make_test_client();
 
-    user->registration("alice", "secret", [](const mtx::responses::Register &, RequestErr err) {
-        ASSERT_TRUE(err);
-        EXPECT_EQ(mtx::errors::to_string(err->matrix_error.errcode), "M_USER_IN_USE");
-    });
+    user->registration("alice",
+                       "secret",
+                       mtx::http::UIAHandler(
+                         [](const mtx::http::UIAHandler &,
+                            const mtx::user_interactive::Unauthorized &) { EXPECT_TRUE(false); }),
+                       [](const mtx::responses::Register &, RequestErr err) {
+                           ASSERT_TRUE(err);
+                           EXPECT_EQ(mtx::errors::to_string(err->matrix_error.errcode),
+                                     "M_USER_IN_USE");
+                       });
 
     auto username = utils::random_token(10, false);
 
@@ -37,23 +43,30 @@ TEST(ClientAPI, Register)
     }
 
     user->registration(
-      username, "secret", [user, username](const mtx::responses::Register &, RequestErr err) {
+      username,
+      "secret",
+      mtx::http::UIAHandler([](const mtx::http::UIAHandler &h,
+                               const mtx::user_interactive::Unauthorized &unauthorized) {
+          EXPECT_EQ(unauthorized.flows.size(), 1);
+          EXPECT_EQ(unauthorized.flows[0].stages[0], "m.login.dummy");
+
+          mtx::user_interactive::Auth auth{unauthorized.session,
+                                           mtx::user_interactive::auth::Dummy{}};
+          h.next(auth);
+      }),
+      [user, username](const mtx::responses::Register &res, RequestErr err) {
           if (!err || err->matrix_error.unauthorized.flows.size() == 0)
               return;
 
-          EXPECT_EQ(err->matrix_error.unauthorized.flows.size(), 1);
-          EXPECT_EQ(err->matrix_error.unauthorized.flows[0].stages[0], "m.login.dummy");
+          check_error(err);
+          const auto user_id = "@" + username + ":" + server_name();
+          EXPECT_EQ(res.user_id.to_string(), user_id);
 
-          user->registration(
-            username,
-            "secret",
-            {err->matrix_error.unauthorized.session, mtx::user_interactive::auth::Dummy{}},
-            [username](const mtx::responses::Register &res, RequestErr err) {
-                const auto user_id = "@" + username + ":" + server_name();
-
-                check_error(err);
-                EXPECT_EQ(res.user_id.to_string(), user_id);
-            });
+          EXPECT_EQ(user->user_id().to_string(), user_id);
+          EXPECT_FALSE(user->access_token().empty());
+          EXPECT_EQ(user->access_token(), res.access_token);
+          EXPECT_FALSE(user->device_id().empty());
+          EXPECT_EQ(user->device_id(), res.device_id);
       });
 
     user->close();

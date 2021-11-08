@@ -883,27 +883,6 @@ Client::redact_event(const std::string &room_id,
 void
 Client::registration(const std::string &user,
                      const std::string &pass,
-                     Callback<mtx::responses::Register> callback)
-{
-    nlohmann::json req = {{"username", user}, {"password", pass}};
-
-    post<nlohmann::json, mtx::responses::Register>("/client/r0/register", req, callback, false);
-}
-
-void
-Client::registration(const std::string &user,
-                     const std::string &pass,
-                     const mtx::user_interactive::Auth &auth,
-                     Callback<mtx::responses::Register> callback)
-{
-    nlohmann::json req = {{"username", user}, {"password", pass}, {"auth", auth}};
-
-    post<nlohmann::json, mtx::responses::Register>("/client/r0/register", req, callback, false);
-}
-
-void
-Client::registration(const std::string &user,
-                     const std::string &pass,
                      UIAHandler uia_handler,
                      Callback<mtx::responses::Register> cb)
 {
@@ -917,12 +896,18 @@ Client::registration(const std::string &user,
         post<nlohmann::json, mtx::responses::Register>(
           "/client/r0/register",
           request,
-          [cb, h](auto &r, RequestErr e) {
+          [this, cb, h](auto &r, RequestErr e) {
               if (e && e->status_code == 401) {
                   std::cout << e->matrix_error.error << "\n";
                   h.prompt(h, e->matrix_error.unauthorized);
-              } else
+              } else {
+                  if (!e && !r.access_token.empty()) {
+                      this->user_id_      = r.user_id;
+                      this->device_id_    = r.device_id;
+                      this->access_token_ = r.access_token;
+                  }
                   cb(r, e);
+              }
           },
           false);
     };
