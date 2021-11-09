@@ -2,6 +2,17 @@
 
 #include <nlohmann/json.hpp>
 
+namespace {
+template<class T>
+T
+safe_get(const nlohmann::json &obj, const std::string &name, T default_val = {})
+try {
+    return obj.value(name, default_val);
+} catch (const nlohmann::json::type_error &) {
+    return default_val;
+}
+}
+
 namespace mtx {
 namespace events {
 namespace msc2545 {
@@ -9,7 +20,7 @@ void
 from_json(const nlohmann::json &obj, PackImage &content)
 {
     content.url  = obj.at("url");
-    content.body = obj.value("body", "");
+    content.body = safe_get<std::string>(obj, "body", "");
     if (obj.contains("info"))
         content.info = obj.at("info").get<mtx::common::ImageInfo>();
 
@@ -26,11 +37,11 @@ from_json(const nlohmann::json &obj, PackImage &content)
 void
 from_json(const nlohmann::json &obj, ImagePack::PackDescription &content)
 {
-    content.avatar_url   = obj.value("avatar_url", "");
-    content.display_name = obj.value("display_name", "");
-    content.attribution  = obj.value("attribution", "");
+    content.avatar_url   = safe_get<std::string>(obj, "avatar_url", "");
+    content.display_name = safe_get<std::string>(obj, "display_name", "");
+    content.attribution  = safe_get<std::string>(obj, "attribution", "");
 
-    if (obj.contains("usage")) {
+    if (obj.contains("usage") && obj.at("usage").is_array()) {
         for (const auto &e : obj.at("usage")) {
             if (e == "sticker")
                 content.usage.set(PackUsage::Sticker);
