@@ -122,7 +122,7 @@ key_to_recoverykey(const BinaryBuf &key)
     buf.back() = parity;
 
     return bin2base58(to_string(buf));
-};
+}
 
 std::string
 decrypt(const mtx::secret_storage::AesHmacSha2EncryptedData &data,
