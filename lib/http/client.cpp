@@ -54,7 +54,7 @@ coeurl::Headers
 mtx::http::Client::prepare_headers(bool requires_auth)
 {
     coeurl::Headers headers;
-    headers["User-Agent"] = "mtxclient v0.5.1";
+    headers["User-Agent"] = "mtxclient v0.6.0";
 
     if (requires_auth && !access_token_.empty())
         headers["Authorization"] = "Bearer " + access_token();

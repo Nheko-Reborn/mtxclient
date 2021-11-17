@@ -38,12 +38,12 @@ option(USE_BUNDLED_SPDLOG "Use the bundled version of spdlog." ${HUNTER_ENABLED}
 
 if (CMAKE_VERSION VERSION_GREATER_EQUAL 3.12)
 project(matrix_client
-	VERSION 0.5.1
+	VERSION 0.6.0
 	DESCRIPTION "Client API library for Matrix."
 	HOMEPAGE_URL https://github.com/Nheko-Reborn/mtxclient)
 else()
 project(matrix_client
-	VERSION 0.5.1
+	VERSION 0.6.0
 	DESCRIPTION "Client API library for Matrix.")
 endif()
 
@@ -104,7 +104,7 @@ if(USE_BUNDLED_OLM)
 	FetchContent_Declare(
 		Olm
 		GIT_REPOSITORY https://gitlab.matrix.org/matrix-org/olm.git
-		GIT_TAG        3.1.4
+		GIT_TAG        3.2.6
 		)
 	FetchContent_MakeAvailable(Olm)
 else()
