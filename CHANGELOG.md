@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.6.0] -- Unreleased
+## [0.6.0] -- 2021-11-17
 
 * Use new login parameters instead of deprecated user
 * Workaround servers returning null for .well-known in /login
