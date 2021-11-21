@@ -6,6 +6,7 @@
 #include <variant>
 
 #include "mtx/events.hpp"
+#include "mtx/events/account_data/direct.hpp"
 #include "mtx/events/account_data/fully_read.hpp"
 #include "mtx/events/aliases.hpp"
 #include "mtx/events/avatar.hpp"
@@ -75,6 +76,7 @@ using DeviceEvents = std::variant<events::DeviceEvent<msgs::RoomKey>,
 //! Collection of room specific account data
 using RoomAccountDataEvents =
   std::variant<events::AccountDataEvent<account_data::Tags>,
+               events::AccountDataEvent<account_data::Direct>,
                events::AccountDataEvent<account_data::FullyRead>,
                events::AccountDataEvent<pushrules::GlobalRuleset>,
                events::AccountDataEvent<account_data::nheko_extensions::HiddenEvents>,
@@ -350,6 +352,9 @@ constexpr inline EventType account_data_content_to_type<mtx::events::msc2545::Im
 template<>
 constexpr inline EventType account_data_content_to_type<mtx::events::account_data::Tags> =
   EventType::Tag;
+template<>
+constexpr inline EventType account_data_content_to_type<mtx::events::account_data::Direct> =
+  EventType::Direct;
 template<>
 constexpr inline EventType
   account_data_content_to_type<mtx::events::account_data::nheko_extensions::HiddenEvents> =

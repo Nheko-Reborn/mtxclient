@@ -217,6 +217,7 @@ target_sources(matrix_client
 	lib/structs/events/topic.cpp
 	lib/structs/events/unknown.cpp
 	lib/structs/events/voip.cpp
+	lib/structs/events/account_data/direct.cpp
 	lib/structs/events/account_data/fully_read.cpp
 	lib/structs/events/ephemeral/receipt.cpp
 	lib/structs/events/ephemeral/typing.cpp

@@ -97,6 +97,7 @@ MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::EphemeralEvent, ephemeral::Typing)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::EphemeralEvent, ephemeral::Receipt)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::EphemeralEvent, Unknown)
 
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::AccountDataEvent, mtx::events::account_data::Direct)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::AccountDataEvent, mtx::events::account_data::Tags)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::AccountDataEvent, mtx::events::account_data::FullyRead)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::AccountDataEvent, pushrules::GlobalRuleset)
@@ -327,6 +328,7 @@ from_json(const json &obj, TimelineEvent &e)
     case events::EventType::RoomKey:          // not part of the timeline
     case events::EventType::ForwardedRoomKey: // not part of the timeline
     case events::EventType::RoomKeyRequest:   // Not part of the timeline
+    case events::EventType::Direct:           // Not part of the timeline
     case events::EventType::Tag:              // Not part of the timeline
     case events::EventType::Presence:         // Not part of the timeline
     case events::EventType::PushRules:        // Not part of the timeline

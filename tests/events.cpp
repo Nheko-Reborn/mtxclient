@@ -1317,7 +1317,29 @@ TEST(Ephemeral, Receipt)
     EXPECT_EQ(j.dump(), json(event).dump());
 }
 
-TEST(Ephemeral, FullyRead)
+TEST(AccountData, Direct)
+{
+    json j = R"({
+      "content": {
+        "@bob:example.com": [
+           "!abcdefgh:example.com",
+           "!hgfedcba:example.com"
+         ]
+       },
+       "type": "m.direct"
+     })"_json;
+
+    ns::AccountDataEvent<ns::account_data::Direct> event = j;
+
+    ASSERT_EQ(event.content.user_to_rooms.size(), 1);
+    ASSERT_EQ(event.content.user_to_rooms.count("@bob:example.com"), 1);
+    ASSERT_EQ(event.content.user_to_rooms["@bob:example.com"].size(), 2);
+    ASSERT_EQ(event.content.user_to_rooms["@bob:example.com"][0], "!abcdefgh:example.com");
+    ASSERT_EQ(event.content.user_to_rooms["@bob:example.com"][1], "!hgfedcba:example.com");
+    EXPECT_EQ(j.dump(), json(event).dump());
+}
+
+TEST(AccountData, FullyRead)
 {
     json j = R"({
             "content": {

@@ -107,6 +107,14 @@ parse_room_account_data_events(
         //}
 
         switch (type) {
+        case events::EventType::Direct: {
+            try {
+                container.emplace_back(events::AccountDataEvent<Direct>(e));
+            } catch (json::exception &err) {
+                log_error(err, e);
+            }
+            break;
+        }
         case events::EventType::Tag: {
             try {
                 container.emplace_back(events::AccountDataEvent<Tags>(e));
@@ -650,6 +658,7 @@ parse_timeline_events(const json &events,
             case events::EventType::RoomKey:          // Not part of timeline or state
             case events::EventType::ForwardedRoomKey: // Not part of timeline or state
             case events::EventType::RoomKeyRequest:   // Not part of the timeline
+            case events::EventType::Direct:           // Not part of the timeline or state
             case events::EventType::Tag:              // Not part of the timeline or state
             case events::EventType::Presence:         // Not part of the timeline or state
             case events::EventType::PushRules:        // Not part of the timeline or state
@@ -1010,6 +1019,7 @@ parse_state_events(const json &events,
             case events::EventType::RoomMessage:
             case events::EventType::RoomPinnedEvents:
             case events::EventType::RoomRedaction:
+            case events::EventType::Direct:    // Not part of the timeline or state
             case events::EventType::Tag:       // Not part of the timeline or state
             case events::EventType::Presence:  // Not part of the timeline or state
             case events::EventType::PushRules: // Not part of the timeline or state
@@ -1204,6 +1214,7 @@ parse_stripped_events(const json &events,
             case events::EventType::ForwardedRoomKey: // Not part of timeline or state
             case events::EventType::RoomKeyRequest:   // Not part of the timeline or state
             case events::EventType::RoomPinnedEvents:
+            case events::EventType::Direct:    // Not part of the timeline or state
             case events::EventType::Tag:       // Not part of the timeline or state
             case events::EventType::Presence:  // Not part of the timeline or state
             case events::EventType::PushRules: // Not part of the timeline or state

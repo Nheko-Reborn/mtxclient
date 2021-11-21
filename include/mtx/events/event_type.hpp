@@ -108,6 +108,8 @@ enum class EventType
     Receipt,
     //! m.fully_read
     FullyRead,
+    //! m.direct
+    Direct,
 
     // custom events
     // im.nheko.hidden_events

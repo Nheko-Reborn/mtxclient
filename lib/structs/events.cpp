@@ -80,6 +80,8 @@ getEventType(const std::string &type)
 
     else if (type == "m.tag")
         return EventType::Tag;
+    else if (type == "m.direct")
+        return EventType::Direct;
     else if (type == "m.presence")
         return EventType::Presence;
     else if (type == "m.push_rules")
@@ -188,6 +190,8 @@ to_string(EventType type)
 
     case EventType::Tag:
         return "m.tag";
+    case EventType::Direct:
+        return "m.direct";
     case EventType::Presence:
         return "m.presence";
     case EventType::PushRules:
