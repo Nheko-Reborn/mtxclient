@@ -1,4 +1,7 @@
 #include "mtx/errors.hpp"
+#include "mtxclient/http/errors.hpp"
+
+#include <coeurl/errors.hpp>
 
 #include <nlohmann/json.hpp>
 
@@ -107,4 +110,10 @@ from_json(const nlohmann::json &obj, Error &error)
     if (obj.contains("flows"))
         error.unauthorized = obj.get<user_interactive::Unauthorized>();
 }
+}
+
+const char *
+mtx::http::ClientError::error_code_string() const
+{
+    return coeurl::to_string(static_cast<CURLcode>(error_code));
 }

@@ -19,6 +19,8 @@ struct ClientError
     int status_code;
     //! Parsing response error.
     std::string parse_error;
+
+    const char *error_code_string() const;
 };
 } // namespace http
 } // namespace mtx

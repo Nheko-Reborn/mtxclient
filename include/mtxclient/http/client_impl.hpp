@@ -122,7 +122,7 @@ mtx::http::Client::prepare_callback(HeadersCallback<Response> callback)
                                      int err_code,
                                      int status_code) {
         Response response_data;
-        mtx::http::ClientError client_error;
+        mtx::http::ClientError client_error{};
 
         if (err_code) {
             client_error.error_code = err_code;
