@@ -227,6 +227,7 @@ TEST(Pushrules, GlobalRuleset)
     EXPECT_EQ(rules.global.sender.size(), 0);
     EXPECT_EQ(rules.global.underride.size(), 6);
     EXPECT_EQ(rules.global.underride[0].conditions.at(0).key, "type");
+    EXPECT_EQ(rules.global.content[0].rule_id, ".m.rule.contains_user_name");
 }
 
 TEST(Pushrules, GetGlobalRuleset)
