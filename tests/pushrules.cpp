@@ -33,7 +33,6 @@ TEST(Pushrules, GlobalRuleset)
           }
         ],
         "default": true,
-        "enabled": true,
         "pattern": "alice",
         "rule_id": ".m.rule.contains_user_name"
       }
@@ -43,7 +42,6 @@ TEST(Pushrules, GlobalRuleset)
         "actions": [
           "dont_notify"
         ],
-        "conditions": [],
         "default": true,
         "enabled": false,
         "rule_id": ".m.rule.master"
@@ -60,7 +58,6 @@ TEST(Pushrules, GlobalRuleset)
           }
         ],
         "default": true,
-        "enabled": true,
         "rule_id": ".m.rule.suppress_notices"
       }
     ],
@@ -87,7 +84,6 @@ TEST(Pushrules, GlobalRuleset)
           }
         ],
         "default": true,
-        "enabled": true,
         "rule_id": ".m.rule.call"
       },
       {
@@ -107,7 +103,6 @@ TEST(Pushrules, GlobalRuleset)
           }
         ],
         "default": true,
-        "enabled": true,
         "rule_id": ".m.rule.contains_display_name"
       },
       {
@@ -134,7 +129,6 @@ TEST(Pushrules, GlobalRuleset)
           }
         ],
         "default": true,
-        "enabled": true,
         "rule_id": ".m.rule.room_one_to_one"
       },
       {
@@ -167,7 +161,6 @@ TEST(Pushrules, GlobalRuleset)
           }
         ],
         "default": true,
-        "enabled": true,
         "rule_id": ".m.rule.invite_for_me"
       },
       {
@@ -186,7 +179,6 @@ TEST(Pushrules, GlobalRuleset)
           }
         ],
         "default": true,
-        "enabled": true,
         "rule_id": ".m.rule.member_event"
       },
       {
@@ -205,7 +197,6 @@ TEST(Pushrules, GlobalRuleset)
           }
         ],
         "default": true,
-        "enabled": true,
         "rule_id": ".m.rule.message"
       }
     ]
@@ -228,6 +219,7 @@ TEST(Pushrules, GlobalRuleset)
     EXPECT_EQ(rules.global.underride.size(), 6);
     EXPECT_EQ(rules.global.underride[0].conditions.at(0).key, "type");
     EXPECT_EQ(rules.global.content[0].rule_id, ".m.rule.contains_user_name");
+    EXPECT_EQ(data, json(rules));
 }
 
 TEST(Pushrules, GetGlobalRuleset)
