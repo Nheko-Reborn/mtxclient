@@ -98,6 +98,7 @@ to_json(nlohmann::json &obj, const PushRule &rule)
 void
 from_json(const nlohmann::json &obj, PushRule &rule)
 {
+    rule.rule_id  = obj.value("rule_id", "");
     rule.default_ = obj.value("default", false);
     rule.enabled  = obj.value("enabled", true);
 
