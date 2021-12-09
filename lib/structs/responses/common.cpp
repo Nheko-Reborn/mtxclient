@@ -644,6 +644,15 @@ parse_timeline_events(const json &events,
 
                 break;
             }
+            case events::EventType::RoomPinnedEvents: {
+                try {
+                    container.emplace_back(events::StateEvent<events::state::PinnedEvents>(e));
+                } catch (json::exception &err) {
+                    log_error(err, e);
+                }
+
+                break;
+            }
             case events::EventType::Unsupported: {
                 try {
                     container.emplace_back(events::RoomEvent<events::Unknown>(e));
@@ -654,7 +663,6 @@ parse_timeline_events(const json &events,
                 break;
             }
             case events::EventType::KeyVerificationRequest:
-            case events::EventType::RoomPinnedEvents:
             case events::EventType::RoomKey:          // Not part of timeline or state
             case events::EventType::ForwardedRoomKey: // Not part of timeline or state
             case events::EventType::RoomKeyRequest:   // Not part of the timeline
@@ -1001,6 +1009,15 @@ parse_state_events(const json &events,
 
                 break;
             }
+            case events::EventType::RoomPinnedEvents: {
+                try {
+                    container.emplace_back(events::StateEvent<events::state::PinnedEvents>(e));
+                } catch (json::exception &err) {
+                    log_error(err, e);
+                }
+
+                break;
+            }
             case events::EventType::Unsupported: {
                 try {
                     container.emplace_back(events::StateEvent<events::Unknown>(e));
@@ -1017,7 +1034,6 @@ parse_state_events(const json &events,
             case events::EventType::ForwardedRoomKey: // Not part of timeline or state
             case events::EventType::RoomKeyRequest:   // Not part of the timeline or state
             case events::EventType::RoomMessage:
-            case events::EventType::RoomPinnedEvents:
             case events::EventType::RoomRedaction:
             case events::EventType::Direct:    // Not part of the timeline or state
             case events::EventType::Tag:       // Not part of the timeline or state
@@ -1195,6 +1211,15 @@ parse_stripped_events(const json &events,
 
                 break;
             }
+            case events::EventType::RoomPinnedEvents: {
+                try {
+                    container.emplace_back(events::StrippedEvent<events::state::PinnedEvents>(e));
+                } catch (json::exception &err) {
+                    log_error(err, e);
+                }
+
+                break;
+            }
             case events::EventType::Unsupported: {
                 try {
                     container.emplace_back(events::StrippedEvent<events::Unknown>(e));
@@ -1213,11 +1238,10 @@ parse_stripped_events(const json &events,
             case events::EventType::RoomKey:          // Not part of timeline or state
             case events::EventType::ForwardedRoomKey: // Not part of timeline or state
             case events::EventType::RoomKeyRequest:   // Not part of the timeline or state
-            case events::EventType::RoomPinnedEvents:
-            case events::EventType::Direct:    // Not part of the timeline or state
-            case events::EventType::Tag:       // Not part of the timeline or state
-            case events::EventType::Presence:  // Not part of the timeline or state
-            case events::EventType::PushRules: // Not part of the timeline or state
+            case events::EventType::Direct:           // Not part of the timeline or state
+            case events::EventType::Tag:              // Not part of the timeline or state
+            case events::EventType::Presence:         // Not part of the timeline or state
+            case events::EventType::PushRules:        // Not part of the timeline or state
             case events::EventType::KeyVerificationCancel:
             case events::EventType::KeyVerificationRequest:
             case events::EventType::KeyVerificationStart:

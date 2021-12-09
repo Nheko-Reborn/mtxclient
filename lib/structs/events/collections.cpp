@@ -191,6 +191,10 @@ from_json(const json &obj, TimelineEvent &e)
         e.data = events::StateEvent<Topic>(obj);
         break;
     }
+    case events::EventType::RoomPinnedEvents: {
+        e.data = events::StateEvent<PinnedEvents>(obj);
+        break;
+    }
     case events::EventType::SpaceChild: {
         e.data = events::StateEvent<space::Child>(obj);
         break;
@@ -324,7 +328,6 @@ from_json(const json &obj, TimelineEvent &e)
         e.data = events::RoomEvent<events::Unknown>(obj);
         break;
     }
-    case events::EventType::RoomPinnedEvents:
     case events::EventType::RoomKey:          // not part of the timeline
     case events::EventType::ForwardedRoomKey: // not part of the timeline
     case events::EventType::RoomKeyRequest:   // Not part of the timeline
