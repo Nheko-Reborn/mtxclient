@@ -24,6 +24,9 @@ if (HAVE_STD_FILESYSTEM)
   endif()
 endif()
 
+add_executable(memberstats memberstats.cpp)
+target_link_libraries(memberstats MatrixClient::MatrixClient)
+
 add_executable(simple_bot simple_bot.cpp)
 target_link_libraries(simple_bot MatrixClient::MatrixClient)
 

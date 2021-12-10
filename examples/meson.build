@@ -14,6 +14,11 @@ media_downloader = executable('media_downloader',
     )
 endif
 
+simple_bot = executable('memberstats',
+    'memberstats.cpp',
+    dependencies: [matrix_client_dep],
+    include_directories : '../tests'
+    )
 simple_bot = executable('simple_bot',
     'simple_bot.cpp',
     dependencies: [matrix_client_dep],
