@@ -65,6 +65,7 @@ struct KeyChanges;
 struct KeySignaturesUpload;
 struct Login;
 struct LoginFlows;
+struct Members;
 struct Messages;
 struct Notifications;
 struct Profile;
@@ -408,6 +409,13 @@ public:
 
     //! Perform sync.
     void sync(const SyncOpts &opts, Callback<mtx::responses::Sync> cb);
+
+    //! List members in a room.
+    void members(const std::string &room_id,
+                 Callback<mtx::responses::Members> cb,
+                 const std::string &at                                        = "",
+                 std::optional<mtx::events::state::Membership> membership     = {},
+                 std::optional<mtx::events::state::Membership> not_membership = {});
 
     //! Paginate through room messages.
     void messages(const MessagesOpts &opts, Callback<mtx::responses::Messages> cb);

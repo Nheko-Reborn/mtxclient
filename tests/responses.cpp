@@ -399,6 +399,38 @@ TEST(Responses, SyncWithEncryption)
 
 TEST(Responses, Rooms) {}
 
+TEST(Responses, Members)
+{
+    json data1 = R"(
+		{
+      "chunk": [
+        {
+          "content": {
+            "avatar_url": "mxc://example.org/SEsfnsuifSDFSSEF",
+            "displayname": "Alice Margatroid",
+            "membership": "join",
+            "reason": "Looking for support"
+          },
+          "event_id": "$143273582443PhrSn:example.org",
+          "origin_server_ts": 1432735824653,
+          "room_id": "!636q39766251:example.com",
+          "sender": "@example:example.org",
+          "state_key": "@alice:example.org",
+          "type": "m.room.member",
+          "unsigned": {
+            "age": 1234
+          }
+        }
+      ]
+    })"_json;
+
+    Members members = data1;
+
+    // It this succeeds parsing was done successfully
+    EXPECT_EQ(members.chunk.size(), 1);
+    EXPECT_EQ(members.chunk[0].content.display_name, "Alice Margatroid");
+}
+
 TEST(Responses, Profile)
 {
     json response = R"({

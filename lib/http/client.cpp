@@ -822,6 +822,32 @@ Client::get_event(const std::string &room_id,
 }
 
 void
+Client::members(const std::string &room_id,
+                Callback<mtx::responses::Members> cb,
+                const std::string &at,
+                std::optional<mtx::events::state::Membership> membership,
+                std::optional<mtx::events::state::Membership> not_membership)
+{
+    std::map<std::string, std::string> params;
+
+    std::string query;
+
+    if (!at.empty())
+        params.emplace("at", at);
+    if (membership)
+        params.emplace("membership", events::state::membershipToString(*membership));
+    if (not_membership)
+        params.emplace("not_membership", events::state::membershipToString(*not_membership));
+
+    const auto api_path = "/client/r0/rooms/" + mtx::client::utils::url_encode(room_id) +
+                          "/members?" + client::utils::query_params(params);
+
+    get<mtx::responses::Members>(
+      api_path,
+      [cb](const mtx::responses::Members &res, HeaderFields, RequestErr err) { cb(res, err); });
+}
+
+void
 Client::messages(const MessagesOpts &opts, Callback<mtx::responses::Messages> callback)
 {
     std::map<std::string, std::string> params;

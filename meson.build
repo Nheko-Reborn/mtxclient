@@ -103,6 +103,7 @@ src = [
 	'lib/structs/responses/groups.cpp',
 	'lib/structs/responses/login.cpp',
 	'lib/structs/responses/media.cpp',
+	'lib/structs/responses/members.cpp',
 	'lib/structs/responses/messages.cpp',
 	'lib/structs/responses/notifications.cpp',
 	'lib/structs/responses/profile.cpp',

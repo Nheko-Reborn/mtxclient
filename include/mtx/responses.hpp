@@ -12,6 +12,7 @@
 #include "responses/groups.hpp"
 #include "responses/login.hpp"
 #include "responses/media.hpp"
+#include "responses/members.hpp"
 #include "responses/messages.hpp"
 #include "responses/notifications.hpp"
 #include "responses/profile.hpp"
