@@ -25,4 +25,3 @@ from_json(const nlohmann::json &obj, Members &res)
 
 }
 }
-

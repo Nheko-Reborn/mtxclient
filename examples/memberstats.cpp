@@ -19,7 +19,6 @@ using namespace mtx::client;
 using namespace mtx::http;
 using namespace mtx::events;
 
-
 namespace {
 std::shared_ptr<Client> client = nullptr;
 }
@@ -88,31 +87,29 @@ member_fetch_loop(Memberevent current)
         }
     }
 
-    client->get_event(roomid,
-                      current.unsigned_data.replaces_state,
-                      [](mtx::events::collections::TimelineEvents ev, RequestErr err) mutable {
-                          if (err) {
-                              cerr << "There was an error fetching a memberevent: ";
-                              print_errors(err);
-                          }
-                          else if (auto event = std::get_if<Memberevent>(&ev)) {
-                              member_fetch_loop(std::move(*event));
-                              return;
-                          }
+    client->get_event(
+      roomid,
+      current.unsigned_data.replaces_state,
+      [](mtx::events::collections::TimelineEvents ev, RequestErr err) mutable {
+          if (err) {
+              cerr << "There was an error fetching a memberevent: ";
+              print_errors(err);
+          } else if (auto event = std::get_if<Memberevent>(&ev)) {
+              member_fetch_loop(std::move(*event));
+              return;
+          }
 
-                          cerr << "Event wrong type, skipping: "
-                               << std::visit([](auto raw) { return nlohmann::json(raw).dump(2); },
-                                             ev)
-                               << "\n";
-                          std::cerr << "#";
+          cerr << "Event wrong type, skipping: "
+               << std::visit([](auto raw) { return nlohmann::json(raw).dump(2); }, ev) << "\n";
+          std::cerr << "#";
 
-                          if (members.empty())
-                              return;
+          if (members.empty())
+              return;
 
-                          auto first = members.back();
-                          members.pop_back();
-                          member_fetch_loop(std::move(first));
-                      });
+          auto first = members.back();
+          members.pop_back();
+          member_fetch_loop(std::move(first));
+      });
 }
 
 void

@@ -286,20 +286,19 @@ TEST(ClientAPI, Members)
     mtx::requests::CreateRoom req;
     req.name  = "Name";
     req.topic = "Topic";
-    mtx_client->create_room(req,
-                            [mtx_client](const mtx::responses::CreateRoom &res, RequestErr err) {
-                                check_error(err);
-                                ASSERT_TRUE(res.room_id.localpart().size() > 10);
-                                EXPECT_EQ(res.room_id.hostname(), server_name());
+    mtx_client->create_room(
+      req, [mtx_client](const mtx::responses::CreateRoom &res, RequestErr err) {
+          check_error(err);
+          ASSERT_TRUE(res.room_id.localpart().size() > 10);
+          EXPECT_EQ(res.room_id.hostname(), server_name());
 
-                                mtx_client->members(
-                                  res.room_id.to_string(),
-                                  [](const mtx::responses::Members &res, RequestErr err) {
-                                      check_error(err);
-                                      ASSERT_EQ(res.chunk.size(), 1);
-                                      EXPECT_EQ(res.chunk[0].state_key, "@alice:" + server_name());
-                                  });
-                            });
+          mtx_client->members(res.room_id.to_string(),
+                              [](const mtx::responses::Members &res, RequestErr err) {
+                                  check_error(err);
+                                  ASSERT_EQ(res.chunk.size(), 1);
+                                  EXPECT_EQ(res.chunk[0].state_key, "@alice:" + server_name());
+                              });
+      });
 
     mtx_client->close();
 }
