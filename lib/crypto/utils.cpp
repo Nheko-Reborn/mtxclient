@@ -488,6 +488,10 @@ encrypt_file(const std::string &plaintext)
     BinaryBuf iv  = create_buffer(16);
     iv[15 - 63 % 8] &= ~(1UL << (63 / 8));
 
+    // Counter should be 0 in v1.1 of the spec...
+    for (int i = 8; i < 16; i++)
+        iv[i] = 0;
+
     BinaryBuf cyphertext = AES_CTR_256_Encrypt(plaintext, key, iv);
 
     // Be careful, the key should be urlsafe and unpadded, the iv and sha only need to

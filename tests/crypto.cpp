@@ -235,6 +235,13 @@ TEST(Encryption, EncryptedFile)
     ASSERT_EQ(32, mtx::crypto::base642bin_urlsafe_unpadded(encryption_data.second.key.k).size());
     // IV needs to be 16 bytes/128 bits
     ASSERT_EQ(16, mtx::crypto::base642bin_unpadded(encryption_data.second.iv).size());
+    ASSERT_EQ(16, mtx::crypto::base642bin_unpadded(encryption_data.second.iv).size());
+    EXPECT_EQ(mtx::crypto::bin2base64_unpadded(std::string(8, '\0')),
+              encryption_data.second.iv.substr(11));
+    auto iv = mtx::crypto::base642bin_unpadded(encryption_data.second.iv);
+    EXPECT_EQ(std::vector<uint8_t>(8, 0), std::vector<uint8_t>(iv.begin() + 8, iv.end()));
+    EXPECT_NE("AAAAAAAAAAAA", encryption_data.second.iv.substr(0, 11));
+    EXPECT_NE(std::vector<uint8_t>(8, 0), std::vector<uint8_t>(iv.begin(), iv.begin() + 8));
 
     json j                                            = R"({
   "type": "m.room.message",
