@@ -38,12 +38,12 @@ option(USE_BUNDLED_SPDLOG "Use the bundled version of spdlog." ${HUNTER_ENABLED}
 
 if (CMAKE_VERSION VERSION_GREATER_EQUAL 3.12)
 project(matrix_client
-	VERSION 0.6.0
+	VERSION 0.6.1
 	DESCRIPTION "Client API library for Matrix."
 	HOMEPAGE_URL https://github.com/Nheko-Reborn/mtxclient)
 else()
 project(matrix_client
-	VERSION 0.6.0
+	VERSION 0.6.1
 	DESCRIPTION "Client API library for Matrix.")
 endif()
 
@@ -162,7 +162,7 @@ if(USE_BUNDLED_COEURL)
 	FetchContent_Declare(
 		coeurl
 		GIT_REPOSITORY https://nheko.im/Nheko-Reborn/coeurl.git
-		GIT_TAG        abafd60d7e9f5cce76c9abad3b2b3dc1382e5349
+		GIT_TAG        v0.1.1
 		)
 	FetchContent_MakeAvailable(coeurl)
 	target_link_libraries(matrix_client PUBLIC coeurl::coeurl)
@@ -171,7 +171,7 @@ elseif(coeurl_DIR)
 	target_link_libraries(matrix_client PUBLIC coeurl::coeurl)
 else()
 	find_package(PkgConfig REQUIRED)
-	pkg_check_modules(coeurl REQUIRED IMPORTED_TARGET coeurl)
+	pkg_check_modules(coeurl REQUIRED IMPORTED_TARGET coeurl>=0.1.1)
 	target_link_libraries(matrix_client PUBLIC PkgConfig::coeurl)
 endif()
 

@@ -1,7 +1,7 @@
 project(
   'mtxclient',
   'cpp',
-version : '0.6.0',
+version : '0.6.1',
 meson_version : '>=0.57.0',
 license : 'MIT',
 default_options : 'cpp_std=c++17'
@@ -14,7 +14,7 @@ if compiler.get_id() == 'msvc'
 	add_project_arguments('/bigobj', language: 'cpp')
 endif
 
-coeurl_dep = dependency('coeurl', required: true)
+coeurl_dep = dependency('coeurl', version: '>=0.1.1', required: true)
 thread_dep = dependency('threads', required: true)
 openssl_dep = dependency('openssl', version: '>=1.1', required: true)
 

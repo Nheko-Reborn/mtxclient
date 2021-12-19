@@ -46,3 +46,8 @@ compile_commands.json
 # Deps
 .third-party
 .deps
+subprojects/coeurl/
+subprojects/libevent-*/
+subprojects/olm/
+subprojects/packagecache/
+subprojects/spdlog-*/

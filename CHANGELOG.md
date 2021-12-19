@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.6.1] -- 2021-12-20
+
+- Set counter for encrypted files always to 0
+- Add bigobj flag to meson build
+- Add script to plot history from memberstats
+- Add example that collects member event history from a room
+- Add endpoint to list room members
+- Fix pinned message events not being parsed
+- Fix version tag in meson.build
+- Actually read out rule_id in PushRule's from_json
+- Support error code to string conversions
+- Add support for m.direct
+
 ## [0.6.0] -- 2021-11-17
 
 * Use new login parameters instead of deprecated user
