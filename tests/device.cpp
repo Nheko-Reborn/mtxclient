@@ -95,12 +95,11 @@ TEST(Devices, DeleteDevices)
       });
 
     // Check if dummy can no longer retrieve list of devices because their token was removed
-    alice_dummy->query_devices(
-      [&responses](const mtx::responses::QueryDevices &res, RequestErr err) {
-          ASSERT_TRUE(err);
-          ASSERT_EQ(res.devices.size(), 0);
-          EXPECT_EQ(mtx::errors::to_string(err->matrix_error.errcode), "M_UNKNOWN_TOKEN");
-      });
+    alice_dummy->query_devices([](const mtx::responses::QueryDevices &res, RequestErr err) {
+        ASSERT_TRUE(err);
+        ASSERT_EQ(res.devices.size(), 0);
+        EXPECT_EQ(mtx::errors::to_string(err->matrix_error.errcode), "M_UNKNOWN_TOKEN");
+    });
 
     while (responses != 3)
         sleep();
