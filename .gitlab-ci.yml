@@ -173,7 +173,7 @@ linting:
 test-pages:
   stage: build
   tags: [docker]
-  image: alpine
+  image: alpine:3.14
   except:
     - master
   needs: []
@@ -192,7 +192,7 @@ test-pages:
 pages:
   stage: build
   tags: [docker]
-  image: alpine
+  image: alpine:3.14
   only:
     - master
   needs: []
