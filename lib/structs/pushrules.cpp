@@ -104,7 +104,7 @@ from_json(const nlohmann::json &obj, PushRule &rule)
 
     if (obj.contains("actions"))
         for (const auto &action : obj["actions"])
-            rule.actions.push_back(action);
+            rule.actions.push_back(action.get<actions::Action>());
 
     rule.pattern = obj.value("pattern", "");
 
