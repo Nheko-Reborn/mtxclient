@@ -29,8 +29,8 @@ create_buffer(std::size_t nbytes)
 }
 
 BinaryBuf
-PBKDF2_HMAC_SHA_512(const std::string pass,
-                    const BinaryBuf salt,
+PBKDF2_HMAC_SHA_512(const std::string& pass,
+                    const BinaryBuf& salt,
                     uint32_t iterations,
                     uint32_t keylen)
 {
@@ -39,7 +39,7 @@ PBKDF2_HMAC_SHA_512(const std::string pass,
                       (int)pass.size(),
                       salt.data(),
                       (int)salt.size(),
-                      iterations,
+                      (int)iterations,
                       EVP_sha512(),
                       (int)keylen,
                       out.data());
@@ -126,8 +126,8 @@ key_to_recoverykey(const BinaryBuf &key)
 
 std::string
 decrypt(const mtx::secret_storage::AesHmacSha2EncryptedData &data,
-        BinaryBuf decryptionKey,
-        const std::string key_name)
+        const BinaryBuf& decryptionKey,
+        const std::string& key_name)
 {
     auto keys   = HKDF_SHA256(decryptionKey, BinaryBuf(32, 0), to_binary_buf(key_name));
     auto keyMac = HMAC_SHA256(keys.mac, to_binary_buf(base642bin(data.ciphertext)));
@@ -143,7 +143,7 @@ decrypt(const mtx::secret_storage::AesHmacSha2EncryptedData &data,
 }
 
 mtx::secret_storage::AesHmacSha2EncryptedData
-encrypt(const std::string &data, BinaryBuf decryptionKey, const std::string key_name)
+encrypt(const std::string &data, const BinaryBuf& decryptionKey, const std::string& key_name)
 {
     mtx::secret_storage::AesHmacSha2EncryptedData encrypted{};
     auto iv      = compatible_iv(create_buffer(16));
@@ -162,7 +162,7 @@ HkdfKeys
 HKDF_SHA256(const BinaryBuf &key, const BinaryBuf &salt, const BinaryBuf &info)
 {
     BinaryBuf buf(64);
-    EVP_PKEY_CTX *pctx = EVP_PKEY_CTX_new_id(EVP_PKEY_HKDF, NULL);
+    EVP_PKEY_CTX *pctx = EVP_PKEY_CTX_new_id(EVP_PKEY_HKDF, nullptr);
 
     if (EVP_PKEY_derive_init(pctx) <= 0) {
         EVP_PKEY_CTX_free(pctx);
@@ -216,7 +216,7 @@ compatible_iv(BinaryBuf incompatible_iv)
 }
 
 BinaryBuf
-AES_CTR_256_Encrypt(const std::string plaintext, const BinaryBuf aes256Key, BinaryBuf iv)
+AES_CTR_256_Encrypt(const std::string& plaintext, const BinaryBuf& aes256Key, BinaryBuf iv)
 {
     EVP_CIPHER_CTX *ctx;
 
@@ -232,7 +232,7 @@ AES_CTR_256_Encrypt(const std::string plaintext, const BinaryBuf aes256Key, Bina
         // handleErrors();
     }
 
-    if (1 != EVP_EncryptInit_ex(ctx, EVP_aes_256_ctr(), NULL, aes256Key.data(), iv.data())) {
+    if (1 != EVP_EncryptInit_ex(ctx, EVP_aes_256_ctr(), nullptr, aes256Key.data(), iv.data())) {
         // handleErrors();
     }
 
@@ -265,7 +265,7 @@ AES_CTR_256_Encrypt(const std::string plaintext, const BinaryBuf aes256Key, Bina
 }
 
 BinaryBuf
-AES_CTR_256_Decrypt(const std::string ciphertext, const BinaryBuf aes256Key, BinaryBuf iv)
+AES_CTR_256_Decrypt(const std::string& ciphertext, const BinaryBuf& aes256Key, BinaryBuf iv)
 {
     EVP_CIPHER_CTX *ctx;
 
@@ -285,7 +285,7 @@ AES_CTR_256_Decrypt(const std::string ciphertext, const BinaryBuf aes256Key, Bin
      * In this example we are using 256 bit AES (i.e. a 256 bit key). The
      * IV size for *most* modes is the same as the block size. For AES this
      * is 128 bits */
-    if (1 != EVP_DecryptInit_ex(ctx, EVP_aes_256_ctr(), NULL, aes256Key.data(), iv.data())) {
+    if (1 != EVP_DecryptInit_ex(ctx, EVP_aes_256_ctr(), nullptr, aes256Key.data(), iv.data())) {
         // handleErrors();
     }
 
@@ -395,7 +395,7 @@ CURVE25519_AES_SHA2_Decrypt(std::string base64_ciphertext,
 }
 
 mtx::responses::backup::EncryptedSessionData
-encrypt_session(const mtx::responses::backup::SessionData &data, const std::string publicKey)
+encrypt_session(const mtx::responses::backup::SessionData &data, const std::string& publicKey)
 {
     mtx::responses::backup::EncryptedSessionData d;
 
@@ -428,8 +428,8 @@ sha256(const std::string &data)
     EVP_MD_CTX *context = EVP_MD_CTX_new();
 #endif
 
-    if (context != NULL) {
-        if (EVP_DigestInit_ex(context, EVP_sha256(), NULL)) {
+    if (context != nullptr) {
+        if (EVP_DigestInit_ex(context, EVP_sha256(), nullptr)) {
             if (EVP_DigestUpdate(context, data.c_str(), data.length())) {
                 unsigned char hash[EVP_MAX_MD_SIZE];
                 unsigned int lengthOfHash = 0;
@@ -536,7 +536,7 @@ unpack_key_file(const std::string &data)
 }
 
 BinaryBuf
-HMAC_SHA256(const BinaryBuf hmacKey, const BinaryBuf data)
+HMAC_SHA256(const BinaryBuf& hmacKey, const BinaryBuf& data)
 {
     unsigned int len = SHA256_DIGEST_LENGTH;
     unsigned char digest[SHA256_DIGEST_LENGTH];
@@ -546,7 +546,7 @@ HMAC_SHA256(const BinaryBuf hmacKey, const BinaryBuf data)
 }
 
 void
-print_binary_buf(const BinaryBuf buf)
+print_binary_buf(const BinaryBuf& buf)
 {
     for (uint8_t val : buf) {
         std::cout << std::to_string(val) << ",";

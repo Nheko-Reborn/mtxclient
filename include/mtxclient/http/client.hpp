@@ -637,7 +637,7 @@ public:
                                 Callback<mtx::responses::KeySignaturesUpload> cb);
 
     //! Upload cross signing keys
-    void device_signing_upload(const mtx::requests::DeviceSigningUpload,
+    void device_signing_upload(const mtx::requests::DeviceSigningUpload &,
                                UIAHandler uia_handler,
                                ErrCallback cb);
 

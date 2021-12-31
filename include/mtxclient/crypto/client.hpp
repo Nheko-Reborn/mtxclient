@@ -164,20 +164,20 @@ struct SAS
     //! Query the public key generated for this object.
     std::string public_key();
     //! Set the key of the other party being verified.
-    void set_their_key(std::string their_public_key);
+    void set_their_key(const std::string& their_public_key);
     /// @brief Returns 3 integers ranging from 1000 to 9191, to be used only after
     /// using `set_their_key`
     ///
     /// These are meant to be compared by the users verifying each other.
-    std::vector<int> generate_bytes_decimal(std::string info);
+    std::vector<int> generate_bytes_decimal(const std::string& info);
     /// @brief Returns 7 integers in the range from 0 to 63, to be used only after using
     /// `set_their_key`
     ///
     /// Map these numpers to one of the 64 emoji from the specification and let the user compare
     /// them.
-    std::vector<int> generate_bytes_emoji(std::string info);
+    std::vector<int> generate_bytes_emoji(const std::string& info);
     //! Calculate MACs after verification to verify keys.
-    std::string calculate_mac(std::string input_data, std::string info);
+    std::string calculate_mac(const std::string& input_data, const std::string& info);
 
 private:
     SASPtr sas;
@@ -187,7 +187,7 @@ private:
 struct PkSigning
 {
     //! Construct from base64 key
-    static PkSigning from_seed(std::string seed);
+    static PkSigning from_seed(const std::string& seed);
     //! construct a new random key
     static PkSigning new_key();
 
@@ -422,11 +422,11 @@ matches_inbound_session_from(OlmSession *session,
 
 //! Encrypt the exported sessions according to the export format from the spec.
 std::string
-encrypt_exported_sessions(const mtx::crypto::ExportedSessionKeys &keys, std::string pass);
+encrypt_exported_sessions(const mtx::crypto::ExportedSessionKeys &keys, const std::string& pass);
 
 //! Decrypt the exported sessions according to the export format from the spec.
 mtx::crypto::ExportedSessionKeys
-decrypt_exported_sessions(const std::string &data, std::string pass);
+decrypt_exported_sessions(const std::string &data, const std::string& pass);
 
 //! Verify a signature object as obtained from the response of /keys/query endpoint
 bool

@@ -84,7 +84,7 @@ log_error(std::exception &err, const json &event)
 }
 
 void
-log_error(std::string err, const json &event)
+log_error(const std::string& err, const json &event)
 {
     std::cout << err << std::endl;
     std::cout << event.dump(2) << std::endl;

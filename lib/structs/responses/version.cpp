@@ -4,7 +4,7 @@
 
 #include <nlohmann/json.hpp>
 
-const static std::regex VERSION_REGEX("r(\\d+)\\.(\\d+)\\.(\\d+)");
+const static std::regex VERSION_REGEX(R"(r(\d+)\.(\d+)\.(\d+))");
 
 namespace mtx {
 namespace responses {

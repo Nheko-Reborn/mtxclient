@@ -110,13 +110,13 @@ decode_base58(const std::array<uint8_t, 256> &reverse_alphabet, const std::strin
             return "";
 
         uint32_t carry = reverse_alphabet[b];
-        for (std::size_t j = 0; j < result.size(); j++) {
-            carry += static_cast<uint8_t>(result[j]) * 58;
-            result[j] = static_cast<uint8_t>(carry % 0x100);
+        for (char & j : result) {
+            carry += static_cast<uint8_t>(j) * 58;
+            j = static_cast<char>(static_cast<uint8_t>(carry % 0x100));
             carry /= 0x100;
         }
         while (carry > 0) {
-            result.push_back(static_cast<uint8_t>(carry % 0x100));
+            result.push_back(static_cast<char>(static_cast<uint8_t>(carry % 0x100)));
             carry /= 0x100;
         }
     }
@@ -199,9 +199,8 @@ decode_base64(const std::array<uint8_t, 256> &reverse_alphabet, const std::strin
         }
     }
 
-    if (bit_index == 2 && static_cast<uint8_t>(d << 4) == 0)
-        decoded.pop_back();
-    else if (bit_index == 3 && static_cast<uint8_t>(d << 6) == 0)
+    if ((bit_index == 2 && static_cast<uint8_t>(d << 4) == 0) ||
+        (bit_index == 3 && static_cast<uint8_t>(d << 6) == 0))
         decoded.pop_back();
 
     return decoded;

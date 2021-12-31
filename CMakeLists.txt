@@ -57,7 +57,7 @@ option(BUILD_SHARED_LIBS "Specifies whether to build mtxclient as a shared libra
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
-if(NOT MSVC)
+if(NOT MSVC AND NOT CLANG_TIDY_WORKAROUND)
 	set(
 		CMAKE_CXX_FLAGS
 		"${CMAKE_CXX_FLAGS} \

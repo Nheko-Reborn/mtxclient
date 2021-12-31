@@ -1,0 +1,14 @@
+---
+Checks: >
+    cert-*,
+    -cert-err58-cpp,
+    misc-misplaced-const,
+    performance-*,
+    modernize-*,
+    bugprone-*,
+    -modernize-use-trailing-return-type,
+    -modernize-concat-nested-namespaces,
+    -modernize-use-auto,
+    -clang-analyzer-cplusplus.NewDeleteLeaks,
+    -clang-analyzer-security.FloatLoopCounter
+...

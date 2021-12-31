@@ -54,9 +54,7 @@ to_string(ErrorCode code)
 ErrorCode
 from_string(const std::string &code)
 {
-    if (code == "M_UNRECOGNIZED")
-        return ErrorCode::M_UNRECOGNIZED;
-    else if (code == "M_FORBIDDEN")
+    if (code == "M_FORBIDDEN")
         return ErrorCode::M_FORBIDDEN;
     else if (code == "M_UNKNOWN_TOKEN")
         return ErrorCode::M_UNKNOWN_TOKEN;
@@ -90,7 +88,7 @@ from_string(const std::string &code)
         return ErrorCode::M_INVALID_SIGNATURE;
     else if (code == "M_UNKNOWN")
         return ErrorCode::M_UNKNOWN;
-    else
+    else // if (code == "M_UNRECOGNIZED")
         return ErrorCode::M_UNRECOGNIZED;
 }
 

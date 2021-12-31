@@ -116,7 +116,7 @@ void
 log_error(std::exception &err, const nlohmann::json &event);
 
 void
-log_error(std::string err, const nlohmann::json &event);
+log_error(const std::string& err, const nlohmann::json &event);
 
 //! Parse multiple account_data events.
 void

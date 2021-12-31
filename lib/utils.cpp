@@ -25,7 +25,7 @@ mtx::client::utils::parse_mxc_url(const std::string &url)
         parts.push_back(std::string(str_left.substr(0, pos)));
         str_left = str_left.substr(pos + 1);
     }
-    parts.push_back(std::string(str_left));
+    parts.emplace_back(str_left);
 
     if (parts.size() != 2) {
         res.server = parts.at(0);
@@ -96,9 +96,7 @@ mtx::client::utils::url_encode(const std::string &value) noexcept
     escaped.fill('0');
     escaped << std::hex;
 
-    for (auto i = value.begin(), n = value.end(); i != n; ++i) {
-        std::string::value_type c = (*i);
-
+    for (char c : value) {
         // Keep alphanumeric and other accepted characters intact
         if (std::isalnum(c) || c == '-' || c == '_' || c == '.' || c == '~') {
             escaped << c;
