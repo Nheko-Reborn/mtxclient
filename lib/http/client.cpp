@@ -709,29 +709,28 @@ Client::get_thumbnail(const ThumbOpts &opts, Callback<std::string> callback, boo
     auto mxc            = mtx::client::utils::parse_mxc_url(opts.mxc_url);
     const auto api_path = "/media/r0/thumbnail/" + mxc.server + "/" + mxc.media_id + "?" +
                           client::utils::query_params(params);
-    get<std::string>(api_path,
-                     [callback = std::move(callback),
-                      try_download,
-                      mxc = std::move(mxc),
-                      _this =
-                        shared_from_this()](const std::string &res, HeaderFields, RequestErr err) {
-                         if (err && try_download) {
-                             const int status_code = static_cast<int>(err->status_code);
+    get<std::string>(
+      api_path,
+      [callback = std::move(callback),
+       try_download,
+       mxc   = std::move(mxc),
+       _this = shared_from_this()](const std::string &res, HeaderFields, RequestErr err) {
+          if (err && try_download) {
+              const int status_code = static_cast<int>(err->status_code);
 
-                             if (status_code == 404) {
-                                 _this->download(
-                                   mxc.server,
-                                   mxc.media_id,
-                                   [callback](const std::string &res,
-                                              const std::string &, // content_type
-                                              const std::string &, // original_filename
-                                              RequestErr err) { callback(res, err); });
-                                 return;
-                             }
-                         }
+              if (status_code == 404) {
+                  _this->download(mxc.server,
+                                  mxc.media_id,
+                                  [callback](const std::string &res,
+                                             const std::string &, // content_type
+                                             const std::string &, // original_filename
+                                             RequestErr err) { callback(res, err); });
+                  return;
+              }
+          }
 
-                         callback(res, err);
-                     });
+          callback(res, err);
+      });
 }
 
 void

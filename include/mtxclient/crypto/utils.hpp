@@ -63,8 +63,8 @@ key_to_recoverykey(const BinaryBuf &key);
 
 //! Simple wrapper around the OpenSSL PKCS5_PBKDF2_HMAC function
 BinaryBuf
-PBKDF2_HMAC_SHA_512(const std::string& pass,
-                    const BinaryBuf& salt,
+PBKDF2_HMAC_SHA_512(const std::string &pass,
+                    const BinaryBuf &salt,
                     uint32_t iterations,
                     uint32_t keylen = 64);
 
@@ -82,12 +82,12 @@ key_from_recoverykey(const std::string &recoverkey,
 //! Decrypt a secret from SSSS
 std::string
 decrypt(const mtx::secret_storage::AesHmacSha2EncryptedData &data,
-        const BinaryBuf& decryptionKey,
-        const std::string& key_name);
+        const BinaryBuf &decryptionKey,
+        const std::string &key_name);
 
 //! Encrypt a secret for SSSS
 mtx::secret_storage::AesHmacSha2EncryptedData
-encrypt(const std::string &data, const BinaryBuf& decryptionKey, const std::string& key_name);
+encrypt(const std::string &data, const BinaryBuf &decryptionKey, const std::string &key_name);
 
 //! HKDF key derivation with SHA256 digest
 struct HkdfKeys
@@ -98,10 +98,10 @@ HkdfKeys
 HKDF_SHA256(const BinaryBuf &key, const BinaryBuf &salt, const BinaryBuf &info);
 
 BinaryBuf
-AES_CTR_256_Encrypt(const std::string& plaintext, const BinaryBuf& aes256Key, BinaryBuf iv);
+AES_CTR_256_Encrypt(const std::string &plaintext, const BinaryBuf &aes256Key, BinaryBuf iv);
 
 BinaryBuf
-AES_CTR_256_Decrypt(const std::string& ciphertext, const BinaryBuf& aes256Key, BinaryBuf iv);
+AES_CTR_256_Decrypt(const std::string &ciphertext, const BinaryBuf &aes256Key, BinaryBuf iv);
 
 //! Base64 encoded CURVE25519_AES_SHA2 encrypted text, including the mac and ephemeral key
 struct CURVE25519_AES_SHA2_Encrypted
@@ -127,7 +127,7 @@ CURVE25519_AES_SHA2_Decrypt(std::string base64_ciphertext,
 
 //! encrypt a session for online key backup
 mtx::responses::backup::EncryptedSessionData
-encrypt_session(const mtx::responses::backup::SessionData &data, const std::string& publicKey);
+encrypt_session(const mtx::responses::backup::SessionData &data, const std::string &publicKey);
 
 //! Decrypt a session retrieved from online key backup.
 mtx::responses::backup::SessionData
@@ -135,7 +135,7 @@ decrypt_session(const mtx::responses::backup::EncryptedSessionData &data,
                 const BinaryBuf &privateKey);
 
 BinaryBuf
-HMAC_SHA256(const BinaryBuf& hmacKey, const BinaryBuf& data);
+HMAC_SHA256(const BinaryBuf &hmacKey, const BinaryBuf &data);
 
 //! Sha256 a string.
 std::string
@@ -166,7 +166,7 @@ void
 uint32_to_uint8(uint8_t b[4], uint32_t u32);
 
 void
-print_binary_buf(const BinaryBuf& buf);
+print_binary_buf(const BinaryBuf &buf);
 
 //! Convert base64 to binary
 std::string

@@ -110,7 +110,7 @@ decode_base58(const std::array<uint8_t, 256> &reverse_alphabet, const std::strin
             return "";
 
         uint32_t carry = reverse_alphabet[b];
-        for (char & j : result) {
+        for (char &j : result) {
             carry += static_cast<uint8_t>(j) * 58;
             j = static_cast<char>(static_cast<uint8_t>(carry % 0x100));
             carry /= 0x100;

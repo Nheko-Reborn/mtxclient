@@ -29,8 +29,8 @@ create_buffer(std::size_t nbytes)
 }
 
 BinaryBuf
-PBKDF2_HMAC_SHA_512(const std::string& pass,
-                    const BinaryBuf& salt,
+PBKDF2_HMAC_SHA_512(const std::string &pass,
+                    const BinaryBuf &salt,
                     uint32_t iterations,
                     uint32_t keylen)
 {
@@ -126,8 +126,8 @@ key_to_recoverykey(const BinaryBuf &key)
 
 std::string
 decrypt(const mtx::secret_storage::AesHmacSha2EncryptedData &data,
-        const BinaryBuf& decryptionKey,
-        const std::string& key_name)
+        const BinaryBuf &decryptionKey,
+        const std::string &key_name)
 {
     auto keys   = HKDF_SHA256(decryptionKey, BinaryBuf(32, 0), to_binary_buf(key_name));
     auto keyMac = HMAC_SHA256(keys.mac, to_binary_buf(base642bin(data.ciphertext)));
@@ -143,7 +143,7 @@ decrypt(const mtx::secret_storage::AesHmacSha2EncryptedData &data,
 }
 
 mtx::secret_storage::AesHmacSha2EncryptedData
-encrypt(const std::string &data, const BinaryBuf& decryptionKey, const std::string& key_name)
+encrypt(const std::string &data, const BinaryBuf &decryptionKey, const std::string &key_name)
 {
     mtx::secret_storage::AesHmacSha2EncryptedData encrypted{};
     auto iv      = compatible_iv(create_buffer(16));
@@ -216,7 +216,7 @@ compatible_iv(BinaryBuf incompatible_iv)
 }
 
 BinaryBuf
-AES_CTR_256_Encrypt(const std::string& plaintext, const BinaryBuf& aes256Key, BinaryBuf iv)
+AES_CTR_256_Encrypt(const std::string &plaintext, const BinaryBuf &aes256Key, BinaryBuf iv)
 {
     EVP_CIPHER_CTX *ctx;
 
@@ -265,7 +265,7 @@ AES_CTR_256_Encrypt(const std::string& plaintext, const BinaryBuf& aes256Key, Bi
 }
 
 BinaryBuf
-AES_CTR_256_Decrypt(const std::string& ciphertext, const BinaryBuf& aes256Key, BinaryBuf iv)
+AES_CTR_256_Decrypt(const std::string &ciphertext, const BinaryBuf &aes256Key, BinaryBuf iv)
 {
     EVP_CIPHER_CTX *ctx;
 
@@ -395,7 +395,7 @@ CURVE25519_AES_SHA2_Decrypt(std::string base64_ciphertext,
 }
 
 mtx::responses::backup::EncryptedSessionData
-encrypt_session(const mtx::responses::backup::SessionData &data, const std::string& publicKey)
+encrypt_session(const mtx::responses::backup::SessionData &data, const std::string &publicKey)
 {
     mtx::responses::backup::EncryptedSessionData d;
 
@@ -536,7 +536,7 @@ unpack_key_file(const std::string &data)
 }
 
 BinaryBuf
-HMAC_SHA256(const BinaryBuf& hmacKey, const BinaryBuf& data)
+HMAC_SHA256(const BinaryBuf &hmacKey, const BinaryBuf &data)
 {
     unsigned int len = SHA256_DIGEST_LENGTH;
     unsigned char digest[SHA256_DIGEST_LENGTH];
@@ -546,7 +546,7 @@ HMAC_SHA256(const BinaryBuf& hmacKey, const BinaryBuf& data)
 }
 
 void
-print_binary_buf(const BinaryBuf& buf)
+print_binary_buf(const BinaryBuf &buf)
 {
     for (uint8_t val : buf) {
         std::cout << std::to_string(val) << ",";

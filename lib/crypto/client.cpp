@@ -577,7 +577,7 @@ SAS::public_key()
 }
 
 void
-SAS::set_their_key(const std::string& their_public_key)
+SAS::set_their_key(const std::string &their_public_key)
 {
     auto pub_key_buffer = to_binary_buf(their_public_key);
 
@@ -589,7 +589,7 @@ SAS::set_their_key(const std::string& their_public_key)
 }
 
 std::vector<int>
-SAS::generate_bytes_decimal(const std::string& info)
+SAS::generate_bytes_decimal(const std::string &info)
 {
     auto input_info_buffer = to_binary_buf(info);
     auto output_buffer     = BinaryBuf(5);
@@ -618,7 +618,7 @@ SAS::generate_bytes_decimal(const std::string& info)
 //! generates and returns a vector of number(int) ranging from 0 to 63, to be used only after using
 //! `set_their_key`
 std::vector<int>
-SAS::generate_bytes_emoji(const std::string& info)
+SAS::generate_bytes_emoji(const std::string &info)
 {
     auto input_info_buffer = to_binary_buf(info);
     auto output_buffer     = BinaryBuf(6);
@@ -649,7 +649,7 @@ SAS::generate_bytes_emoji(const std::string& info)
 //! calculates the mac based on the given input and info using the shared secret produced after
 //! `set_their_key`
 std::string
-SAS::calculate_mac(const std::string& input_data, const std::string& info)
+SAS::calculate_mac(const std::string &input_data, const std::string &info)
 {
     auto input_data_buffer = to_binary_buf(input_data);
     auto info_buffer       = to_binary_buf(info);
@@ -677,7 +677,7 @@ PkSigning::new_key()
 }
 
 PkSigning
-PkSigning::from_seed(const std::string& seed)
+PkSigning::from_seed(const std::string &seed)
 {
     PkSigning s{};
     s.seed_   = seed;
@@ -884,7 +884,7 @@ mtx::crypto::ed25519_verify_signature(std::string signing_key,
 
 std::string
 mtx::crypto::encrypt_exported_sessions(const mtx::crypto::ExportedSessionKeys &keys,
-                                       const std::string& pass)
+                                       const std::string &pass)
 {
     const auto plaintext = json(keys).dump();
 
@@ -931,7 +931,7 @@ mtx::crypto::encrypt_exported_sessions(const mtx::crypto::ExportedSessionKeys &k
 }
 
 mtx::crypto::ExportedSessionKeys
-mtx::crypto::decrypt_exported_sessions(const std::string &data, const std::string& pass)
+mtx::crypto::decrypt_exported_sessions(const std::string &data, const std::string &pass)
 {
     // Parse the data into a base64 string without the header and footer
     std::string unpacked = mtx::crypto::unpack_key_file(data);
