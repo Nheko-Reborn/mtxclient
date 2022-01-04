@@ -169,7 +169,7 @@ mtx::http::Client::prepare_callback(HeadersCallback<Response> callback)
 }
 
 template<typename EventContent>
-[[gnu::used, llvm::used]] void
+[[gnu::used, gnu::retain]] void
 mtx::http::Client::send_to_device(
   const std::string &txid,
   const std::map<mtx::identifiers::User, std::map<std::string, EventContent>> &messages,
@@ -187,7 +187,7 @@ mtx::http::Client::send_to_device(
 }
 
 template<class Payload>
-[[gnu::used, llvm::used]] void
+[[gnu::used, gnu::retain]] void
 mtx::http::Client::send_room_message(const std::string &room_id,
                                      const Payload &payload,
                                      Callback<mtx::responses::EventId> callback)
@@ -196,7 +196,7 @@ mtx::http::Client::send_room_message(const std::string &room_id,
 }
 
 template<class Payload>
-[[gnu::used, llvm::used]] void
+[[gnu::used, gnu::retain]] void
 mtx::http::Client::send_room_message(const std::string &room_id,
                                      const std::string &txn_id,
                                      const Payload &payload,
@@ -213,7 +213,7 @@ mtx::http::Client::send_room_message(const std::string &room_id,
 }
 
 template<class Payload>
-[[gnu::used, llvm::used]] void
+[[gnu::used, gnu::retain]] void
 mtx::http::Client::send_state_event(const std::string &room_id,
                                     const std::string &state_key,
                                     const Payload &payload,
@@ -230,7 +230,7 @@ mtx::http::Client::send_state_event(const std::string &room_id,
 }
 
 template<class Payload>
-[[gnu::used, llvm::used]] void
+[[gnu::used, gnu::retain]] void
 mtx::http::Client::send_state_event(const std::string &room_id,
                                     const Payload &payload,
                                     Callback<mtx::responses::EventId> callback)
@@ -239,7 +239,7 @@ mtx::http::Client::send_state_event(const std::string &room_id,
 }
 
 template<class Payload>
-[[gnu::used, llvm::used]] void
+[[gnu::used, gnu::retain]] void
 mtx::http::Client::get_state_event(const std::string &room_id,
                                    const std::string &type,
                                    const std::string &state_key,
@@ -253,7 +253,7 @@ mtx::http::Client::get_state_event(const std::string &room_id,
                  [cb](const Payload &res, HeaderFields, RequestErr err) { cb(res, err); });
 }
 template<class Payload>
-[[gnu::used, llvm::used]] void
+[[gnu::used, gnu::retain]] void
 mtx::http::Client::get_state_event(const std::string &room_id,
                                    const std::string &state_key,
                                    Callback<Payload> cb)
@@ -265,7 +265,7 @@ mtx::http::Client::get_state_event(const std::string &room_id,
 }
 
 template<class Payload>
-[[gnu::used, llvm::used]] void
+[[gnu::used, gnu::retain]] void
 mtx::http::Client::put_room_account_data(const std::string &room_id,
                                          const std::string &type,
                                          const Payload &payload,
@@ -277,7 +277,7 @@ mtx::http::Client::put_room_account_data(const std::string &room_id,
     put<Payload>(api_path, payload, cb);
 }
 template<class Payload>
-[[gnu::used, llvm::used]] void
+[[gnu::used, gnu::retain]] void
 mtx::http::Client::put_room_account_data(const std::string &room_id,
                                          const Payload &payload,
                                          ErrCallback cb)
@@ -287,7 +287,7 @@ mtx::http::Client::put_room_account_data(const std::string &room_id,
     put_room_account_data(room_id, to_string(event_type), payload, std::move(cb));
 }
 template<class Payload>
-[[gnu::used, llvm::used]] void
+[[gnu::used, gnu::retain]] void
 mtx::http::Client::put_account_data(const std::string &type, const Payload &payload, ErrCallback cb)
 {
     const auto api_path = "/client/r0/user/" +
@@ -296,7 +296,7 @@ mtx::http::Client::put_account_data(const std::string &type, const Payload &payl
     put<Payload>(api_path, payload, cb);
 }
 template<class Payload>
-[[gnu::used, llvm::used]] void
+[[gnu::used, gnu::retain]] void
 mtx::http::Client::put_account_data(const Payload &payload, ErrCallback cb)
 {
     constexpr auto event_type = mtx::events::account_data_content_to_type<Payload>;
@@ -304,7 +304,7 @@ mtx::http::Client::put_account_data(const Payload &payload, ErrCallback cb)
     put_account_data(to_string(event_type), payload, std::move(cb));
 }
 template<class Payload>
-[[gnu::used, llvm::used]] void
+[[gnu::used, gnu::retain]] void
 mtx::http::Client::get_room_account_data(const std::string &room_id,
                                          const std::string &type,
                                          Callback<Payload> cb)
@@ -316,7 +316,7 @@ mtx::http::Client::get_room_account_data(const std::string &room_id,
                  [cb](const Payload &res, HeaderFields, RequestErr err) { cb(res, err); });
 }
 template<class Payload>
-[[gnu::used, llvm::used]] void
+[[gnu::used, gnu::retain]] void
 mtx::http::Client::get_room_account_data(const std::string &room_id, Callback<Payload> cb)
 {
     constexpr auto event_type = mtx::events::account_data_content_to_type<Payload>;
@@ -324,7 +324,7 @@ mtx::http::Client::get_room_account_data(const std::string &room_id, Callback<Pa
     get_room_account_data(room_id, to_string(event_type), std::move(cb));
 }
 template<class Payload>
-[[gnu::used, llvm::used]] void
+[[gnu::used, gnu::retain]] void
 mtx::http::Client::get_account_data(const std::string &type, Callback<Payload> cb)
 {
     const auto api_path = "/client/r0/user/" +
@@ -334,7 +334,7 @@ mtx::http::Client::get_account_data(const std::string &type, Callback<Payload> c
                  [cb](const Payload &res, HeaderFields, RequestErr err) { cb(res, err); });
 }
 template<class Payload>
-[[gnu::used, llvm::used]] void
+[[gnu::used, gnu::retain]] void
 mtx::http::Client::get_account_data(Callback<Payload> cb)
 {
     constexpr auto event_type = mtx::events::account_data_content_to_type<Payload>;
