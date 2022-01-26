@@ -69,6 +69,12 @@ TEST(ClientAPI, Register)
           EXPECT_EQ(user->device_id(), res.device_id);
       });
 
+    user->registration([](const mtx::responses::Register &, RequestErr err) {
+        ASSERT_TRUE(err);
+        EXPECT_EQ(err->status_code, 401);
+        EXPECT_FALSE(err->matrix_error.unauthorized.flows.empty());
+    });
+
     user->close();
 }
 
@@ -987,6 +993,7 @@ TEST(ClientAPI, PresenceOverSync)
       req, [alice, bob, &can_exit](const mtx::responses::CreateRoom &res, RequestErr err) {
           check_error(err);
           auto room_id = res.room_id.to_string();
+          ASSERT_FALSE(room_id.empty());
 
           bob->join_room(
             room_id,

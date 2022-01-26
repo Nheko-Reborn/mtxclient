@@ -265,6 +265,9 @@ public:
                       UIAHandler uia_handler,
                       Callback<mtx::responses::Register> cb);
 
+    //! Send a dummy registration request to query the auth flows
+    void registration(Callback<mtx::responses::Register> cb);
+
     //! Check the validity of a registration token
     void registration_token_validity(const std::string token,
                                      Callback<mtx::responses::RegistrationTokenValidity> cb);

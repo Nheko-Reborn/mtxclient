@@ -967,6 +967,16 @@ Client::registration(const std::string &user,
 }
 
 void
+Client::registration(Callback<mtx::responses::Register> cb)
+{
+    post<nlohmann::json, mtx::responses::Register>(
+      "/client/r0/register",
+      nlohmann::json::object(),
+      [this, cb = std::move(cb)](auto &r, RequestErr e) { cb(r, e); },
+      false);
+}
+
+void
 Client::registration_token_validity(const std::string token,
                                     Callback<mtx::responses::RegistrationTokenValidity> cb)
 {
