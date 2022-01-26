@@ -35,12 +35,24 @@ TEST(ClientAPI, Register)
                                      "M_USER_IN_USE");
                        });
 
+    user->register_username_available(
+      "alice", [](const mtx::responses::Available &, RequestErr err) {
+          ASSERT_TRUE(err);
+          EXPECT_EQ(err->matrix_error.errcode, mtx::errors::ErrorCode::M_USER_IN_USE);
+      });
+
     auto username = utils::random_token(10, false);
 
     // Synapse converts the username to lowercase.
     for (auto &c : username) {
         c = (char)std::tolower(c);
     }
+
+    user->register_username_available(
+      username + "a", [](const mtx::responses::Available &available, RequestErr err) {
+          check_error(err);
+          EXPECT_TRUE(available.available);
+      });
 
     user->registration(
       username,

@@ -77,6 +77,17 @@ struct Success
 void
 from_json(const nlohmann::json &obj, Success &response);
 
+//! Some endpoints return this to indicate availability in addition to the http code (i.e. a
+//! username).
+struct Available
+{
+    //! Required. A flag to indicate that the resource is available.
+    bool available;
+};
+
+void
+from_json(const nlohmann::json &obj, Available &response);
+
 //! Responses to the `/requestToken` endpoints
 struct RequestToken
 {

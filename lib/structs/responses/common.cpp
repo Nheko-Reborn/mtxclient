@@ -66,6 +66,12 @@ from_json(const nlohmann::json &obj, Success &success)
 }
 
 void
+from_json(const nlohmann::json &obj, Available &response)
+{
+    response.available = obj.at("available");
+}
+
+void
 from_json(const nlohmann::json &obj, RequestToken &r)
 {
     r.sid = obj.at("sid");

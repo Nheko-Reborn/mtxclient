@@ -970,10 +970,7 @@ void
 Client::registration(Callback<mtx::responses::Register> cb)
 {
     post<nlohmann::json, mtx::responses::Register>(
-      "/client/r0/register",
-      nlohmann::json::object(),
-      [this, cb = std::move(cb)](auto &r, RequestErr e) { cb(r, e); },
-      false);
+      "/client/r0/register", nlohmann::json::object(), std::move(cb), false);
 }
 
 void
@@ -997,6 +994,18 @@ Client::register_email_request_token(const requests::RequestEmailToken &r,
 {
     post("/client/r0/register/email/requestToken", r, std::move(cb));
 }
+
+void
+Client::register_username_available(const std::string &username,
+                                    Callback<mtx::responses::Available> cb)
+{
+    get<mtx::responses::Available>(
+      "/client/r0/register/available?username=" + mtx::client::utils::url_encode(username),
+      [cb = std::move(cb)](const mtx::responses::Available &res, HeaderFields, RequestErr err) {
+          cb(res, err);
+      });
+}
+
 void
 Client::verify_email_request_token(const requests::RequestEmailToken &r,
                                    Callback<mtx::responses::RequestToken> cb)

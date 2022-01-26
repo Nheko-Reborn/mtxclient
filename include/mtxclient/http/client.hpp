@@ -51,6 +51,7 @@ struct PushersData;
 struct SetPushers;
 }
 namespace responses {
+struct Available;
 struct AvatarUrl;
 struct ClaimKeys;
 struct ContentURI;
@@ -258,6 +259,10 @@ public:
     //! Lookup real server to connect to.
     //! Call set_server with the returned homeserver url after this
     void well_known(Callback<mtx::responses::WellKnown> cb);
+
+    //! Check for username availability
+    void register_username_available(const std::string &username,
+                                     Callback<mtx::responses::Available> cb);
 
     //! Register with an UIA handler so you don't need to repeat the request manually.
     void registration(const std::string &user,
