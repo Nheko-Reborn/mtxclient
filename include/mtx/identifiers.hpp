@@ -89,7 +89,7 @@ parse(const std::string &id)
     }
 
     if (std::string(1, id.at(0)) != identifier.sigil)
-        throw std::invalid_argument(std::string(id + ": missing sigil " + identifier.sigil + "\n"));
+        throw std::invalid_argument(std::string(id + ": missing sigil " + identifier.sigil));
 
     const auto parts = id.find_first_of(':');
 
@@ -98,11 +98,13 @@ parse(const std::string &id)
         identifier.localpart_ = id.substr(1, parts - 1);
         identifier.hostname_  = id.substr(parts + 1);
         identifier.id_        = id;
-    } else {
+    } else if (identifier.sigil == "$") {
         // V3 event ids don't use ':' at all, don't parse them the same way.
         identifier.localpart_ = id;
         identifier.hostname_  = id;
         identifier.id_        = id;
+    } else {
+        throw std::invalid_argument(std::string(id + ": invalid id"));
     }
 
     return identifier;
