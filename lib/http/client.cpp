@@ -934,9 +934,13 @@ void
 Client::registration(const std::string &user,
                      const std::string &pass,
                      UIAHandler uia_handler,
-                     Callback<mtx::responses::Register> cb)
+                     Callback<mtx::responses::Register> cb,
+                     const std::string &initial_device_display_name)
 {
     nlohmann::json req = {{"username", user}, {"password", pass}};
+
+    if (!initial_device_display_name.empty())
+        req["initial_device_display_name"] = initial_device_display_name;
 
     uia_handler.next_ = [this, req, cb = std::move(cb)](const UIAHandler &h,
                                                         const nlohmann::json &auth) {
