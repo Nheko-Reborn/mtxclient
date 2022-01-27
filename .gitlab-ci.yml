@@ -184,15 +184,14 @@ linting:
 test-pages:
   stage: build
   tags: [docker]
-  image: alpine:3.14
+  image: alpine:latest
   except:
     - master
   needs: []
   before_script:
     - apk update
     - apk add doxygen git texlive-full py3-jinja2 py3-pygments
-    #- git clone git://github.com/mosra/m.css
-    - git clone  --single-branch -b fix-class-parsed-as-function git://github.com/crisluengo/m.css
+    - git clone git://github.com/mosra/m.css
   script:
     - ./m.css/documentation/doxygen.py Doxyfile-mcss
     - mv generated-docs/html/ public/
@@ -203,15 +202,14 @@ test-pages:
 pages:
   stage: build
   tags: [docker]
-  image: alpine:3.14
+  image: alpine:latest
   only:
     - master
   needs: []
   before_script:
     - apk update
     - apk add doxygen git texlive-full py3-jinja2 py3-pygments
-    #- git clone git://github.com/mosra/m.css
-    - git clone  --single-branch -b fix-class-parsed-as-function git://github.com/crisluengo/m.css
+    - git clone git://github.com/mosra/m.css
   script:
     - ./m.css/documentation/doxygen.py Doxyfile-mcss
     - mv generated-docs/html/ public/
