@@ -268,7 +268,8 @@ public:
     void registration(const std::string &user,
                       const std::string &pass,
                       UIAHandler uia_handler,
-                      Callback<mtx::responses::Register> cb);
+                      Callback<mtx::responses::Register> cb,
+                      const std::string &initial_device_display_name = "");
 
     //! Send a dummy registration request to query the auth flows
     void registration(Callback<mtx::responses::Register> cb);
