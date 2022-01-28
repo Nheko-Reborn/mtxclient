@@ -56,6 +56,9 @@ enum class ErrorCode
     M_MISSING_TOKEN,
     //! One of the uploaded signatures was invalid
     M_INVALID_SIGNATURE,
+    //! The resource being requested is reserved by an application service, or the application
+    //! service making the request has not created the resource.
+    M_EXCLUSIVE,
 };
 
 //! Convert an error code into a string.

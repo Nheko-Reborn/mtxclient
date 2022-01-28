@@ -44,6 +44,8 @@ to_string(ErrorCode code)
         return "M_MISSING_TOKEN";
     case ErrorCode::M_INVALID_SIGNATURE:
         return "M_INVALID_SIGNATURE";
+    case ErrorCode::M_EXCLUSIVE:
+        return "M_EXCLUSIVE";
     case ErrorCode::M_UNKNOWN:
         return "M_UNKNOWN";
     }
@@ -86,6 +88,8 @@ from_string(const std::string &code)
         return ErrorCode::M_MISSING_TOKEN;
     else if (code == "M_INVALID_SIGNATURE")
         return ErrorCode::M_INVALID_SIGNATURE;
+    else if (code == "M_EXCLUSIVE")
+        return ErrorCode::M_EXCLUSIVE;
     else if (code == "M_UNKNOWN")
         return ErrorCode::M_UNKNOWN;
     else // if (code == "M_UNRECOGNIZED")
