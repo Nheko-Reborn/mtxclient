@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "mtx/common.hpp"
+#include "mtx/events/collections.hpp"
 
 #if __has_include(<nlohmann/json_fwd.hpp>)
 #include <nlohmann/json_fwd.hpp>
@@ -48,6 +49,18 @@ struct PublicRoomsChunk
     bool guest_can_join;
     //! The URL for the room's avatar, if one is set.
     std::string avatar_url;
+
+    //! The room’s join rule. When not present, the room is assumed to be public.
+    mtx::events::state::JoinRule join_rule = mtx::events::state::JoinRule::Public;
+
+    //! Required: The type of room (from m.room.create), if any.
+    std::string room_type;
+
+    //! The m.space.child events of the space-room, represented as Stripped State Events with an
+    //! added origin_server_ts key.
+    //!
+    //! If the room is not a space-room, this should be empty.
+    std::vector<mtx::events::collections::StrippedEvents> children_state;
 };
 
 void
@@ -74,6 +87,19 @@ struct PublicRooms
 
 void
 from_json(const nlohmann::json &obj, PublicRooms &publicRooms);
+
+//! Response from the `GET /_matrix/client/v1/rooms/{roomId}/hierarchy`
+struct HierarchyRooms
+{
+    //! Required: The rooms for the current page, with the current filters.
+    std::vector<PublicRoomsChunk> rooms;
+    //! A token to supply to from to keep paginating the responses. Not present when there are no
+    //! further results.
+    std::string next_batch;
+};
+
+void
+from_json(const nlohmann::json &obj, HierarchyRooms &publicRooms);
 
 } // namespace responses
 } // namespace mtx

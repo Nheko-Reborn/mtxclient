@@ -72,6 +72,7 @@ struct Notifications;
 struct Profile;
 struct PublicRoomVisibility;
 struct PublicRooms;
+struct HierarchyRooms;
 struct QueryDevices;
 struct QueryKeys;
 struct Register;
@@ -594,6 +595,15 @@ public:
     void post_public_rooms(const mtx::requests::PublicRooms &req,
                            Callback<mtx::responses::PublicRooms> cb,
                            const std::string &server = "");
+
+    //! Paginates over the space tree in a depth-first manner to locate child rooms of a given
+    //! space.
+    void get_hierarchy(const std::string &room_id,
+                       Callback<mtx::responses::HierarchyRooms> cb,
+                       const std::string &from = "",
+                       size_t limit            = 0,
+                       size_t max_depth        = 0,
+                       bool suggested_only     = false);
 
     //
     // Group related endpoints.

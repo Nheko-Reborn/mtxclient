@@ -2,6 +2,7 @@
 
 #include "mtx/common.hpp"
 #include "mtx/identifiers.hpp"
+#include "mtx/responses/common.hpp"
 #include "mtx/responses/public_rooms.hpp"
 
 namespace mtx {
@@ -33,6 +34,13 @@ from_json(const nlohmann::json &obj, PublicRoomsChunk &res)
     res.guest_can_join = obj.at("guest_can_join").get<bool>();
 
     res.avatar_url = obj.value("avatar_url", std::string{});
+
+    res.join_rule = mtx::events::state::stringToJoinRule(obj.value("join_rule", "public"));
+
+    res.room_type = obj.value("room_type", std::string{});
+
+    if (obj.contains("children_state"))
+        mtx::responses::utils::parse_stripped_events(obj.at("children_state"), res.children_state);
 }
 
 void
@@ -53,6 +61,16 @@ from_json(const nlohmann::json &obj, PublicRooms &publicRooms)
       obj.count("total_room_count_estimate")
         ? std::optional<size_t>{obj.at("total_room_count_estimate").get<size_t>()}
         : std::nullopt;
+}
+
+void
+from_json(const nlohmann::json &obj, HierarchyRooms &publicRooms)
+{
+    publicRooms.rooms = obj.at("rooms").get<std::vector<PublicRoomsChunk>>();
+
+    if (obj.count("next_batch")) {
+        publicRooms.next_batch = obj.at("next_batch").get<std::string>();
+    }
 }
 
 } // namespace responses

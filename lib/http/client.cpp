@@ -1137,6 +1137,36 @@ Client::get_public_rooms(Callback<mtx::responses::PublicRooms> cb,
                                                           RequestErr err) { cb(res, err); });
 }
 
+void
+Client::get_hierarchy(const std::string &room_id,
+                      Callback<mtx::responses::HierarchyRooms> cb,
+                      const std::string &from,
+                      size_t limit,
+                      size_t max_depth,
+                      bool suggested_only)
+{
+    std::string api_path =
+      "/client/v1/rooms/" + mtx::client::utils::url_encode(room_id) + "/hierarchy";
+
+    std::map<std::string, std::string> params;
+    if (limit > 0)
+        params["limit"] = std::to_string(limit);
+    if (max_depth > 0)
+        params["max_depth"] = std::to_string(max_depth);
+    if (suggested_only)
+        params["suggested_only"] = "true";
+    if (!from.empty())
+        params["from"] = from;
+
+    if (!params.empty())
+        api_path += "?" + mtx::client::utils::query_params(params);
+
+    get<mtx::responses::HierarchyRooms>(
+      api_path,
+      [cb = std::move(cb)](
+        const mtx::responses::HierarchyRooms &res, HeaderFields, RequestErr err) { cb(res, err); });
+}
+
 //
 // Group related endpoints.
 //
