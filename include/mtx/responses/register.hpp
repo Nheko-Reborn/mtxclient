@@ -33,7 +33,7 @@ void
 from_json(const nlohmann::json &obj, Register &response);
 
 //! Response from the `GET
-//! /_matrix/client/unstable/org.matrix.msc3231/register/org.matrix.msc3231.login.registration_token/validity`
+//! /_matrix/client/v1/register/m.login.registration_token/validity`
 //! endpoint.
 struct RegistrationTokenValidity
 {

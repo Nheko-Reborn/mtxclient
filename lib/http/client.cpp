@@ -981,8 +981,7 @@ void
 Client::registration_token_validity(const std::string token,
                                     Callback<mtx::responses::RegistrationTokenValidity> cb)
 {
-    const auto api_path = "/client/unstable/org.matrix.msc3231/register/"
-                          "org.matrix.msc3231.login.registration_token/validity?" +
+    const auto api_path = "/client/v1/register/m.login.registration_token/validity?" +
                           mtx::client::utils::query_params({{"token", token}});
 
     get<mtx::responses::RegistrationTokenValidity>(
