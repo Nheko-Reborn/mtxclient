@@ -462,6 +462,7 @@ public:
                                      const std::string &content_type,
                                      const std::string &original_filename,
                                      RequestErr err)> cb);
+    std::string mxc_to_download_url(const std::string &mxc_url);
 
     //! Retrieve a thumbnail from the given mxc url.
     //! If the thumbnail isn't found and `try_download` is `true` it will try

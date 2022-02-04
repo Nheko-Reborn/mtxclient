@@ -687,6 +687,13 @@ Client::upload(const std::string &data,
       api_path, data, std::move(cb), true, content_type);
 }
 
+std::string
+mtx::http::Client::mxc_to_download_url(const std::string &mxc_url)
+{
+    auto url = mtx::client::utils::parse_mxc_url(mxc_url);
+    return endpoint_to_url("/media/r0/download/" + url.server + "/" + url.media_id);
+}
+
 void
 Client::download(const std::string &mxc_url,
                  std::function<void(const std::string &res,
