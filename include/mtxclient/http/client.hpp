@@ -81,6 +81,7 @@ struct RequestToken;
 struct RoomId;
 struct Success;
 struct Sync;
+struct StateEvents;
 struct TurnServer;
 struct UploadKeys;
 struct Version;
@@ -483,6 +484,9 @@ public:
     void get_event(const std::string &room_id,
                    const std::string &event_id,
                    Callback<mtx::events::collections::TimelineEvents> cb);
+
+    //! Retrieve the whole state of a room
+    void get_state(const std::string &room_id, Callback<mtx::responses::StateEvents> payload);
 
     //! Retrieve a single state event.
     template<class Payload>

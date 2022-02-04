@@ -238,6 +238,17 @@ mtx::http::Client::send_state_event(const std::string &room_id,
     send_state_event<Payload>(room_id, "", payload, callback);
 }
 
+void
+mtx::http::Client::get_state(const std::string &room_id, Callback<mtx::responses::StateEvents> cb)
+{
+    const auto api_path = "/client/r0/rooms/" + mtx::client::utils::url_encode(room_id) + "/state";
+
+    get<mtx::responses::StateEvents>(api_path,
+                                     [cb = std::move(cb)](const mtx::responses::StateEvents &res,
+                                                          HeaderFields,
+                                                          RequestErr err) { cb(res, err); });
+}
+
 template<class Payload>
 [[gnu::used, gnu::retain]] void
 mtx::http::Client::get_state_event(const std::string &room_id,

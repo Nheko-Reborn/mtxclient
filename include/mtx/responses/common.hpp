@@ -156,5 +156,13 @@ parse_device_events(const nlohmann::json &events, DeviceEvents &container);
 void
 parse_ephemeral_events(const nlohmann::json &events, EphemeralEvents &container);
 }
+
+//! An array of state events
+struct StateEvents
+{
+    utils::StateEvents events;
+};
+void
+from_json(const nlohmann::json &arr, StateEvents &response);
 }
 }

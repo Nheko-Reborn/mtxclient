@@ -1375,5 +1375,10 @@ parse_ephemeral_events(const json &events,
     }
 }
 }
+void
+from_json(const nlohmann::json &arr, StateEvents &response)
+{
+    utils::parse_state_events(arr, response.events);
+}
 }
 }
