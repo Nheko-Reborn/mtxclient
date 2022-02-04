@@ -1153,6 +1153,44 @@ TEST(StateEvents, ImagePack)
     EXPECT_EQ(json(event)["content"]["images"].size(), 2);
 }
 
+TEST(StateEvents, Widget)
+{
+    json data = R"({
+    "content": {
+        "creatorUserId": "@rxl881:matrix.org",
+        "data": {
+            "title": "Bridges Dashboard",
+            "dateRange": "1y"
+        },
+        "id": "grafana_@rxl881:matrix.org_1514573757015",
+        "name": "Grafana",
+        "type": "m.grafana",
+        "url": "https://matrix.org/grafana/whatever",
+        "waitForIframeLoad": true
+    },
+    "room_id": "!foo:bar",
+    "event_id": "$15104760642668662QICBu:matrix.org",
+    "sender": "@rxl881:matrix.org",
+    "state_key": "grafana_@rxl881:matrix.org_1514573757015",
+    "origin_server_ts": 1432735824653,
+    "type": "m.widget"
+})"_json;
+
+    ns::StateEvent<ns::state::Widget> event = data;
+
+    EXPECT_EQ(event.type, ns::EventType::Widget);
+    EXPECT_EQ(event.event_id, "$15104760642668662QICBu:matrix.org");
+    EXPECT_EQ(event.room_id, "!foo:bar");
+    EXPECT_EQ(event.sender, "@rxl881:matrix.org");
+    EXPECT_EQ(event.state_key, "grafana_@rxl881:matrix.org_1514573757015");
+    EXPECT_EQ(event.content.creatorUserId, "@rxl881:matrix.org");
+    EXPECT_EQ(event.content.name, "Grafana");
+    EXPECT_EQ(event.content.type, "m.grafana");
+    EXPECT_EQ(event.content.url, "https://matrix.org/grafana/whatever");
+    EXPECT_EQ(event.content.waitForIframeLoad, true);
+    ASSERT_EQ(event.content.data.size(), 2);
+}
+
 TEST(RoomEvents, OlmEncrypted)
 {
     json data = R"({

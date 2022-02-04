@@ -25,6 +25,7 @@ MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::StateEvent, states::PinnedEvents)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::StateEvent, states::PowerLevels)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::StateEvent, states::Tombstone)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::StateEvent, states::Topic)
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::StateEvent, states::Widget)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::StateEvent, states::space::Child)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::StateEvent, states::space::Parent)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::StateEvent, msgs::Redacted)
@@ -70,6 +71,7 @@ MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::StrippedEvent, states::PinnedEvents
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::StrippedEvent, states::PowerLevels)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::StrippedEvent, states::Tombstone)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::StrippedEvent, states::Topic)
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::StrippedEvent, states::Widget)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::StrippedEvent, states::space::Child)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::StrippedEvent, states::space::Parent)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::StrippedEvent, msg::Redacted)
@@ -189,6 +191,14 @@ from_json(const json &obj, TimelineEvent &e)
     }
     case events::EventType::RoomTopic: {
         e.data = events::StateEvent<Topic>(obj);
+        break;
+    }
+    case events::EventType::Widget: {
+        e.data = events::StateEvent<Widget>(obj);
+        break;
+    }
+    case events::EventType::VectorWidget: {
+        e.data = events::StateEvent<Widget>(obj);
         break;
     }
     case events::EventType::RoomPinnedEvents: {

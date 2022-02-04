@@ -213,6 +213,8 @@ parse_room_account_data_events(
         case events::EventType::RoomRedaction:
         case events::EventType::RoomTombstone:
         case events::EventType::RoomTopic:
+        case events::EventType::Widget:
+        case events::EventType::VectorWidget:
         case events::EventType::SpaceChild:
         case events::EventType::SpaceParent:
         case events::EventType::Sticker:
@@ -396,6 +398,24 @@ parse_timeline_events(const json &events,
             case events::EventType::RoomTopic: {
                 try {
                     container.emplace_back(events::StateEvent<Topic>(e));
+                } catch (json::exception &err) {
+                    log_error(err, e);
+                }
+
+                break;
+            }
+            case events::EventType::Widget: {
+                try {
+                    container.emplace_back(events::StateEvent<Widget>(e));
+                } catch (json::exception &err) {
+                    log_error(err, e);
+                }
+
+                break;
+            }
+            case events::EventType::VectorWidget: {
+                try {
+                    container.emplace_back(events::StateEvent<Widget>(e));
                 } catch (json::exception &err) {
                     log_error(err, e);
                 }
@@ -988,6 +1008,24 @@ parse_state_events(const json &events,
 
                 break;
             }
+            case events::EventType::Widget: {
+                try {
+                    container.emplace_back(events::StateEvent<Widget>(e));
+                } catch (json::exception &err) {
+                    log_error(err, e);
+                }
+
+                break;
+            }
+            case events::EventType::VectorWidget: {
+                try {
+                    container.emplace_back(events::StateEvent<Widget>(e));
+                } catch (json::exception &err) {
+                    log_error(err, e);
+                }
+
+                break;
+            }
             case events::EventType::SpaceChild: {
                 try {
                     container.emplace_back(events::StateEvent<space::Child>(e));
@@ -1193,6 +1231,24 @@ parse_stripped_events(const json &events,
             case events::EventType::RoomTopic: {
                 try {
                     container.emplace_back(events::StrippedEvent<Topic>(e));
+                } catch (json::exception &err) {
+                    log_error(err, e);
+                }
+
+                break;
+            }
+            case events::EventType::Widget: {
+                try {
+                    container.emplace_back(events::StrippedEvent<Widget>(e));
+                } catch (json::exception &err) {
+                    log_error(err, e);
+                }
+
+                break;
+            }
+            case events::EventType::VectorWidget: {
+                try {
+                    container.emplace_back(events::StrippedEvent<Widget>(e));
                 } catch (json::exception &err) {
                     log_error(err, e);
                 }

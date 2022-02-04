@@ -83,6 +83,11 @@ enum class EventType
     // m.push_rules
     PushRules,
 
+    //! m.widget
+    Widget,
+    //! im.vector.modular.widgets
+    VectorWidget,
+
     // m.space.child
     SpaceChild,
     // m.space.parent

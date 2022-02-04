@@ -95,6 +95,7 @@ src = [
 	'lib/structs/events/tag.cpp',
 	'lib/structs/events/tombstone.cpp',
 	'lib/structs/events/topic.cpp',
+	'lib/structs/events/widget.cpp',
 	'lib/structs/events/unknown.cpp',
 	'lib/structs/events/voip.cpp',
 	'lib/structs/identifiers.cpp',

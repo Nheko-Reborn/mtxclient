@@ -64,6 +64,10 @@ getEventType(const std::string &type)
         return EventType::RoomPowerLevels;
     else if (type == "m.room.topic")
         return EventType::RoomTopic;
+    else if (type == "m.widget")
+        return EventType::Widget;
+    else if (type == "im.vector.modular.widgets")
+        return EventType::VectorWidget;
     else if (type == "m.room.redaction")
         return EventType::RoomRedaction;
     else if (type == "m.room.pinned_events")
@@ -174,6 +178,10 @@ to_string(EventType type)
         return "m.room.power_levels";
     case EventType::RoomTopic:
         return "m.room.topic";
+    case EventType::Widget:
+        return "m.widget";
+    case EventType::VectorWidget:
+        return "im.vector.modular.widgets";
     case EventType::RoomRedaction:
         return "m.room.redaction";
     case EventType::RoomPinnedEvents:

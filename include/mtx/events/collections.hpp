@@ -34,6 +34,7 @@
 #include "mtx/events/topic.hpp"
 #include "mtx/events/unknown.hpp"
 #include "mtx/events/voip.hpp"
+#include "mtx/events/widget.hpp"
 #include "mtx/pushrules.hpp"
 
 #include "mtx/events/messages/audio.hpp"
@@ -101,6 +102,7 @@ using StateEvents = std::variant<events::StateEvent<states::Aliases>,
                                  events::StateEvent<states::space::Parent>,
                                  events::StateEvent<states::Tombstone>,
                                  events::StateEvent<states::Topic>,
+                                 events::StateEvent<states::Widget>,
                                  events::StateEvent<msgs::Redacted>,
                                  events::StateEvent<msc2545::ImagePack>,
                                  events::StateEvent<Unknown>>;
@@ -121,6 +123,7 @@ using StrippedEvents = std::variant<events::StrippedEvent<states::Aliases>,
                                     events::StrippedEvent<states::space::Parent>,
                                     events::StrippedEvent<states::Tombstone>,
                                     events::StrippedEvent<states::Topic>,
+                                    events::StrippedEvent<states::Widget>,
                                     events::StrippedEvent<msg::Redacted>,
                                     events::StrippedEvent<Unknown>>;
 
@@ -142,6 +145,7 @@ using TimelineEvents = std::variant<events::StateEvent<states::Aliases>,
                                     events::StateEvent<states::space::Parent>,
                                     events::StateEvent<states::Tombstone>,
                                     events::StateEvent<states::Topic>,
+                                    events::StateEvent<states::Widget>,
                                     events::StateEvent<msc2545::ImagePack>,
                                     events::StateEvent<msgs::Redacted>,
                                     events::EncryptedEvent<msgs::Encrypted>,
@@ -280,6 +284,10 @@ constexpr inline EventType state_content_to_type<mtx::events::state::space::Chil
 template<>
 constexpr inline EventType state_content_to_type<mtx::events::state::space::Parent> =
   EventType::SpaceParent;
+
+template<>
+constexpr inline EventType state_content_to_type<mtx::events::state::Widget> =
+  EventType::VectorWidget;
 
 template<>
 constexpr inline EventType state_content_to_type<mtx::events::state::Topic> = EventType::RoomTopic;
