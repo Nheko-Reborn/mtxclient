@@ -868,6 +868,42 @@ TEST(ClientAPI, Sync)
     mtx_client->close();
 }
 
+TEST(ClientAPI, State)
+{
+    std::shared_ptr<Client> mtx_client = make_test_client();
+
+    mtx_client->login(
+      "alice", "secret", [mtx_client](const mtx::responses::Login &, RequestErr err) {
+          check_error(err);
+      });
+
+    while (mtx_client->access_token().empty())
+        sleep();
+
+    mtx::requests::CreateRoom req;
+    req.name  = "Name";
+    req.topic = "Topic";
+    mtx_client->create_room(req, [mtx_client](const mtx::responses::CreateRoom &r, RequestErr err) {
+        check_error(err);
+
+        mtx_client->get_state(
+          r.room_id.to_string(), [](const mtx::responses::StateEvents &res, RequestErr err) {
+              check_error(err);
+              ASSERT_TRUE(res.events.size() > 0);
+              bool found_name_event = false;
+
+              for (const auto &e : res.events) {
+                  auto ev = std::get_if<mtx::events::StateEvent<mtx::events::state::Name>>(&e);
+                  if (ev && ev->content.name == "Name")
+                      found_name_event = true;
+              }
+              EXPECT_TRUE(found_name_event);
+          });
+    });
+
+    mtx_client->close();
+}
+
 TEST(ClientAPI, Versions)
 {
     std::shared_ptr<Client> mtx_client = make_test_client();
