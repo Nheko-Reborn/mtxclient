@@ -41,7 +41,7 @@ constexpr std::string_view dummy = "m.login.dummy";
 //! Authentication by accepting a set of terms like a privacy policy.
 constexpr std::string_view terms = "m.login.terms"; // see MSC1692
 //! Authentication using a registration token. See MSC3231.
-constexpr std::string_view registration_token = "org.matrix.msc3231.login.registration_token";
+constexpr std::string_view registration_token = "m.login.registration_token";
 }
 
 //! A list of auth types

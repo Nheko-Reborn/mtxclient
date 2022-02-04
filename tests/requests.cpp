@@ -272,7 +272,7 @@ TEST(Requests, UserInteractiveAuth)
 
     a.content = auth::RegistrationToken{"<token>"};
     EXPECT_EQ(nlohmann::json(a), R"({
-  "type": "org.matrix.msc3231.login.registration_token",
+  "type": "m.login.registration_token",
   "token": "<token>",
   "session": "<session ID>"
 })"_json);
