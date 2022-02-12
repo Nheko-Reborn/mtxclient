@@ -392,7 +392,9 @@ TEST(ClientAPI, RoomAccountData)
           check_error(err);
 
           mtx::events::account_data::nheko_extensions::HiddenEvents hiddenEv;
-          hiddenEv.hidden_event_types.push_back(mtx::events::EventType::RoomMember);
+          hiddenEv.hidden_event_types = std::vector{
+            mtx::events::EventType::RoomMember,
+          };
 
           mtx_client->put_room_account_data(
             room_id.to_string(), hiddenEv, [mtx_client, room_id](RequestErr err) {
@@ -405,8 +407,8 @@ TEST(ClientAPI, RoomAccountData)
                      RequestErr err) {
                       check_error(err);
 
-                      ASSERT_EQ(hiddenEv.hidden_event_types.size(), 1);
-                      EXPECT_EQ(hiddenEv.hidden_event_types.at(0),
+                      ASSERT_EQ(hiddenEv.hidden_event_types->size(), 1);
+                      EXPECT_EQ(hiddenEv.hidden_event_types->at(0),
                                 mtx::events::EventType::RoomMember);
                   });
             });
@@ -428,7 +430,9 @@ TEST(ClientAPI, AccountData)
         sleep();
 
     mtx::events::account_data::nheko_extensions::HiddenEvents hiddenEv;
-    hiddenEv.hidden_event_types.push_back(mtx::events::EventType::RoomMember);
+    hiddenEv.hidden_event_types = std::vector{
+      mtx::events::EventType::RoomMember,
+    };
 
     mtx_client->put_account_data(hiddenEv, [mtx_client](RequestErr err) {
         check_error(err);
@@ -438,8 +442,8 @@ TEST(ClientAPI, AccountData)
                        RequestErr err) {
               check_error(err);
 
-              ASSERT_EQ(hiddenEv.hidden_event_types.size(), 1);
-              EXPECT_EQ(hiddenEv.hidden_event_types.at(0), mtx::events::EventType::RoomMember);
+              ASSERT_EQ(hiddenEv.hidden_event_types->size(), 1);
+              EXPECT_EQ(hiddenEv.hidden_event_types->at(0), mtx::events::EventType::RoomMember);
           });
     });
 

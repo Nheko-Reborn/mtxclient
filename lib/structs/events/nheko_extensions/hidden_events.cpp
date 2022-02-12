@@ -10,17 +10,23 @@ namespace nheko_extensions {
 void
 from_json(const nlohmann::json &obj, HiddenEvents &content)
 {
-    for (const auto &typeStr : obj.at("hidden_event_types")) {
-        if (auto type = getEventType(typeStr.get<std::string>()); type != EventType::Unsupported)
-            content.hidden_event_types.push_back(type);
+    if (obj.contains("hidden_event_types")) {
+        content.hidden_event_types = std::vector<EventType>{};
+        for (const auto &typeStr : obj.at("hidden_event_types")) {
+            if (auto type = getEventType(typeStr.get<std::string>());
+                type != EventType::Unsupported)
+                content.hidden_event_types->push_back(type);
+        }
     }
 }
 
 void
 to_json(nlohmann::json &obj, const HiddenEvents &content)
 {
-    for (auto type : content.hidden_event_types) {
-        obj["hidden_event_types"].push_back(to_string(type));
+    if (content.hidden_event_types) {
+        for (auto type : content.hidden_event_types.value()) {
+            obj["hidden_event_types"].push_back(to_string(type));
+        }
     }
 }
 }

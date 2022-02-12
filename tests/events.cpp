@@ -1726,9 +1726,10 @@ TEST(RoomAccountData, NhekoHiddenEvents)
     ns::AccountDataEvent<ns::account_data::nheko_extensions::HiddenEvents> event = data;
 
     EXPECT_EQ(event.type, ns::EventType::NhekoHiddenEvents);
-    EXPECT_EQ(event.content.hidden_event_types.size(), 2);
-    EXPECT_EQ(event.content.hidden_event_types[0], ns::EventType::Reaction);
-    EXPECT_EQ(event.content.hidden_event_types[1], ns::EventType::RoomMember);
+    ASSERT_TRUE(event.content.hidden_event_types.has_value());
+    ASSERT_EQ(event.content.hidden_event_types->size(), 2);
+    EXPECT_EQ(event.content.hidden_event_types.value()[0], ns::EventType::Reaction);
+    EXPECT_EQ(event.content.hidden_event_types.value()[1], ns::EventType::RoomMember);
 }
 
 TEST(RoomAccountData, ImagePack)

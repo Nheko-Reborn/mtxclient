@@ -22,7 +22,7 @@ namespace nheko_extensions {
 struct HiddenEvents
 {
     //! The hidden event types
-    std::vector<EventType> hidden_event_types;
+    std::optional<std::vector<EventType>> hidden_event_types;
 };
 
 void
