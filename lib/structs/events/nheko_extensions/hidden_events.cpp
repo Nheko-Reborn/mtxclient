@@ -13,9 +13,8 @@ from_json(const nlohmann::json &obj, HiddenEvents &content)
     if (obj.contains("hidden_event_types")) {
         content.hidden_event_types = std::vector<EventType>{};
         for (const auto &typeStr : obj.at("hidden_event_types")) {
-            if (auto type = getEventType(typeStr.get<std::string>());
-                type != EventType::Unsupported)
-                content.hidden_event_types->push_back(type);
+            auto type = getEventType(typeStr.get<std::string>());
+            content.hidden_event_types->push_back(type);
         }
     }
 }
