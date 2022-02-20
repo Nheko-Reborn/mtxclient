@@ -435,7 +435,10 @@ public:
     void versions(Callback<mtx::responses::Versions> cb);
 
     //! Mark an event as read.
-    void read_event(const std::string &room_id, const std::string &event_id, ErrCallback cb);
+    void read_event(const std::string &room_id,
+                    const std::string &event_id,
+                    ErrCallback cb,
+                    bool hidden = false);
 
     //! Redact an event from a room.
     void redact_event(const std::string &room_id,
