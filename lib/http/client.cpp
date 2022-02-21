@@ -909,12 +909,16 @@ Client::upload_filter(const nlohmann::json &j, Callback<mtx::responses::FilterId
 }
 
 void
-Client::read_event(const std::string &room_id, const std::string &event_id, ErrCallback callback)
+Client::read_event(const std::string &room_id,
+                   const std::string &event_id,
+                   ErrCallback callback,
+                   bool hidden)
 {
     const auto api_path =
       "/client/r0/rooms/" + mtx::client::utils::url_encode(room_id) + "/read_markers";
 
-    nlohmann::json body = {{"m.fully_read", event_id}, {"m.read", event_id}};
+    nlohmann::json body = {
+      {"m.fully_read", event_id}, {"m.read", event_id}, {"org.matrix.msc2285.hidden", hidden}};
 
     post<nlohmann::json, mtx::responses::Empty>(
       api_path,
