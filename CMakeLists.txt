@@ -38,12 +38,12 @@ option(USE_BUNDLED_SPDLOG "Use the bundled version of spdlog." ${HUNTER_ENABLED}
 
 if (CMAKE_VERSION VERSION_GREATER_EQUAL 3.12)
 project(matrix_client
-	VERSION 0.6.1
+	VERSION 0.6.2
 	DESCRIPTION "Client API library for Matrix."
 	HOMEPAGE_URL https://github.com/Nheko-Reborn/mtxclient)
 else()
 project(matrix_client
-	VERSION 0.6.1
+	VERSION 0.6.2
 	DESCRIPTION "Client API library for Matrix.")
 endif()
 

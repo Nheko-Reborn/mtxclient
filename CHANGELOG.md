@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.6.2] -- 2022-02-22
+
+- Fix exception on "new" version string format
+
 ## [0.6.1] -- 2021-12-20
 
 - Set counter for encrypted files always to 0

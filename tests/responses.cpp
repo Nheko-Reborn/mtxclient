@@ -484,7 +484,7 @@ TEST(Responses, Versions)
 
     json error_data = R"({
 	  "versions" : [
-	    "r.0.0.1"
+	    ""
 	  ]
         })"_json;
 
