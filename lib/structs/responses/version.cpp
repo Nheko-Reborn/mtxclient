@@ -4,8 +4,6 @@
 
 #include <nlohmann/json.hpp>
 
-const static std::regex VERSION_REGEX(R"(r(\d+)\.(\d+)\.(\d+))");
-
 namespace mtx {
 namespace responses {
 
@@ -15,7 +13,7 @@ from_json(const nlohmann::json &obj, Versions &response)
     response.versions = obj.at("versions").get<std::vector<std::string>>();
 
     for (auto &version : response.versions) {
-        if (!std::regex_match(version, VERSION_REGEX))
+        if (version.empty())
             throw std::invalid_argument(version + ": invalid version");
     }
 }
