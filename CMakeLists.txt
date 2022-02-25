@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.11...3.13)
 
+set(MTXCLIENT_VERSION "0.6.2")
+set(MTXCLIENT_SOVERSION "0")
 
 set(
 	CMAKE_TOOLCHAIN_FILE
@@ -38,12 +40,12 @@ option(USE_BUNDLED_SPDLOG "Use the bundled version of spdlog." ${HUNTER_ENABLED}
 
 if (CMAKE_VERSION VERSION_GREATER_EQUAL 3.12)
 project(matrix_client
-	VERSION 0.6.2
+	VERSION ${MTXCLIENT_VERSION}
 	DESCRIPTION "Client API library for Matrix."
 	HOMEPAGE_URL https://github.com/Nheko-Reborn/mtxclient)
 else()
 project(matrix_client
-	VERSION 0.6.2
+	VERSION ${MTXCLIENT_VERSION}
 	DESCRIPTION "Client API library for Matrix.")
 endif()
 
@@ -351,7 +353,8 @@ export(EXPORT
 	MatrixClient::)
 export(PACKAGE MatrixClient)
 
-set_property(TARGET matrix_client PROPERTY SOVERSION ${PROJECT_VERSION})
+set_property(TARGET matrix_client PROPERTY VERSION ${MTXCLIENT_VERSION})
+set_property(TARGET matrix_client PROPERTY SOVERSION ${MTXCLIENT_SOVERSION})
 
 if(BUILD_LIB_TESTS)
 	enable_testing()
