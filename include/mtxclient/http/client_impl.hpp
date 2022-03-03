@@ -137,7 +137,7 @@ mtx::http::Client::prepare_callback(HeadersCallback<Response> callback)
             // doesn't return an error struct for non 200 requests.
             try {
                 response_data = client::utils::deserialize<Response>(body);
-            } catch (const nlohmann::json::exception &) {
+            } catch (const std::exception &) {
             }
 
             // The homeserver should return an error struct.
@@ -147,7 +147,7 @@ mtx::http::Client::prepare_callback(HeadersCallback<Response> callback)
 
                 client_error.matrix_error = matrix_error;
                 return callback(response_data, headers, client_error);
-            } catch (const nlohmann::json::exception &e) {
+            } catch (const std::exception &e) {
                 client_error.parse_error = std::string(e.what()) + ": " + std::string(body);
 
                 return callback(response_data, headers, client_error);
@@ -159,7 +159,7 @@ mtx::http::Client::prepare_callback(HeadersCallback<Response> callback)
         try {
             auto res = client::utils::deserialize<Response>(body);
             callback(std::move(res), headers, {});
-        } catch (const nlohmann::json::exception &e) {
+        } catch (const std::exception &e) {
             client_error.parse_error = std::string(e.what()) + ": " + std::string(body);
             callback(response_data, headers, client_error);
         }
