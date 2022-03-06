@@ -931,13 +931,18 @@ Client::read_event(const std::string &room_id,
 void
 Client::redact_event(const std::string &room_id,
                      const std::string &event_id,
-                     Callback<mtx::responses::EventId> callback)
+                     Callback<mtx::responses::EventId> callback,
+                     const std::string &reason)
 {
     const auto api_path = "/client/r0/rooms/" + mtx::client::utils::url_encode(room_id) +
                           "/redact/" + mtx::client::utils::url_encode(event_id) + "/" +
                           mtx::client::utils::url_encode(mtx::client::utils::random_token());
 
     json body = json::object();
+    if (!reason.empty()) {
+        body["reason"] = reason;
+    }
+
     put<nlohmann::json, mtx::responses::EventId>(api_path, body, std::move(callback));
 }
 
