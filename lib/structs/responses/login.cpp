@@ -21,9 +21,19 @@ from_json(const nlohmann::json &obj, Login &response)
 }
 
 void
+from_json(const nlohmann::json &obj, IdentityProvider &response)
+{
+    response.brand = obj.value("brand", "");
+    response.icon  = obj.value("icon", "");
+    response.id    = obj.at("id").get<std::string>();
+    response.name  = obj.at("name").get<std::string>();
+}
+
+void
 from_json(const nlohmann::json &obj, LoginFlow &response)
 {
-    response.type = obj.at("type").get<std::string>();
+    response.type               = obj.at("type").get<std::string>();
+    response.identity_providers = obj.value("identity_providers", std::vector<IdentityProvider>{});
 }
 void
 from_json(const nlohmann::json &obj, LoginFlows &response)

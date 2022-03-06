@@ -255,9 +255,9 @@ public:
 
     //! Get the supported login flows
     void get_login(Callback<mtx::responses::LoginFlows> cb);
-    //! Get url to navigate to for sso login flow
+    //! Get url to navigate to for sso login flow, optionally preselecting an identity provider
     //! Open this in a browser
-    std::string login_sso_redirect(std::string redirectUrl);
+    std::string login_sso_redirect(std::string redirectUrl, const std::string &idp = "");
     //! Lookup real server to connect to.
     //! Call set_server with the returned homeserver url after this
     void well_known(Callback<mtx::responses::WellKnown> cb);

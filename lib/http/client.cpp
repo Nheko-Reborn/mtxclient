@@ -258,10 +258,11 @@ Client::get_login(Callback<mtx::responses::LoginFlows> cb)
 }
 
 std::string
-Client::login_sso_redirect(std::string redirectUrl)
+Client::login_sso_redirect(std::string redirectUrl, const std::string &idp)
 {
+    const std::string idp_suffix = idp.empty() ? idp : ("/" + mtx::client::utils::url_encode(idp));
     return protocol_ + "://" + server() + ":" + std::to_string(port()) +
-           "/_matrix/client/r0/login/sso/redirect?" +
+           "/_matrix/client/r0/login/sso/redirect" + idp_suffix + "?" +
            mtx::client::utils::query_params({{"redirectUrl", redirectUrl}});
 }
 
