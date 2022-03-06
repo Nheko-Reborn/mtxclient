@@ -443,7 +443,8 @@ public:
     //! Redact an event from a room.
     void redact_event(const std::string &room_id,
                       const std::string &event_id,
-                      Callback<mtx::responses::EventId> cb);
+                      Callback<mtx::responses::EventId> cb,
+                      const std::string &reason = "");
 
     //! Upload a filter
     void upload_filter(const nlohmann::json &j, Callback<mtx::responses::FilterId> cb);
