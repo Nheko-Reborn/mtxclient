@@ -213,6 +213,11 @@ public:
     void set_server(const std::string &server);
     //! Retrieve the homeserver domain name.
     std::string server() { return server_; };
+    //! Retrieve the full server url including protocol and ports
+    std::string server_url()
+    {
+        return protocol_ + "://" + server() + ":" + std::to_string(port());
+    };
     //! Set the homeserver port.
     void set_port(uint16_t port) { port_ = port; };
     //! Retrieve the homeserver port.
