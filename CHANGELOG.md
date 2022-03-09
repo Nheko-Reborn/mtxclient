@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.7.0] -- 2022-03-09
+
+- Allow querying a reusable server url for the current server
+- Explicit SSO identity providers
+- Reasons for redactions
+- Treat all exceptions as errors
+- Support hidden read receipts
+- Support fetching the current room state
+- Stabilize registration tokens
+- Widget events
+- Support the space hierarchy API
+- Allow checking a usernames availability
+- Allow querying registration flows ahead of time
+- Properly validate matrix ids
+- Fix ambiguous conversion of pushrule actions
+- Reduce copies for pushrules
+- Remove mentions of Boost.ASIO
+- Fix documentation
+
 ## [0.6.2] -- 2022-02-22
 
 - Fix exception on "new" version string format
