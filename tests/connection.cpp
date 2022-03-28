@@ -16,7 +16,7 @@ TEST(Basic, Connection)
 {
     auto client = make_test_client();
 
-    client->versions([](const mtx::responses::Versions &, RequestErr err) { ASSERT_FALSE(err); });
+    client->versions([](const mtx::responses::Versions &, RequestErr err) { check_error(err); });
     client->close();
 }
 
@@ -30,7 +30,7 @@ TEST(Basic, ServerWithPort)
     EXPECT_EQ(alice->server(), server);
     EXPECT_EQ(alice->port(), 8008);
 
-    alice->versions([](const mtx::responses::Versions &, RequestErr err) { ASSERT_FALSE(err); });
+    alice->versions([](const mtx::responses::Versions &, RequestErr err) { check_error(err); });
     alice->close();
 }
 

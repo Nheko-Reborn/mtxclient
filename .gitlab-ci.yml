@@ -183,7 +183,7 @@ test-pages:
   before_script:
     - apk update
     - apk add doxygen git texlive-full py3-jinja2 py3-pygments
-    - git clone git://github.com/mosra/m.css
+    - git clone https://github.com/mosra/m.css.git
   script:
     - ./m.css/documentation/doxygen.py Doxyfile-mcss
     - mv generated-docs/html/ public/
@@ -201,7 +201,7 @@ pages:
   before_script:
     - apk update
     - apk add doxygen git texlive-full py3-jinja2 py3-pygments
-    - git clone git://github.com/mosra/m.css
+    - git clone https://github.com/mosra/m.css.git
   script:
     - ./m.css/documentation/doxygen.py Doxyfile-mcss
     - mv generated-docs/html/ public/

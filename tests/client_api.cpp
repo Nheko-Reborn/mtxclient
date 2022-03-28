@@ -8,6 +8,7 @@
 #include "mtx/events/encrypted.hpp"
 #include "mtx/requests.hpp"
 #include "mtx/responses.hpp"
+#include "mtxclient/crypto/types.hpp"
 #include "mtxclient/http/client.hpp"
 
 #include "test_helpers.hpp"
@@ -285,6 +286,58 @@ TEST(ClientAPI, CreateRoom)
         ASSERT_TRUE(res.room_id.localpart().size() > 10);
         EXPECT_EQ(res.room_id.hostname(), server_name());
     });
+
+    mtx_client->close();
+}
+
+TEST(ClientAPI, CreateRoomInitialState)
+{
+    mtx::requests::CreateRoom req;
+
+    mtx::events::StrippedEvent<mtx::events::state::Encryption> enc;
+    enc.type                         = mtx::events::EventType::RoomEncryption;
+    enc.content.algorithm            = mtx::crypto::MEGOLM_ALGO;
+    enc.content.rotation_period_ms   = 1000ULL * 60ULL * 60ULL * 777ULL;
+    enc.content.rotation_period_msgs = 777;
+
+    req.initial_state.emplace_back(enc);
+
+    std::shared_ptr<Client> mtx_client = make_test_client();
+
+    mtx_client->login(
+      "alice", "secret", [mtx_client](const mtx::responses::Login &, RequestErr err) {
+          check_error(err);
+      });
+
+    while (mtx_client->access_token().empty())
+        sleep();
+
+    mtx_client->create_room(
+      req, [mtx_client, enc](const mtx::responses::CreateRoom &res, RequestErr err) {
+          check_error(err);
+          ASSERT_TRUE(res.room_id.localpart().size() > 10);
+          EXPECT_EQ(res.room_id.hostname(), server_name());
+
+          mtx_client->get_state(
+            res.room_id.to_string(), [enc](const mtx::responses::StateEvents &res, RequestErr err) {
+                check_error(err);
+                ASSERT_TRUE(res.events.size() > 0);
+                bool found_enc_event = false;
+
+                for (const auto &e : res.events) {
+                    auto ev =
+                      std::get_if<mtx::events::StateEvent<mtx::events::state::Encryption>>(&e);
+                    if (ev) {
+                        found_enc_event = true;
+                        EXPECT_EQ(ev->content.algorithm, enc.content.algorithm);
+                        EXPECT_EQ(ev->content.rotation_period_ms, enc.content.rotation_period_ms);
+                        EXPECT_EQ(ev->content.rotation_period_msgs,
+                                  enc.content.rotation_period_msgs);
+                    }
+                }
+                EXPECT_TRUE(found_enc_event);
+            });
+      });
 
     mtx_client->close();
 }

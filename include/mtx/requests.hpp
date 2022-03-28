@@ -52,6 +52,21 @@ struct CreateRoom
     Preset preset = Preset::PrivateChat;
     //! Whether or not the room will be visible by non members.
     common::RoomVisibility visibility = common::RoomVisibility::Private;
+
+    //! A list of state events to set in the new room. This allows the user to override the default
+    //! state events set in the new room. The expected format of the state events are an object with
+    //! type, state_key and content keys set.
+    std::vector<events::collections::StrippedEvents> initial_state;
+
+    //! The room version to set for the room. If not provided, the homeserver is to use its
+    //! configured default. If provided, the homeserver will return a 400 error with the errcode
+    //! M_UNSUPPORTED_ROOM_VERSION if it does not support the room version.
+    std::string room_version;
+
+    //! Extra keys, such as m.federate, to be added to the content of the m.room.create event. The
+    //! server will overwrite the following keys: creator, room_version. Future versions of the
+    //! specification may allow the server to overwrite other keys.
+    std::optional<events::state::Create> creation_content;
 };
 
 void

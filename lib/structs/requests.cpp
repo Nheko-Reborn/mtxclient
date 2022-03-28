@@ -46,6 +46,22 @@ to_json(json &obj, const CreateRoom &request)
     obj["is_direct"]  = request.is_direct;
     obj["preset"]     = presetToString(request.preset);
     obj["visibility"] = visibilityToString(request.visibility);
+
+    if (!request.room_version.empty())
+        obj["room_version"] = request.room_version;
+
+    if (request.creation_content)
+        obj["creation_content"] = *request.creation_content;
+
+    if (!request.initial_state.empty()) {
+        auto arr = nlohmann::json::array();
+        for (const auto &ev : request.initial_state) {
+            auto event_json = std::visit([](auto e) { return json(e); }, ev);
+            event_json.erase("sender");
+            arr.push_back(std::move(event_json));
+        }
+        obj["initial_state"] = std::move(arr);
+    }
 }
 
 void
