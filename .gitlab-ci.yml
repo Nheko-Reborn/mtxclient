@@ -15,7 +15,7 @@ stages:
   stage: prepare
   image:
     # newer version doesn't seem to like our arm runner
-    name: gcr.io/kaniko-project/executor:v1.7.0-debug
+    name: gcr.io/kaniko-project/executor:v1.6.0-debug
     entrypoint: [""]
   rules:
     - if: $CI_COMMIT_BRANCH
@@ -24,7 +24,7 @@ stages:
         - .ci/synapse/setup-synapse.sh
         - .ci/synapse/service/synapse/*
         - .ci/synapse/service/postgresql/*
-        #- .gitlab-ci.yml
+        - .gitlab-ci.yml
   script:
     - mkdir -p /kaniko/.docker
     - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
