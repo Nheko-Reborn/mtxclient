@@ -393,9 +393,12 @@ public:
     //! room.
     void join_room(const std::string &room,
                    const std::vector<std::string> &via,
-                   Callback<mtx::responses::RoomId> cb);
+                   Callback<mtx::responses::RoomId> cb,
+                   const std::string &reason = "");
     //! Leave a room by its room_id.
-    void leave_room(const std::string &room_id, Callback<mtx::responses::Empty> cb);
+    void leave_room(const std::string &room_id,
+                    Callback<mtx::responses::Empty> cb,
+                    const std::string &reason = "");
     //! Knock on a room.
     void knock_room(const std::string &room_id,
                     const std::vector<std::string> &via,

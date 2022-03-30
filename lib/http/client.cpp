@@ -531,7 +531,8 @@ Client::join_room(const std::string &room, Callback<mtx::responses::RoomId> call
 void
 Client::join_room(const std::string &room,
                   const std::vector<std::string> &via,
-                  Callback<mtx::responses::RoomId> callback)
+                  Callback<mtx::responses::RoomId> callback,
+                  const std::string &reason)
 {
     using mtx::client::utils::url_encode;
     std::string query;
@@ -541,9 +542,13 @@ Client::join_room(const std::string &room,
             query += "&server_name=" + url_encode(via[i]);
         }
     }
-    auto api_path = "/client/r0/join/" + url_encode(room) + query;
+    auto api_path = "/client/v3/join/" + url_encode(room) + query;
 
-    post<std::string, mtx::responses::RoomId>(api_path, "{}", std::move(callback));
+    auto body = nlohmann::json::object();
+    if (!reason.empty())
+        body["reason"] = reason;
+
+    post<std::string, mtx::responses::RoomId>(api_path, body.dump(), std::move(callback));
 }
 
 void
@@ -560,7 +565,7 @@ Client::knock_room(const std::string &room,
             query += "&server_name=" + url_encode(via[i]);
         }
     }
-    auto api_path = "/client/r0/knock/" + url_encode(room) + query;
+    auto api_path = "/client/v3/knock/" + url_encode(room) + query;
 
     auto body = nlohmann::json::object();
     if (!reason.empty())
@@ -570,11 +575,17 @@ Client::knock_room(const std::string &room,
 }
 
 void
-Client::leave_room(const std::string &room_id, Callback<mtx::responses::Empty> callback)
+Client::leave_room(const std::string &room_id,
+                   Callback<mtx::responses::Empty> callback,
+                   const std::string &reason)
 {
-    auto api_path = "/client/r0/rooms/" + mtx::client::utils::url_encode(room_id) + "/leave";
+    auto api_path = "/client/v3/rooms/" + mtx::client::utils::url_encode(room_id) + "/leave";
 
-    post<std::string, mtx::responses::Empty>(api_path, "{}", std::move(callback));
+    auto body = nlohmann::json::object();
+    if (!reason.empty())
+        body["reason"] = reason;
+
+    post<std::string, mtx::responses::Empty>(api_path, body.dump(), std::move(callback));
 }
 
 void
