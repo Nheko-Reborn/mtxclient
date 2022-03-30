@@ -14,7 +14,8 @@ stages:
 .build-synapse-image:
   stage: prepare
   image:
-    name: gcr.io/kaniko-project/executor:debug
+    # newer version doesn't seem to like our arm runner
+    name: gcr.io/kaniko-project/executor:v1.7.0-debug
     entrypoint: [""]
   rules:
     - if: $CI_COMMIT_BRANCH
