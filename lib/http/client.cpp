@@ -1104,6 +1104,31 @@ Client::send_to_device(const std::string &event_type,
 }
 
 void
+Client::resolve_room_alias(const std::string &alias, Callback<mtx::responses::RoomId> cb)
+{
+    const auto api_path = "/client/r0/directory/room/" + mtx::client::utils::url_encode(alias);
+
+    get<mtx::responses::RoomId>(api_path,
+                                [cb = std::move(cb)](const mtx::responses::RoomId &res,
+                                                     HeaderFields,
+                                                     RequestErr err) { cb(res, err); });
+}
+void
+Client::add_room_alias(const std::string &alias, const std::string &roomid, ErrCallback cb)
+{
+    const auto api_path = "/client/r0/directory/room/" + mtx::client::utils::url_encode(alias);
+    auto body           = nlohmann::json::object();
+    body["room_id"]     = roomid;
+    put<nlohmann::json>(api_path, body, std::move(cb));
+}
+
+void
+Client::delete_room_alias(const std::string &alias, ErrCallback cb)
+{
+    delete_("/client/r0/directory/room/" + mtx::client::utils::url_encode(alias), std::move(cb));
+}
+
+void
 Client::get_room_visibility(const std::string &room_id,
                             Callback<mtx::responses::PublicRoomVisibility> cb)
 {

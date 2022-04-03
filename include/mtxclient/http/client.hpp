@@ -592,6 +592,13 @@ public:
       const std::map<mtx::identifiers::User, std::map<std::string, EventContent>> &messages,
       ErrCallback callback);
 
+    //! Resolve the specified roomalias to a roomid.
+    void resolve_room_alias(const std::string &alias, Callback<mtx::responses::RoomId> cb);
+    //! Add an alias to a room.
+    void add_room_alias(const std::string &alias, const std::string &roomid, ErrCallback cb);
+    //! Delete an alias from a room.
+    void delete_room_alias(const std::string &alias, ErrCallback cb);
+
     //! Gets the visibility of a given room on the server's public room directory.
     void get_room_visibility(const std::string &room_id,
                              Callback<mtx::responses::PublicRoomVisibility> cb);
