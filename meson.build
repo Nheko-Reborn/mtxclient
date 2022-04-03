@@ -17,6 +17,7 @@ endif
 coeurl_dep = dependency('coeurl', version: '>=0.1.1', required: true)
 thread_dep = dependency('threads', required: true)
 openssl_dep = dependency('openssl', version: '>=1.1', required: true)
+spdlog_dep = dependency('spdlog', fallback: ['spdlog', 'spdlog_dep'])
 
 json_dep = dependency('nlohmann_json', version: '>=3.2.0', required: true)
 
@@ -46,7 +47,8 @@ deps = [
   thread_dep,
   olm_dep,
   openssl_dep,
-  json_dep
+  json_dep,
+  spdlog_dep
 ]
 
 inc = include_directories('include')

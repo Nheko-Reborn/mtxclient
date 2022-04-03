@@ -1,17 +1,14 @@
 #include <mtx/log.hpp>
 
-#include <iostream>
+#include "spdlog/sinks/stdout_color_sinks.h"
 
 namespace mtx::utils::log {
-void
-log_warning(const std::string_view &msg)
+std::shared_ptr<spdlog::logger>
+log()
 {
-    std::cerr << "warning:" << msg << "\n";
-}
+    static auto mtx_logger = std::make_shared<spdlog::logger>(
+      "mtx", std::make_shared<spdlog::sinks::stderr_color_sink_mt>());
 
-void
-log_error(const std::string_view &msg)
-{
-    std::cerr << "error:" << msg << "\n";
+    return mtx_logger;
 }
 }

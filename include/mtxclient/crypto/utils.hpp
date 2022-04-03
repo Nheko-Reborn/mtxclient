@@ -165,9 +165,6 @@ uint8_to_uint32(uint8_t b[4], uint32_t &u32);
 void
 uint32_to_uint8(uint8_t b[4], uint32_t u32);
 
-void
-print_binary_buf(const BinaryBuf &buf);
-
 //! Convert base64 to binary
 std::string
 base642bin(const std::string &b64);

@@ -1,14 +1,13 @@
 #pragma once
 
-#include <string_view>
+#include <memory>
+#include <spdlog/spdlog.h>
 
 namespace mtx {
 namespace utils {
 namespace log {
-void
-log_warning(const std::string_view &msg);
-void
-log_error(const std::string_view &msg);
+std::shared_ptr<spdlog::logger>
+log();
 }
 }
 }

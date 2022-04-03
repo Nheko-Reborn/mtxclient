@@ -12,9 +12,8 @@
 #include <olm/pk.h>
 
 #include <algorithm>
-#include <iomanip>
-#include <iostream>
 
+#include "mtx/log.hpp"
 #include "mtxclient/crypto/client.hpp"
 
 namespace mtx {
@@ -543,15 +542,6 @@ HMAC_SHA256(const BinaryBuf &hmacKey, const BinaryBuf &data)
     HMAC(EVP_sha256(), hmacKey.data(), (int)hmacKey.size(), data.data(), data.size(), digest, &len);
     BinaryBuf output(digest, digest + SHA256_DIGEST_LENGTH);
     return output;
-}
-
-void
-print_binary_buf(const BinaryBuf &buf)
-{
-    for (uint8_t val : buf) {
-        std::cout << std::to_string(val) << ",";
-    }
-    std::cout << std::endl;
 }
 
 void

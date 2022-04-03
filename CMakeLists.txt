@@ -33,7 +33,6 @@ option(USE_BUNDLED_COEURL "Use a bundled version of the Curl wrapper"
 	${HUNTER_ENABLED})
 option(USE_BUNDLED_LIBEVENT "Use the bundled version of spdlog." ${HUNTER_ENABLED})
 option(USE_BUNDLED_LIBCURL "Use the bundled version of spdlog." ${HUNTER_ENABLED})
-option(USE_BUNDLED_SPDLOG "Use the bundled version of spdlog." ${HUNTER_ENABLED})
 
 
 if (CMAKE_VERSION VERSION_GREATER_EQUAL 3.12)
@@ -155,7 +154,13 @@ endif()
 if(USE_BUNDLED_SPDLOG)
 	hunter_add_package(spdlog)
 endif()
-find_package(spdlog 1.0.0 CONFIG REQUIRED)
+find_package(spdlog 1.0.0 CONFIG)
+set_package_properties(spdlog PROPERTIES
+    DESCRIPTION "Very fast, header only, C++ logging library"
+    URL "https://github.com/gabime/spdlog"
+    TYPE REQUIRED
+)
+target_link_libraries(matrix_client PUBLIC spdlog::spdlog)
 
 if(USE_BUNDLED_COEURL)
 	include(FetchContent)

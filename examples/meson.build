@@ -1,5 +1,3 @@
-spdlog_dep = dependency('spdlog', fallback: ['spdlog', 'spdlog_dep'])
-
 room_feed = executable('room_feed',
     'room_feed.cpp',
     dependencies: [matrix_client_dep],
@@ -26,7 +24,7 @@ simple_bot = executable('simple_bot',
     )
 crypto_bot = executable('crypto_bot',
     'crypto_bot.cpp',
-    dependencies: [matrix_client_dep, spdlog_dep],
+    dependencies: [matrix_client_dep],
     include_directories : '../tests'
     )
 online_backup_exporter = executable('online_backup_exporter',

@@ -263,8 +263,7 @@ from_json(const json &obj, TimelineEvent &e)
                 e.data = events::RoomEvent<events::msg::Redacted>(obj);
                 return;
             } catch (json::exception &err) {
-                mtx::utils::log::log_error(std::string("Invalid event type: ") + err.what() + " " +
-                                           obj.dump(2));
+                mtx::utils::log::log()->error("Invalid event type: {} {}", err.what(), obj.dump(2));
                 return;
             }
         }

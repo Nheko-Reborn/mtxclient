@@ -2,7 +2,6 @@
 #include "mtx/log.hpp"
 #include "mtxclient/http/client_impl.hpp"
 
-#include <iostream>
 #include <mutex>
 #include <thread>
 
@@ -14,6 +13,7 @@
 
 #include "mtxclient/utils.hpp"
 
+#include "mtx/log.hpp"
 #include "mtx/requests.hpp"
 #include "mtx/responses.hpp"
 
@@ -981,7 +981,7 @@ Client::registration(const std::string &user,
           request,
           [this, cb, h](auto &r, RequestErr e) {
               if (e && e->status_code == 401) {
-                  std::cout << e->matrix_error.error << "\n";
+                  mtx::utils::log::log()->debug("{}", e->matrix_error.error);
                   h.prompt(h, e->matrix_error.unauthorized);
               } else {
                   if (!e && !r.access_token.empty()) {

@@ -16,6 +16,7 @@ Client API library for the Matrix protocol.
 - C++ 17 compiler
 - CMake 3.15 or greater (lower versions can work, but not all build system options may work.)
 - Google Test (for testing)
+- spdlog (for logging)
 
 If you are missing some or all of those above dependencies, you can add `-DHUNTER_ENABLED=ON` to the cmake configure command to use bundled dependencies. You can finetune them with the following variables. They default to ON, if Hunter is enabled and to OFF otherwise.
 

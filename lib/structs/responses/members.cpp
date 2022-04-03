@@ -16,8 +16,8 @@ from_json(const nlohmann::json &obj, Members &res)
                 mtx::events::StateEvent<mtx::events::state::Member> member = e;
                 res.chunk.push_back(member);
             } catch (const std::exception &e) {
-                utils::log::log_warning(
-                  std::string("Failed to parse member event in members chunk: ") + e.what());
+                utils::log::log()->warn("Failed to parse member event in members chunk: {}",
+                                        e.what());
             }
         }
     }

@@ -1,5 +1,3 @@
-#include <iostream>
-
 #include <nlohmann/json.hpp>
 #include <utility>
 
@@ -9,6 +7,8 @@
 #include "mtxclient/crypto/client.hpp"
 #include "mtxclient/crypto/types.hpp"
 #include "mtxclient/crypto/utils.hpp"
+
+#include "mtx/log.hpp"
 
 using json = nlohmann::json;
 using namespace mtx::crypto;
@@ -840,7 +840,7 @@ mtx::crypto::verify_identity_signature(const DeviceKeys &device_keys,
         return ed25519_verify_signature(signing_key, nlohmann::json(device_keys), signature);
 
     } catch (const nlohmann::json::exception &e) {
-        std::cerr << "verify_identity_signature: " << e.what();
+        mtx::utils::log::log()->error("verify_identity_signature: {}", e.what());
     }
 
     return false;
@@ -876,7 +876,7 @@ mtx::crypto::ed25519_verify_signature(std::string signing_key,
 
         return true;
     } catch (const nlohmann::json::exception &e) {
-        std::cerr << "verify_signature: " << e.what();
+        mtx::utils::log::log()->error("verify_signature: {}", e.what());
     }
 
     return false;

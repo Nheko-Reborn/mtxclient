@@ -19,8 +19,7 @@
 #include "mtx/events/tag.hpp"
 #include "mtx/events/topic.hpp"
 #include "mtx/events/voip.hpp"
-
-#include <iostream>
+#include "mtx/log.hpp"
 
 using json = nlohmann::json;
 using namespace mtx::events::account_data;
@@ -85,15 +84,13 @@ namespace utils {
 void
 log_error(std::exception &err, const json &event)
 {
-    std::cout << err.what() << std::endl;
-    std::cout << event.dump(2) << std::endl;
+    mtx::utils::log::log()->error("Error parsing events: {}, {}", err.what(), event.dump(2));
 }
 
 void
 log_error(const std::string &err, const json &event)
 {
-    std::cout << err << std::endl;
-    std::cout << event.dump(2) << std::endl;
+    mtx::utils::log::log()->error("Error parsing events: {}, {}", err, event.dump(2));
 }
 
 void

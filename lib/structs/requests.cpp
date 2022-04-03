@@ -1,7 +1,7 @@
 #include "mtx/requests.hpp"
 #include "mtx/events/collections.hpp"
 #include "mtx/events/encrypted.hpp"
-#include <iostream>
+
 #include <nlohmann/json.hpp>
 
 using json = nlohmann::json;
