@@ -84,13 +84,13 @@ namespace utils {
 void
 log_error(std::exception &err, const json &event)
 {
-    mtx::utils::log::log()->error("Error parsing events: {}, {}", err.what(), event.dump(2));
+    mtx::utils::log::log()->warn("Error parsing events: {}, {}", err.what(), event.dump(2));
 }
 
 void
 log_error(const std::string &err, const json &event)
 {
-    mtx::utils::log::log()->error("Error parsing events: {}, {}", err, event.dump(2));
+    mtx::utils::log::log()->warn("Error parsing events: {}, {}", err, event.dump(2));
 }
 
 void
