@@ -212,7 +212,7 @@ to_json(json &obj, const KeyRequest &event)
         obj["body"]["room_id"] = event.room_id;
 
         // MSC3070
-        if (event.sender_key.empty())
+        if (!event.sender_key.empty())
             obj["body"]["sender_key"] = event.sender_key;
 
         obj["body"]["session_id"] = event.session_id;
