@@ -187,7 +187,7 @@ from_json(const json &obj, KeyRequest &event)
     if (action == "request") {
         event.action     = RequestAction::Request;
         event.room_id    = obj.at("body").at("room_id");
-        event.sender_key = obj.at("body").at("sender_key");
+        event.sender_key = obj.at("body").value("sender_key", "");
         event.session_id = obj.at("body").at("session_id");
         event.algorithm  = obj.at("body").at("algorithm");
     } else if (action == "request_cancellation") {
