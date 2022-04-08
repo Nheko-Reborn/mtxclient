@@ -67,7 +67,9 @@ key_from_passphrase(const std::string &password,
       std::string(32, '\0'), testKeys.aes, to_binary_buf(base642bin(parameters.iv)));
 
     auto mac = HMAC_SHA256(testKeys.mac, encrypted);
-    if (bin2base64(to_string(mac)) != parameters.mac) {
+    if (mac != to_binary_buf(base642bin(parameters.mac))) {
+        mtx::utils::log::log()->debug(
+          "mac mismatch: {} != {}", bin2base64(to_string(mac)), parameters.mac);
         return std::nullopt;
     }
 
@@ -100,7 +102,9 @@ key_from_recoverykey(const std::string &recoverykey,
       std::string(32, '\0'), testKeys.aes, to_binary_buf(base642bin(parameters.iv)));
 
     auto mac = HMAC_SHA256(testKeys.mac, encrypted);
-    if (bin2base64(to_string(mac)) != parameters.mac) {
+    if (mac != to_binary_buf(base642bin(parameters.mac))) {
+        mtx::utils::log::log()->debug(
+          "mac mismatch: {} != {}", bin2base64(to_string(mac)), parameters.mac);
         return std::nullopt;
     }
 
@@ -131,7 +135,9 @@ decrypt(const mtx::secret_storage::AesHmacSha2EncryptedData &data,
     auto keys   = HKDF_SHA256(decryptionKey, BinaryBuf(32, 0), to_binary_buf(key_name));
     auto keyMac = HMAC_SHA256(keys.mac, to_binary_buf(base642bin(data.ciphertext)));
 
-    if (bin2base64(to_string(keyMac)) != data.mac) {
+    if (keyMac != to_binary_buf(base642bin(data.mac))) {
+        mtx::utils::log::log()->debug(
+          "mac mismatch: {} != {}", bin2base64(to_string(keyMac)), data.mac);
         return "";
     }
 
