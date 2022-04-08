@@ -97,10 +97,13 @@ from_json(const json &obj, Encrypted &content)
 {
     content.algorithm  = obj.at("algorithm").get<std::string>();
     content.ciphertext = obj.at("ciphertext").get<std::string>();
-    content.device_id  = obj.at("device_id").get<std::string>();
-    content.sender_key = obj.at("sender_key").get<std::string>();
     content.session_id = obj.at("session_id").get<std::string>();
-    content.relations  = common::parse_relations(obj);
+
+    // MSC3700
+    content.device_id  = obj.value("device_id", "");
+    content.sender_key = obj.value("sender_key", "");
+
+    content.relations = common::parse_relations(obj);
 }
 
 void
@@ -108,8 +111,13 @@ to_json(json &obj, const Encrypted &content)
 {
     obj["algorithm"]  = content.algorithm;
     obj["ciphertext"] = content.ciphertext;
-    obj["device_id"]  = content.device_id;
-    obj["sender_key"] = content.sender_key;
+
+    // MSC3700
+    if (!content.device_id.empty())
+        obj["device_id"] = content.device_id;
+    if (!content.sender_key.empty())
+        obj["sender_key"] = content.sender_key;
+
     obj["session_id"] = content.session_id;
 
     // For encrypted events, only add releations, don't generate new_content and friends
@@ -201,8 +209,12 @@ to_json(json &obj, const KeyRequest &event)
     case RequestAction::Request: {
         obj["body"] = json::object();
 
-        obj["body"]["room_id"]    = event.room_id;
-        obj["body"]["sender_key"] = event.sender_key;
+        obj["body"]["room_id"] = event.room_id;
+
+        // MSC3070
+        if (event.sender_key.empty())
+            obj["body"]["sender_key"] = event.sender_key;
+
         obj["body"]["session_id"] = event.session_id;
         obj["body"]["algorithm"]  = "m.megolm.v1.aes-sha2";
 
