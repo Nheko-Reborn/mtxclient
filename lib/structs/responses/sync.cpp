@@ -188,6 +188,10 @@ from_json(const json &obj, Sync &response)
         response.device_one_time_keys_count =
           obj.at("device_one_time_keys_count").get<std::map<std::string, uint16_t>>();
 
+    if (obj.count("device_unused_fallback_key_types") != 0)
+        response.device_unused_fallback_key_types =
+          obj.at("device_unused_fallback_key_types").get<std::vector<std::string>>();
+
     if (obj.count("presence") != 0 && obj.at("presence").contains("events")) {
         response.presence =
           obj.at("presence")

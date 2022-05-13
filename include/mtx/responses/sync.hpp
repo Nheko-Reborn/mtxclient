@@ -183,6 +183,9 @@ struct Sync
     //! A mapping from algorithm to the number of one time keys
     //! the server has for the current device.
     std::map<std::string, uint16_t> device_one_time_keys_count;
+    //! Required. The unused fallback key algorithms. Absence can be used to detect server support
+    std::optional<std::vector<std::string>> device_unused_fallback_key_types;
+
     //! global account data
     AccountData account_data;
 };

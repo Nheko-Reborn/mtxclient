@@ -203,6 +203,8 @@ to_json(json &obj, const DeviceUpdate &request)
 void
 to_json(json &obj, const SignedOneTimeKey &request)
 {
+    if (request.fallback)
+        obj["fallback"] = true;
     obj["key"]        = request.key;
     obj["signatures"] = request.signatures;
 }
@@ -217,6 +219,10 @@ to_json(json &obj, const UploadKeys &request)
 
     for (const auto &[key_id, key] : request.one_time_keys) {
         obj["one_time_keys"][key_id] = std::visit([](const auto &e) { return json(e); }, key);
+    }
+
+    for (const auto &[key_id, key] : request.fallback_keys) {
+        obj["fallback_keys"][key_id] = std::visit([](const auto &e) { return json(e); }, key);
     }
 }
 

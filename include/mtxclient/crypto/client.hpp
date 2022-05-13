@@ -276,22 +276,30 @@ public:
     Base64String sign_identity_keys();
 
     //! Generate a number of one time keys.
-    std::size_t generate_one_time_keys(std::size_t nkeys);
+    std::size_t generate_one_time_keys(std::size_t nkeys, bool generate_fallback = false);
     //! Retrieve the json representation of the one time keys for the given account.
     OneTimeKeys one_time_keys();
+    //! Retrieve the json representation of the unpublished fallback one time keys for the given
+    //! account.
+    OneTimeKeys unpublished_fallback_keys();
     //! Sign the given one time keys and encode it to base64.
-    Base64String sign_one_time_key(const Base64String &encoded_key);
+    Base64String sign_one_time_key(const Base64String &encoded_key, bool fallback = false);
     //! Sign one_time_keys and generate the appropriate structure for the /keys/upload request.
-    SignedOneTimeKeys sign_one_time_keys(const OneTimeKeys &keys);
+    SignedOneTimeKeys sign_one_time_keys(const OneTimeKeys &keys, bool fallback = false);
     //! Generate the json structure for the signed one time key.
     requests::SignedOneTimeKey signed_one_time_key(const std::string &key,
-                                                   const std::string &signature);
+                                                   const std::string &signature,
+                                                   bool fallback = false);
 
     //! Marks the current set of one time keys as being published.
     void mark_keys_as_published() { olm_account_mark_keys_as_published(account_.get()); }
+    //! Forgets an old fallback key. Call this when you are sure the old key is no longer in use,
+    //! i.e. 5 minutes after publishing a new one.
+    void forget_old_fallback_key() { olm_account_forget_old_fallback_key(account_.get()); }
 
     //! Prepare request for the /keys/upload endpoint by signing identity & one time keys.
-    mtx::requests::UploadKeys create_upload_keys_request(const OneTimeKeys &keys);
+    mtx::requests::UploadKeys create_upload_keys_request(const OneTimeKeys &keys,
+                                                         const OneTimeKeys &fallback_keys);
     //! Prepare an empty /keys/upload request.
     mtx::requests::UploadKeys create_upload_keys_request();
 

@@ -113,6 +113,27 @@ TEST(Requests, UploadKeys)
       "JLAFKJWSCS\":"
       "\"IQeCEPb9HFk217cU9kw9EOiusC6kMIkoIRnbnfOh5Oc63S1ghgyjShBGpu34blQomoalCyXWyhaaT3MrLZYQAA"
       "\"}}}}}");
+
+    k1.fallback = true;
+    r3.fallback_keys.emplace("signed_curve25519:AAAAAA", k1);
+    j = r3;
+
+    ASSERT_EQ(
+      j.dump(),
+      "{\"fallback_keys\":{\"signed_curve25519:AAAAAA\":{\"fallback\":true,\"key\":\"zKbLg+"
+      "NrIjpnagy+pIY6uPL4ZwEG2v+8F9lmgsnlZzs\",\"signatures\":{\"@alice:example.com\":{\"ed25519:"
+      "JLAFKJWSCS\":"
+      "\"IQeCEPb9HFk217cU9kw9EOiusC6kMIkoIRnbnfOh5Oc63S1ghgyjShBGpu34blQomoalCyXWyhaaT3MrLZYQAA\"}}"
+      "}},\"one_time_keys\":{\"curve25519:AAAAAQ\":\"/qyvZvwjiTxGdGU0RCguDCLeR+nmsb3FfNG3/"
+      "Ve4vU8\",\"signed_curve25519:AAAAHQ\":{\"key\":"
+      "\"j3fR3HemM16M7CWhoI4Sk5ZsdmdfQHsKL1xuSft6MSw\",\"signatures\":{\"@alice:example.com\":{"
+      "\"ed25519:JLAFKJWSCS\":"
+      "\"FLWxXqGbwrb8SM3Y795eB6OA8bwBcoMZFXBqnTn58AYWZSqiD45tlBVcDa2L7RwdKXebW/"
+      "VzDlnfVJ+9jok1Bw\"}}},\"signed_curve25519:AAAAHg\":{\"key\":\"zKbLg+NrIjpnagy+"
+      "pIY6uPL4ZwEG2v+8F9lmgsnlZzs\",\"signatures\":{\"@alice:example.com\":{\"ed25519:"
+      "JLAFKJWSCS\":"
+      "\"IQeCEPb9HFk217cU9kw9EOiusC6kMIkoIRnbnfOh5Oc63S1ghgyjShBGpu34blQomoalCyXWyhaaT3MrLZYQAA\"}}"
+      "}}}");
 }
 
 TEST(Requests, QueryKeys)

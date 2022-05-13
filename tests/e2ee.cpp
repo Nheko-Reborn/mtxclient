@@ -61,7 +61,7 @@ generate_keys(std::shared_ptr<mtx::crypto::OlmClient> account)
     account->generate_one_time_keys(1);
     auto otks = account->one_time_keys();
 
-    return account->create_upload_keys_request(otks);
+    return account->create_upload_keys_request(otks, {});
 }
 
 TEST(Encryption, UploadIdentityKeys)
@@ -88,7 +88,7 @@ TEST(Encryption, UploadIdentityKeys)
     ASSERT_TRUE(id_keys.curve25519.size() > 10);
 
     mtx::crypto::OneTimeKeys unused;
-    auto request = olm_account->create_upload_keys_request(unused);
+    auto request = olm_account->create_upload_keys_request(unused, {});
 
     // Make the request with the signed identity keys.
     alice->upload_keys(request, [](const mtx::responses::UploadKeys &res, RequestErr err) {
@@ -115,20 +115,16 @@ TEST(Encryption, UploadOneTimeKeys)
     olm_account->set_user_id(alice->user_id().to_string());
     olm_account->set_device_id(alice->device_id());
 
-    auto nkeys = olm_account->generate_one_time_keys(5);
+    auto nkeys = olm_account->generate_one_time_keys(5, true);
     EXPECT_EQ(nkeys, 5);
 
-    auto otks = olm_account->one_time_keys();
-
-    mtx::requests::UploadKeys req;
-
-    for (auto [key_id, key] : otks.curve25519)
-        req.one_time_keys["curve25519:" + key_id] = key;
+    mtx::requests::UploadKeys req = olm_account->create_upload_keys_request();
 
     alice->upload_keys(req, [](const mtx::responses::UploadKeys &res, RequestErr err) {
         check_error(err);
-        ASSERT_TRUE(res.one_time_key_counts.find("curve25519") != res.one_time_key_counts.end());
-        EXPECT_EQ(res.one_time_key_counts.at("curve25519"), 5);
+        ASSERT_TRUE(res.one_time_key_counts.find("signed_curve25519") !=
+                    res.one_time_key_counts.end());
+        EXPECT_EQ(res.one_time_key_counts.at("signed_curve25519"), 5);
     });
 
     alice->close();
@@ -488,7 +484,7 @@ TEST(Encryption, UploadCrossSigningKeys)
     ASSERT_TRUE(id_keys.curve25519.size() > 10);
 
     mtx::crypto::OneTimeKeys unused;
-    auto request = olm_account->create_upload_keys_request(unused);
+    auto request = olm_account->create_upload_keys_request(unused, {});
 
     // Make the request with the signed identity keys.
     alice->upload_keys(
@@ -546,7 +542,7 @@ TEST(Encryption, UploadOnlineBackup)
     ASSERT_TRUE(id_keys.curve25519.size() > 10);
 
     mtx::crypto::OneTimeKeys unused;
-    auto request = olm_account->create_upload_keys_request(unused);
+    auto request = olm_account->create_upload_keys_request(unused, {});
 
     // Make the request with the signed identity keys.
     alice->upload_keys(

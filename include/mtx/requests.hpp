@@ -308,6 +308,9 @@ struct SignedOneTimeKey
 {
     //! Required. The unpadded Base64-encoded 32-byte Curve25519 public key.
     std::string key;
+    //! When uploading a signed key, an additional fallback: true key should be included to denote
+    //! that the key is a fallback key.
+    bool fallback = false;
     //! Required. Signatures of the key object.
     //! The signature is calculated using the process described at Signing JSON.
     std::map<std::string, std::map<std::string, std::string>> signatures;
@@ -324,6 +327,20 @@ struct UploadKeys
     //! The names of the properties should be in the format `<algorithm>:<key_id>`.
     //! The format of the key is determined by the key algorithm.
     std::map<std::string, std::variant<std::string, SignedOneTimeKey>> one_time_keys;
+
+    //! The public key which should be used if the device’s one-time keys are exhausted. The
+    //! fallback key is not deleted once used, but should be replaced when additional one-time keys
+    //! are being uploaded. The server will notify the client of the fallback key being used through
+    //! /sync.
+    //!
+    //! There can only be at most one key per algorithm uploaded, and the server will only persist
+    //! one key per algorithm.
+    //!
+    //! When uploading a signed key, an additional fallback: true key should be included to denote
+    //! that the key is a fallback key.
+    //!
+    //! May be absent if a new fallback key is not required.
+    std::map<std::string, std::variant<std::string, SignedOneTimeKey>> fallback_keys;
 };
 
 void

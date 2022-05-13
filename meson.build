@@ -21,7 +21,7 @@ spdlog_dep = dependency('spdlog', fallback: ['spdlog', 'spdlog_dep'])
 
 json_dep = dependency('nlohmann_json', version: '>=3.2.0', required: true)
 
-olm_dep = dependency('Olm', method: 'cmake', required: get_option('wrap_mode') == 'nofallback')
+olm_dep = dependency('Olm', method: 'cmake', version: '>=3.2.6', required: get_option('wrap_mode') == 'nofallback')
 
 if (not olm_dep.found()
   or get_option('wrap_mode') == 'forcefallback'

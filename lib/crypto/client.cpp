@@ -110,7 +110,7 @@ OlmClient::sign_identity_keys()
 }
 
 std::size_t
-OlmClient::generate_one_time_keys(std::size_t number_of_keys)
+OlmClient::generate_one_time_keys(std::size_t number_of_keys, bool generate_fallback)
 {
     const std::size_t nbytes =
       olm_account_generate_one_time_keys_random_length(account_.get(), number_of_keys);
@@ -122,6 +122,14 @@ OlmClient::generate_one_time_keys(std::size_t number_of_keys)
 
     if (ret == olm_error())
         throw olm_exception("generate_one_time_keys", account_.get());
+
+    if (generate_fallback) {
+        const std::size_t nbytes = olm_account_generate_fallback_key_random_length(account_.get());
+        buf                      = create_buffer(nbytes);
+        auto temp = olm_account_generate_fallback_key(account_.get(), buf.data(), buf.size());
+        if (temp == olm_error())
+            throw olm_exception("generate_fallback_keys", account_.get());
+    }
 
     return ret;
 }
@@ -136,18 +144,37 @@ OlmClient::one_time_keys()
     if (ret == olm_error())
         throw olm_exception("one_time_keys", account_.get());
 
-    return json::parse(std::string(buf.begin(), buf.end()));
+    mtx::crypto::OneTimeKeys otks = json::parse(std::string(buf.begin(), buf.end()));
+
+    return otks;
+}
+
+mtx::crypto::OneTimeKeys
+OlmClient::unpublished_fallback_keys()
+{
+    auto fbuf = create_buffer(olm_account_unpublished_fallback_key_length(account_.get()));
+
+    const auto fret =
+      olm_account_unpublished_fallback_key(account_.get(), fbuf.data(), fbuf.size());
+    if (fret == olm_error())
+        throw olm_exception("unpublished_fallback_keys", account_.get());
+
+    mtx::crypto::OneTimeKeys fotks = json::parse(std::string(fbuf.begin(), fbuf.end()));
+
+    return fotks;
 }
 
 std::string
-OlmClient::sign_one_time_key(const std::string &key)
+OlmClient::sign_one_time_key(const std::string &key, bool fallback)
 {
     json j{{"key", key}};
+    if (fallback)
+        j["fallback"] = true;
     return sign_message(j.dump());
 }
 
 std::map<std::string, mtx::requests::SignedOneTimeKey>
-OlmClient::sign_one_time_keys(const OneTimeKeys &keys)
+OlmClient::sign_one_time_keys(const OneTimeKeys &keys, bool fallback)
 {
     // Sign & append the one time keys.
     std::map<std::string, mtx::requests::SignedOneTimeKey> signed_one_time_keys;
@@ -155,20 +182,21 @@ OlmClient::sign_one_time_keys(const OneTimeKeys &keys)
         const auto key_id       = elem.first;
         const auto one_time_key = elem.second;
 
-        auto sig = sign_one_time_key(one_time_key);
+        auto sig = sign_one_time_key(one_time_key, fallback);
 
         signed_one_time_keys["signed_curve25519:" + key_id] =
-          signed_one_time_key(one_time_key, sig);
+          signed_one_time_key(one_time_key, sig, fallback);
     }
 
     return signed_one_time_keys;
 }
 
 mtx::requests::SignedOneTimeKey
-OlmClient::signed_one_time_key(const std::string &key, const std::string &signature)
+OlmClient::signed_one_time_key(const std::string &key, const std::string &signature, bool fallback)
 {
     mtx::requests::SignedOneTimeKey sign{};
     sign.key        = key;
+    sign.fallback   = fallback;
     sign.signatures = {{user_id_, {{"ed25519:" + device_id_, signature}}}};
     return sign;
 }
@@ -176,11 +204,12 @@ OlmClient::signed_one_time_key(const std::string &key, const std::string &signat
 mtx::requests::UploadKeys
 OlmClient::create_upload_keys_request()
 {
-    return create_upload_keys_request(one_time_keys());
+    return create_upload_keys_request(one_time_keys(), unpublished_fallback_keys());
 }
 
 mtx::requests::UploadKeys
-OlmClient::create_upload_keys_request(const mtx::crypto::OneTimeKeys &one_time_keys)
+OlmClient::create_upload_keys_request(const mtx::crypto::OneTimeKeys &one_time_keys,
+                                      const mtx::crypto::OneTimeKeys &fallback_keys)
 {
     mtx::requests::UploadKeys req;
     req.device_keys.user_id   = user_id_;
@@ -196,13 +225,15 @@ OlmClient::create_upload_keys_request(const mtx::crypto::OneTimeKeys &one_time_k
 
     req.device_keys.signatures[user_id_]["ed25519:" + device_id_] = sig;
 
-    if (one_time_keys.curve25519.empty())
-        return req;
-
     // Sign & append the one time keys.
     auto temp = sign_one_time_keys(one_time_keys);
     for (const auto &[key_id, key] : temp)
         req.one_time_keys[key_id] = key;
+
+    temp = sign_one_time_keys(fallback_keys, true);
+    for (const auto &[key_id, key] : temp) {
+        req.fallback_keys[key_id] = key;
+    }
 
     return req;
 }
