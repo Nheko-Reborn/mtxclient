@@ -124,8 +124,8 @@ OlmClient::generate_one_time_keys(std::size_t number_of_keys, bool generate_fall
         throw olm_exception("generate_one_time_keys", account_.get());
 
     if (generate_fallback) {
-        const std::size_t nbytes = olm_account_generate_fallback_key_random_length(account_.get());
-        buf                      = create_buffer(nbytes);
+        const std::size_t fnbytes = olm_account_generate_fallback_key_random_length(account_.get());
+        buf                       = create_buffer(fnbytes);
         auto temp = olm_account_generate_fallback_key(account_.get(), buf.data(), buf.size());
         if (temp == olm_error())
             throw olm_exception("generate_fallback_keys", account_.get());
