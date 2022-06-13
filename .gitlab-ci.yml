@@ -101,7 +101,9 @@ build linux amd64:
   coverage: /^\s*lines:\s*\d+.\d+\%/
   artifacts:
     reports:
-      cobertura: build/coverage.xml
+      coverage_report:
+        coverage_format: cobertura
+        path: build/coverage.xml
     paths: 
       - build/junit-output/*.xml
       - build/coverage.xml
