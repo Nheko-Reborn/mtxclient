@@ -10,9 +10,19 @@ void
 from_json(const nlohmann::json &obj, Receipt &content)
 {
     for (const auto &eventReceipts : obj.items()) {
-        for (const auto &userReceipts : eventReceipts.value().at("m.read").items()) {
-            content.receipts[eventReceipts.key()].users[userReceipts.key()].ts =
-              userReceipts.value().value<uint64_t>("ts", 0);
+        for (const auto &receiptsByType : eventReceipts.value().items()) {
+            Receipt::ReceiptType t = Receipt::Read;
+            if (receiptsByType.key() == "m.read")
+                t = Receipt::Read;
+            else if (receiptsByType.key() == "org.matrix.msc2285.read.private")
+                t = Receipt::ReadPrivate;
+            else
+                continue;
+
+            for (const auto &userReceipts : receiptsByType.value().items()) {
+                content.receipts[eventReceipts.key()][t].users[userReceipts.key()].ts =
+                  userReceipts.value().value<uint64_t>("ts", 0);
+            }
         }
     }
 }
@@ -20,9 +30,15 @@ from_json(const nlohmann::json &obj, Receipt &content)
 void
 to_json(nlohmann::json &obj, const Receipt &content)
 {
-    for (const auto &[event_id, userReceipts] : content.receipts) {
-        for (const auto &[user_id, receipt] : userReceipts.users) {
-            obj[event_id]["m.read"][user_id]["ts"] = receipt.ts;
+    for (const auto &[event_id, receiptsByType] : content.receipts) {
+        for (const auto &[receiptType, userReceipts] : receiptsByType) {
+            for (const auto &[user_id, receipt] : userReceipts.users) {
+                if (receiptType == Receipt::ReceiptType::Read)
+                    obj[event_id]["m.read"][user_id]["ts"] = receipt.ts;
+                else if (receiptType == Receipt::ReceiptType::ReadPrivate)
+
+                    obj[event_id]["org.matrix.msc2285.read.private"][user_id]["ts"] = receipt.ts;
+            }
         }
     }
 }

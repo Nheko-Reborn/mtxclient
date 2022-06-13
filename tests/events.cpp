@@ -1349,9 +1349,11 @@ TEST(Ephemeral, Receipt)
 
     EXPECT_EQ(event.room_id, "!jEsUZKDJdhlrceRyVU:example.org");
     EXPECT_EQ(event.type, ns::EventType::Receipt);
-    EXPECT_EQ(
-      event.content.receipts.at("$1435641916114394fHBLK:matrix.org").users.at("@rikj:jki.re").ts,
-      1436451550453);
+    EXPECT_EQ(event.content.receipts.at("$1435641916114394fHBLK:matrix.org")
+                .at(ns::ephemeral::Receipt::Read)
+                .users.at("@rikj:jki.re")
+                .ts,
+              1436451550453);
     EXPECT_EQ(j.dump(), json(event).dump());
 }
 

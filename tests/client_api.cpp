@@ -1487,8 +1487,9 @@ TEST(ClientAPI, ReadMarkers)
                             std::get<mtx::events::EphemeralEvent<mtx::events::ephemeral::Receipt>>(
                               receipts.front())
                               .content.receipts[event_id];
-                          EXPECT_EQ(users.users.size(), 1);
-                          ASSERT_TRUE(users.users["@alice:" + server_name()].ts > 0);
+                          using mtx::events::ephemeral::Receipt;
+                          EXPECT_EQ(users[Receipt::Read].users.size(), 1);
+                          ASSERT_TRUE(users[Receipt::Read].users["@alice:" + server_name()].ts > 0);
                       });
                 });
           });

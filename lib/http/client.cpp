@@ -929,8 +929,8 @@ Client::read_event(const std::string &room_id,
     const auto api_path =
       "/client/r0/rooms/" + mtx::client::utils::url_encode(room_id) + "/read_markers";
 
-    nlohmann::json body = {
-      {"m.fully_read", event_id}, {"m.read", event_id}, {"org.matrix.msc2285.hidden", hidden}};
+    nlohmann::json body = {{"m.fully_read", event_id},
+                           {hidden ? "org.matrix.msc2285.read.private" : "m.read", event_id}};
 
     post<nlohmann::json, mtx::responses::Empty>(
       api_path,

@@ -20,7 +20,7 @@ namespace ephemeral {
 struct IndividualReceipt
 {
     //! The timestamp the receipt was sent at.
-    uint64_t ts;
+    uint64_t ts = 0;
 };
 
 //! A list of receipts for a single event.
@@ -36,9 +36,17 @@ struct Receipts
 /// acknowledgement: m.read which indicates that the user has read up to a given event.
 struct Receipt
 {
+    //! The type of read receipt, currently public or private
+    enum ReceiptType
+    {
+        //! A public read receipt (m.read)
+        Read,
+        //! A private read receipt (MSC2285)
+        ReadPrivate
+    };
     //! The mapping of event ID to a collection of receipts for this event ID. The event ID is
     //! the ID of the event being acknowledged and not an ID for the receipt itself.
-    std::map<std::string, Receipts> receipts;
+    std::map<std::string, std::map<ReceiptType, Receipts>> receipts;
 };
 
 //! Deserialization method needed by @p nlohmann::json.

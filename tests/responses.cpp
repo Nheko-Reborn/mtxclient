@@ -837,12 +837,16 @@ TEST(Responses, EphemeralReceipts)
     auto read =
       std::get<mtx::events::EphemeralEvent<mtx::events::ephemeral::Receipt>>(ephemeral.events[1]);
 
+    using mtx::events::ephemeral::Receipt;
     EXPECT_EQ(read.content.receipts.size(), 5);
-    EXPECT_EQ(read.content.receipts["$149339947230ohuCC:krtdex.com"].users.size(), 1);
-    EXPECT_EQ(read.content.receipts["$14935874261161012PaoJD:matrix.org"].users.size(), 7);
+    EXPECT_EQ(read.content.receipts["$149339947230ohuCC:krtdex.com"][Receipt::Read].users.size(),
+              1);
     EXPECT_EQ(
-      read.content.receipts["$14935874261161012PaoJD:matrix.org"].users["@matthew:matrix.org"].ts,
-      1510440324233);
+      read.content.receipts["$14935874261161012PaoJD:matrix.org"][Receipt::Read].users.size(), 7);
+    EXPECT_EQ(read.content.receipts["$14935874261161012PaoJD:matrix.org"][Receipt::Read]
+                .users["@matthew:matrix.org"]
+                .ts,
+              1510440324233);
 }
 
 TEST(Responses, Empty)
