@@ -142,7 +142,7 @@ mtx::http::Client::prepare_callback(HeadersCallback<Response> callback)
 
             // The homeserver should return an error struct.
             try {
-                nlohmann::json json_error = json::parse(body);
+                nlohmann::json json_error = nlohmann::json::parse(body);
                 client_error.matrix_error = json_error.get<mtx::errors::Error>();
                 return callback(response_data, headers, client_error);
             } catch (const std::exception &e) {
@@ -176,7 +176,7 @@ mtx::http::Client::send_to_device(
     constexpr auto event_type = mtx::events::to_device_content_to_type<EventContent>;
     static_assert(event_type != mtx::events::EventType::Unsupported);
 
-    json j;
+    nlohmann::json j;
     for (const auto &[user, deviceToMessage] : messages)
         for (const auto &[deviceid, message] : deviceToMessage)
             j["messages"][user.to_string()][deviceid] = message;

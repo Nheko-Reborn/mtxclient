@@ -114,7 +114,7 @@ MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::RedactionEvent, msg::Redaction)
 
 namespace mtx::events::collections {
 void
-from_json(const json &obj, TimelineEvent &e)
+from_json(const nlohmann::json &obj, TimelineEvent &e)
 {
     const auto type = mtx::events::getEventType(obj);
     using namespace mtx::events::state;
@@ -262,7 +262,7 @@ from_json(const json &obj, TimelineEvent &e)
 
                 e.data = events::RoomEvent<events::msg::Redacted>(obj);
                 return;
-            } catch (json::exception &err) {
+            } catch (nlohmann::json::exception &err) {
                 mtx::utils::log::log()->error("Invalid event type: {} {}", err.what(), obj.dump(2));
                 return;
             }

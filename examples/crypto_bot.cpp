@@ -230,7 +230,7 @@ struct Storage
         if (db_data.empty())
             return;
 
-        json obj = json::parse(db_data);
+        nlohmann::json obj = nlohmann::json::parse(db_data);
 
         devices         = obj.at("devices").get<map<string, vector<string>>>();
         device_keys     = obj.at("device_keys").get<map<string, DevKeys>>();
@@ -281,7 +281,7 @@ struct Storage
             return;
         }
 
-        json data;
+        nlohmann::json data;
         data["devices"]         = devices;
         data["device_keys"]     = device_keys;
         data["encrypted_rooms"] = encrypted_rooms;
@@ -344,9 +344,9 @@ send_group_message(OlmOutboundGroupSession *session,
                    const std::string &msg)
 {
     // Create event payload
-    json doc{{"type", "m.room.message"},
-             {"content", {{"type", "m.text"}, {"body", msg}}},
-             {"room_id", room_id}};
+    nlohmann::json doc{{"type", "m.room.message"},
+                       {"content", {{"type", "m.text"}, {"body", msg}}},
+                       {"room_id", room_id}};
 
     auto payload = olm_client->encrypt_group_message(session, doc.dump());
 
@@ -418,7 +418,7 @@ create_outbound_megolm_session(const std::string &room_id, const std::string &re
                                                                            device_keys.ed25519,
                                                                            device_keys.curve25519);
 
-                json body{{"messages", {{member, {{dev, device_msg}}}}}};
+                nlohmann::json body{{"messages", {{member, {{dev, device_msg}}}}}};
 
                 client->send_to_device("m.room.encrypted", body, to_device_cb);
                 // TODO: send message to device
@@ -432,7 +432,7 @@ create_outbound_megolm_session(const std::string &room_id, const std::string &re
                     }
 
                     console->info("claimed keys for {} - {}", member, dev);
-                    console->info("room_key {}", json(megolm_payload).dump(4));
+                    console->info("room_key {}", nlohmann::json(megolm_payload).dump(4));
 
                     console->warn("signed one time keys");
                     auto retrieved_devices = res.one_time_keys.at(member);
@@ -457,7 +457,7 @@ create_outbound_megolm_session(const std::string &room_id, const std::string &re
                         // sent.
                         storage.olm_outbound_sessions[id_key] = std::move(session);
 
-                        json body{{"messages", {{member, {{dev, device_msg}}}}}};
+                        nlohmann::json body{{"messages", {{member, {{dev, device_msg}}}}}};
 
                         client->send_to_device("m.room.encrypted", body, to_device_cb);
                     }
@@ -546,7 +546,7 @@ template<class T>
 std::string
 get_json(const T &event)
 {
-    return std::visit([](auto e) { return json(e).dump(2); }, event);
+    return std::visit([](auto e) { return nlohmann::json(e).dump(2); }, event);
 }
 
 void
@@ -616,7 +616,8 @@ decrypt_olm_message(const OlmMessage &olm_msg)
                     auto output =
                       olm_client->decrypt_message(inbound_session.get(), msg_type, msg_body);
 
-                    auto plaintext = json::parse(std::string((char *)output.data(), output.size()));
+                    auto plaintext =
+                      nlohmann::json::parse(std::string((char *)output.data(), output.size()));
                     console->info("decrypted message: \n {}", plaintext.dump(2));
 
                     storage.olm_inbound_sessions.emplace(olm_msg.sender_key,
@@ -712,7 +713,7 @@ parse_messages(const mtx::responses::Sync &res)
 
                     auto msg_str = std::string((char *)res.data.data(), res.data.size());
                     const auto body =
-                      json::parse(msg_str).at("content").at("body").get<std::string>();
+                      nlohmann::json::parse(msg_str).at("content").at("body").get<std::string>();
 
                     console->info("decrypted data: {}", body);
                     console->info("decrypted message_index: {}", res.message_index);
@@ -849,12 +850,14 @@ get_device_keys(const UserId &user)
                 const auto data = device.second;
 
                 try {
-                    auto ok = verify_identity_signature(
-                      json(data).get<mtx::crypto::DeviceKeys>(), DeviceId(id), UserId(user_id));
+                    auto ok =
+                      verify_identity_signature(nlohmann::json(data).get<mtx::crypto::DeviceKeys>(),
+                                                DeviceId(id),
+                                                UserId(user_id));
 
                     if (!ok) {
                         console->warn("signature could not be verified");
-                        console->warn(json(data).dump(2));
+                        console->warn(nlohmann::json(data).dump(2));
                     }
                 } catch (const olm_exception &e) {
                     console->warn(e.what());
@@ -873,11 +876,11 @@ handle_to_device_msgs(const mtx::responses::ToDevice &msgs)
         console->info("inspecting {} to_device messages", msgs.events.size());
 
     for (const auto &msg : msgs.events) {
-        console->info(std::visit([](const auto &e) { return json(e); }, msg).dump(2));
+        console->info(std::visit([](const auto &e) { return nlohmann::json(e); }, msg).dump(2));
 
         try {
             OlmMessage olm_msg =
-              std::visit([](const auto &e) { return json(e).get<OlmMessage>(); }, msg);
+              std::visit([](const auto &e) { return nlohmann::json(e).get<OlmMessage>(); }, msg);
             decrypt_olm_message(std::move(olm_msg));
         } catch (const nlohmann::json::exception &e) {
             console->warn("parsing error for olm message: {}", e.what());
@@ -946,7 +949,7 @@ shutdown_handler(int sig)
         return;
     }
 
-    json data;
+    nlohmann::json data;
     data["account"] = olm_client->save(STORAGE_KEY);
 
     db << data.dump(2);
@@ -977,7 +980,8 @@ main()
     if (db_data.empty())
         olm_client->create_new_account();
     else
-        olm_client->load(json::parse(db_data).at("account").get<std::string>(), STORAGE_KEY);
+        olm_client->load(nlohmann::json::parse(db_data).at("account").get<std::string>(),
+                         STORAGE_KEY);
 
     storage.load();
 

@@ -105,7 +105,7 @@ mtx::http::Client::delete_(const std::string &endpoint, ErrCallback cb, bool req
           if (client_error.status_code < 200 || client_error.status_code >= 300) {
               // The homeserver should return an error struct.
               try {
-                  nlohmann::json json_error = json::parse(r.response());
+                  nlohmann::json json_error = nlohmann::json::parse(r.response());
                   client_error.matrix_error = json_error.get<mtx::errors::Error>();
               } catch (const nlohmann::json::exception &e) {
                   client_error.parse_error =
@@ -948,7 +948,7 @@ Client::redact_event(const std::string &room_id,
                           "/redact/" + mtx::client::utils::url_encode(event_id) + "/" +
                           mtx::client::utils::url_encode(mtx::client::utils::random_token());
 
-    json body = json::object();
+    nlohmann::json body = nlohmann::json::object();
     if (!reason.empty()) {
         body["reason"] = reason;
     }
@@ -1067,7 +1067,7 @@ Client::validate_submit_token(const std::string &url,
       });
     p->client.post(
       url,
-      json(r).dump(),
+      nlohmann::json(r).dump(),
       "application/json",
       [callback = std::move(callback)](const coeurl::Request &r) {
           callback(r.response_headers(), r.response(), r.error_code(), r.response_code());

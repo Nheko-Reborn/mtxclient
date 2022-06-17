@@ -186,7 +186,7 @@ struct TimelineEvent
 };
 
 void
-from_json(const json &obj, TimelineEvent &e);
+from_json(const nlohmann::json &obj, TimelineEvent &e);
 
 } // namespace collections
 

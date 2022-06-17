@@ -1509,19 +1509,19 @@ TEST(ClientAPI, SendToDevice)
     while (alice->access_token().empty() || bob->access_token().empty())
         sleep();
 
-    json body{{"messages",
-               {{bob->user_id().to_string(),
-                 {{bob->device_id(),
-                   {
-                     {"action", "request"},
-                     {"body",
-                      {{"sender_key", "test"},
-                       {"algorithm", "test_algo"},
-                       {"room_id", "test_room_id"},
-                       {"session_id", "test_session_id"}}},
-                     {"request_id", "test_request_id"},
-                     {"requesting_device_id", "test_req_id"},
-                   }}}}}}};
+    nlohmann::json body{{"messages",
+                         {{bob->user_id().to_string(),
+                           {{bob->device_id(),
+                             {
+                               {"action", "request"},
+                               {"body",
+                                {{"sender_key", "test"},
+                                 {"algorithm", "test_algo"},
+                                 {"room_id", "test_room_id"},
+                                 {"session_id", "test_session_id"}}},
+                               {"request_id", "test_request_id"},
+                               {"requesting_device_id", "test_req_id"},
+                             }}}}}}};
 
     alice->send_to_device("m.room_key_request", body, [bob](RequestErr err) {
         check_error(err);

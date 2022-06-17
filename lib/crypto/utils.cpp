@@ -416,7 +416,7 @@ mtx::responses::backup::SessionData
 decrypt_session(const mtx::responses::backup::EncryptedSessionData &data,
                 const BinaryBuf &privateKey)
 {
-    return json::parse(
+    return nlohmann::json::parse(
              CURVE25519_AES_SHA2_Decrypt(data.ciphertext, privateKey, data.ephemeral, data.mac))
       .get<mtx::responses::backup::SessionData>();
 }

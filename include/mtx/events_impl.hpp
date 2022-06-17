@@ -20,7 +20,7 @@ struct can_edit<Content, std::void_t<decltype(Content::relations)>>
 
 template<class Content>
 [[gnu::used, gnu::retain]] void
-to_json(json &obj, const Event<Content> &event)
+to_json(nlohmann::json &obj, const Event<Content> &event)
 {
     obj["content"] = event.content;
     obj["sender"]  = event.sender;
@@ -32,7 +32,7 @@ to_json(json &obj, const Event<Content> &event)
 
 template<class Content>
 [[gnu::used, gnu::retain]] void
-from_json(const json &obj, Event<Content> &event)
+from_json(const nlohmann::json &obj, Event<Content> &event)
 {
     if (!std::is_same_v<Content, mtx::events::msg::Encrypted> &&
         obj.at("content").contains("m.new_content")) {
@@ -61,7 +61,7 @@ from_json(const json &obj, Event<Content> &event)
 
 template<class Content>
 [[gnu::used, gnu::retain]] void
-from_json(const json &obj, DeviceEvent<Content> &event)
+from_json(const nlohmann::json &obj, DeviceEvent<Content> &event)
 {
     Event<Content> base_event = event;
     from_json(obj, base_event);
@@ -72,7 +72,7 @@ from_json(const json &obj, DeviceEvent<Content> &event)
 
 template<class Content>
 [[gnu::used, gnu::retain]] void
-to_json(json &obj, const DeviceEvent<Content> &event)
+to_json(nlohmann::json &obj, const DeviceEvent<Content> &event)
 {
     Event<Content> base_event = event;
     to_json(obj, base_event);
@@ -81,7 +81,7 @@ to_json(json &obj, const DeviceEvent<Content> &event)
 }
 
 void
-from_json(const json &obj, UnsignedData &data)
+from_json(const nlohmann::json &obj, UnsignedData &data)
 {
     if (obj.find("age") != obj.end())
         data.age = obj.at("age").get<uint64_t>();
@@ -104,7 +104,7 @@ from_json(const json &obj, UnsignedData &data)
 }
 
 void
-to_json(json &obj, const UnsignedData &event)
+to_json(nlohmann::json &obj, const UnsignedData &event)
 {
     if (!event.prev_sender.empty())
         obj["prev_sender"] = event.prev_sender;
@@ -127,7 +127,7 @@ to_json(json &obj, const UnsignedData &event)
 
 template<class Content>
 [[gnu::used, gnu::retain]] void
-from_json(const json &obj, StrippedEvent<Content> &event)
+from_json(const nlohmann::json &obj, StrippedEvent<Content> &event)
 {
     Event<Content> &base = event;
     from_json(obj, base);
@@ -137,7 +137,7 @@ from_json(const json &obj, StrippedEvent<Content> &event)
 
 template<class Content>
 [[gnu::used, gnu::retain]] void
-to_json(json &obj, const StrippedEvent<Content> &event)
+to_json(nlohmann::json &obj, const StrippedEvent<Content> &event)
 {
     Event<Content> base_event = event;
     to_json(obj, base_event);
@@ -147,7 +147,7 @@ to_json(json &obj, const StrippedEvent<Content> &event)
 
 template<class Content>
 [[gnu::used, gnu::retain]] void
-from_json(const json &obj, RoomEvent<Content> &event)
+from_json(const nlohmann::json &obj, RoomEvent<Content> &event)
 {
     Event<Content> &base = event;
     from_json(obj, base);
@@ -165,7 +165,7 @@ from_json(const json &obj, RoomEvent<Content> &event)
 
 template<class Content>
 [[gnu::used, gnu::retain]] void
-to_json(json &obj, const RoomEvent<Content> &event)
+to_json(nlohmann::json &obj, const RoomEvent<Content> &event)
 {
     Event<Content> base_event = event;
     to_json(obj, base_event);
@@ -180,7 +180,7 @@ to_json(json &obj, const RoomEvent<Content> &event)
 
 template<class Content>
 [[gnu::used, gnu::retain]] void
-to_json(json &obj, const StateEvent<Content> &event)
+to_json(nlohmann::json &obj, const StateEvent<Content> &event)
 {
     RoomEvent<Content> base_event = event;
     to_json(obj, base_event);
@@ -190,7 +190,7 @@ to_json(json &obj, const StateEvent<Content> &event)
 
 template<class Content>
 [[gnu::used, gnu::retain]] void
-from_json(const json &obj, StateEvent<Content> &event)
+from_json(const nlohmann::json &obj, StateEvent<Content> &event)
 {
     RoomEvent<Content> &base = event;
     from_json(obj, base);
@@ -200,7 +200,7 @@ from_json(const json &obj, StateEvent<Content> &event)
 
 template<class Content>
 [[gnu::used, gnu::retain]] void
-to_json(json &obj, const RedactionEvent<Content> &event)
+to_json(nlohmann::json &obj, const RedactionEvent<Content> &event)
 {
     RoomEvent<Content> base_event = event;
     to_json(obj, base_event);
@@ -210,7 +210,7 @@ to_json(json &obj, const RedactionEvent<Content> &event)
 
 template<class Content>
 [[gnu::used, gnu::retain]] void
-from_json(const json &obj, RedactionEvent<Content> &event)
+from_json(const nlohmann::json &obj, RedactionEvent<Content> &event)
 {
     RoomEvent<Content> &base = event;
     from_json(obj, base);
@@ -220,7 +220,7 @@ from_json(const json &obj, RedactionEvent<Content> &event)
 
 template<class Content>
 [[gnu::used, gnu::retain]] void
-to_json(json &obj, const EncryptedEvent<Content> &event)
+to_json(nlohmann::json &obj, const EncryptedEvent<Content> &event)
 {
     RoomEvent<Content> base_event = event;
     to_json(obj, base_event);
@@ -228,7 +228,7 @@ to_json(json &obj, const EncryptedEvent<Content> &event)
 
 template<class Content>
 [[gnu::used, gnu::retain]] void
-from_json(const json &obj, EncryptedEvent<Content> &event)
+from_json(const nlohmann::json &obj, EncryptedEvent<Content> &event)
 {
     RoomEvent<Content> &base = event;
     from_json(obj, base);
@@ -236,7 +236,7 @@ from_json(const json &obj, EncryptedEvent<Content> &event)
 
 template<class Content>
 [[gnu::used, gnu::retain]] void
-to_json(json &obj, const EphemeralEvent<Content> &event)
+to_json(nlohmann::json &obj, const EphemeralEvent<Content> &event)
 {
     obj["content"] = event.content;
     if constexpr (std::is_same_v<Unknown, Content>)
@@ -250,7 +250,7 @@ to_json(json &obj, const EphemeralEvent<Content> &event)
 
 template<class Content>
 [[gnu::used, gnu::retain]] void
-from_json(const json &obj, EphemeralEvent<Content> &event)
+from_json(const nlohmann::json &obj, EphemeralEvent<Content> &event)
 {
     event.content = obj.at("content").get<Content>();
     event.type    = getEventType(obj.at("type").get<std::string>());

@@ -14,7 +14,6 @@
 #include "mtx/events/redaction.hpp"
 #include "mtx/identifiers.hpp"
 
-using json = nlohmann::json;
 //! Top level namespace for mtxclient
 namespace mtx {
 namespace events {
@@ -35,11 +34,11 @@ struct Event
 
 template<class Content>
 void
-to_json(json &obj, const Event<Content> &event);
+to_json(nlohmann::json &obj, const Event<Content> &event);
 
 template<class Content>
 void
-from_json(const json &obj, Event<Content> &event);
+from_json(const nlohmann::json &obj, Event<Content> &event);
 
 //! Extension of the Event type for device events.
 template<class Content>
@@ -50,11 +49,11 @@ struct DeviceEvent : public Event<Content>
 
 template<class Content>
 void
-from_json(const json &obj, DeviceEvent<Content> &event);
+from_json(const nlohmann::json &obj, DeviceEvent<Content> &event);
 
 template<class Content>
 void
-to_json(json &obj, const DeviceEvent<Content> &event);
+to_json(nlohmann::json &obj, const DeviceEvent<Content> &event);
 
 //! Additional server provided data for this event.
 struct UnsignedData
@@ -79,10 +78,10 @@ struct UnsignedData
 };
 
 void
-from_json(const json &obj, UnsignedData &data);
+from_json(const nlohmann::json &obj, UnsignedData &data);
 
 void
-to_json(json &obj, const UnsignedData &event);
+to_json(nlohmann::json &obj, const UnsignedData &event);
 
 template<class Content>
 struct StrippedEvent : public Event<Content>
@@ -92,11 +91,11 @@ struct StrippedEvent : public Event<Content>
 
 template<class Content>
 void
-from_json(const json &obj, StrippedEvent<Content> &event);
+from_json(const nlohmann::json &obj, StrippedEvent<Content> &event);
 
 template<class Content>
 void
-to_json(json &obj, const StrippedEvent<Content> &event);
+to_json(nlohmann::json &obj, const StrippedEvent<Content> &event);
 
 //! RoomEvent.
 template<class Content>
@@ -116,11 +115,11 @@ struct RoomEvent : public Event<Content>
 
 template<class Content>
 void
-from_json(const json &obj, RoomEvent<Content> &event);
+from_json(const nlohmann::json &obj, RoomEvent<Content> &event);
 
 template<class Content>
 void
-to_json(json &obj, const RoomEvent<Content> &event);
+to_json(nlohmann::json &obj, const RoomEvent<Content> &event);
 
 //! Extension of the RoomEvent.
 template<class Content>
@@ -133,11 +132,11 @@ struct StateEvent : public RoomEvent<Content>
 
 template<class Content>
 void
-to_json(json &obj, const StateEvent<Content> &event);
+to_json(nlohmann::json &obj, const StateEvent<Content> &event);
 
 template<class Content>
 void
-from_json(const json &obj, StateEvent<Content> &event);
+from_json(const nlohmann::json &obj, StateEvent<Content> &event);
 
 //! Extension of the RoomEvent.
 template<class Content>
@@ -149,11 +148,11 @@ struct RedactionEvent : public RoomEvent<Content>
 
 template<class Content>
 void
-to_json(json &obj, const RedactionEvent<Content> &event);
+to_json(nlohmann::json &obj, const RedactionEvent<Content> &event);
 
 template<class Content>
 void
-from_json(const json &obj, RedactionEvent<Content> &event);
+from_json(const nlohmann::json &obj, RedactionEvent<Content> &event);
 
 //! Extension of the RoomEvent.
 template<class Content>
@@ -162,11 +161,11 @@ struct EncryptedEvent : public RoomEvent<Content>
 
 template<class Content>
 void
-to_json(json &obj, const EncryptedEvent<Content> &event);
+to_json(nlohmann::json &obj, const EncryptedEvent<Content> &event);
 
 template<class Content>
 void
-from_json(const json &obj, EncryptedEvent<Content> &event);
+from_json(const nlohmann::json &obj, EncryptedEvent<Content> &event);
 
 enum class MessageType
 {
@@ -196,7 +195,7 @@ MessageType
 getMessageType(const std::string &type);
 
 MessageType
-getMessageType(const json &obj);
+getMessageType(const nlohmann::json &obj);
 
 struct Sticker : public RoomEvent<mtx::events::msg::StickerImage>
 {};
@@ -219,11 +218,11 @@ struct EphemeralEvent
 
 template<class Content>
 void
-to_json(json &obj, const EphemeralEvent<Content> &event);
+to_json(nlohmann::json &obj, const EphemeralEvent<Content> &event);
 
 template<class Content>
 void
-from_json(const json &obj, EphemeralEvent<Content> &event);
+from_json(const nlohmann::json &obj, EphemeralEvent<Content> &event);
 
 /// @brief An account_data event like fully_read or tags.
 /// @sa Event

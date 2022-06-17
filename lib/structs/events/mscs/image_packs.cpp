@@ -118,9 +118,9 @@ to_json(nlohmann::json &obj, const ImagePackRooms &content)
     for (const auto &[roomid, packs] : content.rooms) {
         for (const auto &[packid, body] : packs) {
             if (body.empty())
-                obj["rooms"][roomid][packid] = json::object();
+                obj["rooms"][roomid][packid] = nlohmann::json::object();
             else
-                obj["rooms"][roomid][packid] = json::parse(body);
+                obj["rooms"][roomid][packid] = nlohmann::json::parse(body);
         }
     }
 }

@@ -11,7 +11,7 @@ namespace events {
 namespace msg {
 
 void
-to_json(json &obj, const SASMethods &method)
+to_json(nlohmann::json &obj, const SASMethods &method)
 {
     switch (method) {
     case SASMethods::Decimal:
@@ -28,7 +28,7 @@ to_json(json &obj, const SASMethods &method)
 }
 
 void
-from_json(const json &obj, SASMethods &method)
+from_json(const nlohmann::json &obj, SASMethods &method)
 {
     if (obj.get<std::string>() == "decimal")
         method = SASMethods::Decimal;
@@ -39,7 +39,7 @@ from_json(const json &obj, SASMethods &method)
 }
 
 void
-to_json(json &obj, const VerificationMethods &method)
+to_json(nlohmann::json &obj, const VerificationMethods &method)
 {
     switch (method) {
     case VerificationMethods::SASv1:
@@ -53,7 +53,7 @@ to_json(json &obj, const VerificationMethods &method)
 }
 
 void
-from_json(const json &obj, VerificationMethods &method)
+from_json(const nlohmann::json &obj, VerificationMethods &method)
 {
     if (obj.get<std::string>() == "m.sas.v1")
         method = VerificationMethods::SASv1;
@@ -62,21 +62,21 @@ from_json(const json &obj, VerificationMethods &method)
 }
 
 void
-from_json(const json &obj, OlmCipherContent &msg)
+from_json(const nlohmann::json &obj, OlmCipherContent &msg)
 {
     msg.body = obj.at("body").get<std::string>();
     msg.type = obj.at("type").get<uint8_t>();
 }
 
 void
-to_json(json &obj, const OlmCipherContent &msg)
+to_json(nlohmann::json &obj, const OlmCipherContent &msg)
 {
     obj["body"] = msg.body;
     obj["type"] = msg.type;
 }
 
 void
-from_json(const json &obj, OlmEncrypted &msg)
+from_json(const nlohmann::json &obj, OlmEncrypted &msg)
 {
     msg.algorithm  = OLM_ALGO;
     msg.sender_key = obj.at("sender_key").get<std::string>();
@@ -85,7 +85,7 @@ from_json(const json &obj, OlmEncrypted &msg)
 }
 
 void
-to_json(json &obj, const OlmEncrypted &msg)
+to_json(nlohmann::json &obj, const OlmEncrypted &msg)
 {
     obj["algorithm"]  = msg.algorithm;
     obj["sender_key"] = msg.sender_key;
@@ -93,7 +93,7 @@ to_json(json &obj, const OlmEncrypted &msg)
 }
 
 void
-from_json(const json &obj, Encrypted &content)
+from_json(const nlohmann::json &obj, Encrypted &content)
 {
     content.algorithm  = obj.at("algorithm").get<std::string>();
     content.ciphertext = obj.at("ciphertext").get<std::string>();
@@ -107,7 +107,7 @@ from_json(const json &obj, Encrypted &content)
 }
 
 void
-to_json(json &obj, const Encrypted &content)
+to_json(nlohmann::json &obj, const Encrypted &content)
 {
     obj["algorithm"]  = content.algorithm;
     obj["ciphertext"] = content.ciphertext;
@@ -125,17 +125,17 @@ to_json(json &obj, const Encrypted &content)
 }
 
 void
-from_json(const json &, Dummy &)
+from_json(const nlohmann::json &, Dummy &)
 {}
 
 void
-to_json(json &obj, const Dummy &)
+to_json(nlohmann::json &obj, const Dummy &)
 {
-    obj = json::object();
+    obj = nlohmann::json::object();
 }
 
 void
-from_json(const json &obj, RoomKey &event)
+from_json(const nlohmann::json &obj, RoomKey &event)
 {
     event.algorithm   = obj.at("algorithm").get<std::string>();
     event.room_id     = obj.at("room_id").get<std::string>();
@@ -144,7 +144,7 @@ from_json(const json &obj, RoomKey &event)
 }
 
 void
-to_json(json &obj, const RoomKey &event)
+to_json(nlohmann::json &obj, const RoomKey &event)
 {
     obj["algorithm"]   = event.algorithm;
     obj["room_id"]     = event.room_id;
@@ -153,7 +153,7 @@ to_json(json &obj, const RoomKey &event)
 }
 
 void
-from_json(const json &obj, ForwardedRoomKey &event)
+from_json(const nlohmann::json &obj, ForwardedRoomKey &event)
 {
     event.algorithm                  = obj.at("algorithm").get<std::string>();
     event.room_id                    = obj.at("room_id").get<std::string>();
@@ -166,7 +166,7 @@ from_json(const json &obj, ForwardedRoomKey &event)
 }
 
 void
-to_json(json &obj, const ForwardedRoomKey &event)
+to_json(nlohmann::json &obj, const ForwardedRoomKey &event)
 {
     obj["algorithm"]                       = event.algorithm;
     obj["room_id"]                         = event.room_id;
@@ -178,7 +178,7 @@ to_json(json &obj, const ForwardedRoomKey &event)
 }
 
 void
-from_json(const json &obj, KeyRequest &event)
+from_json(const nlohmann::json &obj, KeyRequest &event)
 {
     event.request_id           = obj.at("request_id").get<std::string>();
     event.requesting_device_id = obj.at("requesting_device_id").get<std::string>();
@@ -196,18 +196,18 @@ from_json(const json &obj, KeyRequest &event)
 }
 
 void
-to_json(json &obj, const KeyRequest &event)
+to_json(nlohmann::json &obj, const KeyRequest &event)
 {
-    obj = json::object();
+    obj = nlohmann::json::object();
 
-    obj = json::object();
+    obj = nlohmann::json::object();
 
     obj["request_id"]           = event.request_id;
     obj["requesting_device_id"] = event.requesting_device_id;
 
     switch (event.action) {
     case RequestAction::Request: {
-        obj["body"] = json::object();
+        obj["body"] = nlohmann::json::object();
 
         obj["body"]["room_id"] = event.room_id;
 
@@ -231,7 +231,7 @@ to_json(json &obj, const KeyRequest &event)
 }
 
 void
-from_json(const json &obj, KeyVerificationRequest &event)
+from_json(const nlohmann::json &obj, KeyVerificationRequest &event)
 {
     if (obj.count("body") != 0) {
         event.body = obj.at("body").get<std::string>();
@@ -253,7 +253,7 @@ from_json(const json &obj, KeyVerificationRequest &event)
 }
 
 void
-to_json(json &obj, const KeyVerificationRequest &event)
+to_json(nlohmann::json &obj, const KeyVerificationRequest &event)
 {
     if (event.body.has_value())
         obj["body"] = event.body.value();
@@ -270,7 +270,7 @@ to_json(json &obj, const KeyVerificationRequest &event)
 }
 
 void
-from_json(const json &obj, KeyVerificationStart &event)
+from_json(const nlohmann::json &obj, KeyVerificationStart &event)
 {
     event.from_device = obj.at("from_device").get<std::string>();
     if (obj.count("transaction_id") != 0) {
@@ -291,7 +291,7 @@ from_json(const json &obj, KeyVerificationStart &event)
 }
 
 void
-to_json(json &obj, const KeyVerificationStart &event)
+to_json(nlohmann::json &obj, const KeyVerificationStart &event)
 {
     obj["from_device"] = event.from_device;
     obj["method"]      = event.method;
@@ -307,7 +307,7 @@ to_json(json &obj, const KeyVerificationStart &event)
 }
 
 void
-from_json(const json &obj, KeyVerificationReady &event)
+from_json(const nlohmann::json &obj, KeyVerificationReady &event)
 {
     if (obj.count("transaction_id") != 0) {
         event.transaction_id = obj.at("transaction_id").get<std::string>();
@@ -318,7 +318,7 @@ from_json(const json &obj, KeyVerificationReady &event)
 }
 
 void
-to_json(json &obj, const KeyVerificationReady &event)
+to_json(nlohmann::json &obj, const KeyVerificationReady &event)
 {
     obj["methods"] = event.methods;
     if (event.transaction_id.has_value())
@@ -345,7 +345,7 @@ to_json(nlohmann::json &obj, const KeyVerificationDone &event)
 }
 
 void
-from_json(const json &obj, KeyVerificationAccept &event)
+from_json(const nlohmann::json &obj, KeyVerificationAccept &event)
 {
     if (obj.count("transaction_id") != 0) {
         event.transaction_id = obj.at("transaction_id").get<std::string>();
@@ -361,7 +361,7 @@ from_json(const json &obj, KeyVerificationAccept &event)
 }
 
 void
-to_json(json &obj, const KeyVerificationAccept &event)
+to_json(nlohmann::json &obj, const KeyVerificationAccept &event)
 {
     if (event.transaction_id.has_value())
         obj["transaction_id"] = event.transaction_id.value();
@@ -375,7 +375,7 @@ to_json(json &obj, const KeyVerificationAccept &event)
 }
 
 void
-from_json(const json &obj, KeyVerificationCancel &event)
+from_json(const nlohmann::json &obj, KeyVerificationCancel &event)
 {
     if (obj.count("transaction_id") != 0) {
         event.transaction_id = obj.at("transaction_id").get<std::string>();
@@ -386,7 +386,7 @@ from_json(const json &obj, KeyVerificationCancel &event)
 }
 
 void
-to_json(json &obj, const KeyVerificationCancel &event)
+to_json(nlohmann::json &obj, const KeyVerificationCancel &event)
 {
     if (event.transaction_id.has_value())
         obj["transaction_id"] = event.transaction_id.value();
@@ -396,7 +396,7 @@ to_json(json &obj, const KeyVerificationCancel &event)
 }
 
 void
-from_json(const json &obj, KeyVerificationKey &event)
+from_json(const nlohmann::json &obj, KeyVerificationKey &event)
 {
     if (obj.count("transaction_id") != 0) {
         event.transaction_id = obj.at("transaction_id").get<std::string>();
@@ -406,7 +406,7 @@ from_json(const json &obj, KeyVerificationKey &event)
 }
 
 void
-to_json(json &obj, const KeyVerificationKey &event)
+to_json(nlohmann::json &obj, const KeyVerificationKey &event)
 {
     if (event.transaction_id.has_value())
         obj["transaction_id"] = event.transaction_id.value();
@@ -415,7 +415,7 @@ to_json(json &obj, const KeyVerificationKey &event)
 }
 
 void
-from_json(const json &obj, KeyVerificationMac &event)
+from_json(const nlohmann::json &obj, KeyVerificationMac &event)
 {
     if (obj.count("transaction_id") != 0) {
         event.transaction_id = obj.at("transaction_id").get<std::string>();
@@ -426,7 +426,7 @@ from_json(const json &obj, KeyVerificationMac &event)
 }
 
 void
-to_json(json &obj, const KeyVerificationMac &event)
+to_json(nlohmann::json &obj, const KeyVerificationMac &event)
 {
     if (event.transaction_id.has_value())
         obj["transaction_id"] = event.transaction_id.value();

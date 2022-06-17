@@ -14,9 +14,6 @@
 #include <nlohmann/json.hpp>
 #endif
 
-using json       = nlohmann::json;
-namespace common = mtx::common;
-
 namespace mtx {
 //! Namespace for request structs
 namespace requests {
@@ -70,7 +67,7 @@ struct CreateRoom
 };
 
 void
-to_json(json &obj, const CreateRoom &request);
+to_json(nlohmann::json &obj, const CreateRoom &request);
 
 namespace login_identifier {
 //! The user is identified by their Matrix ID.
@@ -124,7 +121,7 @@ struct Login
 };
 
 void
-to_json(json &obj, const Login &request);
+to_json(nlohmann::json &obj, const Login &request);
 
 /// @brief Request payload for
 /// `POST /_matrix/client/r0/{register,account/password}/email/requestToken`
@@ -150,7 +147,7 @@ struct RequestEmailToken
 };
 
 void
-to_json(json &obj, const RequestEmailToken &request);
+to_json(nlohmann::json &obj, const RequestEmailToken &request);
 
 /// @brief Request payload for
 /// `POST /_matrix/client/r0/{register,account/password}/msisdn/requestToken`
@@ -178,7 +175,7 @@ struct RequestMSISDNToken
 };
 
 void
-to_json(json &obj, const RequestMSISDNToken &request);
+to_json(nlohmann::json &obj, const RequestMSISDNToken &request);
 
 //! Validate ownership of an email address/phone number.
 struct IdentitySubmitToken
@@ -192,7 +189,7 @@ struct IdentitySubmitToken
 };
 
 void
-to_json(json &obj, const IdentitySubmitToken &request);
+to_json(nlohmann::json &obj, const IdentitySubmitToken &request);
 
 //! Request payload for the `PUT /_matrix/client/r0/sendToDevice/{eventType}/{transcationID}`
 template<typename EventContent>
@@ -205,7 +202,7 @@ struct AvatarUrl
 };
 
 void
-to_json(json &obj, const AvatarUrl &request);
+to_json(nlohmann::json &obj, const AvatarUrl &request);
 
 //! Request payload for the `PUT /_matrix/client/r0/profile/{userId}/displayname` endpoint.
 struct DisplayName
@@ -215,7 +212,7 @@ struct DisplayName
 };
 
 void
-to_json(json &obj, const DisplayName &request);
+to_json(nlohmann::json &obj, const DisplayName &request);
 
 //! Request payload for the `POST /_matrix/client/r0/rooms/{roomId}/invite` endpoint as well as ban,
 //! unban and kick.
@@ -228,7 +225,7 @@ struct RoomMembershipChange
 };
 
 void
-to_json(json &obj, const RoomMembershipChange &request);
+to_json(nlohmann::json &obj, const RoomMembershipChange &request);
 
 //! Request payload for the `PUT /_matrix/client/r0/rooms/{roomId}/typing/{userId}` endpoint.
 struct TypingNotification
@@ -240,7 +237,7 @@ struct TypingNotification
 };
 
 void
-to_json(json &obj, const TypingNotification &request);
+to_json(nlohmann::json &obj, const TypingNotification &request);
 
 //! Request payload for the `PUT /_matrix/client/r0/devices/{deviceId}` endpoint.
 struct DeviceUpdate
@@ -249,7 +246,7 @@ struct DeviceUpdate
 };
 
 void
-to_json(json &obj, const DeviceUpdate &request);
+to_json(nlohmann::json &obj, const DeviceUpdate &request);
 
 //! Request payload for the `PUT /_matrix/client/r0/directory/list/room/{roomId}` endpoint
 struct PublicRoomVisibility
@@ -260,7 +257,7 @@ struct PublicRoomVisibility
 };
 
 void
-to_json(json &obj, const PublicRoomVisibility &request);
+to_json(nlohmann::json &obj, const PublicRoomVisibility &request);
 
 struct PublicRoomsFilter
 {
@@ -293,13 +290,13 @@ struct PublicRooms
 };
 
 void
-to_json(json &obj, const PublicRooms &request);
+to_json(nlohmann::json &obj, const PublicRooms &request);
 
 struct Empty
 {};
 
 inline void
-to_json(json &, const Empty &)
+to_json(nlohmann::json &, const Empty &)
 {}
 
 using Logout = Empty;
@@ -316,7 +313,7 @@ struct SignedOneTimeKey
     std::map<std::string, std::map<std::string, std::string>> signatures;
 };
 void
-to_json(json &obj, const SignedOneTimeKey &);
+to_json(nlohmann::json &obj, const SignedOneTimeKey &);
 
 struct UploadKeys
 {
@@ -344,7 +341,7 @@ struct UploadKeys
 };
 
 void
-to_json(json &obj, const UploadKeys &);
+to_json(nlohmann::json &obj, const UploadKeys &);
 
 constexpr uint64_t DEFAULT_DOWNLOAD_TIMEOUT = 10 * 1000; // 10 seconds
 
@@ -365,7 +362,7 @@ struct QueryKeys
 };
 
 void
-to_json(json &obj, const QueryKeys &);
+to_json(nlohmann::json &obj, const QueryKeys &);
 
 struct ClaimKeys
 {
@@ -376,7 +373,7 @@ struct ClaimKeys
 };
 
 void
-to_json(json &obj, const ClaimKeys &request);
+to_json(nlohmann::json &obj, const ClaimKeys &request);
 
 struct KeySignaturesUpload
 {
@@ -389,7 +386,7 @@ struct KeySignaturesUpload
 };
 
 void
-to_json(json &obj, const KeySignaturesUpload &req);
+to_json(nlohmann::json &obj, const KeySignaturesUpload &req);
 
 //! Upload cross signing keys
 struct DeviceSigningUpload
@@ -405,7 +402,7 @@ struct DeviceSigningUpload
 };
 
 void
-to_json(json &obj, const DeviceSigningUpload &req);
+to_json(nlohmann::json &obj, const DeviceSigningUpload &req);
 
 struct PusherData
 {
@@ -420,7 +417,7 @@ struct PusherData
 };
 
 void
-to_json(json &obj, const PusherData &data);
+to_json(nlohmann::json &obj, const PusherData &data);
 
 //! Request payload for the `POST /_matrix/client/r0/pushers/set` endpoint.
 struct SetPusher
@@ -451,6 +448,6 @@ struct SetPusher
 };
 
 void
-to_json(json &obj, const SetPusher &req);
+to_json(nlohmann::json &obj, const SetPusher &req);
 } // namespace requests
 } // namespace mtx
