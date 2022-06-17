@@ -29,6 +29,9 @@ enum class JoinRule
     //! the same as invite, except users may also join if they are a member of a room listed in
     //! the allow rules.
     Restricted,
+    //! a user can request an invite using the same functions offered by the knock join rule, or can
+    //! attempt to join having satisfied an allow condition per the restricted join rule.
+    KnockRestricted,
 };
 
 std::string
