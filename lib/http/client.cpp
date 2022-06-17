@@ -105,10 +105,8 @@ mtx::http::Client::delete_(const std::string &endpoint, ErrCallback cb, bool req
           if (client_error.status_code < 200 || client_error.status_code >= 300) {
               // The homeserver should return an error struct.
               try {
-                  nlohmann::json json_error       = json::parse(r.response());
-                  mtx::errors::Error matrix_error = json_error;
-
-                  client_error.matrix_error = matrix_error;
+                  nlohmann::json json_error = json::parse(r.response());
+                  client_error.matrix_error = json_error.get<mtx::errors::Error>();
               } catch (const nlohmann::json::exception &e) {
                   client_error.parse_error =
                     std::string(e.what()) + ": " + std::string(r.response());

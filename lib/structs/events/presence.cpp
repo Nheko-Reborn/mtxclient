@@ -44,7 +44,7 @@ from_json(const nlohmann::json &obj, Presence &presence)
     presence.currently_active = obj.value("currently_active", false);
     try {
         if (obj.contains("status_msg"))
-            presence.status_msg = obj.at("status_msg");
+            presence.status_msg = obj.at("status_msg").get<std::string>();
     } catch (...) {
     }
 }

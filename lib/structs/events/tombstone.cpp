@@ -11,8 +11,8 @@ namespace state {
 void
 from_json(const json &obj, Tombstone &content)
 {
-    content.body             = obj.at("body");
-    content.replacement_room = obj.at("replacement_room");
+    content.body             = obj.value("body", "");
+    content.replacement_room = obj.value("replacement_room", "");
 }
 
 void

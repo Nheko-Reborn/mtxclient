@@ -71,9 +71,9 @@ namespace backup {
 void
 from_json(const nlohmann::json &obj, EncryptedSessionData &response)
 {
-    response.ephemeral  = obj.at("ephemeral");
-    response.ciphertext = obj.at("ciphertext");
-    response.mac        = obj.at("mac");
+    response.ephemeral  = obj.at("ephemeral").get<std::string>();
+    response.ciphertext = obj.at("ciphertext").get<std::string>();
+    response.mac        = obj.at("mac").get<std::string>();
 }
 void
 to_json(nlohmann::json &obj, const EncryptedSessionData &response)
@@ -86,10 +86,10 @@ to_json(nlohmann::json &obj, const EncryptedSessionData &response)
 void
 from_json(const nlohmann::json &obj, SessionBackup &response)
 {
-    response.first_message_index = obj.at("first_message_index");
-    response.forwarded_count     = obj.at("forwarded_count");
-    response.is_verified         = obj.at("is_verified");
-    response.session_data        = obj.at("session_data");
+    response.first_message_index = obj.at("first_message_index").get<int64_t>();
+    response.forwarded_count     = obj.at("forwarded_count").get<int64_t>();
+    response.is_verified         = obj.at("is_verified").get<bool>();
+    response.session_data        = obj.at("session_data").get<EncryptedSessionData>();
 }
 void
 to_json(nlohmann::json &obj, const SessionBackup &response)
@@ -125,12 +125,12 @@ to_json(nlohmann::json &obj, const KeysBackup &response)
 void
 from_json(const nlohmann::json &obj, BackupVersion &response)
 {
-    response.algorithm = obj.at("algorithm");
+    response.algorithm = obj.at("algorithm").get<std::string>();
     response.auth_data = obj.at("auth_data").dump();
-    response.count     = obj.at("count");
+    response.count     = obj.at("count").get<int64_t>();
     response.etag =
       obj.at("etag").dump(); // workaround, since synapse 1.15.1 and older sends this as integer
-    response.version = obj.at("version");
+    response.version = obj.at("version").get<std::string>();
 }
 void
 to_json(nlohmann::json &obj, const BackupVersion &response)
@@ -155,14 +155,14 @@ to_json(nlohmann::json &obj, const SessionData &data)
 void
 from_json(const nlohmann::json &obj, SessionData &data)
 {
-    data.algorithm                       = obj.at("algorithm");
+    data.algorithm                       = obj.at("algorithm").get<std::string>();
     data.forwarding_curve25519_key_chain = obj.at("forwarding_curve25519_key_chain")
                                              .get<decltype(data.forwarding_curve25519_key_chain)>();
-    data.sender_key = obj.at("sender_key");
+    data.sender_key = obj.at("sender_key").get<std::string>();
     // required, but some clients don't send it
     data.sender_claimed_keys =
       obj.value("sender_claimed_keys", std::map<std::string, std::string>());
-    data.session_key = obj.at("session_key");
+    data.session_key = obj.at("session_key").get<std::string>();
 }
 }
 }

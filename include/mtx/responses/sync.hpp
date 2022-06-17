@@ -59,9 +59,9 @@ struct UnreadNotifications
 {
     //! The number of unread notifications for this room with the
     //! highlight flag set.
-    uint16_t highlight_count = 0;
+    uint64_t highlight_count = 0;
     //! The total number of unread notifications for this room.
-    uint16_t notification_count = 0;
+    uint64_t notification_count = 0;
 };
 
 void

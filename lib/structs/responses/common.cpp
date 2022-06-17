@@ -31,52 +31,52 @@ namespace responses {
 void
 from_json(const nlohmann::json &obj, GroupId &response)
 {
-    response.group_id = obj.at("group_id");
+    response.group_id = obj.at("group_id").get<std::string>();
 }
 
 void
 from_json(const nlohmann::json &obj, RoomId &response)
 {
-    response.room_id = obj.at("room_id");
+    response.room_id = obj.at("room_id").get<std::string>();
 }
 
 void
 from_json(const nlohmann::json &obj, EventId &response)
 {
-    response.event_id = obj.at("event_id");
+    response.event_id = obj.at("event_id").get<mtx::identifiers::Event>();
 }
 
 void
 from_json(const nlohmann::json &obj, FilterId &response)
 {
-    response.filter_id = obj.at("filter_id");
+    response.filter_id = obj.at("filter_id").get<std::string>();
 }
 
 void
 from_json(const nlohmann::json &obj, Version &response)
 {
-    response.version = obj.at("version");
+    response.version = obj.at("version").get<std::string>();
 }
 
 void
 from_json(const nlohmann::json &obj, Success &success)
 {
-    success.success = obj.at("success");
+    success.success = obj.at("success").get<bool>();
 }
 
 void
 from_json(const nlohmann::json &obj, Available &response)
 {
-    response.available = obj.at("available");
+    response.available = obj.at("available").get<bool>();
 }
 
 void
 from_json(const nlohmann::json &obj, RequestToken &r)
 {
-    r.sid = obj.at("sid");
+    r.sid = obj.at("sid").get<std::string>();
 
     if (obj.contains("submit_url"))
-        r.submit_url = obj.at("submit_url");
+        r.submit_url = obj.at("submit_url").get<std::string>();
 }
 
 namespace utils {
@@ -231,8 +231,8 @@ void
 compose_timeline_events(json &events,
                         const std::vector<mtx::events::collections::TimelineEvents> &container)
 {
-    const auto c = container.at(0);
-    events       = std::visit([](auto e) { return json(e); }, c);
+    const auto &c = container.at(0);
+    events        = std::visit([](auto e) { return json(e); }, c);
 }
 
 void

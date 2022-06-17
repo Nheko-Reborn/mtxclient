@@ -37,10 +37,10 @@ void
 from_json(const json &obj, UnreadNotifications &notifications)
 {
     if (obj.find("highlight_count") != obj.end())
-        notifications.highlight_count = obj.at("highlight_count");
+        notifications.highlight_count = obj.at("highlight_count").get<uint64_t>();
 
     if (obj.find("notification_count") != obj.end())
-        notifications.notification_count = obj.at("notification_count");
+        notifications.notification_count = obj.at("notification_count").get<uint64_t>();
 }
 
 void

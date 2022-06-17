@@ -13,8 +13,8 @@ namespace state {
 void
 from_json(const json &obj, PreviousRoom &predecessor)
 {
-    predecessor.room_id  = obj.at("room_id");
-    predecessor.event_id = obj.at("event_id");
+    predecessor.room_id  = obj.at("room_id").get<std::string>();
+    predecessor.event_id = obj.at("event_id").get<std::string>();
 }
 void
 to_json(json &obj, const PreviousRoom &predecessor)
@@ -26,17 +26,17 @@ to_json(json &obj, const PreviousRoom &predecessor)
 void
 from_json(const json &obj, Create &create)
 {
-    create.creator = obj.at("creator");
+    create.creator = obj.at("creator").get<std::string>();
 
     if (obj.contains("type") && obj.at("type").is_string())
-        create.type = obj.at("type");
+        create.type = obj.at("type").get<std::string>();
 
     if (obj.find("m.federate") != obj.end())
         create.federate = obj.at("m.federate").get<bool>();
 
     // Assume room verison 1 for events where it's not specified
     if (obj.find("room_version") != obj.end())
-        create.room_version = obj.at("room_version");
+        create.room_version = obj.at("room_version").get<std::string>();
     else
         create.room_version = "1";
 

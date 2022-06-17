@@ -12,12 +12,12 @@ void
 from_json(const json &obj, Notification &res)
 {
     res.actions = obj.at("actions").get<decltype(res.actions)>();
-    res.read    = obj.at("read");
-    res.room_id = obj.at("room_id");
-    res.ts      = obj.at("ts");
+    res.read    = obj.at("read").get<bool>();
+    res.room_id = obj.at("room_id").get<std::string>();
+    res.ts      = obj.at("ts").get<uint64_t>();
 
     if (obj.find("profile_tag") != obj.end() && !obj.at("profile_tag").is_null())
-        res.profile_tag = obj.at("profile_tag");
+        res.profile_tag = obj.at("profile_tag").get<std::string>();
 
     // HACK to work around the fact that there isn't
     // a method to parse a timeline event from a json object.

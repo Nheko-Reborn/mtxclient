@@ -15,7 +15,7 @@ void
 from_json(const json &obj, Image &content)
 {
     content.body    = obj.value("body", "");
-    content.msgtype = obj.at("msgtype");
+    content.msgtype = obj.at("msgtype").get<std::string>();
 
     content.url = obj.value("url", "");
 

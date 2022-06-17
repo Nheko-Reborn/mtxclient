@@ -67,7 +67,7 @@ from_json(const json &obj, DeviceEvent<Content> &event)
     from_json(obj, base_event);
     event.content = base_event.content;
     event.type    = base_event.type;
-    event.sender  = obj.at("sender");
+    event.sender  = obj.at("sender").get<std::string>();
 }
 
 template<class Content>
@@ -132,7 +132,7 @@ from_json(const json &obj, StrippedEvent<Content> &event)
     Event<Content> &base = event;
     from_json(obj, base);
 
-    event.state_key = obj.at("state_key");
+    event.state_key = obj.at("state_key").get<std::string>();
 }
 
 template<class Content>
@@ -152,15 +152,15 @@ from_json(const json &obj, RoomEvent<Content> &event)
     Event<Content> &base = event;
     from_json(obj, base);
 
-    event.event_id         = obj.at("event_id");
-    event.origin_server_ts = obj.at("origin_server_ts");
+    event.event_id         = obj.at("event_id").get<std::string>();
+    event.origin_server_ts = obj.at("origin_server_ts").get<uint64_t>();
 
     // SPEC_BUG: Not present in the state array returned by /sync.
     if (obj.find("room_id") != obj.end())
-        event.room_id = obj.at("room_id");
+        event.room_id = obj.at("room_id").get<std::string>();
 
     if (obj.find("unsigned") != obj.end())
-        event.unsigned_data = obj.at("unsigned");
+        event.unsigned_data = obj.at("unsigned").get<UnsignedData>();
 }
 
 template<class Content>

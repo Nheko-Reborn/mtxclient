@@ -67,7 +67,7 @@ TEST(Crypto, DeviceKeys)
           }
         })"_json;
 
-    DeviceKeys device2 = data;
+    DeviceKeys device2 = data.get<DeviceKeys>();
 
     EXPECT_EQ(device2.user_id, device1.user_id);
     EXPECT_EQ(device2.device_id, device1.device_id);
@@ -95,7 +95,7 @@ TEST(Crypto, EncryptedFile)
         "sha256": "fdSLu/YkRx3Wyh3KQabP3rd6+SFiKg5lsJZQHtkSAYA"
       }})"_json;
 
-    EncryptedFile file = j;
+    EncryptedFile file = j.get<EncryptedFile>();
     // json j2            = file;
 
     // EXPECT_EQ(j, j2);
@@ -243,7 +243,7 @@ TEST(Encryption, EncryptedFile)
     EXPECT_NE("AAAAAAAAAAAA", encryption_data.second.iv.substr(0, 11));
     EXPECT_NE(std::vector<uint8_t>(8, 0), std::vector<uint8_t>(iv.begin(), iv.begin() + 8));
 
-    json j                                            = R"({
+    json j = R"({
   "type": "m.room.message",
   "content": {
     "body": "test.txt",
@@ -281,7 +281,8 @@ TEST(Encryption, EncryptedFile)
   },
   "room_id": "!YnUlhwgbBaGcAFsJOJ:neko.dev"
 })"_json;
-    mtx::events::RoomEvent<mtx::events::msg::File> ev = j;
+    mtx::events::RoomEvent<mtx::events::msg::File> ev =
+      j.get<mtx::events::RoomEvent<mtx::events::msg::File>>();
 
     ASSERT_EQ("abcdefg\n",
               mtx::crypto::to_string(
@@ -320,7 +321,7 @@ TEST(SecretStorage, Secret)
 	  }
 	})"_json;
 
-    mtx::secret_storage::Secret secret = j;
+    mtx::secret_storage::Secret secret = j.get<mtx::secret_storage::Secret>();
 
     ASSERT_EQ(json(secret), j);
     ASSERT_EQ(secret.encrypted.size(), 1);
@@ -338,7 +339,8 @@ TEST(SecretStorage, SecretKey)
 	  "mac": "mac+of+encrypted+zeros"
 	})"_json;
 
-    mtx::secret_storage::AesHmacSha2KeyDescription desc = j;
+    mtx::secret_storage::AesHmacSha2KeyDescription desc =
+      j.get<mtx::secret_storage::AesHmacSha2KeyDescription>();
 
     ASSERT_EQ(json(desc), j);
     ASSERT_EQ(desc.name, "m.default");
@@ -364,7 +366,7 @@ TEST(SecretStorage, SecretKey)
 	  }
 	})"_json;
 
-    desc = j;
+    desc = j.get<mtx::secret_storage::AesHmacSha2KeyDescription>();
 
     ASSERT_EQ(json(desc), j);
     ASSERT_EQ(desc.name, "m.default");
@@ -419,8 +421,8 @@ TEST(SecretStorage, CreateOnlineKeyBackup)
     s.sender_key  = "abc";
     s.session_key = "cde";
 
-    auto enc1 =
-      mtx::crypto::encrypt_session(s, json::parse(okb->backupVersion.auth_data)["public_key"]);
+    auto enc1 = mtx::crypto::encrypt_session(
+      s, json::parse(okb->backupVersion.auth_data)["public_key"].get<std::string>());
     EXPECT_FALSE(enc1.ciphertext.empty());
 
     auto enc2 = mtx::crypto::encrypt_session(

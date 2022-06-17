@@ -19,7 +19,7 @@ from_json(const json &obj, WellKnown &response)
 void
 from_json(const json &obj, ServerInformation &response)
 {
-    response.base_url = obj.at("base_url");
+    response.base_url = obj.at("base_url").get<std::string>();
 }
 }
 }

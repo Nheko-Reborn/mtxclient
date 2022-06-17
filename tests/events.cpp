@@ -24,7 +24,8 @@ TEST(Events, Redaction)
           "type": "m.room.redaction"
         })"_json;
 
-    ns::RedactionEvent<ns::msg::Redaction> event = data;
+    ns::RedactionEvent<ns::msg::Redaction> event =
+      data.get<ns::RedactionEvent<ns::msg::Redaction>>();
 
     EXPECT_EQ(event.type, ns::EventType::RoomRedaction);
     EXPECT_EQ(event.event_id, "$143273582443PhrSn:localhost");
@@ -53,7 +54,8 @@ TEST(Events, Redacted)
           "type": "m.room.redaction"
         })"_json;
 
-    mtx::events::collections::TimelineEvent event = data;
+    mtx::events::collections::TimelineEvent event =
+      data.get<mtx::events::collections::TimelineEvent>();
 
     ASSERT_TRUE(std::holds_alternative<ns::RoomEvent<ns::msg::Redacted>>(event.data));
 
@@ -82,7 +84,7 @@ TEST(Events, Redacted)
 		"event_id": "$redacted_id_2"
 	})"_json;
 
-    event = data2;
+    event = data2.get<mtx::events::collections::TimelineEvent>();
     ASSERT_TRUE(std::holds_alternative<ns::StateEvent<ns::state::Member>>(event.data));
     ASSERT_TRUE(std::get<ns::StateEvent<ns::state::Member>>(event.data)
                   .unsigned_data.redacted_because.has_value());
@@ -134,7 +136,7 @@ TEST(StateEvents, Aliases)
 	  "type": "m.room.aliases"
 	})"_json;
 
-    ns::StateEvent<ns::state::Aliases> aliases = data;
+    ns::StateEvent<ns::state::Aliases> aliases = data.get<ns::StateEvent<ns::state::Aliases>>();
 
     EXPECT_EQ(aliases.type, ns::EventType::RoomAliases);
     EXPECT_EQ(aliases.event_id, "$WLGTSEFSEF:localhost");
@@ -168,7 +170,7 @@ TEST(StateEvents, Avatar)
           "type": "m.room.avatar"
         })"_json;
 
-    ns::StateEvent<ns::state::Avatar> event = data;
+    ns::StateEvent<ns::state::Avatar> event = data.get<ns::StateEvent<ns::state::Avatar>>();
 
     EXPECT_EQ(event.type, ns::EventType::RoomAvatar);
     EXPECT_EQ(event.event_id, "$15067620711415511reUFC:matrix.org");
@@ -201,7 +203,8 @@ TEST(StateEvents, CanonicalAlias)
     }
 })"_json;
 
-    ns::StateEvent<ns::state::CanonicalAlias> event = data;
+    ns::StateEvent<ns::state::CanonicalAlias> event =
+      data.get<ns::StateEvent<ns::state::CanonicalAlias>>();
 
     EXPECT_EQ(event.type, ns::EventType::RoomCanonicalAlias);
     EXPECT_EQ(event.event_id, "$143273582443PhrSn:example.org");
@@ -232,7 +235,7 @@ TEST(StateEvents, Create)
           "type": "m.room.create"
         })"_json;
 
-    ns::StateEvent<ns::state::Create> event = data;
+    ns::StateEvent<ns::state::Create> event = data.get<ns::StateEvent<ns::state::Create>>();
 
     EXPECT_EQ(event.type, ns::EventType::RoomCreate);
     EXPECT_EQ(event.event_id, "$15067619231414398jhvQC:matrix.org");
@@ -263,7 +266,7 @@ TEST(StateEvents, Create)
             }
         })"_json;
 
-    event = example_from_spec;
+    event = example_from_spec.get<ns::StateEvent<ns::state::Create>>();
 
     EXPECT_EQ(event.type, ns::EventType::RoomCreate);
     EXPECT_EQ(event.event_id, "$143273582443PhrSn:example.org");
@@ -295,7 +298,7 @@ TEST(StateEvents, CreateWithType)
           "type": "m.room.create"
         })"_json;
 
-    ns::StateEvent<ns::state::Create> event = data;
+    ns::StateEvent<ns::state::Create> event = data.get<ns::StateEvent<ns::state::Create>>();
 
     EXPECT_EQ(event.type, ns::EventType::RoomCreate);
     EXPECT_EQ(event.event_id, "$15067619231414398jhvQC:matrix.org");
@@ -324,7 +327,7 @@ TEST(StateEvents, CreateWithType)
   "room_id": "!KLPDfgYGHhdZWLbUwD:neko.dev"
 })"_json;
 
-    event = example_from_spec;
+    event = example_from_spec.get<ns::StateEvent<ns::state::Create>>();
 
     EXPECT_TRUE(event.content.type.has_value());
     EXPECT_EQ(event.content.type.value(), ns::state::room_type::space);
@@ -346,7 +349,8 @@ TEST(StateEvents, GuestAccess)
           "type": "m.room.guest_access"
         })"_json;
 
-    ns::StateEvent<ns::state::GuestAccess> event = data;
+    ns::StateEvent<ns::state::GuestAccess> event =
+      data.get<ns::StateEvent<ns::state::GuestAccess>>();
 
     EXPECT_EQ(event.type, ns::EventType::RoomGuestAccess);
     EXPECT_EQ(event.event_id, "$15067619231414398jhvQC:matrix.org");
@@ -374,7 +378,8 @@ TEST(StateEvents, HistoryVisibility)
 	  "room_id": "!lfoDRlNFWlvOnvkBwQ:matrix.org"
 	})"_json;
 
-    ns::StateEvent<ns::state::HistoryVisibility> event = data;
+    ns::StateEvent<ns::state::HistoryVisibility> event =
+      data.get<ns::StateEvent<ns::state::HistoryVisibility>>();
 
     EXPECT_EQ(event.type, ns::EventType::RoomHistoryVisibility);
     EXPECT_EQ(event.event_id, "$15104731332646268uOFJp:matrix.org");
@@ -405,7 +410,8 @@ TEST(StateEvents, HistoryVisibility)
           "room_id": "!lfoDRlNFWlvOnvkBwQ:matrix.org"
         })"_json;
 
-    ns::StateEvent<ns::state::HistoryVisibility> event2 = data2;
+    ns::StateEvent<ns::state::HistoryVisibility> event2 =
+      data2.get<ns::StateEvent<ns::state::HistoryVisibility>>();
 
     EXPECT_EQ(event2.type, ns::EventType::RoomHistoryVisibility);
     EXPECT_EQ(event2.event_id, "$15104767782674661tXoeB:matrix.org");
@@ -434,7 +440,7 @@ TEST(StateEvents, JoinRules)
           "type": "m.room.join_rules"
         })"_json;
 
-    ns::StateEvent<ns::state::JoinRules> event = data;
+    ns::StateEvent<ns::state::JoinRules> event = data.get<ns::StateEvent<ns::state::JoinRules>>();
 
     EXPECT_EQ(event.type, ns::EventType::RoomJoinRules);
     EXPECT_EQ(event.event_id, "$15067619241414401ASocy:matrix.org");
@@ -515,7 +521,7 @@ TEST(StateEvents, JoinRules)
           }
       })"_json;
 
-    ns::StateEvent<ns::state::JoinRules> event2 = data;
+    ns::StateEvent<ns::state::JoinRules> event2 = data.get<ns::StateEvent<ns::state::JoinRules>>();
     ASSERT_EQ(event2.content.allow.size(), 2);
     ASSERT_EQ(event2.content.allow[0].type, mtx::events::state::JoinAllowanceType::RoomMembership);
     ASSERT_EQ(event2.content.allow[0].room_id, "!mods:example.org");
@@ -543,7 +549,7 @@ TEST(StateEvents, Member)
           "room_id": "!lfoDRlNFWlvOnvkBwQ:matrix.org"
 	})"_json;
 
-    ns::StateEvent<ns::state::Member> event = data;
+    ns::StateEvent<ns::state::Member> event = data.get<ns::StateEvent<ns::state::Member>>();
 
     EXPECT_EQ(event.type, ns::EventType::RoomMember);
     EXPECT_EQ(event.event_id, "$15104731322646264oUPqj:matrix.org");
@@ -589,7 +595,7 @@ TEST(StateEvents, Member)
           "type": "m.room.member"
         })"_json;
 
-    ns::StateEvent<ns::state::Member> event2 = data2;
+    ns::StateEvent<ns::state::Member> event2 = data2.get<ns::StateEvent<ns::state::Member>>();
 
     EXPECT_EQ(event2.type, ns::EventType::RoomMember);
     EXPECT_EQ(event2.event_id, "$15092141005099019aHvYG:matrix.org");
@@ -622,7 +628,7 @@ TEST(StateEvents, Name)
           "room_id": "!lfoDRlNFWlvOnvkBwQ:matrix.org"
         })"_json;
 
-    ns::StateEvent<ns::state::Name> event = data;
+    ns::StateEvent<ns::state::Name> event = data.get<ns::StateEvent<ns::state::Name>>();
 
     EXPECT_EQ(event.type, ns::EventType::RoomName);
     EXPECT_EQ(event.event_id, "$15104731332646270uaKBS:matrix.org");
@@ -654,7 +660,8 @@ TEST(StateEvents, PinnedEvents)
           "type": "m.room.pinned_events"
         })"_json;
 
-    ns::StateEvent<ns::state::PinnedEvents> event = data;
+    ns::StateEvent<ns::state::PinnedEvents> event =
+      data.get<ns::StateEvent<ns::state::PinnedEvents>>();
 
     EXPECT_EQ(event.type, ns::EventType::RoomPinnedEvents);
     EXPECT_EQ(event.event_id, "$WLGTSEFSEF:localhost");
@@ -701,7 +708,8 @@ TEST(StateEvents, PowerLevels)
           "type": "m.room.power_levels"
 	})"_json;
 
-    ns::StateEvent<ns::state::PowerLevels> event = data;
+    ns::StateEvent<ns::state::PowerLevels> event =
+      data.get<ns::StateEvent<ns::state::PowerLevels>>();
 
     EXPECT_EQ(event.type, ns::EventType::RoomPowerLevels);
     EXPECT_EQ(event.event_id, "$15067619231414400iQDgf:matrix.org");
@@ -757,7 +765,7 @@ TEST(StateEvents, Tombstone)
             }
         })"_json;
 
-    ns::StateEvent<ns::state::Tombstone> event = data;
+    ns::StateEvent<ns::state::Tombstone> event = data.get<ns::StateEvent<ns::state::Tombstone>>();
 
     EXPECT_EQ(event.type, ns::EventType::RoomTombstone);
     EXPECT_EQ(event.event_id, "$143273582443PhrSn:example.org");
@@ -787,7 +795,7 @@ TEST(StateEvents, Topic)
           "room_id": "!lfoDRlNFWlvOnvkBwQ:matrix.org"
         })"_json;
 
-    ns::StateEvent<ns::state::Topic> event = data;
+    ns::StateEvent<ns::state::Topic> event = data.get<ns::StateEvent<ns::state::Topic>>();
 
     EXPECT_EQ(event.type, ns::EventType::RoomTopic);
     EXPECT_EQ(event.event_id, "$15104760642668662QICBu:matrix.org");
@@ -813,7 +821,8 @@ TEST(StateEvents, SpaceChild)
 }
         )"_json;
 
-    ns::StateEvent<ns::state::space::Child> event = data;
+    ns::StateEvent<ns::state::space::Child> event =
+      data.get<ns::StateEvent<ns::state::space::Child>>();
 
     EXPECT_EQ(event.type, ns::EventType::SpaceChild);
     EXPECT_EQ(event.event_id, "$15104760642668662QICBu:matrix.org");
@@ -838,7 +847,7 @@ TEST(StateEvents, SpaceChild)
 }
         )"_json;
 
-    event = data;
+    event = data.get<ns::StateEvent<ns::state::space::Child>>();
 
     EXPECT_EQ(event.type, ns::EventType::SpaceChild);
     EXPECT_EQ(event.event_id, "$15104760642668662QICBu:matrix.org");
@@ -861,7 +870,7 @@ TEST(StateEvents, SpaceChild)
 }
         )"_json;
 
-    event = data;
+    event = data.get<ns::StateEvent<ns::state::space::Child>>();
 
     EXPECT_EQ(event.type, ns::EventType::SpaceChild);
     EXPECT_EQ(event.event_id, "$15104760642668662QICBu:matrix.org");
@@ -884,7 +893,7 @@ TEST(StateEvents, SpaceChild)
 }
         )"_json;
 
-    event = data;
+    event = data.get<ns::StateEvent<ns::state::space::Child>>();
 
     EXPECT_EQ(event.type, ns::EventType::SpaceChild);
     EXPECT_EQ(event.event_id, "$15104760642668662QICBu:matrix.org");
@@ -907,7 +916,7 @@ TEST(StateEvents, SpaceChild)
 }
         )"_json;
 
-    event = data;
+    event = data.get<ns::StateEvent<ns::state::space::Child>>();
 
     EXPECT_FALSE(event.content.via.has_value());
 
@@ -924,7 +933,7 @@ TEST(StateEvents, SpaceChild)
 }
         )"_json;
 
-    event = data;
+    event = data.get<ns::StateEvent<ns::state::space::Child>>();
 
     EXPECT_FALSE(event.content.via.has_value());
     data = R"({
@@ -940,7 +949,7 @@ TEST(StateEvents, SpaceChild)
 }
         )"_json;
 
-    event = data;
+    event = data.get<ns::StateEvent<ns::state::space::Child>>();
 
     EXPECT_FALSE(event.content.via.has_value());
 
@@ -956,7 +965,7 @@ TEST(StateEvents, SpaceChild)
 }
         )"_json;
 
-    event = data;
+    event = data.get<ns::StateEvent<ns::state::space::Child>>();
 
     EXPECT_FALSE(event.content.via.has_value());
 }
@@ -974,7 +983,8 @@ TEST(StateEvents, SpaceParent)
           }
         })"_json;
 
-    ns::StateEvent<ns::state::space::Parent> event = data;
+    ns::StateEvent<ns::state::space::Parent> event =
+      data.get<ns::StateEvent<ns::state::space::Parent>>();
 
     EXPECT_EQ(event.type, ns::EventType::SpaceParent);
     EXPECT_EQ(event.event_id, "$15104760642668662QICBu:matrix.org");
@@ -997,7 +1007,7 @@ TEST(StateEvents, SpaceParent)
           }
         })"_json;
 
-    event = data;
+    event = data.get<ns::StateEvent<ns::state::space::Parent>>();
 
     EXPECT_EQ(event.type, ns::EventType::SpaceParent);
     EXPECT_EQ(event.event_id, "$15104760642668662QICBu:matrix.org");
@@ -1019,7 +1029,7 @@ TEST(StateEvents, SpaceParent)
           }
         })"_json;
 
-    event = data;
+    event = data.get<ns::StateEvent<ns::state::space::Parent>>();
 
     EXPECT_EQ(event.type, ns::EventType::SpaceParent);
     EXPECT_EQ(event.event_id, "$15104760642668662QICBu:matrix.org");
@@ -1041,7 +1051,7 @@ TEST(StateEvents, SpaceParent)
           }
         })"_json;
 
-    event = data;
+    event = data.get<ns::StateEvent<ns::state::space::Parent>>();
 
     EXPECT_EQ(event.type, ns::EventType::SpaceParent);
     EXPECT_EQ(event.event_id, "$15104760642668662QICBu:matrix.org");
@@ -1063,7 +1073,7 @@ TEST(StateEvents, SpaceParent)
           }
         })"_json;
 
-    event = data;
+    event = data.get<ns::StateEvent<ns::state::space::Parent>>();
 
     EXPECT_EQ(event.type, ns::EventType::SpaceParent);
     EXPECT_EQ(event.event_id, "$15104760642668662QICBu:matrix.org");
@@ -1084,7 +1094,7 @@ TEST(StateEvents, SpaceParent)
           }
         })"_json;
 
-    event = data;
+    event = data.get<ns::StateEvent<ns::state::space::Parent>>();
 
     EXPECT_EQ(event.type, ns::EventType::SpaceParent);
     EXPECT_EQ(event.event_id, "$15104760642668662QICBu:matrix.org");
@@ -1127,7 +1137,8 @@ TEST(StateEvents, ImagePack)
           "room_id": "!lfoDRlNFWlvOnvkBwQ:matrix.org"
         })"_json;
 
-    ns::StateEvent<ns::msc2545::ImagePack> event = data;
+    ns::StateEvent<ns::msc2545::ImagePack> event =
+      data.get<ns::StateEvent<ns::msc2545::ImagePack>>();
 
     EXPECT_EQ(event.type, ns::EventType::ImagePackInRoom);
     EXPECT_EQ(event.event_id, "$15104760642668662QICBu:matrix.org");
@@ -1176,7 +1187,7 @@ TEST(StateEvents, Widget)
     "type": "m.widget"
 })"_json;
 
-    ns::StateEvent<ns::state::Widget> event = data;
+    ns::StateEvent<ns::state::Widget> event = data.get<ns::StateEvent<ns::state::Widget>>();
 
     EXPECT_EQ(event.type, ns::EventType::Widget);
     EXPECT_EQ(event.event_id, "$15104760642668662QICBu:matrix.org");
@@ -1215,8 +1226,9 @@ TEST(RoomEvents, OlmEncrypted)
           }
         })"_json;
 
-    ns::EncryptedEvent<ns::msg::OlmEncrypted> event = data;
-    const auto key                                  = event.content.ciphertext.begin()->first;
+    ns::EncryptedEvent<ns::msg::OlmEncrypted> event =
+      data.get<ns::EncryptedEvent<ns::msg::OlmEncrypted>>();
+    const auto key = event.content.ciphertext.begin()->first;
 
     EXPECT_EQ(event.type, ns::EventType::RoomEncrypted);
     EXPECT_EQ(event.event_id, "$143273582443PhrSn:localhost");
@@ -1266,7 +1278,8 @@ TEST(RoomEvents, Encrypted)
           }
         })"_json;
 
-    ns::EncryptedEvent<ns::msg::Encrypted> event = data;
+    ns::EncryptedEvent<ns::msg::Encrypted> event =
+      data.get<ns::EncryptedEvent<ns::msg::Encrypted>>();
 
     EXPECT_EQ(event.type, ns::EventType::RoomEncrypted);
     EXPECT_EQ(event.event_id, "$143273582443PhrSn:localhost");
@@ -1320,7 +1333,8 @@ TEST(Ephemeral, Typing)
     "type": "m.typing"
 })"_json;
 
-    ns::EphemeralEvent<ns::ephemeral::Typing> event = j;
+    ns::EphemeralEvent<ns::ephemeral::Typing> event =
+      j.get<ns::EphemeralEvent<ns::ephemeral::Typing>>();
 
     EXPECT_EQ(event.room_id, "!jEsUZKDJdhlrceRyVU:example.org");
     EXPECT_EQ(event.type, ns::EventType::Typing);
@@ -1345,7 +1359,8 @@ TEST(Ephemeral, Receipt)
     "type": "m.receipt"
 })"_json;
 
-    ns::EphemeralEvent<ns::ephemeral::Receipt> event = j;
+    ns::EphemeralEvent<ns::ephemeral::Receipt> event =
+      j.get<ns::EphemeralEvent<ns::ephemeral::Receipt>>();
 
     EXPECT_EQ(event.room_id, "!jEsUZKDJdhlrceRyVU:example.org");
     EXPECT_EQ(event.type, ns::EventType::Receipt);
@@ -1369,7 +1384,8 @@ TEST(AccountData, Direct)
        "type": "m.direct"
      })"_json;
 
-    ns::AccountDataEvent<ns::account_data::Direct> event = j;
+    ns::AccountDataEvent<ns::account_data::Direct> event =
+      j.get<ns::AccountDataEvent<ns::account_data::Direct>>();
 
     ASSERT_EQ(event.content.user_to_rooms.size(), 1);
     ASSERT_EQ(event.content.user_to_rooms.count("@bob:example.com"), 1);
@@ -1389,7 +1405,8 @@ TEST(AccountData, FullyRead)
           "type": "m.fully_read"
         })"_json;
 
-    ns::AccountDataEvent<ns::account_data::FullyRead> event = j;
+    ns::AccountDataEvent<ns::account_data::FullyRead> event =
+      j.get<ns::AccountDataEvent<ns::account_data::FullyRead>>();
 
     EXPECT_EQ(event.room_id, "!somewhere:example.org");
     EXPECT_EQ(event.type, ns::EventType::FullyRead);
@@ -1412,8 +1429,9 @@ TEST(ToDevice, KeyVerificationRequest)
     "type": "m.key.verification.request"
 })"_json;
 
-    ns::Event<ns::msg::KeyVerificationRequest> event = request_data;
-    auto keyEvent                                    = event.content;
+    ns::Event<ns::msg::KeyVerificationRequest> event =
+      request_data.get<ns::Event<ns::msg::KeyVerificationRequest>>();
+    auto keyEvent = event.content;
     EXPECT_EQ(keyEvent.from_device, "AliceDevice2");
     EXPECT_EQ(event.type, mtx::events::EventType::KeyVerificationRequest);
     EXPECT_EQ(keyEvent.transaction_id, "S0meUniqueAndOpaqueString");
@@ -1448,8 +1466,9 @@ TEST(ToDevice, KeyVerificationStart)
     "type": "m.key.verification.start"
 })"_json;
 
-    ns::Event<ns::msg::KeyVerificationStart> event = request_data;
-    auto keyEvent                                  = event.content;
+    ns::Event<ns::msg::KeyVerificationStart> event =
+      request_data.get<ns::Event<ns::msg::KeyVerificationStart>>();
+    auto keyEvent = event.content;
     EXPECT_EQ(keyEvent.from_device, "BobDevice1");
     EXPECT_EQ(keyEvent.hashes[0], "sha256");
     EXPECT_EQ(keyEvent.key_agreement_protocols[0], "curve25519");
@@ -1483,8 +1502,9 @@ TEST(ToDevice, KeyVerificationAccept)
     "type": "m.key.verification.accept"
 })"_json;
 
-    ns::Event<ns::msg::KeyVerificationAccept> event = request_data;
-    auto keyEvent                                   = event.content;
+    ns::Event<ns::msg::KeyVerificationAccept> event =
+      request_data.get<ns::Event<ns::msg::KeyVerificationAccept>>();
+    auto keyEvent = event.content;
     EXPECT_EQ(event.type, mtx::events::EventType::KeyVerificationAccept);
     EXPECT_EQ(
       keyEvent.commitment,
@@ -1510,8 +1530,9 @@ TEST(ToDevice, KeyVerificationReady)
     "type": "m.key.verification.ready"
 })"_json;
 
-    ns::Event<ns::msg::KeyVerificationReady> event = request_data;
-    auto keyEvent                                  = event.content;
+    ns::Event<ns::msg::KeyVerificationReady> event =
+      request_data.get<ns::Event<ns::msg::KeyVerificationReady>>();
+    auto keyEvent = event.content;
     EXPECT_EQ(event.sender, "test_user");
     EXPECT_EQ(event.type, mtx::events::EventType::KeyVerificationReady);
     EXPECT_EQ(keyEvent.from_device, "@alice:localhost");
@@ -1529,8 +1550,9 @@ TEST(ToDevice, KeyVerificationDone)
     "type": "m.key.verification.done"
 })"_json;
 
-    ns::Event<ns::msg::KeyVerificationDone> event = request_data;
-    auto keyEvent                                 = event.content;
+    ns::Event<ns::msg::KeyVerificationDone> event =
+      request_data.get<ns::Event<ns::msg::KeyVerificationDone>>();
+    auto keyEvent = event.content;
     EXPECT_EQ(event.sender, "test_user");
     EXPECT_EQ(event.type, mtx::events::EventType::KeyVerificationDone);
     EXPECT_EQ(keyEvent.transaction_id, "S0meUniqueAndOpaqueString");
@@ -1548,8 +1570,9 @@ TEST(ToDevice, KeyVerificationCancel)
     "type": "m.key.verification.cancel"
 })"_json;
 
-    ns::Event<ns::msg::KeyVerificationCancel> event = request_data;
-    auto keyEvent                                   = event.content;
+    ns::Event<ns::msg::KeyVerificationCancel> event =
+      request_data.get<ns::Event<ns::msg::KeyVerificationCancel>>();
+    auto keyEvent = event.content;
     EXPECT_EQ(event.type, mtx::events::EventType::KeyVerificationCancel);
     EXPECT_EQ(keyEvent.code, "m.user");
     EXPECT_EQ(keyEvent.reason, "User rejected the key verification request");
@@ -1568,8 +1591,9 @@ TEST(ToDevice, KeyVerificationKey)
     "type": "m.key.verification.key"
 })"_json;
 
-    ns::Event<ns::msg::KeyVerificationKey> event = request_data;
-    auto keyEvent                                = event.content;
+    ns::Event<ns::msg::KeyVerificationKey> event =
+      request_data.get<ns::Event<ns::msg::KeyVerificationKey>>();
+    auto keyEvent = event.content;
     EXPECT_EQ(event.type, mtx::events::EventType::KeyVerificationKey);
     EXPECT_EQ(
       keyEvent.key,
@@ -1592,8 +1616,9 @@ TEST(ToDevice, KeyVerificationMac)
     "type": "m.key.verification.mac"
 })"_json;
 
-    ns::Event<ns::msg::KeyVerificationMac> event = request_data;
-    auto keyEvent                                = event.content;
+    ns::Event<ns::msg::KeyVerificationMac> event =
+      request_data.get<ns::Event<ns::msg::KeyVerificationMac>>();
+    auto keyEvent = event.content;
     EXPECT_EQ(event.type, mtx::events::EventType::KeyVerificationMac);
     EXPECT_EQ(
       keyEvent.keys,
@@ -1679,7 +1704,8 @@ TEST(Collection, Events)
 	  "type": "m.room.aliases"
 	})"_json;
 
-    mtx::events::collections::TimelineEvent event = data;
+    mtx::events::collections::TimelineEvent event =
+      data.get<mtx::events::collections::TimelineEvent>();
 
     ASSERT_TRUE(std::get_if<ns::StateEvent<ns::state::Aliases>>(&event.data) != nullptr);
 }
@@ -1703,7 +1729,8 @@ TEST(RoomAccountData, Tags)
           "type": "m.tag"
         })"_json;
 
-    ns::AccountDataEvent<ns::account_data::Tags> event = data;
+    ns::AccountDataEvent<ns::account_data::Tags> event =
+      data.get<ns::AccountDataEvent<ns::account_data::Tags>>();
 
     EXPECT_EQ(event.type, ns::EventType::Tag);
     EXPECT_EQ(event.content.tags.size(), 3);
@@ -1725,7 +1752,8 @@ TEST(RoomAccountData, NhekoHiddenEvents)
           "type": "im.nheko.hidden_events"
         })"_json;
 
-    ns::AccountDataEvent<ns::account_data::nheko_extensions::HiddenEvents> event = data;
+    ns::AccountDataEvent<ns::account_data::nheko_extensions::HiddenEvents> event =
+      data.get<ns::AccountDataEvent<ns::account_data::nheko_extensions::HiddenEvents>>();
 
     EXPECT_EQ(event.type, ns::EventType::NhekoHiddenEvents);
     ASSERT_TRUE(event.content.hidden_event_types.has_value());
@@ -1758,7 +1786,8 @@ TEST(RoomAccountData, ImagePack)
           "type": "im.ponies.user_emotes"
         })"_json;
 
-    ns::AccountDataEvent<ns::msc2545::ImagePack> event = data;
+    ns::AccountDataEvent<ns::msc2545::ImagePack> event =
+      data.get<ns::AccountDataEvent<ns::msc2545::ImagePack>>();
 
     EXPECT_EQ(event.type, ns::EventType::ImagePackInAccountData);
     EXPECT_EQ(event.content.pack.has_value(), true);
@@ -1795,7 +1824,8 @@ TEST(RoomAccountData, ImagePackRooms)
           "type": "im.ponies.emote_rooms"
         })"_json;
 
-    ns::AccountDataEvent<ns::msc2545::ImagePackRooms> event = data;
+    ns::AccountDataEvent<ns::msc2545::ImagePackRooms> event =
+      data.get<ns::AccountDataEvent<ns::msc2545::ImagePackRooms>>();
 
     EXPECT_EQ(event.type, ns::EventType::ImagePackRooms);
     EXPECT_EQ(event.content.rooms.size(), 2);
@@ -1809,7 +1839,7 @@ TEST(RoomAccountData, ImagePackRooms)
     ns::msc2545::ImagePackRooms empty = {};
     EXPECT_EQ(json(empty).dump(), "{\"rooms\":{}}");
 
-    ns::msc2545::ImagePackRooms empty2 = json::object();
+    ns::msc2545::ImagePackRooms empty2 = json::object().get<ns::msc2545::ImagePackRooms>();
     EXPECT_TRUE(empty2.rooms.empty());
 }
 
@@ -1827,7 +1857,7 @@ TEST(Presence, Presence)
 	    "type": "m.presence"
 	})"_json;
 
-    ns::Event<ns::presence::Presence> event = data;
+    ns::Event<ns::presence::Presence> event = data.get<ns::Event<ns::presence::Presence>>();
 
     EXPECT_EQ(event.type, ns::EventType::Presence);
     EXPECT_EQ(event.sender, "@example:localhost");

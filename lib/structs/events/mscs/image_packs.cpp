@@ -19,7 +19,7 @@ namespace msc2545 {
 void
 from_json(const nlohmann::json &obj, PackImage &content)
 {
-    content.url  = obj.at("url");
+    content.url  = obj.at("url").get<std::string>();
     content.body = safe_get<std::string>(obj, "body", "");
     if (obj.contains("info"))
         content.info = obj.at("info").get<mtx::common::ImageInfo>();

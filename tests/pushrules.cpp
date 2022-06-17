@@ -203,7 +203,7 @@ TEST(Pushrules, GlobalRuleset)
   }
 })"_json;
 
-    ns::GlobalRuleset rules = data;
+    ns::GlobalRuleset rules = data.get<ns::GlobalRuleset>();
     EXPECT_EQ(rules.global.content.at(0).actions.size(), 3);
     EXPECT_TRUE(
       std::holds_alternative<ns::actions::notify>(rules.global.content.at(0).actions.at(0)));

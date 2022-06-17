@@ -180,16 +180,16 @@ to_json(json &obj, const ForwardedRoomKey &event)
 void
 from_json(const json &obj, KeyRequest &event)
 {
-    event.request_id           = obj.at("request_id");
-    event.requesting_device_id = obj.at("requesting_device_id");
+    event.request_id           = obj.at("request_id").get<std::string>();
+    event.requesting_device_id = obj.at("requesting_device_id").get<std::string>();
 
     auto action = obj.at("action").get<std::string>();
     if (action == "request") {
         event.action     = RequestAction::Request;
-        event.room_id    = obj.at("body").at("room_id");
+        event.room_id    = obj.at("body").at("room_id").get<std::string>();
         event.sender_key = obj.at("body").value("sender_key", "");
-        event.session_id = obj.at("body").at("session_id");
-        event.algorithm  = obj.at("body").at("algorithm");
+        event.session_id = obj.at("body").at("session_id").get<std::string>();
+        event.algorithm  = obj.at("body").at("algorithm").get<std::string>();
     } else if (action == "request_cancellation") {
         event.action = RequestAction::Cancellation;
     }

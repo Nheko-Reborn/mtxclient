@@ -23,7 +23,7 @@ template<class T>
 inline T
 deserialize(std::string_view data)
 {
-    return nlohmann::json::parse(data);
+    return nlohmann::json::parse(data).get<T>();
 }
 
 template<>
@@ -142,10 +142,8 @@ mtx::http::Client::prepare_callback(HeadersCallback<Response> callback)
 
             // The homeserver should return an error struct.
             try {
-                nlohmann::json json_error       = json::parse(body);
-                mtx::errors::Error matrix_error = json_error;
-
-                client_error.matrix_error = matrix_error;
+                nlohmann::json json_error = json::parse(body);
+                client_error.matrix_error = json_error.get<mtx::errors::Error>();
                 return callback(response_data, headers, client_error);
             } catch (const std::exception &e) {
                 client_error.parse_error = std::string(e.what()) + ": " + std::string(body);

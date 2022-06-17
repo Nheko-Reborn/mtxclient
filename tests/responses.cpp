@@ -54,7 +54,7 @@ TEST(Responses, State)
 	  ]
 	})"_json;
 
-    State state = data;
+    State state = data.get<State>();
 
     EXPECT_EQ(state.events.size(), 2);
 
@@ -111,7 +111,7 @@ TEST(Responses, State)
 	  ]
 	})"_json;
 
-    State malformed_state = malformed_data;
+    State malformed_state = malformed_data.get<State>();
 
     EXPECT_EQ(malformed_state.events.size(), 1);
 
@@ -151,7 +151,7 @@ TEST(Responses, JoinedRoom)
             }
 	})"_json;
 
-    JoinedRoom room1 = data1;
+    JoinedRoom room1 = data1.get<JoinedRoom>();
 
     // It this succeeds parsing was done successfully
     EXPECT_EQ(room1.ephemeral.events.size(), 1);
@@ -208,7 +208,7 @@ TEST(Responses, JoinedRoom)
             }
 	})"_json;
 
-    JoinedRoom room2 = data2;
+    JoinedRoom room2 = data2.get<JoinedRoom>();
     EXPECT_EQ(room2.ephemeral.events.size(), 0);
     EXPECT_EQ(room2.timeline.events.size(), 2);
     EXPECT_EQ(room2.timeline.prev_batch, "s42_42_42_42_42_42_42_42_1");
@@ -247,7 +247,7 @@ TEST(Responses, LeftRoom)
             }
 	})"_json;
 
-    LeftRoom room = data;
+    LeftRoom room = data.get<LeftRoom>();
 
     EXPECT_EQ(room.timeline.events.size(), 1);
     EXPECT_EQ(room.timeline.limited, false);
@@ -310,7 +310,7 @@ TEST(Responses, InvitedRoom)
 	]}}
 	)"_json;
 
-    InvitedRoom room = data;
+    InvitedRoom room = data.get<InvitedRoom>();
 
     EXPECT_EQ(room.invite_state.size(), 6);
 
@@ -330,7 +330,7 @@ TEST(Responses, Sync)
     json data1;
     file >> data1;
 
-    Sync sync1 = data1;
+    Sync sync1 = data1.get<Sync>();
 
     EXPECT_EQ(sync1.next_batch,
               "s333358558_324502987_444424_65663508_21685260_193623_2377336_2940807_454");
@@ -353,7 +353,7 @@ TEST(Responses, Sync)
             "next_batch": "s123_42_42_42_42_42_42_42_7"
 	})"_json;
 
-    Sync sync2 = data2;
+    Sync sync2 = data2.get<Sync>();
 
     EXPECT_EQ(sync2.next_batch, "s123_42_42_42_42_42_42_42_7");
     EXPECT_EQ(sync2.rooms.join.size(), 0);
@@ -368,7 +368,7 @@ TEST(Responses, SyncWithEncryption)
     json data;
     file >> data;
 
-    Sync sync = data;
+    Sync sync = data.get<Sync>();
 
     EXPECT_EQ(sync.device_lists.changed.size(), 1);
     EXPECT_EQ(sync.device_lists.changed.at(0), "@carl:matrix.org");
@@ -424,7 +424,7 @@ TEST(Responses, Members)
       ]
     })"_json;
 
-    Members members = data1;
+    Members members = data1.get<Members>();
 
     // It this succeeds parsing was done successfully
     EXPECT_EQ(members.chunk.size(), 1);
@@ -451,19 +451,19 @@ TEST(Responses, Profile)
 	  "displayname": 42
         })"_json;
 
-    Profile profile = response;
+    Profile profile = response.get<Profile>();
     EXPECT_EQ(profile.avatar_url, "mxc://matrix.org/SDGdghriugerRg");
     EXPECT_EQ(profile.display_name, "Alice Margatroid");
 
-    Profile null_profile = null_response;
+    Profile null_profile = null_response.get<Profile>();
     EXPECT_EQ(null_profile.avatar_url, "mxc://matrix.org/SDGdghriugerRg");
     EXPECT_EQ(null_profile.display_name, "");
 
-    Profile missing_profile = missing_response;
+    Profile missing_profile = missing_response.get<Profile>();
     EXPECT_EQ(missing_profile.avatar_url, "");
     EXPECT_EQ(missing_profile.display_name, "Alice Margatroid");
 
-    ASSERT_THROW(Profile error_profile = error_response, std::exception);
+    ASSERT_THROW(Profile error_profile = error_response.get<Profile>(), std::exception);
 }
 
 TEST(Responses, Versions)
@@ -476,7 +476,7 @@ TEST(Responses, Versions)
 	  ]
         })"_json;
 
-    Versions versions = data;
+    Versions versions = data.get<Versions>();
     EXPECT_EQ(versions.versions.size(), 3);
     EXPECT_EQ(versions.versions[0], "r0.0.1");
     EXPECT_EQ(versions.versions[1], "r0.2.0");
@@ -488,7 +488,7 @@ TEST(Responses, Versions)
 	  ]
         })"_json;
 
-    ASSERT_THROW(Versions versions = error_data, std::invalid_argument);
+    ASSERT_THROW(Versions versions = error_data.get<Versions>(), std::invalid_argument);
 }
 
 TEST(Responses, WellKnown)
@@ -505,7 +505,7 @@ TEST(Responses, WellKnown)
           }
         })"_json;
 
-    WellKnown wellknown = data;
+    WellKnown wellknown = data.get<WellKnown>();
     EXPECT_EQ(wellknown.homeserver.base_url, "https://matrix.example.com");
     EXPECT_EQ(wellknown.identity_server->base_url, "https://identity.example.com");
 }
@@ -514,7 +514,7 @@ TEST(Responses, RegistrationTokenValidity)
 {
     json data = R"({"valid" : true})"_json;
 
-    RegistrationTokenValidity validity = data;
+    RegistrationTokenValidity validity = data.get<RegistrationTokenValidity>();
     EXPECT_EQ(validity.valid, true);
 }
 
@@ -522,12 +522,12 @@ TEST(Responses, CreateRoom)
 {
     json data = R"({"room_id" : "!sefiuhWgwghwWgh:example.com"})"_json;
 
-    mtx::responses::CreateRoom create_room = data;
+    mtx::responses::CreateRoom create_room = data.get<mtx::responses::CreateRoom>();
     EXPECT_EQ(create_room.room_id.to_string(), "!sefiuhWgwghwWgh:example.com");
 
     json error_data = R"({"room_id" : "#akajdkf:example.com"})"_json;
 
-    ASSERT_THROW(CreateRoom create_room = error_data, std::invalid_argument);
+    ASSERT_THROW(CreateRoom create_room = error_data.get<CreateRoom>(), std::invalid_argument);
 }
 
 TEST(Responses, Login)
@@ -547,7 +547,7 @@ TEST(Responses, Login)
 	  }
         })"_json;
 
-    Login login = data;
+    Login login = data.get<Login>();
     EXPECT_EQ(login.user_id.to_string(), "@cheeky_monkey:matrix.org");
     EXPECT_EQ(login.access_token, "abc123");
     EXPECT_EQ(login.device_id, "GHTYAJCE");
@@ -560,7 +560,7 @@ TEST(Responses, Login)
 	  "home_server": "matrix.org"
         })"_json;
 
-    Login login2 = data2;
+    Login login2 = data2.get<Login>();
     EXPECT_EQ(login2.user_id.to_string(), "@cheeky_monkey:matrix.org");
     EXPECT_EQ(login2.access_token, "abc123");
     EXPECT_EQ(login2.device_id, "");
@@ -569,7 +569,7 @@ TEST(Responses, Login)
           "user_id": "@cheeky_monkey:matrix.org",
           "access_token": "abc123"
         })"_json;
-    Login login3 = data3;
+    Login login3 = data3.get<Login>();
     EXPECT_EQ(login3.user_id.to_string(), "@cheeky_monkey:matrix.org");
     EXPECT_EQ(login3.access_token, "abc123");
     EXPECT_EQ(login3.device_id, "");
@@ -619,7 +619,7 @@ TEST(Responses, Messages)
 	 }
 	]})"_json;
 
-    Messages messages = data;
+    Messages messages = data.get<Messages>();
     EXPECT_EQ(messages.start, "t47429-4392820_219380_26003_2265");
     EXPECT_EQ(messages.end, "t47409-4357353_219380_26003_2265");
     EXPECT_EQ(messages.chunk.size(), 3);
@@ -688,7 +688,7 @@ TEST(Responses, Messages)
 	 }
 	]})"_json;
 
-    messages = malformed_data;
+    messages = malformed_data.get<Messages>();
     EXPECT_EQ(messages.start, "t47429-4392820_219380_26003_2265");
     EXPECT_EQ(messages.end, "t47409-4357353_219380_26003_2265");
     ASSERT_EQ(messages.chunk.size(), 2);
@@ -734,7 +734,7 @@ TEST(Responses, Messages)
 }
 	]})"_json;
 
-    messages = redactions;
+    messages = redactions.get<Messages>();
 
     ASSERT_EQ(messages.chunk.size(), 2);
     auto redaction = std::get<RedactionEvent<msg::Redaction>>(messages.chunk[0]);
@@ -757,7 +757,7 @@ TEST(Responses, EphemeralTyping)
           }]
         })"_json;
 
-    mtx::responses::Ephemeral ephemeral = data;
+    mtx::responses::Ephemeral ephemeral = data.get<mtx::responses::Ephemeral>();
 
     EXPECT_EQ(ephemeral.events.size(), 1);
     ASSERT_TRUE(std::holds_alternative<mtx::events::EphemeralEvent<mtx::events::ephemeral::Typing>>(
@@ -819,7 +819,7 @@ TEST(Responses, EphemeralReceipts)
 	  }]
         })"_json;
 
-    mtx::responses::Ephemeral ephemeral = data;
+    mtx::responses::Ephemeral ephemeral = data.get<mtx::responses::Ephemeral>();
 
     EXPECT_EQ(ephemeral.events.size(), 2);
     ASSERT_TRUE(std::holds_alternative<mtx::events::EphemeralEvent<mtx::events::ephemeral::Typing>>(
@@ -853,7 +853,7 @@ TEST(Responses, Empty)
 {
     json data = R"({})"_json;
 
-    Empty e = data;
+    Empty e = data.get<Empty>();
     (void)e;
 }
 
@@ -863,7 +863,7 @@ TEST(Responses, Media)
 	  "content_uri": "mxc://example.com/AQwafuaFswefuhsfAFAgsw"
 	})"_json;
 
-    ContentURI res = data;
+    ContentURI res = data.get<ContentURI>();
     EXPECT_EQ(res.content_uri, "mxc://example.com/AQwafuaFswefuhsfAFAgsw");
 }
 
@@ -876,7 +876,7 @@ TEST(Responses, UploadKeys)
           }
 	})"_json;
 
-    UploadKeys res = data;
+    UploadKeys res = data.get<UploadKeys>();
 
     EXPECT_EQ(res.one_time_key_counts.size(), 2);
     EXPECT_EQ(res.one_time_key_counts["curve25519"], 10);
@@ -955,7 +955,7 @@ TEST(Responses, QueryKeys)
           }
         })"_json;
 
-    QueryKeys res = data;
+    QueryKeys res = data.get<QueryKeys>();
 
     EXPECT_EQ(res.failures.size(), 2);
     EXPECT_EQ(res.device_keys.size(), 1);
@@ -988,7 +988,7 @@ TEST(Responses, QueryKeys)
     EXPECT_EQ(user_signing_keys.signatures["@alice:example.org"].size(), 1);
 
     json data2     = R"({})"_json;
-    QueryKeys res2 = data2;
+    QueryKeys res2 = data2.get<QueryKeys>();
     EXPECT_TRUE(res2.failures.empty());
     EXPECT_TRUE(res2.device_keys.empty());
     EXPECT_TRUE(res2.user_signing_keys.empty());
@@ -1009,7 +1009,7 @@ TEST(Crypto, KeyChanges)
           ]
         })"_json;
 
-    KeyChanges res = data;
+    KeyChanges res = data.get<KeyChanges>();
 
     EXPECT_EQ(res.changed.size(), 2);
     EXPECT_EQ(res.changed[0], "@alice:example.com");
@@ -1040,7 +1040,7 @@ TEST(Crypto, ClaimKeys)
 	  }
 	})"_json;
 
-    ClaimKeys res = data;
+    ClaimKeys res = data.get<ClaimKeys>();
     EXPECT_EQ(res.failures.size(), 0);
     EXPECT_EQ(res.one_time_keys.size(), 1);
 
@@ -1076,7 +1076,7 @@ TEST(Responses, Notifications)
          }]
 	})"_json;
 
-    mtx::responses::Notifications notif = data;
+    mtx::responses::Notifications notif = data.get<mtx::responses::Notifications>();
 
     // EXPECT_EQ(notif.next_token, "abcdef");
     EXPECT_EQ(notif.notifications.size(), 1);
@@ -1132,7 +1132,8 @@ TEST(Responses, Userinteractive)
     }
   }
 })"_json;
-    mtx::user_interactive::Unauthorized unauthorized = data;
+    mtx::user_interactive::Unauthorized unauthorized =
+      data.get<mtx::user_interactive::Unauthorized>();
 
     EXPECT_EQ(unauthorized.completed[0], "example.type.foo");
     EXPECT_EQ(unauthorized.session, "YQVPFRiztSYtmsjLNQmsxTCg");
@@ -1173,7 +1174,7 @@ TEST(Responses, Userinteractive)
   "params": {}
 })"_json;
 
-    unauthorized = data2;
+    unauthorized = data.get<mtx::user_interactive::Unauthorized>();
     EXPECT_EQ(unauthorized.flows[0].stages[0], mtx::user_interactive::auth_types::password);
 }
 
@@ -1190,7 +1191,7 @@ TEST(Responses, TurnServer)
           "ttl": 86400
         })"_json;
 
-    TurnServer turnServer = data;
+    TurnServer turnServer = data.get<TurnServer>();
     EXPECT_EQ(turnServer.username, "1443779631:@user:example.com");
     EXPECT_EQ(turnServer.password, "JlKfBy1QwLrO20385QyAtEyIv0=");
     EXPECT_EQ(turnServer.uris[0], "turn:turn.example.com:3478?transport=udp");
@@ -1201,12 +1202,13 @@ TEST(Responses, TurnServer)
 
 TEST(Responses, PublicRoomVisibility)
 {
-    json data                                           = {{"visibility", "public"}};
-    mtx::responses::PublicRoomVisibility roomVisibility = data;
+    json data = {{"visibility", "public"}};
+    mtx::responses::PublicRoomVisibility roomVisibility =
+      data.get<mtx::responses::PublicRoomVisibility>();
     EXPECT_EQ(roomVisibility.visibility, mtx::common::RoomVisibility::Public);
 
     data           = {{"visibility", "private"}};
-    roomVisibility = data;
+    roomVisibility = data.get<mtx::responses::PublicRoomVisibility>();
     EXPECT_EQ(roomVisibility.visibility, mtx::common::RoomVisibility::Private);
 }
 
@@ -1232,7 +1234,7 @@ TEST(Responses, PublicRooms)
           "total_room_count_estimate": 115
         })"_json;
 
-    PublicRooms publicRooms = data;
+    PublicRooms publicRooms = data.get<PublicRooms>();
     EXPECT_EQ(publicRooms.chunk.size(), 1);
     auto &chunk = publicRooms.chunk[0];
     EXPECT_EQ(chunk.aliases.size(), 1);

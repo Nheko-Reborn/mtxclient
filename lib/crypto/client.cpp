@@ -79,7 +79,8 @@ OlmClient::identity_keys() const
     if (ret == olm_error())
         throw olm_exception("identity_keys", account_.get());
 
-    return json::parse(std::string(tmp_buf.begin(), tmp_buf.end()));
+    return json::parse(std::string(tmp_buf.begin(), tmp_buf.end()))
+      .get<mtx::crypto::IdentityKeys>();
 }
 
 std::string
@@ -144,9 +145,7 @@ OlmClient::one_time_keys()
     if (ret == olm_error())
         throw olm_exception("one_time_keys", account_.get());
 
-    mtx::crypto::OneTimeKeys otks = json::parse(std::string(buf.begin(), buf.end()));
-
-    return otks;
+    return json::parse(std::string(buf.begin(), buf.end())).get<mtx::crypto::OneTimeKeys>();
 }
 
 mtx::crypto::OneTimeKeys
@@ -159,9 +158,7 @@ OlmClient::unpublished_fallback_keys()
     if (fret == olm_error())
         throw olm_exception("unpublished_fallback_keys", account_.get());
 
-    mtx::crypto::OneTimeKeys fotks = json::parse(std::string(fbuf.begin(), fbuf.end()));
-
-    return fotks;
+    return json::parse(std::string(fbuf.begin(), fbuf.end())).get<mtx::crypto::OneTimeKeys>();
 }
 
 std::string
@@ -1023,5 +1020,5 @@ mtx::crypto::decrypt_exported_sessions(const std::string &data, const std::strin
     auto decrypted = mtx::crypto::AES_CTR_256_Decrypt(ciphertext, aes256, iv);
 
     std::string plaintext(decrypted.begin(), decrypted.end());
-    return json::parse(plaintext);
+    return json::parse(plaintext).get<mtx::crypto::ExportedSessionKeys>();
 }

@@ -18,7 +18,7 @@ from_json(const nlohmann::json &obj, PolicyDescription &d)
 void
 from_json(const nlohmann::json &obj, Policy &policy)
 {
-    policy.version = obj.at("version");
+    policy.version = obj.at("version").get<std::string>();
 
     for (const auto &e : obj.items())
         if (e.key() != "version")

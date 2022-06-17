@@ -102,8 +102,10 @@ TEST(Utilities, ValidUploadKeysRequest)
 
     ASSERT_TRUE(device_keys.dump() == body.dump());
 
-    ASSERT_TRUE(verify_identity_signature(body, DeviceId(device_id), UserId(user_id)));
-    ASSERT_TRUE(verify_identity_signature(device_keys, DeviceId(device_id), UserId(user_id)));
+    ASSERT_TRUE(verify_identity_signature(
+      body.get<mtx::crypto::DeviceKeys>(), DeviceId(device_id), UserId(user_id)));
+    ASSERT_TRUE(verify_identity_signature(
+      device_keys.get<mtx::crypto::DeviceKeys>(), DeviceId(device_id), UserId(user_id)));
 }
 
 TEST(Utilities, VerifySignedIdentityKeys)
@@ -192,5 +194,6 @@ TEST(Utilities, VerifyIdentityKeyJson)
     const auto user_id   = data.at("user_id").get<std::string>();
     const auto device_id = data.at("device_id").get<std::string>();
 
-    ASSERT_TRUE(verify_identity_signature(data, DeviceId(device_id), UserId(user_id)));
+    ASSERT_TRUE(verify_identity_signature(
+      data.get<mtx::crypto::DeviceKeys>(), DeviceId(device_id), UserId(user_id)));
 }

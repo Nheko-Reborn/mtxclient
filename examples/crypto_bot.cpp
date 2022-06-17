@@ -46,8 +46,8 @@ struct OlmCipherContent
 inline void
 from_json(const nlohmann::json &obj, OlmCipherContent &msg)
 {
-    msg.body = obj.at("body");
-    msg.type = obj.at("type");
+    msg.body = obj.at("body").get<std::string>();
+    msg.type = obj.at("type").get<uint8_t>();
 }
 
 struct OlmMessage
@@ -69,8 +69,8 @@ from_json(const nlohmann::json &obj, OlmMessage &msg)
     if (obj.at("content").at("algorithm") != OLM_ALGO)
         throw std::invalid_argument("invalid algorithm for olm message");
 
-    msg.sender     = obj.at("sender");
-    msg.sender_key = obj.at("content").at("sender_key");
+    msg.sender     = obj.at("sender").get<std::string>();
+    msg.sender_key = obj.at("content").at("sender_key").get<std::string>();
     msg.ciphertext =
       obj.at("content").at("ciphertext").get<std::map<std::string, OlmCipherContent>>();
 }
@@ -112,9 +112,9 @@ to_json(nlohmann::json &obj, const OutboundSessionData &msg)
 inline void
 from_json(const nlohmann::json &obj, OutboundSessionData &msg)
 {
-    msg.session_id    = obj.at("session_id");
-    msg.session_key   = obj.at("session_key");
-    msg.message_index = obj.at("message_index");
+    msg.session_id    = obj.at("session_id").get<std::string>();
+    msg.session_key   = obj.at("session_key").get<std::string>();
+    msg.message_index = obj.at("message_index").get<uint64_t>();
 }
 
 struct OutboundSessionDataRef
@@ -139,8 +139,8 @@ to_json(nlohmann::json &obj, const DevKeys &msg)
 inline void
 from_json(const nlohmann::json &obj, DevKeys &msg)
 {
-    msg.ed25519    = obj.at("ed25519");
-    msg.curve25519 = obj.at("curve25519");
+    msg.ed25519    = obj.at("ed25519").get<std::string>();
+    msg.curve25519 = obj.at("curve25519").get<std::string>();
 }
 
 auto console = spdlog::stdout_color_mt("console");
@@ -443,7 +443,8 @@ create_outbound_megolm_session(const std::string &room_id, const std::string &re
                         auto otk    = rd.second.begin()->at("key");
                         auto id_key = storage.device_keys[dev].curve25519;
 
-                        auto session = olm_client->create_outbound_session(id_key, otk);
+                        auto session =
+                          olm_client->create_outbound_session(id_key, otk.get<std::string>());
 
                         auto device_msg = olm_client->create_olm_encrypted_content(
                           session.get(),
@@ -621,9 +622,11 @@ decrypt_olm_message(const OlmMessage &olm_msg)
                     storage.olm_inbound_sessions.emplace(olm_msg.sender_key,
                                                          std::move(inbound_session));
 
-                    std::string room_id     = plaintext.at("content").at("room_id");
-                    std::string session_id  = plaintext.at("content").at("session_id");
-                    std::string session_key = plaintext.at("content").at("session_key");
+                    std::string room_id = plaintext.at("content").at("room_id").get<std::string>();
+                    std::string session_id =
+                      plaintext.at("content").at("session_id").get<std::string>();
+                    std::string session_key =
+                      plaintext.at("content").at("session_key").get<std::string>();
 
                     if (storage.inbound_group_exists(room_id, session_id, olm_msg.sender_key)) {
                         console->warn("megolm session already exists");
@@ -846,7 +849,8 @@ get_device_keys(const UserId &user)
                 const auto data = device.second;
 
                 try {
-                    auto ok = verify_identity_signature(json(data), DeviceId(id), UserId(user_id));
+                    auto ok = verify_identity_signature(
+                      json(data).get<mtx::crypto::DeviceKeys>(), DeviceId(id), UserId(user_id));
 
                     if (!ok) {
                         console->warn("signature could not be verified");
@@ -872,7 +876,8 @@ handle_to_device_msgs(const mtx::responses::ToDevice &msgs)
         console->info(std::visit([](const auto &e) { return json(e); }, msg).dump(2));
 
         try {
-            OlmMessage olm_msg = std::visit([](const auto &e) { return json(e); }, msg);
+            OlmMessage olm_msg =
+              std::visit([](const auto &e) { return json(e).get<OlmMessage>(); }, msg);
             decrypt_olm_message(std::move(olm_msg));
         } catch (const nlohmann::json::exception &e) {
             console->warn("parsing error for olm message: {}", e.what());

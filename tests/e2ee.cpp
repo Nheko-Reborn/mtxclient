@@ -48,8 +48,8 @@ from_json(const nlohmann::json &obj, OlmMessage &msg)
     if (obj.at("content").at("algorithm") != OLM_ALGO)
         throw std::invalid_argument("invalid algorithm for olm message");
 
-    msg.sender     = obj.at("sender");
-    msg.sender_key = obj.at("content").at("sender_key");
+    msg.sender     = obj.at("sender").get<std::string>();
+    msg.sender_key = obj.at("content").at("sender_key").get<std::string>();
     msg.ciphertext =
       obj.at("content").at("ciphertext").get<std::map<std::string, OlmCipherContent>>();
 }
@@ -352,8 +352,9 @@ TEST(Encryption, ClaimKeys)
           const auto current_device = bob_devices.at(bob->device_id());
 
           // Verify signature.
-          ASSERT_TRUE(verify_identity_signature(
-            json(current_device), DeviceId(bob->device_id()), UserId(bob->user_id().to_string())));
+          ASSERT_TRUE(verify_identity_signature(json(current_device).get<mtx::crypto::DeviceKeys>(),
+                                                DeviceId(bob->device_id()),
+                                                UserId(bob->user_id().to_string())));
 
           mtx::requests::ClaimKeys claim_keys;
           for (const auto &d : devices)
@@ -713,8 +714,10 @@ TEST(Encryption, CreateOutboundGroupSession)
 
     auto outbound_session = alice->init_outbound_group_session();
 
-    auto session_id  = mtx::crypto::session_id(outbound_session.get());
+    auto session_id = mtx::crypto::session_id(outbound_session.get());
+    ASSERT_FALSE(session_id.empty());
     auto session_key = mtx::crypto::session_key(outbound_session.get());
+    ASSERT_FALSE(session_key.empty());
 }
 
 TEST(Encryption, OlmSessions)
@@ -928,7 +931,8 @@ TEST(Encryption, OlmRoomKeyEncryption)
                                auto retrieved_devices = res.one_time_keys.at(user_id);
                                for (const auto &device : retrieved_devices) {
                                    if (device.first == device_id) {
-                                       bob_otk = device.second.begin()->at("key");
+                                       bob_otk =
+                                         device.second.begin()->at("key").get<std::string>();
                                        break;
                                    }
                                }
@@ -993,7 +997,7 @@ TEST(Encryption, OlmRoomKeyEncryption)
 
           // Parsing the original plaintext json object.
           auto plaintext     = json::parse(std::string((char *)output.data(), output.size()));
-          std::string secret = plaintext.at("content").at("secret");
+          std::string secret = plaintext.at("content").at("secret").get<std::string>();
 
           ASSERT_EQ(secret, SECRET_TEXT);
       });
@@ -1083,7 +1087,8 @@ TEST(Encryption, ShareSecret)
                                auto retrieved_devices = res.one_time_keys.at(user_id);
                                for (const auto &device : retrieved_devices) {
                                    if (device.first == device_id) {
-                                       bob_otk = device.second.begin()->at("key");
+                                       bob_otk =
+                                         device.second.begin()->at("key").get<std::string>();
                                        break;
                                    }
                                }
@@ -1142,7 +1147,8 @@ TEST(Encryption, ShareSecret)
 
               std::map<mtx::identifiers::User,
                        std::map<std::string, mtx::events::msg::OlmEncrypted>>
-                body{{bob_http->user_id(), {{bob_http->device_id(), device_msg}}}};
+                body{{bob_http->user_id(),
+                      {{bob_http->device_id(), device_msg.get<mtx::events::msg::OlmEncrypted>()}}}};
               alice_http->send_to_device<OlmEncrypted>(
                 alice_http->generate_txn_id(), body, [&is_sent](RequestErr err) {
                     check_error(err);
@@ -1397,7 +1403,7 @@ TEST(Encryption, EncryptedFile)
     // IV needs to be 16 bytes/128 bits
     ASSERT_EQ(16, mtx::crypto::base642bin_unpadded(encryption_data.second.iv).size());
 
-    json j                                            = R"({
+    json j = R"({
   "type": "m.room.message",
   "content": {
     "body": "test.txt",
@@ -1435,7 +1441,8 @@ TEST(Encryption, EncryptedFile)
   },
   "room_id": "!YnUlhwgbBaGcAFsJOJ:neko.dev"
 })"_json;
-    mtx::events::RoomEvent<mtx::events::msg::File> ev = j;
+    mtx::events::RoomEvent<mtx::events::msg::File> ev =
+      j.get<mtx::events::RoomEvent<mtx::events::msg::File>>();
 
     ASSERT_EQ("abcdefg\n",
               mtx::crypto::to_string(

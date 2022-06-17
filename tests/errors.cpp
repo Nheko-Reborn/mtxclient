@@ -13,7 +13,7 @@ TEST(MatrixErrors, BasicError)
 	  "error": "Unrecognized request"
 	})"_json;
 
-    Error err = data;
+    Error err = data.get<Error>();
 
     EXPECT_EQ(err.errcode, ErrorCode::M_UNRECOGNIZED);
     EXPECT_EQ(err.error, "Unrecognized request");
@@ -23,7 +23,7 @@ TEST(MatrixErrors, BasicError)
 	  "error": "Missing access token"
 	})"_json;
 
-    err = data2;
+    err = data2.get<Error>();
 
     EXPECT_EQ(err.errcode, ErrorCode::M_MISSING_TOKEN);
     EXPECT_EQ(err.error, "Missing access token");

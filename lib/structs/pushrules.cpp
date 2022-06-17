@@ -20,7 +20,7 @@ to_json(nlohmann::json &obj, const PushCondition &condition)
 void
 from_json(const nlohmann::json &obj, PushCondition &condition)
 {
-    condition.kind    = obj["kind"];
+    condition.kind    = obj["kind"].get<std::string>();
     condition.key     = obj.value("key", "");
     condition.pattern = obj.value("pattern", "");
     condition.is      = obj.value("is", "");
@@ -110,7 +110,7 @@ from_json(const nlohmann::json &obj, PushRule &rule)
 
     if (obj.contains("conditions"))
         for (const auto &condition : obj["conditions"])
-            rule.conditions.push_back(condition);
+            rule.conditions.push_back(condition.get<PushCondition>());
 }
 
 void
@@ -151,7 +151,7 @@ to_json(nlohmann::json &obj, const GlobalRuleset &set)
 void
 from_json(const nlohmann::json &obj, GlobalRuleset &set)
 {
-    set.global = obj["global"];
+    set.global = obj["global"].get<Ruleset>();
 }
 
 void
@@ -163,7 +163,7 @@ to_json(nlohmann::json &obj, const Enabled &enabled)
 void
 from_json(const nlohmann::json &obj, Enabled &enabled)
 {
-    enabled.enabled = obj["enabled"];
+    enabled.enabled = obj.value("enabled", true);
 }
 }
 }

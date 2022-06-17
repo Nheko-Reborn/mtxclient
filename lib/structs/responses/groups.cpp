@@ -15,9 +15,9 @@ void
 from_json(const nlohmann::json &obj, GroupProfile &res)
 {
     if (obj.count("name") != 0 && !obj.at("name").is_null())
-        res.name = obj.at("name");
+        res.name = obj.at("name").get<std::string>();
     if (obj.count("avatar_url") != 0 && !obj.at("avatar_url").is_null())
-        res.avatar_url = obj.at("avatar_url");
+        res.avatar_url = obj.at("avatar_url").get<std::string>();
 }
 }
 }
