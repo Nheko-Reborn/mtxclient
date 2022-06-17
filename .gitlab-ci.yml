@@ -69,6 +69,7 @@ build synapse arm64:
         -DCMAKE_BUILD_TYPE=Debug -DHUNTER_CONFIGURATION_TYPES=Debug
         -DCI_BUILD=ON
         -DCOVERAGE=${COVERAGE}
+        -DJSON_ImplicitConversions=OFF
     - cmake --build build
     - MTXCLIENT_SERVER=synapse GTEST_OUTPUT=xml:junit-output/ make test
   after_script:

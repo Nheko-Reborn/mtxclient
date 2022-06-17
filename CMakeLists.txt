@@ -53,6 +53,7 @@ option(BUILD_LIB_EXAMPLES "Build examples" ON)
 option(COVERAGE "Calculate test coverage" OFF)
 option(IWYU "Check headers with include-what-you-use" OFF)
 option(BUILD_SHARED_LIBS "Specifies whether to build mtxclient as a shared library lib or not" ON)
+option(JSON_ImplicitConversions "Disable implicit conversions in nlohmann/json" ON)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
@@ -262,6 +263,14 @@ target_include_directories(
 	PUBLIC
 	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
 	$<INSTALL_INTERFACE:include>)
+
+if (NOT JSON_ImplicitConversions)
+	set_target_properties(nlohmann_json::nlohmann_json PROPERTIES
+					INTERFACE_COMPILE_DEFINITIONS "JSON_USE_IMPLICIT_CONVERSIONS=\$<BOOL:OFF>;JSON_DIAGNOSTICS=\$<BOOL:OFF>"
+					)
+	target_compile_definitions(matrix_client PUBLIC JSON_USE_IMPLICIT_CONVERSIONS=0)
+endif()
+
 target_link_libraries(matrix_client
 	PUBLIC
 	OpenSSL::Crypto
