@@ -1174,7 +1174,7 @@ TEST(Responses, Userinteractive)
   "params": {}
 })"_json;
 
-    unauthorized = data.get<mtx::user_interactive::Unauthorized>();
+    unauthorized = data2.get<mtx::user_interactive::Unauthorized>();
     EXPECT_EQ(unauthorized.flows[0].stages[0], mtx::user_interactive::auth_types::password);
 }
 
