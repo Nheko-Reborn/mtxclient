@@ -1533,8 +1533,8 @@ TEST(ClientAPI, SendToDevice)
 
             EXPECT_EQ(res.to_device.events.size(), 1);
 
-            auto event =
-              std::get<mtx::events::DeviceEvent<msgs::KeyRequest>>(res.to_device.events[0]);
+            auto event = std::get<mtx::events::DeviceEvent<mtx::events::msg::KeyRequest>>(
+              res.to_device.events[0]);
             EXPECT_EQ(event.content.action, mtx::events::msg::RequestAction::Request);
             EXPECT_EQ(event.content.sender_key, "test");
             EXPECT_EQ(event.content.algorithm, "test_algo");
@@ -1565,10 +1565,10 @@ TEST(ClientAPI, NewSendToDevice)
            carl->access_token().empty())
         sleep();
 
-    ToDeviceMessages<msgs::KeyRequest> body1;
-    ToDeviceMessages<msgs::KeyRequest> body2;
+    ToDeviceMessages<mtx::events::msg::KeyRequest> body1;
+    ToDeviceMessages<mtx::events::msg::KeyRequest> body2;
 
-    msgs::KeyRequest request1;
+    mtx::events::msg::KeyRequest request1;
 
     request1.action               = mtx::events::msg::RequestAction::Request;
     request1.sender_key           = "test";
@@ -1580,7 +1580,7 @@ TEST(ClientAPI, NewSendToDevice)
 
     body1[bob->user_id()][bob->device_id()] = request1;
 
-    msgs::KeyRequest request2;
+    mtx::events::msg::KeyRequest request2;
 
     request2.action               = mtx::events::msg::RequestAction::Cancellation;
     request2.request_id           = "test_request_id_1";
@@ -1600,8 +1600,8 @@ TEST(ClientAPI, NewSendToDevice)
                 check_error(err);
 
                 EXPECT_EQ(res.to_device.events.size(), 2);
-                auto event =
-                  std::get<mtx::events::DeviceEvent<msgs::KeyRequest>>(res.to_device.events[0]);
+                auto event = std::get<mtx::events::DeviceEvent<mtx::events::msg::KeyRequest>>(
+                  res.to_device.events[0]);
             });
         });
     });

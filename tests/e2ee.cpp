@@ -979,8 +979,9 @@ TEST(Encryption, OlmRoomKeyEncryption)
 
           EXPECT_EQ(res.to_device.events.size(), 1);
 
-          auto olm_msg = std::get<DeviceEvent<msgs::OlmEncrypted>>(res.to_device.events[0]).content;
-          auto cipher  = olm_msg.ciphertext.begin();
+          auto olm_msg =
+            std::get<DeviceEvent<mtx::events::msg::OlmEncrypted>>(res.to_device.events[0]).content;
+          auto cipher = olm_msg.ciphertext.begin();
 
           EXPECT_EQ(cipher->first, bob->identity_keys().curve25519);
 
@@ -1166,8 +1167,9 @@ TEST(Encryption, ShareSecret)
 
           EXPECT_EQ(res.to_device.events.size(), 1);
 
-          auto olm_msg = std::get<DeviceEvent<msgs::OlmEncrypted>>(res.to_device.events[0]).content;
-          auto cipher  = olm_msg.ciphertext.begin();
+          auto olm_msg =
+            std::get<DeviceEvent<mtx::events::msg::OlmEncrypted>>(res.to_device.events[0]).content;
+          auto cipher = olm_msg.ciphertext.begin();
 
           EXPECT_EQ(cipher->first, bob->identity_keys().curve25519);
 
