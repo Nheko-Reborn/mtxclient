@@ -59,9 +59,6 @@ struct CreateRoom;
 struct Device;
 struct EventId;
 struct FilterId;
-struct GroupId;
-struct GroupProfile;
-struct JoinedGroups;
 struct KeyChanges;
 struct KeySignaturesUpload;
 struct Login;
@@ -628,19 +625,6 @@ public:
                        size_t limit            = 0,
                        size_t max_depth        = 0,
                        bool suggested_only     = false);
-
-    //
-    // Group related endpoints.
-    //
-
-    void create_group(const std::string &localpart, Callback<mtx::responses::GroupId> cb);
-    void joined_groups(Callback<mtx::responses::JoinedGroups> cb);
-    void group_profile(const std::string &group_id, Callback<mtx::responses::GroupProfile> cb);
-    void group_rooms(const std::string &group_id, Callback<nlohmann::json> cb);
-    void set_group_profile(const std::string &group_id,
-                           nlohmann::json &req,
-                           Callback<nlohmann::json> cb);
-    void add_room_to_group(const std::string &room_id, const std::string &group_id, ErrCallback cb);
 
     //
     // Device related endpoints.

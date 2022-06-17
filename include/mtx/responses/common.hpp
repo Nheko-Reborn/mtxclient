@@ -27,16 +27,6 @@ struct EventId
 void
 from_json(const nlohmann::json &obj, EventId &response);
 
-//! A group id returned by the API.
-struct GroupId
-{
-    //! The group id.
-    std::string group_id;
-};
-
-void
-from_json(const nlohmann::json &obj, GroupId &response);
-
 //! A room id returned by the API.
 struct RoomId
 {

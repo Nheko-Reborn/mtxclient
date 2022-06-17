@@ -177,7 +177,6 @@ struct Sync
     ToDevice to_device;
     //! Information about presence of other users
     std::vector<mtx::events::Event<mtx::events::presence::Presence>> presence;
-    /* Groups groups; */
     //! Information on end-to-end device updates,
     DeviceLists device_lists;
     //! A mapping from algorithm to the number of one time keys

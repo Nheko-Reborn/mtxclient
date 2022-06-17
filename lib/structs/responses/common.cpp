@@ -29,12 +29,6 @@ using namespace mtx::events::msg;
 namespace mtx {
 namespace responses {
 void
-from_json(const nlohmann::json &obj, GroupId &response)
-{
-    response.group_id = obj.at("group_id").get<std::string>();
-}
-
-void
 from_json(const nlohmann::json &obj, RoomId &response)
 {
     response.room_id = obj.at("room_id").get<std::string>();

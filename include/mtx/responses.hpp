@@ -9,7 +9,6 @@
 #include "responses/crypto.hpp"
 #include "responses/device.hpp"
 #include "responses/empty.hpp"
-#include "responses/groups.hpp"
 #include "responses/login.hpp"
 #include "responses/media.hpp"
 #include "responses/members.hpp"
