@@ -105,6 +105,12 @@ getEventType(const std::string &type)
         return EventType::CallAnswer;
     else if (type == "m.call.hangup")
         return EventType::CallHangUp;
+    else if (type == "m.call.select_answer")
+        return EventType::CallSelectAnswer;
+    else if (type == "m.call.reject")
+        return EventType::CallReject;
+    else if (type == "m.call.negotiate")
+        return EventType::CallNegotiate;
     else if (type == "m.secret.request")
         return EventType::SecretRequest;
     else if (type == "m.secret.send")
@@ -226,6 +232,12 @@ to_string(EventType type)
         return "m.call.answer";
     case EventType::CallHangUp:
         return "m.call.hangup";
+    case EventType::CallSelectAnswer:
+        return "m.call.select_answer";
+    case EventType::CallReject:
+        return "m.call.reject";
+    case EventType::CallNegotiate:
+        return "m.call.negotiate";
     case EventType::SecretRequest:
         return "m.secret.request";
     case EventType::SecretSend:

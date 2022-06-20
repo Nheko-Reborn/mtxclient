@@ -222,6 +222,9 @@ parse_room_account_data_events(
         case events::EventType::CallCandidates:
         case events::EventType::CallAnswer:
         case events::EventType::CallHangUp:
+        case events::EventType::CallSelectAnswer:
+        case events::EventType::CallReject:
+        case events::EventType::CallNegotiate:
         case events::EventType::Typing:
         case events::EventType::Receipt:
         case events::EventType::ImagePackInRoom:
@@ -663,7 +666,7 @@ parse_timeline_events(const json &events,
             }
             case events::EventType::CallInvite: {
                 try {
-                    container.emplace_back(events::RoomEvent<events::msg::CallInvite>(e));
+                    container.emplace_back(events::RoomEvent<events::voip::CallInvite>(e));
                 } catch (json::exception &err) {
                     log_error(err, e);
                 }
@@ -672,7 +675,7 @@ parse_timeline_events(const json &events,
             }
             case events::EventType::CallCandidates: {
                 try {
-                    container.emplace_back(events::RoomEvent<events::msg::CallCandidates>(e));
+                    container.emplace_back(events::RoomEvent<events::voip::CallCandidates>(e));
                 } catch (json::exception &err) {
                     log_error(err, e);
                 }
@@ -681,7 +684,7 @@ parse_timeline_events(const json &events,
             }
             case events::EventType::CallAnswer: {
                 try {
-                    container.emplace_back(events::RoomEvent<events::msg::CallAnswer>(e));
+                    container.emplace_back(events::RoomEvent<events::voip::CallAnswer>(e));
                 } catch (json::exception &err) {
                     log_error(err, e);
                 }
@@ -690,7 +693,34 @@ parse_timeline_events(const json &events,
             }
             case events::EventType::CallHangUp: {
                 try {
-                    container.emplace_back(events::RoomEvent<events::msg::CallHangUp>(e));
+                    container.emplace_back(events::RoomEvent<events::voip::CallHangUp>(e));
+                } catch (json::exception &err) {
+                    log_error(err, e);
+                }
+
+                break;
+            }
+            case events::EventType::CallSelectAnswer: {
+                try {
+                    container.emplace_back(events::RoomEvent<events::voip::CallSelectAnswer>(e));
+                } catch (json::exception &err) {
+                    log_error(err, e);
+                }
+
+                break;
+            }
+            case events::EventType::CallReject: {
+                try {
+                    container.emplace_back(events::RoomEvent<events::voip::CallReject>(e));
+                } catch (json::exception &err) {
+                    log_error(err, e);
+                }
+
+                break;
+            }
+            case events::EventType::CallNegotiate: {
+                try {
+                    container.emplace_back(events::RoomEvent<events::voip::CallNegotiate>(e));
                 } catch (json::exception &err) {
                     log_error(err, e);
                 }
@@ -1151,6 +1181,9 @@ parse_state_events(const json &events,
             case events::EventType::CallCandidates:
             case events::EventType::CallAnswer:
             case events::EventType::CallHangUp:
+            case events::EventType::CallSelectAnswer:
+            case events::EventType::CallReject:
+            case events::EventType::CallNegotiate:
             case events::EventType::Typing:
             case events::EventType::Receipt:
             case events::EventType::FullyRead:
@@ -1399,6 +1432,9 @@ parse_stripped_events(const json &events,
             case events::EventType::CallCandidates:
             case events::EventType::CallAnswer:
             case events::EventType::CallHangUp:
+            case events::EventType::CallSelectAnswer:
+            case events::EventType::CallReject:
+            case events::EventType::CallNegotiate:
             case events::EventType::Typing:
             case events::EventType::Receipt:
             case events::EventType::FullyRead:

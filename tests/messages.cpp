@@ -791,7 +791,11 @@ TEST(RoomEvents, CallInvite)
           }
         })"_json;
 
+<<<<<<< HEAD
     RoomEvent<msg::CallInvite> event = data.get<RoomEvent<msg::CallInvite>>();
+=======
+    RoomEvent<voip::CallInvite> event = data;
+>>>>>>> 09cff3c (Changed namespace for voip events and added new events)
 
     EXPECT_EQ(event.event_id, "$143273582443PhrSn:example.org");
     EXPECT_EQ(event.origin_server_ts, 1432735824653L);
@@ -831,7 +835,11 @@ TEST(RoomEvents, CallCandidates)
           }
         })"_json;
 
+<<<<<<< HEAD
     RoomEvent<msg::CallCandidates> event = data.get<RoomEvent<msg::CallCandidates>>();
+=======
+    RoomEvent<voip::CallCandidates> event = data;
+>>>>>>> 09cff3c (Changed namespace for voip events and added new events)
 
     EXPECT_EQ(event.event_id, "$143273582443PhrSn:example.org");
     EXPECT_EQ(event.origin_server_ts, 1432735824653L);
@@ -870,7 +878,11 @@ TEST(RoomEvents, CallAnswer)
           }
         })"_json;
 
+<<<<<<< HEAD
     RoomEvent<msg::CallAnswer> event = data.get<RoomEvent<msg::CallAnswer>>();
+=======
+    RoomEvent<voip::CallAnswer> event = data;
+>>>>>>> 09cff3c (Changed namespace for voip events and added new events)
 
     EXPECT_EQ(event.event_id, "$143273582443PhrSn:example.org");
     EXPECT_EQ(event.origin_server_ts, 1432735824653L);
@@ -903,7 +915,11 @@ TEST(RoomEvents, CallHangUp)
           }
         })"_json;
 
+<<<<<<< HEAD
     RoomEvent<msg::CallHangUp> event = data.get<RoomEvent<msg::CallHangUp>>();
+=======
+    RoomEvent<voip::CallHangUp> event = data;
+>>>>>>> 09cff3c (Changed namespace for voip events and added new events)
 
     EXPECT_EQ(event.event_id, "$143273582443PhrSn:example.org");
     EXPECT_EQ(event.origin_server_ts, 1432735824653L);
@@ -913,7 +929,105 @@ TEST(RoomEvents, CallHangUp)
     EXPECT_EQ(event.unsigned_data.age, 1234);
     EXPECT_EQ(event.content.call_id, "c1591052749788");
     EXPECT_EQ(event.content.version, "0");
-    EXPECT_EQ(event.content.reason, msg::CallHangUp::Reason::InviteTimeOut);
+    EXPECT_EQ(event.content.reason, voip::CallHangUp::Reason::InviteTimeOut);
 
     EXPECT_EQ(data, json(event));
+}
+
+TEST(RoomEvents, CallSelectAnswer)
+{
+    // nlohmann::json data = R"({
+    //       "content": {
+    //         "call_id": "c1591052749788",
+    //         "version": 0,
+    //         "reason": "invite_timeout"
+    //       },
+    //       "event_id": "$143273582443PhrSn:example.org",
+    //       "origin_server_ts": 1432735824653,
+    //       "room_id": "!jEsUZKDJdhlrceRyVU:example.org",
+    //       "sender": "@example:example.org",
+    //       "type": "m.call.select_answer",
+    //       "unsigned": {
+    //         "age": 1234
+    //       }
+    //     })"_json;
+
+    // RoomEvent<voip::CallSelectAnswer> event = data;
+
+    // EXPECT_EQ(event.event_id, "$143273582443PhrSn:example.org");
+    // EXPECT_EQ(event.origin_server_ts, 1432735824653L);
+    // EXPECT_EQ(event.room_id, "!jEsUZKDJdhlrceRyVU:example.org");
+    // EXPECT_EQ(event.sender, "@example:example.org");
+    // EXPECT_EQ(event.type, EventType::CallSelectAnswer);
+    // EXPECT_EQ(event.unsigned_data.age, 1234);
+    // EXPECT_EQ(event.content.call_id, "c1591052749788");
+    // EXPECT_EQ(event.content.version, "0");
+    // EXPECT_EQ(event.content.reason, voip::CallSelectAnswer::Reason::InviteTimeOut);
+
+    // EXPECT_EQ(data, json(event));
+}
+
+TEST(RoomEvents, CallSelectAnswer)
+{
+    // nlohmann::json data = R"({
+    //       "content": {
+    //         "call_id": "c1591052749788",
+    //         "version": 0,
+    //         "reason": "invite_timeout"
+    //       },
+    //       "event_id": "$143273582443PhrSn:example.org",
+    //       "origin_server_ts": 1432735824653,
+    //       "room_id": "!jEsUZKDJdhlrceRyVU:example.org",
+    //       "sender": "@example:example.org",
+    //       "type": "m.call.select_answer",
+    //       "unsigned": {
+    //         "age": 1234
+    //       }
+    //     })"_json;
+
+    // RoomEvent<voip::CallSelectAnswer> event = data;
+
+    // EXPECT_EQ(event.event_id, "$143273582443PhrSn:example.org");
+    // EXPECT_EQ(event.origin_server_ts, 1432735824653L);
+    // EXPECT_EQ(event.room_id, "!jEsUZKDJdhlrceRyVU:example.org");
+    // EXPECT_EQ(event.sender, "@example:example.org");
+    // EXPECT_EQ(event.type, EventType::CallSelectAnswer);
+    // EXPECT_EQ(event.unsigned_data.age, 1234);
+    // EXPECT_EQ(event.content.call_id, "c1591052749788");
+    // EXPECT_EQ(event.content.version, "0");
+    // EXPECT_EQ(event.content.reason, voip::CallSelectAnswer::Reason::InviteTimeOut);
+
+    // EXPECT_EQ(data, json(event));
+}
+TEST(RoomEvents, CallNegotiate)
+{
+    // nlohmann::json data = R"({
+    //       "content": {
+    //         "call_id": "c1591052749788",
+    //         "version": 0,
+    //         "reason": "invite_timeout"
+    //       },
+    //       "event_id": "$143273582443PhrSn:example.org",
+    //       "origin_server_ts": 1432735824653,
+    //       "room_id": "!jEsUZKDJdhlrceRyVU:example.org",
+    //       "sender": "@example:example.org",
+    //       "type": "m.call.negotiate",
+    //       "unsigned": {
+    //         "age": 1234
+    //       }
+    //     })"_json;
+
+    // RoomEvent<voip::CallNegotiate> event = data;
+
+    // EXPECT_EQ(event.event_id, "$143273582443PhrSn:example.org");
+    // EXPECT_EQ(event.origin_server_ts, 1432735824653L);
+    // EXPECT_EQ(event.room_id, "!jEsUZKDJdhlrceRyVU:example.org");
+    // EXPECT_EQ(event.sender, "@example:example.org");
+    // EXPECT_EQ(event.type, EventType::CallNegotiate);
+    // EXPECT_EQ(event.unsigned_data.age, 1234);
+    // EXPECT_EQ(event.content.call_id, "c1591052749788");
+    // EXPECT_EQ(event.content.version, "0");
+    // EXPECT_EQ(event.content.reason, voip::CallNegotiate::Reason::InviteTimeOut);
+
+    // EXPECT_EQ(data, json(event));
 }

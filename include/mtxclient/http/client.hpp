@@ -883,10 +883,14 @@ MTXCLIENT_SEND_ROOM_MESSAGE_FWD(mtx::events::msg::Video)
 // MTXCLIENT_SEND_ROOM_MESSAGE(mtx::events::msg::KeyVerificationCancel)
 // MTXCLIENT_SEND_ROOM_MESSAGE(mtx::events::msg::KeyVerificationKey)
 // MTXCLIENT_SEND_ROOM_MESSAGE(mtx::events::msg::KeyVerificationMac)
-MTXCLIENT_SEND_ROOM_MESSAGE_FWD(mtx::events::msg::CallInvite)
-MTXCLIENT_SEND_ROOM_MESSAGE_FWD(mtx::events::msg::CallCandidates)
-MTXCLIENT_SEND_ROOM_MESSAGE_FWD(mtx::events::msg::CallAnswer)
-MTXCLIENT_SEND_ROOM_MESSAGE_FWD(mtx::events::msg::CallHangUp)
+MTXCLIENT_SEND_ROOM_MESSAGE_FWD(mtx::events::voip::CallInvite)
+MTXCLIENT_SEND_ROOM_MESSAGE_FWD(mtx::events::voip::CallCandidates)
+MTXCLIENT_SEND_ROOM_MESSAGE_FWD(mtx::events::voip::CallAnswer)
+MTXCLIENT_SEND_ROOM_MESSAGE_FWD(mtx::events::voip::CallHangUp)
+MTXCLIENT_SEND_ROOM_MESSAGE_FWD(mtx::events::voip::CallSelectAnswer)
+MTXCLIENT_SEND_ROOM_MESSAGE_FWD(mtx::events::voip::CallReject)
+MTXCLIENT_SEND_ROOM_MESSAGE_FWD(mtx::events::voip::CallNegotiate)
+
 
 #define MTXCLIENT_SEND_TO_DEVICE_FWD(Content)                                                      \
     extern template void mtx::http::Client::send_to_device<Content>(                               \

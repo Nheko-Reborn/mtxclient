@@ -180,10 +180,13 @@ using TimelineEvents =
                mtx::events::RoomEvent<mtx::events::msg::KeyVerificationCancel>,
                mtx::events::RoomEvent<mtx::events::msg::KeyVerificationKey>,
                mtx::events::RoomEvent<mtx::events::msg::KeyVerificationMac>,
-               mtx::events::RoomEvent<mtx::events::msg::CallInvite>,
-               mtx::events::RoomEvent<mtx::events::msg::CallCandidates>,
-               mtx::events::RoomEvent<mtx::events::msg::CallAnswer>,
-               mtx::events::RoomEvent<mtx::events::msg::CallHangUp>,
+               mtx::events::RoomEvent<mtx::events::voip::CallCandidates>,
+               mtx::events::RoomEvent<mtx::events::voip::CallInvite>,
+               mtx::events::RoomEvent<mtx::events::voip::CallAnswer>,
+               mtx::events::RoomEvent<mtx::events::voip::CallHangUp>,
+               mtx::events::RoomEvent<mtx::events::voip::CallSelectAnswer>,
+               mtx::events::RoomEvent<mtx::events::voip::CallReject>,
+               mtx::events::RoomEvent<mtx::events::voip::CallNegotiate>,
                mtx::events::RoomEvent<mtx::events::Unknown>>;
 
 using EphemeralEvents = std::variant<mtx::events::EphemeralEvent<mtx::events::ephemeral::Typing>,
@@ -234,17 +237,26 @@ template<>
 constexpr inline EventType message_content_to_type<mtx::events::msg::StickerImage> =
   EventType::Sticker;
 template<>
-constexpr inline EventType message_content_to_type<mtx::events::msg::CallInvite> =
+constexpr inline EventType message_content_to_type<mtx::events::voip::CallInvite> =
   EventType::CallInvite;
 template<>
-constexpr inline EventType message_content_to_type<mtx::events::msg::CallCandidates> =
+constexpr inline EventType message_content_to_type<mtx::events::voip::CallCandidates> =
   EventType::CallCandidates;
 template<>
-constexpr inline EventType message_content_to_type<mtx::events::msg::CallAnswer> =
+constexpr inline EventType message_content_to_type<mtx::events::voip::CallAnswer> =
   EventType::CallAnswer;
 template<>
-constexpr inline EventType message_content_to_type<mtx::events::msg::CallHangUp> =
+constexpr inline EventType message_content_to_type<mtx::events::voip::CallHangUp> =
   EventType::CallHangUp;
+template<>
+constexpr inline EventType message_content_to_type<mtx::events::voip::CallSelectAnswer> =
+  EventType::CallSelectAnswer;
+template<>
+constexpr inline EventType message_content_to_type<mtx::events::voip::CallReject> =
+  EventType::CallReject;
+template<>
+constexpr inline EventType message_content_to_type<mtx::events::voip::CallNegotiate> =
+  EventType::CallNegotiate;
 
 //! Get the right event type for some type of state event content.
 template<typename Content>
