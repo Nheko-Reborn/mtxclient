@@ -19,7 +19,7 @@ namespace voip {
 //! Universal RTC Session Description structure compatible with the WebRTC API
 struct RTCSessionDescriptionInit
 {
-    enum class Type 
+    enum class Type
     {
         Answer,
         Offer,
@@ -40,7 +40,6 @@ to_json(nlohmann::json &obj, const RTCSessionDescriptionInit &content);
 //! Content for the `m.call.invite` event.
 struct CallInvite
 {
-
     //! A unique identifier for the call.
     std::string call_id;
     //! A unique identifier for the client participating in the event.
@@ -49,8 +48,8 @@ struct CallInvite
     RTCSessionDescriptionInit offer;
     //! The version of the VoIP specification this message adheres to.
     std::string version;
-    //! The time in milliseconds that the invite is valid for.
-    uint32_t lifetime;
+    //! The time in milliseconds that the invite is valid for. Recommended 90000ms
+    uint32_t lifetime = 90000;
     //! The ID of the user that the call is being placed to. See MSC2746.
     std::string invitee;
 };
@@ -131,7 +130,7 @@ struct CallHangUp
     //! The version of the VoIP specification this message adheres to.
     std::string version;
     //! The reason for the call hang up.
-    Reason reason = Reason::User;
+    Reason reason = Reason::UserHangUp;
 };
 
 void
@@ -179,16 +178,14 @@ to_json(nlohmann::json &obj, const CallReject &content);
 //! Content for the `m.call.negotiate` event. See MSC2746.
 struct CallNegotiate
 {
-
     //! The ID of the call this event relates to.
     std::string call_id;
     //! A unique identifier for the client participating in the event.
     std::string party_id;
-    //! The time in milliseconds that the negotiation is valid for.
-    uint32_t lifetime;
+    //! The time in milliseconds that the negotiation is valid for. Recommended 90000ms.
+    uint32_t lifetime = 90000;
     //! The session description object
     RTCSessionDescriptionInit description;
-
 };
 
 void

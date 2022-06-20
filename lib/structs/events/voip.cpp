@@ -26,22 +26,21 @@ add_version(json &obj, std::string_view version)
 
 namespace mtx::events::voip {
 
-// RTC Session Description 
+// RTC Session Description
 void
 from_json(const json &obj, RTCSessionDescriptionInit &content)
 {
-    content.sdp  = obj.at("sdp").get<std::string>();
+    content.sdp = obj.at("sdp").get<std::string>();
     if (obj.at("type").get<std::string>() == "answer")
         content.type = RTCSessionDescriptionInit::Type::Answer;
-    else if(obj.at("type").get<std::string>() == "offer")
+    else if (obj.at("type").get<std::string>() == "offer")
         content.type = RTCSessionDescriptionInit::Type::Offer;
-        
 }
 
 void
 to_json(json &obj, const RTCSessionDescriptionInit &content)
 {
-    obj["sdp"]  = content.sdp;
+    obj["sdp"] = content.sdp;
     if (content.type == RTCSessionDescriptionInit::Type::Answer)
         obj["type"] = "answer";
     else if (content.type == RTCSessionDescriptionInit::Type::Offer)
@@ -53,13 +52,12 @@ void
 from_json(const json &obj, CallInvite &content)
 {
     content.call_id  = obj.at("call_id").get<std::string>();
-    content.offer      = obj.at("offer").get<RTCSessionDescriptionInit>();
+    content.offer    = obj.at("offer").get<RTCSessionDescriptionInit>();
     content.version  = version(obj);
     content.lifetime = obj.at("lifetime").get<uint32_t>();
-    if(content.version != "0")
-    {
-        content.party_id  = obj.at("party_id").get<std::string>();
-        content.invitee = obj.at("invitee").get<std::string>();
+    if (content.version != "0") {
+        content.party_id = obj.at("party_id").get<std::string>();
+        content.invitee  = obj.at("invitee").get<std::string>();
     }
 }
 
@@ -67,11 +65,13 @@ void
 to_json(json &obj, const CallInvite &content)
 {
     obj["call_id"] = content.call_id;
-    obj["party_id"] = content.party_id;
-    obj["offer"] = content.offer;
+    obj["offer"]   = content.offer;
     add_version(obj, content.version);
     obj["lifetime"] = content.lifetime;
-    obj["invitee"] = content.invitee;
+    if (content.version != "0") {
+        obj["party_id"] = content.party_id;
+        obj["invitee"]  = content.invitee;
+    }
 }
 
 // m.call.candidates
@@ -97,9 +97,8 @@ from_json(const json &obj, CallCandidates &content)
     content.call_id    = obj.at("call_id").get<std::string>();
     content.candidates = obj.at("candidates").get<std::vector<CallCandidates::Candidate>>();
     content.version    = version(obj);
-    if(content.version != "0")
-    {
-        content.party_id    = obj.at("party_id").get<std::string>();
+    if (content.version != "0") {
+        content.party_id = obj.at("party_id").get<std::string>();
     }
 }
 
@@ -107,9 +106,11 @@ void
 to_json(json &obj, const CallCandidates &content)
 {
     obj["call_id"]    = content.call_id;
-    obj["party_id"]    = content.party_id;
     obj["candidates"] = content.candidates;
     add_version(obj, content.version);
+    if (content.version != "0") {
+        obj["party_id"] = content.party_id;
+    }
 }
 
 // m.call.answer
@@ -117,11 +118,10 @@ void
 from_json(const json &obj, CallAnswer &content)
 {
     content.call_id = obj.at("call_id").get<std::string>();
-    content.answer     = obj.at("answer").get<RTCSessionDescriptionInit>();
+    content.answer  = obj.at("answer").get<RTCSessionDescriptionInit>();
     content.version = version(obj);
-    if(content.version != "0")
-    {
-        content.party_id    = obj.at("party_id").get<std::string>();
+    if (content.version != "0") {
+        content.party_id = obj.at("party_id").get<std::string>();
     }
 }
 
@@ -129,9 +129,11 @@ void
 to_json(json &obj, const CallAnswer &content)
 {
     obj["call_id"] = content.call_id;
-    obj["party_id"] = content.party_id;
-    obj["answer"] = content.answer;
+    obj["answer"]  = content.answer;
     add_version(obj, content.version);
+    if (content.version != "0") {
+        obj["party_id"] = content.party_id;
+    }
 }
 
 // m.call.hangup
@@ -140,9 +142,8 @@ from_json(const json &obj, CallHangUp &content)
 {
     content.call_id = obj.at("call_id").get<std::string>();
     content.version = version(obj);
-    if(content.version != "0")
-    {
-        content.party_id    = obj.at("party_id").get<std::string>();
+    if (content.version != "0") {
+        content.party_id = obj.at("party_id").get<std::string>();
     }
     if (obj.count("reason") == 0) {
         content.reason = CallHangUp::Reason::User;
@@ -169,7 +170,9 @@ to_json(json &obj, const CallHangUp &content)
 {
     obj["call_id"] = content.call_id;
     add_version(obj, content.version);
-    obj["party_id"] = content.party_id;
+    if (content.version != "0") {
+        obj["party_id"] = content.party_id;
+    }
     if (content.reason == CallHangUp::Reason::ICEFailed)
         obj["reason"] = "ice_failed";
     else if (content.reason == CallHangUp::Reason::InviteTimeOut)
@@ -190,10 +193,10 @@ to_json(json &obj, const CallHangUp &content)
 void
 from_json(const json &obj, CallSelectAnswer &content)
 {
-    content.call_id = obj.at("call_id").get<std::string>();
-    content.version = version(obj);
-    content.party_id    = obj.at("party_id").get<std::string>();
-    content.selected_party_id    = obj.at("selected_party_id").get<std::string>();
+    content.call_id           = obj.at("call_id").get<std::string>();
+    content.version           = version(obj);
+    content.party_id          = obj.at("party_id").get<std::string>();
+    content.selected_party_id = obj.at("selected_party_id").get<std::string>();
 }
 
 void
@@ -201,7 +204,7 @@ to_json(json &obj, const CallSelectAnswer &content)
 {
     obj["call_id"] = content.call_id;
     add_version(obj, content.version);
-    obj["party_id"] = content.party_id;
+    obj["party_id"]          = content.party_id;
     obj["selected_party_id"] = content.selected_party_id;
 }
 
@@ -209,9 +212,9 @@ to_json(json &obj, const CallSelectAnswer &content)
 void
 from_json(const json &obj, CallReject &content)
 {
-    content.call_id = obj.at("call_id").get<std::string>();
-    content.version = version(obj);
-    content.party_id    = obj.at("party_id").get<std::string>();
+    content.call_id  = obj.at("call_id").get<std::string>();
+    content.version  = version(obj);
+    content.party_id = obj.at("party_id").get<std::string>();
 }
 
 void
@@ -226,7 +229,7 @@ to_json(json &obj, const CallReject &content)
 void
 from_json(const json &obj, CallNegotiate &content)
 {
-    content.call_id = obj.at("call_id").get<std::string>();
+    content.call_id     = obj.at("call_id").get<std::string>();
     content.party_id    = obj.at("party_id").get<std::string>();
     content.lifetime    = obj.at("lifetime").get<uint32_t>();
     content.description = obj.at("description");
@@ -235,11 +238,10 @@ from_json(const json &obj, CallNegotiate &content)
 void
 to_json(json &obj, const CallNegotiate &content)
 {
-    obj["call_id"] = content.call_id;
-    obj["party_id"] = content.party_id;
-    obj["lifetime"] = content.lifetime;
+    obj["call_id"]     = content.call_id;
+    obj["party_id"]    = content.party_id;
+    obj["lifetime"]    = content.lifetime;
     obj["description"] = content.description;
-
 }
 
 } // namespace mtx::events::voip

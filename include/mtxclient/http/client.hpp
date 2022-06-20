@@ -891,7 +891,6 @@ MTXCLIENT_SEND_ROOM_MESSAGE_FWD(mtx::events::voip::CallSelectAnswer)
 MTXCLIENT_SEND_ROOM_MESSAGE_FWD(mtx::events::voip::CallReject)
 MTXCLIENT_SEND_ROOM_MESSAGE_FWD(mtx::events::voip::CallNegotiate)
 
-
 #define MTXCLIENT_SEND_TO_DEVICE_FWD(Content)                                                      \
     extern template void mtx::http::Client::send_to_device<Content>(                               \
       const std::string &txid,                                                                     \
