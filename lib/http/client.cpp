@@ -230,7 +230,7 @@ void
 Client::login(const mtx::requests::Login &req, Callback<mtx::responses::Login> callback)
 {
     post<mtx::requests::Login, mtx::responses::Login>(
-      "/client/r0/login",
+      "/client/v3/login",
       req,
       [_this    = shared_from_this(),
        callback = std::move(callback)](const mtx::responses::Login &resp, RequestErr err) {
@@ -248,7 +248,7 @@ void
 Client::get_login(Callback<mtx::responses::LoginFlows> cb)
 {
     get<mtx::responses::LoginFlows>(
-      "/client/r0/login",
+      "/client/v3/login",
       [cb = std::move(cb)](const mtx::responses::LoginFlows &res, HeaderFields, RequestErr err) {
           cb(res, err);
       },
@@ -260,7 +260,7 @@ Client::login_sso_redirect(std::string redirectUrl, const std::string &idp)
 {
     const std::string idp_suffix = idp.empty() ? idp : ("/" + mtx::client::utils::url_encode(idp));
     return protocol_ + "://" + server() + ":" + std::to_string(port()) +
-           "/_matrix/client/r0/login/sso/redirect" + idp_suffix + "?" +
+           "/_matrix/client/v3/login/sso/redirect" + idp_suffix + "?" +
            mtx::client::utils::query_params({{"redirectUrl", redirectUrl}});
 }
 
@@ -282,7 +282,7 @@ Client::logout(Callback<mtx::responses::Logout> callback)
     mtx::requests::Logout req;
 
     post<mtx::requests::Logout, mtx::responses::Logout>(
-      "/client/r0/logout",
+      "/client/v3/logout",
       req,
       [_this    = shared_from_this(),
        callback = std::move(callback)](const mtx::responses::Logout &res, RequestErr err) {
@@ -313,7 +313,7 @@ Client::notifications(uint64_t limit,
     }
 
     get<mtx::responses::Notifications>(
-      "/client/r0/notifications?" + mtx::client::utils::query_params(params),
+      "/client/v3/notifications?" + mtx::client::utils::query_params(params),
       [cb = std::move(cb)](const mtx::responses::Notifications &res, HeaderFields, RequestErr err) {
           cb(res, err);
       });
@@ -323,7 +323,7 @@ void
 Client::get_pushrules(Callback<mtx::pushrules::GlobalRuleset> cb)
 {
     get<mtx::pushrules::GlobalRuleset>(
-      "/client/r0/pushrules/",
+      "/client/v3/pushrules/",
       [cb = std::move(cb)](const mtx::pushrules::GlobalRuleset &res, HeaderFields, RequestErr err) {
           cb(res, err);
       });
@@ -336,7 +336,7 @@ Client::get_pushrules(const std::string &scope,
                       Callback<mtx::pushrules::PushRule> cb)
 {
     get<mtx::pushrules::PushRule>(
-      "/client/r0/pushrules/" + mtx::client::utils::url_encode(scope) + "/" +
+      "/client/v3/pushrules/" + mtx::client::utils::url_encode(scope) + "/" +
         mtx::client::utils::url_encode(kind) + "/" + mtx::client::utils::url_encode(ruleId),
       [cb = std::move(cb)](const mtx::pushrules::PushRule &res, HeaderFields, RequestErr err) {
           cb(res, err);
@@ -349,7 +349,7 @@ Client::delete_pushrules(const std::string &scope,
                          const std::string &ruleId,
                          ErrCallback cb)
 {
-    delete_("/client/r0/pushrules/" + mtx::client::utils::url_encode(scope) + "/" +
+    delete_("/client/v3/pushrules/" + mtx::client::utils::url_encode(scope) + "/" +
               mtx::client::utils::url_encode(kind) + "/" + mtx::client::utils::url_encode(ruleId),
             std::move(cb));
 }
@@ -371,7 +371,7 @@ Client::put_pushrules(const std::string &scope,
     if (!after.empty())
         params.emplace("after", after);
 
-    std::string path = "/client/r0/pushrules/" + mtx::client::utils::url_encode(scope) + "/" +
+    std::string path = "/client/v3/pushrules/" + mtx::client::utils::url_encode(scope) + "/" +
                        mtx::client::utils::url_encode(kind) + "/" +
                        mtx::client::utils::url_encode(ruleId);
     if (!params.empty())
@@ -385,7 +385,7 @@ Client::get_pushrules_enabled(const std::string &scope,
                               const std::string &ruleId,
                               Callback<mtx::pushrules::Enabled> cb)
 {
-    get<mtx::pushrules::Enabled>("/client/r0/pushrules/" + mtx::client::utils::url_encode(scope) +
+    get<mtx::pushrules::Enabled>("/client/v3/pushrules/" + mtx::client::utils::url_encode(scope) +
                                    "/" + mtx::client::utils::url_encode(kind) + "/" +
                                    mtx::client::utils::url_encode(ruleId) + "/enabled",
                                  [cb = std::move(cb)](const mtx::pushrules::Enabled &res,
@@ -400,7 +400,7 @@ Client::put_pushrules_enabled(const std::string &scope,
                               bool enabled,
                               ErrCallback cb)
 {
-    put<mtx::pushrules::Enabled>("/client/r0/pushrules/" + mtx::client::utils::url_encode(scope) +
+    put<mtx::pushrules::Enabled>("/client/v3/pushrules/" + mtx::client::utils::url_encode(scope) +
                                    "/" + mtx::client::utils::url_encode(kind) + "/" +
                                    mtx::client::utils::url_encode(ruleId) + "/enabled",
                                  {enabled},
@@ -414,7 +414,7 @@ Client::get_pushrules_actions(const std::string &scope,
                               Callback<mtx::pushrules::actions::Actions> cb)
 {
     get<mtx::pushrules::actions::Actions>(
-      "/client/r0/pushrules/" + mtx::client::utils::url_encode(scope) + "/" +
+      "/client/v3/pushrules/" + mtx::client::utils::url_encode(scope) + "/" +
         mtx::client::utils::url_encode(kind) + "/" + mtx::client::utils::url_encode(ruleId) +
         "/actions",
       [cb = std::move(cb)](const mtx::pushrules::actions::Actions &res,
@@ -429,7 +429,7 @@ Client::put_pushrules_actions(const std::string &scope,
                               const mtx::pushrules::actions::Actions &actions,
                               ErrCallback cb)
 {
-    put<mtx::pushrules::actions::Actions>("/client/r0/pushrules/" +
+    put<mtx::pushrules::actions::Actions>("/client/v3/pushrules/" +
                                             mtx::client::utils::url_encode(scope) + "/" +
                                             mtx::client::utils::url_encode(kind) + "/" +
                                             mtx::client::utils::url_encode(ruleId) + "/actions",
@@ -444,7 +444,7 @@ Client::set_avatar_url(const std::string &avatar_url, ErrCallback callback)
     req.avatar_url = avatar_url;
 
     put<mtx::requests::AvatarUrl>(
-      "/client/r0/profile/" + mtx::client::utils::url_encode(user_id_.to_string()) + "/avatar_url",
+      "/client/v3/profile/" + mtx::client::utils::url_encode(user_id_.to_string()) + "/avatar_url",
       req,
       std::move(callback));
 }
@@ -456,7 +456,7 @@ Client::set_displayname(const std::string &displayname, ErrCallback callback)
     req.displayname = displayname;
 
     put<mtx::requests::DisplayName>(
-      "/client/r0/profile/" + mtx::client::utils::url_encode(user_id_.to_string()) + "/displayname",
+      "/client/v3/profile/" + mtx::client::utils::url_encode(user_id_.to_string()) + "/displayname",
       req,
       std::move(callback));
 }
@@ -465,7 +465,7 @@ void
 Client::get_profile(const std::string &user_id, Callback<mtx::responses::Profile> callback)
 {
     get<mtx::responses::Profile>(
-      "/client/r0/profile/" + mtx::client::utils::url_encode(user_id),
+      "/client/v3/profile/" + mtx::client::utils::url_encode(user_id),
       [callback = std::move(callback)](
         const mtx::responses::Profile &res, HeaderFields, RequestErr err) { callback(res, err); });
 }
@@ -474,7 +474,7 @@ void
 Client::get_avatar_url(const std::string &user_id, Callback<mtx::responses::AvatarUrl> callback)
 {
     get<mtx::responses::AvatarUrl>(
-      "/client/r0/profile/" + mtx::client::utils::url_encode(user_id) + "/avatar_url",
+      "/client/v3/profile/" + mtx::client::utils::url_encode(user_id) + "/avatar_url",
       [callback = std::move(callback)](const mtx::responses::AvatarUrl &res,
                                        HeaderFields,
                                        RequestErr err) { callback(res, err); });
@@ -484,7 +484,7 @@ void
 Client::get_tags(const std::string &room_id, Callback<mtx::events::account_data::Tags> cb)
 {
     get<mtx::events::account_data::Tags>(
-      "/client/r0/user/" + mtx::client::utils::url_encode(user_id_.to_string()) + "/rooms/" +
+      "/client/v3/user/" + mtx::client::utils::url_encode(user_id_.to_string()) + "/rooms/" +
         mtx::client::utils::url_encode(room_id) + "/tags",
       [cb = std::move(cb)](const mtx::events::account_data::Tags &res,
                            HeaderFields,
@@ -496,7 +496,7 @@ Client::put_tag(const std::string &room_id,
                 const mtx::events::account_data::Tag &tag,
                 ErrCallback cb)
 {
-    put<mtx::events::account_data::Tag>("/client/r0/user/" +
+    put<mtx::events::account_data::Tag>("/client/v3/user/" +
                                           mtx::client::utils::url_encode(user_id_.to_string()) +
                                           "/rooms/" + mtx::client::utils::url_encode(room_id) +
                                           "/tags/" + mtx::client::utils::url_encode(tag_name),
@@ -506,7 +506,7 @@ Client::put_tag(const std::string &room_id,
 void
 Client::delete_tag(const std::string &room_id, const std::string &tag_name, ErrCallback cb)
 {
-    delete_("/client/r0/user/" + mtx::client::utils::url_encode(user_id_.to_string()) + "/rooms/" +
+    delete_("/client/v3/user/" + mtx::client::utils::url_encode(user_id_.to_string()) + "/rooms/" +
               mtx::client::utils::url_encode(room_id) + "/tags/" +
               mtx::client::utils::url_encode(tag_name),
             std::move(cb));
@@ -517,7 +517,7 @@ Client::create_room(const mtx::requests::CreateRoom &room_options,
                     Callback<mtx::responses::CreateRoom> callback)
 {
     post<mtx::requests::CreateRoom, mtx::responses::CreateRoom>(
-      "/client/r0/createRoom", room_options, std::move(callback));
+      "/client/v3/createRoom", room_options, std::move(callback));
 }
 
 void
@@ -596,7 +596,7 @@ Client::invite_user(const std::string &room_id,
     req.user_id = user_id;
     req.reason  = reason;
 
-    auto api_path = "/client/r0/rooms/" + mtx::client::utils::url_encode(room_id) + "/invite";
+    auto api_path = "/client/v3/rooms/" + mtx::client::utils::url_encode(room_id) + "/invite";
 
     post<mtx::requests::RoomMembershipChange, mtx::responses::RoomInvite>(
       api_path, req, std::move(callback));
@@ -612,7 +612,7 @@ Client::kick_user(const std::string &room_id,
     req.user_id = user_id;
     req.reason  = reason;
 
-    auto api_path = "/client/r0/rooms/" + mtx::client::utils::url_encode(room_id) + "/kick";
+    auto api_path = "/client/v3/rooms/" + mtx::client::utils::url_encode(room_id) + "/kick";
 
     post<mtx::requests::RoomMembershipChange, mtx::responses::Empty>(
       api_path, req, std::move(callback));
@@ -628,7 +628,7 @@ Client::ban_user(const std::string &room_id,
     req.user_id = user_id;
     req.reason  = reason;
 
-    auto api_path = "/client/r0/rooms/" + mtx::client::utils::url_encode(room_id) + "/ban";
+    auto api_path = "/client/v3/rooms/" + mtx::client::utils::url_encode(room_id) + "/ban";
 
     post<mtx::requests::RoomMembershipChange, mtx::responses::Empty>(
       api_path, req, std::move(callback));
@@ -644,7 +644,7 @@ Client::unban_user(const std::string &room_id,
     req.user_id = user_id;
     req.reason  = reason;
 
-    auto api_path = "/client/r0/rooms/" + mtx::client::utils::url_encode(room_id) + "/unban";
+    auto api_path = "/client/v3/rooms/" + mtx::client::utils::url_encode(room_id) + "/unban";
 
     post<mtx::requests::RoomMembershipChange, mtx::responses::Empty>(
       api_path, req, std::move(callback));
@@ -670,7 +670,7 @@ Client::sync(const SyncOpts &opts, Callback<mtx::responses::Sync> callback)
     params.emplace("timeout", std::to_string(opts.timeout));
 
     get<mtx::responses::Sync>(
-      "/client/r0/sync?" + mtx::client::utils::query_params(params),
+      "/client/v3/sync?" + mtx::client::utils::query_params(params),
       [callback = std::move(callback)](
         const mtx::responses::Sync &res, HeaderFields, RequestErr err) { callback(res, err); });
 }
@@ -692,7 +692,7 @@ Client::upload(const std::string &data,
 {
     std::map<std::string, std::string> params = {{"filename", filename}};
 
-    const auto api_path = "/media/r0/upload?" + client::utils::query_params(params);
+    const auto api_path = "/media/v3/upload?" + client::utils::query_params(params);
     post<std::string, mtx::responses::ContentURI>(
       api_path, data, std::move(cb), true, content_type);
 }
@@ -701,7 +701,7 @@ std::string
 mtx::http::Client::mxc_to_download_url(const std::string &mxc_url)
 {
     auto url = mtx::client::utils::parse_mxc_url(mxc_url);
-    return endpoint_to_url("/media/r0/download/" + url.server + "/" + url.media_id);
+    return endpoint_to_url("/media/v3/download/" + url.server + "/" + url.media_id);
 }
 
 void
@@ -724,7 +724,7 @@ Client::get_thumbnail(const ThumbOpts &opts, Callback<std::string> callback, boo
     params.emplace("method", opts.method);
 
     auto mxc            = mtx::client::utils::parse_mxc_url(opts.mxc_url);
-    const auto api_path = "/media/r0/thumbnail/" + mxc.server + "/" + mxc.media_id + "?" +
+    const auto api_path = "/media/v3/thumbnail/" + mxc.server + "/" + mxc.media_id + "?" +
                           client::utils::query_params(params);
     get<std::string>(
       api_path,
@@ -758,7 +758,7 @@ Client::download(const std::string &server,
                                     const std::string &original_filename,
                                     RequestErr err)> callback)
 {
-    const auto api_path = "/media/r0/download/" + server + "/" + media_id;
+    const auto api_path = "/media/v3/download/" + server + "/" + media_id;
     get<std::string>(
       api_path,
       [callback =
@@ -791,7 +791,7 @@ Client::start_typing(const std::string &room_id, uint64_t timeout, ErrCallback c
 {
     using mtx::client::utils::url_encode;
     const auto api_path =
-      "/client/r0/rooms/" + url_encode(room_id) + "/typing/" + url_encode(user_id_.to_string());
+      "/client/v3/rooms/" + url_encode(room_id) + "/typing/" + url_encode(user_id_.to_string());
 
     mtx::requests::TypingNotification req;
     req.typing  = true;
@@ -805,7 +805,7 @@ Client::stop_typing(const std::string &room_id, ErrCallback callback)
 {
     using mtx::client::utils::url_encode;
     const auto api_path =
-      "/client/r0/rooms/" + url_encode(room_id) + "/typing/" + url_encode(user_id_.to_string());
+      "/client/v3/rooms/" + url_encode(room_id) + "/typing/" + url_encode(user_id_.to_string());
 
     mtx::requests::TypingNotification req;
     req.typing = false;
@@ -818,7 +818,7 @@ Client::presence_status(const std::string &user_id,
                         Callback<mtx::events::presence::Presence> callback)
 {
     using mtx::client::utils::url_encode;
-    const auto api_path = "/client/r0/presence/" + url_encode(user_id) + "/status";
+    const auto api_path = "/client/v3/presence/" + url_encode(user_id) + "/status";
     get<mtx::events::presence::Presence>(
       api_path,
       [callback = std::move(callback)](const mtx::events::presence::Presence &res,
@@ -831,7 +831,7 @@ Client::put_presence_status(mtx::presence::PresenceState state,
                             ErrCallback cb)
 {
     using mtx::client::utils::url_encode;
-    const auto api_path = "/client/r0/presence/" + url_encode(user_id_.to_string()) + "/status";
+    const auto api_path = "/client/v3/presence/" + url_encode(user_id_.to_string()) + "/status";
 
     nlohmann::json body;
     body["presence"] = mtx::presence::to_string(state);
@@ -848,7 +848,7 @@ Client::get_event(const std::string &room_id,
 {
     using namespace mtx::client::utils;
     const auto api_path =
-      "/client/r0/rooms/" + url_encode(room_id) + "/event/" + url_encode(event_id);
+      "/client/v3/rooms/" + url_encode(room_id) + "/event/" + url_encode(event_id);
 
     get<mtx::events::collections::TimelineEvent>(
       api_path,
@@ -875,7 +875,7 @@ Client::members(const std::string &room_id,
     if (not_membership)
         params.emplace("not_membership", events::state::membershipToString(*not_membership));
 
-    const auto api_path = "/client/r0/rooms/" + mtx::client::utils::url_encode(room_id) +
+    const auto api_path = "/client/v3/rooms/" + mtx::client::utils::url_encode(room_id) +
                           "/members?" + client::utils::query_params(params);
 
     get<mtx::responses::Members>(api_path,
@@ -900,7 +900,7 @@ Client::messages(const MessagesOpts &opts, Callback<mtx::responses::Messages> ca
     if (!opts.filter.empty())
         params.emplace("filter", opts.filter);
 
-    const auto api_path = "/client/r0/rooms/" + mtx::client::utils::url_encode(opts.room_id) +
+    const auto api_path = "/client/v3/rooms/" + mtx::client::utils::url_encode(opts.room_id) +
                           "/messages?" + client::utils::query_params(params);
 
     get<mtx::responses::Messages>(
@@ -913,7 +913,7 @@ void
 Client::upload_filter(const nlohmann::json &j, Callback<mtx::responses::FilterId> callback)
 {
     const auto api_path =
-      "/client/r0/user/" + mtx::client::utils::url_encode(user_id_.to_string()) + "/filter";
+      "/client/v3/user/" + mtx::client::utils::url_encode(user_id_.to_string()) + "/filter";
 
     post<nlohmann::json, mtx::responses::FilterId>(api_path, j, std::move(callback));
 }
@@ -925,7 +925,7 @@ Client::read_event(const std::string &room_id,
                    bool hidden)
 {
     const auto api_path =
-      "/client/r0/rooms/" + mtx::client::utils::url_encode(room_id) + "/read_markers";
+      "/client/v3/rooms/" + mtx::client::utils::url_encode(room_id) + "/read_markers";
 
     nlohmann::json body = {{"m.fully_read", event_id},
                            {hidden ? "org.matrix.msc2285.read.private" : "m.read", event_id}};
@@ -944,7 +944,7 @@ Client::redact_event(const std::string &room_id,
                      Callback<mtx::responses::EventId> callback,
                      const std::string &reason)
 {
-    const auto api_path = "/client/r0/rooms/" + mtx::client::utils::url_encode(room_id) +
+    const auto api_path = "/client/v3/rooms/" + mtx::client::utils::url_encode(room_id) +
                           "/redact/" + mtx::client::utils::url_encode(event_id) + "/" +
                           mtx::client::utils::url_encode(mtx::client::utils::random_token());
 
@@ -975,7 +975,7 @@ Client::registration(const std::string &user,
             request["auth"] = auth;
 
         post<nlohmann::json, mtx::responses::Register>(
-          "/client/r0/register",
+          "/client/v3/register",
           request,
           [this, cb, h](auto &r, RequestErr e) {
               if (e && e->status_code == 401) {
@@ -1000,7 +1000,7 @@ void
 Client::registration(Callback<mtx::responses::Register> cb)
 {
     post<nlohmann::json, mtx::responses::Register>(
-      "/client/r0/register", nlohmann::json::object(), std::move(cb), false);
+      "/client/v3/register", nlohmann::json::object(), std::move(cb), false);
 }
 
 void
@@ -1021,7 +1021,7 @@ void
 Client::register_email_request_token(const requests::RequestEmailToken &r,
                                      Callback<mtx::responses::RequestToken> cb)
 {
-    post("/client/r0/register/email/requestToken", r, std::move(cb));
+    post("/client/v3/register/email/requestToken", r, std::move(cb));
 }
 
 void
@@ -1029,7 +1029,7 @@ Client::register_username_available(const std::string &username,
                                     Callback<mtx::responses::Available> cb)
 {
     get<mtx::responses::Available>(
-      "/client/r0/register/available?username=" + mtx::client::utils::url_encode(username),
+      "/client/v3/register/available?username=" + mtx::client::utils::url_encode(username),
       [cb = std::move(cb)](const mtx::responses::Available &res, HeaderFields, RequestErr err) {
           cb(res, err);
       });
@@ -1039,20 +1039,20 @@ void
 Client::verify_email_request_token(const requests::RequestEmailToken &r,
                                    Callback<mtx::responses::RequestToken> cb)
 {
-    post("/client/r0/account/password/email/requestToken", r, std::move(cb));
+    post("/client/v3/account/password/email/requestToken", r, std::move(cb));
 }
 
 void
 Client::register_phone_request_token(const requests::RequestMSISDNToken &r,
                                      Callback<mtx::responses::RequestToken> cb)
 {
-    post("/client/r0/register/msisdn/requestToken", r, std::move(cb));
+    post("/client/v3/register/msisdn/requestToken", r, std::move(cb));
 }
 void
 Client::verify_phone_request_token(const requests::RequestMSISDNToken &r,
                                    Callback<mtx::responses::RequestToken> cb)
 {
-    post("/client/r0/account/password/msisdn/requestToken", r, std::move(cb));
+    post("/client/v3/account/password/msisdn/requestToken", r, std::move(cb));
 }
 
 void
@@ -1082,7 +1082,7 @@ Client::send_state_event(const std::string &room_id,
                          const nlohmann::json &payload,
                          Callback<mtx::responses::EventId> callback)
 {
-    const auto api_path = "/client/r0/rooms/" + mtx::client::utils::url_encode(room_id) +
+    const auto api_path = "/client/v3/rooms/" + mtx::client::utils::url_encode(room_id) +
                           "/state/" + mtx::client::utils::url_encode(event_type) + "/" +
                           mtx::client::utils::url_encode(state_key);
 
@@ -1095,7 +1095,7 @@ Client::send_to_device(const std::string &event_type,
                        const nlohmann::json &body,
                        ErrCallback callback)
 {
-    const auto api_path = "/client/r0/sendToDevice/" + mtx::client::utils::url_encode(event_type) +
+    const auto api_path = "/client/v3/sendToDevice/" + mtx::client::utils::url_encode(event_type) +
                           "/" + mtx::client::utils::url_encode(txn_id);
 
     put<nlohmann::json>(api_path, body, std::move(callback));
@@ -1104,7 +1104,7 @@ Client::send_to_device(const std::string &event_type,
 void
 Client::resolve_room_alias(const std::string &alias, Callback<mtx::responses::RoomId> cb)
 {
-    const auto api_path = "/client/r0/directory/room/" + mtx::client::utils::url_encode(alias);
+    const auto api_path = "/client/v3/directory/room/" + mtx::client::utils::url_encode(alias);
 
     get<mtx::responses::RoomId>(api_path,
                                 [cb = std::move(cb)](const mtx::responses::RoomId &res,
@@ -1114,7 +1114,7 @@ Client::resolve_room_alias(const std::string &alias, Callback<mtx::responses::Ro
 void
 Client::add_room_alias(const std::string &alias, const std::string &roomid, ErrCallback cb)
 {
-    const auto api_path = "/client/r0/directory/room/" + mtx::client::utils::url_encode(alias);
+    const auto api_path = "/client/v3/directory/room/" + mtx::client::utils::url_encode(alias);
     auto body           = nlohmann::json::object();
     body["room_id"]     = roomid;
     put<nlohmann::json>(api_path, body, std::move(cb));
@@ -1123,7 +1123,7 @@ Client::add_room_alias(const std::string &alias, const std::string &roomid, ErrC
 void
 Client::delete_room_alias(const std::string &alias, ErrCallback cb)
 {
-    delete_("/client/r0/directory/room/" + mtx::client::utils::url_encode(alias), std::move(cb));
+    delete_("/client/v3/directory/room/" + mtx::client::utils::url_encode(alias), std::move(cb));
 }
 
 void
@@ -1131,7 +1131,7 @@ Client::get_room_visibility(const std::string &room_id,
                             Callback<mtx::responses::PublicRoomVisibility> cb)
 {
     const auto api_path =
-      "/client/r0/directory/list/room/" + mtx::client::utils::url_encode(room_id);
+      "/client/v3/directory/list/room/" + mtx::client::utils::url_encode(room_id);
 
     get<mtx::responses::PublicRoomVisibility>(
       api_path,
@@ -1146,7 +1146,7 @@ Client::put_room_visibility(const std::string &room_id,
                             ErrCallback cb)
 {
     const auto api_path =
-      "/client/r0/directory/list/room/" + mtx::client::utils::url_encode(room_id);
+      "/client/v3/directory/list/room/" + mtx::client::utils::url_encode(room_id);
     put<mtx::requests::PublicRoomVisibility>(api_path, req, std::move(cb));
 }
 
@@ -1155,7 +1155,7 @@ Client::post_public_rooms(const mtx::requests::PublicRooms &req,
                           Callback<mtx::responses::PublicRooms> cb,
                           const std::string &server)
 {
-    std::string api_path = "/client/r0/publicRooms";
+    std::string api_path = "/client/v3/publicRooms";
 
     if (!server.empty())
         api_path += "?" + mtx::client::utils::query_params({{"server", server}});
@@ -1168,7 +1168,7 @@ Client::get_public_rooms(Callback<mtx::responses::PublicRooms> cb,
                          size_t limit,
                          const std::string &since)
 {
-    std::string api_path = "/client/r0/publicRooms";
+    std::string api_path = "/client/v3/publicRooms";
 
     std::map<std::string, std::string> params;
     if (!server.empty())
@@ -1224,7 +1224,7 @@ Client::get_hierarchy(const std::string &room_id,
 void
 Client::query_devices(Callback<mtx::responses::QueryDevices> cb)
 {
-    get<mtx::responses::QueryDevices>("/client/r0/devices",
+    get<mtx::responses::QueryDevices>("/client/v3/devices",
                                       [cb = std::move(cb)](const mtx::responses::QueryDevices &res,
                                                            HeaderFields,
                                                            RequestErr err) { cb(res, err); });
@@ -1233,7 +1233,7 @@ Client::query_devices(Callback<mtx::responses::QueryDevices> cb)
 void
 Client::get_device(const std::string &device_id, Callback<mtx::responses::Device> cb)
 {
-    get<mtx::responses::Device>("/client/r0/devices/" + mtx::client::utils::url_encode(device_id),
+    get<mtx::responses::Device>("/client/v3/devices/" + mtx::client::utils::url_encode(device_id),
                                 [cb = std::move(cb)](const mtx::responses::Device &res,
                                                      HeaderFields,
                                                      RequestErr err) { cb(res, err); });
@@ -1248,7 +1248,7 @@ Client::set_device_name(const std::string &device_id,
     req.display_name = display_name;
 
     put<mtx::requests::DeviceUpdate>(
-      "/client/r0/devices/" + mtx::client::utils::url_encode(device_id), req, std::move(callback));
+      "/client/v3/devices/" + mtx::client::utils::url_encode(device_id), req, std::move(callback));
 }
 
 void
@@ -1264,7 +1264,7 @@ Client::delete_device(const std::string &device_id, UIAHandler uia_handler, ErrC
             request["auth"] = auth;
 
         post<nlohmann::json, mtx::responses::Empty>(
-          "/client/r0/delete_devices", request, [cb, h](auto &, RequestErr e) {
+          "/client/v3/delete_devices", request, [cb, h](auto &, RequestErr e) {
               if (e && e->status_code == 401 && !e->matrix_error.unauthorized.flows.empty())
                   h.prompt(h, e->matrix_error.unauthorized);
               else
@@ -1290,7 +1290,7 @@ Client::delete_devices(const std::vector<std::string> &device_ids,
             request["auth"] = auth;
 
         post<nlohmann::json, mtx::responses::Empty>(
-          "/client/r0/delete_devices", request, [cb, h](auto &, RequestErr e) {
+          "/client/v3/delete_devices", request, [cb, h](auto &, RequestErr e) {
               if (e && e->status_code == 401 && !e->matrix_error.unauthorized.flows.empty())
                   h.prompt(h, e->matrix_error.unauthorized);
               else
@@ -1310,7 +1310,7 @@ Client::upload_keys(const mtx::requests::UploadKeys &req,
                     Callback<mtx::responses::UploadKeys> callback)
 {
     post<mtx::requests::UploadKeys, mtx::responses::UploadKeys>(
-      "/client/r0/keys/upload", req, std::move(callback));
+      "/client/v3/keys/upload", req, std::move(callback));
 }
 
 void
@@ -1351,7 +1351,7 @@ Client::query_keys(const mtx::requests::QueryKeys &req,
                    Callback<mtx::responses::QueryKeys> callback)
 {
     post<mtx::requests::QueryKeys, mtx::responses::QueryKeys>(
-      "/client/r0/keys/query", req, std::move(callback));
+      "/client/v3/keys/query", req, std::move(callback));
 }
 
 //! Claims one-time keys for use in pre-key messages.
@@ -1359,7 +1359,7 @@ void
 Client::claim_keys(const mtx::requests::ClaimKeys &req, Callback<mtx::responses::ClaimKeys> cb)
 {
     post<mtx::requests::ClaimKeys, mtx::responses::ClaimKeys>(
-      "/client/r0/keys/claim", req, std::move(cb));
+      "/client/v3/keys/claim", req, std::move(cb));
 }
 
 void
@@ -1376,7 +1376,7 @@ Client::key_changes(const std::string &from,
         params.emplace("to", to);
 
     get<mtx::responses::KeyChanges>(
-      "/client/r0/keys/changes?" + mtx::client::utils::query_params(params),
+      "/client/v3/keys/changes?" + mtx::client::utils::query_params(params),
       [callback = std::move(callback)](const mtx::responses::KeyChanges &res,
                                        HeaderFields,
                                        RequestErr err) { callback(res, err); });
@@ -1389,7 +1389,7 @@ void
 Client::backup_version(Callback<mtx::responses::backup::BackupVersion> cb)
 {
     get<mtx::responses::backup::BackupVersion>(
-      "/client/r0/room_keys/version",
+      "/client/v3/room_keys/version",
       [cb = std::move(cb)](const mtx::responses::backup::BackupVersion &res,
                            HeaderFields,
                            RequestErr err) { cb(res, err); });
@@ -1399,7 +1399,7 @@ Client::backup_version(const std::string &version,
                        Callback<mtx::responses::backup::BackupVersion> cb)
 {
     get<mtx::responses::backup::BackupVersion>(
-      "/client/r0/room_keys/version/" + mtx::client::utils::url_encode(version),
+      "/client/v3/room_keys/version/" + mtx::client::utils::url_encode(version),
       [cb = std::move(cb)](const mtx::responses::backup::BackupVersion &res,
                            HeaderFields,
                            RequestErr err) { cb(res, err); });
@@ -1410,7 +1410,7 @@ Client::update_backup_version(const std::string &version,
                               const mtx::responses::backup::BackupVersion &data,
                               ErrCallback cb)
 {
-    put<mtx::responses::backup::BackupVersion>("/client/r0/room_keys/version/" +
+    put<mtx::responses::backup::BackupVersion>("/client/v3/room_keys/version/" +
                                                  mtx::client::utils::url_encode(version),
                                                data,
                                                std::move(cb));
@@ -1424,13 +1424,13 @@ Client::post_backup_version(const std::string &algorithm,
     nlohmann::json req = {{"algorithm", algorithm},
                           {"auth_data", nlohmann::json::parse(auth_data)}};
     post<nlohmann::json, mtx::responses::Version>(
-      "/client/r0/room_keys/version", req, std::move(cb));
+      "/client/v3/room_keys/version", req, std::move(cb));
 }
 void
 Client::room_keys(const std::string &version, Callback<mtx::responses::backup::KeysBackup> cb)
 {
     get<mtx::responses::backup::KeysBackup>(
-      "/client/r0/room_keys/keys?" + mtx::client::utils::query_params({{"version", version}}),
+      "/client/v3/room_keys/keys?" + mtx::client::utils::query_params({{"version", version}}),
       [cb = std::move(cb)](const mtx::responses::backup::KeysBackup &res,
                            HeaderFields,
                            RequestErr err) { cb(res, err); });
@@ -1441,7 +1441,7 @@ Client::room_keys(const std::string &version,
                   Callback<mtx::responses::backup::RoomKeysBackup> cb)
 {
     get<mtx::responses::backup::RoomKeysBackup>(
-      "/client/r0/room_keys/keys/" + mtx::client::utils::url_encode(room_id) + "?" +
+      "/client/v3/room_keys/keys/" + mtx::client::utils::url_encode(room_id) + "?" +
         mtx::client::utils::query_params({{"version", version}}),
       [cb = std::move(cb)](const mtx::responses::backup::RoomKeysBackup &res,
                            HeaderFields,
@@ -1454,7 +1454,7 @@ Client::room_keys(const std::string &version,
                   Callback<mtx::responses::backup::SessionBackup> cb)
 {
     get<mtx::responses::backup::SessionBackup>(
-      "/client/r0/room_keys/keys/" + mtx::client::utils::url_encode(room_id) + "/" +
+      "/client/v3/room_keys/keys/" + mtx::client::utils::url_encode(room_id) + "/" +
         mtx::client::utils::url_encode(session_id) + "?" +
         mtx::client::utils::query_params({{"version", version}}),
       [cb = std::move(cb)](const mtx::responses::backup::SessionBackup &res,
@@ -1467,7 +1467,7 @@ Client::put_room_keys(const std::string &version,
                       const mtx::responses::backup::KeysBackup &keys,
                       ErrCallback cb)
 {
-    put("/client/r0/room_keys/keys?" + mtx::client::utils::query_params({{"version", version}}),
+    put("/client/v3/room_keys/keys?" + mtx::client::utils::query_params({{"version", version}}),
         keys,
         std::move(cb));
 }
@@ -1477,7 +1477,7 @@ Client::put_room_keys(const std::string &version,
                       const mtx::responses::backup::RoomKeysBackup &keys,
                       ErrCallback cb)
 {
-    put("/client/r0/room_keys/keys/" + mtx::client::utils::url_encode(room_id) + "?" +
+    put("/client/v3/room_keys/keys/" + mtx::client::utils::url_encode(room_id) + "?" +
           mtx::client::utils::query_params({{"version", version}}),
         keys,
         std::move(cb));
@@ -1489,7 +1489,7 @@ Client::put_room_keys(const std::string &version,
                       const mtx::responses::backup::SessionBackup &keys,
                       ErrCallback cb)
 {
-    put("/client/r0/room_keys/keys/" + mtx::client::utils::url_encode(room_id) + "/" +
+    put("/client/v3/room_keys/keys/" + mtx::client::utils::url_encode(room_id) + "/" +
           mtx::client::utils::url_encode(session_id) + "?" +
           mtx::client::utils::query_params({{"version", version}}),
         keys,
@@ -1502,7 +1502,7 @@ Client::secret_storage_secret(const std::string &secret_id,
                               Callback<mtx::secret_storage::Secret> cb)
 {
     get<mtx::secret_storage::Secret>(
-      "/client/r0/user/" + mtx::client::utils::url_encode(user_id_.to_string()) + "/account_data/" +
+      "/client/v3/user/" + mtx::client::utils::url_encode(user_id_.to_string()) + "/account_data/" +
         mtx::client::utils::url_encode(secret_id),
       [cb = std::move(cb)](const mtx::secret_storage::Secret &res, HeaderFields, RequestErr err) {
           cb(res, err);
@@ -1514,7 +1514,7 @@ Client::secret_storage_key(const std::string &key_id,
                            Callback<mtx::secret_storage::AesHmacSha2KeyDescription> cb)
 {
     get<mtx::secret_storage::AesHmacSha2KeyDescription>(
-      "/client/r0/user/" + mtx::client::utils::url_encode(user_id_.to_string()) +
+      "/client/v3/user/" + mtx::client::utils::url_encode(user_id_.to_string()) +
         "/account_data/m.secret_storage.key." + mtx::client::utils::url_encode(key_id),
       [cb = std::move(cb)](const mtx::secret_storage::AesHmacSha2KeyDescription &res,
                            HeaderFields,
@@ -1527,7 +1527,7 @@ Client::upload_secret_storage_secret(const std::string &secret_id,
                                      const mtx::secret_storage::Secret &secret,
                                      ErrCallback cb)
 {
-    put("/client/r0/user/" + mtx::client::utils::url_encode(user_id_.to_string()) +
+    put("/client/v3/user/" + mtx::client::utils::url_encode(user_id_.to_string()) +
           "/account_data/" + mtx::client::utils::url_encode(secret_id),
         secret,
         std::move(cb));
@@ -1539,7 +1539,7 @@ Client::upload_secret_storage_key(const std::string &key_id,
                                   const mtx::secret_storage::AesHmacSha2KeyDescription &desc,
                                   ErrCallback cb)
 {
-    put("/client/r0/user/" + mtx::client::utils::url_encode(user_id_.to_string()) +
+    put("/client/v3/user/" + mtx::client::utils::url_encode(user_id_.to_string()) +
           "/account_data/m.secret_storage.key." + mtx::client::utils::url_encode(key_id),
         desc,
         std::move(cb));
@@ -1549,7 +1549,7 @@ void
 Client::set_secret_storage_default_key(const std::string &key_id, ErrCallback cb)
 {
     nlohmann::json key = {{"key", key_id}};
-    put("/client/r0/user/" + mtx::client::utils::url_encode(user_id_.to_string()) +
+    put("/client/v3/user/" + mtx::client::utils::url_encode(user_id_.to_string()) +
           "/account_data/m.secret_storage.default_key",
         key,
         std::move(cb));
@@ -1567,7 +1567,7 @@ Client::enable_encryption(const std::string &room, Callback<mtx::responses::Even
 void
 Client::get_turn_server(Callback<mtx::responses::TurnServer> cb)
 {
-    get<mtx::responses::TurnServer>("/client/r0/voip/turnServer",
+    get<mtx::responses::TurnServer>("/client/v3/voip/turnServer",
                                     [cb = std::move(cb)](const mtx::responses::TurnServer &res,
                                                          HeaderFields,
                                                          RequestErr err) { cb(res, err); });
@@ -1577,7 +1577,7 @@ void
 Client::set_pusher(const mtx::requests::SetPusher &req, Callback<mtx::responses::Empty> cb)
 {
     post<mtx::requests::SetPusher, mtx::responses::Empty>(
-      "/client/r0/pushers/set", req, std::move(cb));
+      "/client/v3/pushers/set", req, std::move(cb));
 }
 
 // Template instantiations for the various send functions

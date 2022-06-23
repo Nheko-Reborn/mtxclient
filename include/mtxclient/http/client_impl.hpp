@@ -203,7 +203,7 @@ mtx::http::Client::send_room_message(const std::string &room_id,
     constexpr auto event_type = mtx::events::message_content_to_type<Payload>;
     static_assert(event_type != mtx::events::EventType::Unsupported);
 
-    const auto api_path = "/client/r0/rooms/" + mtx::client::utils::url_encode(room_id) + "/send/" +
+    const auto api_path = "/client/v3/rooms/" + mtx::client::utils::url_encode(room_id) + "/send/" +
                           mtx::events::to_string(event_type) + "/" +
                           mtx::client::utils::url_encode(txn_id);
 
@@ -220,7 +220,7 @@ mtx::http::Client::send_state_event(const std::string &room_id,
     constexpr auto event_type = mtx::events::state_content_to_type<Payload>;
     static_assert(event_type != mtx::events::EventType::Unsupported);
 
-    const auto api_path = "/client/r0/rooms/" + mtx::client::utils::url_encode(room_id) +
+    const auto api_path = "/client/v3/rooms/" + mtx::client::utils::url_encode(room_id) +
                           "/state/" + mtx::events::to_string(event_type) + "/" +
                           mtx::client::utils::url_encode(state_key);
 
@@ -239,7 +239,7 @@ mtx::http::Client::send_state_event(const std::string &room_id,
 void
 mtx::http::Client::get_state(const std::string &room_id, Callback<mtx::responses::StateEvents> cb)
 {
-    const auto api_path = "/client/r0/rooms/" + mtx::client::utils::url_encode(room_id) + "/state";
+    const auto api_path = "/client/v3/rooms/" + mtx::client::utils::url_encode(room_id) + "/state";
 
     get<mtx::responses::StateEvents>(api_path,
                                      [cb = std::move(cb)](const mtx::responses::StateEvents &res,
@@ -254,7 +254,7 @@ mtx::http::Client::get_state_event(const std::string &room_id,
                                    const std::string &state_key,
                                    Callback<Payload> cb)
 {
-    const auto api_path = "/client/r0/rooms/" + mtx::client::utils::url_encode(room_id) +
+    const auto api_path = "/client/v3/rooms/" + mtx::client::utils::url_encode(room_id) +
                           "/state/" + mtx::client::utils::url_encode(type) + "/" +
                           mtx::client::utils::url_encode(state_key);
 
@@ -280,7 +280,7 @@ mtx::http::Client::put_room_account_data(const std::string &room_id,
                                          const Payload &payload,
                                          ErrCallback cb)
 {
-    const auto api_path = "/client/r0/user/" +
+    const auto api_path = "/client/v3/user/" +
                           mtx::client::utils::url_encode(user_id_.to_string()) + "/rooms/" +
                           mtx::client::utils::url_encode(room_id) + "/account_data/" + type;
     put<Payload>(api_path, payload, cb);
@@ -299,7 +299,7 @@ template<class Payload>
 [[gnu::used, gnu::retain]] void
 mtx::http::Client::put_account_data(const std::string &type, const Payload &payload, ErrCallback cb)
 {
-    const auto api_path = "/client/r0/user/" +
+    const auto api_path = "/client/v3/user/" +
                           mtx::client::utils::url_encode(user_id_.to_string()) + "/account_data/" +
                           type;
     put<Payload>(api_path, payload, cb);
@@ -318,7 +318,7 @@ mtx::http::Client::get_room_account_data(const std::string &room_id,
                                          const std::string &type,
                                          Callback<Payload> cb)
 {
-    const auto api_path = "/client/r0/user/" +
+    const auto api_path = "/client/v3/user/" +
                           mtx::client::utils::url_encode(user_id_.to_string()) + "/rooms/" +
                           mtx::client::utils::url_encode(room_id) + "/account_data/" + type;
     get<Payload>(api_path,
@@ -336,7 +336,7 @@ template<class Payload>
 [[gnu::used, gnu::retain]] void
 mtx::http::Client::get_account_data(const std::string &type, Callback<Payload> cb)
 {
-    const auto api_path = "/client/r0/user/" +
+    const auto api_path = "/client/v3/user/" +
                           mtx::client::utils::url_encode(user_id_.to_string()) + "/account_data/" +
                           type;
     get<Payload>(api_path,
