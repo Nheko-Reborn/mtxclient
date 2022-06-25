@@ -108,7 +108,6 @@ src = [
 	'lib/structs/responses/crypto.cpp',
 	'lib/structs/responses/device.cpp',
 	'lib/structs/responses/empty.cpp',
-	'lib/structs/responses/groups.cpp',
 	'lib/structs/responses/login.cpp',
 	'lib/structs/responses/media.cpp',
 	'lib/structs/responses/members.cpp',
