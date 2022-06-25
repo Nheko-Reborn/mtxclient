@@ -56,15 +56,16 @@ TEST(Basic, Shutdown)
     std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
 
     SyncOpts opts;
-    opts.timeout = 40'000; // milliseconds
+    opts.timeout = 1'000; // milliseconds
     client->sync(opts, [client, &opts](const mtx::responses::Sync &res, RequestErr err) {
         check_error(err);
 
-        opts.since = res.next_batch;
+        opts.since   = res.next_batch;
+        opts.timeout = 60'000; // milliseconds
         client->sync(opts, [](const mtx::responses::Sync &, RequestErr) {});
     });
 
-    std::this_thread::sleep_for(std::chrono::seconds(1));
+    std::this_thread::sleep_for(std::chrono::seconds(2));
 
     // Force terminate all active connections.
     client->shutdown();
