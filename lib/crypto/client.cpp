@@ -937,22 +937,18 @@ mtx::crypto::encrypt_exported_sessions(const mtx::crypto::ExportedSessionKeys &k
 
     // Format of the output buffer: (0x01 + salt + IV + number of rounds + ciphertext +
     // hmac-sha-256)
-    BinaryBuf output{0x01};
-    output.insert(
-      output.end(), std::make_move_iterator(salt.begin()), std::make_move_iterator(salt.end()));
-    output.insert(
-      output.end(), std::make_move_iterator(nonce.begin()), std::make_move_iterator(nonce.end()));
+    BinaryBuf output{
+      0x01,
+    };
+    output.insert(output.end(), salt.begin(), salt.end());
+    output.insert(output.end(), nonce.begin(), nonce.end());
     output.insert(output.end(), &iterationsArr[0], &iterationsArr[4]);
-    output.insert(output.end(),
-                  std::make_move_iterator(ciphertext.begin()),
-                  std::make_move_iterator(ciphertext.end()));
+    output.insert(output.end(), ciphertext.begin(), ciphertext.end());
 
     // Need to hmac-sha256 our string so far, and then use that to finish making the output.
     auto hmacSha256 = mtx::crypto::HMAC_SHA256(hmac256, output);
 
-    output.insert(output.end(),
-                  std::make_move_iterator(hmacSha256.begin()),
-                  std::make_move_iterator(hmacSha256.end()));
+    output.insert(output.end(), hmacSha256.begin(), hmacSha256.end());
     auto encrypted = std::string(output.begin(), output.end());
 
     return encrypted;
