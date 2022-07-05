@@ -1127,6 +1127,18 @@ Client::delete_room_alias(const std::string &alias, ErrCallback cb)
 }
 
 void
+Client::list_room_aliases(const std::string &room_id, Callback<mtx::responses::Aliases> cb)
+{
+    const auto api_path =
+      "/client/v3/rooms/" + mtx::client::utils::url_encode(room_id) + "/aliases";
+
+    get<mtx::responses::Aliases>(api_path,
+                                 [cb = std::move(cb)](const mtx::responses::Aliases &res,
+                                                      HeaderFields,
+                                                      RequestErr err) { cb(res, err); });
+}
+
+void
 Client::get_room_visibility(const std::string &room_id,
                             Callback<mtx::responses::PublicRoomVisibility> cb)
 {

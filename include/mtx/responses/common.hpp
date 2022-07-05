@@ -95,6 +95,16 @@ struct RequestToken
 void
 from_json(const nlohmann::json &obj, RequestToken &response);
 
+//! A simple list of aliases
+struct Aliases
+{
+    //! The aliases
+    std::vector<std::string> aliases;
+};
+
+void
+from_json(const nlohmann::json &obj, Aliases &response);
+
 //! Different helper for parsing responses.
 namespace utils {
 //! Multiple account_data events.

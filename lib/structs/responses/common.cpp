@@ -73,6 +73,12 @@ from_json(const nlohmann::json &obj, RequestToken &r)
         r.submit_url = obj.at("submit_url").get<std::string>();
 }
 
+void
+from_json(const nlohmann::json &obj, Aliases &response)
+{
+    response.aliases = obj.at("aliases").get<std::vector<std::string>>();
+}
+
 namespace utils {
 
 void
@@ -262,7 +268,7 @@ parse_timeline_events(const json &events,
             }
             case events::EventType::RoomAliases: {
                 try {
-                    container.emplace_back(events::StateEvent<Aliases>(e));
+                    container.emplace_back(events::StateEvent<events::state::Aliases>(e));
                 } catch (json::exception &err) {
                     log_error(err, e);
                 }
@@ -884,7 +890,7 @@ parse_state_events(const json &events,
             switch (type) {
             case events::EventType::RoomAliases: {
                 try {
-                    container.emplace_back(events::StateEvent<Aliases>(e));
+                    container.emplace_back(events::StateEvent<events::state::Aliases>(e));
                 } catch (json::exception &err) {
                     log_error(err, e);
                 }
@@ -1122,7 +1128,7 @@ parse_stripped_events(const json &events,
             switch (type) {
             case events::EventType::RoomAliases: {
                 try {
-                    container.emplace_back(events::StrippedEvent<Aliases>(e));
+                    container.emplace_back(events::StrippedEvent<mtx::events::state::Aliases>(e));
                 } catch (json::exception &err) {
                     log_error(err, e);
                 }

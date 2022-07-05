@@ -51,6 +51,7 @@ struct PushersData;
 struct SetPushers;
 }
 namespace responses {
+struct Aliases;
 struct Available;
 struct AvatarUrl;
 struct ClaimKeys;
@@ -595,6 +596,8 @@ public:
     void add_room_alias(const std::string &alias, const std::string &roomid, ErrCallback cb);
     //! Delete an alias from a room.
     void delete_room_alias(const std::string &alias, ErrCallback cb);
+    //! List the local aliases on the users server.
+    void list_room_aliases(const std::string &room_id, Callback<mtx::responses::Aliases> cb);
 
     //! Gets the visibility of a given room on the server's public room directory.
     void get_room_visibility(const std::string &room_id,
