@@ -77,6 +77,13 @@ getEventType(const std::string &type)
     else if (type == "m.sticker")
         return EventType::Sticker;
 
+    else if (type == "m.policy.rule.user")
+        return EventType::PolicyRuleUser;
+    else if (type == "m.policy.rule.room")
+        return EventType::PolicyRuleRoom;
+    else if (type == "m.policy.rule.server")
+        return EventType::PolicyRuleServer;
+
     else if (type == "m.space.child")
         return EventType::SpaceChild;
     else if (type == "m.space.parent")
@@ -190,6 +197,13 @@ to_string(EventType type)
         return "m.room.tombstone";
     case EventType::Sticker:
         return "m.sticker";
+
+    case EventType::PolicyRuleUser:
+        return "m.policy.rule.user";
+    case EventType::PolicyRuleRoom:
+        return "m.policy.rule.room";
+    case EventType::PolicyRuleServer:
+        return "m.policy.rule.server";
 
     case EventType::SpaceChild:
         return "m.space.child";

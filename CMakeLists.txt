@@ -213,6 +213,7 @@ target_sources(matrix_client
 	lib/structs/events/member.cpp
 	lib/structs/events/name.cpp
 	lib/structs/events/pinned_events.cpp
+	lib/structs/events/policy_rules.cpp
 	lib/structs/events/power_levels.cpp
 	lib/structs/events/presence.cpp
 	lib/structs/events/reaction.cpp

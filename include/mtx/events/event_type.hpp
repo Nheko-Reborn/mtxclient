@@ -88,6 +88,13 @@ enum class EventType
     //! im.vector.modular.widgets
     VectorWidget,
 
+    //! m.policy.rule.user
+    PolicyRuleUser,
+    //! m.policy.rule.room
+    PolicyRuleRoom,
+    //! m.policy.rule.server
+    PolicyRuleServer,
+
     // m.space.child
     SpaceChild,
     // m.space.parent

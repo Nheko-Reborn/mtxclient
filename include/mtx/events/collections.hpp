@@ -24,6 +24,7 @@
 #include "mtx/events/name.hpp"
 #include "mtx/events/nheko_extensions/hidden_events.hpp"
 #include "mtx/events/pinned_events.hpp"
+#include "mtx/events/policy_rules.hpp"
 #include "mtx/events/power_levels.hpp"
 #include "mtx/events/presence.hpp"
 #include "mtx/events/reaction.hpp"
@@ -83,26 +84,30 @@ using RoomAccountDataEvents = std::variant<
   mtx::events::AccountDataEvent<mtx::events::Unknown>>;
 
 //! Collection of @p StateEvent only.
-using StateEvents = std::variant<mtx::events::StateEvent<mtx::events::state::Aliases>,
-                                 mtx::events::StateEvent<mtx::events::state::Avatar>,
-                                 mtx::events::StateEvent<mtx::events::state::CanonicalAlias>,
-                                 mtx::events::StateEvent<mtx::events::state::Create>,
-                                 mtx::events::StateEvent<mtx::events::state::Encryption>,
-                                 mtx::events::StateEvent<mtx::events::state::GuestAccess>,
-                                 mtx::events::StateEvent<mtx::events::state::HistoryVisibility>,
-                                 mtx::events::StateEvent<mtx::events::state::JoinRules>,
-                                 mtx::events::StateEvent<mtx::events::state::Member>,
-                                 mtx::events::StateEvent<mtx::events::state::Name>,
-                                 mtx::events::StateEvent<mtx::events::state::PinnedEvents>,
-                                 mtx::events::StateEvent<mtx::events::state::PowerLevels>,
-                                 mtx::events::StateEvent<mtx::events::state::space::Child>,
-                                 mtx::events::StateEvent<mtx::events::state::space::Parent>,
-                                 mtx::events::StateEvent<mtx::events::state::Tombstone>,
-                                 mtx::events::StateEvent<mtx::events::state::Topic>,
-                                 mtx::events::StateEvent<mtx::events::state::Widget>,
-                                 mtx::events::StateEvent<mtx::events::msg::Redacted>,
-                                 mtx::events::StateEvent<mtx::events::msc2545::ImagePack>,
-                                 mtx::events::StateEvent<mtx::events::Unknown>>;
+using StateEvents =
+  std::variant<mtx::events::StateEvent<mtx::events::state::Aliases>,
+               mtx::events::StateEvent<mtx::events::state::Avatar>,
+               mtx::events::StateEvent<mtx::events::state::CanonicalAlias>,
+               mtx::events::StateEvent<mtx::events::state::Create>,
+               mtx::events::StateEvent<mtx::events::state::Encryption>,
+               mtx::events::StateEvent<mtx::events::state::GuestAccess>,
+               mtx::events::StateEvent<mtx::events::state::HistoryVisibility>,
+               mtx::events::StateEvent<mtx::events::state::JoinRules>,
+               mtx::events::StateEvent<mtx::events::state::Member>,
+               mtx::events::StateEvent<mtx::events::state::Name>,
+               mtx::events::StateEvent<mtx::events::state::PinnedEvents>,
+               mtx::events::StateEvent<mtx::events::state::PowerLevels>,
+               mtx::events::StateEvent<mtx::events::state::policy_rule::UserRule>,
+               mtx::events::StateEvent<mtx::events::state::policy_rule::RoomRule>,
+               mtx::events::StateEvent<mtx::events::state::policy_rule::ServerRule>,
+               mtx::events::StateEvent<mtx::events::state::space::Child>,
+               mtx::events::StateEvent<mtx::events::state::space::Parent>,
+               mtx::events::StateEvent<mtx::events::state::Tombstone>,
+               mtx::events::StateEvent<mtx::events::state::Topic>,
+               mtx::events::StateEvent<mtx::events::state::Widget>,
+               mtx::events::StateEvent<mtx::events::msg::Redacted>,
+               mtx::events::StateEvent<mtx::events::msc2545::ImagePack>,
+               mtx::events::StateEvent<mtx::events::Unknown>>;
 
 //! Collection of @p StrippedEvent only.
 using StrippedEvents =
@@ -118,6 +123,9 @@ using StrippedEvents =
                mtx::events::StrippedEvent<mtx::events::state::Name>,
                mtx::events::StrippedEvent<mtx::events::state::PinnedEvents>,
                mtx::events::StrippedEvent<mtx::events::state::PowerLevels>,
+               mtx::events::StrippedEvent<mtx::events::state::policy_rule::UserRule>,
+               mtx::events::StrippedEvent<mtx::events::state::policy_rule::RoomRule>,
+               mtx::events::StrippedEvent<mtx::events::state::policy_rule::ServerRule>,
                mtx::events::StrippedEvent<mtx::events::state::space::Child>,
                mtx::events::StrippedEvent<mtx::events::state::space::Parent>,
                mtx::events::StrippedEvent<mtx::events::state::Tombstone>,
@@ -141,6 +149,9 @@ using TimelineEvents =
                mtx::events::StateEvent<mtx::events::state::Name>,
                mtx::events::StateEvent<mtx::events::state::PinnedEvents>,
                mtx::events::StateEvent<mtx::events::state::PowerLevels>,
+               mtx::events::StateEvent<mtx::events::state::policy_rule::UserRule>,
+               mtx::events::StateEvent<mtx::events::state::policy_rule::RoomRule>,
+               mtx::events::StateEvent<mtx::events::state::policy_rule::ServerRule>,
                mtx::events::StateEvent<mtx::events::state::space::Child>,
                mtx::events::StateEvent<mtx::events::state::space::Parent>,
                mtx::events::StateEvent<mtx::events::state::Tombstone>,
@@ -271,6 +282,15 @@ constexpr inline EventType state_content_to_type<mtx::events::state::Name> = Eve
 template<>
 constexpr inline EventType state_content_to_type<mtx::events::state::PinnedEvents> =
   EventType::RoomPinnedEvents;
+template<>
+constexpr inline EventType state_content_to_type<mtx::events::state::policy_rule::UserRule> =
+  EventType::PolicyRuleUser;
+template<>
+constexpr inline EventType state_content_to_type<mtx::events::state::policy_rule::RoomRule> =
+  EventType::PolicyRuleRoom;
+template<>
+constexpr inline EventType state_content_to_type<mtx::events::state::policy_rule::ServerRule> =
+  EventType::PolicyRuleServer;
 template<>
 constexpr inline EventType state_content_to_type<mtx::events::state::PowerLevels> =
   EventType::RoomPowerLevels;

@@ -26,6 +26,10 @@ MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::StateEvent, mtx::events::state::Pow
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::StateEvent, mtx::events::state::Tombstone)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::StateEvent, mtx::events::state::Topic)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::StateEvent, mtx::events::state::Widget)
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::StateEvent, mtx::events::state::policy_rule::UserRule)
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::StateEvent, mtx::events::state::policy_rule::RoomRule)
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::StateEvent,
+                                     mtx::events::state::policy_rule::ServerRule)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::StateEvent, mtx::events::state::space::Child)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::StateEvent, mtx::events::state::space::Parent)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::StateEvent, mtx::events::msg::Redacted)
@@ -72,6 +76,12 @@ MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::StrippedEvent, mtx::events::state::
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::StrippedEvent, mtx::events::state::Tombstone)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::StrippedEvent, mtx::events::state::Topic)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::StrippedEvent, mtx::events::state::Widget)
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::StrippedEvent,
+                                     mtx::events::state::policy_rule::UserRule)
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::StrippedEvent,
+                                     mtx::events::state::policy_rule::RoomRule)
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::StrippedEvent,
+                                     mtx::events::state::policy_rule::ServerRule)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::StrippedEvent, mtx::events::state::space::Child)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::StrippedEvent, mtx::events::state::space::Parent)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::StrippedEvent, msg::Redacted)
@@ -203,6 +213,18 @@ from_json(const nlohmann::json &obj, TimelineEvent &e)
     }
     case events::EventType::RoomPinnedEvents: {
         e.data = events::StateEvent<PinnedEvents>(obj);
+        break;
+    }
+    case events::EventType::PolicyRuleUser: {
+        e.data = events::StateEvent<policy_rule::UserRule>(obj);
+        break;
+    }
+    case events::EventType::PolicyRuleRoom: {
+        e.data = events::StateEvent<policy_rule::RoomRule>(obj);
+        break;
+    }
+    case events::EventType::PolicyRuleServer: {
+        e.data = events::StateEvent<policy_rule::ServerRule>(obj);
         break;
     }
     case events::EventType::SpaceChild: {

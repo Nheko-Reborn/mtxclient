@@ -110,6 +110,9 @@ TEST(Events, Conversions)
     EXPECT_EQ("m.room.tombstone", ns::to_string(ns::EventType::RoomTombstone));
     EXPECT_EQ("m.room.redaction", ns::to_string(ns::EventType::RoomRedaction));
     EXPECT_EQ("m.room.pinned_events", ns::to_string(ns::EventType::RoomPinnedEvents));
+    EXPECT_EQ("m.policy.rule.user", ns::to_string(ns::EventType::PolicyRuleUser));
+    EXPECT_EQ("m.policy.rule.room", ns::to_string(ns::EventType::PolicyRuleRoom));
+    EXPECT_EQ("m.policy.rule.server", ns::to_string(ns::EventType::PolicyRuleServer));
     EXPECT_EQ("m.space.child", ns::to_string(ns::EventType::SpaceChild));
     EXPECT_EQ("m.space.parent", ns::to_string(ns::EventType::SpaceParent));
     EXPECT_EQ("m.tag", ns::to_string(ns::EventType::Tag));
@@ -805,6 +808,96 @@ TEST(StateEvents, Topic)
     EXPECT_EQ(event.unsigned_data.age, 37);
     EXPECT_EQ(event.state_key, "");
     EXPECT_EQ(event.content.topic, "Test topic");
+}
+
+TEST(StateEvents, PolicyRuleUser)
+{
+    json data = R"(
+{
+    "content": {
+        "entity": "@alice*:example.org",
+        "reason": "undesirable behaviour",
+        "recommendation": "m.ban"
+    },
+    "event_id": "$143273582443PhrSn:example.org",
+    "origin_server_ts": 1432735824653,
+    "room_id": "!jEsUZKDJdhlrceRyVU:example.org",
+    "sender": "@example:example.org",
+    "state_key": "rule:@alice*:example.org",
+    "type": "m.policy.rule.user",
+    "unsigned": {
+        "age": 1234
+    }
+}
+        )"_json;
+
+    auto event = data.get<ns::StateEvent<ns::state::policy_rule::UserRule>>();
+
+    EXPECT_EQ(event.type, ns::EventType::PolicyRuleUser);
+    EXPECT_EQ(event.event_id, "$143273582443PhrSn:example.org");
+    EXPECT_EQ(event.content.entity, "@alice*:example.org");
+    EXPECT_EQ(event.content.reason, "undesirable behaviour");
+    EXPECT_EQ(event.content.recommendation, ns::state::policy_rule::recommendation::ban);
+}
+
+TEST(StateEvents, PolicyRuleRoom)
+{
+    json data = R"(
+{
+    "content": {
+        "entity": "#*:example.org",
+        "reason": "undesirable content",
+        "recommendation": "m.ban"
+    },
+    "event_id": "$143273582443PhrSn:example.org",
+    "origin_server_ts": 1432735824653,
+    "room_id": "!jEsUZKDJdhlrceRyVU:example.org",
+    "sender": "@example:example.org",
+    "state_key": "rule:@alice*:example.org",
+    "type": "m.policy.rule.user",
+    "unsigned": {
+        "age": 1234
+    }
+}
+        )"_json;
+
+    auto event = data.get<ns::StateEvent<ns::state::policy_rule::RoomRule>>();
+
+    EXPECT_EQ(event.type, ns::EventType::PolicyRuleRoom);
+    EXPECT_EQ(event.event_id, "$143273582443PhrSn:example.org");
+    EXPECT_EQ(event.content.entity, "#*:example.org");
+    EXPECT_EQ(event.content.reason, "undesirable behaviour");
+    EXPECT_EQ(event.content.recommendation, ns::state::policy_rule::recommendation::ban);
+}
+
+TEST(StateEvents, PolicyRuleServer)
+{
+    json data = R"(
+{
+    "content": {
+        "entity": "*.example.org",
+        "reason": "undesirable engagement",
+        "recommendation": "m.ban"
+    },
+    "event_id": "$143273582443PhrSn:example.org",
+    "origin_server_ts": 1432735824653,
+    "room_id": "!jEsUZKDJdhlrceRyVU:example.org",
+    "sender": "@example:example.org",
+    "state_key": "rule:@alice*:example.org",
+    "type": "m.policy.rule.user",
+    "unsigned": {
+        "age": 1234
+    }
+}
+        )"_json;
+
+    auto event = data.get<ns::StateEvent<ns::state::policy_rule::ServerRule>>();
+
+    EXPECT_EQ(event.type, ns::EventType::PolicyRuleServer);
+    EXPECT_EQ(event.event_id, "$143273582443PhrSn:example.org");
+    EXPECT_EQ(event.content.entity, "*.example.org");
+    EXPECT_EQ(event.content.reason, "undesirable behaviour");
+    EXPECT_EQ(event.content.recommendation, ns::state::policy_rule::recommendation::ban);
 }
 
 TEST(StateEvents, SpaceChild)
