@@ -6,9 +6,9 @@ namespace mtx::events::state::policy_rule {
 void
 from_json(const nlohmann::json &obj, Rule &rule)
 {
-    rule.entity         = obj.at("entity").get<std::string>();
-    rule.recommendation = obj.at("recommendation").get<std::string>();
-    rule.reason         = obj.at("reason").get<std::string>();
+    rule.entity         = obj.value("entity", "");
+    rule.recommendation = obj.value("recommendation", "");
+    rule.reason         = obj.value("reason", "");
 }
 
 void
