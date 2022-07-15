@@ -14,19 +14,44 @@
 
 namespace mtx {
 namespace events {
-namespace msg {
+namespace voip {
+
+//! Universal RTC Session Description structure compatible with the WebRTC API
+struct RTCSessionDescriptionInit
+{
+    enum class Type
+    {
+        Answer,
+        Offer,
+
+    };
+    //! The SDP text of the session description.
+    std::string sdp;
+    //! The type of session description.
+    Type type;
+};
+
+void
+from_json(const nlohmann::json &obj, RTCSessionDescriptionInit &content);
+
+void
+to_json(nlohmann::json &obj, const RTCSessionDescriptionInit &content);
 
 //! Content for the `m.call.invite` event.
 struct CallInvite
 {
     //! A unique identifier for the call.
     std::string call_id;
-    //! The SDP text of the session description.
-    std::string sdp;
+    //! A unique identifier for the client participating in the event.
+    std::string party_id;
+    //! The session description object
+    RTCSessionDescriptionInit offer;
     //! The version of the VoIP specification this message adheres to.
     std::string version;
-    //! The time in milliseconds that the invite is valid for.
-    uint32_t lifetime;
+    //! The time in milliseconds that the invite is valid for. Recommended 90000ms
+    uint32_t lifetime = 90000;
+    //! The ID of the user that the call is being placed to. See MSC2746.
+    std::string invitee;
 };
 
 void
@@ -50,6 +75,8 @@ struct CallCandidates
 
     //! The ID of the call this event relates to.
     std::string call_id;
+    //! A unique identifier for the client participating in the event.
+    std::string party_id;
     //! Array of objects describing the candidates.
     std::vector<Candidate> candidates;
     //! The version of the VoIP specification this message adheres to.
@@ -67,10 +94,12 @@ struct CallAnswer
 {
     //! The ID of the call this event relates to.
     std::string call_id;
-    //! The SDP text of the session description.
-    std::string sdp;
+    //! A unique identifier for the client participating in the event.
+    std::string party_id;
     //! The version of the VoIP specification this message adheres to.
     std::string version;
+    //! The session description object
+    RTCSessionDescriptionInit answer;
 };
 
 void
@@ -86,15 +115,22 @@ struct CallHangUp
     {
         ICEFailed,
         InviteTimeOut,
+        ICETimeOut,
+        UserHangUp,
+        UserMediaFailed,
+        UserBusy,
+        UnknownError,
         User
     };
 
     //! The ID of the call this event relates to.
     std::string call_id;
+    //! A unique identifier for the client participating in the event.
+    std::string party_id;
     //! The version of the VoIP specification this message adheres to.
     std::string version;
     //! The reason for the call hang up.
-    Reason reason = Reason::User;
+    Reason reason = Reason::UserHangUp;
 };
 
 void
@@ -103,6 +139,61 @@ from_json(const nlohmann::json &obj, CallHangUp &content);
 void
 to_json(nlohmann::json &obj, const CallHangUp &content);
 
-} // namespace mtx::events::msg
+//! Content for the `m.call.select_answer` event. See MSC2746.
+struct CallSelectAnswer
+{
+    //! The ID of the call this event relates to.
+    std::string call_id;
+    //! A unique identifier for the client participating in the event.
+    std::string party_id;
+    //! The version of the VoIP specification this message adheres to.
+    std::string version;
+    //! The ID of the selected party.
+    std::string selected_party_id;
+};
+
+void
+from_json(const nlohmann::json &obj, CallSelectAnswer &content);
+
+void
+to_json(nlohmann::json &obj, const CallSelectAnswer &content);
+
+//! Content for the `m.call.reject` event. See MSC2746.
+struct CallReject
+{
+    //! The ID of the call this event relates to.
+    std::string call_id;
+    //! A unique identifier for the client participating in the event.
+    std::string party_id;
+    //! The version of the VoIP specification this message adheres to.
+    std::string version;
+};
+
+void
+from_json(const nlohmann::json &obj, CallReject &content);
+
+void
+to_json(nlohmann::json &obj, const CallReject &content);
+
+//! Content for the `m.call.negotiate` event. See MSC2746.
+struct CallNegotiate
+{
+    //! The ID of the call this event relates to.
+    std::string call_id;
+    //! A unique identifier for the client participating in the event.
+    std::string party_id;
+    //! The time in milliseconds that the negotiation is valid for. Recommended 90000ms.
+    uint32_t lifetime = 90000;
+    //! The session description object
+    RTCSessionDescriptionInit description;
+};
+
+void
+from_json(const nlohmann::json &obj, CallNegotiate &content);
+
+void
+to_json(nlohmann::json &obj, const CallNegotiate &content);
+
+} // namespace mtx::events::voip
 }
 }

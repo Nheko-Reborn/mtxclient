@@ -447,6 +447,12 @@ if(BUILD_LIB_TESTS)
 		GTest::GTest
 		GTest::Main)
 
+	add_executable(voip tests/voip.cpp)
+	target_link_libraries(voip
+		MatrixClient::MatrixClient
+		GTest::GTest
+		GTest::Main)
+
 	add_executable(responses tests/responses.cpp)
 	target_link_libraries(responses
 		MatrixClient::MatrixClient
@@ -483,6 +489,7 @@ if(BUILD_LIB_TESTS)
 	add_test(CryptoStructs crypto)
 	add_test(StateEvents events)
 	add_test(RoomEvents messages)
+	add_test(VoIPEvents voip)
 	add_test(Responses responses)
 	add_test(Requests requests)
 endif()

@@ -55,10 +55,13 @@ MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::RoomEvent, mtx::events::msg::KeyVer
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::RoomEvent, mtx::events::msg::KeyVerificationCancel)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::RoomEvent, mtx::events::msg::KeyVerificationKey)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::RoomEvent, mtx::events::msg::KeyVerificationMac)
-MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::RoomEvent, mtx::events::msg::CallInvite)
-MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::RoomEvent, mtx::events::msg::CallCandidates)
-MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::RoomEvent, mtx::events::msg::CallAnswer)
-MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::RoomEvent, mtx::events::msg::CallHangUp)
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::RoomEvent, mtx::events::voip::CallInvite)
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::RoomEvent, mtx::events::voip::CallCandidates)
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::RoomEvent, mtx::events::voip::CallAnswer)
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::RoomEvent, mtx::events::voip::CallHangUp)
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::RoomEvent, mtx::events::voip::CallSelectAnswer)
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::RoomEvent, mtx::events::voip::CallReject)
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::RoomEvent, mtx::events::voip::CallNegotiate)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::RoomEvent, Unknown)
 
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::StrippedEvent, mtx::events::state::Aliases)
@@ -129,6 +132,7 @@ from_json(const nlohmann::json &obj, TimelineEvent &e)
     const auto type = mtx::events::getEventType(obj);
     using namespace mtx::events::state;
     using namespace mtx::events::msg;
+    using namespace mtx::events::voip;
 
     if (!obj.contains("content") || obj["content"].empty()) {
         if (obj.contains("state_key"))
@@ -340,19 +344,31 @@ from_json(const nlohmann::json &obj, TimelineEvent &e)
         break;
     }
     case events::EventType::CallInvite: {
-        e.data = events::RoomEvent<events::msg::CallInvite>(obj);
+        e.data = events::RoomEvent<events::voip::CallInvite>(obj);
         break;
     }
     case events::EventType::CallCandidates: {
-        e.data = events::RoomEvent<events::msg::CallCandidates>(obj);
+        e.data = events::RoomEvent<events::voip::CallCandidates>(obj);
         break;
     }
     case events::EventType::CallAnswer: {
-        e.data = events::RoomEvent<events::msg::CallAnswer>(obj);
+        e.data = events::RoomEvent<events::voip::CallAnswer>(obj);
         break;
     }
     case events::EventType::CallHangUp: {
-        e.data = events::RoomEvent<events::msg::CallHangUp>(obj);
+        e.data = events::RoomEvent<events::voip::CallHangUp>(obj);
+        break;
+    }
+    case events::EventType::CallSelectAnswer: {
+        e.data = events::RoomEvent<events::voip::CallSelectAnswer>(obj);
+        break;
+    }
+    case events::EventType::CallReject: {
+        e.data = events::RoomEvent<events::voip::CallReject>(obj);
+        break;
+    }
+    case events::EventType::CallNegotiate: {
+        e.data = events::RoomEvent<events::voip::CallNegotiate>(obj);
         break;
     }
     case events::EventType::Unsupported: {

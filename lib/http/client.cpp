@@ -1661,10 +1661,13 @@ MTXCLIENT_SEND_ROOM_MESSAGE(mtx::events::msg::Video)
 // MTXCLIENT_SEND_ROOM_MESSAGE(mtx::events::msg::KeyVerificationCancel)
 // MTXCLIENT_SEND_ROOM_MESSAGE(mtx::events::msg::KeyVerificationKey)
 // MTXCLIENT_SEND_ROOM_MESSAGE(mtx::events::msg::KeyVerificationMac)
-MTXCLIENT_SEND_ROOM_MESSAGE(mtx::events::msg::CallInvite)
-MTXCLIENT_SEND_ROOM_MESSAGE(mtx::events::msg::CallCandidates)
-MTXCLIENT_SEND_ROOM_MESSAGE(mtx::events::msg::CallAnswer)
-MTXCLIENT_SEND_ROOM_MESSAGE(mtx::events::msg::CallHangUp)
+MTXCLIENT_SEND_ROOM_MESSAGE(mtx::events::voip::CallInvite)
+MTXCLIENT_SEND_ROOM_MESSAGE(mtx::events::voip::CallCandidates)
+MTXCLIENT_SEND_ROOM_MESSAGE(mtx::events::voip::CallAnswer)
+MTXCLIENT_SEND_ROOM_MESSAGE(mtx::events::voip::CallHangUp)
+MTXCLIENT_SEND_ROOM_MESSAGE(mtx::events::voip::CallSelectAnswer)
+MTXCLIENT_SEND_ROOM_MESSAGE(mtx::events::voip::CallReject)
+MTXCLIENT_SEND_ROOM_MESSAGE(mtx::events::voip::CallNegotiate)
 
 #define MTXCLIENT_SEND_TO_DEVICE(Content)                                                          \
     template void mtx::http::Client::send_to_device<Content>(                                      \

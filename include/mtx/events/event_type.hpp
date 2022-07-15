@@ -108,6 +108,12 @@ enum class EventType
     CallAnswer,
     // m.call.hangup
     CallHangUp,
+    // m.call.select_answer
+    CallSelectAnswer,
+    // m.call.reject
+    CallReject,
+    // m.call.negotiate
+    CallNegotiate,
 
     // m.secret.request
     SecretRequest,
