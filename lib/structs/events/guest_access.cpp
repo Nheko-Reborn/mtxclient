@@ -30,7 +30,7 @@ stringToAccessState(const std::string &state)
 void
 from_json(const json &obj, GuestAccess &guest_access)
 {
-    guest_access.guest_access = stringToAccessState(obj.at("guest_access").get<std::string>());
+    guest_access.guest_access = stringToAccessState(obj.value("guest_access", ""));
 }
 
 void

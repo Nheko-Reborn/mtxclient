@@ -42,7 +42,7 @@ stringToVisibility(const std::string &rule)
 void
 from_json(const json &obj, HistoryVisibility &event)
 {
-    event.history_visibility = stringToVisibility(obj.at("history_visibility").get<std::string>());
+    event.history_visibility = stringToVisibility(obj.value("history_visibility", ""));
 }
 
 void

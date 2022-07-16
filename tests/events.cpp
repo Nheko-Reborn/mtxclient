@@ -57,7 +57,7 @@ TEST(Events, Redacted)
     mtx::events::collections::TimelineEvent event =
       data.get<mtx::events::collections::TimelineEvent>();
 
-    ASSERT_TRUE(std::holds_alternative<ns::RoomEvent<ns::msg::Redacted>>(event.data));
+    ASSERT_TRUE(std::holds_alternative<ns::RedactionEvent<ns::msg::Redaction>>(event.data));
 
     json data2 = R"({
 		"content": {
@@ -85,10 +85,10 @@ TEST(Events, Redacted)
 	})"_json;
 
     event = data2.get<mtx::events::collections::TimelineEvent>();
-    ASSERT_TRUE(std::holds_alternative<ns::StateEvent<ns::state::Member>>(event.data));
-    ASSERT_TRUE(std::get<ns::StateEvent<ns::state::Member>>(event.data)
+    ASSERT_TRUE(std::holds_alternative<ns::StateEvent<ns::msg::Redacted>>(event.data));
+    ASSERT_TRUE(std::get<ns::StateEvent<ns::msg::Redacted>>(event.data)
                   .unsigned_data.redacted_because.has_value());
-    ASSERT_EQ(std::get<ns::StateEvent<ns::state::Member>>(event.data)
+    ASSERT_EQ(std::get<ns::StateEvent<ns::msg::Redacted>>(event.data)
                 .unsigned_data.redacted_because->sender,
               "@redacted_user_2:example.com");
 }

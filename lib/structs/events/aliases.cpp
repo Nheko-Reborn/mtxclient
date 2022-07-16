@@ -11,7 +11,7 @@ namespace state {
 void
 from_json(const json &obj, Aliases &content)
 {
-    content.aliases = obj.at("aliases").get<std::vector<std::string>>();
+    content.aliases = obj.value("aliases", std::vector<std::string>{});
 }
 
 void

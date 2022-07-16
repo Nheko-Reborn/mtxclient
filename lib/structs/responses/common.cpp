@@ -109,126 +109,97 @@ parse_room_account_data_events(
         //        break;
         //}
 
-        switch (type) {
-        case events::EventType::Direct: {
-            try {
+        try {
+            switch (type) {
+            case events::EventType::Direct: {
                 container.emplace_back(events::AccountDataEvent<Direct>(e));
-            } catch (json::exception &err) {
-                log_error(err, e);
+                break;
             }
-            break;
-        }
-        case events::EventType::Tag: {
-            try {
+            case events::EventType::Tag: {
                 container.emplace_back(events::AccountDataEvent<Tags>(e));
-            } catch (json::exception &err) {
-                log_error(err, e);
+                break;
             }
-            break;
-        }
-        case events::EventType::FullyRead: {
-            try {
+            case events::EventType::FullyRead: {
                 container.emplace_back(
                   events::AccountDataEvent<events::account_data::FullyRead>(e));
-            } catch (json::exception &err) {
-                log_error(err, e);
+                break;
             }
-
-            break;
-        }
-        case events::EventType::PushRules: {
-            try {
+            case events::EventType::PushRules: {
                 container.emplace_back(events::AccountDataEvent<pushrules::GlobalRuleset>(e));
-            } catch (json::exception &err) {
-                log_error(err, e);
+                break;
             }
-            break;
-        }
-        case events::EventType::NhekoHiddenEvents: {
-            try {
+            case events::EventType::NhekoHiddenEvents: {
                 container.emplace_back(events::AccountDataEvent<nheko_extensions::HiddenEvents>(e));
-            } catch (json::exception &err) {
-                log_error(err, e);
+                break;
             }
-            break;
-        }
-        case events::EventType::ImagePackRooms: {
-            try {
+            case events::EventType::ImagePackRooms: {
                 container.emplace_back(
                   events::AccountDataEvent<events::msc2545::ImagePackRooms>(e));
-            } catch (json::exception &err) {
-                log_error(err, e);
+                break;
             }
-            break;
-        }
-        case events::EventType::ImagePackInAccountData: {
-            try {
+            case events::EventType::ImagePackInAccountData: {
                 container.emplace_back(events::AccountDataEvent<events::msc2545::ImagePack>(e));
-            } catch (json::exception &err) {
-                log_error(err, e);
+                break;
             }
-            break;
-        }
-        case events::EventType::Unsupported: {
-            try {
+            case events::EventType::Unsupported: {
                 container.emplace_back(events::EphemeralEvent<events::Unknown>(e));
-            } catch (json::exception &err) {
-                log_error(err, e);
+                break;
             }
-            break;
-        }
-        case events::EventType::KeyVerificationCancel:
-        case events::EventType::KeyVerificationRequest:
-        case events::EventType::KeyVerificationStart:
-        case events::EventType::KeyVerificationReady:
-        case events::EventType::KeyVerificationDone:
-        case events::EventType::KeyVerificationAccept:
-        case events::EventType::KeyVerificationKey:
-        case events::EventType::KeyVerificationMac:
-        case events::EventType::SecretRequest:
-        case events::EventType::SecretSend:
-        case events::EventType::Presence:
-        case events::EventType::Reaction:
-        case events::EventType::RoomAliases:
-        case events::EventType::RoomAvatar:
-        case events::EventType::RoomCanonicalAlias:
-        case events::EventType::RoomCreate:
-        case events::EventType::RoomEncrypted:
-        case events::EventType::Dummy:
-        case events::EventType::RoomEncryption:
-        case events::EventType::RoomGuestAccess:
-        case events::EventType::RoomHistoryVisibility:
-        case events::EventType::RoomJoinRules:
-        case events::EventType::RoomKey:
-        case events::EventType::ForwardedRoomKey:
-        case events::EventType::RoomKeyRequest:
-        case events::EventType::RoomMember:
-        case events::EventType::RoomMessage:
-        case events::EventType::RoomName:
-        case events::EventType::RoomPinnedEvents:
-        case events::EventType::RoomPowerLevels:
-        case events::EventType::RoomRedaction:
-        case events::EventType::RoomTombstone:
-        case events::EventType::RoomTopic:
-        case events::EventType::Widget:
-        case events::EventType::VectorWidget:
-        case events::EventType::PolicyRuleUser:
-        case events::EventType::PolicyRuleRoom:
-        case events::EventType::PolicyRuleServer:
-        case events::EventType::SpaceChild:
-        case events::EventType::SpaceParent:
-        case events::EventType::Sticker:
-        case events::EventType::CallInvite:
-        case events::EventType::CallCandidates:
-        case events::EventType::CallAnswer:
-        case events::EventType::CallHangUp:
-        case events::EventType::CallSelectAnswer:
-        case events::EventType::CallReject:
-        case events::EventType::CallNegotiate:
-        case events::EventType::Typing:
-        case events::EventType::Receipt:
-        case events::EventType::ImagePackInRoom:
-            continue;
+            case events::EventType::KeyVerificationCancel:
+            case events::EventType::KeyVerificationRequest:
+            case events::EventType::KeyVerificationStart:
+            case events::EventType::KeyVerificationReady:
+            case events::EventType::KeyVerificationDone:
+            case events::EventType::KeyVerificationAccept:
+            case events::EventType::KeyVerificationKey:
+            case events::EventType::KeyVerificationMac:
+            case events::EventType::SecretRequest:
+            case events::EventType::SecretSend:
+            case events::EventType::Presence:
+            case events::EventType::Reaction:
+            case events::EventType::RoomAliases:
+            case events::EventType::RoomAvatar:
+            case events::EventType::RoomCanonicalAlias:
+            case events::EventType::RoomCreate:
+            case events::EventType::RoomEncrypted:
+            case events::EventType::Dummy:
+            case events::EventType::RoomEncryption:
+            case events::EventType::RoomGuestAccess:
+            case events::EventType::RoomHistoryVisibility:
+            case events::EventType::RoomJoinRules:
+            case events::EventType::RoomKey:
+            case events::EventType::ForwardedRoomKey:
+            case events::EventType::RoomKeyRequest:
+            case events::EventType::RoomMember:
+            case events::EventType::RoomMessage:
+            case events::EventType::RoomName:
+            case events::EventType::RoomPinnedEvents:
+            case events::EventType::RoomPowerLevels:
+            case events::EventType::RoomRedaction:
+            case events::EventType::RoomTombstone:
+            case events::EventType::RoomTopic:
+            case events::EventType::Widget:
+            case events::EventType::VectorWidget:
+            case events::EventType::PolicyRuleUser:
+            case events::EventType::PolicyRuleRoom:
+            case events::EventType::PolicyRuleServer:
+            case events::EventType::SpaceChild:
+            case events::EventType::SpaceParent:
+            case events::EventType::Sticker:
+            case events::EventType::CallInvite:
+            case events::EventType::CallCandidates:
+            case events::EventType::CallAnswer:
+            case events::EventType::CallHangUp:
+            case events::EventType::CallSelectAnswer:
+            case events::EventType::CallReject:
+            case events::EventType::CallNegotiate:
+            case events::EventType::Typing:
+            case events::EventType::Receipt:
+            case events::EventType::ImagePackInRoom:
+                continue;
+            }
+        } catch (json::exception &err) {
+            log_error(err, e);
         }
     }
 }
@@ -251,296 +222,160 @@ parse_timeline_events(const json &events,
     for (const auto &e : events) {
         const auto type = mtx::events::getEventType(e);
 
-        if (type != events::EventType::RoomRedaction &&
-            (!e.contains("content") || e["content"].empty())) {
-            try {
+        try {
+            if (e.contains("unsigned") && e["unsigned"].contains("redacted_by")) {
                 if (e.contains("state_key"))
                     container.emplace_back(events::StateEvent<events::msg::Redacted>(e));
                 else
                     container.emplace_back(events::RoomEvent<events::msg::Redacted>(e));
-            } catch (json::exception &err) {
-                log_error(err, e);
+                return;
             }
-        } else {
             switch (type) {
             case events::EventType::Reaction: {
-                try {
-                    container.emplace_back(events::RoomEvent<events::msg::Reaction>(e));
-                } catch (json::exception &err) {
-                    log_error(err, e);
-                }
-
+                container.emplace_back(events::RoomEvent<events::msg::Reaction>(e));
                 break;
             }
             case events::EventType::RoomAliases: {
-                try {
-                    container.emplace_back(events::StateEvent<events::state::Aliases>(e));
-                } catch (json::exception &err) {
-                    log_error(err, e);
-                }
-
+                container.emplace_back(events::StateEvent<events::state::Aliases>(e));
                 break;
             }
             case events::EventType::RoomAvatar: {
-                try {
-                    container.emplace_back(events::StateEvent<Avatar>(e));
-                } catch (json::exception &err) {
-                    log_error(err, e);
-                }
-
+                container.emplace_back(events::StateEvent<Avatar>(e));
                 break;
             }
             case events::EventType::RoomCanonicalAlias: {
-                try {
-                    container.emplace_back(events::StateEvent<CanonicalAlias>(e));
-                } catch (json::exception &err) {
-                    log_error(err, e);
-                }
-
+                container.emplace_back(events::StateEvent<CanonicalAlias>(e));
                 break;
             }
             case events::EventType::RoomCreate: {
-                try {
-                    container.emplace_back(events::StateEvent<Create>(e));
-                } catch (json::exception &err) {
-                    log_error(err, e);
-                }
-
+                container.emplace_back(events::StateEvent<Create>(e));
                 break;
             }
             case events::EventType::RoomEncrypted: {
-                try {
-                    container.emplace_back(events::EncryptedEvent<mtx::events::msg::Encrypted>(e));
-                } catch (json::exception &err) {
-                    log_error(err, e);
-                }
-
+                container.emplace_back(events::EncryptedEvent<mtx::events::msg::Encrypted>(e));
                 break;
             }
             case events::EventType::RoomEncryption: {
-                try {
-                    container.emplace_back(events::StateEvent<Encryption>(e));
-                } catch (json::exception &err) {
-                    log_error(err, e);
-                }
-
+                container.emplace_back(events::StateEvent<Encryption>(e));
                 break;
             }
             case events::EventType::RoomGuestAccess: {
-                try {
-                    container.emplace_back(events::StateEvent<GuestAccess>(e));
-                } catch (json::exception &err) {
-                    log_error(err, e);
-                }
+                container.emplace_back(events::StateEvent<GuestAccess>(e));
 
                 break;
             }
             case events::EventType::RoomHistoryVisibility: {
-                try {
-                    container.emplace_back(events::StateEvent<HistoryVisibility>(e));
-                } catch (json::exception &err) {
-                    log_error(err, e);
-                }
+                container.emplace_back(events::StateEvent<HistoryVisibility>(e));
 
                 break;
             }
             case events::EventType::RoomJoinRules: {
-                try {
-                    container.emplace_back(events::StateEvent<JoinRules>(e));
-                } catch (json::exception &err) {
-                    log_error(err, e);
-                }
+                container.emplace_back(events::StateEvent<JoinRules>(e));
 
                 break;
             }
             case events::EventType::RoomMember: {
-                try {
-                    container.emplace_back(events::StateEvent<Member>(e));
-                } catch (json::exception &err) {
-                    log_error(err, e);
-                }
+                container.emplace_back(events::StateEvent<Member>(e));
 
                 break;
             }
             case events::EventType::RoomName: {
-                try {
-                    container.emplace_back(events::StateEvent<Name>(e));
-                } catch (json::exception &err) {
-                    log_error(err, e);
-                }
+                container.emplace_back(events::StateEvent<Name>(e));
 
                 break;
             }
             case events::EventType::RoomPowerLevels: {
-                try {
-                    container.emplace_back(events::StateEvent<PowerLevels>(e));
-                } catch (json::exception &err) {
-                    log_error(err, e);
-                }
+                container.emplace_back(events::StateEvent<PowerLevels>(e));
 
                 break;
             }
             case events::EventType::RoomRedaction: {
-                try {
-                    container.emplace_back(events::RedactionEvent<mtx::events::msg::Redaction>(e));
-                } catch (json::exception &err) {
-                    log_error(err, e);
-                }
+                container.emplace_back(events::RedactionEvent<mtx::events::msg::Redaction>(e));
 
                 break;
             }
             case events::EventType::RoomTombstone: {
-                try {
-                    container.emplace_back(events::StateEvent<Tombstone>(e));
-                } catch (json::exception &err) {
-                    log_error(err, e);
-                }
+                container.emplace_back(events::StateEvent<Tombstone>(e));
 
                 break;
             }
             case events::EventType::RoomTopic: {
-                try {
-                    container.emplace_back(events::StateEvent<Topic>(e));
-                } catch (json::exception &err) {
-                    log_error(err, e);
-                }
+                container.emplace_back(events::StateEvent<Topic>(e));
 
                 break;
             }
             case events::EventType::Widget: {
-                try {
-                    container.emplace_back(events::StateEvent<Widget>(e));
-                } catch (json::exception &err) {
-                    log_error(err, e);
-                }
+                container.emplace_back(events::StateEvent<Widget>(e));
 
                 break;
             }
             case events::EventType::VectorWidget: {
-                try {
-                    container.emplace_back(events::StateEvent<Widget>(e));
-                } catch (json::exception &err) {
-                    log_error(err, e);
-                }
+                container.emplace_back(events::StateEvent<Widget>(e));
 
                 break;
             }
             case events::EventType::PolicyRuleUser: {
-                try {
-                    container.emplace_back(events::StateEvent<policy_rule::UserRule>(e));
-                } catch (json::exception &err) {
-                    log_error(err, e);
-                }
+                container.emplace_back(events::StateEvent<policy_rule::UserRule>(e));
 
                 break;
             }
             case events::EventType::PolicyRuleRoom: {
-                try {
-                    container.emplace_back(events::StateEvent<policy_rule::RoomRule>(e));
-                } catch (json::exception &err) {
-                    log_error(err, e);
-                }
+                container.emplace_back(events::StateEvent<policy_rule::RoomRule>(e));
 
                 break;
             }
             case events::EventType::PolicyRuleServer: {
-                try {
-                    container.emplace_back(events::StateEvent<policy_rule::ServerRule>(e));
-                } catch (json::exception &err) {
-                    log_error(err, e);
-                }
+                container.emplace_back(events::StateEvent<policy_rule::ServerRule>(e));
 
                 break;
             }
             case events::EventType::SpaceChild: {
-                try {
-                    container.emplace_back(events::StateEvent<space::Child>(e));
-                } catch (json::exception &err) {
-                    log_error(err, e);
-                }
+                container.emplace_back(events::StateEvent<space::Child>(e));
 
                 break;
             }
             case events::EventType::SpaceParent: {
-                try {
-                    container.emplace_back(events::StateEvent<space::Parent>(e));
-                } catch (json::exception &err) {
-                    log_error(err, e);
-                }
+                container.emplace_back(events::StateEvent<space::Parent>(e));
 
                 break;
             }
             case events::EventType::ImagePackInRoom: {
-                try {
-                    container.emplace_back(events::StateEvent<events::msc2545::ImagePack>(e));
-                } catch (json::exception &err) {
-                    log_error(err, e);
-                }
+                container.emplace_back(events::StateEvent<events::msc2545::ImagePack>(e));
 
                 break;
             }
             case events::EventType::KeyVerificationStart: {
-                try {
-                    container.emplace_back(events::RoomEvent<events::msg::KeyVerificationStart>(e));
-                } catch (json::exception &err) {
-                    log_error(err, e);
-                }
+                container.emplace_back(events::RoomEvent<events::msg::KeyVerificationStart>(e));
 
                 break;
             }
             case events::EventType::KeyVerificationAccept: {
-                try {
-                    container.emplace_back(
-                      events::RoomEvent<events::msg::KeyVerificationAccept>(e));
-                } catch (json::exception &err) {
-                    log_error(err, e);
-                }
+                container.emplace_back(events::RoomEvent<events::msg::KeyVerificationAccept>(e));
 
                 break;
             }
             case events::EventType::KeyVerificationDone: {
-                try {
-                    container.emplace_back(events::RoomEvent<events::msg::KeyVerificationDone>(e));
-                } catch (json::exception &err) {
-                    log_error(err, e);
-                }
+                container.emplace_back(events::RoomEvent<events::msg::KeyVerificationDone>(e));
 
                 break;
             }
             case events::EventType::KeyVerificationReady: {
-                try {
-                    container.emplace_back(events::RoomEvent<events::msg::KeyVerificationReady>(e));
-                } catch (json::exception &err) {
-                    log_error(err, e);
-                }
+                container.emplace_back(events::RoomEvent<events::msg::KeyVerificationReady>(e));
 
                 break;
             }
             case events::EventType::KeyVerificationKey: {
-                try {
-                    container.emplace_back(events::RoomEvent<events::msg::KeyVerificationKey>(e));
-                } catch (json::exception &err) {
-                    log_error(err, e);
-                }
+                container.emplace_back(events::RoomEvent<events::msg::KeyVerificationKey>(e));
 
                 break;
             }
             case events::EventType::KeyVerificationMac: {
-                try {
-                    container.emplace_back(events::RoomEvent<events::msg::KeyVerificationMac>(e));
-                } catch (json::exception &err) {
-                    log_error(err, e);
-                }
+                container.emplace_back(events::RoomEvent<events::msg::KeyVerificationMac>(e));
 
                 break;
             }
             case events::EventType::KeyVerificationCancel: {
-                try {
-                    container.emplace_back(
-                      events::RoomEvent<events::msg::KeyVerificationCancel>(e));
-                } catch (json::exception &err) {
-                    log_error(err, e);
-                }
+                container.emplace_back(events::RoomEvent<events::msg::KeyVerificationCancel>(e));
 
                 break;
             }
@@ -548,57 +383,24 @@ parse_timeline_events(const json &events,
                 using MsgType       = mtx::events::MessageType;
                 const auto msg_type = mtx::events::getMessageType(e.at("content"));
 
-                if (msg_type == events::MessageType::Unknown) {
-                    try {
-                        auto unsigned_data = e.at("unsigned").at("redacted_by").get<std::string>();
-
-                        if (unsigned_data.empty())
-                            continue;
-
-                        container.emplace_back(events::RoomEvent<events::msg::Redacted>(e));
-                        continue;
-                    } catch (json::exception &err) {
-                        log_error(err, e);
-                    }
-
-                    log_error("Invalid event type", e);
-                    continue;
-                }
-
                 switch (msg_type) {
                 case MsgType::Audio: {
-                    try {
-                        container.emplace_back(events::RoomEvent<events::msg::Audio>(e));
-                    } catch (json::exception &err) {
-                        log_error(err, e);
-                    }
+                    container.emplace_back(events::RoomEvent<events::msg::Audio>(e));
 
                     break;
                 }
                 case MsgType::Emote: {
-                    try {
-                        container.emplace_back(events::RoomEvent<events::msg::Emote>(e));
-                    } catch (json::exception &err) {
-                        log_error(err, e);
-                    }
+                    container.emplace_back(events::RoomEvent<events::msg::Emote>(e));
 
                     break;
                 }
                 case MsgType::File: {
-                    try {
-                        container.emplace_back(events::RoomEvent<events::msg::File>(e));
-                    } catch (json::exception &err) {
-                        log_error(err, e);
-                    }
+                    container.emplace_back(events::RoomEvent<events::msg::File>(e));
 
                     break;
                 }
                 case MsgType::Image: {
-                    try {
-                        container.emplace_back(events::RoomEvent<events::msg::Image>(e));
-                    } catch (json::exception &err) {
-                        log_error(err, e);
-                    }
+                    container.emplace_back(events::RoomEvent<events::msg::Image>(e));
 
                     break;
                 }
@@ -608,140 +410,80 @@ parse_timeline_events(const json &events,
                     break;
                 }
                 case MsgType::Notice: {
-                    try {
-                        container.emplace_back(events::RoomEvent<events::msg::Notice>(e));
-                    } catch (json::exception &err) {
-                        log_error(err, e);
-                    }
+                    container.emplace_back(events::RoomEvent<events::msg::Notice>(e));
 
                     break;
                 }
                 case MsgType::Text: {
-                    try {
-                        container.emplace_back(events::RoomEvent<events::msg::Text>(e));
-                    } catch (json::exception &err) {
-                        log_error(err, e);
-                    }
+                    container.emplace_back(events::RoomEvent<events::msg::Text>(e));
 
                     break;
                 }
                 case MsgType::Video: {
-                    try {
-                        container.emplace_back(events::RoomEvent<events::msg::Video>(e));
-                    } catch (json::exception &err) {
-                        log_error(err, e);
-                    }
+                    container.emplace_back(events::RoomEvent<events::msg::Video>(e));
 
                     break;
                 }
                 case MsgType::KeyVerificationRequest: {
-                    try {
-                        container.emplace_back(
-                          events::RoomEvent<events::msg::KeyVerificationRequest>(e));
-                    } catch (json::exception &err) {
-                        log_error(err, e);
-                    }
+                    container.emplace_back(
+                      events::RoomEvent<events::msg::KeyVerificationRequest>(e));
 
                     break;
                 }
                 case MsgType::Unknown: {
-                    try {
-                        container.emplace_back(events::RoomEvent<events::Unknown>(e));
-                    } catch (json::exception &err) {
-                        log_error(err, e);
-                    }
+                    container.emplace_back(events::RoomEvent<events::Unknown>(e));
                     break;
                 }
                 }
                 break;
             }
             case events::EventType::Sticker: {
-                try {
-                    container.emplace_back(events::Sticker(e));
-                } catch (json::exception &err) {
-                    log_error(err, e);
-                }
+                container.emplace_back(events::Sticker(e));
 
                 break;
             }
             case events::EventType::CallInvite: {
-                try {
-                    container.emplace_back(events::RoomEvent<events::voip::CallInvite>(e));
-                } catch (json::exception &err) {
-                    log_error(err, e);
-                }
+                container.emplace_back(events::RoomEvent<events::voip::CallInvite>(e));
 
                 break;
             }
             case events::EventType::CallCandidates: {
-                try {
-                    container.emplace_back(events::RoomEvent<events::voip::CallCandidates>(e));
-                } catch (json::exception &err) {
-                    log_error(err, e);
-                }
+                container.emplace_back(events::RoomEvent<events::voip::CallCandidates>(e));
 
                 break;
             }
             case events::EventType::CallAnswer: {
-                try {
-                    container.emplace_back(events::RoomEvent<events::voip::CallAnswer>(e));
-                } catch (json::exception &err) {
-                    log_error(err, e);
-                }
+                container.emplace_back(events::RoomEvent<events::voip::CallAnswer>(e));
 
                 break;
             }
             case events::EventType::CallHangUp: {
-                try {
-                    container.emplace_back(events::RoomEvent<events::voip::CallHangUp>(e));
-                } catch (json::exception &err) {
-                    log_error(err, e);
-                }
+                container.emplace_back(events::RoomEvent<events::voip::CallHangUp>(e));
 
                 break;
             }
             case events::EventType::CallSelectAnswer: {
-                try {
-                    container.emplace_back(events::RoomEvent<events::voip::CallSelectAnswer>(e));
-                } catch (json::exception &err) {
-                    log_error(err, e);
-                }
+                container.emplace_back(events::RoomEvent<events::voip::CallSelectAnswer>(e));
 
                 break;
             }
             case events::EventType::CallReject: {
-                try {
-                    container.emplace_back(events::RoomEvent<events::voip::CallReject>(e));
-                } catch (json::exception &err) {
-                    log_error(err, e);
-                }
+                container.emplace_back(events::RoomEvent<events::voip::CallReject>(e));
 
                 break;
             }
             case events::EventType::CallNegotiate: {
-                try {
-                    container.emplace_back(events::RoomEvent<events::voip::CallNegotiate>(e));
-                } catch (json::exception &err) {
-                    log_error(err, e);
-                }
+                container.emplace_back(events::RoomEvent<events::voip::CallNegotiate>(e));
 
                 break;
             }
             case events::EventType::RoomPinnedEvents: {
-                try {
-                    container.emplace_back(events::StateEvent<events::state::PinnedEvents>(e));
-                } catch (json::exception &err) {
-                    log_error(err, e);
-                }
+                container.emplace_back(events::StateEvent<events::state::PinnedEvents>(e));
 
                 break;
             }
             case events::EventType::Unsupported: {
-                try {
-                    container.emplace_back(events::RoomEvent<events::Unknown>(e));
-                } catch (json::exception &err) {
-                    log_error(err, e);
-                }
+                container.emplace_back(events::RoomEvent<events::Unknown>(e));
 
                 break;
             }
@@ -764,6 +506,8 @@ parse_timeline_events(const json &events,
             case events::EventType::Dummy:
                 continue;
             }
+        } catch (json::exception &err) {
+            log_error(err, e);
         }
     }
 }
@@ -777,9 +521,9 @@ parse_device_events(const json &events,
     for (const auto &e : events) {
         const auto type = mtx::events::getEventType(e);
 
-        switch (type) {
-        case events::EventType::RoomEncrypted: {
-            try {
+        try {
+            switch (type) {
+            case events::EventType::RoomEncrypted: {
                 const auto algo = e.at("content").at("algorithm").get<std::string>();
                 // Algorithm determines whether it's an olm or megolm event
                 if (algo == "m.olm.v1.curve25519-aes-sha2") {
@@ -790,139 +534,78 @@ parse_device_events(const json &events,
                     log_error("Invalid m.room.encrypted algorithm", e);
                     continue;
                 }
-            } catch (json::exception &err) {
-                log_error(err, e);
+                break;
             }
-
-            break;
-        }
-        case events::EventType::Dummy: {
-            try {
+            case events::EventType::Dummy: {
                 container.emplace_back(events::DeviceEvent<Dummy>(e));
-            } catch (json::exception &err) {
-                log_error(err, e);
-            }
 
-            break;
-        }
-        case events::EventType::RoomKey: {
-            try {
+                break;
+            }
+            case events::EventType::RoomKey: {
                 container.emplace_back(events::DeviceEvent<RoomKey>(e));
-            } catch (json::exception &err) {
-                log_error(err, e);
-            }
 
-            break;
-        }
-        case events::EventType::ForwardedRoomKey: {
-            try {
+                break;
+            }
+            case events::EventType::ForwardedRoomKey: {
                 container.emplace_back(events::DeviceEvent<ForwardedRoomKey>(e));
-            } catch (json::exception &err) {
-                log_error(err, e);
-            }
 
-            break;
-        }
-        case events::EventType::RoomKeyRequest: {
-            try {
+                break;
+            }
+            case events::EventType::RoomKeyRequest: {
                 container.emplace_back(events::DeviceEvent<KeyRequest>(e));
-            } catch (json::exception &err) {
-                log_error(err, e);
-            }
 
-            break;
-        }
-        case events::EventType::KeyVerificationCancel: {
-            try {
+                break;
+            }
+            case events::EventType::KeyVerificationCancel: {
                 container.emplace_back(events::DeviceEvent<KeyVerificationCancel>(e));
-            } catch (json::exception &err) {
-                log_error(err, e);
-            }
 
-            break;
-        }
-        case events::EventType::KeyVerificationRequest:
-            try {
+                break;
+            }
+            case events::EventType::KeyVerificationRequest:
                 container.emplace_back(events::DeviceEvent<KeyVerificationRequest>(e));
-            } catch (json::exception &err) {
-                log_error(err, e);
-            }
 
-            break;
-        case events::EventType::KeyVerificationStart:
-            try {
+                break;
+            case events::EventType::KeyVerificationStart:
                 container.emplace_back(events::DeviceEvent<KeyVerificationStart>(e));
-            } catch (json::exception &err) {
-                log_error(err, e);
-            }
 
-            break;
-        case events::EventType::KeyVerificationAccept:
-            try {
+                break;
+            case events::EventType::KeyVerificationAccept:
                 container.emplace_back(events::DeviceEvent<KeyVerificationAccept>(e));
-            } catch (json::exception &err) {
-                log_error(err, e);
-            }
 
-            break;
-        case events::EventType::KeyVerificationKey:
-            try {
+                break;
+            case events::EventType::KeyVerificationKey:
                 container.emplace_back(events::DeviceEvent<KeyVerificationKey>(e));
-            } catch (json::exception &err) {
-                log_error(err, e);
-            }
 
-            break;
-        case events::EventType::KeyVerificationMac:
-            try {
+                break;
+            case events::EventType::KeyVerificationMac:
                 container.emplace_back(events::DeviceEvent<KeyVerificationMac>(e));
-            } catch (json::exception &err) {
-                log_error(err, e);
-            }
 
-            break;
-        case events::EventType::KeyVerificationReady:
-            try {
+                break;
+            case events::EventType::KeyVerificationReady:
                 container.emplace_back(events::DeviceEvent<KeyVerificationReady>(e));
-            } catch (json::exception &err) {
-                log_error(err, e);
-            }
 
-            break;
-        case events::EventType::KeyVerificationDone:
-            try {
+                break;
+            case events::EventType::KeyVerificationDone:
                 container.emplace_back(events::DeviceEvent<KeyVerificationDone>(e));
-            } catch (json::exception &err) {
-                log_error(err, e);
-            }
 
-            break;
-        case events::EventType::SecretSend:
-            try {
+                break;
+            case events::EventType::SecretSend:
                 container.emplace_back(events::DeviceEvent<SecretSend>(e));
-            } catch (json::exception &err) {
-                log_error(err, e);
-            }
 
-            break;
-        case events::EventType::SecretRequest:
-            try {
+                break;
+            case events::EventType::SecretRequest:
                 container.emplace_back(events::DeviceEvent<SecretRequest>(e));
-            } catch (json::exception &err) {
-                log_error(err, e);
-            }
 
-            break;
-        case events::EventType::Unsupported:
-            try {
+                break;
+            case events::EventType::Unsupported:
                 container.emplace_back(events::DeviceEvent<events::Unknown>(e));
-            } catch (json::exception &err) {
-                log_error(err, e);
-            }
 
-            break;
-        default:
-            continue;
+                break;
+            default:
+                continue;
+            }
+        } catch (json::exception &err) {
+            log_error(err, e);
         }
     }
 }
@@ -937,221 +620,124 @@ parse_state_events(const json &events,
     for (const auto &e : events) {
         const auto type = mtx::events::getEventType(e);
 
-        if (type != events::EventType::RoomRedaction &&
-            (!e.contains("content") || e["content"].empty())) {
-            try {
+        try {
+            if (e.contains("unsigned") && e["unsigned"].contains("redacted_by")) {
                 container.emplace_back(events::StateEvent<events::msg::Redacted>(e));
-            } catch (json::exception &err) {
-                log_error(err, e);
+                return;
             }
-        }
 
-        else {
             switch (type) {
             case events::EventType::RoomAliases: {
-                try {
-                    container.emplace_back(events::StateEvent<events::state::Aliases>(e));
-                } catch (json::exception &err) {
-                    log_error(err, e);
-                }
+                container.emplace_back(events::StateEvent<events::state::Aliases>(e));
 
                 break;
             }
             case events::EventType::RoomAvatar: {
-                try {
-                    container.emplace_back(events::StateEvent<Avatar>(e));
-                } catch (json::exception &err) {
-                    log_error(err, e);
-                }
-
+                container.emplace_back(events::StateEvent<Avatar>(e));
                 break;
             }
             case events::EventType::RoomCanonicalAlias: {
-                try {
-                    container.emplace_back(events::StateEvent<CanonicalAlias>(e));
-                } catch (json::exception &err) {
-                    log_error(err, e);
-                }
+                container.emplace_back(events::StateEvent<CanonicalAlias>(e));
 
                 break;
             }
             case events::EventType::RoomCreate: {
-                try {
-                    container.emplace_back(events::StateEvent<Create>(e));
-                } catch (json::exception &err) {
-                    log_error(err, e);
-                }
+                container.emplace_back(events::StateEvent<Create>(e));
 
                 break;
             }
             case events::EventType::RoomEncryption: {
-                try {
-                    container.emplace_back(events::StateEvent<Encryption>(e));
-                } catch (json::exception &err) {
-                    log_error(err, e);
-                }
+                container.emplace_back(events::StateEvent<Encryption>(e));
 
                 break;
             }
             case events::EventType::RoomGuestAccess: {
-                try {
-                    container.emplace_back(events::StateEvent<GuestAccess>(e));
-                } catch (json::exception &err) {
-                    log_error(err, e);
-                }
+                container.emplace_back(events::StateEvent<GuestAccess>(e));
 
                 break;
             }
             case events::EventType::RoomHistoryVisibility: {
-                try {
-                    container.emplace_back(events::StateEvent<HistoryVisibility>(e));
-                } catch (json::exception &err) {
-                    log_error(err, e);
-                }
+                container.emplace_back(events::StateEvent<HistoryVisibility>(e));
 
                 break;
             }
             case events::EventType::RoomJoinRules: {
-                try {
-                    container.emplace_back(events::StateEvent<JoinRules>(e));
-                } catch (json::exception &err) {
-                    log_error(err, e);
-                }
+                container.emplace_back(events::StateEvent<JoinRules>(e));
 
                 break;
             }
             case events::EventType::RoomMember: {
-                try {
-                    container.emplace_back(events::StateEvent<Member>(e));
-                } catch (json::exception &err) {
-                    log_error(err, e);
-                }
+                container.emplace_back(events::StateEvent<Member>(e));
 
                 break;
             }
             case events::EventType::RoomName: {
-                try {
-                    container.emplace_back(events::StateEvent<Name>(e));
-                } catch (json::exception &err) {
-                    log_error(err, e);
-                }
+                container.emplace_back(events::StateEvent<Name>(e));
 
                 break;
             }
             case events::EventType::RoomPowerLevels: {
-                try {
-                    container.emplace_back(events::StateEvent<PowerLevels>(e));
-                } catch (json::exception &err) {
-                    log_error(err, e);
-                }
+                container.emplace_back(events::StateEvent<PowerLevels>(e));
 
                 break;
             }
             case events::EventType::RoomTombstone: {
-                try {
-                    container.emplace_back(events::StateEvent<Tombstone>(e));
-                } catch (json::exception &err) {
-                    log_error(err, e);
-                }
+                container.emplace_back(events::StateEvent<Tombstone>(e));
 
                 break;
             }
             case events::EventType::RoomTopic: {
-                try {
-                    container.emplace_back(events::StateEvent<Topic>(e));
-                } catch (json::exception &err) {
-                    log_error(err, e);
-                }
+                container.emplace_back(events::StateEvent<Topic>(e));
 
                 break;
             }
             case events::EventType::Widget: {
-                try {
-                    container.emplace_back(events::StateEvent<Widget>(e));
-                } catch (json::exception &err) {
-                    log_error(err, e);
-                }
+                container.emplace_back(events::StateEvent<Widget>(e));
 
                 break;
             }
             case events::EventType::VectorWidget: {
-                try {
-                    container.emplace_back(events::StateEvent<Widget>(e));
-                } catch (json::exception &err) {
-                    log_error(err, e);
-                }
+                container.emplace_back(events::StateEvent<Widget>(e));
 
                 break;
             }
             case events::EventType::PolicyRuleUser: {
-                try {
-                    container.emplace_back(events::StateEvent<policy_rule::UserRule>(e));
-                } catch (json::exception &err) {
-                    log_error(err, e);
-                }
+                container.emplace_back(events::StateEvent<policy_rule::UserRule>(e));
 
                 break;
             }
             case events::EventType::PolicyRuleRoom: {
-                try {
-                    container.emplace_back(events::StateEvent<policy_rule::RoomRule>(e));
-                } catch (json::exception &err) {
-                    log_error(err, e);
-                }
+                container.emplace_back(events::StateEvent<policy_rule::RoomRule>(e));
 
                 break;
             }
             case events::EventType::PolicyRuleServer: {
-                try {
-                    container.emplace_back(events::StateEvent<policy_rule::ServerRule>(e));
-                } catch (json::exception &err) {
-                    log_error(err, e);
-                }
+                container.emplace_back(events::StateEvent<policy_rule::ServerRule>(e));
 
                 break;
             }
             case events::EventType::SpaceChild: {
-                try {
-                    container.emplace_back(events::StateEvent<space::Child>(e));
-                } catch (json::exception &err) {
-                    log_error(err, e);
-                }
+                container.emplace_back(events::StateEvent<space::Child>(e));
 
                 break;
             }
             case events::EventType::SpaceParent: {
-                try {
-                    container.emplace_back(events::StateEvent<space::Parent>(e));
-                } catch (json::exception &err) {
-                    log_error(err, e);
-                }
+                container.emplace_back(events::StateEvent<space::Parent>(e));
 
                 break;
             }
             case events::EventType::ImagePackInRoom: {
-                try {
-                    container.emplace_back(events::StateEvent<events::msc2545::ImagePack>(e));
-                } catch (json::exception &err) {
-                    log_error(err, e);
-                }
+                container.emplace_back(events::StateEvent<events::msc2545::ImagePack>(e));
 
                 break;
             }
             case events::EventType::RoomPinnedEvents: {
-                try {
-                    container.emplace_back(events::StateEvent<events::state::PinnedEvents>(e));
-                } catch (json::exception &err) {
-                    log_error(err, e);
-                }
+                container.emplace_back(events::StateEvent<events::state::PinnedEvents>(e));
 
                 break;
             }
             case events::EventType::Unsupported: {
-                try {
-                    container.emplace_back(events::StateEvent<events::Unknown>(e));
-                } catch (json::exception &err) {
-                    log_error(err, e);
-                }
+                container.emplace_back(events::StateEvent<events::Unknown>(e));
 
                 break;
             }
@@ -1193,6 +779,8 @@ parse_state_events(const json &events,
             case events::EventType::Dummy:
                 continue;
             }
+        } catch (json::exception &err) {
+            log_error(err, e);
         }
     }
 }
@@ -1207,201 +795,110 @@ parse_stripped_events(const json &events,
     for (const auto &e : events) {
         const auto type = mtx::events::getEventType(e);
 
-        if (type != events::EventType::RoomRedaction &&
-            (!e.contains("content") || e["content"].empty())) {
-            try {
-                container.emplace_back(events::StrippedEvent<events::msg::Redacted>(e));
-            } catch (json::exception &err) {
-                log_error(err, e);
-            }
-        } else {
+        try {
             switch (type) {
             case events::EventType::RoomAliases: {
-                try {
-                    container.emplace_back(events::StrippedEvent<mtx::events::state::Aliases>(e));
-                } catch (json::exception &err) {
-                    log_error(err, e);
-                }
+                container.emplace_back(events::StrippedEvent<mtx::events::state::Aliases>(e));
 
                 break;
             }
             case events::EventType::RoomAvatar: {
-                try {
-                    container.emplace_back(events::StrippedEvent<Avatar>(e));
-                } catch (json::exception &err) {
-                    log_error(err, e);
-                }
+                container.emplace_back(events::StrippedEvent<Avatar>(e));
 
                 break;
             }
             case events::EventType::RoomCanonicalAlias: {
-                try {
-                    container.emplace_back(events::StrippedEvent<CanonicalAlias>(e));
-                } catch (json::exception &err) {
-                    log_error(err, e);
-                }
+                container.emplace_back(events::StrippedEvent<CanonicalAlias>(e));
 
                 break;
             }
             case events::EventType::RoomCreate: {
-                try {
-                    container.emplace_back(events::StrippedEvent<Create>(e));
-                } catch (json::exception &err) {
-                    log_error(err, e);
-                }
+                container.emplace_back(events::StrippedEvent<Create>(e));
 
                 break;
             }
             case events::EventType::RoomGuestAccess: {
-                try {
-                    container.emplace_back(events::StrippedEvent<GuestAccess>(e));
-                } catch (json::exception &err) {
-                    log_error(err, e);
-                }
+                container.emplace_back(events::StrippedEvent<GuestAccess>(e));
 
                 break;
             }
             case events::EventType::RoomHistoryVisibility: {
-                try {
-                    container.emplace_back(events::StrippedEvent<HistoryVisibility>(e));
-                } catch (json::exception &err) {
-                    log_error(err, e);
-                }
+                container.emplace_back(events::StrippedEvent<HistoryVisibility>(e));
 
                 break;
             }
             case events::EventType::RoomJoinRules: {
-                try {
-                    container.emplace_back(events::StrippedEvent<JoinRules>(e));
-                } catch (json::exception &err) {
-                    log_error(err, e);
-                }
+                container.emplace_back(events::StrippedEvent<JoinRules>(e));
 
                 break;
             }
             case events::EventType::RoomMember: {
-                try {
-                    container.emplace_back(events::StrippedEvent<Member>(e));
-                } catch (json::exception &err) {
-                    log_error(err, e);
-                }
+                container.emplace_back(events::StrippedEvent<Member>(e));
 
                 break;
             }
             case events::EventType::RoomName: {
-                try {
-                    container.emplace_back(events::StrippedEvent<Name>(e));
-                } catch (json::exception &err) {
-                    log_error(err, e);
-                }
+                container.emplace_back(events::StrippedEvent<Name>(e));
 
                 break;
             }
             case events::EventType::RoomPowerLevels: {
-                try {
-                    container.emplace_back(events::StrippedEvent<PowerLevels>(e));
-                } catch (json::exception &err) {
-                    log_error(err, e);
-                }
+                container.emplace_back(events::StrippedEvent<PowerLevels>(e));
 
                 break;
             }
             case events::EventType::RoomTombstone: {
-                try {
-                    container.emplace_back(events::StrippedEvent<Tombstone>(e));
-                } catch (json::exception &err) {
-                    log_error(err, e);
-                }
+                container.emplace_back(events::StrippedEvent<Tombstone>(e));
 
                 break;
             }
             case events::EventType::RoomTopic: {
-                try {
-                    container.emplace_back(events::StrippedEvent<Topic>(e));
-                } catch (json::exception &err) {
-                    log_error(err, e);
-                }
+                container.emplace_back(events::StrippedEvent<Topic>(e));
 
                 break;
             }
             case events::EventType::Widget: {
-                try {
-                    container.emplace_back(events::StrippedEvent<Widget>(e));
-                } catch (json::exception &err) {
-                    log_error(err, e);
-                }
+                container.emplace_back(events::StrippedEvent<Widget>(e));
 
                 break;
             }
             case events::EventType::VectorWidget: {
-                try {
-                    container.emplace_back(events::StrippedEvent<Widget>(e));
-                } catch (json::exception &err) {
-                    log_error(err, e);
-                }
+                container.emplace_back(events::StrippedEvent<Widget>(e));
 
                 break;
             }
             case events::EventType::PolicyRuleUser: {
-                try {
-                    container.emplace_back(events::StrippedEvent<policy_rule::UserRule>(e));
-                } catch (json::exception &err) {
-                    log_error(err, e);
-                }
+                container.emplace_back(events::StrippedEvent<policy_rule::UserRule>(e));
 
                 break;
             }
             case events::EventType::PolicyRuleRoom: {
-                try {
-                    container.emplace_back(events::StrippedEvent<policy_rule::RoomRule>(e));
-                } catch (json::exception &err) {
-                    log_error(err, e);
-                }
+                container.emplace_back(events::StrippedEvent<policy_rule::RoomRule>(e));
 
                 break;
             }
             case events::EventType::PolicyRuleServer: {
-                try {
-                    container.emplace_back(events::StrippedEvent<policy_rule::ServerRule>(e));
-                } catch (json::exception &err) {
-                    log_error(err, e);
-                }
+                container.emplace_back(events::StrippedEvent<policy_rule::ServerRule>(e));
 
                 break;
             }
             case events::EventType::SpaceChild: {
-                try {
-                    container.emplace_back(events::StrippedEvent<space::Child>(e));
-                } catch (json::exception &err) {
-                    log_error(err, e);
-                }
+                container.emplace_back(events::StrippedEvent<space::Child>(e));
 
                 break;
             }
             case events::EventType::SpaceParent: {
-                try {
-                    container.emplace_back(events::StrippedEvent<space::Parent>(e));
-                } catch (json::exception &err) {
-                    log_error(err, e);
-                }
+                container.emplace_back(events::StrippedEvent<space::Parent>(e));
 
                 break;
             }
             case events::EventType::RoomPinnedEvents: {
-                try {
-                    container.emplace_back(events::StrippedEvent<events::state::PinnedEvents>(e));
-                } catch (json::exception &err) {
-                    log_error(err, e);
-                }
+                container.emplace_back(events::StrippedEvent<events::state::PinnedEvents>(e));
 
                 break;
             }
             case events::EventType::Unsupported: {
-                try {
-                    container.emplace_back(events::StrippedEvent<events::Unknown>(e));
-                } catch (json::exception &err) {
-                    log_error(err, e);
-                }
+                container.emplace_back(events::StrippedEvent<events::Unknown>(e));
 
                 break;
             }
@@ -1445,6 +942,8 @@ parse_stripped_events(const json &events,
             case events::EventType::Dummy:
                 continue;
             }
+        } catch (json::exception &err) {
+            log_error(err, e);
         }
     }
 }
@@ -1458,40 +957,32 @@ parse_ephemeral_events(const json &events,
     for (const auto &e : events) {
         const auto type = mtx::events::getEventType(e);
 
-        switch (type) {
-        case events::EventType::Typing: {
-            try {
+        try {
+            switch (type) {
+            case events::EventType::Typing: {
                 container.emplace_back(events::EphemeralEvent<events::ephemeral::Typing>(e));
-            } catch (json::exception &err) {
-                log_error(err, e);
+                break;
             }
-
-            break;
-        }
-        case events::EventType::Receipt: {
-            try {
+            case events::EventType::Receipt: {
                 container.emplace_back(events::EphemeralEvent<events::ephemeral::Receipt>(e));
-            } catch (json::exception &err) {
-                log_error(err, e);
-            }
 
-            break;
-        }
-        case events::EventType::Unsupported: {
-            try {
+                break;
+            }
+            case events::EventType::Unsupported: {
                 container.emplace_back(events::EphemeralEvent<events::Unknown>(e));
-            } catch (json::exception &err) {
-                log_error(err, e);
-            }
 
-            break;
-        }
-        default:
-            continue;
+                break;
+            }
+            default:
+                continue;
+            }
+        } catch (json::exception &err) {
+            utils::log_error(err, e);
         }
     }
 }
 }
+
 void
 from_json(const nlohmann::json &arr, StateEvents &response)
 {

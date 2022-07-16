@@ -12,7 +12,7 @@ namespace state {
 void
 from_json(const json &obj, PinnedEvents &event)
 {
-    event.pinned = obj.at("pinned").get<std::vector<std::string>>();
+    event.pinned = obj.value("pinned", std::vector<std::string>{});
 }
 
 void

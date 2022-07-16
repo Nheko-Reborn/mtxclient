@@ -71,7 +71,7 @@ to_json(json &obj, const JoinAllowance &allowance)
 void
 from_json(const json &obj, JoinRules &join_rules)
 {
-    join_rules.join_rule = stringToJoinRule(obj.at("join_rule").get<std::string>());
+    join_rules.join_rule = stringToJoinRule(obj.value("join_rule", ""));
 
     if (obj.contains("allow"))
         join_rules.allow = obj.at("allow").get<decltype(join_rules.allow)>();

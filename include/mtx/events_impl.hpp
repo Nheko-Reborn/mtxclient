@@ -48,8 +48,10 @@ from_json(const nlohmann::json &obj, Event<Content> &event)
               obj.at("content").at("im.nheko.relations.v1.relations");
 
         event.content = new_content.get<Content>();
-    } else {
+    } else if (obj.at("content").is_object()) {
         event.content = obj.at("content").get<Content>();
+    } else {
+        event.content = {};
     }
 
     event.type   = getEventType(obj.at("type").get<std::string>());

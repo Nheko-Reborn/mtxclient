@@ -693,7 +693,7 @@ TEST(Responses, Messages)
     EXPECT_EQ(messages.end, "t47409-4357353_219380_26003_2265");
     ASSERT_EQ(messages.chunk.size(), 2);
 
-    EXPECT_TRUE(std::holds_alternative<RoomEvent<msg::Redacted>>(messages.chunk[0]));
+    EXPECT_TRUE(std::holds_alternative<RoomEvent<Unknown>>(messages.chunk[0]));
 
     third_event = std::get<StateEvent<Name>>(messages.chunk[1]);
     EXPECT_EQ(third_event.content.name, "New room name");
