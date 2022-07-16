@@ -838,6 +838,23 @@ TEST(StateEvents, PolicyRuleUser)
     EXPECT_EQ(event.content.entity, "@alice*:example.org");
     EXPECT_EQ(event.content.reason, "undesirable behaviour");
     EXPECT_EQ(event.content.recommendation, ns::state::policy_rule::recommendation::ban);
+
+    data  = R"(
+{
+    "content": null,
+    "event_id": "$143273582443PhrSn:example.org",
+    "origin_server_ts": 1432735824653,
+    "room_id": "!jEsUZKDJdhlrceRyVU:example.org",
+    "sender": "@example:example.org",
+    "state_key": "rule:@alice*:example.org",
+    "type": "m.policy.rule.user",
+    "unsigned": {
+        "age": 1234
+    }
+}
+        )"_json;
+    event = data.get<ns::StateEvent<ns::state::policy_rule::UserRule>>();
+    EXPECT_EQ(event.type, ns::EventType::PolicyRuleUser);
 }
 
 TEST(StateEvents, PolicyRuleRoom)
