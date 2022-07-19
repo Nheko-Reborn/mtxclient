@@ -228,7 +228,7 @@ parse_timeline_events(const json &events,
                     container.emplace_back(events::StateEvent<events::msg::Redacted>(e));
                 else
                     container.emplace_back(events::RoomEvent<events::msg::Redacted>(e));
-                return;
+                continue;
             }
             switch (type) {
             case events::EventType::Reaction: {
@@ -623,7 +623,7 @@ parse_state_events(const json &events,
         try {
             if (e.contains("unsigned") && e["unsigned"].contains("redacted_by")) {
                 container.emplace_back(events::StateEvent<events::msg::Redacted>(e));
-                return;
+                continue;
             }
 
             switch (type) {

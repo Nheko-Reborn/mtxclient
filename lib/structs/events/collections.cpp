@@ -320,7 +320,7 @@ from_json(const nlohmann::json &obj, TimelineEvent &e)
             }
             case MsgType::Unknown: {
                 e.data = events::RoomEvent<events::Unknown>(obj);
-                return;
+                break;
             }
             }
             break;
@@ -377,7 +377,7 @@ from_json(const nlohmann::json &obj, TimelineEvent &e)
         case events::EventType::ImagePackInAccountData:
         case events::EventType::ImagePackRooms:
         case events::EventType::Dummy:
-            return;
+            break;
         }
     } catch (std::exception &err) {
         mtx::utils::log::log()->error("Invalid event type: {} {}", err.what(), obj.dump(2));
