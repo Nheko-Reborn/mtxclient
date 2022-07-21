@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.8.0] -- unreleased
+
+- Update hidden read receipts to current MSC
+- Add support for policy rules
+- Support for v1 call events and use voip namespace (contributed by r0hit)
+- Simplify unknown and redacted event handling
+- Support listing, resolving and setting aliases
+- Require Matrix v1.1
+- Support the knock_restricted rule
+- Get rid of redundant namespaces and using namespaces
+- Remove support for groups
+- Optionally disable implicit JSON conversions
+- Support fallback keys
+- Make sender_key optional
+- Allow more base64 encodings for cross-signing events
+- Use spdlog for logging
+- Support reasons for knocking, joining leaving and inviting.
+- Support initial state in createRoom
+
 ## [0.7.0] -- 2022-03-09
 
 - Allow querying a reusable server url for the current server
