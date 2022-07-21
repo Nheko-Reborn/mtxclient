@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.8.0] -- unreleased
+## [0.8.0] -- 2022-07-22
 
 - Update hidden read receipts to current MSC
 - Add support for policy rules
