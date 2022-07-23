@@ -238,6 +238,7 @@ target_sources(matrix_client
 	lib/structs/events/messages/text.cpp
 	lib/structs/events/messages/video.cpp
 	lib/structs/events/mscs/image_packs.cpp
+	lib/structs/responses/capabilities.cpp
 	lib/structs/responses/common.cpp
 	lib/structs/responses/create_room.cpp
 	lib/structs/responses/crypto.cpp

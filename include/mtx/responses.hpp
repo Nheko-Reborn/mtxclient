@@ -5,6 +5,7 @@
 
 #include "responses/common.hpp"
 
+#include "responses/capabilities.hpp"
 #include "responses/create_room.hpp"
 #include "responses/crypto.hpp"
 #include "responses/device.hpp"

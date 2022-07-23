@@ -685,6 +685,16 @@ Client::versions(Callback<mtx::responses::Versions> callback)
 }
 
 void
+Client::capabilities(Callback<mtx::responses::capabilities::Capabilities> callback)
+{
+    get<mtx::responses::capabilities::Capabilities>(
+      "/client/v3/capabilities",
+      [callback = std::move(callback)](const mtx::responses::capabilities::Capabilities &res,
+                                       HeaderFields,
+                                       RequestErr err) { callback(res, err); });
+}
+
+void
 Client::upload(const std::string &data,
                const std::string &content_type,
                const std::string &filename,

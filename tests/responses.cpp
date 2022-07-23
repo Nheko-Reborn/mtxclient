@@ -518,6 +518,172 @@ TEST(Responses, RegistrationTokenValidity)
     EXPECT_EQ(validity.valid, true);
 }
 
+TEST(Responses, Capabilities)
+{
+    json data = R"(
+{
+  "capabilities": {
+    "com.example.custom.ratelimit": {
+      "max_requests_per_hour": 600
+    },
+    "m.change_password": {
+      "enabled": false
+    },
+    "m.room_versions": {
+      "available": {
+        "1": "stable",
+        "2": "stable",
+        "3": "unstable",
+        "test-version": "unstable"
+      },
+      "default": "1"
+    }
+  }
+}
+)"_json;
+
+    namespace cap = mtx::responses::capabilities;
+
+    cap::Capabilities c = data.get<cap::Capabilities>();
+    EXPECT_EQ(c.room_versions.default_, "1");
+    EXPECT_EQ(c.room_versions.available["1"], capabilities::RoomVersionStability::Stable);
+    EXPECT_EQ(c.room_versions.available["2"], capabilities::RoomVersionStability::Stable);
+    EXPECT_EQ(c.room_versions.available["3"], capabilities::RoomVersionStability::Unstable);
+    EXPECT_EQ(c.room_versions.available["not-listed"],
+              capabilities::RoomVersionStability::Unstable);
+    EXPECT_EQ(c.room_versions.available["test-version"],
+              capabilities::RoomVersionStability::Unstable);
+    EXPECT_EQ(c.change_3pid.enabled, true);
+    EXPECT_EQ(c.change_password.enabled, false);
+    EXPECT_EQ(c.set_avatar_url.enabled, true);
+    EXPECT_EQ(c.set_displayname.enabled, true);
+
+    data = R"(
+{
+  "capabilities": {
+    "m.change_password": {
+      "enabled": false
+    }
+  }
+}
+		)"_json;
+
+    c = data.get<cap::Capabilities>();
+    EXPECT_EQ(c.room_versions.default_, "1");
+    EXPECT_EQ(c.room_versions.available["1"], capabilities::RoomVersionStability::Stable);
+    EXPECT_EQ(c.room_versions.available["2"], capabilities::RoomVersionStability::Unstable);
+    EXPECT_EQ(c.room_versions.available["3"], capabilities::RoomVersionStability::Unstable);
+    EXPECT_EQ(c.room_versions.available["not-listed"],
+              capabilities::RoomVersionStability::Unstable);
+    EXPECT_EQ(c.room_versions.available["test-version"],
+              capabilities::RoomVersionStability::Unstable);
+    EXPECT_EQ(c.change_3pid.enabled, true);
+    EXPECT_EQ(c.change_password.enabled, false);
+    EXPECT_EQ(c.set_avatar_url.enabled, true);
+    EXPECT_EQ(c.set_displayname.enabled, true);
+
+    data = R"(
+{
+  "capabilities": {
+    "m.room_versions": {
+      "default": "2",
+      "available": {
+        "1": "stable",
+        "2": "stable",
+        "3": "unstable",
+        "custom-version": "unstable"
+      }
+    }
+  }
+}
+		)"_json;
+
+    c = data.get<cap::Capabilities>();
+    EXPECT_EQ(c.room_versions.default_, "2");
+    EXPECT_EQ(c.room_versions.available["1"], capabilities::RoomVersionStability::Stable);
+    EXPECT_EQ(c.room_versions.available["2"], capabilities::RoomVersionStability::Stable);
+    EXPECT_EQ(c.room_versions.available["3"], capabilities::RoomVersionStability::Unstable);
+    EXPECT_EQ(c.room_versions.available["not-listed"],
+              capabilities::RoomVersionStability::Unstable);
+    EXPECT_EQ(c.room_versions.available["test-version"],
+              capabilities::RoomVersionStability::Unstable);
+    EXPECT_EQ(c.change_3pid.enabled, true);
+    EXPECT_EQ(c.change_password.enabled, true);
+    EXPECT_EQ(c.set_avatar_url.enabled, true);
+    EXPECT_EQ(c.set_displayname.enabled, true);
+
+    data = R"(
+{
+  "capabilities": {
+    "m.set_displayname": {
+      "enabled": false
+    }
+  }
+}
+		)"_json;
+
+    c = data.get<cap::Capabilities>();
+    EXPECT_EQ(c.room_versions.default_, "1");
+    EXPECT_EQ(c.room_versions.available["1"], capabilities::RoomVersionStability::Stable);
+    EXPECT_EQ(c.room_versions.available["2"], capabilities::RoomVersionStability::Unstable);
+    EXPECT_EQ(c.room_versions.available["3"], capabilities::RoomVersionStability::Unstable);
+    EXPECT_EQ(c.room_versions.available["not-listed"],
+              capabilities::RoomVersionStability::Unstable);
+    EXPECT_EQ(c.room_versions.available["test-version"],
+              capabilities::RoomVersionStability::Unstable);
+    EXPECT_EQ(c.change_3pid.enabled, true);
+    EXPECT_EQ(c.change_password.enabled, true);
+    EXPECT_EQ(c.set_avatar_url.enabled, true);
+    EXPECT_EQ(c.set_displayname.enabled, false);
+
+    data = R"(
+{
+  "capabilities": {
+    "m.set_avatar_url": {
+      "enabled": false
+    }
+  }
+}
+		)"_json;
+
+    c = data.get<cap::Capabilities>();
+    EXPECT_EQ(c.room_versions.default_, "1");
+    EXPECT_EQ(c.room_versions.available["1"], capabilities::RoomVersionStability::Stable);
+    EXPECT_EQ(c.room_versions.available["2"], capabilities::RoomVersionStability::Unstable);
+    EXPECT_EQ(c.room_versions.available["3"], capabilities::RoomVersionStability::Unstable);
+    EXPECT_EQ(c.room_versions.available["not-listed"],
+              capabilities::RoomVersionStability::Unstable);
+    EXPECT_EQ(c.room_versions.available["test-version"],
+              capabilities::RoomVersionStability::Unstable);
+    EXPECT_EQ(c.change_3pid.enabled, true);
+    EXPECT_EQ(c.change_password.enabled, true);
+    EXPECT_EQ(c.set_avatar_url.enabled, false);
+    EXPECT_EQ(c.set_displayname.enabled, true);
+
+    data = R"(
+{
+  "capabilities": {
+    "m.3pid_changes": {
+      "enabled": false
+    }
+  }
+}
+		)"_json;
+
+    c = data.get<cap::Capabilities>();
+    EXPECT_EQ(c.room_versions.default_, "1");
+    EXPECT_EQ(c.room_versions.available["1"], capabilities::RoomVersionStability::Stable);
+    EXPECT_EQ(c.room_versions.available["2"], capabilities::RoomVersionStability::Unstable);
+    EXPECT_EQ(c.room_versions.available["3"], capabilities::RoomVersionStability::Unstable);
+    EXPECT_EQ(c.room_versions.available["not-listed"],
+              capabilities::RoomVersionStability::Unstable);
+    EXPECT_EQ(c.room_versions.available["test-version"],
+              capabilities::RoomVersionStability::Unstable);
+    EXPECT_EQ(c.change_3pid.enabled, false);
+    EXPECT_EQ(c.change_password.enabled, true);
+    EXPECT_EQ(c.set_avatar_url.enabled, true);
+    EXPECT_EQ(c.set_displayname.enabled, true);
+}
 TEST(Responses, CreateRoom)
 {
     json data = R"({"room_id" : "!sefiuhWgwghwWgh:example.com"})"_json;

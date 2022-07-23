@@ -984,6 +984,31 @@ TEST(ClientAPI, Versions)
     mtx_client->close();
 }
 
+TEST(ClientAPI, Capabilities)
+{
+    std::shared_ptr<Client> mtx_client = make_test_client();
+
+    mtx_client->login(
+      "alice", "secret", [mtx_client](const mtx::responses::Login &, RequestErr err) {
+          check_error(err);
+          mtx_client->capabilities(
+            [](const mtx::responses::capabilities::Capabilities &res, RequestErr err) {
+                check_error(err);
+
+                EXPECT_GE(res.room_versions.default_.size(), 1);
+                EXPECT_GE(res.room_versions.available.size(), 1);
+                EXPECT_EQ(res.room_versions.available.at(res.room_versions.default_),
+                          mtx::responses::capabilities::RoomVersionStability::Stable);
+                EXPECT_EQ(res.change_3pid.enabled, true);
+                EXPECT_EQ(res.change_password.enabled, true);
+                EXPECT_EQ(res.set_avatar_url.enabled, true);
+                EXPECT_EQ(res.set_displayname.enabled, true);
+            });
+      });
+
+    mtx_client->close();
+}
+
 TEST(ClientAPI, Typing)
 {
     auto alice = make_test_client();

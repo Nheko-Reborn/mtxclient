@@ -91,6 +91,9 @@ struct RoomKeysBackup;
 struct KeysBackup;
 struct BackupVersion;
 }
+namespace capabilities {
+struct Capabilities;
+}
 }
 }
 
@@ -439,6 +442,9 @@ public:
 
     //! Get the supported versions from the server.
     void versions(Callback<mtx::responses::Versions> cb);
+
+    //! Get the supported capabilities from the server.
+    void capabilities(Callback<mtx::responses::capabilities::Capabilities> cb);
 
     //! Mark an event as read.
     void read_event(const std::string &room_id,
