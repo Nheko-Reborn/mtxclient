@@ -23,24 +23,21 @@ sed -i 's,/data,/data2,g' /conf/homeserver.yaml
 
 SYNAPSE_SERVER_NAME=synapse SYNAPSE_REPORT_STATS=no /start.py generate
 
-perl -pi -w -e \
-    's/#enable_registration: false/enable_registration: true/g;' data2/homeserver.yaml
-perl -pi -w -e \
-    's/tls: false/tls: true/g;' data2/homeserver.yaml
-perl -pi -w -e \
-    's/#tls_certificate_path:/tls_certificate_path:/g;' data2/homeserver.yaml
-perl -pi -w -e \
-    's/#tls_private_key_path:/tls_private_key_path:/g;' data2/homeserver.yaml
-
 openssl req -x509 -newkey rsa:4096 -keyout data2/synapse.tls.key -out data2/synapse.tls.crt -days 365 -subj '/CN=synapse' -nodes
 chmod 0777 data2/synapse.tls.crt
 chmod 0777 data2/synapse.tls.key
 
-# set db config to postgres
-sed -i '/^database/,+4d' /data2/homeserver.yaml
+sed -i 's/tls: false/tls: true/g;' data2/homeserver.yaml
 
 # yes, the empty line is needed
 cat <<EOF >> /data2/homeserver.yaml
+
+
+enable_registration: true
+enable_registration_without_verification: true
+
+tls_certificate_path: "/data2/synapse.tls.crt"
+tls_private_key_path: "/data2/synapse.tls.key"
 
 database:
   name: psycopg2
@@ -81,6 +78,9 @@ rc_joins:
   remote:
     per_second: 10000
     burst_count: 100000
+
+experimental_features:
+  msc3266_enabled: true
 EOF
 
 # start synapse and create users

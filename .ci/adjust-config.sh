@@ -15,6 +15,12 @@ $CMD perl -pi -w -e \
 cat <<HEREDOC
 
 
+enable_registration: true
+enable_registration_without_verification: true
+
+tls_certificate_path: "/data/localhost.tls.crt"
+tls_private_key_path: "/data/localhost.tls.key"
+
 rc_message:
   per_second: 10000
   burst_count: 100000
@@ -45,17 +51,16 @@ rc_joins:
   remote:
     per_second: 10000
     burst_count: 100000
+
+experimental_features:
+  msc2716_enabled: true
+  msc3266_enabled: true
+
 HEREDOC
 ) | $CMD tee -a data/homeserver.yaml
 
 $CMD perl -pi -w -e \
-    's/#enable_registration: false/enable_registration: true/g;' data/homeserver.yaml
-$CMD perl -pi -w -e \
     's/tls: false/tls: true/g;' data/homeserver.yaml
-$CMD perl -pi -w -e \
-    's/#tls_certificate_path:/tls_certificate_path:/g;' data/homeserver.yaml
-$CMD perl -pi -w -e \
-    's/#tls_private_key_path:/tls_private_key_path:/g;' data/homeserver.yaml
 
 $CMD openssl req -x509 -newkey rsa:4096 -keyout data/localhost.tls.key -out data/localhost.tls.crt -days 365 -subj '/CN=localhost' -nodes
 

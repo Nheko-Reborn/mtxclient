@@ -1,6 +1,7 @@
 FILES=`find lib include tests examples -type f -type f \( -iname "*.cpp" -o -iname "*.hpp" \)`
 
-SYNAPSE_IMAGE="matrixdotorg/synapse:v1.55.0"
+# see https://github.com/matrix-org/synapse/issues/13375
+SYNAPSE_IMAGE="matrixdotorg/synapse:v1.61.0"
 
 DEPS_BUILD_DIR=.deps
 DEPS_SOURCE_DIR=deps

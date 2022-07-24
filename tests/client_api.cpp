@@ -1044,6 +1044,8 @@ TEST(ClientAPI, Typing)
                 alice->stop_typing(room_id, [alice, room_id](RequestErr err) {
                     check_error(err);
 
+                    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+
                     SyncOpts opts;
                     opts.timeout = 0;
                     alice->sync(opts, [room_id](const mtx::responses::Sync &res, RequestErr err) {
@@ -1433,7 +1435,9 @@ TEST(ClientAPI, Pagination)
                   check_error(err);
 
                   // We reached the start of the timeline.
-                  EXPECT_EQ(res.start, res.end);
+                  // Old synapse versions send start == end in that case, newer ones send an empty
+                  // token.
+                  EXPECT_TRUE(res.start == res.end || res.end.empty());
                   EXPECT_EQ(res.chunk.size(), 0);
               });
           });
