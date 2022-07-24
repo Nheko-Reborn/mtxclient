@@ -1117,7 +1117,7 @@ TEST(ClientAPI, PresenceOverSync)
     bob->login(
       "bob", "secret", [](const mtx::responses::Login &, RequestErr err) { check_error(err); });
 
-    while (alice->access_token().empty() && bob->access_token().empty())
+    while (alice->access_token().empty() || bob->access_token().empty())
         sleep();
 
     std::atomic<bool> can_exit = false;
@@ -1840,6 +1840,50 @@ TEST(ClientAPI, PublicRooms)
       });
 
     WAIT_UNTIL(can_exit);
+
+    alice->close();
+    bob->close();
+}
+
+TEST(ClientAPI, Summary)
+{
+    // Setup : Create a new (public) room with some settings
+    auto alice = make_test_client();
+    auto bob   = make_test_client();
+
+    alice->login("alice", "secret", [alice](const mtx::responses::Login &, RequestErr err) {
+        check_error(err);
+    });
+
+    bob->login(
+      "bob", "secret", [bob](const mtx::responses::Login &, RequestErr err) { check_error(err); });
+
+    while (alice->access_token().empty() || bob->access_token().empty())
+        sleep();
+
+    std::string room_name = "Public Room" + alice->generate_txn_id();
+    mtx::requests::CreateRoom req;
+    req.name            = room_name;
+    req.topic           = "Test";
+    req.visibility      = mtx::common::RoomVisibility::Public;
+    req.invite          = {"@bob:" + server_name()};
+    req.room_alias_name = alice->generate_txn_id();
+    req.preset          = Preset::PublicChat;
+
+    alice->create_room(
+      req, [alice, bob, room_name](const mtx::responses::CreateRoom &res, RequestErr err) {
+          check_error(err);
+          auto room_id = res.room_id;
+
+          bob->get_summary(room_id.to_string(),
+                           [room_name](const mtx::responses::PublicRoom &res, RequestErr err) {
+                               check_error(err);
+                               EXPECT_EQ(res.name, room_name);
+                               EXPECT_NE(res.room_version, "1");
+                               EXPECT_NE(res.room_version, "");
+                               EXPECT_EQ(res.membership, mtx::events::state::Membership::Invite);
+                           });
+      });
 
     alice->close();
     bob->close();

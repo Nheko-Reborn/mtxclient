@@ -56,12 +56,22 @@ struct PublicRoomsChunk
     //! Required: The type of room (from m.room.create), if any.
     std::string room_type;
 
+    //! Optional (not all APIs return this): The version of this room.
+    std::string room_version;
+
+    //! Optional: If you are a member of this room. Can usually be assumed to be "leave".
+    events::state::Membership membership = events::state::Membership::Leave;
+
+    //! Optional: If the room is encrypted, the encryption algorithm.
+    std::string encryption;
+
     //! The m.space.child events of the space-room, represented as Stripped State Events with an
     //! added origin_server_ts key.
     //!
     //! If the room is not a space-room, this should be empty.
     std::vector<mtx::events::collections::StrippedEvents> children_state;
 };
+using PublicRoom = PublicRoomsChunk;
 
 void
 from_json(const nlohmann::json &obj, PublicRoomsChunk &res);

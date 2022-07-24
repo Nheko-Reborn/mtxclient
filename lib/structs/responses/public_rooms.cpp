@@ -39,6 +39,14 @@ from_json(const nlohmann::json &obj, PublicRoomsChunk &res)
 
     res.room_type = obj.value("room_type", std::string{});
 
+    res.room_version = obj.value("im.nheko.summary.room_version",
+                                 obj.value("im.nheko.summary.version", std::string{}));
+
+    res.membership = mtx::events::state::stringToMembership(
+      obj.value("membership", obj.value("im.nheko.summary.membership", "leave")));
+
+    res.encryption = obj.value("im.nheko.summary.encryption", std::string{});
+
     if (obj.contains("children_state"))
         mtx::responses::utils::parse_stripped_events(obj.at("children_state"), res.children_state);
 }

@@ -1245,6 +1245,58 @@ Client::get_hierarchy(const std::string &room_id,
         const mtx::responses::HierarchyRooms &res, HeaderFields, RequestErr err) { cb(res, err); });
 }
 
+void
+Client::get_summary(const std::string &room_id,
+                    Callback<mtx::responses::PublicRoomsChunk> cb,
+                    std::vector<std::string> via)
+{
+    std::string query;
+    if (!via.empty()) {
+        query = "?via=" + mtx::client::utils::url_encode(via[0]);
+        for (size_t i = 1; i < via.size(); i++) {
+            query += "&via=" + mtx::client::utils::url_encode(via[i]);
+        }
+    }
+    std::string api_path = "/client/unstable/im.nheko.summary/rooms/" +
+                           mtx::client::utils::url_encode(room_id) + "/summary" + query;
+
+    get<mtx::responses::PublicRoomsChunk>(
+      api_path,
+      [this, room_id, cb = std::move(cb)](
+        const mtx::responses::PublicRoomsChunk &res, HeaderFields, RequestErr err) {
+          if (!err && !(err->status_code == 404 || err->status_code == 400))
+              cb(res, err);
+          else if (!room_id.empty() && room_id[0] == '#')
+              resolve_room_alias(
+                room_id, [this, cb](const mtx::responses::RoomId &room, RequestErr err) {
+                    if (room.room_id.empty())
+                        cb({}, err);
+                    else
+                        get_hierarchy(
+                          room.room_id,
+                          [cb](const mtx::responses::HierarchyRooms &res, RequestErr err) {
+                              if (res.rooms.empty())
+                                  cb({}, err);
+                              else
+                                  cb(res.rooms.front(), err);
+                          },
+                          "",
+                          1);
+                });
+          else
+              get_hierarchy(
+                room_id,
+                [cb](const mtx::responses::HierarchyRooms &res, RequestErr err) {
+                    if (res.rooms.empty())
+                        cb({}, err);
+                    else
+                        cb(res.rooms.front(), err);
+                },
+                "",
+                1);
+      });
+}
+
 //
 // Device related endpoints
 //

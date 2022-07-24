@@ -69,6 +69,7 @@ struct Messages;
 struct Notifications;
 struct Profile;
 struct PublicRoomVisibility;
+struct PublicRoomsChunk;
 struct PublicRooms;
 struct HierarchyRooms;
 struct QueryDevices;
@@ -634,6 +635,11 @@ public:
                        size_t limit            = 0,
                        size_t max_depth        = 0,
                        bool suggested_only     = false);
+
+    //! summarize a room
+    void get_summary(const std::string &room_id,
+                     Callback<mtx::responses::PublicRoomsChunk> cb,
+                     std::vector<std::string> vias = {});
 
     //
     // Device related endpoints.

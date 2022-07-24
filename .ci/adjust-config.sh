@@ -53,7 +53,6 @@ rc_joins:
     burst_count: 100000
 
 experimental_features:
-  msc2716_enabled: true
   msc3266_enabled: true
 
 HEREDOC
