@@ -1,5 +1,4 @@
-FROM matrixdotorg/synapse:v1.61.0
-# see https://github.com/matrix-org/synapse/issues/13375
+FROM matrixdotorg/synapse:v1.63.1
 
 COPY setup-synapse.sh /setup-synapse.sh
 COPY entrypoint.sh /entrypoint.sh

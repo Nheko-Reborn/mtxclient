@@ -1033,7 +1033,8 @@ TEST(ClientAPI, Typing)
             alice->sync(opts, [room_id, alice](const mtx::responses::Sync &res, RequestErr err) {
                 check_error(err);
 
-                auto room = res.rooms.join.at(room_id);
+                auto room       = res.rooms.join.at(room_id);
+                auto next_batch = res.next_batch;
 
                 EXPECT_EQ(room.ephemeral.events.size(), 1);
                 EXPECT_EQ(std::get<mtx::events::EphemeralEvent<mtx::events::ephemeral::Typing>>(
@@ -1041,13 +1042,12 @@ TEST(ClientAPI, Typing)
                             .content.user_ids.front(),
                           "@alice:" + server_name());
 
-                alice->stop_typing(room_id, [alice, room_id](RequestErr err) {
+                alice->stop_typing(room_id, [alice, room_id, next_batch](RequestErr err) {
                     check_error(err);
-
-                    std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
                     SyncOpts opts;
                     opts.timeout = 0;
+                    opts.since   = next_batch;
                     alice->sync(opts, [room_id](const mtx::responses::Sync &res, RequestErr err) {
                         check_error(err);
                         auto room = res.rooms.join.at(room_id);
