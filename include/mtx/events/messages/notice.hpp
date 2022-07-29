@@ -30,13 +30,10 @@ struct Notice
     std::string formatted_body;
     //! Relates to for rich replies
     mtx::common::Relations relations;
+
+    friend void from_json(const nlohmann::json &obj, Notice &content);
+    friend void to_json(nlohmann::json &obj, const Notice &content);
 };
-
-void
-from_json(const nlohmann::json &obj, Notice &content);
-
-void
-to_json(nlohmann::json &obj, const Notice &content);
 
 } // namespace msg
 } // namespace events

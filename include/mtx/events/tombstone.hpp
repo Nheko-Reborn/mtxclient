@@ -24,15 +24,13 @@ struct Tombstone
     std::string body;
     //! Required. The new room the client should be visiting.
     std::string replacement_room;
+
+    //! Deserialization method needed by @p nlohmann::json.
+    friend void from_json(const nlohmann::json &obj, Tombstone &content);
+
+    //! Serialization method needed by @p nlohmann::json.
+    friend void to_json(nlohmann::json &obj, const Tombstone &content);
 };
-
-//! Deserialization method needed by @p nlohmann::json.
-void
-from_json(const nlohmann::json &obj, Tombstone &content);
-
-//! Serialization method needed by @p nlohmann::json.
-void
-to_json(nlohmann::json &obj, const Tombstone &content);
 
 } // namespace state
 } // namespace events

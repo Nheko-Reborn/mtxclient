@@ -37,14 +37,10 @@ struct PushCondition
     //! less than the given number and so forth. If no prefix is present, this parameter
     //! defaults to ==.
     std::string is;
+
+    friend void to_json(nlohmann::json &obj, const PushCondition &condition);
+    friend void from_json(const nlohmann::json &obj, PushCondition &condition);
 };
-
-void
-to_json(nlohmann::json &obj, const PushCondition &condition);
-
-void
-from_json(const nlohmann::json &obj, PushCondition &condition);
-
 //! Namespace for the different push actions.
 namespace actions {
 //! Notify the user.
@@ -89,12 +85,10 @@ from_json(const nlohmann::json &obj, Action &action);
 struct Actions
 {
     std::vector<Action> actions;
-};
-void
-to_json(nlohmann::json &obj, const Actions &action);
 
-void
-from_json(const nlohmann::json &obj, Actions &action);
+    friend void to_json(nlohmann::json &obj, const Actions &action);
+    friend void from_json(const nlohmann::json &obj, Actions &action);
+};
 }
 
 //! A pushrule defining the notification behaviour for a message.
@@ -114,13 +108,10 @@ struct PushRule
     //! event. A rule with no conditions always matches. Only applicable to underride and
     //! override rules.
     std::vector<PushCondition> conditions;
+
+    friend void to_json(nlohmann::json &obj, const PushRule &condition);
+    friend void from_json(const nlohmann::json &obj, PushRule &condition);
 };
-
-void
-to_json(nlohmann::json &obj, const PushRule &condition);
-
-void
-from_json(const nlohmann::json &obj, PushRule &condition);
 
 //! All the pushrules to evaluate for events.
 struct Ruleset
@@ -139,37 +130,28 @@ struct Ruleset
     std::vector<PushRule> room;
     std::vector<PushRule> sender;
     std::vector<PushRule> underride;
+
+    friend void to_json(nlohmann::json &obj, const Ruleset &condition);
+    friend void from_json(const nlohmann::json &obj, Ruleset &condition);
 };
-
-void
-to_json(nlohmann::json &obj, const Ruleset &condition);
-
-void
-from_json(const nlohmann::json &obj, Ruleset &condition);
 
 //! The global ruleset applied to all events.
 struct GlobalRuleset
 {
     //! The actual ruleset.
     Ruleset global;
+
+    friend void to_json(nlohmann::json &obj, const GlobalRuleset &set);
+    friend void from_json(const nlohmann::json &obj, GlobalRuleset &set);
 };
-
-void
-to_json(nlohmann::json &obj, const GlobalRuleset &set);
-
-void
-from_json(const nlohmann::json &obj, GlobalRuleset &set);
 
 //! The response for queries, if a specific ruleset is enabled.
 struct Enabled
 {
     bool enabled = true;
+
+    friend void to_json(nlohmann::json &obj, const Enabled &enabled);
+    friend void from_json(const nlohmann::json &obj, Enabled &enabled);
 };
-
-void
-to_json(nlohmann::json &obj, const Enabled &enabled);
-
-void
-from_json(const nlohmann::json &obj, Enabled &enabled);
 }
 }

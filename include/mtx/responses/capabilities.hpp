@@ -31,19 +31,18 @@ struct RoomVersionsCapability
     std::map<std::string, RoomVersionStability> available = {
       {"1", RoomVersionStability::Stable},
     };
+
+    friend void from_json(const nlohmann::json &obj, RoomVersionsCapability &cap);
 };
-void
-from_json(const nlohmann::json &obj, RoomVersionsCapability &cap);
 
 //! any capability that can be enabled or disabled.
 struct Enabled
 {
     //! If this capability is enabled.
     bool enabled = true;
-};
 
-void
-from_json(const nlohmann::json &obj, Enabled &cap);
+    friend void from_json(const nlohmann::json &obj, Enabled &cap);
+};
 
 //! Response from the `GET  /_matrix/client/v3/capabilities` endpoint.
 //
@@ -61,10 +60,9 @@ struct Capabilities
     //! This capability has a single flag, enabled, to denote whether the user is able to add,
     //! remove, or change 3PID associations on their account.
     Enabled change_3pid;
-};
 
-void
-from_json(const nlohmann::json &obj, Capabilities &caps);
+    friend void from_json(const nlohmann::json &obj, Capabilities &caps);
+};
 }
 }
 }

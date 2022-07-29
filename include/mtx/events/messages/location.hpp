@@ -32,13 +32,10 @@ struct Location
     mtx::common::LocationInfo info;
     //! Relates to for rich replies
     mtx::common::Relations relations;
+
+    friend void from_json(const nlohmann::json &obj, Location &content);
+    friend void to_json(nlohmann::json &obj, const Location &content);
 };
-
-void
-from_json(const nlohmann::json &obj, Location &content);
-
-void
-to_json(nlohmann::json &obj, const Location &content);
 
 } // namespace msg
 } // namespace events

@@ -54,13 +54,11 @@ struct OlmCipherContent
     /// `0` for initial pre-key messages.
     /// `1` for normal messages after the initial exchange.
     uint8_t type;
+
+    friend void from_json(const nlohmann::json &obj, OlmCipherContent &event);
+
+    friend void to_json(nlohmann::json &obj, const OlmCipherContent &event);
 };
-
-void
-from_json(const nlohmann::json &obj, OlmCipherContent &event);
-
-void
-to_json(nlohmann::json &obj, const OlmCipherContent &event);
 
 //! Content of the `m.room.encrypted` Olm event.
 struct OlmEncrypted
@@ -73,13 +71,11 @@ struct OlmEncrypted
     using RecipientKey = std::string;
     //! Map of recipient curve25519 key to the encrypted message.
     std::map<RecipientKey, OlmCipherContent> ciphertext;
+
+    friend void from_json(const nlohmann::json &obj, OlmEncrypted &event);
+
+    friend void to_json(nlohmann::json &obj, const OlmEncrypted &event);
 };
-
-void
-from_json(const nlohmann::json &obj, OlmEncrypted &event);
-
-void
-to_json(nlohmann::json &obj, const OlmEncrypted &event);
 
 //! Content of the `m.room.encrypted` event.
 struct Encrypted
@@ -96,23 +92,18 @@ struct Encrypted
     std::string session_id;
     //! Relations like rich replies
     common::Relations relations;
+
+    friend void from_json(const nlohmann::json &obj, Encrypted &event);
+
+    friend void to_json(nlohmann::json &obj, const Encrypted &event);
 };
-
-void
-from_json(const nlohmann::json &obj, Encrypted &event);
-
-void
-to_json(nlohmann::json &obj, const Encrypted &event);
 
 //! Content of the `m.dummy` event.
 struct Dummy
-{};
-
-void
-from_json(const nlohmann::json &obj, Dummy &event);
-
-void
-to_json(nlohmann::json &obj, const Dummy &event);
+{
+    friend void from_json(const nlohmann::json &obj, Dummy &event);
+    friend void to_json(nlohmann::json &obj, const Dummy &event);
+};
 
 //! Content of the `m.room_key` event.
 struct RoomKey
@@ -124,13 +115,10 @@ struct RoomKey
     std::string room_id;     //!< *Required.* The room where the key is used.
     std::string session_id;  //!< *Required.* The ID of the session that the key is for.
     std::string session_key; //!< *Required.* The key to be exchanged.
+
+    friend void from_json(const nlohmann::json &obj, RoomKey &event);
+    friend void to_json(nlohmann::json &obj, const RoomKey &event);
 };
-
-void
-from_json(const nlohmann::json &obj, RoomKey &event);
-
-void
-to_json(nlohmann::json &obj, const RoomKey &event);
 
 //! Content of the `m.forwarded_room_key` event.
 struct ForwardedRoomKey
@@ -156,13 +144,10 @@ struct ForwardedRoomKey
     /// forwarded from A to B to C, this field is empty between A and B, and contains A's
     /// Curve25519 key between B and C.
     std::vector<std::string> forwarding_curve25519_key_chain;
+
+    friend void from_json(const nlohmann::json &obj, ForwardedRoomKey &event);
+    friend void to_json(nlohmann::json &obj, const ForwardedRoomKey &event);
 };
-
-void
-from_json(const nlohmann::json &obj, ForwardedRoomKey &event);
-
-void
-to_json(nlohmann::json &obj, const ForwardedRoomKey &event);
 
 //! The type of key request.
 enum class RequestAction
@@ -199,13 +184,10 @@ struct KeyRequest
     std::string request_id;
     //! The device requesting the keys.
     std::string requesting_device_id;
+
+    friend void from_json(const nlohmann::json &obj, KeyRequest &event);
+    friend void to_json(nlohmann::json &obj, const KeyRequest &event);
 };
-
-void
-from_json(const nlohmann::json &obj, KeyRequest &event);
-
-void
-to_json(nlohmann::json &obj, const KeyRequest &event);
 
 //! Content of the `m.key.verification.request` event
 struct KeyVerificationRequest
@@ -227,13 +209,10 @@ struct KeyVerificationRequest
     //! the future by more than 5 minutes or more than 10 minutes in the past, the message
     //! should be ignored by the receiver.
     std::optional<uint64_t> timestamp;
+
+    friend void from_json(const nlohmann::json &obj, KeyVerificationRequest &event);
+    friend void to_json(nlohmann::json &obj, const KeyVerificationRequest &event);
 };
-
-void
-from_json(const nlohmann::json &obj, KeyVerificationRequest &event);
-
-void
-to_json(nlohmann::json &obj, const KeyVerificationRequest &event);
 
 //! Content of the `m.key.verification.start` event
 struct KeyVerificationStart
@@ -279,13 +258,10 @@ struct KeyVerificationStart
     /// @note Will be used only for room-verification msgs where this is used in place of
     /// transaction_id.
     common::Relations relations;
+
+    friend void from_json(const nlohmann::json &obj, KeyVerificationStart &event);
+    friend void to_json(nlohmann::json &obj, const KeyVerificationStart &event);
 };
-
-void
-from_json(const nlohmann::json &obj, KeyVerificationStart &event);
-
-void
-to_json(nlohmann::json &obj, const KeyVerificationStart &event);
 
 //! Implements the `m.key.verification.ready` event
 struct KeyVerificationReady
@@ -300,13 +276,10 @@ struct KeyVerificationReady
     //! key.verification.request will be used only for room-verification msgs where this
     //! is used in place of txnid
     common::Relations relations;
+
+    friend void from_json(const nlohmann::json &obj, KeyVerificationReady &event);
+    friend void to_json(nlohmann::json &obj, const KeyVerificationReady &event);
 };
-
-void
-from_json(const nlohmann::json &obj, KeyVerificationReady &event);
-
-void
-to_json(nlohmann::json &obj, const KeyVerificationReady &event);
 
 // ! Implements the `m.key.verification.done` event
 struct KeyVerificationDone
@@ -316,13 +289,10 @@ struct KeyVerificationDone
     //! this is used for relating this message with previously sent key.verification.request
     //! will be used only for room-verification msgs where this is used in place of txnid
     common::Relations relations;
+
+    friend void from_json(const nlohmann::json &obj, KeyVerificationDone &event);
+    friend void to_json(nlohmann::json &obj, const KeyVerificationDone &event);
 };
-
-void
-from_json(const nlohmann::json &obj, KeyVerificationDone &event);
-
-void
-to_json(nlohmann::json &obj, const KeyVerificationDone &event);
 
 //! Implements the `m.key.verification.accept` event
 struct KeyVerificationAccept
@@ -352,13 +322,10 @@ struct KeyVerificationAccept
     //! this is used for relating this message with previously sent key.verification.request
     //! will be used only for room-verification msgs where this is used in place of txnid
     common::Relations relations;
+
+    friend void from_json(const nlohmann::json &obj, KeyVerificationAccept &event);
+    friend void to_json(nlohmann::json &obj, const KeyVerificationAccept &event);
 };
-
-void
-from_json(const nlohmann::json &obj, KeyVerificationAccept &event);
-
-void
-to_json(nlohmann::json &obj, const KeyVerificationAccept &event);
 
 //! implementation of the `m.key.verification.cancel` event
 struct KeyVerificationCancel
@@ -397,13 +364,10 @@ struct KeyVerificationCancel
     //! this is used for relating this message with previously sent key.verification.request
     //! will be used only for room-verification msgs where this is used in place of txnid
     common::Relations relations;
+
+    friend void from_json(const nlohmann::json &obj, KeyVerificationCancel &event);
+    friend void to_json(nlohmann::json &obj, const KeyVerificationCancel &event);
 };
-
-void
-from_json(const nlohmann::json &obj, KeyVerificationCancel &event);
-
-void
-to_json(nlohmann::json &obj, const KeyVerificationCancel &event);
 
 struct KeyVerificationKey
 {
@@ -415,13 +379,10 @@ struct KeyVerificationKey
     //! this is used for relating this message with previously sent key.verification.request
     //! will be used only for room-verification msgs where this is used in place of txnid
     common::Relations relations;
+
+    friend void from_json(const nlohmann::json &obj, KeyVerificationKey &event);
+    friend void to_json(nlohmann::json &obj, const KeyVerificationKey &event);
 };
-
-void
-from_json(const nlohmann::json &obj, KeyVerificationKey &event);
-
-void
-to_json(nlohmann::json &obj, const KeyVerificationKey &event);
 
 struct KeyVerificationMac
 {
@@ -437,13 +398,10 @@ struct KeyVerificationMac
     //! this is used for relating this message with previously sent key.verification.request
     //! will be used only for room-verification msgs where this is used in place of txnid
     common::Relations relations;
+
+    friend void from_json(const nlohmann::json &obj, KeyVerificationMac &event);
+    friend void to_json(nlohmann::json &obj, const KeyVerificationMac &event);
 };
-
-void
-from_json(const nlohmann::json &obj, KeyVerificationMac &event);
-
-void
-to_json(nlohmann::json &obj, const KeyVerificationMac &event);
 
 struct SecretRequest
 {
@@ -457,13 +415,10 @@ struct SecretRequest
     std::string request_id;
     //! The device requesting the keys.
     std::string requesting_device_id;
+
+    friend void from_json(const nlohmann::json &obj, SecretRequest &event);
+    friend void to_json(nlohmann::json &obj, const SecretRequest &event);
 };
-
-void
-from_json(const nlohmann::json &obj, SecretRequest &event);
-
-void
-to_json(nlohmann::json &obj, const SecretRequest &event);
 
 struct SecretSend
 {
@@ -472,13 +427,10 @@ struct SecretSend
 
     //! A unique identifier for this request.
     std::string request_id;
+
+    friend void from_json(const nlohmann::json &obj, SecretSend &event);
+    friend void to_json(nlohmann::json &obj, const SecretSend &event);
 };
-
-void
-from_json(const nlohmann::json &obj, SecretSend &event);
-
-void
-to_json(nlohmann::json &obj, const SecretSend &event);
 
 } // namespace msg
 } // namespace events

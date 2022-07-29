@@ -2,8 +2,9 @@
 
 #include <nlohmann/json.hpp>
 
+namespace mtx::responses::capabilities {
 void
-mtx::responses::capabilities::from_json(const nlohmann::json &obj, RoomVersionStability &stab)
+from_json(const nlohmann::json &obj, RoomVersionStability &stab)
 {
     if (obj == "stable")
         stab = RoomVersionStability::Stable;
@@ -12,7 +13,7 @@ mtx::responses::capabilities::from_json(const nlohmann::json &obj, RoomVersionSt
 }
 
 void
-mtx::responses::capabilities::from_json(const nlohmann::json &obj, RoomVersionsCapability &cap)
+from_json(const nlohmann::json &obj, RoomVersionsCapability &cap)
 {
     cap.available = obj.value("available",
                               std::map<std::string, RoomVersionStability>{
@@ -22,13 +23,13 @@ mtx::responses::capabilities::from_json(const nlohmann::json &obj, RoomVersionsC
 }
 
 void
-mtx::responses::capabilities::from_json(const nlohmann::json &obj, Enabled &cap)
+from_json(const nlohmann::json &obj, Enabled &cap)
 {
     cap.enabled = obj.value("enabled", true);
 }
 
 void
-mtx::responses::capabilities::from_json(const nlohmann::json &obj, Capabilities &caps)
+from_json(const nlohmann::json &obj, Capabilities &caps)
 {
     if (obj.contains("capabilities") && obj.at("capabilities").is_object()) {
         const auto &j = obj.at("capabilities");
@@ -39,4 +40,5 @@ mtx::responses::capabilities::from_json(const nlohmann::json &obj, Capabilities 
         caps.set_avatar_url  = j.value("m.set_avatar_url", Enabled{});
         caps.change_3pid     = j.value("m.3pid_changes", Enabled{});
     }
+}
 }

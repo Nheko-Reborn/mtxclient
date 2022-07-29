@@ -46,13 +46,10 @@ struct HistoryVisibility
 {
     //! Who can see the room history.
     Visibility history_visibility;
+
+    friend void from_json(const nlohmann::json &obj, HistoryVisibility &event);
+    friend void to_json(nlohmann::json &obj, const HistoryVisibility &event);
 };
-
-void
-from_json(const nlohmann::json &obj, HistoryVisibility &event);
-
-void
-to_json(nlohmann::json &obj, const HistoryVisibility &event);
 
 } // namespace state
 } // namespace events

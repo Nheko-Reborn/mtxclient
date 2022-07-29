@@ -43,12 +43,10 @@ struct Presence
                                            //! of: ["online", "offline", "unavailable"]
     bool currently_active;                 //! Whether the user is currently active
     std::string status_msg;                //! An optional description to accompany the presence.
-};
 
-void
-from_json(const nlohmann::json &obj, Presence &presence);
-void
-to_json(nlohmann::json &obj, const Presence &presence);
+    friend void from_json(const nlohmann::json &obj, Presence &presence);
+    friend void to_json(nlohmann::json &obj, const Presence &presence);
+};
 }
 }
 }

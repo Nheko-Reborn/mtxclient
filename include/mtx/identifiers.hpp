@@ -46,6 +46,9 @@ public:
 private:
     //! The `sigil` used to represent an Event.
     std::string sigil = "$";
+
+    friend void from_json(const nlohmann::json &obj, Event &event);
+    friend void to_json(nlohmann::json &obj, const Event &event);
 };
 
 //! A room id.
@@ -57,6 +60,9 @@ public:
 
 private:
     std::string sigil = "!";
+
+    friend void from_json(const nlohmann::json &obj, Room &room);
+    friend void to_json(nlohmann::json &obj, const Room &room);
 };
 
 //! A user id.
@@ -69,6 +75,9 @@ public:
 
 private:
     std::string sigil = "@";
+
+    friend void from_json(const nlohmann::json &obj, User &user);
+    friend void to_json(nlohmann::json &obj, const User &user);
 };
 
 //! Parses the given string into a @p Identifier.
@@ -109,24 +118,6 @@ parse(const std::string &id)
 
     return identifier;
 }
-
-void
-from_json(const nlohmann::json &obj, User &user);
-
-void
-to_json(nlohmann::json &obj, const User &user);
-
-void
-from_json(const nlohmann::json &obj, Room &room);
-
-void
-to_json(nlohmann::json &obj, const Room &room);
-
-void
-from_json(const nlohmann::json &obj, Event &event);
-
-void
-to_json(nlohmann::json &obj, const Event &event);
 
 } // namespace identifiers
 } // namespace mtx

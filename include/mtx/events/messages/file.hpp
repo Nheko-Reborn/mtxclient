@@ -40,13 +40,10 @@ struct File
     std::optional<crypto::EncryptedFile> file;
     //! Relates to for rich replies
     mtx::common::Relations relations;
+
+    friend void from_json(const nlohmann::json &obj, File &content);
+    friend void to_json(nlohmann::json &obj, const File &content);
 };
-
-void
-from_json(const nlohmann::json &obj, File &content);
-
-void
-to_json(nlohmann::json &obj, const File &content);
 
 } // namespace msg
 } // namespace events

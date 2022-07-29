@@ -52,13 +52,11 @@ struct Create
 
     //! A reference to the room this room replaces, if the previous room was upgraded.
     std::optional<PreviousRoom> predecessor;
+
+    friend void from_json(const nlohmann::json &obj, Create &create);
+
+    friend void to_json(nlohmann::json &obj, const Create &create);
 };
-
-void
-from_json(const nlohmann::json &obj, Create &create);
-
-void
-to_json(nlohmann::json &obj, const Create &create);
 
 } // namespace state
 } // namespace events

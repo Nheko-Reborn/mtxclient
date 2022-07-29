@@ -928,7 +928,7 @@ mtx::crypto::encrypt_exported_sessions(const mtx::crypto::ExportedSessionKeys &k
 
     BinaryBuf aes256 = BinaryBuf(buf.begin(), buf.begin() + 32);
 
-    BinaryBuf hmac256 = BinaryBuf(buf.begin() + 32, buf.begin() + (2 * 32));
+    BinaryBuf hmac256 = BinaryBuf(buf.begin() + 32, buf.begin() + (2UL * 32));
 
     auto ciphertext = mtx::crypto::AES_CTR_256_Encrypt(plaintext, aes256, nonce);
 
@@ -940,6 +940,7 @@ mtx::crypto::encrypt_exported_sessions(const mtx::crypto::ExportedSessionKeys &k
     BinaryBuf output{
       0x01,
     };
+    output.reserve(1 + salt.size() + nonce.size() + 4 + ciphertext.size());
     output.insert(output.end(), salt.begin(), salt.end());
     output.insert(output.end(), nonce.begin(), nonce.end());
     output.insert(output.end(), &iterationsArr[0], &iterationsArr[4]);

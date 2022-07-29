@@ -31,12 +31,10 @@ struct Notification
     std::string room_id;
     //! The unix timestamp at which the event notification was sent, in milliseconds.
     uint64_t ts;
-};
 
-void
-from_json(const nlohmann::json &obj, Notification &res);
-void
-to_json(nlohmann::json &obj, const Notification &res);
+    friend void from_json(const nlohmann::json &obj, Notification &res);
+    friend void to_json(nlohmann::json &obj, const Notification &res);
+};
 
 //! Response from the `GET /_matrix/client/r0/notifications` endpoint.
 //
@@ -51,11 +49,9 @@ struct Notifications
     // std::string next_token;
     //! The list of events that triggered notifications.
     std::vector<Notification> notifications;
-};
 
-void
-from_json(const nlohmann::json &obj, Notifications &res);
-void
-to_json(nlohmann::json &obj, const Notifications &res);
+    friend void from_json(const nlohmann::json &obj, Notifications &res);
+    friend void to_json(nlohmann::json &obj, const Notifications &res);
+};
 }
 }

@@ -35,13 +35,10 @@ struct Video
     std::optional<crypto::EncryptedFile> file;
     //! Relates to for rich replies
     mtx::common::Relations relations;
+
+    friend void from_json(const nlohmann::json &obj, Video &content);
+    friend void to_json(nlohmann::json &obj, const Video &content);
 };
-
-void
-from_json(const nlohmann::json &obj, Video &content);
-
-void
-to_json(nlohmann::json &obj, const Video &content);
 
 } // namespace msg
 } // namespace events

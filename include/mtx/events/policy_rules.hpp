@@ -66,32 +66,26 @@ struct Rule
 
     //! Required: The suggested action to take. Currently only m.ban is specified.
     std::string recommendation;
+
+    friend void from_json(const nlohmann::json &obj, Rule &create);
+    friend void to_json(nlohmann::json &obj, const Rule &create);
 };
 
 struct UserRule : public Rule
-{};
+{
+    friend void from_json(const nlohmann::json &obj, UserRule &create);
+    friend void to_json(nlohmann::json &obj, const UserRule &create);
+};
 struct RoomRule : public Rule
-{};
+{
+    friend void from_json(const nlohmann::json &obj, RoomRule &create);
+    friend void to_json(nlohmann::json &obj, const RoomRule &create);
+};
 struct ServerRule : public Rule
-{};
-
-void
-from_json(const nlohmann::json &obj, Rule &create);
-void
-to_json(nlohmann::json &obj, const Rule &create);
-
-void
-from_json(const nlohmann::json &obj, UserRule &create);
-void
-to_json(nlohmann::json &obj, const UserRule &create);
-void
-from_json(const nlohmann::json &obj, RoomRule &create);
-void
-to_json(nlohmann::json &obj, const RoomRule &create);
-void
-from_json(const nlohmann::json &obj, ServerRule &create);
-void
-to_json(nlohmann::json &obj, const ServerRule &create);
+{
+    friend void from_json(const nlohmann::json &obj, ServerRule &create);
+    friend void to_json(nlohmann::json &obj, const ServerRule &create);
+};
 } // namespace policy_rule
 } // namespace state
 } // namespace events

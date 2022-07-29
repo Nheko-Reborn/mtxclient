@@ -22,50 +22,45 @@ struct EventId
 {
     //! The event id.
     mtx::identifiers::Event event_id;
-};
 
-void
-from_json(const nlohmann::json &obj, EventId &response);
+    friend void from_json(const nlohmann::json &obj, EventId &response);
+};
 
 //! A room id returned by the API.
 struct RoomId
 {
     //! The room id.
     std::string room_id;
-};
 
-void
-from_json(const nlohmann::json &obj, RoomId &response);
+    friend void from_json(const nlohmann::json &obj, RoomId &response);
+};
 
 //! A filter id returned by the API.
 struct FilterId
 {
     //! The filter id.
     std::string filter_id;
-};
 
-void
-from_json(const nlohmann::json &obj, FilterId &response);
+    friend void from_json(const nlohmann::json &obj, FilterId &response);
+};
 
 //! A new room version as returned by the room_keys/version API
 struct Version
 {
     //! Required: The backup version. This is an opaque string.
     std::string version;
-};
 
-void
-from_json(const nlohmann::json &obj, Version &response);
+    friend void from_json(const nlohmann::json &obj, Version &response);
+};
 
 //! Some endpoints return this to indicate success in addition to the http code.
 struct Success
 {
     //! Required. Whether the validation was successful or not.
     bool success;
-};
 
-void
-from_json(const nlohmann::json &obj, Success &response);
+    friend void from_json(const nlohmann::json &obj, Success &response);
+};
 
 //! Some endpoints return this to indicate availability in addition to the http code (i.e. a
 //! username).
@@ -73,10 +68,9 @@ struct Available
 {
     //! Required. A flag to indicate that the resource is available.
     bool available;
-};
 
-void
-from_json(const nlohmann::json &obj, Available &response);
+    friend void from_json(const nlohmann::json &obj, Available &response);
+};
 
 //! Responses to the `/requestToken` endpoints
 struct RequestToken
@@ -90,20 +84,18 @@ struct RequestToken
     //! endpoint (without the requirement for an access token). The homeserver must send this token
     //! to the user (if applicable), who should then be prompted to provide it to the client.
     std::string submit_url;
-};
 
-void
-from_json(const nlohmann::json &obj, RequestToken &response);
+    friend void from_json(const nlohmann::json &obj, RequestToken &response);
+};
 
 //! A simple list of aliases
 struct Aliases
 {
     //! The aliases
     std::vector<std::string> aliases;
-};
 
-void
-from_json(const nlohmann::json &obj, Aliases &response);
+    friend void from_json(const nlohmann::json &obj, Aliases &response);
+};
 
 //! Different helper for parsing responses.
 namespace utils {
@@ -161,8 +153,8 @@ parse_ephemeral_events(const nlohmann::json &events, EphemeralEvents &container)
 struct StateEvents
 {
     utils::StateEvents events;
+
+    friend void from_json(const nlohmann::json &arr, StateEvents &response);
 };
-void
-from_json(const nlohmann::json &arr, StateEvents &response);
 }
 }

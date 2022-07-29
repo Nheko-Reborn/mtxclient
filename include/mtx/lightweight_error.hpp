@@ -76,9 +76,8 @@ struct LightweightError
     ErrorCode errcode = {};
     //! Human readable version of the error.
     std::string error;
-};
 
-void
-from_json(const nlohmann::json &obj, LightweightError &error);
+    friend void from_json(const nlohmann::json &obj, LightweightError &error);
+};
 }
 }

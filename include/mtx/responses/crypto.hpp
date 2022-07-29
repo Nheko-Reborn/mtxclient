@@ -23,10 +23,9 @@ struct UploadKeys
     //! For each key algorithm, the number of unclaimed one-time keys
     //! of that type currently held on the server for this device.
     std::map<std::string, uint32_t> one_time_key_counts;
-};
 
-void
-from_json(const nlohmann::json &obj, UploadKeys &response);
+    friend void from_json(const nlohmann::json &obj, UploadKeys &response);
+};
 
 using DeviceToKeysMap = std::map<std::string, mtx::crypto::DeviceKeys>;
 
@@ -48,23 +47,19 @@ struct QueryKeys
     std::map<std::string, mtx::crypto::CrossSigningKeys> user_signing_keys;
     //! A map from user ID, to information about self_signing_keys.
     std::map<std::string, mtx::crypto::CrossSigningKeys> self_signing_keys;
+
+    friend void to_json(nlohmann::json &obj, const QueryKeys &response);
+    friend void from_json(const nlohmann::json &obj, QueryKeys &response);
 };
-
-void
-to_json(nlohmann::json &obj, const QueryKeys &response);
-
-void
-from_json(const nlohmann::json &obj, QueryKeys &response);
 
 //! Request for `POST /_matrix/client/r0/keys/upload`.
 struct KeySignaturesUpload
 {
     //! Errors returned during upload.
     std::map<std::string, std::map<std::string, mtx::errors::LightweightError>> errors;
-};
 
-void
-from_json(const nlohmann::json &obj, KeySignaturesUpload &response);
+    friend void from_json(const nlohmann::json &obj, KeySignaturesUpload &response);
+};
 
 //! Response from the `POST /_matrix/client/r0/keys/claim` endpoint.
 struct ClaimKeys
@@ -76,10 +71,9 @@ struct ClaimKeys
     //! One-time keys for the queried devices. A map from user ID,
     //! to a map from <algorithm>:<key_id> to the key object.
     std::map<std::string, std::map<std::string, nlohmann::json>> one_time_keys;
-};
 
-void
-from_json(const nlohmann::json &obj, ClaimKeys &response);
+    friend void from_json(const nlohmann::json &obj, ClaimKeys &response);
+};
 
 //! Response from the `GET /_matrix/client/r0/keys/changes` endpoint.
 struct KeyChanges
@@ -89,10 +83,9 @@ struct KeyChanges
     //! The Matrix User IDs of all users who may have left all the end-to-end
     //! encrypted rooms they previously shared with the user.
     std::vector<std::string> left;
-};
 
-void
-from_json(const nlohmann::json &obj, KeyChanges &response);
+    friend void from_json(const nlohmann::json &obj, KeyChanges &response);
+};
 
 //! KeysBackup related responses.
 namespace backup {
@@ -111,11 +104,10 @@ struct EncryptedSessionData
     //! MAC key generated above. The first 8 bytes of the resulting MAC are base64-encoded, and
     //! become the mac property of the session_data.
     std::string mac;
+
+    friend void from_json(const nlohmann::json &obj, EncryptedSessionData &response);
+    friend void to_json(nlohmann::json &obj, const EncryptedSessionData &response);
 };
-void
-from_json(const nlohmann::json &obj, EncryptedSessionData &response);
-void
-to_json(nlohmann::json &obj, const EncryptedSessionData &response);
 
 //! Responses from the `GET /_matrix/client/r0/room_keys/keys/{room_id}/{session_id}` endpoint
 struct SessionBackup
@@ -131,33 +123,30 @@ struct SessionBackup
     //! Required. Algorithm-dependent data. See the documentation for the backup algorithms in
     //! Server-side key backups for more information on the expected format of the data.
     EncryptedSessionData session_data;
+
+    friend void from_json(const nlohmann::json &obj, SessionBackup &response);
+    friend void to_json(nlohmann::json &obj, const SessionBackup &response);
 };
-void
-from_json(const nlohmann::json &obj, SessionBackup &response);
-void
-to_json(nlohmann::json &obj, const SessionBackup &response);
 
 //! Responses from the `GET /_matrix/client/r0/room_keys/keys/{room_id}` endpoint
 struct RoomKeysBackup
 {
     //! map of session id to the individual sessions
     std::map<std::string, SessionBackup> sessions;
+
+    friend void from_json(const nlohmann::json &obj, RoomKeysBackup &response);
+    friend void to_json(nlohmann::json &obj, const RoomKeysBackup &response);
 };
-void
-from_json(const nlohmann::json &obj, RoomKeysBackup &response);
-void
-to_json(nlohmann::json &obj, const RoomKeysBackup &response);
 
 //! Responses from the `GET /_matrix/client/r0/room_keys/keys` endpoint
 struct KeysBackup
 {
     //! map of room id to map of session ids to backups of individual sessions
     std::map<std::string, RoomKeysBackup> rooms;
+
+    friend void from_json(const nlohmann::json &obj, KeysBackup &response);
+    friend void to_json(nlohmann::json &obj, const KeysBackup &response);
 };
-void
-from_json(const nlohmann::json &obj, KeysBackup &response);
-void
-to_json(nlohmann::json &obj, const KeysBackup &response);
 
 constexpr const char *megolm_backup_v1 = "m.megolm_backup.v1.curve25519-aes-sha2";
 //! Responses from the `GET /_matrix/client/r0/room_keys/version` endpoint
@@ -177,11 +166,10 @@ struct BackupVersion
     std::string etag;
     //! Required. The backup version
     std::string version;
+
+    friend void from_json(const nlohmann::json &obj, BackupVersion &response);
+    friend void to_json(nlohmann::json &obj, const BackupVersion &response);
 };
-void
-from_json(const nlohmann::json &obj, BackupVersion &response);
-void
-to_json(nlohmann::json &obj, const BackupVersion &response);
 
 //! The SessionData stored in the KeysBackup.
 struct SessionData
@@ -199,13 +187,10 @@ struct SessionData
     std::map<std::string, std::string> sender_claimed_keys;
     // Required. Unpadded base64-encoded session key in session-sharing format.
     std::string session_key;
+
+    friend void to_json(nlohmann::json &obj, const SessionData &desc);
+    friend void from_json(const nlohmann::json &obj, SessionData &desc);
 };
-
-void
-to_json(nlohmann::json &obj, const SessionData &desc);
-
-void
-from_json(const nlohmann::json &obj, SessionData &desc);
 }
 } // namespace responses
 } // namespace mtx

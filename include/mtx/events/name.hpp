@@ -22,13 +22,10 @@ struct Name
 {
     //! The name of the room.
     std::string name;
+
+    friend void from_json(const nlohmann::json &obj, Name &event);
+    friend void to_json(nlohmann::json &obj, const Name &event);
 };
-
-void
-from_json(const nlohmann::json &obj, Name &event);
-
-void
-to_json(nlohmann::json &obj, const Name &event);
 
 } // namespace state
 } // namespace events

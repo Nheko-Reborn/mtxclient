@@ -28,15 +28,13 @@ struct CanonicalAlias
     //! Alternative aliases the room advertises. This list can have aliases despite the alias
     //! field being null, empty, or otherwise not present.
     std::vector<std::string> alt_aliases;
+
+    //! Deserialization method needed by @p nlohmann::json.
+    friend void from_json(const nlohmann::json &obj, CanonicalAlias &canonical_alias);
+
+    //! Serialization method needed by @p nlohmann::json.
+    friend void to_json(nlohmann::json &obj, const CanonicalAlias &canonical_alias);
 };
-
-//! Deserialization method needed by @p nlohmann::json.
-void
-from_json(const nlohmann::json &obj, CanonicalAlias &canonical_alias);
-
-//! Serialization method needed by @p nlohmann::json.
-void
-to_json(nlohmann::json &obj, const CanonicalAlias &canonical_alias);
 
 } // namespace state
 } // namespace events

@@ -77,26 +77,20 @@ struct ImagePack
 
     //! Information about this pack
     std::optional<PackDescription> pack;
+
+    friend void from_json(const nlohmann::json &obj, ImagePack &content);
+    friend void to_json(nlohmann::json &obj, const ImagePack &content);
 };
-
-void
-from_json(const nlohmann::json &obj, ImagePack &content);
-
-void
-to_json(nlohmann::json &obj, const ImagePack &content);
 
 //! The image packs from rooms enabled by this user to be available globally.
 struct ImagePackRooms
 {
     // A map from room_id to state key to an arbitrary object (which currently is unused).
     std::map<std::string, std::map<std::string, std::string>> rooms;
+
+    friend void from_json(const nlohmann::json &obj, ImagePackRooms &content);
+    friend void to_json(nlohmann::json &obj, const ImagePackRooms &content);
 };
-
-void
-from_json(const nlohmann::json &obj, ImagePackRooms &content);
-
-void
-to_json(nlohmann::json &obj, const ImagePackRooms &content);
 
 } // namespace msc2545
 } // namespace events

@@ -24,18 +24,16 @@ struct Profile
     std::string avatar_url;
     //! The user's display name if they have set one, otherwise not present.
     std::string display_name;
-};
 
-void
-from_json(const nlohmann::json &obj, Profile &profile);
+    friend void from_json(const nlohmann::json &obj, Profile &profile);
+};
 
 //! Response from the `GET /_matrix/client/r0/profile/{userId}/avatar_url` endpoint.
 struct AvatarUrl
 {
     std::string avatar_url;
-};
 
-void
-from_json(const nlohmann::json &obj, AvatarUrl &avatar);
+    friend void from_json(const nlohmann::json &obj, AvatarUrl &avatar);
+};
 }
 }

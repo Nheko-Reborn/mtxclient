@@ -18,9 +18,8 @@ struct CreateRoom
 {
     //! The room ID of the newly created room.
     mtx::identifiers::Room room_id;
-};
 
-void
-from_json(const nlohmann::json &obj, CreateRoom &response);
+    friend void from_json(const nlohmann::json &obj, CreateRoom &response);
+};
 }
 }

@@ -35,13 +35,10 @@ struct AesHmacSha2EncryptedData
     std::string iv;         //!< Required. The 16-byte initialization vector, encoded as base64.
     std::string ciphertext; //!< Required. The AES-CTR-encrypted data, encoded as base64.
     std::string mac;        //!< Required. The MAC, encoded as base64.
+
+    friend void to_json(nlohmann::json &obj, const AesHmacSha2EncryptedData &data);
+    friend void from_json(const nlohmann::json &obj, AesHmacSha2EncryptedData &data);
 };
-
-void
-to_json(nlohmann::json &obj, const AesHmacSha2EncryptedData &data);
-
-void
-from_json(const nlohmann::json &obj, AesHmacSha2EncryptedData &data);
 
 //! A secret, encrypted with one or more algorithms.
 struct Secret
@@ -51,13 +48,10 @@ struct Secret
     /// The exact format for the encrypted data is dependent on the key algorithm. See the
     /// definition of AesHmacSha2EncryptedData in the m.secret_storage.v1.aes-hmac-sha2 section.
     std::map<std::string, AesHmacSha2EncryptedData> encrypted;
+
+    friend void to_json(nlohmann::json &obj, const Secret &secret);
+    friend void from_json(const nlohmann::json &obj, Secret &secret);
 };
-
-void
-to_json(nlohmann::json &obj, const Secret &secret);
-
-void
-from_json(const nlohmann::json &obj, Secret &secret);
 
 //! Information about the key derivation from a passphrase.
 struct PBKDF2
@@ -70,13 +64,10 @@ struct PBKDF2
     uint32_t iterations;
     //! Optional. The number of bits to generate for the key. Defaults to 256.
     uint32_t bits = 256;
+
+    friend void to_json(nlohmann::json &obj, const PBKDF2 &desc);
+    friend void from_json(const nlohmann::json &obj, PBKDF2 &desc);
 };
-
-void
-to_json(nlohmann::json &obj, const PBKDF2 &desc);
-
-void
-from_json(const nlohmann::json &obj, PBKDF2 &desc);
 
 //! Description of the key for a secret.
 struct AesHmacSha2KeyDescription
@@ -92,12 +83,9 @@ struct AesHmacSha2KeyDescription
 
     //! userid -> key -> key (undocumented)
     std::map<std::string, std::map<std::string, std::string>> signatures;
+
+    friend void to_json(nlohmann::json &obj, const AesHmacSha2KeyDescription &desc);
+    friend void from_json(const nlohmann::json &obj, AesHmacSha2KeyDescription &desc);
 };
-
-void
-to_json(nlohmann::json &obj, const AesHmacSha2KeyDescription &desc);
-
-void
-from_json(const nlohmann::json &obj, AesHmacSha2KeyDescription &desc);
 }
 }

@@ -39,13 +39,10 @@ struct Parent
     /// with the lowest room ID, as determined via a lexicographic ordering of the Unicode
     /// code-points.
     bool canonical = false;
+
+    friend void from_json(const nlohmann::json &obj, Parent &child);
+    friend void to_json(nlohmann::json &obj, const Parent &child);
 };
-
-void
-from_json(const nlohmann::json &obj, Parent &child);
-
-void
-to_json(nlohmann::json &obj, const Parent &child);
 
 /// @brief Event to point at a child room or space from a parent space
 ///
@@ -68,13 +65,10 @@ struct Child
     /// not consist solely of ascii characters in the range \x20 (space) to \x7E (~), or consist
     /// of more than 50 characters, are forbidden and the field should be ignored if received.
     std::optional<std::string> order;
+
+    friend void from_json(const nlohmann::json &obj, Child &child);
+    friend void to_json(nlohmann::json &obj, const Child &child);
 };
-
-void
-from_json(const nlohmann::json &obj, Child &child);
-
-void
-to_json(nlohmann::json &obj, const Child &child);
 }
 }
 }

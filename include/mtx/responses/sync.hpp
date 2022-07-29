@@ -23,20 +23,18 @@ struct AccountData
 {
     //! List of events.
     std::vector<events::collections::RoomAccountDataEvents> events;
-};
 
-void
-from_json(const nlohmann::json &obj, AccountData &account_data);
+    friend void from_json(const nlohmann::json &obj, AccountData &account_data);
+};
 
 //! State events.
 struct State
 {
     //! List of events.
     std::vector<events::collections::StateEvents> events;
-};
 
-void
-from_json(const nlohmann::json &obj, State &state);
+    friend void from_json(const nlohmann::json &obj, State &state);
+};
 
 //! State and Room events.
 struct Timeline
@@ -49,10 +47,9 @@ struct Timeline
     //! **true** if the number of events returned was limited by the
     //! limit on the filter.
     bool limited = false;
-};
 
-void
-from_json(const nlohmann::json &obj, Timeline &timeline);
+    friend void from_json(const nlohmann::json &obj, Timeline &timeline);
+};
 
 //! Counts of unread notifications for this room
 struct UnreadNotifications
@@ -62,10 +59,9 @@ struct UnreadNotifications
     uint64_t highlight_count = 0;
     //! The total number of unread notifications for this room.
     uint64_t notification_count = 0;
-};
 
-void
-from_json(const nlohmann::json &obj, UnreadNotifications &notifications);
+    friend void from_json(const nlohmann::json &obj, UnreadNotifications &notifications);
+};
 
 //! The ephemeral events in the room that aren't recorded in
 //! the timeline or state of the room. e.g. typing.
@@ -73,10 +69,9 @@ struct Ephemeral
 {
     //! A list of ephemeral events like typing and read notifications.
     std::vector<events::collections::EphemeralEvents> events;
-};
 
-void
-from_json(const nlohmann::json &obj, Ephemeral &ephemeral);
+    friend void from_json(const nlohmann::json &obj, Ephemeral &ephemeral);
+};
 
 //! A room that the user has joined.
 struct JoinedRoom
@@ -94,10 +89,9 @@ struct JoinedRoom
     Ephemeral ephemeral;
     //! The account_data events associated with this room.
     AccountData account_data;
-};
 
-void
-from_json(const nlohmann::json &obj, JoinedRoom &room);
+    friend void from_json(const nlohmann::json &obj, JoinedRoom &room);
+};
 
 //! A room that the user has left or been banned from.
 struct LeftRoom
@@ -107,10 +101,9 @@ struct LeftRoom
     //! The timeline of messages and state changes in the room
     //! up to the point when the user left.
     Timeline timeline;
-};
 
-void
-from_json(const nlohmann::json &obj, LeftRoom &room);
+    friend void from_json(const nlohmann::json &obj, LeftRoom &room);
+};
 
 //! A room that the user has been invited to.
 struct InvitedRoom
@@ -123,10 +116,9 @@ struct InvitedRoom
     std::string name() const;
     //! Returns the URL for the avatar of the room.
     std::string avatar() const;
-};
 
-void
-from_json(const nlohmann::json &obj, InvitedRoom &room);
+    friend void from_json(const nlohmann::json &obj, InvitedRoom &room);
+};
 
 //! Room updates.
 struct Rooms
@@ -137,10 +129,9 @@ struct Rooms
     std::map<std::string, LeftRoom> leave;
     //! The rooms that the user has been invited to.
     std::map<std::string, InvitedRoom> invite;
-};
 
-void
-from_json(const nlohmann::json &obj, Rooms &rooms);
+    friend void from_json(const nlohmann::json &obj, Rooms &rooms);
+};
 
 //! Information on e2e device updates.
 struct DeviceLists
@@ -151,20 +142,18 @@ struct DeviceLists
     //! List of users who may have left all the end-to-end encrypted
     //! rooms they previously shared with the user.
     std::vector<std::string> left;
-};
 
-void
-from_json(const nlohmann::json &obj, DeviceLists &device_lists);
+    friend void from_json(const nlohmann::json &obj, DeviceLists &device_lists);
+};
 
 //! Information on to_device events in sync.
 struct ToDevice
 {
     //!  Information on the send-to-device messages for the client device.
     std::vector<events::collections::DeviceEvents> events;
-};
 
-void
-from_json(const nlohmann::json &obj, ToDevice &to_device);
+    friend void from_json(const nlohmann::json &obj, ToDevice &to_device);
+};
 
 //! Response from the `GET /_matrix/client/r0/sync` endpoint.
 struct Sync
@@ -187,9 +176,8 @@ struct Sync
 
     //! global account data
     AccountData account_data;
-};
 
-void
-from_json(const nlohmann::json &obj, Sync &response);
+    friend void from_json(const nlohmann::json &obj, Sync &response);
+};
 }
 }

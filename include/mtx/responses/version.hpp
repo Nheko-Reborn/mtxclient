@@ -19,9 +19,8 @@ struct Versions
 {
     //! The supported versions.
     std::vector<std::string> versions;
-};
 
-void
-from_json(const nlohmann::json &obj, Versions &response);
+    friend void from_json(const nlohmann::json &obj, Versions &response);
+};
 }
 }

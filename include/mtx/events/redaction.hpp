@@ -20,25 +20,17 @@ struct Redaction
 {
     //! The reason for the redaction, if any.
     std::string reason;
+
+    friend void from_json(const nlohmann::json &obj, Redaction &event);
+    friend void to_json(nlohmann::json &obj, const Redaction &event);
 };
-
-void
-from_json(const nlohmann::json &obj, Redaction &event);
-
-void
-to_json(nlohmann::json &obj, const Redaction &event);
 
 //! Stripped out content for redacted events.
 struct Redacted
-{};
-
-inline void
-from_json(const nlohmann::json &, Redacted &)
-{}
-
-inline void
-to_json(nlohmann::json &, const Redacted &)
-{}
+{
+    friend inline void from_json(const nlohmann::json &, Redacted &) {}
+    friend inline void to_json(nlohmann::json &, const Redacted &) {}
+};
 
 } // namespace msg
 } // namespace events

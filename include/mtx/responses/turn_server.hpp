@@ -31,9 +31,8 @@ struct TurnServer
 
     //! The time-to-live in seconds.
     uint32_t ttl;
-};
 
-void
-from_json(const nlohmann::json &obj, TurnServer &turnServer);
+    friend void from_json(const nlohmann::json &obj, TurnServer &turnServer);
+};
 }
 }

@@ -27,15 +27,13 @@ struct Aliases
 {
     //! A list of room aliases.
     std::vector<std::string> aliases;
+
+    //! Deserialization method needed by @p nlohmann::json.
+    friend void from_json(const nlohmann::json &obj, Aliases &content);
+
+    //! Serialization method needed by @p nlohmann::json.
+    friend void to_json(nlohmann::json &obj, const Aliases &content);
 };
-
-//! Deserialization method needed by @p nlohmann::json.
-void
-from_json(const nlohmann::json &obj, Aliases &content);
-
-//! Serialization method needed by @p nlohmann::json.
-void
-to_json(nlohmann::json &obj, const Aliases &content);
 
 } // namespace state
 } // namespace events

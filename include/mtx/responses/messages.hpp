@@ -28,9 +28,8 @@ struct Messages
     std::string end;
     //! A list of room events.
     std::vector<mtx::events::collections::TimelineEvents> chunk;
-};
 
-void
-from_json(const nlohmann::json &obj, Messages &messages);
+    friend void from_json(const nlohmann::json &obj, Messages &messages);
+};
 }
 }

@@ -27,10 +27,9 @@ struct Register
     //! ID of the registered device. Will be the same as the corresponding
     //! parameter in the request, if one was specified.
     std::string device_id;
-};
 
-void
-from_json(const nlohmann::json &obj, Register &response);
+    friend void from_json(const nlohmann::json &obj, Register &response);
+};
 
 //! Response from the `GET
 //! /_matrix/client/v1/register/m.login.registration_token/validity`
@@ -39,9 +38,8 @@ struct RegistrationTokenValidity
 {
     //! Whether the registration token is valid or not
     bool valid;
-};
 
-void
-from_json(const nlohmann::json &obj, RegistrationTokenValidity &response);
+    friend void from_json(const nlohmann::json &obj, RegistrationTokenValidity &response);
+};
 }
 }

@@ -26,15 +26,13 @@ struct FullyRead
 {
     //! Required. The event the user's read marker is located at in the room.
     std::string event_id;
+
+    //! Deserialization method needed by @p nlohmann::json.
+    friend void from_json(const nlohmann::json &obj, FullyRead &content);
+
+    //! Serialization method needed by @p nlohmann::json.
+    friend void to_json(nlohmann::json &obj, const FullyRead &content);
 };
-
-//! Deserialization method needed by @p nlohmann::json.
-void
-from_json(const nlohmann::json &obj, FullyRead &content);
-
-//! Serialization method needed by @p nlohmann::json.
-void
-to_json(nlohmann::json &obj, const FullyRead &content);
 
 } // namespace state
 } // namespace events

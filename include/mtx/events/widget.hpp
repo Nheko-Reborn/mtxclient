@@ -46,13 +46,10 @@ struct Widget
     //! instance (as opposed to the user that last modified the widget instance, as given by the
     //! 'sender' field on the m.widgets event).
     std::string creatorUserId;
+
+    friend void from_json(const nlohmann::json &obj, Widget &create);
+    friend void to_json(nlohmann::json &obj, const Widget &create);
 };
-
-void
-from_json(const nlohmann::json &obj, Widget &create);
-
-void
-to_json(nlohmann::json &obj, const Widget &create);
 
 } // namespace state
 } // namespace events

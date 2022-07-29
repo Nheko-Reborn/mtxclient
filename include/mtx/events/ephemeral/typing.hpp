@@ -26,15 +26,13 @@ struct Typing
 {
     //! Required. The list of user IDs typing in this room, if any.
     std::vector<std::string> user_ids;
+
+    //! Deserialization method needed by @p nlohmann::json.
+    friend void from_json(const nlohmann::json &obj, Typing &content);
+
+    //! Serialization method needed by @p nlohmann::json.
+    friend void to_json(nlohmann::json &obj, const Typing &content);
 };
-
-//! Deserialization method needed by @p nlohmann::json.
-void
-from_json(const nlohmann::json &obj, Typing &content);
-
-//! Serialization method needed by @p nlohmann::json.
-void
-to_json(nlohmann::json &obj, const Typing &content);
 
 } // namespace state
 } // namespace events

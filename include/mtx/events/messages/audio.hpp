@@ -35,13 +35,10 @@ struct Audio
     std::optional<crypto::EncryptedFile> file;
     //! Relates to for rich replies
     mtx::common::Relations relations;
+
+    friend void from_json(const nlohmann::json &obj, Audio &content);
+    friend void to_json(nlohmann::json &obj, const Audio &content);
 };
-
-void
-from_json(const nlohmann::json &obj, Audio &content);
-
-void
-to_json(nlohmann::json &obj, const Audio &content);
 
 } // namespace msg
 } // namespace events

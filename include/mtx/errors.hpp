@@ -18,9 +18,8 @@ struct Error
 
     //! Auth flows in case of 401
     user_interactive::Unauthorized unauthorized;
-};
 
-void
-from_json(const nlohmann::json &obj, Error &error);
+    friend void from_json(const nlohmann::json &obj, Error &error);
+};
 }
 }

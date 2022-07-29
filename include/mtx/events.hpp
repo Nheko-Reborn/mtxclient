@@ -30,30 +30,24 @@ struct Event
     EventType type;
     //! Contains the fully-qualified ID of the user who sent this event.
     std::string sender;
+
+    template<class C>
+    friend void to_json(nlohmann::json &obj, const Event<C> &event);
+    template<class C>
+    friend void from_json(const nlohmann::json &obj, Event<C> &event);
 };
-
-template<class Content>
-void
-to_json(nlohmann::json &obj, const Event<Content> &event);
-
-template<class Content>
-void
-from_json(const nlohmann::json &obj, Event<Content> &event);
 
 //! Extension of the Event type for device events.
 template<class Content>
 struct DeviceEvent : public Event<Content>
 {
     std::string sender;
+
+    template<class C>
+    friend void from_json(const nlohmann::json &obj, DeviceEvent<C> &event);
+    template<class C>
+    friend void to_json(nlohmann::json &obj, const DeviceEvent<C> &event);
 };
-
-template<class Content>
-void
-from_json(const nlohmann::json &obj, DeviceEvent<Content> &event);
-
-template<class Content>
-void
-to_json(nlohmann::json &obj, const DeviceEvent<Content> &event);
 
 //! Additional server provided data for this event.
 struct UnsignedData
@@ -75,27 +69,21 @@ struct UnsignedData
     std::string redacted_by;
     //! The event that redacted this event.
     std::optional<Event<mtx::events::msg::Redaction>> redacted_because;
+
+    friend void from_json(const nlohmann::json &obj, UnsignedData &data);
+    friend void to_json(nlohmann::json &obj, const UnsignedData &event);
 };
-
-void
-from_json(const nlohmann::json &obj, UnsignedData &data);
-
-void
-to_json(nlohmann::json &obj, const UnsignedData &event);
 
 template<class Content>
 struct StrippedEvent : public Event<Content>
 {
     std::string state_key;
+
+    template<class C>
+    friend void from_json(const nlohmann::json &obj, StrippedEvent<C> &event);
+    template<class C>
+    friend void to_json(nlohmann::json &obj, const StrippedEvent<C> &event);
 };
-
-template<class Content>
-void
-from_json(const nlohmann::json &obj, StrippedEvent<Content> &event);
-
-template<class Content>
-void
-to_json(nlohmann::json &obj, const StrippedEvent<Content> &event);
 
 //! RoomEvent.
 template<class Content>
@@ -111,15 +99,12 @@ struct RoomEvent : public Event<Content>
     // SPEC_BUG: The contents of unsigned_data are also present as top level keys.
     //! Contains optional extra information about the event.
     UnsignedData unsigned_data;
+
+    template<class C>
+    friend void from_json(const nlohmann::json &obj, RoomEvent<C> &event);
+    template<class C>
+    friend void to_json(nlohmann::json &obj, const RoomEvent<C> &event);
 };
-
-template<class Content>
-void
-from_json(const nlohmann::json &obj, RoomEvent<Content> &event);
-
-template<class Content>
-void
-to_json(nlohmann::json &obj, const RoomEvent<Content> &event);
 
 //! Extension of the RoomEvent.
 template<class Content>
@@ -128,15 +113,12 @@ struct StateEvent : public RoomEvent<Content>
     //! A unique key which defines the overwriting semantics
     //! for this piece of room state.
     std::string state_key;
+
+    template<class C>
+    friend void to_json(nlohmann::json &obj, const StateEvent<C> &event);
+    template<class C>
+    friend void from_json(const nlohmann::json &obj, StateEvent<C> &event);
 };
-
-template<class Content>
-void
-to_json(nlohmann::json &obj, const StateEvent<Content> &event);
-
-template<class Content>
-void
-from_json(const nlohmann::json &obj, StateEvent<Content> &event);
 
 //! Extension of the RoomEvent.
 template<class Content>
@@ -144,28 +126,22 @@ struct RedactionEvent : public RoomEvent<Content>
 {
     //! The event id of the event that was redacted.
     std::string redacts;
+
+    template<class C>
+    friend void to_json(nlohmann::json &obj, const RedactionEvent<C> &event);
+    template<class C>
+    friend void from_json(const nlohmann::json &obj, RedactionEvent<C> &event);
 };
-
-template<class Content>
-void
-to_json(nlohmann::json &obj, const RedactionEvent<Content> &event);
-
-template<class Content>
-void
-from_json(const nlohmann::json &obj, RedactionEvent<Content> &event);
 
 //! Extension of the RoomEvent.
 template<class Content>
 struct EncryptedEvent : public RoomEvent<Content>
-{};
-
-template<class Content>
-void
-to_json(nlohmann::json &obj, const EncryptedEvent<Content> &event);
-
-template<class Content>
-void
-from_json(const nlohmann::json &obj, EncryptedEvent<Content> &event);
+{
+    template<class C>
+    friend void to_json(nlohmann::json &obj, const EncryptedEvent<C> &event);
+    template<class C>
+    friend void from_json(const nlohmann::json &obj, EncryptedEvent<C> &event);
+};
 
 enum class MessageType
 {
@@ -214,15 +190,12 @@ struct EphemeralEvent
     EventType type;
     //! The room this was sent in. May not always be present.
     std::string room_id;
+
+    template<class C>
+    friend void to_json(nlohmann::json &obj, const EphemeralEvent<C> &event);
+    template<class C>
+    friend void from_json(const nlohmann::json &obj, EphemeralEvent<C> &event);
 };
-
-template<class Content>
-void
-to_json(nlohmann::json &obj, const EphemeralEvent<Content> &event);
-
-template<class Content>
-void
-from_json(const nlohmann::json &obj, EphemeralEvent<Content> &event);
 
 /// @brief An account_data event like fully_read or tags.
 /// @sa Event

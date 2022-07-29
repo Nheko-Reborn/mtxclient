@@ -22,13 +22,10 @@ struct Topic
 {
     //! The topic text.
     std::string topic;
+
+    friend void from_json(const nlohmann::json &obj, Topic &event);
+    friend void to_json(nlohmann::json &obj, const Topic &event);
 };
-
-void
-from_json(const nlohmann::json &obj, Topic &event);
-
-void
-to_json(nlohmann::json &obj, const Topic &event);
 
 } // namespace state
 } // namespace events

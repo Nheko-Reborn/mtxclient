@@ -36,6 +36,9 @@ struct Image
     std::optional<crypto::EncryptedFile> file;
     //! Relates to for rich replies
     mtx::common::Relations relations;
+
+    friend void from_json(const nlohmann::json &obj, Image &content);
+    friend void to_json(nlohmann::json &obj, const Image &content);
 };
 
 //! Content of `m.sticker`.
@@ -53,19 +56,10 @@ struct StickerImage
     std::optional<crypto::EncryptedFile> file;
     //! Relates to for rich replies
     mtx::common::Relations relations;
+
+    friend void from_json(const nlohmann::json &obj, StickerImage &content);
+    friend void to_json(nlohmann::json &obj, const StickerImage &content);
 };
-
-void
-from_json(const nlohmann::json &obj, Image &content);
-
-void
-to_json(nlohmann::json &obj, const Image &content);
-
-void
-from_json(const nlohmann::json &obj, StickerImage &content);
-
-void
-to_json(nlohmann::json &obj, const StickerImage &content);
 
 } // namespace msg
 } // namespace events

@@ -55,13 +55,10 @@ struct Member
     std::string join_authorised_via_users_server;
 
     /* ThirdPartyInvite third_party_invite; */
+
+    friend void from_json(const nlohmann::json &obj, Member &member);
+    friend void to_json(nlohmann::json &obj, const Member &member);
 };
-
-void
-from_json(const nlohmann::json &obj, Member &member);
-
-void
-to_json(nlohmann::json &obj, const Member &member);
 
 } // namespace state
 } // namespace events

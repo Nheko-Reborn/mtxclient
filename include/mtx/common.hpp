@@ -23,13 +23,10 @@ struct UnsignedDeviceInfo
 {
     //! The display name which the user set on the device.
     std::string device_display_name;
+
+    friend void from_json(const nlohmann::json &obj, UnsignedDeviceInfo &res);
+    friend void to_json(nlohmann::json &obj, const UnsignedDeviceInfo &res);
 };
-
-void
-from_json(const nlohmann::json &obj, UnsignedDeviceInfo &res);
-
-void
-to_json(nlohmann::json &obj, const UnsignedDeviceInfo &res);
 
 struct DeviceKeys
 {
@@ -49,13 +46,10 @@ struct DeviceKeys
     ///! Additional data added to the device key information
     //! by intermediate servers, and not covered by the signatures.
     UnsignedDeviceInfo unsigned_info;
+
+    friend void from_json(const nlohmann::json &obj, DeviceKeys &res);
+    friend void to_json(nlohmann::json &obj, const DeviceKeys &res);
 };
-
-void
-from_json(const nlohmann::json &obj, DeviceKeys &res);
-
-void
-to_json(nlohmann::json &obj, const DeviceKeys &res);
 
 struct CrossSigningKeys
 {
@@ -69,13 +63,10 @@ struct CrossSigningKeys
     //! Signatures for the cross signing key object.
     //! A map from user ID, to a map from <algorithm>:<public_key> to the signature.
     std::map<std::string, std::map<std::string, std::string>> signatures;
+
+    friend void from_json(const nlohmann::json &obj, CrossSigningKeys &res);
+    friend void to_json(nlohmann::json &obj, const CrossSigningKeys &res);
 };
-
-void
-from_json(const nlohmann::json &obj, CrossSigningKeys &res);
-
-void
-to_json(nlohmann::json &obj, const CrossSigningKeys &res);
 
 struct JWK
 {
@@ -89,13 +80,10 @@ struct JWK
     std::string k;
     //! Required. Extractable. Must be true. This is a W3C extension.
     bool ext;
+
+    friend void from_json(const nlohmann::json &obj, JWK &res);
+    friend void to_json(nlohmann::json &obj, const JWK &res);
 };
-
-void
-from_json(const nlohmann::json &obj, JWK &res);
-
-void
-to_json(nlohmann::json &obj, const JWK &res);
 
 struct EncryptedFile
 {
@@ -110,13 +98,10 @@ struct EncryptedFile
     std::map<std::string, std::string> hashes;
     //! Required. Version of the encrypted attachments protocol. Must be v2.
     std::string v;
+
+    friend void from_json(const nlohmann::json &obj, EncryptedFile &res);
+    friend void to_json(nlohmann::json &obj, const EncryptedFile &res);
 };
-
-void
-from_json(const nlohmann::json &obj, EncryptedFile &res);
-
-void
-to_json(nlohmann::json &obj, const EncryptedFile &res);
 
 } // namespace crypto
 

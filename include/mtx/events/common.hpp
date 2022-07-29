@@ -31,15 +31,13 @@ struct ThumbnailInfo
     uint64_t size = 0;
     //! The mimetype of the thumbnail, e.g. image/jpeg.
     std::string mimetype;
+
+    //! Deserialization method needed by @p nlohmann::json.
+    friend void from_json(const nlohmann::json &obj, ThumbnailInfo &info);
+
+    //! Serialization method needed by @p nlohmann::json.
+    friend void to_json(nlohmann::json &obj, const ThumbnailInfo &info);
 };
-
-//! Deserialization method needed by @p nlohmann::json.
-void
-from_json(const nlohmann::json &obj, ThumbnailInfo &info);
-
-//! Serialization method needed by @p nlohmann::json.
-void
-to_json(nlohmann::json &obj, const ThumbnailInfo &info);
 
 //! Metadata about an image.
 struct ImageInfo
@@ -60,15 +58,13 @@ struct ImageInfo
     std::optional<crypto::EncryptedFile> thumbnail_file;
     //! experimental blurhash, see MSC2448
     std::string blurhash;
+
+    //! Deserialization method needed by @p nlohmann::json.
+    friend void from_json(const nlohmann::json &obj, ImageInfo &info);
+
+    //! Serialization method needed by @p nlohmann::json.
+    friend void to_json(nlohmann::json &obj, const ImageInfo &info);
 };
-
-//! Deserialization method needed by @p nlohmann::json.
-void
-from_json(const nlohmann::json &obj, ImageInfo &info);
-
-//! Serialization method needed by @p nlohmann::json.
-void
-to_json(nlohmann::json &obj, const ImageInfo &info);
 
 //! Metadata about a file.
 struct FileInfo
@@ -83,15 +79,13 @@ struct FileInfo
     std::string mimetype;
     //! Encryption members. If present, they replace thumbnail_url.
     std::optional<crypto::EncryptedFile> thumbnail_file;
+
+    //! Deserialization method needed by @p nlohmann::json.
+    friend void from_json(const nlohmann::json &obj, FileInfo &info);
+
+    //! Serialization method needed by @p nlohmann::json.
+    friend void to_json(nlohmann::json &obj, const FileInfo &info);
 };
-
-//! Deserialization method needed by @p nlohmann::json.
-void
-from_json(const nlohmann::json &obj, FileInfo &info);
-
-//! Serialization method needed by @p nlohmann::json.
-void
-to_json(nlohmann::json &obj, const FileInfo &info);
 
 //! Audio clip metadata.
 struct AudioInfo
@@ -102,15 +96,13 @@ struct AudioInfo
     uint64_t duration = 0;
     //! The mimetype of the audio e.g. `audio/aac`.
     std::string mimetype;
+
+    //! Deserialization method needed by @p nlohmann::json.
+    friend void from_json(const nlohmann::json &obj, AudioInfo &info);
+
+    //! Serialization method needed by @p nlohmann::json.
+    friend void to_json(nlohmann::json &obj, const AudioInfo &info);
 };
-
-//! Deserialization method needed by @p nlohmann::json.
-void
-from_json(const nlohmann::json &obj, AudioInfo &info);
-
-//! Serialization method needed by @p nlohmann::json.
-void
-to_json(nlohmann::json &obj, const AudioInfo &info);
 
 //! Video clip metadata.
 struct VideoInfo
@@ -133,15 +125,13 @@ struct VideoInfo
     std::optional<crypto::EncryptedFile> thumbnail_file;
     //! experimental blurhash, see MSC2448
     std::string blurhash;
+
+    //! Deserialization method needed by @p nlohmann::json.
+    friend void from_json(const nlohmann::json &obj, VideoInfo &info);
+
+    //! Serialization method needed by @p nlohmann::json.
+    friend void to_json(nlohmann::json &obj, const VideoInfo &info);
 };
-
-//! Deserialization method needed by @p nlohmann::json.
-void
-from_json(const nlohmann::json &obj, VideoInfo &info);
-
-//! Serialization method needed by @p nlohmann::json.
-void
-to_json(nlohmann::json &obj, const VideoInfo &info);
 
 //! Location metadata
 struct LocationInfo
@@ -154,15 +144,13 @@ struct LocationInfo
     std::optional<crypto::EncryptedFile> thumbnail_file;
     //! experimental blurhash, see MSC2448
     std::string blurhash;
+
+    //! Deserialization method needed by @p nlohmann::json.
+    friend void from_json(const nlohmann::json &obj, ThumbnailInfo &info);
+
+    //! Serialization method needed by @p nlohmann::json.
+    friend void to_json(nlohmann::json &obj, const ThumbnailInfo &info);
 };
-
-//! Deserialization method needed by @p nlohmann::json.
-void
-from_json(const nlohmann::json &obj, ThumbnailInfo &info);
-
-//! Serialization method needed by @p nlohmann::json.
-void
-to_json(nlohmann::json &obj, const ThumbnailInfo &info);
 
 //! Definition of rel_type for relations.
 enum class RelationType
@@ -194,11 +182,10 @@ struct Relation
     std::string event_id = "";
     //! key is the reaction itself
     std::optional<std::string> key = std::nullopt;
+
+    friend void from_json(const nlohmann::json &obj, Relation &relation);
+    friend void to_json(nlohmann::json &obj, const Relation &relation);
 };
-void
-from_json(const nlohmann::json &obj, Relation &relation);
-void
-to_json(nlohmann::json &obj, const Relation &relation);
 
 //! Multiple relations for a event
 struct Relations

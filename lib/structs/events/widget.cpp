@@ -2,8 +2,9 @@
 
 #include <nlohmann/json.hpp>
 
+namespace mtx::events::state {
 void
-mtx::events::state::from_json(const nlohmann::json &obj, Widget &create)
+from_json(const nlohmann::json &obj, Widget &create)
 {
     create.waitForIframeLoad = obj.value("waitForIframeLoad", true);
     create.type              = obj.value("type", "");
@@ -15,7 +16,7 @@ mtx::events::state::from_json(const nlohmann::json &obj, Widget &create)
 }
 
 void
-mtx::events::state::to_json(nlohmann::json &obj, const Widget &create)
+to_json(nlohmann::json &obj, const Widget &create)
 {
     if (!create.name.empty())
         obj["name"] = create.name;
@@ -27,4 +28,5 @@ mtx::events::state::to_json(nlohmann::json &obj, const Widget &create)
     obj["id"]                = create.id;
     obj["creatorUserId"]     = create.creatorUserId;
     obj["waitForIframeLoad"] = create.waitForIframeLoad;
+}
 }

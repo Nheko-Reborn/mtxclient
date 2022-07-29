@@ -21,13 +21,10 @@ struct Unknown
     std::string content;
     //! The original type
     std::string type;
+
+    friend void from_json(const nlohmann::json &obj, Unknown &event);
+    friend void to_json(nlohmann::json &obj, const Unknown &event);
 };
-
-void
-from_json(const nlohmann::json &obj, Unknown &event);
-
-void
-to_json(nlohmann::json &obj, const Unknown &event);
 
 } // namespace events
 } // namespace mtx

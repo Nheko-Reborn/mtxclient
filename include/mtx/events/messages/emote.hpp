@@ -30,13 +30,10 @@ struct Emote
     std::string formatted_body;
     //! Relates to for rich replies
     mtx::common::Relations relations;
+
+    friend void from_json(const nlohmann::json &obj, Emote &content);
+    friend void to_json(nlohmann::json &obj, const Emote &content);
 };
-
-void
-from_json(const nlohmann::json &obj, Emote &content);
-
-void
-to_json(nlohmann::json &obj, const Emote &content);
 
 } // namespace msg
 } // namespace events

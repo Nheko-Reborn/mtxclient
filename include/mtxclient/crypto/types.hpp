@@ -39,6 +39,9 @@ struct ExportedSession
     std::string session_id;
     //! Required. The key for the session.
     std::string session_key;
+
+    friend void to_json(nlohmann::json &obj, const ExportedSession &s);
+    friend void from_json(const nlohmann::json &obj, ExportedSession &s);
 };
 
 //! A list of exported sessions.
@@ -46,6 +49,9 @@ struct ExportedSessionKeys
 {
     //! The actual sessions.
     std::vector<ExportedSession> sessions;
+
+    friend void to_json(nlohmann::json &obj, const ExportedSessionKeys &keys);
+    friend void from_json(const nlohmann::json &obj, ExportedSessionKeys &keys);
 };
 
 //! A pair of keys connected to an olm account.
@@ -55,6 +61,9 @@ struct IdentityKeys
     std::string curve25519;
     //! The signing key.
     std::string ed25519;
+
+    friend void to_json(nlohmann::json &obj, const IdentityKeys &keys);
+    friend void from_json(const nlohmann::json &obj, IdentityKeys &keys);
 };
 
 //! A list of one time keys.
@@ -67,31 +76,10 @@ struct OneTimeKeys
 
     //! The one time keys by key id.
     std::map<KeyId, EncodedKey> curve25519;
+
+    friend void to_json(nlohmann::json &obj, const OneTimeKeys &keys);
+    friend void from_json(const nlohmann::json &obj, OneTimeKeys &keys);
 };
-
-void
-to_json(nlohmann::json &obj, const ExportedSession &s);
-
-void
-from_json(const nlohmann::json &obj, ExportedSession &s);
-
-void
-to_json(nlohmann::json &obj, const ExportedSessionKeys &keys);
-
-void
-from_json(const nlohmann::json &obj, ExportedSessionKeys &keys);
-
-void
-to_json(nlohmann::json &obj, const IdentityKeys &keys);
-
-void
-from_json(const nlohmann::json &obj, IdentityKeys &keys);
-
-void
-to_json(nlohmann::json &obj, const OneTimeKeys &keys);
-
-void
-from_json(const nlohmann::json &obj, OneTimeKeys &keys);
 
 template<class T, class Name>
 class strong_type
@@ -108,8 +96,8 @@ public:
     operator T &() noexcept { return value_; }
     constexpr operator const T &() const noexcept { return value_; }
 
-    T &get() { return value_; }
-    T const &get() const { return value_; }
+    [[nodiscard]] T &get() { return value_; }
+    [[nodiscard]] T const &get() const { return value_; }
 
 private:
     T value_;

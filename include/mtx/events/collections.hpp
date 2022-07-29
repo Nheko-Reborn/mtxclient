@@ -197,10 +197,9 @@ using EphemeralEvents = std::variant<mtx::events::EphemeralEvent<mtx::events::ep
 struct TimelineEvent
 {
     TimelineEvents data;
-};
 
-void
-from_json(const nlohmann::json &obj, TimelineEvent &e);
+    friend void from_json(const nlohmann::json &obj, TimelineEvent &e);
+};
 
 } // namespace collections
 

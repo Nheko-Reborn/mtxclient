@@ -29,13 +29,10 @@ struct RTCSessionDescriptionInit
     std::string sdp;
     //! The type of session description.
     Type type;
+
+    friend void from_json(const nlohmann::json &obj, RTCSessionDescriptionInit &content);
+    friend void to_json(nlohmann::json &obj, const RTCSessionDescriptionInit &content);
 };
-
-void
-from_json(const nlohmann::json &obj, RTCSessionDescriptionInit &content);
-
-void
-to_json(nlohmann::json &obj, const RTCSessionDescriptionInit &content);
 
 //! Content for the `m.call.invite` event.
 struct CallInvite
@@ -52,13 +49,10 @@ struct CallInvite
     uint32_t lifetime = 90000;
     //! The ID of the user that the call is being placed to. See MSC2746.
     std::string invitee;
+
+    friend void from_json(const nlohmann::json &obj, CallInvite &content);
+    friend void to_json(nlohmann::json &obj, const CallInvite &content);
 };
-
-void
-from_json(const nlohmann::json &obj, CallInvite &content);
-
-void
-to_json(nlohmann::json &obj, const CallInvite &content);
 
 //! Content for the `m.call.candidates` event
 struct CallCandidates
@@ -81,13 +75,10 @@ struct CallCandidates
     std::vector<Candidate> candidates;
     //! The version of the VoIP specification this message adheres to.
     std::string version;
+
+    friend void from_json(const nlohmann::json &obj, CallCandidates &content);
+    friend void to_json(nlohmann::json &obj, const CallCandidates &content);
 };
-
-void
-from_json(const nlohmann::json &obj, CallCandidates &content);
-
-void
-to_json(nlohmann::json &obj, const CallCandidates &content);
 
 //! Content for the `m.call.answer` event
 struct CallAnswer
@@ -100,13 +91,10 @@ struct CallAnswer
     std::string version;
     //! The session description object
     RTCSessionDescriptionInit answer;
+
+    friend void from_json(const nlohmann::json &obj, CallAnswer &content);
+    friend void to_json(nlohmann::json &obj, const CallAnswer &content);
 };
-
-void
-from_json(const nlohmann::json &obj, CallAnswer &content);
-
-void
-to_json(nlohmann::json &obj, const CallAnswer &content);
 
 //! Content for the `m.call.hangup` event
 struct CallHangUp
@@ -131,13 +119,10 @@ struct CallHangUp
     std::string version;
     //! The reason for the call hang up.
     Reason reason = Reason::UserHangUp;
+
+    friend void from_json(const nlohmann::json &obj, CallHangUp &content);
+    friend void to_json(nlohmann::json &obj, const CallHangUp &content);
 };
-
-void
-from_json(const nlohmann::json &obj, CallHangUp &content);
-
-void
-to_json(nlohmann::json &obj, const CallHangUp &content);
 
 //! Content for the `m.call.select_answer` event. See MSC2746.
 struct CallSelectAnswer
@@ -150,13 +135,10 @@ struct CallSelectAnswer
     std::string version;
     //! The ID of the selected party.
     std::string selected_party_id;
+
+    friend void from_json(const nlohmann::json &obj, CallSelectAnswer &content);
+    friend void to_json(nlohmann::json &obj, const CallSelectAnswer &content);
 };
-
-void
-from_json(const nlohmann::json &obj, CallSelectAnswer &content);
-
-void
-to_json(nlohmann::json &obj, const CallSelectAnswer &content);
 
 //! Content for the `m.call.reject` event. See MSC2746.
 struct CallReject
@@ -167,13 +149,10 @@ struct CallReject
     std::string party_id;
     //! The version of the VoIP specification this message adheres to.
     std::string version;
+
+    friend void from_json(const nlohmann::json &obj, CallReject &content);
+    friend void to_json(nlohmann::json &obj, const CallReject &content);
 };
-
-void
-from_json(const nlohmann::json &obj, CallReject &content);
-
-void
-to_json(nlohmann::json &obj, const CallReject &content);
 
 //! Content for the `m.call.negotiate` event. See MSC2746.
 struct CallNegotiate
@@ -186,13 +165,10 @@ struct CallNegotiate
     uint32_t lifetime = 90000;
     //! The session description object
     RTCSessionDescriptionInit description;
+
+    friend void from_json(const nlohmann::json &obj, CallNegotiate &content);
+    friend void to_json(nlohmann::json &obj, const CallNegotiate &content);
 };
-
-void
-from_json(const nlohmann::json &obj, CallNegotiate &content);
-
-void
-to_json(nlohmann::json &obj, const CallNegotiate &content);
 
 } // namespace mtx::events::voip
 }

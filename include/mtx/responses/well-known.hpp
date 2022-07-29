@@ -18,6 +18,8 @@ struct ServerInformation
 {
     //! Required. The base URL for client-server connections.
     std::string base_url;
+
+    friend void from_json(const nlohmann::json &obj, ServerInformation &response);
 };
 
 //! Response from the `GET /.well-known/matrix/client` endpoint.
@@ -30,11 +32,8 @@ struct WellKnown
     ServerInformation homeserver;
     //! Used by clients to discover identity server information.
     std::optional<ServerInformation> identity_server;
-};
 
-void
-from_json(const nlohmann::json &obj, WellKnown &response);
-void
-from_json(const nlohmann::json &obj, ServerInformation &response);
+    friend void from_json(const nlohmann::json &obj, WellKnown &response);
+};
 }
 }

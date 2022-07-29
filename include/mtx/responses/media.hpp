@@ -19,9 +19,8 @@ struct ContentURI
 {
     //! The MXC URI for the uploaded content.
     std::string content_uri;
-};
 
-void
-from_json(const nlohmann::json &obj, ContentURI &response);
+    friend void from_json(const nlohmann::json &obj, ContentURI &response);
+};
 }
 }

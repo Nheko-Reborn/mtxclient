@@ -20,13 +20,10 @@ struct PinnedEvents
 {
     //! The ids of the pinned events.
     std::vector<std::string> pinned;
+
+    friend void from_json(const nlohmann::json &obj, PinnedEvents &event);
+    friend void to_json(nlohmann::json &obj, const PinnedEvents &event);
 };
-
-void
-from_json(const nlohmann::json &obj, PinnedEvents &event);
-
-void
-to_json(nlohmann::json &obj, const PinnedEvents &event);
 
 } // namespace state
 } // namespace events

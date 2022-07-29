@@ -51,27 +51,27 @@ struct Flow
 {
     //! The stages to complete.
     Stages stages;
+
+    friend void from_json(const nlohmann::json &obj, Flow &flow);
 };
-void
-from_json(const nlohmann::json &obj, Flow &flow);
 
 //! Parameters for oauth2.
 struct OAuth2Params
 {
     //! The oauth uri
     std::string uri;
+
+    friend void from_json(const nlohmann::json &obj, OAuth2Params &params);
 };
-void
-from_json(const nlohmann::json &obj, OAuth2Params &params);
 
 //! The desciption of one policy in the terms and conditions.
 struct PolicyDescription
 {
     std::string name; //!< language specific name
     std::string url;  //!< language specific link
+
+    friend void from_json(const nlohmann::json &obj, PolicyDescription &desc);
 };
-void
-from_json(const nlohmann::json &obj, PolicyDescription &desc);
 
 //! A policy in the terms and conditions.
 struct Policy
@@ -81,18 +81,18 @@ struct Policy
     /// @brief 2 letter language code to policy name and link, fallback to "en"
     /// recommended, when language not available.
     std::unordered_map<std::string, PolicyDescription> langToPolicy;
+
+    friend void from_json(const nlohmann::json &obj, Policy &policy);
 };
-void
-from_json(const nlohmann::json &obj, Policy &policy);
 
 //! Parameters for the auth stage requiring you to accept terms and conditions.
 struct TermsParams
 {
     //! The different policies by name.
     std::unordered_map<std::string, Policy> policies;
+
+    friend void from_json(const nlohmann::json &obj, TermsParams &params);
 };
-void
-from_json(const nlohmann::json &obj, TermsParams &params);
 
 //! All the different parameters.
 using Params = std::variant<OAuth2Params, TermsParams, std::string>;
@@ -111,9 +111,9 @@ struct Unauthorized
 
     // AuthType may be an undocumented string, not defined in auth_types
     std::unordered_map<AuthType, Params> params;
+
+    friend void from_json(const nlohmann::json &obj, Unauthorized &unauthorized);
 };
-void
-from_json(const nlohmann::json &obj, Unauthorized &unauthorized);
 
 //! namespace for the request types in the different auth stages.
 namespace auth {

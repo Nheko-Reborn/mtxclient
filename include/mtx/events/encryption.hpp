@@ -27,13 +27,10 @@ struct Encryption
     //! How many messages should be sent before changing the session. 100 is the recommended
     //! default.
     uint64_t rotation_period_msgs = 100;
+
+    friend void from_json(const nlohmann::json &obj, Encryption &encryption);
+    friend void to_json(nlohmann::json &obj, const Encryption &encryption);
 };
-
-void
-from_json(const nlohmann::json &obj, Encryption &encryption);
-
-void
-to_json(nlohmann::json &obj, const Encryption &encryption);
 
 } // namespace state
 } // namespace events

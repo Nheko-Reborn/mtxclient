@@ -22,13 +22,10 @@ struct Reaction
 {
     //! Should be an annotation relation
     common::Relations relations;
+
+    friend void from_json(const nlohmann::json &obj, Reaction &event);
+    friend void to_json(nlohmann::json &obj, const Reaction &event);
 };
-
-void
-from_json(const nlohmann::json &obj, Reaction &event);
-
-void
-to_json(nlohmann::json &obj, const Reaction &event);
 
 } // namespace msg
 } // namespace events

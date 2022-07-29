@@ -20,9 +20,8 @@ struct Members
 {
     //! A chunk of member events.
     std::vector<mtx::events::StateEvent<events::state::Member>> chunk;
-};
 
-void
-from_json(const nlohmann::json &obj, Members &res);
+    friend void from_json(const nlohmann::json &obj, Members &res);
+};
 }
 }

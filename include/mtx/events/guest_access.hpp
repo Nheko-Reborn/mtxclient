@@ -35,13 +35,10 @@ struct GuestAccess
 {
     //! Whether guests can join the room.
     AccessState guest_access = AccessState::Forbidden;
+
+    friend void from_json(const nlohmann::json &obj, GuestAccess &guest_access);
+    friend void to_json(nlohmann::json &obj, const GuestAccess &guest_access);
 };
-
-void
-from_json(const nlohmann::json &obj, GuestAccess &guest_access);
-
-void
-to_json(nlohmann::json &obj, const GuestAccess &guest_access);
 
 } // namespace state
 } // namespace events

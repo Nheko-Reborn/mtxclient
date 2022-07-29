@@ -28,15 +28,13 @@ struct Direct
     //! keys are the user IDs and values are lists of room ID strings of the ‘direct’ rooms for that
     //! user ID.
     std::map<std::string, std::vector<std::string>> user_to_rooms;
+
+    //! Deserialization method needed by @p nlohmann::json.
+    friend void from_json(const nlohmann::json &obj, Direct &content);
+
+    //! Serialization method needed by @p nlohmann::json.
+    friend void to_json(nlohmann::json &obj, const Direct &content);
 };
-
-//! Deserialization method needed by @p nlohmann::json.
-void
-from_json(const nlohmann::json &obj, Direct &content);
-
-//! Serialization method needed by @p nlohmann::json.
-void
-to_json(nlohmann::json &obj, const Direct &content);
 
 } // namespace state
 } // namespace events

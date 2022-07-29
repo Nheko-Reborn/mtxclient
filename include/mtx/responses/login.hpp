@@ -35,10 +35,9 @@ struct Login
     //! If present, clients SHOULD use the provided object to reconfigure themselves,
     //! optionally validating the URLs within.
     std::optional<WellKnown> well_known;
-};
 
-void
-from_json(const nlohmann::json &obj, Login &response);
+    friend void from_json(const nlohmann::json &obj, Login &response);
+};
 
 //! Identity provider for SSO
 struct IdentityProvider
@@ -66,9 +65,9 @@ struct IdentityProvider
     std::string id;
     //! Required: Human readable description for the IdP, intended to be shown to the user.
     std::string name;
+
+    friend void from_json(const nlohmann::json &obj, IdentityProvider &response);
 };
-void
-from_json(const nlohmann::json &obj, IdentityProvider &response);
 
 //! One supported login flow.
 struct LoginFlow
@@ -80,18 +79,17 @@ struct LoginFlow
     //! distinct buttons for the user to interact with, and would map to the appropriate
     //! IdP-dependent redirect endpoint for that IdP.
     std::vector<IdentityProvider> identity_providers;
+
+    friend void from_json(const nlohmann::json &obj, LoginFlow &response);
 };
-void
-from_json(const nlohmann::json &obj, LoginFlow &response);
 
 //! Response from the `GET /_matrix/client/r0/login` endpoint.
 struct LoginFlows
 {
     //! The list of supported flows.
     std::vector<LoginFlow> flows;
-};
 
-void
-from_json(const nlohmann::json &obj, LoginFlows &response);
+    friend void from_json(const nlohmann::json &obj, LoginFlows &response);
+};
 }
 }

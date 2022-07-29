@@ -22,10 +22,9 @@ struct PublicRoomVisibility
 {
     //! The visibility of the room in the directory. One of: ["private", "public"]
     common::RoomVisibility visibility;
-};
 
-void
-from_json(const nlohmann::json &obj, PublicRoomVisibility &res);
+    friend void from_json(const nlohmann::json &obj, PublicRoomVisibility &res);
+};
 
 struct PublicRoomsChunk
 {
@@ -70,11 +69,10 @@ struct PublicRoomsChunk
     //!
     //! If the room is not a space-room, this should be empty.
     std::vector<mtx::events::collections::StrippedEvents> children_state;
+
+    friend void from_json(const nlohmann::json &obj, PublicRoomsChunk &res);
 };
 using PublicRoom = PublicRoomsChunk;
-
-void
-from_json(const nlohmann::json &obj, PublicRoomsChunk &res);
 
 //! Response from the `GET /_matrix/client/r0/publicRooms` &
 //! `POST /_matrix/client/r0/publicRooms` endpoints.
@@ -93,10 +91,9 @@ struct PublicRooms
     //! An estimate on the total number of public rooms,
     //! if the server has an estimate.
     std::optional<size_t> total_room_count_estimate;
-};
 
-void
-from_json(const nlohmann::json &obj, PublicRooms &publicRooms);
+    friend void from_json(const nlohmann::json &obj, PublicRooms &publicRooms);
+};
 
 //! Response from the `GET /_matrix/client/v1/rooms/{roomId}/hierarchy`
 struct HierarchyRooms
@@ -106,10 +103,9 @@ struct HierarchyRooms
     //! A token to supply to from to keep paginating the responses. Not present when there are no
     //! further results.
     std::string next_batch;
-};
 
-void
-from_json(const nlohmann::json &obj, HierarchyRooms &publicRooms);
+    friend void from_json(const nlohmann::json &obj, HierarchyRooms &publicRooms);
+};
 
 } // namespace responses
 } // namespace mtx

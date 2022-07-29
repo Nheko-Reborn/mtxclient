@@ -23,13 +23,10 @@ struct HiddenEvents
 {
     //! The hidden event types
     std::optional<std::vector<EventType>> hidden_event_types;
+
+    friend void from_json(const nlohmann::json &obj, HiddenEvents &content);
+    friend void to_json(nlohmann::json &obj, const HiddenEvents &content);
 };
-
-void
-from_json(const nlohmann::json &obj, HiddenEvents &content);
-
-void
-to_json(nlohmann::json &obj, const HiddenEvents &content);
 }
 } // namespace account_data
 } // namespace events

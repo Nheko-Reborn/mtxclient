@@ -111,13 +111,10 @@ struct PowerLevels
     //! The power level requirements for specific notification types. This is a mapping from key
     //! to power level for that notifications key.
     std::map<std::string, power_level_t, std::less<>> notifications;
+
+    friend void from_json(const nlohmann::json &obj, PowerLevels &power_levels);
+    friend void to_json(nlohmann::json &obj, const PowerLevels &power_levels);
 };
-
-void
-from_json(const nlohmann::json &obj, PowerLevels &power_levels);
-
-void
-to_json(nlohmann::json &obj, const PowerLevels &power_levels);
 
 } // namespace state
 } // namespace events

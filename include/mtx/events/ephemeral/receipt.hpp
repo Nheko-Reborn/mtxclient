@@ -47,15 +47,13 @@ struct Receipt
     //! The mapping of event ID to a collection of receipts for this event ID. The event ID is
     //! the ID of the event being acknowledged and not an ID for the receipt itself.
     std::map<std::string, std::map<ReceiptType, Receipts>> receipts;
+
+    //! Deserialization method needed by @p nlohmann::json.
+    friend void from_json(const nlohmann::json &obj, Receipt &content);
+
+    //! Serialization method needed by @p nlohmann::json.
+    friend void to_json(nlohmann::json &obj, const Receipt &content);
 };
-
-//! Deserialization method needed by @p nlohmann::json.
-void
-from_json(const nlohmann::json &obj, Receipt &content);
-
-//! Serialization method needed by @p nlohmann::json.
-void
-to_json(nlohmann::json &obj, const Receipt &content);
 
 } // namespace state
 } // namespace events

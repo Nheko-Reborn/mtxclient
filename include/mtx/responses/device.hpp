@@ -33,10 +33,9 @@ struct Device
     //! The timestamp (in milliseconds since the unix epoch) when this devices was last seen. (May
     //! be a few minutes out of date, for efficiency reasons).
     size_t last_seen_ts;
-};
 
-void
-from_json(const nlohmann::json &obj, Device &res);
+    friend void from_json(const nlohmann::json &obj, Device &res);
+};
 
 //! Response from the `GET /_matrix/client/r0/devices` endpoint.
 struct QueryDevices
@@ -45,10 +44,9 @@ struct QueryDevices
     //! A list of all registered devices for this user.
     //
     std::vector<Device> devices;
-};
 
-void
-from_json(const nlohmann::json &obj, QueryDevices &response);
+    friend void from_json(const nlohmann::json &obj, QueryDevices &response);
+};
 
 }
 }
