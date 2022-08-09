@@ -66,6 +66,11 @@ struct Child
     /// of more than 50 characters, are forbidden and the field should be ignored if received.
     std::optional<std::string> order;
 
+    //! Optional (default false) flag to denote whether the child is “suggested” or of interest to
+    //! members of the space. This is primarily intended as a rendering hint for clients to display
+    //! the room differently, such as eagerly rendering them in the room list.
+    bool suggested = false;
+
     friend void from_json(const nlohmann::json &obj, Child &child);
     friend void to_json(nlohmann::json &obj, const Child &child);
 };

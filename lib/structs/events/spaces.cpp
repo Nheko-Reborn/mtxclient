@@ -21,6 +21,8 @@ from_json(const nlohmann::json &obj, Parent &parent)
 void
 to_json(nlohmann::json &obj, const Parent &parent)
 {
+    obj = nlohmann::json::object();
+
     // event without via is invalid.
     if (!parent.via.has_value() || parent.via.value().empty())
         return;
@@ -53,11 +55,15 @@ from_json(const nlohmann::json &obj, Child &child)
     if (obj.contains("order") && obj.at("order").is_string() &&
         is_valid_order_str(obj.at("order").get<std::string>()))
         child.order = obj.at("order").get<std::string>();
+
+    child.suggested = obj.value("suggested", false);
 }
 
 void
 to_json(nlohmann::json &obj, const Child &child)
 {
+    obj = nlohmann::json::object();
+
     // event without via is invalid.
     if (!child.via.has_value() || child.via.value().empty())
         return;
@@ -66,6 +72,9 @@ to_json(nlohmann::json &obj, const Child &child)
 
     if (child.order && is_valid_order_str(child.order.value()))
         obj["order"] = child.order.value();
+
+    if (child.suggested)
+        obj["suggested"] = true;
 }
 }
 } // namespace state
