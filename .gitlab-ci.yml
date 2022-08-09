@@ -43,7 +43,7 @@ build synapse arm64:
 
 .build-linux:
   stage: build
-  image: ubuntu:20.04
+  image: ubuntu:22.04
   services:
     - name: $CI_REGISTRY_IMAGE/synapse-${M_ARCH}:latest
       alias: synapse
