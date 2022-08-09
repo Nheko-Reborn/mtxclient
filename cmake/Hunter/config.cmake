@@ -1,9 +1,4 @@
 hunter_config(
-    spdlog
-    VERSION 1.8.0-p1
-)
-
-hunter_config(
     OpenSSL
     VERSION 1.1.1j
 )
