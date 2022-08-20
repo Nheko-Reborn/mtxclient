@@ -57,7 +57,8 @@ from_json(const json &obj, CallInvite &content)
     content.lifetime = obj.at("lifetime").get<uint32_t>();
     if (content.version != "0") {
         content.party_id = obj.at("party_id").get<std::string>();
-        content.invitee  = obj.at("invitee").get<std::string>();
+        if(obj.contains("invitee"))
+            content.invitee  = obj.at("invitee").get<std::string>();
     }
 }
 
