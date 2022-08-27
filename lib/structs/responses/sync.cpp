@@ -5,6 +5,7 @@
 
 #include <nlohmann/json.hpp>
 
+#include <algorithm>
 #include <variant>
 
 using json = nlohmann::json;
@@ -157,11 +158,38 @@ from_json(const json &obj, Rooms &rooms)
 void
 from_json(const json &obj, DeviceLists &device_lists)
 {
-    if (obj.count("changed") != 0)
+    if (obj.count("changed") != 0) {
         device_lists.changed = obj.at("changed").get<std::vector<std::string>>();
 
-    if (obj.count("left") != 0)
+        device_lists.changed.erase(
+          std::remove_if(device_lists.changed.begin(),
+                         device_lists.changed.end(),
+                         [](const std::string &user) {
+                             if (user.size() > 255) {
+                                 mtx::utils::log::log()->warn(
+                                   "Invalid userid in device list changed.");
+                                 return true;
+                             } else
+                                 return false;
+                         }),
+          device_lists.changed.end());
+    }
+
+    if (obj.count("left") != 0) {
         device_lists.left = obj.at("left").get<std::vector<std::string>>();
+
+        device_lists.left.erase(std::remove_if(device_lists.left.begin(),
+                                               device_lists.left.end(),
+                                               [](const std::string &user) {
+                                                   if (user.size() > 255) {
+                                                       mtx::utils::log::log()->warn(
+                                                         "Invalid userid in device list left.");
+                                                       return true;
+                                                   } else
+                                                       return false;
+                                               }),
+                                device_lists.left.end());
+    }
 }
 
 void
@@ -193,10 +221,17 @@ from_json(const json &obj, Sync &response)
         response.device_unused_fallback_key_types = fallback_keys->get<std::vector<std::string>>();
 
     if (obj.count("presence") != 0 && obj.at("presence").contains("events")) {
-        response.presence =
-          obj.at("presence")
-            .at("events")
-            .get<std::vector<mtx::events::Event<mtx::events::presence::Presence>>>();
+        const auto &events = obj.at("presence").at("events");
+        response.presence.reserve(events.size());
+        for (const auto &e : events) {
+            try {
+                response.presence.push_back(
+                  e.get<mtx::events::Event<mtx::events::presence::Presence>>());
+            } catch (std::exception &ex) {
+                mtx::utils::log::log()->warn(
+                  "Error parsing presence event: {}, {}", ex.what(), e.dump(2));
+            }
+        }
     }
 
     if (obj.count("account_data") != 0) {

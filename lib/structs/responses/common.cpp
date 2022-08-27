@@ -198,7 +198,7 @@ parse_room_account_data_events(
             case events::EventType::ImagePackInRoom:
                 continue;
             }
-        } catch (json::exception &err) {
+        } catch (std::exception &err) {
             log_error(err, e);
         }
     }
@@ -506,7 +506,7 @@ parse_timeline_events(const json &events,
             case events::EventType::Dummy:
                 continue;
             }
-        } catch (json::exception &err) {
+        } catch (std::exception &err) {
             log_error(err, e);
         }
     }
@@ -604,7 +604,7 @@ parse_device_events(const json &events,
             default:
                 continue;
             }
-        } catch (json::exception &err) {
+        } catch (std::exception &err) {
             log_error(err, e);
         }
     }
@@ -779,7 +779,7 @@ parse_state_events(const json &events,
             case events::EventType::Dummy:
                 continue;
             }
-        } catch (json::exception &err) {
+        } catch (std::exception &err) {
             log_error(err, e);
         }
     }
@@ -942,7 +942,7 @@ parse_stripped_events(const json &events,
             case events::EventType::Dummy:
                 continue;
             }
-        } catch (json::exception &err) {
+        } catch (std::exception &err) {
             log_error(err, e);
         }
     }
@@ -976,7 +976,7 @@ parse_ephemeral_events(const json &events,
             default:
                 continue;
             }
-        } catch (json::exception &err) {
+        } catch (std::exception &err) {
             utils::log_error(err, e);
         }
     }

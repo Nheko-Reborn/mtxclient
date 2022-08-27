@@ -54,8 +54,17 @@ from_json(const nlohmann::json &obj, Event<Content> &event)
         event.content = {};
     }
 
-    event.type   = getEventType(obj.at("type").get<std::string>());
+    auto type = obj.at("type").get<std::string>();
+    if (type.size() > 255) {
+        throw std::out_of_range("Type exceeds 255 bytes");
+    }
+    event.type = getEventType(type);
+
     event.sender = obj.value("sender", "");
+
+    if (event.sender.size() > 255) {
+        throw std::out_of_range("Sender exceeds 255 bytes");
+    }
 
     if constexpr (std::is_same_v<Unknown, Content>)
         event.content.type = obj.at("type").get<std::string>();
@@ -135,6 +144,10 @@ from_json(const nlohmann::json &obj, StrippedEvent<Content> &event)
     from_json(obj, base);
 
     event.state_key = obj.at("state_key").get<std::string>();
+
+    if (event.state_key.size() > 255) {
+        throw std::out_of_range("State key exceeds 255 bytes");
+    }
 }
 
 template<class Content>
@@ -154,12 +167,21 @@ from_json(const nlohmann::json &obj, RoomEvent<Content> &event)
     Event<Content> &base = event;
     from_json(obj, base);
 
-    event.event_id         = obj.at("event_id").get<std::string>();
+    event.event_id = obj.at("event_id").get<std::string>();
+
+    if (event.event_id.size() > 255) {
+        throw std::out_of_range("Event id exceeds 255 bytes");
+    }
+
     event.origin_server_ts = obj.at("origin_server_ts").get<uint64_t>();
 
     // SPEC_BUG: Not present in the state array returned by /sync.
     if (obj.find("room_id") != obj.end())
         event.room_id = obj.at("room_id").get<std::string>();
+
+    if (event.room_id.size() > 255) {
+        throw std::out_of_range("Room id exceeds 255 bytes");
+    }
 
     if (obj.find("unsigned") != obj.end())
         event.unsigned_data = obj.at("unsigned").get<UnsignedData>();
@@ -198,6 +220,10 @@ from_json(const nlohmann::json &obj, StateEvent<Content> &event)
     from_json(obj, base);
 
     event.state_key = obj.at("state_key").get<std::string>();
+
+    if (event.state_key.size() > 255) {
+        throw std::out_of_range("State key exceeds 255 bytes");
+    }
 }
 
 template<class Content>
@@ -261,6 +287,10 @@ from_json(const nlohmann::json &obj, EphemeralEvent<Content> &event)
 
     if (obj.contains("room_id"))
         event.room_id = obj.at("room_id").get<std::string>();
+
+    if (event.room_id.size() > 255) {
+        throw std::out_of_range("Room id exceeds 255 bytes");
+    }
 }
 
 }
