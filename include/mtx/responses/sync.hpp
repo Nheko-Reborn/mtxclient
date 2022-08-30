@@ -120,6 +120,21 @@ struct InvitedRoom
     friend void from_json(const nlohmann::json &obj, InvitedRoom &room);
 };
 
+//! A room that the user has knocked on.
+struct KnockedRoom
+{
+    //! The state of a room that the user has knocked on.
+    //! These state events may only have the `sender`, `type`,
+    //! `state_key` and `content` keys present.
+    std::vector<events::collections::StrippedEvents> knock_state;
+    //! Returns the name of the room.
+    std::string name() const;
+    //! Returns the URL for the avatar of the room.
+    std::string avatar() const;
+
+    friend void from_json(const nlohmann::json &obj, KnockedRoom &room);
+};
+
 //! Room updates.
 struct Rooms
 {
@@ -129,6 +144,9 @@ struct Rooms
     std::map<std::string, LeftRoom> leave;
     //! The rooms that the user has been invited to.
     std::map<std::string, InvitedRoom> invite;
+
+    //! The rooms that the user has knocked on.
+    std::map<std::string, KnockedRoom> knock;
 
     friend void from_json(const nlohmann::json &obj, Rooms &rooms);
 };

@@ -140,18 +140,53 @@ from_json(const json &obj, InvitedRoom &room)
 }
 
 void
+from_json(const json &obj, KnockedRoom &room)
+{
+    utils::parse_stripped_events(obj.at("knock_state").at("events"), room.knock_state);
+}
+
+void
 from_json(const json &obj, Rooms &rooms)
 {
-    if (obj.count("join") != 0) {
-        rooms.join = obj.at("join").get<std::map<std::string, JoinedRoom>>();
+    if (auto entries = obj.find("join"); entries != obj.end()) {
+        for (const auto &r : entries->items()) {
+            if (r.key().size() < 256) {
+                rooms.join.emplace_hint(rooms.join.end(), r.key(), r.value().get<JoinedRoom>());
+            } else {
+                mtx::utils::log::log()->warn("Skipping roomid which exceeds 255 bytes.");
+            }
+        }
     }
 
-    if (obj.count("leave") != 0) {
-        rooms.leave = obj.at("leave").get<std::map<std::string, LeftRoom>>();
+    if (auto entries = obj.find("leave"); entries != obj.end()) {
+        for (const auto &r : entries->items()) {
+            if (r.key().size() < 256) {
+                rooms.leave.emplace_hint(rooms.leave.end(), r.key(), r.value().get<LeftRoom>());
+            } else {
+                mtx::utils::log::log()->warn("Skipping roomid which exceeds 255 bytes.");
+            }
+        }
     }
 
-    if (obj.count("invite") != 0) {
-        rooms.invite = obj.at("invite").get<std::map<std::string, InvitedRoom>>();
+    if (auto entries = obj.find("invite"); entries != obj.end()) {
+        for (const auto &r : entries->items()) {
+            if (r.key().size() < 256) {
+                rooms.invite.emplace_hint(
+                  rooms.invite.end(), r.key(), r.value().get<InvitedRoom>());
+            } else {
+                mtx::utils::log::log()->warn("Skipping roomid which exceeds 255 bytes.");
+            }
+        }
+    }
+
+    if (auto entries = obj.find("knock"); entries != obj.end()) {
+        for (const auto &r : entries->items()) {
+            if (r.key().size() < 256) {
+                rooms.knock.emplace_hint(rooms.knock.end(), r.key(), r.value().get<KnockedRoom>());
+            } else {
+                mtx::utils::log::log()->warn("Skipping roomid which exceeds 255 bytes.");
+            }
+        }
     }
 }
 
