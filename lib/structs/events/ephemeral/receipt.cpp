@@ -14,7 +14,8 @@ from_json(const nlohmann::json &obj, Receipt &content)
             Receipt::ReceiptType t = Receipt::Read;
             if (receiptsByType.key() == "m.read")
                 t = Receipt::Read;
-            else if (receiptsByType.key() == "m.read.private" || receiptsByType.key() == "org.matrix.msc2285.read.private")
+            else if (receiptsByType.key() == "m.read.private" ||
+                     receiptsByType.key() == "org.matrix.msc2285.read.private")
                 t = Receipt::ReadPrivate;
             else
                 continue;
