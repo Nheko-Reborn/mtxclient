@@ -14,7 +14,7 @@ from_json(const nlohmann::json &obj, Receipt &content)
             Receipt::ReceiptType t = Receipt::Read;
             if (receiptsByType.key() == "m.read")
                 t = Receipt::Read;
-            else if (receiptsByType.key() == "org.matrix.msc2285.read.private")
+            else if (receiptsByType.key() == "m.read.private" || receiptsByType.key() == "org.matrix.msc2285.read.private")
                 t = Receipt::ReadPrivate;
             else
                 continue;
@@ -37,7 +37,7 @@ to_json(nlohmann::json &obj, const Receipt &content)
                     obj[event_id]["m.read"][user_id]["ts"] = receipt.ts;
                 else if (receiptType == Receipt::ReceiptType::ReadPrivate)
 
-                    obj[event_id]["org.matrix.msc2285.read.private"][user_id]["ts"] = receipt.ts;
+                    obj[event_id]["m.read.private"][user_id]["ts"] = receipt.ts;
             }
         }
     }
