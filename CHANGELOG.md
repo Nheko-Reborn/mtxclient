@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.8.1] -- 2022-09-07
+
+- Allow creating rooms with custom create event but default version
+- Update dependencies
+- Support stable hidden read receipts
+- Validate fields servers are required to validate again
+- Fix voip v1 event parsing (contributed by r0hit)
+- Use hidden friends to reduce overload sets
+- Add support for the unstable polics room type
+- Support querying server capabilities
+
 ## [0.8.0] -- 2022-07-22
 
 - Update hidden read receipts to current MSC

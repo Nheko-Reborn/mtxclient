@@ -1,6 +1,6 @@
 ---
 
-version: 0.8.0-{build}
+version: 0.8.1-{build}
 
 configuration: Release
 image: Visual Studio 2019
