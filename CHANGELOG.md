@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.8.2] -- 2022-09-09
+
+- fix crash when fetching room summaries
+
 ## [0.8.1] -- 2022-09-07
 
 - Allow creating rooms with custom create event but default version
