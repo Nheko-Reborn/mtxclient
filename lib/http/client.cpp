@@ -1264,7 +1264,7 @@ Client::get_summary(const std::string &room_id,
       api_path,
       [this, room_id, cb = std::move(cb)](
         const mtx::responses::PublicRoomsChunk &res, HeaderFields, RequestErr err) {
-          if (!err && !(err->status_code == 404 || err->status_code == 400))
+          if (!err || !(err->status_code == 404 || err->status_code == 400))
               cb(res, err);
           else if (!room_id.empty() && room_id[0] == '#')
               resolve_room_alias(
