@@ -136,13 +136,17 @@ InvitedRoom::avatar() const
 void
 from_json(const json &obj, InvitedRoom &room)
 {
-    utils::parse_stripped_events(obj.at("invite_state").at("events"), room.invite_state);
+    if (auto state = obj.find("invite_state"); state != obj.end())
+        if (auto events = state->find("events"); events != state->end())
+            utils::parse_stripped_events(*events, room.invite_state);
 }
 
 void
 from_json(const json &obj, KnockedRoom &room)
 {
-    utils::parse_stripped_events(obj.at("knock_state").at("events"), room.knock_state);
+    if (auto state = obj.find("knock_state"); state != obj.end())
+        if (auto events = state->find("events"); events != state->end())
+            utils::parse_stripped_events(*events, room.knock_state);
 }
 
 void

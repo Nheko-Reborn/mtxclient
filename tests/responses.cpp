@@ -359,6 +359,199 @@ TEST(Responses, Sync)
     EXPECT_EQ(sync2.rooms.join.size(), 0);
     EXPECT_EQ(sync2.rooms.leave.size(), 0);
     EXPECT_EQ(sync2.rooms.invite.size(), 0);
+
+    json data_missing_fields = R"(
+{
+  "account_data": {
+    "events": [
+      {
+        "content": {
+          "custom_config_key": "custom_config_value"
+        },
+        "type": "org.example.custom.config"
+      }
+    ]
+  },
+  "next_batch": "s72595_4483_1934",
+  "presence": {
+    "events": [
+      {
+        "content": {
+          "avatar_url": "mxc://localhost/wefuiwegh8742w",
+          "currently_active": false,
+          "last_active_ago": 2478593,
+          "presence": "online",
+          "status_msg": "Making cupcakes"
+        },
+        "sender": "@example:localhost",
+        "type": "m.presence"
+      }
+    ]
+  },
+  "rooms": {
+    "invite": {
+      "!696r7674:example.com": {
+        "invite_state": {
+          "events": [
+            {
+              "content": {
+                "name": "My Room Name"
+              },
+              "sender": "@alice:example.com",
+              "state_key": "",
+              "type": "m.room.name"
+            },
+            {
+              "content": {
+                "membership": "invite"
+              },
+              "sender": "@alice:example.com",
+              "state_key": "@bob:example.com",
+              "type": "m.room.member"
+            }
+          ]
+        }
+      },
+      "!696r7675:example.com": {}
+    },
+    "join": {
+      "!726s6s6q:example.com": {
+        "account_data": {
+          "events": [
+            {
+              "content": {
+                "tags": {
+                  "u.work": {
+                    "order": 0.9
+                  }
+                }
+              },
+              "type": "m.tag"
+            },
+            {
+              "content": {
+                "custom_config_key": "custom_config_value"
+              },
+              "type": "org.example.custom.room.config"
+            }
+          ]
+        },
+        "ephemeral": {
+          "events": [
+            {
+              "content": {
+                "user_ids": [
+                  "@alice:matrix.org",
+                  "@bob:example.com"
+                ]
+              },
+              "type": "m.typing"
+            }
+          ]
+        },
+        "state": {
+          "events": [
+            {
+              "content": {
+                "avatar_url": "mxc://example.org/SEsfnsuifSDFSSEF",
+                "displayname": "Alice Margatroid",
+                "membership": "join",
+                "reason": "Looking for support"
+              },
+              "event_id": "$143273582443PhrSn:example.org",
+              "origin_server_ts": 1432735824653,
+              "room_id": "!jEsUZKDJdhlrceRyVU:example.org",
+              "sender": "@example:example.org",
+              "state_key": "@alice:example.org",
+              "type": "m.room.member",
+              "unsigned": {
+                "age": 1234
+              }
+            }
+          ]
+        },
+        "summary": {
+          "m.heroes": [
+            "@alice:example.com",
+            "@bob:example.com"
+          ],
+          "m.invited_member_count": 0,
+          "m.joined_member_count": 2
+        },
+        "timeline": {
+          "events": [
+            {
+              "content": {
+                "avatar_url": "mxc://example.org/SEsfnsuifSDFSSEF",
+                "displayname": "Alice Margatroid",
+                "membership": "join",
+                "reason": "Looking for support"
+              },
+              "event_id": "$143273582443PhrSn:example.org",
+              "origin_server_ts": 1432735824653,
+              "room_id": "!jEsUZKDJdhlrceRyVU:example.org",
+              "sender": "@example:example.org",
+              "state_key": "@alice:example.org",
+              "type": "m.room.member",
+              "unsigned": {
+                "age": 1234
+              }
+            },
+            {
+              "content": {
+                "body": "This is an example text message",
+                "format": "org.matrix.custom.html",
+                "formatted_body": "<b>This is an example text message</b>",
+                "msgtype": "m.text"
+              },
+              "event_id": "$143273582443PhrSn:example.org",
+              "origin_server_ts": 1432735824653,
+              "room_id": "!jEsUZKDJdhlrceRyVU:example.org",
+              "sender": "@example:example.org",
+              "type": "m.room.message",
+              "unsigned": {
+                "age": 1234
+              }
+            }
+          ],
+          "limited": true,
+          "prev_batch": "t34-23535_0_0"
+        }
+      },
+      "!726s7s6q:example.com": {}
+    },
+    "knock": {
+      "!223asd456:example.com": {
+        "knock_state": {
+          "events": [
+            {
+              "content": {
+                "name": "My Room Name"
+              },
+              "sender": "@alice:example.com",
+              "state_key": "",
+              "type": "m.room.name"
+            },
+            {
+              "content": {
+                "membership": "knock"
+              },
+              "sender": "@bob:example.com",
+              "state_key": "@bob:example.com",
+              "type": "m.room.member"
+            }
+          ]
+        }
+      },
+      "!223asd457:example.com": {}
+    },
+    "leave": {}
+  }
+})"_json;
+    Sync sync3               = data_missing_fields.get<Sync>();
+    EXPECT_EQ(sync3.rooms.invite.count("!696r7675:example.com"), 1);
+    EXPECT_EQ(sync3.rooms.knock.count("!223asd457:example.com"), 1);
+    EXPECT_EQ(sync3.rooms.join.count("!726s7s6q:example.com"), 1);
 }
 
 TEST(Responses, SyncWithEncryption)
