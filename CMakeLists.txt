@@ -31,8 +31,8 @@ option(USE_BUNDLED_OPENSSL "Use the bundled version of OpenSSL."
 	${HUNTER_ENABLED})
 option(USE_BUNDLED_COEURL "Use a bundled version of the Curl wrapper"
 	${HUNTER_ENABLED})
-option(USE_BUNDLED_LIBEVENT "Use the bundled version of spdlog." ${HUNTER_ENABLED})
-option(USE_BUNDLED_LIBCURL "Use the bundled version of spdlog." ${HUNTER_ENABLED})
+option(USE_BUNDLED_LIBEVENT "Use the bundled version of libevent." ${HUNTER_ENABLED})
+option(USE_BUNDLED_LIBCURL "Use the bundled version of libcurl." ${HUNTER_ENABLED})
 
 
 if (CMAKE_VERSION VERSION_GREATER_EQUAL 3.12)
