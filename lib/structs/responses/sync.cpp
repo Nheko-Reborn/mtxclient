@@ -200,34 +200,26 @@ from_json(const json &obj, DeviceLists &device_lists)
     if (obj.count("changed") != 0) {
         device_lists.changed = obj.at("changed").get<std::vector<std::string>>();
 
-        device_lists.changed.erase(
-          std::remove_if(device_lists.changed.begin(),
-                         device_lists.changed.end(),
-                         [](const std::string &user) {
-                             if (user.size() > 255) {
-                                 mtx::utils::log::log()->warn(
-                                   "Invalid userid in device list changed.");
-                                 return true;
-                             } else
-                                 return false;
-                         }),
-          device_lists.changed.end());
+        std::erase_if(device_lists.changed, [](const std::string &user) {
+            if (user.size() > 255) {
+                mtx::utils::log::log()->warn("Invalid userid in device list changed.");
+                return true;
+            } else
+                return false;
+        });
     }
 
     if (obj.count("left") != 0) {
         device_lists.left = obj.at("left").get<std::vector<std::string>>();
 
-        device_lists.left.erase(std::remove_if(device_lists.left.begin(),
-                                               device_lists.left.end(),
-                                               [](const std::string &user) {
-                                                   if (user.size() > 255) {
-                                                       mtx::utils::log::log()->warn(
-                                                         "Invalid userid in device list left.");
-                                                       return true;
-                                                   } else
-                                                       return false;
-                                               }),
-                                device_lists.left.end());
+        std::erase_if(device_lists.left, [](const std::string &user) {
+            if (user.size() > 255) {
+                mtx::utils::log::log()->warn(
+                        "Invalid userid in device list left.");
+                return true;
+            } else
+                return false;
+        });
     }
 }
 
