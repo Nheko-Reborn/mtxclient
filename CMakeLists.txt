@@ -257,7 +257,7 @@ target_sources(matrix_client
 	lib/structs/responses/well-known.cpp
 	lib/structs/responses/public_rooms.cpp)
 add_library(MatrixClient::MatrixClient ALIAS matrix_client)
-set_property(TARGET matrix_client  PROPERTY CXX_STANDARD 17)
+set_property(TARGET matrix_client  PROPERTY CXX_STANDARD 20)
 set_property(TARGET matrix_client  PROPERTY CXX_EXTENSIONS OFF)
 target_include_directories(
 	matrix_client

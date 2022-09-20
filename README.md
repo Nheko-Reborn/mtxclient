@@ -13,7 +13,7 @@ Client API library for the Matrix protocol.
 
 - Coeurl (A C++ wrapper around curl.)
 - OpenSSL
-- C++ 17 compiler
+- C++ 20 compiler
 - CMake 3.15 or greater (lower versions can work, but not all build system options may work.)
 - Google Test (for testing)
 - spdlog (for logging)
