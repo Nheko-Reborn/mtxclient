@@ -72,7 +72,7 @@ class User : public ID
 public:
     template<typename Identifier>
     friend Identifier parse(const std::string &id);
-    auto operator<=>(User const &other) const noexcept { return id_ <=> other.id_; };
+    auto operator<=>(User const &other) const noexcept { return id_.compare(other.id_) <=> 0; };
     bool operator==(User const &other) const noexcept { return id_ == other.id_; };
 
 private:
