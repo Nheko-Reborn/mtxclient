@@ -72,8 +72,8 @@ class User : public ID
 public:
     template<typename Identifier>
     friend Identifier parse(const std::string &id);
-    constexpr auto operator<=>(User const &other) const noexcept { return id_ <=> other.id_; };
-    constexpr bool operator==(User const &other) const noexcept { return id_ == other.id_; };
+    auto operator<=>(User const &other) const noexcept { return id_ <=> other.id_; };
+    bool operator==(User const &other) const noexcept { return id_ == other.id_; };
 
 private:
     static constexpr std::string_view sigil = "@";
