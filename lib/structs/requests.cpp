@@ -81,15 +81,14 @@ to_json(json &obj, const Login &request)
 
     std::visit(
       [&obj](const auto &id) {
-          if constexpr (std::is_same_v<const login_identifier::User &, decltype(id)>) {
+          if constexpr (std::same_as<const login_identifier::User &, decltype(id)>) {
               obj["identifier"]["type"] = "m.id.user";
               obj["identifier"]["user"] = id.user;
-          } else if constexpr (std::is_same_v<const login_identifier::Thirdparty &, decltype(id)>) {
+          } else if constexpr (std::same_as<const login_identifier::Thirdparty &, decltype(id)>) {
               obj["identifier"]["type"]    = "m.id.thirdparty";
               obj["identifier"]["medium"]  = id.medium;
               obj["identifier"]["address"] = id.address;
-          } else if constexpr (std::is_same_v<const login_identifier::PhoneNumber &,
-                                              decltype(id)>) {
+          } else if constexpr (std::same_as<const login_identifier::PhoneNumber &, decltype(id)>) {
               obj["identifier"]["type"]    = "m.id.phone";
               obj["identifier"]["country"] = id.country;
               obj["identifier"]["phone"]   = id.phone;
