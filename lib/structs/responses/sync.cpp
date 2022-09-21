@@ -214,8 +214,7 @@ from_json(const json &obj, DeviceLists &device_lists)
 
         std::erase_if(device_lists.left, [](const std::string &user) {
             if (user.size() > 255) {
-                mtx::utils::log::log()->warn(
-                        "Invalid userid in device list left.");
+                mtx::utils::log::log()->warn("Invalid userid in device list left.");
                 return true;
             } else
                 return false;
