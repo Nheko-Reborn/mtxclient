@@ -111,6 +111,10 @@ from_json(const nlohmann::json &obj, Error &error)
 
     if (obj.contains("flows"))
         error.unauthorized = obj.get<user_interactive::Unauthorized>();
+
+    if (obj.contains("retry_after_ms"))
+        error.retry_after =
+          std::chrono::milliseconds(obj.value("retry_after_ms", std::uint64_t{0}));
 }
 }
 
