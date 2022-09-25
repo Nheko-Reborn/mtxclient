@@ -126,7 +126,8 @@ to_json(nlohmann::json &obj, const Encrypted &content)
 
 void
 from_json(const nlohmann::json &, Dummy &)
-{}
+{
+}
 
 void
 to_json(nlohmann::json &obj, const Dummy &)

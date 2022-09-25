@@ -140,7 +140,8 @@ public:
     //! Create a new UIA handler. Pass a callback for when a new stage needs to be completed.
     UIAHandler(UIAPrompt prompt_)
       : prompt(std::move(prompt_))
-    {}
+    {
+    }
 
     void next(const user_interactive::Auth &auth) const;
 

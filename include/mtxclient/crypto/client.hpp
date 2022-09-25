@@ -59,44 +59,53 @@ class olm_exception : public std::exception
 public:
     olm_exception(std::string func, OlmSession *s)
       : olm_exception(std::move(func), std::string(olm_session_last_error(s)))
-    {}
+    {
+    }
 
     olm_exception(std::string func, OlmAccount *acc)
       : olm_exception(std::move(func),
                       std::string(acc ? olm_account_last_error(acc) : "account == nullptr"))
-    {}
+    {
+    }
 
     olm_exception(std::string func, OlmUtility *util)
       : olm_exception(std::move(func), std::string(olm_utility_last_error(util)))
-    {}
+    {
+    }
 
     olm_exception(std::string func, OlmPkDecryption *s)
       : olm_exception(std::move(func), std::string(olm_pk_decryption_last_error(s)))
-    {}
+    {
+    }
 
     olm_exception(std::string func, OlmPkEncryption *s)
       : olm_exception(std::move(func), std::string(olm_pk_encryption_last_error(s)))
-    {}
+    {
+    }
 
     olm_exception(std::string func, OlmPkSigning *s)
       : olm_exception(std::move(func), std::string(olm_pk_signing_last_error(s)))
-    {}
+    {
+    }
 
     olm_exception(std::string func, OlmOutboundGroupSession *s)
       : olm_exception(
           std::move(func),
           std::string(s ? olm_outbound_group_session_last_error(s) : "session == nullptr"))
-    {}
+    {
+    }
 
     olm_exception(std::string func, OlmInboundGroupSession *s)
       : olm_exception(
           std::move(func),
           std::string(s ? olm_inbound_group_session_last_error(s) : "session == nullptr"))
-    {}
+    {
+    }
 
     olm_exception(std::string func, OlmSAS *s)
       : olm_exception(std::move(func), std::string(olm_sas_last_error(s)))
-    {}
+    {
+    }
 
     //! Returns a description of the olm error.
     const char *what() const noexcept override { return msg_.c_str(); }
@@ -108,7 +117,8 @@ private:
     olm_exception(std::string &&func, std::string error_string)
       : msg_(func + ": " + error_string)
       , ec_(ec_from_string(error_string))
-    {}
+    {
+    }
 
     OlmErrorCode ec_from_string(std::string_view);
 
@@ -216,7 +226,8 @@ public:
     OlmClient(std::string user_id, std::string device_id)
       : user_id_(std::move(user_id))
       , device_id_(std::move(device_id))
-    {}
+    {
+    }
 
     //! Base64 encoded string
     using Base64String = std::string;

@@ -88,10 +88,12 @@ public:
     strong_type() = default;
     explicit strong_type(const T &value)
       : value_(value)
-    {}
+    {
+    }
     explicit strong_type(T &&value)
       : value_(std::forward<T>(value))
-    {}
+    {
+    }
 
     operator T &() noexcept { return value_; }
     constexpr operator const T &() const noexcept { return value_; }

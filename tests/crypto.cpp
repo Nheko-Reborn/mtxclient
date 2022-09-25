@@ -30,7 +30,7 @@ TEST(Crypto, DeviceKeys)
     device1.user_id    = "@alice:example.com";
     device1.device_id  = "JLAFKJWSCS";
     device1.keys       = {{"curve25519:JLAFKJWSCS", "3C5BFWi2Y8MaVvjM8M22DBmh24PmgR0nPvJOIArzgyI"},
-                    {"ed25519:JLAFKJWSCS", "lEuiRJBit0IG6nUf5pUzWTUEsRVVe/HJkoKuEww9ULI"}};
+                          {"ed25519:JLAFKJWSCS", "lEuiRJBit0IG6nUf5pUzWTUEsRVVe/HJkoKuEww9ULI"}};
     device1.signatures = {{"@alice:example.com",
                            {{"ed25519:JLAFKJWSCS",
                              "dSO80A01XiigH3uBiDVx/EjzaoycHcjq9lfQX0uWsqxl2giMIiSPR8a4d291W1ihKJL/"

@@ -19,7 +19,8 @@ class crypto_exception : public std::exception
 public:
     crypto_exception(std::string func, const char *msg)
       : msg_(func + ": " + std::string(msg))
-    {}
+    {
+    }
 
     //! Describes the error
     const char *what() const noexcept override { return msg_.c_str(); }
