@@ -768,3 +768,48 @@ TEST(RoomEvents, Encrypted)
 
     EXPECT_EQ(data, json(event));
 }
+
+TEST(RoomEvents, ThreadedMessage)
+{
+    json data = R"({
+          "origin_server_ts": 1510489356530,
+          "sender": "@nheko_test:matrix.org",
+          "event_id": "$15104893562785758wEgEU:matrix.org",
+          "unsigned": {
+            "age": 2225,
+            "transaction_id": "m1510489356267.2"
+          },
+          "content": {
+            "body": "hey there",
+            "msgtype": "m.text",
+"m.relates_to": {
+  "rel_type": "m.thread",
+  "event_id": "$root",
+  "m.in_reply_to": {
+    "event_id": "$target"
+  },
+  "is_falling_back": true
+}
+          },
+          "type": "m.room.message",
+          "room_id": "!lfoDRlNFWlvOnvkBwQ:matrix.org"
+         })"_json;
+
+    RoomEvent<msg::Text> event = data.get<RoomEvent<msg::Text>>();
+
+    EXPECT_EQ(event.type, EventType::RoomMessage);
+    EXPECT_EQ(event.event_id, "$15104893562785758wEgEU:matrix.org");
+    EXPECT_EQ(event.room_id, "!lfoDRlNFWlvOnvkBwQ:matrix.org");
+    EXPECT_EQ(event.sender, "@nheko_test:matrix.org");
+    EXPECT_EQ(event.origin_server_ts, 1510489356530L);
+    EXPECT_EQ(event.unsigned_data.age, 2225);
+    EXPECT_EQ(event.unsigned_data.transaction_id, "m1510489356267.2");
+
+    EXPECT_EQ(event.content.body, "hey there");
+    EXPECT_EQ(event.content.msgtype, "m.text");
+    EXPECT_EQ(event.content.relations.reply_to(), "$target");
+    EXPECT_EQ(event.content.relations.reply_to(false), std::nullopt);
+    EXPECT_EQ(event.content.relations.thread(), "$root");
+
+    EXPECT_EQ(data.dump(), json(event).dump());
+}

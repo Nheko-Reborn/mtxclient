@@ -185,6 +185,9 @@ to_json(json &obj, const RelationType &type)
     case RelationType::InReplyTo:
         obj = "im.nheko.relations.v1.in_reply_to";
         break;
+    case RelationType::Thread:
+        obj = "m.thread";
+        break;
     case RelationType::Unsupported:
     default:
         obj = "unsupported";
@@ -203,6 +206,8 @@ from_json(const json &obj, RelationType &type)
         type = RelationType::Replace;
     else if (obj.get<std::string>() == "im.nheko.relations.v1.in_reply_to")
         type = RelationType::InReplyTo;
+    else if (obj.get<std::string>() == "m.thread")
+        type = RelationType::Thread;
     else
         type = RelationType::Unsupported;
 }
@@ -218,18 +223,27 @@ parse_relations(const nlohmann::json &content)
             rels.synthesized = false;
             return rels;
         } else if (content.contains("m.relates_to")) {
-            if (content.at("m.relates_to").contains("m.in_reply_to")) {
+            const auto &relates_to = content.at("m.relates_to");
+            if (relates_to.contains("m.in_reply_to")) {
                 Relation r;
-                r.event_id =
-                  content.at("m.relates_to").at("m.in_reply_to").at("event_id").get<std::string>();
+                r.event_id = relates_to.at("m.in_reply_to").at("event_id").get<std::string>();
                 r.rel_type = RelationType::InReplyTo;
 
                 Relations rels;
+                if (auto thread_type = relates_to.find("rel_type");
+                    thread_type != relates_to.end() && *thread_type == "m.thread") {
+                    if (auto thread_id = relates_to.find("event_id");
+                        thread_id != relates_to.end()) {
+                        r.is_fallback = relates_to.value("is_falling_back", false);
+                        rels.relations.push_back(relates_to.get<mtx::common::Relation>());
+                    }
+                }
+
                 rels.relations.push_back(r);
                 rels.synthesized = true;
                 return rels;
             } else {
-                Relation r = content.at("m.relates_to").get<mtx::common::Relation>();
+                Relation r = relates_to.get<mtx::common::Relation>();
                 Relations rels;
                 rels.relations.push_back(r);
                 rels.synthesized = true;
@@ -262,20 +276,24 @@ add_relations(nlohmann::json &content, const Relations &relations)
     if (relations.relations.empty())
         return;
 
-    std::optional<Relation> edit, not_edit;
+    std::optional<Relation> edit, not_edit, reply;
     for (const auto &r : relations.relations) {
         if (r.rel_type == RelationType::Replace)
             edit = r;
+        else if (r.rel_type == RelationType::InReplyTo)
+            reply = r;
         else
             not_edit = r;
     }
 
     if (not_edit) {
-        if (not_edit->rel_type == RelationType::InReplyTo) {
-            content["m.relates_to"]["m.in_reply_to"]["event_id"] = not_edit->event_id;
-        } else {
-            content["m.relates_to"] = *not_edit;
-        }
+        content["m.relates_to"] = *not_edit;
+    }
+
+    if (reply) {
+        content["m.relates_to"]["m.in_reply_to"]["event_id"] = reply->event_id;
+        if (reply->is_fallback && not_edit && not_edit->rel_type == RelationType::Thread)
+            content["m.relates_to"]["is_falling_back"] = true;
     }
 
     if (edit) {
@@ -316,12 +334,14 @@ apply_relations(nlohmann::json &content, const Relations &relations)
 void
 from_json(const json &obj, Relation &relates_to)
 {
-    if (obj.find("rel_type") != obj.end())
-        relates_to.rel_type = obj.at("rel_type").get<RelationType>();
-    if (obj.find("event_id") != obj.end())
-        relates_to.event_id = obj.at("event_id").get<std::string>();
-    if (obj.find("key") != obj.end())
-        relates_to.key = obj.at("key").get<std::string>();
+    if (auto it = obj.find("rel_type"); it != obj.end())
+        relates_to.rel_type = it->get<RelationType>();
+    if (auto it = obj.find("event_id"); it != obj.end())
+        relates_to.event_id = it->get<std::string>();
+    if (auto it = obj.find("key"); it != obj.end())
+        relates_to.key = it->get<std::string>();
+    if (auto it = obj.find("im.nheko.relations.v1.is_fallback"); it != obj.end())
+        relates_to.is_fallback = it->get<bool>();
 }
 
 void
@@ -331,36 +351,43 @@ to_json(json &obj, const Relation &relates_to)
     obj["event_id"] = relates_to.event_id;
     if (relates_to.key.has_value())
         obj["key"] = relates_to.key.value();
+    if (relates_to.is_fallback)
+        obj["im.nheko.relations.v1.is_fallback"] = true;
 }
 
 static inline std::optional<std::string>
-return_first_relation_matching(RelationType t, const Relations &rels)
+return_first_relation_matching(RelationType t, const Relations &rels, bool include_fallback)
 {
     for (const auto &r : rels.relations)
-        if (r.rel_type == t)
+        if (r.rel_type == t && (include_fallback || r.is_fallback == false))
             return r.event_id;
     return std::nullopt;
 }
 std::optional<std::string>
-Relations::reply_to() const
+Relations::reply_to(bool include_fallback) const
 {
-    return return_first_relation_matching(RelationType::InReplyTo, *this);
+    return return_first_relation_matching(RelationType::InReplyTo, *this, include_fallback);
 }
 std::optional<std::string>
-Relations::replaces() const
+Relations::replaces(bool include_fallback) const
 {
-    return return_first_relation_matching(RelationType::Replace, *this);
+    return return_first_relation_matching(RelationType::Replace, *this, include_fallback);
 }
 std::optional<std::string>
-Relations::references() const
+Relations::references(bool include_fallback) const
 {
-    return return_first_relation_matching(RelationType::Reference, *this);
+    return return_first_relation_matching(RelationType::Reference, *this, include_fallback);
+}
+std::optional<std::string>
+Relations::thread(bool include_fallback) const
+{
+    return return_first_relation_matching(RelationType::Thread, *this, include_fallback);
 }
 std::optional<Relation>
-Relations::annotates() const
+Relations::annotates(bool include_fallback) const
 {
     for (const auto &r : relations)
-        if (r.rel_type == RelationType::Annotation)
+        if (r.rel_type == RelationType::Annotation && (include_fallback || r.is_fallback == false))
             return r;
     return std::nullopt;
 }

@@ -163,6 +163,8 @@ enum class RelationType
     Replace,
     //! im.nheko.relations.v1.in_reply_to rel_type
     InReplyTo,
+    //! m.thread
+    Thread,
     //! not one of the supported types
     Unsupported
 };
@@ -183,6 +185,9 @@ struct Relation
     //! key is the reaction itself
     std::optional<std::string> key = std::nullopt;
 
+    //! proprietary field to track if this is a fallback for something else
+    bool is_fallback = false;
+
     friend void from_json(const nlohmann::json &obj, Relation &relation);
     friend void to_json(nlohmann::json &obj, const Relation &relation);
 };
@@ -196,10 +201,11 @@ struct Relations
     //! im.nheko.relactions.v1.relations
     bool synthesized = false;
 
-    std::optional<std::string> reply_to() const;
-    std::optional<std::string> replaces() const;
-    std::optional<std::string> references() const;
-    std::optional<Relation> annotates() const;
+    std::optional<std::string> reply_to(bool include_fallback = true) const;
+    std::optional<std::string> replaces(bool include_fallback = true) const;
+    std::optional<std::string> references(bool include_fallback = true) const;
+    std::optional<std::string> thread(bool include_fallback = true) const;
+    std::optional<Relation> annotates(bool include_fallback = true) const;
 };
 
 /// @brief Parses relations from a content object
