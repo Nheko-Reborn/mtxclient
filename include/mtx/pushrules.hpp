@@ -9,11 +9,20 @@
 #include <nlohmann/json.hpp>
 #endif
 
+#include <compare>
 #include <string>
 #include <variant>
 #include <vector>
 
+#include "mtx/events/power_levels.hpp"
+
 namespace mtx {
+namespace events {
+namespace collections {
+struct TimelineEvent;
+}
+}
+
 //! Namespace for the pushrules specific endpoints.
 namespace pushrules {
 //! A condition to match pushrules on.
@@ -45,27 +54,37 @@ struct PushCondition
 namespace actions {
 //! Notify the user.
 struct notify
-{};
+{
+    bool operator==(const notify &) const noexcept = default;
+};
 //! Don't notify the user.
 struct dont_notify
-{};
+{
+    bool operator==(const dont_notify &) const noexcept = default;
+};
 /// @brief This enables notifications for matching events but activates homeserver specific
 /// behaviour to intelligently coalesce multiple events into a single notification.
 ///
 /// Not all homeservers may support this. Those that do not support it should treat it as the notify
 /// action.
 struct coalesce
-{};
+{
+    bool operator==(const coalesce &) const noexcept = default;
+};
 //! Play a sound.
 struct set_tweak_sound
 {
     //! The sound to play.
     std::string value = "default";
+
+    bool operator==(const set_tweak_sound &) const noexcept = default;
 };
 //! Highlight the message.
 struct set_tweak_highlight
 {
     bool value = true;
+
+    bool operator==(const set_tweak_highlight &) const noexcept = default;
 };
 
 //! A collection for the different actions.
@@ -88,6 +107,8 @@ struct Actions
 
     friend void to_json(nlohmann::json &obj, const Actions &action);
     friend void from_json(const nlohmann::json &obj, Actions &action);
+
+    bool operator==(const Actions &) const noexcept = default;
 };
 }
 
@@ -152,6 +173,41 @@ struct Enabled
 
     friend void to_json(nlohmann::json &obj, const Enabled &enabled);
     friend void from_json(const nlohmann::json &obj, Enabled &enabled);
+};
+
+//! An optimized structure to calculate notifications for events.
+///
+/// You will want to cache this for as long as possible (until the pushrules change), since
+/// constructing this is somewhat expensive.
+class PushRuleEvaluator
+{
+public:
+    //! Construct a new push evaluator. Pass the current set of pushrules to evaluate.
+    PushRuleEvaluator(const Ruleset &rules);
+    ~PushRuleEvaluator();
+
+    //! Additional room information needed to evaluate push rules.
+    struct RoomContext
+    {
+        //! The displayname of the user in the room.
+        std::string user_display_name;
+        //! the membercount of the room
+        std::size_t member_count = 0;
+        //! The powerlevels event in this room
+        mtx::events::state::PowerLevels power_levels;
+    };
+
+    //! Evaluate the pushrules for @event .
+    ///
+    /// You need to have the room_id set for the event.
+    /// \returns the actions to apply.
+    [[nodiscard]] std::vector<actions::Action> evaluate(
+      const mtx::events::collections::TimelineEvent &event,
+      const RoomContext &ctx) const;
+
+private:
+    struct OptimizedRules;
+    std::unique_ptr<OptimizedRules> rules;
 };
 }
 }

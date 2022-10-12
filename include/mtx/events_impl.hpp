@@ -10,14 +10,12 @@ namespace detail {
 
 template<typename, typename = void>
 struct can_edit : std::false_type
-{
-};
+{};
 
 template<typename Content>
 struct can_edit<Content, std::void_t<decltype(Content::relations)>>
   : std::is_same<decltype(Content::relations), mtx::common::Relations>
-{
-};
+{};
 }
 
 template<class Content>

@@ -33,6 +33,7 @@ option(USE_BUNDLED_COEURL "Use a bundled version of the Curl wrapper"
 	${HUNTER_ENABLED})
 option(USE_BUNDLED_LIBEVENT "Use the bundled version of libevent." ${HUNTER_ENABLED})
 option(USE_BUNDLED_LIBCURL "Use the bundled version of libcurl." ${HUNTER_ENABLED})
+option(USE_BUNDLED_RE2 "Use the bundled version of re2." ${HUNTER_ENABLED})
 
 
 if (CMAKE_VERSION VERSION_GREATER_EQUAL 3.12)
@@ -125,6 +126,16 @@ set_package_properties(nlohmann_json PROPERTIES
 	URL "https://nlohmann.github.io/json/"
 	TYPE REQUIRED
 	)
+
+if(USE_BUNDLED_RE2)
+	hunter_add_package(re2)
+	find_package(re2 CONFIG REQUIRED)
+	target_link_libraries(matrix_client PRIVATE re2::re2)
+else()
+	find_package(PkgConfig REQUIRED) 
+	pkg_check_modules(re2 REQUIRED IMPORTED_TARGET re2)
+	target_link_libraries(matrix_client PRIVATE PkgConfig::re2)
+endif()
 
 ## Need to repeat all libevent deps?!?
 # libevent

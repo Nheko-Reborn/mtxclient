@@ -31,6 +31,7 @@ If you are missing some or all of those above dependencies, you can add `-DHUNTE
 | USE_BUNDLED_GTEST   | Use the bundled version of Google Test. |
 | USE_BUNDLED_JSON    | Use the bundled version of nlohmann json. |
 | USE_BUNDLED_OPENSSL | Use the bundled version of OpenSSL. |
+| USE_BUNDLED_RE2 | Use the bundled version of re2. |
 
 Below is an example which will build the library along with the tests & examples.
 

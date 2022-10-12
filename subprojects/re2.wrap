@@ -1,0 +1,12 @@
+[wrap-file]
+directory = re2-2022-04-01
+source_url = https://github.com/google/re2/archive/2022-04-01.tar.gz
+source_filename = re2-2022-04-01.tar.gz
+source_hash = 1ae8ccfdb1066a731bba6ee0881baad5efd2cd661acd9569b689f2586e1a50e9
+patch_filename = re2_20220401-1_patch.zip
+patch_url = https://wrapdb.mesonbuild.com/v2/re2_20220401-1/get_patch
+patch_hash = e27e17c208b5870483b6fa46f85bb540d974a2cf1c89eaff55fa3d0574cd3c2e
+
+[provide]
+re2 = re2_dep
+

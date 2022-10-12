@@ -127,6 +127,12 @@ MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::RedactionEvent, msg::Redaction)
 
 namespace mtx::events::collections {
 void
+to_json(nlohmann::json &obj, const TimelineEvent &e)
+{
+    std::visit([&obj](const auto &ev) { return to_json(obj, ev); }, e.data);
+}
+
+void
 from_json(const nlohmann::json &obj, TimelineEvent &e)
 {
     const auto type = mtx::events::getEventType(obj);

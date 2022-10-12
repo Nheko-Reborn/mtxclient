@@ -199,6 +199,7 @@ struct TimelineEvent
     TimelineEvents data;
 
     friend void from_json(const nlohmann::json &obj, TimelineEvent &e);
+    friend void to_json(nlohmann::json &obj, const TimelineEvent &e);
 };
 
 } // namespace collections

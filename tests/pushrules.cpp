@@ -412,3 +412,253 @@ TEST(Pushrules, RoomRuleMentions)
     });
     client->close();
 }
+
+TEST(Pushrules, EventMatches)
+{
+    mtx::pushrules::PushRule event_match_rule;
+    event_match_rule.actions = {
+      mtx::pushrules::actions::notify{},
+      mtx::pushrules::actions::set_tweak_highlight{},
+    };
+    event_match_rule.conditions.push_back(mtx::pushrules::PushCondition{
+      .kind    = "event_match",
+      .key     = "content.body",
+      .pattern = "honk",
+      .is      = "",
+    });
+
+    mtx::events::RoomEvent<mtx::events::msg::Text> textEv{};
+    textEv.content.body = "abc def ghi honk jkl";
+    textEv.room_id      = "!abc:def.ghi";
+    textEv.event_id     = "$abc1234567890:def.ghi";
+    textEv.sender       = "@me:def.ghi";
+
+    auto testEval = [actions = event_match_rule.actions,
+                     &textEv](const mtx::pushrules::PushRuleEvaluator &evaluator) {
+        mtx::pushrules::PushRuleEvaluator::RoomContext ctx{};
+        EXPECT_EQ(evaluator.evaluate({textEv}, ctx), actions);
+
+        auto textEvEnd         = textEv;
+        textEvEnd.content.body = "abc honk";
+        EXPECT_EQ(evaluator.evaluate({textEvEnd}, ctx), actions);
+        auto textEvStart         = textEv;
+        textEvStart.content.body = "honk abc";
+        EXPECT_EQ(evaluator.evaluate({textEvStart}, ctx), actions);
+        auto textEvNL         = textEv;
+        textEvNL.content.body = "abc\nhonk\nabc";
+        EXPECT_EQ(evaluator.evaluate({textEvNL}, ctx), actions);
+        auto textEvFull         = textEv;
+        textEvFull.content.body = "honk";
+        EXPECT_EQ(evaluator.evaluate({textEvFull}, ctx), actions);
+        auto textEvCase         = textEv;
+        textEvCase.content.body = "HoNk";
+        EXPECT_EQ(evaluator.evaluate({textEvCase}, ctx), actions);
+        auto textEvNo         = textEv;
+        textEvNo.content.body = "HoN";
+        EXPECT_TRUE(evaluator.evaluate({textEvNo}, ctx).empty());
+        auto textEvNo2         = textEv;
+        textEvNo2.content.body = "honkb";
+        EXPECT_TRUE(evaluator.evaluate({textEvNo2}, ctx).empty());
+        auto textEvWordBoundaries         = textEv;
+        textEvWordBoundaries.content.body = "@honk:";
+        EXPECT_EQ(evaluator.evaluate({textEvWordBoundaries}, ctx), actions);
+
+        // It is what the spec says ¯\_(ツ)_/¯
+        auto textEvWordBoundaries2         = textEv;
+        textEvWordBoundaries2.content.body = "ähonkü";
+        EXPECT_EQ(evaluator.evaluate({textEvWordBoundaries2}, ctx), actions);
+    };
+
+    mtx::pushrules::Ruleset override_ruleset;
+    override_ruleset.override_.push_back(event_match_rule);
+    mtx::pushrules::PushRuleEvaluator over_evaluator{override_ruleset};
+    testEval(over_evaluator);
+
+    mtx::pushrules::Ruleset underride_ruleset;
+    underride_ruleset.underride.push_back(event_match_rule);
+    mtx::pushrules::PushRuleEvaluator under_evaluator{underride_ruleset};
+    testEval(under_evaluator);
+
+    mtx::pushrules::Ruleset room_ruleset;
+    auto room_rule    = event_match_rule;
+    room_rule.rule_id = "!abc:def.ghi";
+    room_ruleset.room.push_back(room_rule);
+    mtx::pushrules::PushRuleEvaluator room_evaluator{room_ruleset};
+    EXPECT_EQ(room_evaluator.evaluate({textEv}, {}), room_rule.actions);
+
+    mtx::pushrules::Ruleset sender_ruleset;
+    auto sender_rule    = event_match_rule;
+    sender_rule.rule_id = "@me:def.ghi";
+    sender_ruleset.sender.push_back(sender_rule);
+    mtx::pushrules::PushRuleEvaluator sender_evaluator{sender_ruleset};
+    EXPECT_EQ(sender_evaluator.evaluate({textEv}, {}), sender_rule.actions);
+
+    mtx::pushrules::Ruleset content_ruleset;
+    mtx::pushrules::PushRule content_match_rule;
+    content_match_rule.actions = event_match_rule.actions;
+    content_match_rule.pattern = "honk";
+    content_ruleset.content.push_back(content_match_rule);
+    mtx::pushrules::PushRuleEvaluator content_evaluator{content_ruleset};
+    testEval(content_evaluator);
+}
+
+TEST(Pushrules, DisplaynameMatches)
+{
+    mtx::pushrules::PushRule event_match_rule;
+    event_match_rule.actions = {
+      mtx::pushrules::actions::notify{},
+      mtx::pushrules::actions::set_tweak_highlight{},
+    };
+    event_match_rule.conditions.push_back(mtx::pushrules::PushCondition{
+      .kind    = "contains_display_name",
+      .key     = "",
+      .pattern = "",
+      .is      = "",
+    });
+
+    mtx::events::RoomEvent<mtx::events::msg::Text> textEv{};
+    textEv.content.body = "abc def ghi honk jkl";
+    textEv.room_id      = "!abc:def.ghi";
+    textEv.event_id     = "$abc1234567890:def.ghi";
+    textEv.sender       = "@me:def.ghi";
+
+    auto testEval = [actions = event_match_rule.actions,
+                     &textEv](const mtx::pushrules::PushRuleEvaluator &evaluator) {
+        mtx::pushrules::PushRuleEvaluator::RoomContext ctx{};
+        ctx.user_display_name = "honk";
+
+        EXPECT_EQ(evaluator.evaluate({textEv}, ctx), actions);
+
+        auto textEvEnd         = textEv;
+        textEvEnd.content.body = "abc honk";
+        EXPECT_EQ(evaluator.evaluate({textEvEnd}, ctx), actions);
+        auto textEvStart         = textEv;
+        textEvStart.content.body = "honk abc";
+        EXPECT_EQ(evaluator.evaluate({textEvStart}, ctx), actions);
+        auto textEvNL         = textEv;
+        textEvNL.content.body = "abc\nhonk\nabc";
+        EXPECT_EQ(evaluator.evaluate({textEvNL}, ctx), actions);
+        auto textEvFull         = textEv;
+        textEvFull.content.body = "honk";
+        EXPECT_EQ(evaluator.evaluate({textEvFull}, ctx), actions);
+        auto textEvCase         = textEv;
+        textEvCase.content.body = "HoNk";
+        EXPECT_EQ(evaluator.evaluate({textEvCase}, ctx), actions);
+        auto textEvNo         = textEv;
+        textEvNo.content.body = "HoN";
+        EXPECT_TRUE(evaluator.evaluate({textEvNo}, ctx).empty());
+        auto textEvNo2         = textEv;
+        textEvNo2.content.body = "honkb";
+        EXPECT_TRUE(evaluator.evaluate({textEvNo2}, ctx).empty());
+        auto textEvWordBoundaries         = textEv;
+        textEvWordBoundaries.content.body = "@honk:";
+        EXPECT_EQ(evaluator.evaluate({textEvWordBoundaries}, ctx), actions);
+
+        // It is what the spec says ¯\_(ツ)_/¯
+        auto textEvWordBoundaries2         = textEv;
+        textEvWordBoundaries2.content.body = "ähonkü";
+        EXPECT_EQ(evaluator.evaluate({textEvWordBoundaries2}, ctx), actions);
+    };
+
+    mtx::pushrules::Ruleset override_ruleset;
+    override_ruleset.override_.push_back(event_match_rule);
+    mtx::pushrules::PushRuleEvaluator over_evaluator{override_ruleset};
+    testEval(over_evaluator);
+
+    mtx::pushrules::Ruleset underride_ruleset;
+    underride_ruleset.underride.push_back(event_match_rule);
+    mtx::pushrules::PushRuleEvaluator under_evaluator{underride_ruleset};
+    testEval(under_evaluator);
+}
+
+TEST(Pushrules, PowerLevelMatches)
+{
+    mtx::pushrules::PushRule event_match_rule;
+    event_match_rule.actions = {
+      mtx::pushrules::actions::notify{},
+      mtx::pushrules::actions::set_tweak_highlight{},
+    };
+    event_match_rule.conditions.push_back(mtx::pushrules::PushCondition{
+      .kind    = "sender_notification_permission",
+      .key     = "room",
+      .pattern = "",
+      .is      = "",
+    });
+
+    auto testEval =
+      [actions = event_match_rule.actions](const mtx::pushrules::PushRuleEvaluator &evaluator) {
+          mtx::events::RoomEvent<mtx::events::msg::Text> textEv{};
+          textEv.content.body = "abc def ghi honk @room jkl";
+          textEv.room_id      = "!abc:def.ghi";
+          textEv.event_id     = "$abc1234567890:def.ghi";
+          textEv.sender       = "@me:def.ghi";
+
+          mtx::events::state::PowerLevels pls;
+          pls.notifications["room"] = 1;
+          pls.users["@me:def.ghi"]  = 1;
+          mtx::pushrules::PushRuleEvaluator::RoomContext ctx{
+            .user_display_name = "me",
+            .member_count      = 100,
+            .power_levels      = pls,
+          };
+
+          EXPECT_EQ(evaluator.evaluate({textEv}, ctx), actions);
+
+          ctx.power_levels.users["@me:def.ghi"] = 0;
+          EXPECT_TRUE(evaluator.evaluate({textEv}, ctx).empty());
+      };
+
+    mtx::pushrules::Ruleset override_ruleset;
+    override_ruleset.override_.push_back(event_match_rule);
+    mtx::pushrules::PushRuleEvaluator over_evaluator{override_ruleset};
+    testEval(over_evaluator);
+
+    mtx::pushrules::Ruleset underride_ruleset;
+    underride_ruleset.underride.push_back(event_match_rule);
+    mtx::pushrules::PushRuleEvaluator under_evaluator{underride_ruleset};
+    testEval(under_evaluator);
+}
+
+TEST(Pushrules, MemberCountMatches)
+{
+    auto testEval = [](const std::string &is, bool lt, bool eq, bool gt) {
+        mtx::events::RoomEvent<mtx::events::msg::Text> textEv{};
+        textEv.content.body = "abc def ghi honk @room jkl";
+        textEv.room_id      = "!abc:def.ghi";
+        textEv.event_id     = "$abc1234567890:def.ghi";
+        textEv.sender       = "@me:def.ghi";
+
+        mtx::pushrules::PushRule event_match_rule;
+        event_match_rule.actions = {
+          mtx::pushrules::actions::notify{},
+          mtx::pushrules::actions::set_tweak_highlight{},
+        };
+        event_match_rule.conditions = {
+          mtx::pushrules::PushCondition{
+            .kind    = "room_member_count",
+            .key     = "",
+            .pattern = "",
+            .is      = is,
+          },
+        };
+        mtx::pushrules::Ruleset ruleset;
+        ruleset.override_.push_back(event_match_rule);
+        mtx::pushrules::PushRuleEvaluator evaluator{ruleset};
+
+        mtx::pushrules::PushRuleEvaluator::RoomContext ctx{};
+
+        ctx.member_count = 99;
+        EXPECT_EQ(!evaluator.evaluate({textEv}, ctx).empty(), lt);
+        ctx.member_count = 100;
+        EXPECT_EQ(!evaluator.evaluate({textEv}, ctx).empty(), eq);
+        ctx.member_count = 101;
+        EXPECT_EQ(!evaluator.evaluate({textEv}, ctx).empty(), gt);
+    };
+
+    testEval("100", false, true, false);
+    testEval("==100", false, true, false);
+    testEval(">=100", false, true, true);
+    testEval("<=100", true, true, false);
+    testEval(">100", false, false, true);
+    testEval("<100", true, false, false);
+}
