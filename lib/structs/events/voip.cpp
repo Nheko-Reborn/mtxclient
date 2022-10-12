@@ -79,9 +79,12 @@ to_json(json &obj, const CallInvite &content)
 void
 from_json(const json &obj, CallCandidates::Candidate &content)
 {
-    content.sdpMid        = obj.at("sdpMid").get<std::string>();
-    content.sdpMLineIndex = obj.at("sdpMLineIndex").get<uint16_t>();
-    content.candidate     = obj.at("candidate").get<std::string>();
+    if (obj.contains("sdpMid"))
+        content.sdpMid = obj.at("sdpMid").get<std::string>();
+    if (obj.contains("sdpMLineIndex"))
+        content.sdpMLineIndex = obj.at("sdpMLineIndex").get<uint16_t>();
+    if (obj.contains("candidate"))
+        content.candidate = obj.at("candidate").get<std::string>();
 }
 
 void
