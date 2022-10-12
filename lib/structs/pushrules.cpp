@@ -234,11 +234,11 @@ struct PushRuleEvaluator::OptimizedRules
             }
 
             if (!notification_levels.empty()) {
-                auto sender = ev.find("sender");
-                if (sender == ev.end())
+                auto sender_ = ev.find("sender");
+                if (sender_ == ev.end())
                     return false;
 
-                auto sender_level = ctx.power_levels.user_level(sender->second);
+                auto sender_level = ctx.power_levels.user_level(sender_->second);
 
                 for (const auto &n : notification_levels) {
                     if (sender_level < ctx.power_levels.notification_level(n))
