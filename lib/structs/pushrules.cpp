@@ -477,6 +477,11 @@ PushRuleEvaluator::evaluate(const mtx::events::collections::TimelineEvent &event
             return rule.actions;
     }
 
+    for (const auto &rule : rules->content) {
+        if (rule.matches(flat_event, ctx))
+            return rule.actions;
+    }
+
     // room rule always matches if present
     if (auto room_rule = rules->room.find(event_json.value("room_id", ""));
         room_rule != rules->room.end()) {
@@ -487,11 +492,6 @@ PushRuleEvaluator::evaluate(const mtx::events::collections::TimelineEvent &event
     if (auto sender_rule = rules->sender.find(event_json.value("sender", ""));
         sender_rule != rules->sender.end()) {
         return sender_rule->second.actions;
-    }
-
-    for (const auto &rule : rules->content) {
-        if (rule.matches(flat_event, ctx))
-            return rule.actions;
     }
 
     for (const auto &rule : rules->underride) {
