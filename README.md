@@ -3,7 +3,8 @@ mtxclient
 [![Build Status](https://travis-ci.org/Nheko-Reborn/mtxclient.svg?branch=master)](https://travis-ci.org/Nheko-Reborn/mtxclient)
 [![Build status](https://ci.appveyor.com/api/projects/status/hyp1n9pq3wtv8dqu/branch/master?svg=true)](https://ci.appveyor.com/project/redsky17/mtxclient/branch/master)
 [![codecov](https://codecov.io/gh/Nheko-Reborn/mtxclient/branch/master/graph/badge.svg)](https://codecov.io/gh/Nheko-Reborn/mtxclient)
-[![experimental](https://img.shields.io/badge/stability-experimental-orange.svg)](http://github.com/badges/stability-badges)
+[![unstable](http://badges.github.io/stability-badges/dist/unstable.svg)](http://github.com/badges/stability-badges)
+[![documentation](https://img.shields.io/badge/documentation-doxygen-informational)](https://nheko-reborn.pages.nheko.im/mtxclient/index.html)
 
 Client API library for the Matrix protocol.
 
