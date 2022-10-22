@@ -135,7 +135,7 @@ build linux meson wraps:
   script:
     - meson setup builddir -Dtests=true -Dexamples=true -Ddefault_library=static
     - meson compile -C builddir
-    - MTXCLIENT_SERVER=synapse meson test -C builddir
+    - 'MTXCLIENT_SERVER=synapse meson test -C builddir mtxclient:'
   artifacts:
     reports:
       junit: builddir/*.xml
