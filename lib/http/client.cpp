@@ -1398,7 +1398,7 @@ Client::keys_signatures_upload(const mtx::requests::KeySignaturesUpload &req,
                                Callback<mtx::responses::KeySignaturesUpload> cb)
 {
     post<mtx::requests::KeySignaturesUpload, mtx::responses::KeySignaturesUpload>(
-      "/client/unstable/keys/signatures/upload", req, std::move(cb));
+      "/client/v3/keys/signatures/upload", req, std::move(cb));
 }
 
 void
@@ -1415,7 +1415,7 @@ Client::device_signing_upload(const mtx::requests::DeviceSigningUpload &deviceKe
             request["auth"] = auth;
 
         post<nlohmann::json, mtx::responses::Empty>(
-          "/client/unstable/keys/device_signing/upload", request, [cb, h](auto &, RequestErr e) {
+          "/client/v3/keys/device_signing/upload", request, [cb, h](auto &, RequestErr e) {
               if (e && e->status_code == 401 && !e->matrix_error.unauthorized.flows.empty())
                   h.prompt(h, e->matrix_error.unauthorized);
               else
