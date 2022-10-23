@@ -343,7 +343,7 @@ PushRuleEvaluator::PushRuleEvaluator(const Ruleset &rules_)
                     is   = is.substr(1);
                 }
 
-                std::from_chars(is.begin(), is.end(), c.count);
+                std::from_chars(is.data(), is.data() + is.size(), c.count);
                 rule.membercounts.push_back(c);
             } else if (cond.kind == "sender_notification_permission") {
                 rule.notification_levels.push_back(cond.key);
