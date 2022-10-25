@@ -160,7 +160,7 @@ void
 Client::set_server(const std::string &server)
 {
     std::string_view server_name = server;
-    int port                     = 443;
+    std::uint16_t port           = 443;
     this->protocol_              = "https";
     // Remove https prefix, if it exists
     if (server_name.substr(0, 8) == "https://") {
@@ -181,7 +181,7 @@ Client::set_server(const std::string &server)
 
         auto tmp = std::string(server_name.substr(colon_offset + 1));
         if (mtx::client::utils::is_number(tmp)) {
-            port_ = std::stoi(tmp);
+            port_ = static_cast<std::uint16_t>(std::stoul(tmp));
             return;
         }
     }

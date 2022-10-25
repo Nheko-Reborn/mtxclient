@@ -215,8 +215,9 @@ compatible_iv(BinaryBuf incompatible_iv)
     // the last byte. So we need to clear byte 15 - 63%8 = 15 - 7 = 8, the highest bit, 1 << 7
     // see:
     // https://github.com/matrix-org/matrix-js-sdk/blob/529fe93ab14b93c515e9ab0d0277c1942a5d73c5/src/crypto/aes.ts#L144
-    uint8_t *data = incompatible_iv.data();
-    data[15 - 63 % 8] &= ~(1UL << (63 / 8));
+    uint8_t *data               = incompatible_iv.data();
+    constexpr std::uint8_t mask = static_cast<std::uint8_t>(~(1U << (63 / 8)));
+    data[15 - 63 % 8] &= mask;
     return incompatible_iv;
 }
 
@@ -233,7 +234,7 @@ AES_CTR_256_Encrypt(const std::string &plaintext, const BinaryBuf &aes256Key, Bi
     BinaryBuf encrypted = compatible_iv(create_buffer(plaintext.size() + AES_BLOCK_SIZE));
 
     /* Create and initialise the context */
-    if (!(ctx = EVP_CIPHER_CTX_new())) {
+    if (ctx = EVP_CIPHER_CTX_new(); !ctx) {
         // handleErrors();
     }
 
@@ -281,7 +282,7 @@ AES_CTR_256_Decrypt(const std::string &ciphertext, const BinaryBuf &aes256Key, B
     BinaryBuf decrypted = create_buffer(ciphertext.size());
 
     /* Create and initialise the context */
-    if (!(ctx = EVP_CIPHER_CTX_new())) {
+    if (ctx = EVP_CIPHER_CTX_new(); !ctx) {
         // handleErrors();
     }
 
@@ -489,9 +490,10 @@ encrypt_file(const std::string &plaintext)
     mtx::crypto::EncryptedFile encryption_info;
 
     // iv has to be 16 bytes, key 32!
-    BinaryBuf key = create_buffer(32);
-    BinaryBuf iv  = create_buffer(16);
-    iv[15 - 63 % 8] &= ~(1UL << (63 / 8));
+    BinaryBuf key               = create_buffer(32);
+    BinaryBuf iv                = create_buffer(16);
+    constexpr std::uint8_t mask = static_cast<std::uint8_t>(~(1U << (63 / 8)));
+    iv[15 - 63 % 8] &= mask;
 
     // Counter should be 0 in v1.1 of the spec...
     for (int i = 8; i < 16; i++)

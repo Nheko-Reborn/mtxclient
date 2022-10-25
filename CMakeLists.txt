@@ -64,6 +64,7 @@ if(NOT MSVC AND NOT CLANG_TIDY_WORKAROUND)
 		"${CMAKE_CXX_FLAGS} \
 		-Wall \
 		-Wextra \
+		-Wconversion \
 		-pipe \
 		-pedantic \
 		-fsized-deallocation \

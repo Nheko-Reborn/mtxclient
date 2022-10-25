@@ -186,16 +186,16 @@ decode_base64(const std::array<uint8_t, 256> &reverse_alphabet, const std::strin
             decoded.push_back(static_cast<char>(d << 2));
             break;
         case 1:
-            decoded.back() += (d >> 4);
+            decoded.back() = static_cast<char>(decoded.back() + (d >> 4));
             decoded.push_back(static_cast<char>(d << 4));
             break;
         case 2:
-            decoded.back() += (d >> 2);
+            decoded.back() = static_cast<char>(decoded.back() + (d >> 2));
             decoded.push_back(static_cast<char>(d << 6));
             break;
         case 3:
-            decoded.back() += d;
-            bit_index = 0;
+            decoded.back() = static_cast<char>(decoded.back() + d);
+            bit_index      = 0;
         }
     }
 
