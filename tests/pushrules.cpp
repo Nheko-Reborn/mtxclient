@@ -991,6 +991,7 @@ TEST(Pushrules, ContentOverRoomRulesMatches)
 
     json raw_event = R"(
 {
+  "global": {
     "content": {
         "body": "> <@lordmzte:mzte.de> btw, im still not getting notification on replies, only explicit mentions.\n\nprobably because of your username :p",
         "format": "org.matrix.custom.html",
@@ -1033,4 +1034,454 @@ TEST(Pushrules, ContentOverRoomRulesMatches)
     };
 
     EXPECT_TRUE(notifies(actions));
+}
+
+TEST(Pushrules, ReactionDoesNotMatch)
+{
+    json raw_rule = R"(
+{
+  "global": {
+    "content": [
+        {
+            "actions": [
+                "notify",
+                {
+                    "set_tweak": "highlight",
+                    "value": false
+                }
+            ],
+            "pattern": "nheko",
+            "rule_id": "nheko"
+        },
+        {
+            "actions": [
+                "notify",
+                {
+                    "set_tweak": "highlight",
+                    "value": false
+                }
+            ],
+            "pattern": "Nheko",
+            "rule_id": "Nheko"
+        },
+        {
+            "actions": [
+                "notify",
+                {
+                    "set_tweak": "highlight",
+                    "value": false
+                }
+            ],
+            "pattern": "nico",
+            "rule_id": "nico"
+        },
+        {
+            "actions": [
+                "notify",
+                {
+                    "set_tweak": "highlight",
+                    "value": false
+                }
+            ],
+            "pattern": "Nico",
+            "rule_id": "Nico"
+        },
+        {
+            "actions": [
+                "notify",
+                {
+                    "set_tweak": "highlight",
+                    "value": false
+                }
+            ],
+            "pattern": "cc2",
+            "rule_id": "cc2"
+        }
+    ],
+    "override": [
+        {
+            "actions": [
+                "dont_notify"
+            ],
+            "default": true,
+            "enabled": false,
+            "rule_id": ".m.rule.master"
+        },
+        {
+            "actions": [
+                "dont_notify"
+            ],
+            "conditions": [
+                {
+                    "key": "content.msgtype",
+                    "kind": "event_match",
+                    "pattern": "m.notice"
+                }
+            ],
+            "default": true,
+            "rule_id": ".m.rule.suppress_notices"
+        },
+        {
+            "actions": [
+                "notify",
+                {
+                    "set_tweak": "highlight",
+                    "value": false
+                },
+                {
+                    "set_tweak": "sound",
+                    "value": "default"
+                }
+            ],
+            "conditions": [
+                {
+                    "key": "type",
+                    "kind": "event_match",
+                    "pattern": "m.room.member"
+                },
+                {
+                    "key": "content.membership",
+                    "kind": "event_match",
+                    "pattern": "invite"
+                },
+                {
+                    "key": "state_key",
+                    "kind": "event_match",
+                    "pattern": "@deepbluev7:neko.dev"
+                }
+            ],
+            "default": true,
+            "rule_id": ".m.rule.invite_for_me"
+        },
+        {
+            "actions": [
+                "dont_notify"
+            ],
+            "conditions": [
+                {
+                    "key": "type",
+                    "kind": "event_match",
+                    "pattern": "m.room.member"
+                }
+            ],
+            "default": true,
+            "rule_id": ".m.rule.member_event"
+        },
+        {
+            "actions": [
+                "notify",
+                {
+                    "set_tweak": "highlight"
+                },
+                {
+                    "set_tweak": "sound",
+                    "value": "default"
+                }
+            ],
+            "conditions": [
+                {
+                    "key": "sender",
+                    "kind": "im.nheko.msc3664.related_event_match",
+                    "pattern": "@deepbluev7:neko.dev"
+                }
+            ],
+            "default": true,
+            "rule_id": ".im.nheko.msc3664.reply"
+        },
+        {
+            "actions": [
+                "notify",
+                {
+                    "set_tweak": "highlight"
+                },
+                {
+                    "set_tweak": "sound",
+                    "value": "default"
+                }
+            ],
+            "conditions": [
+                {
+                    "kind": "contains_display_name"
+                }
+            ],
+            "default": true,
+            "rule_id": ".m.rule.contains_display_name"
+        },
+        {
+            "actions": [
+                "notify",
+                {
+                    "set_tweak": "highlight"
+                }
+            ],
+            "conditions": [
+                {
+                    "key": "room",
+                    "kind": "sender_notification_permission"
+                },
+                {
+                    "key": "content.body",
+                    "kind": "event_match",
+                    "pattern": "@room"
+                }
+            ],
+            "default": true,
+            "rule_id": ".m.rule.roomnotif"
+        },
+        {
+            "actions": [
+                "notify",
+                {
+                    "set_tweak": "highlight"
+                }
+            ],
+            "conditions": [
+                {
+                    "key": "type",
+                    "kind": "event_match",
+                    "pattern": "m.room.tombstone"
+                },
+                {
+                    "key": "state_key",
+                    "kind": "event_match"
+                }
+            ],
+            "default": true,
+            "rule_id": ".m.rule.tombstone"
+        },
+        {
+            "actions": [
+                "dont_notify"
+            ],
+            "conditions": [
+                {
+                    "key": "type",
+                    "kind": "event_match",
+                    "pattern": "m.reaction"
+                }
+            ],
+            "default": true,
+            "rule_id": ".m.rule.reaction"
+        },
+        {
+            "conditions": [
+                {
+                    "key": "type",
+                    "kind": "event_match",
+                    "pattern": "m.room.server_acl"
+                },
+                {
+                    "key": "state_key",
+                    "kind": "event_match"
+                }
+            ],
+            "default": true,
+            "rule_id": ".m.rule.room.server_acl"
+        }
+    ],
+    "room": [
+        {
+            "actions": [
+                "notify",
+                {
+                    "set_tweak": "highlight",
+                    "value": false
+                },
+                {
+                    "set_tweak": "sound",
+                    "value": "default"
+                }
+            ],
+            "rule_id": "!gHDcupDIWdXmlHOhoN:neko.dev"
+        }
+    ],
+    "sender": [
+    ],
+    "underride": [
+        {
+            "actions": [
+                "notify",
+                {
+                    "set_tweak": "sound",
+                    "value": "ring"
+                },
+                {
+                    "set_tweak": "highlight",
+                    "value": false
+                }
+            ],
+            "conditions": [
+                {
+                    "key": "type",
+                    "kind": "event_match",
+                    "pattern": "m.call.invite"
+                }
+            ],
+            "default": true,
+            "rule_id": ".m.rule.call"
+        },
+        {
+            "actions": [
+                "notify",
+                {
+                    "set_tweak": "sound",
+                    "value": "default"
+                },
+                {
+                    "set_tweak": "highlight",
+                    "value": false
+                }
+            ],
+            "conditions": [
+                {
+                    "key": "type",
+                    "kind": "event_match",
+                    "pattern": "m.room.message"
+                },
+                {
+                    "is": "2",
+                    "kind": "room_member_count"
+                }
+            ],
+            "default": true,
+            "rule_id": ".m.rule.room_one_to_one"
+        },
+        {
+            "actions": [
+                "notify",
+                {
+                    "set_tweak": "sound",
+                    "value": "default"
+                },
+                {
+                    "set_tweak": "highlight",
+                    "value": false
+                }
+            ],
+            "conditions": [
+                {
+                    "key": "type",
+                    "kind": "event_match",
+                    "pattern": "m.room.encrypted"
+                },
+                {
+                    "is": "2",
+                    "kind": "room_member_count"
+                }
+            ],
+            "default": true,
+            "rule_id": ".m.rule.encrypted_room_one_to_one"
+        },
+        {
+            "actions": [
+                "notify",
+                {
+                    "set_tweak": "sound",
+                    "value": "default"
+                },
+                {
+                    "set_tweak": "highlight",
+                    "value": false
+                }
+            ],
+            "conditions": [
+                {
+                    "key": "type",
+                    "kind": "event_match",
+                    "pattern": "m.room.message"
+                }
+            ],
+            "default": true,
+            "rule_id": ".m.rule.message"
+        },
+        {
+            "actions": [
+                "notify",
+                {
+                    "set_tweak": "sound",
+                    "value": "default"
+                },
+                {
+                    "set_tweak": "highlight",
+                    "value": false
+                }
+            ],
+            "conditions": [
+                {
+                    "key": "type",
+                    "kind": "event_match",
+                    "pattern": "m.room.encrypted"
+                }
+            ],
+            "default": true,
+            "rule_id": ".m.rule.encrypted"
+        },
+        {
+            "actions": [
+                "notify",
+                {
+                    "set_tweak": "highlight",
+                    "value": false
+                }
+            ],
+            "conditions": [
+                {
+                    "key": "type",
+                    "kind": "event_match",
+                    "pattern": "im.vector.modular.widgets"
+                },
+                {
+                    "key": "content.type",
+                    "kind": "event_match",
+                    "pattern": "jitsi"
+                },
+                {
+                    "key": "state_key",
+                    "kind": "event_match",
+                    "pattern": "*"
+                }
+            ],
+            "default": true,
+            "rule_id": ".im.vector.jitsi"
+        }
+    ]
+}
+})"_json;
+
+    mtx::pushrules::GlobalRuleset ruleset = raw_rule.get<mtx::pushrules::GlobalRuleset>();
+
+    json raw_event = R"(
+{
+    "content": {
+        "m.relates_to": {
+            "event_id": "$ifmL9zdEQjnec3LlgxX0Bqr7xVm0agynZBglt7q59AU",
+            "key": "a",
+            "rel_type": "m.annotation"
+        }
+    },
+    "event_id": "$mol6Bt546FLBNM7WgTj8mGTAieS8ZsX3JLZ2MH9qQwg",
+    "origin_server_ts": 1666006933326,
+    "room_id": "!UbCmIlGTHNIgIRZcpt:nheko.im",
+    "sender": "@deepbluev7:neko.dev",
+    "type": "m.reaction",
+    "unsigned": {
+        "age": 568918
+    }
+})"_json;
+    auto text      = raw_event.get<mtx::events::RoomEvent<mtx::events::msg::Reaction>>();
+    mtx::pushrules::PushRuleEvaluator evaluator{ruleset.global};
+    mtx::pushrules::PushRuleEvaluator::RoomContext ctx{};
+
+    auto actions = evaluator.evaluate({text}, ctx);
+
+    auto notifies = [](const std::vector<mtx::pushrules::actions::Action> &a) {
+        for (const auto &action : a) {
+            if (action == mtx::pushrules::actions::Action{mtx::pushrules::actions::notify{}}) {
+                return true;
+            }
+        }
+        return false;
+    };
+
+    EXPECT_FALSE(notifies(actions));
 }

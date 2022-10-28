@@ -6,6 +6,8 @@
 #include <re2/re2.h>
 
 #include "mtx/events/collections.hpp"
+#include "mtx/log.hpp"
+
 namespace mtx {
 namespace pushrules {
 
@@ -273,6 +275,8 @@ struct PushRuleEvaluator::OptimizedRules
                                      "(\\W|$)",
                                    opts)))
                         return false;
+                } else {
+                    return false;
                 }
             }
 
@@ -347,8 +351,14 @@ PushRuleEvaluator::PushRuleEvaluator(const Ruleset &rules_)
                 rule.membercounts.push_back(c);
             } else if (cond.kind == "sender_notification_permission") {
                 rule.notification_levels.push_back(cond.key);
+            } else {
+                mtx::utils::log::log()->info("Skipping rule with unknown condition type: {}",
+                                             cond.kind);
+                return false;
             }
         }
+
+        return true;
     };
 
     for (const auto &rule_ : rules_.override_) {
@@ -358,7 +368,8 @@ PushRuleEvaluator::PushRuleEvaluator(const Ruleset &rules_)
         OptimizedRules::OptimizedRule rule;
         rule.actions = rule_.actions;
 
-        add_conditions_to_rule(rule, rule_.conditions);
+        if (!add_conditions_to_rule(rule, rule_.conditions))
+            continue;
 
         rules->override_.push_back(std::move(rule));
     }
@@ -370,7 +381,8 @@ PushRuleEvaluator::PushRuleEvaluator(const Ruleset &rules_)
         OptimizedRules::OptimizedRule rule;
         rule.actions = rule_.actions;
 
-        add_conditions_to_rule(rule, rule_.conditions);
+        if (!add_conditions_to_rule(rule, rule_.conditions))
+            continue;
 
         rules->underride.push_back(std::move(rule));
     }
@@ -410,7 +422,8 @@ PushRuleEvaluator::PushRuleEvaluator(const Ruleset &rules_)
           PushCondition{.kind = "event_match", .key = "content.body", .pattern = rule_.pattern},
         };
 
-        add_conditions_to_rule(rule, conditions);
+        if (!add_conditions_to_rule(rule, rule_.conditions))
+            continue;
 
         rules->content.push_back(std::move(rule));
     }
