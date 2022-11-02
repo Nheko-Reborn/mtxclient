@@ -280,13 +280,18 @@ struct PublicRooms
     friend void to_json(nlohmann::json &obj, const PublicRooms &request);
 };
 
+//! An empty response.
+///
+/// Some endpoints return this on success.
 struct Empty
 {
     friend inline void to_json(nlohmann::json &, const Empty &) {}
 };
 
+//! A successfull logout.
 using Logout = Empty;
 
+//! A signed onetime key. Usually curve25519.
 struct SignedOneTimeKey
 {
     //! Required. The unpadded Base64-encoded 32-byte Curve25519 public key.
@@ -301,6 +306,7 @@ struct SignedOneTimeKey
     friend void to_json(nlohmann::json &obj, const SignedOneTimeKey &);
 };
 
+//! Upload a mix of device, one time and fallback keys.
 struct UploadKeys
 {
     //! Identity keys for the device.
@@ -328,8 +334,10 @@ struct UploadKeys
     friend void to_json(nlohmann::json &obj, const UploadKeys &);
 };
 
+//! The default timeout for a download.
 constexpr uint64_t DEFAULT_DOWNLOAD_TIMEOUT = 10UL * 1000; // 10 seconds
 
+//! Query the keys of devices of specific users.
 struct QueryKeys
 {
     //! The time (in milliseconds) to wait when downloading keys from remote servers.
@@ -348,6 +356,7 @@ struct QueryKeys
     friend void to_json(nlohmann::json &obj, const QueryKeys &);
 };
 
+//! Claim onetime keys of devices of specific users.
 struct ClaimKeys
 {
     //! The time (in milliseconds) to wait when downloading keys from remote servers.
@@ -358,6 +367,7 @@ struct ClaimKeys
     friend void to_json(nlohmann::json &obj, const ClaimKeys &request);
 };
 
+//! Upload new signatures for a device or cross-signing key.
 struct KeySignaturesUpload
 {
     //! map from user_id to either a map of device id to DeviceKey with new signatures or the
@@ -385,6 +395,7 @@ struct DeviceSigningUpload
     friend void to_json(nlohmann::json &obj, const DeviceSigningUpload &req);
 };
 
+//! Information about a pusher.
 struct PusherData
 {
     //! Required if `kind` is http. The URL to use to send notifications to.
