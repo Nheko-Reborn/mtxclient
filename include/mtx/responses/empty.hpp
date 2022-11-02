@@ -21,10 +21,10 @@ struct Empty
 };
 
 //! The response for a logout.
-using Logout      = Empty;
+using Logout = Empty;
 //! The response after changing your display name.
 using DisplayName = Empty;
 //! The response after inviting a user to a room.
-using RoomInvite  = Empty;
+using RoomInvite = Empty;
 }
 }
