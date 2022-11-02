@@ -18,6 +18,7 @@
 namespace mtx {
 namespace responses {
 
+//! Information about one of your devices.
 struct Device
 {
     //! **Required.** Identifier of this device.
