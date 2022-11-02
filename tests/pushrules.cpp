@@ -1485,3 +1485,407 @@ TEST(Pushrules, ReactionDoesNotMatch)
 
     EXPECT_FALSE(notifies(actions));
 }
+
+TEST(Pushrules, NormalMessageDoesNotHighlight)
+{
+    json raw_rule =
+      R"({
+  "global": {
+    "underride": [
+      {
+        "conditions": [
+          {
+            "kind": "event_match",
+            "key": "type",
+            "pattern": "m.call.invite"
+          }
+        ],
+        "actions": [
+          "notify",
+          {
+            "set_tweak": "sound",
+            "value": "ring"
+          },
+          {
+            "set_tweak": "highlight",
+            "value": false
+          }
+        ],
+        "rule_id": ".m.rule.call",
+        "default": true,
+        "enabled": true
+      },
+      {
+        "conditions": [
+          {
+            "kind": "event_match",
+            "key": "type",
+            "pattern": "m.room.message"
+          },
+          {
+            "kind": "room_member_count",
+            "is": "2"
+          }
+        ],
+        "actions": [
+          "notify",
+          {
+            "set_tweak": "sound",
+            "value": "default"
+          },
+          {
+            "set_tweak": "highlight",
+            "value": false
+          }
+        ],
+        "rule_id": ".m.rule.room_one_to_one",
+        "default": true,
+        "enabled": true
+      },
+      {
+        "conditions": [
+          {
+            "kind": "event_match",
+            "key": "type",
+            "pattern": "m.room.encrypted"
+          },
+          {
+            "kind": "room_member_count",
+            "is": "2"
+          }
+        ],
+        "actions": [
+          "notify",
+          {
+            "set_tweak": "sound",
+            "value": "default"
+          },
+          {
+            "set_tweak": "highlight",
+            "value": false
+          }
+        ],
+        "rule_id": ".m.rule.encrypted_room_one_to_one",
+        "default": true,
+        "enabled": true
+      },
+      {
+        "conditions": [
+          {
+            "kind": "event_match",
+            "key": "type",
+            "pattern": "m.room.message"
+          }
+        ],
+        "actions": [
+          "notify",
+          {
+            "set_tweak": "highlight",
+            "value": false
+          }
+        ],
+        "rule_id": ".m.rule.message",
+        "default": true,
+        "enabled": true
+      },
+      {
+        "conditions": [
+          {
+            "kind": "event_match",
+            "key": "type",
+            "pattern": "m.room.encrypted"
+          }
+        ],
+        "actions": [
+          "notify",
+          {
+            "set_tweak": "highlight",
+            "value": false
+          }
+        ],
+        "rule_id": ".m.rule.encrypted",
+        "default": true,
+        "enabled": true
+      },
+      {
+        "conditions": [
+          {
+            "kind": "event_match",
+            "key": "type",
+            "pattern": "im.vector.modular.widgets"
+          },
+          {
+            "kind": "event_match",
+            "key": "content.type",
+            "pattern": "jitsi"
+          },
+          {
+            "kind": "event_match",
+            "key": "state_key",
+            "pattern": "*"
+          }
+        ],
+        "actions": [
+          "notify",
+          {
+            "set_tweak": "highlight",
+            "value": false
+          }
+        ],
+        "rule_id": ".im.vector.jitsi",
+        "default": true,
+        "enabled": true
+      }
+    ],
+    "sender": [],
+    "room": [
+    ],
+    "content": [
+      {
+        "actions": [
+          "notify",
+          {
+            "set_tweak": "sound",
+            "value": "default"
+          },
+          {
+            "set_tweak": "highlight"
+          }
+        ],
+        "pattern": "Stuart",
+        "rule_id": "Stuart",
+        "default": false,
+        "enabled": true
+      },
+      {
+        "actions": [
+          "notify",
+          {
+            "set_tweak": "sound",
+            "value": "default"
+          },
+          {
+            "set_tweak": "highlight"
+          }
+        ],
+        "pattern": "stuart",
+        "rule_id": "stuart",
+        "default": false,
+        "enabled": true
+      }
+    ],
+    "override": [
+      {
+        "conditions": [],
+        "actions": [
+          "dont_notify"
+        ],
+        "rule_id": ".m.rule.master",
+        "default": true,
+        "enabled": false
+      },
+      {
+        "conditions": [
+          {
+            "kind": "event_match",
+            "key": "content.msgtype",
+            "pattern": "m.notice"
+          }
+        ],
+        "actions": [
+          "dont_notify"
+        ],
+        "rule_id": ".m.rule.suppress_notices",
+        "default": true,
+        "enabled": true
+      },
+      {
+        "conditions": [
+          {
+            "kind": "event_match",
+            "key": "type",
+            "pattern": "m.room.member"
+          },
+          {
+            "kind": "event_match",
+            "key": "content.membership",
+            "pattern": "invite"
+          },
+          {
+            "kind": "event_match",
+            "key": "state_key",
+            "pattern": "@cadair:cadair.com"
+          }
+        ],
+        "actions": [
+          "notify",
+          {
+            "set_tweak": "highlight",
+            "value": false
+          },
+          {
+            "set_tweak": "sound",
+            "value": "default"
+          }
+        ],
+        "rule_id": ".m.rule.invite_for_me",
+        "default": true,
+        "enabled": true
+      },
+      {
+        "conditions": [
+          {
+            "kind": "event_match",
+            "key": "type",
+            "pattern": "m.room.member"
+          }
+        ],
+        "actions": [
+          "dont_notify"
+        ],
+        "rule_id": ".m.rule.member_event",
+        "default": true,
+        "enabled": true
+      },
+      {
+        "conditions": [
+          {
+            "kind": "contains_display_name"
+          }
+        ],
+        "actions": [
+          "notify",
+          {
+            "set_tweak": "highlight"
+          },
+          {
+            "set_tweak": "sound",
+            "value": "default"
+          }
+        ],
+        "rule_id": ".m.rule.contains_display_name",
+        "default": true,
+        "enabled": true
+      },
+      {
+        "conditions": [
+          {
+            "kind": "sender_notification_permission",
+            "key": "room"
+          },
+          {
+            "kind": "event_match",
+            "key": "content.body",
+            "pattern": "@room"
+          }
+        ],
+        "actions": [
+          "notify",
+          {
+            "set_tweak": "highlight"
+          }
+        ],
+        "rule_id": ".m.rule.roomnotif",
+        "default": true,
+        "enabled": true
+      },
+      {
+        "conditions": [
+          {
+            "kind": "event_match",
+            "key": "type",
+            "pattern": "m.room.tombstone"
+          },
+          {
+            "kind": "event_match",
+            "key": "state_key",
+            "pattern": ""
+          }
+        ],
+        "actions": [
+          "notify",
+          {
+            "set_tweak": "highlight"
+          }
+        ],
+        "rule_id": ".m.rule.tombstone",
+        "default": true,
+        "enabled": true
+      },
+      {
+        "conditions": [
+          {
+            "kind": "event_match",
+            "key": "type",
+            "pattern": "m.reaction"
+          }
+        ],
+        "actions": [
+          "dont_notify"
+        ],
+        "rule_id": ".m.rule.reaction",
+        "default": true,
+        "enabled": true
+      },
+      {
+        "conditions": [
+          {
+            "kind": "event_match",
+            "key": "type",
+            "pattern": "m.room.server_acl"
+          },
+          {
+            "kind": "event_match",
+            "key": "state_key",
+            "pattern": ""
+          }
+        ],
+        "actions": [],
+        "rule_id": ".m.rule.room.server_acl",
+        "default": true,
+        "enabled": true
+      }
+    ]
+  },
+  "device": {}
+}
+)"_json;
+
+    mtx::pushrules::GlobalRuleset ruleset = raw_rule.get<mtx::pushrules::GlobalRuleset>();
+
+    json raw_event = R"({
+    "content": {
+        "body": "You can hide them in the room settings",
+        "msgtype": "m.text"
+    },
+    "event_id": "$4gnZ8Vop7BnXjpri2qH4wk2xZ7PRWzqMJWhDboe8Upc",
+    "origin_server_ts": 1667410048371,
+    "sender": "@deepbluev7:neko.dev",
+    "type": "m.room.message",
+    "unsigned": {
+        "age": 69,
+        "transaction_id": "mEfzSS17er68gvakLESSodiRsoDwvBqdk"
+    }
+}
+)"_json;
+    auto text      = raw_event.get<mtx::events::RoomEvent<mtx::events::msg::Text>>();
+    mtx::pushrules::PushRuleEvaluator evaluator{ruleset.global};
+    mtx::pushrules::PushRuleEvaluator::RoomContext ctx{};
+
+    auto actions = evaluator.evaluate({text}, ctx);
+
+    auto notifies = [](const std::vector<mtx::pushrules::actions::Action> &a) {
+        for (const auto &action : a) {
+            if (action == mtx::pushrules::actions::Action{mtx::pushrules::actions::notify{}}) {
+                return true;
+            }
+        }
+        return false;
+    };
+
+    EXPECT_TRUE(notifies(actions));
+    for (const auto &action : actions) {
+        EXPECT_NE(action,
+                  mtx::pushrules::actions::Action{mtx::pushrules::actions::set_tweak_highlight{}});
+    }
+}

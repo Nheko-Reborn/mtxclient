@@ -422,7 +422,7 @@ PushRuleEvaluator::PushRuleEvaluator(const Ruleset &rules_)
           PushCondition{.kind = "event_match", .key = "content.body", .pattern = rule_.pattern},
         };
 
-        if (!add_conditions_to_rule(rule, rule_.conditions))
+        if (!add_conditions_to_rule(rule, conditions))
             continue;
 
         rules->content.push_back(std::move(rule));
