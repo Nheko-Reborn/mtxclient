@@ -991,7 +991,6 @@ TEST(Pushrules, ContentOverRoomRulesMatches)
 
     json raw_event = R"(
 {
-  "global": {
     "content": {
         "body": "> <@lordmzte:mzte.de> btw, im still not getting notification on replies, only explicit mentions.\n\nprobably because of your username :p",
         "format": "org.matrix.custom.html",
