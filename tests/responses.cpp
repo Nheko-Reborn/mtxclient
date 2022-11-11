@@ -1608,3 +1608,23 @@ TEST(Responses, PublicRooms)
     EXPECT_EQ(publicRooms.prev_batch, "p1902");
     EXPECT_EQ(publicRooms.total_room_count_estimate, 115);
 }
+
+TEST(Response, Users)
+{
+    json data   = R"({
+          "limited": false,
+          "results": [
+            {
+              "avatar_url": "mxc://bar.com/foo",
+              "display_name": "Foo",
+              "user_id": "@foo:bar.com"
+            }
+          ]
+        })"_json;
+    Users users = data.get<Users>();
+    EXPECT_EQ(users.results.size(), 1);
+    EXPECT_EQ(users.results[0].avatar_url, "mxc://bar.com/foo");
+    EXPECT_EQ(users.results[0].display_name, "Foo");
+    EXPECT_EQ(users.results[0].user_id, "@foo:bar.com");
+    EXPECT_EQ(users.limited, false);
+}

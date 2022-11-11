@@ -83,6 +83,7 @@ struct Sync;
 struct StateEvents;
 struct TurnServer;
 struct UploadKeys;
+struct Users;
 struct Version;
 struct Versions;
 struct WellKnown;
@@ -760,6 +761,11 @@ public:
 
     //! Sets, updates, or deletes a pusher
     void set_pusher(const mtx::requests::SetPusher &req, Callback<mtx::responses::Empty> cb);
+
+    //! Searches the user directory
+    void search_user_directory(const std::string &search_term,
+                               int limit,
+                               Callback<mtx::responses::Users> callback);
 
 private:
     template<class Request, class Response>

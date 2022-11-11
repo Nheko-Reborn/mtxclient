@@ -287,5 +287,12 @@ to_json(json &obj, const SetPusher &req)
     obj["append"] = req.append;
 }
 
+void
+to_json(json &obj, const userDirectorySearch &request)
+{
+    obj["limit"]       = request.limit;
+    obj["search_term"] = request.search_term;
+}
+
 } // namespace requests
 } // namespace mtx

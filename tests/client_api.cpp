@@ -1845,6 +1845,70 @@ TEST(ClientAPI, PublicRooms)
     bob->close();
 }
 
+TEST(ClientAPI, Users)
+{
+    auto alice = make_test_client();
+    auto bob   = make_test_client();
+    auto carl  = make_test_client();
+
+    alice->login("alice", "secret", [alice](const mtx::responses::Login &, RequestErr err) {
+        check_error(err);
+    });
+
+    bob->login("bob", "secret", [bob](const mtx::responses::Login &, RequestErr err) {
+        check_error(err);
+        bob->set_displayname("Bob", [](RequestErr err) { check_error(err); });
+    });
+
+    carl->login("carl", "secret", [carl](const mtx::responses::Login &, RequestErr err) {
+        check_error(err);
+        carl->set_displayname("Bobby", [](RequestErr err) { check_error(err); });
+    });
+
+    while (alice->access_token().empty() || bob->access_token().empty() ||
+           carl->access_token().empty())
+        sleep();
+
+    mtx::requests::CreateRoom req;
+    req.name   = "Name";
+    req.topic  = "Topic";
+    req.invite = {"@bob:" + server_name(), "@carl:" + server_name()};
+    alice->create_room(req, [bob, carl](const mtx::responses::CreateRoom &res, RequestErr err) {
+        check_error(err);
+        auto room_id = res.room_id.to_string();
+
+        bob->join_room(room_id,
+                       [](const mtx::responses::RoomId &, RequestErr err) { check_error(err); });
+
+        carl->join_room(room_id,
+                        [](const mtx::responses::RoomId &, RequestErr err) { check_error(err); });
+    });
+
+    alice->search_user_directory(
+      "carl", 10, [alice](const mtx::responses::Users &users, RequestErr err) {
+          check_error(err);
+          EXPECT_EQ(users.results.size(), 1);
+          EXPECT_EQ(users.results[0].display_name, "Bobby");
+          EXPECT_EQ(users.limited, false);
+      });
+    alice->search_user_directory(
+      "Bob", 0, [alice](const mtx::responses::Users &users, RequestErr err) {
+          check_error(err);
+          EXPECT_EQ(users.results.size(), 1);
+          EXPECT_EQ(users.limited, true);
+      });
+    alice->search_user_directory(
+      "Bob", 10, [alice](const mtx::responses::Users &users, RequestErr err) {
+          check_error(err);
+          EXPECT_EQ(users.results.size(), 2);
+          EXPECT_EQ(users.limited, false);
+      });
+
+    alice->close();
+    bob->close();
+    carl->close();
+}
+
 TEST(ClientAPI, Summary)
 {
     // Setup : Create a new (public) room with some settings
