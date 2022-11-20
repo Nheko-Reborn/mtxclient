@@ -204,6 +204,9 @@ public:
     Client(const std::string &server = "", uint16_t port = 443);
     ~Client();
 
+    //! Set a path to cache alternate service lookups like the http/3 ports of a server.
+    void alt_svc_cache_path(const std::string &path);
+
     //! Wait for the client to close.
     void close(bool force = false);
     //! Enable or disable certificate verification. On by default

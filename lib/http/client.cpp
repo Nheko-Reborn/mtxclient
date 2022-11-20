@@ -51,6 +51,12 @@ Client::shutdown()
     p->client.shutdown();
 }
 
+void
+Client::alt_svc_cache_path(const std::string &path)
+{
+    p->client.alt_svc_cache_path(path);
+}
+
 coeurl::Headers
 mtx::http::Client::prepare_headers(bool requires_auth)
 {

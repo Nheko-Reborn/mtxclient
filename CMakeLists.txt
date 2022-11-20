@@ -15,8 +15,8 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON CACHE BOOL "compile as PIC by default")
 option(HUNTER_ENABLED "Enable Hunter package manager" OFF)
 include("cmake/HunterGate.cmake")
 HunterGate(
-    URL "https://github.com/cpp-pm/hunter/archive/v0.24.3.tar.gz"
-    SHA1 "10738b59e539818a01090e64c2d09896247530c7"
+    URL "https://github.com/cpp-pm/hunter/archive/v0.24.8.tar.gz"
+    SHA1 "ca7838dded9a1811b04ffd56175f629e0af82d3d"
     LOCAL
 )
 
@@ -180,7 +180,7 @@ if(USE_BUNDLED_COEURL)
 	FetchContent_Declare(
 		coeurl
 		GIT_REPOSITORY https://nheko.im/Nheko-Reborn/coeurl.git
-		GIT_TAG        v0.2.1
+		GIT_TAG        f989f3c54c1ca15e29c5bd6b1ce4efbcb3fd8078
 		)
 	FetchContent_MakeAvailable(coeurl)
 	target_link_libraries(matrix_client PUBLIC coeurl::coeurl)
