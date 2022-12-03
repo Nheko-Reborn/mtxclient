@@ -204,7 +204,8 @@ from_json(const json &obj, RelationType &type)
         type = RelationType::Reference;
     else if (obj.get<std::string>() == "m.replace")
         type = RelationType::Replace;
-    else if (obj.get<std::string>() == "im.nheko.relations.v1.in_reply_to")
+    else if (obj.get<std::string>() == "im.nheko.relations.v1.in_reply_to" ||
+             obj.get<std::string>() == "m.in_reply_to")
         type = RelationType::InReplyTo;
     else if (obj.get<std::string>() == "m.thread")
         type = RelationType::Thread;

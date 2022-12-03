@@ -436,37 +436,37 @@ TEST(Pushrules, EventMatches)
     auto testEval = [actions = event_match_rule.actions,
                      &textEv](const mtx::pushrules::PushRuleEvaluator &evaluator) {
         mtx::pushrules::PushRuleEvaluator::RoomContext ctx{};
-        EXPECT_EQ(evaluator.evaluate({textEv}, ctx), actions);
+        EXPECT_EQ(evaluator.evaluate({textEv}, ctx, {}), actions);
 
         auto textEvEnd         = textEv;
         textEvEnd.content.body = "abc honk";
-        EXPECT_EQ(evaluator.evaluate({textEvEnd}, ctx), actions);
+        EXPECT_EQ(evaluator.evaluate({textEvEnd}, ctx, {}), actions);
         auto textEvStart         = textEv;
         textEvStart.content.body = "honk abc";
-        EXPECT_EQ(evaluator.evaluate({textEvStart}, ctx), actions);
+        EXPECT_EQ(evaluator.evaluate({textEvStart}, ctx, {}), actions);
         auto textEvNL         = textEv;
         textEvNL.content.body = "abc\nhonk\nabc";
-        EXPECT_EQ(evaluator.evaluate({textEvNL}, ctx), actions);
+        EXPECT_EQ(evaluator.evaluate({textEvNL}, ctx, {}), actions);
         auto textEvFull         = textEv;
         textEvFull.content.body = "honk";
-        EXPECT_EQ(evaluator.evaluate({textEvFull}, ctx), actions);
+        EXPECT_EQ(evaluator.evaluate({textEvFull}, ctx, {}), actions);
         auto textEvCase         = textEv;
         textEvCase.content.body = "HoNk";
-        EXPECT_EQ(evaluator.evaluate({textEvCase}, ctx), actions);
+        EXPECT_EQ(evaluator.evaluate({textEvCase}, ctx, {}), actions);
         auto textEvNo         = textEv;
         textEvNo.content.body = "HoN";
-        EXPECT_TRUE(evaluator.evaluate({textEvNo}, ctx).empty());
+        EXPECT_TRUE(evaluator.evaluate({textEvNo}, ctx, {}).empty());
         auto textEvNo2         = textEv;
         textEvNo2.content.body = "honkb";
-        EXPECT_TRUE(evaluator.evaluate({textEvNo2}, ctx).empty());
+        EXPECT_TRUE(evaluator.evaluate({textEvNo2}, ctx, {}).empty());
         auto textEvWordBoundaries         = textEv;
         textEvWordBoundaries.content.body = "@honk:";
-        EXPECT_EQ(evaluator.evaluate({textEvWordBoundaries}, ctx), actions);
+        EXPECT_EQ(evaluator.evaluate({textEvWordBoundaries}, ctx, {}), actions);
 
         // It is what the spec says ¯\_(ツ)_/¯
         auto textEvWordBoundaries2         = textEv;
         textEvWordBoundaries2.content.body = "ähonkü";
-        EXPECT_EQ(evaluator.evaluate({textEvWordBoundaries2}, ctx), actions);
+        EXPECT_EQ(evaluator.evaluate({textEvWordBoundaries2}, ctx, {}), actions);
     };
 
     mtx::pushrules::Ruleset override_ruleset;
@@ -484,14 +484,14 @@ TEST(Pushrules, EventMatches)
     room_rule.rule_id = "!abc:def.ghi";
     room_ruleset.room.push_back(room_rule);
     mtx::pushrules::PushRuleEvaluator room_evaluator{room_ruleset};
-    EXPECT_EQ(room_evaluator.evaluate({textEv}, {}), room_rule.actions);
+    EXPECT_EQ(room_evaluator.evaluate({textEv}, {}, {}), room_rule.actions);
 
     mtx::pushrules::Ruleset sender_ruleset;
     auto sender_rule    = event_match_rule;
     sender_rule.rule_id = "@me:def.ghi";
     sender_ruleset.sender.push_back(sender_rule);
     mtx::pushrules::PushRuleEvaluator sender_evaluator{sender_ruleset};
-    EXPECT_EQ(sender_evaluator.evaluate({textEv}, {}), sender_rule.actions);
+    EXPECT_EQ(sender_evaluator.evaluate({textEv}, {}, {}), sender_rule.actions);
 
     mtx::pushrules::Ruleset content_ruleset;
     mtx::pushrules::PushRule content_match_rule;
@@ -527,37 +527,37 @@ TEST(Pushrules, DisplaynameMatches)
         mtx::pushrules::PushRuleEvaluator::RoomContext ctx{};
         ctx.user_display_name = "honk";
 
-        EXPECT_EQ(evaluator.evaluate({textEv}, ctx), actions);
+        EXPECT_EQ(evaluator.evaluate({textEv}, ctx, {}), actions);
 
         auto textEvEnd         = textEv;
         textEvEnd.content.body = "abc honk";
-        EXPECT_EQ(evaluator.evaluate({textEvEnd}, ctx), actions);
+        EXPECT_EQ(evaluator.evaluate({textEvEnd}, ctx, {}), actions);
         auto textEvStart         = textEv;
         textEvStart.content.body = "honk abc";
-        EXPECT_EQ(evaluator.evaluate({textEvStart}, ctx), actions);
+        EXPECT_EQ(evaluator.evaluate({textEvStart}, ctx, {}), actions);
         auto textEvNL         = textEv;
         textEvNL.content.body = "abc\nhonk\nabc";
-        EXPECT_EQ(evaluator.evaluate({textEvNL}, ctx), actions);
+        EXPECT_EQ(evaluator.evaluate({textEvNL}, ctx, {}), actions);
         auto textEvFull         = textEv;
         textEvFull.content.body = "honk";
-        EXPECT_EQ(evaluator.evaluate({textEvFull}, ctx), actions);
+        EXPECT_EQ(evaluator.evaluate({textEvFull}, ctx, {}), actions);
         auto textEvCase         = textEv;
         textEvCase.content.body = "HoNk";
-        EXPECT_EQ(evaluator.evaluate({textEvCase}, ctx), actions);
+        EXPECT_EQ(evaluator.evaluate({textEvCase}, ctx, {}), actions);
         auto textEvNo         = textEv;
         textEvNo.content.body = "HoN";
-        EXPECT_TRUE(evaluator.evaluate({textEvNo}, ctx).empty());
+        EXPECT_TRUE(evaluator.evaluate({textEvNo}, ctx, {}).empty());
         auto textEvNo2         = textEv;
         textEvNo2.content.body = "honkb";
-        EXPECT_TRUE(evaluator.evaluate({textEvNo2}, ctx).empty());
+        EXPECT_TRUE(evaluator.evaluate({textEvNo2}, ctx, {}).empty());
         auto textEvWordBoundaries         = textEv;
         textEvWordBoundaries.content.body = "@honk:";
-        EXPECT_EQ(evaluator.evaluate({textEvWordBoundaries}, ctx), actions);
+        EXPECT_EQ(evaluator.evaluate({textEvWordBoundaries}, ctx, {}), actions);
 
         // It is what the spec says ¯\_(ツ)_/¯
         auto textEvWordBoundaries2         = textEv;
         textEvWordBoundaries2.content.body = "ähonkü";
-        EXPECT_EQ(evaluator.evaluate({textEvWordBoundaries2}, ctx), actions);
+        EXPECT_EQ(evaluator.evaluate({textEvWordBoundaries2}, ctx, {}), actions);
     };
 
     mtx::pushrules::Ruleset override_ruleset;
@@ -602,10 +602,10 @@ TEST(Pushrules, PowerLevelMatches)
             .power_levels      = pls,
           };
 
-          EXPECT_EQ(evaluator.evaluate({textEv}, ctx), actions);
+          EXPECT_EQ(evaluator.evaluate({textEv}, ctx, {}), actions);
 
           ctx.power_levels.users["@me:def.ghi"] = 0;
-          EXPECT_TRUE(evaluator.evaluate({textEv}, ctx).empty());
+          EXPECT_TRUE(evaluator.evaluate({textEv}, ctx, {}).empty());
       };
 
     mtx::pushrules::Ruleset override_ruleset;
@@ -648,11 +648,11 @@ TEST(Pushrules, MemberCountMatches)
         mtx::pushrules::PushRuleEvaluator::RoomContext ctx{};
 
         ctx.member_count = 99;
-        EXPECT_EQ(!evaluator.evaluate({textEv}, ctx).empty(), lt);
+        EXPECT_EQ(!evaluator.evaluate({textEv}, ctx, {}).empty(), lt);
         ctx.member_count = 100;
-        EXPECT_EQ(!evaluator.evaluate({textEv}, ctx).empty(), eq);
+        EXPECT_EQ(!evaluator.evaluate({textEv}, ctx, {}).empty(), eq);
         ctx.member_count = 101;
-        EXPECT_EQ(!evaluator.evaluate({textEv}, ctx).empty(), gt);
+        EXPECT_EQ(!evaluator.evaluate({textEv}, ctx, {}).empty(), gt);
     };
 
     testEval("100", false, true, false);
@@ -1021,7 +1021,7 @@ TEST(Pushrules, ContentOverRoomRulesMatches)
     mtx::pushrules::PushRuleEvaluator evaluator{ruleset.global};
     mtx::pushrules::PushRuleEvaluator::RoomContext ctx{};
 
-    auto actions = evaluator.evaluate({text}, ctx);
+    auto actions = evaluator.evaluate({text}, ctx, {});
 
     auto notifies = [](const std::vector<mtx::pushrules::actions::Action> &a) {
         for (const auto &action : a) {
@@ -1181,7 +1181,8 @@ TEST(Pushrules, ReactionDoesNotMatch)
                 {
                     "key": "sender",
                     "kind": "im.nheko.msc3664.related_event_match",
-                    "pattern": "@deepbluev7:neko.dev"
+                    "pattern": "@deepbluev7:neko.dev",
+                    "rel_type": "m.in_reply_to"
                 }
             ],
             "default": true,
@@ -1471,7 +1472,7 @@ TEST(Pushrules, ReactionDoesNotMatch)
     mtx::pushrules::PushRuleEvaluator evaluator{ruleset.global};
     mtx::pushrules::PushRuleEvaluator::RoomContext ctx{};
 
-    auto actions = evaluator.evaluate({text}, ctx);
+    auto actions = evaluator.evaluate({text}, ctx, {});
 
     auto notifies = [](const std::vector<mtx::pushrules::actions::Action> &a) {
         for (const auto &action : a) {
@@ -1871,7 +1872,7 @@ TEST(Pushrules, NormalMessageDoesNotHighlight)
     mtx::pushrules::PushRuleEvaluator evaluator{ruleset.global};
     mtx::pushrules::PushRuleEvaluator::RoomContext ctx{};
 
-    auto actions = evaluator.evaluate({text}, ctx);
+    auto actions = evaluator.evaluate({text}, ctx, {});
 
     auto notifies = [](const std::vector<mtx::pushrules::actions::Action> &a) {
         for (const auto &action : a) {
@@ -1887,4 +1888,452 @@ TEST(Pushrules, NormalMessageDoesNotHighlight)
         EXPECT_NE(action,
                   mtx::pushrules::actions::Action{mtx::pushrules::actions::set_tweak_highlight{}});
     }
+}
+
+TEST(Pushrules, RelatedEventMatch)
+{
+    json raw_rule = R"(
+{
+  "global": {
+    "content": [
+    ],
+    "override": [
+        {
+            "actions": [
+                "dont_notify"
+            ],
+            "default": true,
+            "enabled": false,
+            "rule_id": ".m.rule.master"
+        },
+        {
+            "actions": [
+                "notify",
+                {
+                    "set_tweak": "highlight"
+                },
+                {
+                    "set_tweak": "sound",
+                    "value": "default"
+                }
+            ],
+            "conditions": [
+                {
+                    "key": "sender",
+                    "kind": "im.nheko.msc3664.related_event_match",
+                    "pattern": "@deepbluev7:neko.dev",
+                    "rel_type": "m.in_reply_to"
+                }
+            ],
+            "default": true,
+            "rule_id": ".im.nheko.msc3664.reply"
+        }
+    ],
+    "room": [
+    ],
+    "sender": [
+    ],
+    "underride": [
+    ]
+}
+})"_json;
+
+    mtx::pushrules::GlobalRuleset ruleset = raw_rule.get<mtx::pushrules::GlobalRuleset>();
+
+    json raw_event         = R"(
+{
+    "content": {
+        "body": "You can hide them in the room settings",
+        "msgtype": "m.text",
+        "m.relates_to": {
+            "m.in_reply_to": {
+              "event_id": "$aaaaaaaaaaaaaaaaaaaa:bc.de"
+            },
+            "event_id": "$aaaaaaaaaaaaaaaaaaaa:bc.de",
+            "rel_type": "m.thread"
+        }
+    },
+    "event_id": "$mol6Bt546FLBNM7WgTj8mGTAieS8ZsX3JLZ2MH9qQwg",
+    "origin_server_ts": 1666006933326,
+    "room_id": "!UbCmIlGTHNIgIRZcpt:nheko.im",
+    "sender": "@nico:neko.dev",
+    "type": "m.room.message"
+})"_json;
+    json related_raw_event = R"(
+{
+    "content": {
+        "body": "You can hide them in the room settings",
+        "msgtype": "m.text"
+    },
+    "event_id": "$aaaaaaaaaaaaaaaaaaaa:bc.de",
+    "origin_server_ts": 1666006933326,
+    "room_id": "!UbCmIlGTHNIgIRZcpt:nheko.im",
+    "sender": "@deepbluev7:neko.dev",
+    "type": "m.room.message"
+})"_json;
+
+    auto text         = raw_event.get<mtx::events::RoomEvent<mtx::events::msg::Text>>();
+    auto related_text = related_raw_event.get<mtx::events::RoomEvent<mtx::events::msg::Text>>();
+    mtx::pushrules::PushRuleEvaluator evaluator{ruleset.global};
+    mtx::pushrules::PushRuleEvaluator::RoomContext ctx{};
+
+    auto actions = evaluator.evaluate({text},
+                                      ctx,
+                                      {
+                                        {text.content.relations.relations.at(0), {related_text}},
+                                        {text.content.relations.relations.at(1), {related_text}},
+                                      });
+
+    auto notifies = [](const std::vector<mtx::pushrules::actions::Action> &a) {
+        for (const auto &action : a) {
+            if (action == mtx::pushrules::actions::Action{mtx::pushrules::actions::notify{}}) {
+                return true;
+            }
+        }
+        return false;
+    };
+
+    EXPECT_TRUE(
+      notifies(evaluator.evaluate({text},
+                                  ctx,
+                                  {
+                                    {text.content.relations.relations.at(0), {related_text}},
+                                    {text.content.relations.relations.at(1), {related_text}},
+                                  })));
+    EXPECT_FALSE(notifies(evaluator.evaluate({text}, ctx, {})));
+
+    raw_rule = R"(
+{
+  "global": {
+    "content": [
+    ],
+    "override": [
+        {
+            "actions": [
+                "dont_notify"
+            ],
+            "default": true,
+            "enabled": false,
+            "rule_id": ".m.rule.master"
+        },
+        {
+            "actions": [
+                "notify",
+                {
+                    "set_tweak": "highlight"
+                },
+                {
+                    "set_tweak": "sound",
+                    "value": "default"
+                }
+            ],
+            "conditions": [
+                {
+                    "key": "sender",
+                    "kind": "im.nheko.msc3664.related_event_match",
+                    "pattern": "@deepbluev7:neko.dev",
+                    "rel_type": "m.thread"
+                }
+            ],
+            "default": true,
+            "rule_id": ".im.nheko.msc3664.reply"
+        }
+    ],
+    "room": [
+    ],
+    "sender": [
+    ],
+    "underride": [
+    ]
+}
+})"_json;
+
+    ruleset = raw_rule.get<mtx::pushrules::GlobalRuleset>();
+    mtx::pushrules::PushRuleEvaluator evaluator1{ruleset.global};
+    EXPECT_TRUE(
+      notifies(evaluator1.evaluate({text},
+                                   ctx,
+                                   {
+                                     {text.content.relations.relations.at(0), {related_text}},
+                                     {text.content.relations.relations.at(1), {related_text}},
+                                   })));
+    EXPECT_FALSE(notifies(evaluator1.evaluate({text}, ctx, {})));
+
+    raw_rule = R"(
+{
+  "global": {
+    "content": [
+    ],
+    "override": [
+        {
+            "actions": [
+                "dont_notify"
+            ],
+            "default": true,
+            "enabled": false,
+            "rule_id": ".m.rule.master"
+        },
+        {
+            "actions": [
+                "notify",
+                {
+                    "set_tweak": "highlight"
+                },
+                {
+                    "set_tweak": "sound",
+                    "value": "default"
+                }
+            ],
+            "conditions": [
+                {
+                    "kind": "im.nheko.msc3664.related_event_match",
+                    "rel_type": "m.thread"
+                }
+            ],
+            "default": true,
+            "rule_id": ".im.nheko.msc3664.reply"
+        }
+    ],
+    "room": [
+    ],
+    "sender": [
+    ],
+    "underride": [
+    ]
+}
+})"_json;
+
+    ruleset = raw_rule.get<mtx::pushrules::GlobalRuleset>();
+    mtx::pushrules::PushRuleEvaluator evaluator2{ruleset.global};
+    EXPECT_TRUE(
+      notifies(evaluator2.evaluate({text},
+                                   ctx,
+                                   {
+                                     {text.content.relations.relations.at(0), {related_text}},
+                                     {text.content.relations.relations.at(1), {related_text}},
+                                   })));
+    EXPECT_FALSE(notifies(evaluator2.evaluate({text}, ctx, {})));
+
+    raw_rule = R"(
+{
+  "global": {
+    "content": [
+    ],
+    "override": [
+        {
+            "actions": [
+                "dont_notify"
+            ],
+            "default": true,
+            "enabled": false,
+            "rule_id": ".m.rule.master"
+        },
+        {
+            "actions": [
+                "notify",
+                {
+                    "set_tweak": "highlight"
+                },
+                {
+                    "set_tweak": "sound",
+                    "value": "default"
+                }
+            ],
+            "conditions": [
+                {
+                    "key": "sender",
+                    "kind": "im.nheko.msc3664.related_event_match",
+                    "pattern": "@deepbluev8:neko.dev",
+                    "rel_type": "m.in_reply_to"
+                }
+            ],
+            "default": true,
+            "rule_id": ".im.nheko.msc3664.reply"
+        }
+    ],
+    "room": [
+    ],
+    "sender": [
+    ],
+    "underride": [
+    ]
+}
+})"_json;
+
+    ruleset = raw_rule.get<mtx::pushrules::GlobalRuleset>();
+    mtx::pushrules::PushRuleEvaluator evaluator3{ruleset.global};
+    EXPECT_FALSE(
+      notifies(evaluator3.evaluate({text},
+                                   ctx,
+                                   {
+                                     {text.content.relations.relations.at(0), {related_text}},
+                                     {text.content.relations.relations.at(1), {related_text}},
+                                   })));
+    EXPECT_FALSE(notifies(evaluator3.evaluate({text}, ctx, {})));
+
+    raw_event = R"(
+{
+    "content": {
+        "body": "You can hide them in the room settings",
+        "msgtype": "m.text",
+        "m.relates_to": {
+            "m.in_reply_to": {
+              "event_id": "$aaaaaaaaaaaaaaaaaaaa:bc.de"
+            },
+            "is_falling_back": true,
+            "event_id": "$aaaaaaaaaaaaaaaaaaaa:bc.de",
+            "rel_type": "m.thread"
+        }
+    },
+    "event_id": "$mol6Bt546FLBNM7WgTj8mGTAieS8ZsX3JLZ2MH9qQwg",
+    "origin_server_ts": 1666006933326,
+    "room_id": "!UbCmIlGTHNIgIRZcpt:nheko.im",
+    "sender": "@nico:neko.dev",
+    "type": "m.room.message"
+})"_json;
+    text      = raw_event.get<mtx::events::RoomEvent<mtx::events::msg::Text>>();
+    EXPECT_FALSE(
+      notifies(evaluator.evaluate({text},
+                                  ctx,
+                                  {
+                                    {text.content.relations.relations.at(0), {related_text}},
+                                    {text.content.relations.relations.at(1), {related_text}},
+                                  })));
+    EXPECT_FALSE(notifies(evaluator.evaluate({text}, ctx, {})));
+
+    raw_rule = R"(
+{
+  "global": {
+    "content": [
+    ],
+    "override": [
+        {
+            "actions": [
+                "dont_notify"
+            ],
+            "default": true,
+            "enabled": false,
+            "rule_id": ".m.rule.master"
+        },
+        {
+            "actions": [
+                "notify",
+                {
+                    "set_tweak": "highlight"
+                },
+                {
+                    "set_tweak": "sound",
+                    "value": "default"
+                }
+            ],
+            "conditions": [
+                {
+                    "key": "sender",
+                    "kind": "im.nheko.msc3664.related_event_match",
+                    "pattern": "@deepbluev7:neko.dev",
+                    "rel_type": "m.in_reply_to",
+                    "include_fallback": true
+                }
+            ],
+            "default": true,
+            "rule_id": ".im.nheko.msc3664.reply"
+        }
+    ],
+    "room": [
+    ],
+    "sender": [
+    ],
+    "underride": [
+    ]
+}
+})"_json;
+
+    ruleset = raw_rule.get<mtx::pushrules::GlobalRuleset>();
+    mtx::pushrules::PushRuleEvaluator evaluator4{ruleset.global};
+    EXPECT_TRUE(
+      notifies(evaluator4.evaluate({text},
+                                   ctx,
+                                   {
+                                     {text.content.relations.relations.at(0), {related_text}},
+                                     {text.content.relations.relations.at(1), {related_text}},
+                                   })));
+    EXPECT_FALSE(notifies(evaluator4.evaluate({text}, ctx, {})));
+
+    raw_rule = R"(
+{
+  "global": {
+    "content": [
+    ],
+    "override": [
+        {
+            "actions": [
+                "dont_notify"
+            ],
+            "default": true,
+            "enabled": false,
+            "rule_id": ".m.rule.master"
+        },
+        {
+            "actions": [
+                "notify",
+                {
+                    "set_tweak": "highlight"
+                },
+                {
+                    "set_tweak": "sound",
+                    "value": "default"
+                }
+            ],
+            "conditions": [
+                {
+                    "key": "sender",
+                    "kind": "im.nheko.msc3664.related_event_match",
+                    "pattern": "@deepbluev7:neko.dev",
+                    "rel_type": "m.in_reply_to"
+                }
+            ],
+            "default": true,
+            "rule_id": ".im.nheko.msc3664.reply"
+        }
+    ],
+    "room": [
+    ],
+    "sender": [
+    ],
+    "underride": [
+    ]
+}
+})"_json;
+
+    raw_event  = R"(
+{
+    "content": {
+        "body": "You can hide them in the room settings",
+        "msgtype": "m.emote",
+        "m.relates_to": {
+            "m.in_reply_to": {
+              "event_id": "$aaaaaaaaaaaaaaaaaaaa:bc.de"
+            },
+            "event_id": "$aaaaaaaaaaaaaaaaaaaa:bc.de",
+            "rel_type": "m.thread"
+        }
+    },
+    "event_id": "$mol6Bt546FLBNM7WgTj8mGTAieS8ZsX3JLZ2MH9qQwg",
+    "origin_server_ts": 1666006933326,
+    "room_id": "!UbCmIlGTHNIgIRZcpt:nheko.im",
+    "sender": "@nico:neko.dev",
+    "type": "m.room.message"
+})"_json;
+    auto emote = raw_event.get<mtx::events::RoomEvent<mtx::events::msg::Emote>>();
+
+    ruleset = raw_rule.get<mtx::pushrules::GlobalRuleset>();
+    mtx::pushrules::PushRuleEvaluator evaluator5{ruleset.global};
+    EXPECT_TRUE(
+      notifies(evaluator5.evaluate({emote},
+                                   ctx,
+                                   {
+                                     {emote.content.relations.relations.at(0), {related_text}},
+                                     {emote.content.relations.relations.at(1), {related_text}},
+                                   })));
+    EXPECT_FALSE(notifies(evaluator5.evaluate({emote}, ctx, {})));
 }

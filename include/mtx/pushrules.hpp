@@ -14,6 +14,7 @@
 #include <variant>
 #include <vector>
 
+#include "mtx/events/common.hpp"
 #include "mtx/events/power_levels.hpp"
 
 namespace mtx {
@@ -46,6 +47,12 @@ struct PushCondition
     //! less than the given number and so forth. If no prefix is present, this parameter
     //! defaults to ==.
     std::string is;
+
+    //! The relation type to match on. Only valid for `im.nheko.msc3664.related_event_match`
+    //! conditions.
+    mtx::common::RelationType rel_type = mtx::common::RelationType::Unsupported;
+    //! Wether to match fallback relations or not.
+    bool include_fallback = false;
 
     friend void to_json(nlohmann::json &obj, const PushCondition &condition);
     friend void from_json(const nlohmann::json &obj, PushCondition &condition);
@@ -200,10 +207,14 @@ public:
     //! Evaluate the pushrules for @event .
     ///
     /// You need to have the room_id set for the event.
+    /// `relatedEvents` is a mapping of rel_type to event. Pass all the events that are related to
+    /// by this event here.
     /// \returns the actions to apply.
     [[nodiscard]] std::vector<actions::Action> evaluate(
       const mtx::events::collections::TimelineEvent &event,
-      const RoomContext &ctx) const;
+      const RoomContext &ctx,
+      const std::vector<std::pair<mtx::common::Relation, mtx::events::collections::TimelineEvent>>
+        &relatedEvents) const;
 
 private:
     struct OptimizedRules;
