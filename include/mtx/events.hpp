@@ -163,6 +163,8 @@ enum class MessageType
     Video,
     /// m.key.verification.request
     KeyVerificationRequest,
+    // nic.custom.confetti
+    Confetti,
     // Unrecognized message type
     Unknown,
 };

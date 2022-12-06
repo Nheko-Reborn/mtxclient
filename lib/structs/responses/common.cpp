@@ -389,6 +389,11 @@ parse_timeline_events(const json &events,
 
                     break;
                 }
+                case MsgType::Confetti: {
+                    container.emplace_back(events::RoomEvent<events::msg::Confetti>(e));
+
+                    break;
+                }
                 case MsgType::Emote: {
                     container.emplace_back(events::RoomEvent<events::msg::Emote>(e));
 
