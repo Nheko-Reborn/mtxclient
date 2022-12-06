@@ -291,6 +291,10 @@ from_json(const nlohmann::json &obj, TimelineEvent &e)
                 e.data = events::RoomEvent<events::msg::Audio>(obj);
                 break;
             }
+            case MsgType::Confetti: {
+                e.data = events::RoomEvent<events::msg::Confetti>(obj);
+                break;
+            }
             case MsgType::Emote: {
                 e.data = events::RoomEvent<events::msg::Emote>(obj);
                 break;
