@@ -443,7 +443,7 @@ struct SetPusher
 struct userDirectorySearch
 {
     //! The maximum number of results to return. Defaults to 10.
-    int limit;
+    std::optional<int> limit;
     //! Required: The term to search for
     std::string search_term;
 

@@ -1662,13 +1662,13 @@ Client::set_pusher(const mtx::requests::SetPusher &req, Callback<mtx::responses:
 
 void
 Client::search_user_directory(const std::string &search_term,
-                              int limit,
-                              Callback<mtx::responses::Users> callback)
+                              Callback<mtx::responses::Users> callback,
+                              int limit)
 {
-    mtx::requests::userDirectorySearch req;
-    req.search_term = search_term;
-    req.limit       = limit;
-    post<mtx::requests::userDirectorySearch, mtx::responses::Users>(
+    nlohmann::json req = {{"search_term", search_term}};
+    if (limit >= 0)
+        req["limit"] = limit;
+    post<nlohmann::json, mtx::responses::Users>(
       "/client/v3/user_directory/search", req, std::move(callback));
 }
 

@@ -354,16 +354,3 @@ TEST(Requests, PublicRooms)
 
     EXPECT_THROW(json req = b3, std::invalid_argument);
 }
-
-TEST(Requests, userDirectorySearch)
-{
-    userDirectorySearch search;
-    search.search_term = "foo";
-    search.limit       = 10;
-
-    json j = search;
-    EXPECT_EQ(j, R"({
-    "limit": 10,
-    "search_term": "foo"
-  })"_json);
-}

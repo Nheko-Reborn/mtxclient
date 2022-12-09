@@ -1884,25 +1884,31 @@ TEST(ClientAPI, Users)
                         [](const mtx::responses::RoomId &, RequestErr err) { check_error(err); });
     });
 
+    alice->search_user_directory("carl",
+                                 [alice](const mtx::responses::Users &users, RequestErr err) {
+                                     check_error(err);
+                                     EXPECT_EQ(users.results.size(), 1);
+                                     EXPECT_EQ(users.results[0].display_name, "Bobby");
+                                     EXPECT_EQ(users.limited, false);
+                                 });
+    // synapse appears to return limit+1 results, this does not seem to
+    // be spec compliant. To make the tests work, we pass 0 to get 1 result
     alice->search_user_directory(
-      "carl", 10, [alice](const mtx::responses::Users &users, RequestErr err) {
-          check_error(err);
-          EXPECT_EQ(users.results.size(), 1);
-          EXPECT_EQ(users.results[0].display_name, "Bobby");
-          EXPECT_EQ(users.limited, false);
-      });
-    alice->search_user_directory(
-      "Bob", 0, [alice](const mtx::responses::Users &users, RequestErr err) {
+      "Bob",
+      [alice](const mtx::responses::Users &users, RequestErr err) {
           check_error(err);
           EXPECT_EQ(users.results.size(), 1);
           EXPECT_EQ(users.limited, true);
-      });
+      },
+      0);
     alice->search_user_directory(
-      "Bob", 10, [alice](const mtx::responses::Users &users, RequestErr err) {
+      "Bob",
+      [alice](const mtx::responses::Users &users, RequestErr err) {
           check_error(err);
           EXPECT_EQ(users.results.size(), 2);
           EXPECT_EQ(users.limited, false);
-      });
+      },
+      -1);
 
     alice->close();
     bob->close();

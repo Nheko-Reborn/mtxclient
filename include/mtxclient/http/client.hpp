@@ -764,8 +764,8 @@ public:
 
     //! Searches the user directory
     void search_user_directory(const std::string &search_term,
-                               int limit,
-                               Callback<mtx::responses::Users> callback);
+                               Callback<mtx::responses::Users> callback,
+                               int limit = -1);
 
 private:
     template<class Request, class Response>
