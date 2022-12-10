@@ -394,6 +394,11 @@ parse_timeline_events(const json &events,
 
                     break;
                 }
+                case MsgType::DuckTypesToText: {
+                    container.emplace_back(events::RoomEvent<events::msg::DuckTypesToText>(e));
+
+                    break;
+                }
                 case MsgType::Emote: {
                     container.emplace_back(events::RoomEvent<events::msg::Emote>(e));
 
@@ -436,7 +441,11 @@ parse_timeline_events(const json &events,
                     break;
                 }
                 case MsgType::Unknown: {
-                    container.emplace_back(events::RoomEvent<events::Unknown>(e));
+                    try {
+                        container.emplace_back(events::RoomEvent<events::msg::DuckTypesToText>(e));
+                    } catch (const json::exception &ex) {
+                        container.emplace_back(events::RoomEvent<events::Unknown>(e));
+                    }
                     break;
                 }
                 }

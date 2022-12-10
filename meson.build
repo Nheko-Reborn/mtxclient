@@ -82,6 +82,7 @@ src = [
 	'lib/structs/events/member.cpp',
 	'lib/structs/events/messages/audio.cpp',
 	'lib/structs/events/messages/confetti.cpp',
+	'lib/structs/events/messages/ducktypes_to_text.cpp',
 	'lib/structs/events/messages/emote.cpp',
 	'lib/structs/events/messages/file.cpp',
 	'lib/structs/events/messages/image.cpp',

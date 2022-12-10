@@ -41,6 +41,8 @@ MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::RoomEvent, mtx::events::msg::Sticke
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::RoomEvent, mtx::events::msg::Reaction)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::RoomEvent, mtx::events::msg::Redacted)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::RoomEvent, mtx::events::msg::Audio)
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::RoomEvent, mtx::events::msg::Confetti)
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::RoomEvent, mtx::events::msg::DuckTypesToText)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::RoomEvent, mtx::events::msg::Emote)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::RoomEvent, mtx::events::msg::File)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::RoomEvent, mtx::events::msg::Image)
@@ -295,6 +297,10 @@ from_json(const nlohmann::json &obj, TimelineEvent &e)
                 e.data = events::RoomEvent<events::msg::Confetti>(obj);
                 break;
             }
+            case MsgType::DuckTypesToText: {
+                e.data = events::RoomEvent<events::msg::DuckTypesToText>(obj);
+                break;
+            }
             case MsgType::Emote: {
                 e.data = events::RoomEvent<events::msg::Emote>(obj);
                 break;
@@ -329,7 +335,11 @@ from_json(const nlohmann::json &obj, TimelineEvent &e)
                 break;
             }
             case MsgType::Unknown: {
-                e.data = events::RoomEvent<events::Unknown>(obj);
+                try {
+                    e.data = events::RoomEvent<events::msg::DuckTypesToText>(obj);
+                } catch (const nlohmann::json::exception &ex) {
+                    e.data = events::RoomEvent<events::Unknown>(obj);
+                }
                 break;
             }
             }

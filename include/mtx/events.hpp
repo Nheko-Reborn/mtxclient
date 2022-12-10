@@ -165,6 +165,8 @@ enum class MessageType
     KeyVerificationRequest,
     // nic.custom.confetti
     Confetti,
+    // If it looks like m.text and quacks like m.text...
+    DuckTypesToText,
     // Unrecognized message type
     Unknown,
 };

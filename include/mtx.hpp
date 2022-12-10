@@ -25,6 +25,7 @@
 
 #include "mtx/events/messages/audio.hpp"
 #include "mtx/events/messages/confetti.hpp"
+#include "mtx/events/messages/ducktypes_to_text.hpp"
 #include "mtx/events/messages/emote.hpp"
 #include "mtx/events/messages/file.hpp"
 #include "mtx/events/messages/image.hpp"
