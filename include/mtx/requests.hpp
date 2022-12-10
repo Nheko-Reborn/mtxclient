@@ -439,15 +439,5 @@ struct SetPusher
 
     friend void to_json(nlohmann::json &obj, const SetPusher &req);
 };
-
-struct userDirectorySearch
-{
-    //! The maximum number of results to return. Defaults to 10.
-    std::optional<int> limit;
-    //! Required: The term to search for
-    std::string search_term;
-
-    friend void to_json(nlohmann::json &obj, const userDirectorySearch &data);
-};
 } // namespace requests
 } // namespace mtx
