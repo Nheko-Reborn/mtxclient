@@ -441,11 +441,7 @@ parse_timeline_events(const json &events,
                     break;
                 }
                 case MsgType::Unknown: {
-                    try {
-                        container.emplace_back(events::RoomEvent<events::msg::DuckTypesToText>(e));
-                    } catch (const json::exception &ex) {
-                        container.emplace_back(events::RoomEvent<events::Unknown>(e));
-                    }
+                    container.emplace_back(events::RoomEvent<events::Unknown>(e));
                     break;
                 }
                 }
