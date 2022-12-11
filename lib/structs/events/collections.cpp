@@ -41,6 +41,7 @@ MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::RoomEvent, mtx::events::msg::Sticke
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::RoomEvent, mtx::events::msg::Reaction)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::RoomEvent, mtx::events::msg::Redacted)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::RoomEvent, mtx::events::msg::Audio)
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::RoomEvent, mtx::events::msg::Confetti)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::RoomEvent, mtx::events::msg::Emote)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::RoomEvent, mtx::events::msg::File)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::RoomEvent, mtx::events::msg::Image)
