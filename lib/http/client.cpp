@@ -1666,6 +1666,18 @@ Client::set_pusher(const mtx::requests::SetPusher &req, Callback<mtx::responses:
       "/client/v3/pushers/set", req, std::move(cb));
 }
 
+void
+Client::search_user_directory(const std::string &search_term,
+                              Callback<mtx::responses::Users> callback,
+                              int limit)
+{
+    nlohmann::json req = {{"search_term", search_term}};
+    if (limit >= 0)
+        req["limit"] = limit;
+    post<nlohmann::json, mtx::responses::Users>(
+      "/client/v3/user_directory/search", req, std::move(callback));
+}
+
 // Template instantiations for the various send functions
 
 #define MTXCLIENT_SEND_STATE_EVENT(Content)                                                        \

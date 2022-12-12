@@ -123,6 +123,7 @@ src = [
 	'lib/structs/responses/register.cpp',
 	'lib/structs/responses/sync.cpp',
 	'lib/structs/responses/turn_server.cpp',
+	'lib/structs/responses/users.cpp',
 	'lib/structs/responses/version.cpp',
 	'lib/structs/responses/well-known.cpp',
 	'lib/structs/secret_storage.cpp',
