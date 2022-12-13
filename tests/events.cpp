@@ -334,6 +334,32 @@ TEST(StateEvents, CreateWithType)
 
     EXPECT_TRUE(event.content.type.has_value());
     EXPECT_EQ(event.content.type.value(), ns::state::room_type::space);
+
+    json room_v10 = R"(
+{
+  "content": {
+    "creator": "@test:neko.dev",
+    "predecessor": {
+      "event_id": "$hpB30pm_PDHq9dcz7zJR6gwnEFRPxzea7J8bxVuuSTg",
+      "room_id": "!isYaZDvAOnwGmoNKgD:neko.dev"
+    },
+    "room_version": "10"
+  },
+  "origin_server_ts": 1670903493618,
+  "sender": "@test:neko.dev",
+  "state_key": "",
+  "type": "m.room.create",
+  "unsigned": {
+    "age": 118
+  },
+  "event_id": "$2NH68IAcuHuAwsy1WEyLqAnOH_iAVjyUu2GP5IksnYc",
+  "room_id": "!FhwxBVrewHNqikGaXN:neko.dev"
+}
+    )"_json;
+
+    event = room_v10.get<ns::StateEvent<ns::state::Create>>();
+
+    EXPECT_EQ(event.content.room_version, "10");
 }
 
 TEST(StateEvents, GuestAccess)
