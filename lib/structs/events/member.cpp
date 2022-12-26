@@ -57,7 +57,7 @@ from_json(const json &obj, Member &member)
     if (obj.find("is_direct") != obj.end())
         member.is_direct = obj.at("is_direct").get<bool>();
 
-    if (obj.find("reason") != obj.end())
+    if (auto r = obj.find("reason"); r != obj.end() && r->is_string())
         member.reason = obj.at("reason").get<std::string>();
 
     if (obj.contains("join_authorised_via_users_server"))
