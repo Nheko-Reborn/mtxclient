@@ -5,6 +5,7 @@
 
 #include <variant>
 
+#include "messages/unknown.hpp"
 #include "mtx/events.hpp"
 #include "mtx/events/account_data/direct.hpp"
 #include "mtx/events/account_data/fully_read.hpp"
@@ -45,6 +46,7 @@
 #include "mtx/events/messages/image.hpp"
 #include "mtx/events/messages/notice.hpp"
 #include "mtx/events/messages/text.hpp"
+#include "mtx/events/messages/unknown.hpp"
 #include "mtx/events/messages/video.hpp"
 
 namespace mtx {
@@ -173,6 +175,7 @@ using TimelineEvents =
                // TODO: events::RoomEvent<mtx::events::msg::Location>,
                mtx::events::RoomEvent<mtx::events::msg::Notice>,
                mtx::events::RoomEvent<mtx::events::msg::Text>,
+               mtx::events::RoomEvent<mtx::events::msg::Unknown>,
                mtx::events::RoomEvent<mtx::events::msg::Video>,
                mtx::events::RoomEvent<mtx::events::msg::KeyVerificationRequest>,
                mtx::events::RoomEvent<mtx::events::msg::KeyVerificationStart>,
@@ -232,6 +235,9 @@ constexpr inline EventType message_content_to_type<mtx::events::msg::Notice> =
   EventType::RoomMessage;
 template<>
 constexpr inline EventType message_content_to_type<mtx::events::msg::Text> = EventType::RoomMessage;
+template<>
+constexpr inline EventType message_content_to_type<mtx::events::msg::Unknown> =
+  EventType::RoomMessage;
 template<>
 constexpr inline EventType message_content_to_type<mtx::events::msg::Video> =
   EventType::RoomMessage;
