@@ -16,13 +16,15 @@ namespace responses {
 void
 from_json(const json &obj, AccountData &account_data)
 {
-    utils::parse_room_account_data_events(obj.at("events"), account_data.events);
+    if (auto it = obj.find("events"); it != obj.end() && it->is_array())
+        utils::parse_room_account_data_events(*it, account_data.events);
 }
 
 void
 from_json(const json &obj, State &state)
 {
-    utils::parse_state_events(obj.at("events"), state.events);
+    if (auto it = obj.find("events"); it != obj.end() && it->is_array())
+        utils::parse_state_events(*it, state.events);
 }
 
 void
@@ -37,51 +39,47 @@ from_json(const json &obj, Timeline &timeline)
 void
 from_json(const json &obj, UnreadNotifications &notifications)
 {
-    if (obj.find("highlight_count") != obj.end())
-        notifications.highlight_count = obj.at("highlight_count").get<uint64_t>();
+    if (auto it = obj.find("highlight_count"); it != obj.end())
+        notifications.highlight_count = it->get<uint64_t>();
 
-    if (obj.find("notification_count") != obj.end())
-        notifications.notification_count = obj.at("notification_count").get<uint64_t>();
+    if (auto it = obj.find("notification_count"); it != obj.end())
+        notifications.notification_count = it->get<uint64_t>();
 }
 
 void
 from_json(const json &obj, Ephemeral &ephemeral)
 {
-    if (obj.count("events") == 0)
-        return;
-
-    utils::parse_ephemeral_events(obj.at("events"), ephemeral.events);
+    if (auto it = obj.find("events"); it != obj.end() && it->is_array())
+        utils::parse_ephemeral_events(*it, ephemeral.events);
 }
 
 void
 from_json(const json &obj, JoinedRoom &room)
 {
-    if (obj.count("state") != 0)
-        room.state = obj.at("state").get<State>();
+    if (auto it = obj.find("state"); it != obj.end())
+        room.state = it->get<State>();
 
-    if (obj.count("timeline") != 0)
-        room.timeline = obj.at("timeline").get<Timeline>();
+    if (auto it = obj.find("timeline"); it != obj.end())
+        room.timeline = it->get<Timeline>();
 
-    if (obj.find("unread_notifications") != obj.end())
-        room.unread_notifications = obj.at("unread_notifications").get<UnreadNotifications>();
+    if (auto it = obj.find("unread_notifications"); it != obj.end())
+        room.unread_notifications = it->get<UnreadNotifications>();
 
-    if (obj.find("ephemeral") != obj.end())
-        room.ephemeral = obj.at("ephemeral").get<Ephemeral>();
+    if (auto it = obj.find("ephemeral"); it != obj.end())
+        room.ephemeral = it->get<Ephemeral>();
 
-    if (obj.count("account_data") != 0) {
-        if (obj.at("account_data").count("events") != 0)
-            room.account_data = obj.at("account_data").get<AccountData>();
-    }
+    if (auto it = obj.find("account_data"); it != obj.end())
+        room.account_data = it->get<AccountData>();
 }
 
 void
 from_json(const json &obj, LeftRoom &room)
 {
-    if (obj.count("state") != 0)
-        room.state = obj.at("state").get<State>();
+    if (auto it = obj.find("state"); it != obj.end())
+        room.state = it->get<State>();
 
-    if (obj.count("timeline") != 0)
-        room.timeline = obj.at("timeline").get<Timeline>();
+    if (auto it = obj.find("timeline"); it != obj.end())
+        room.timeline = it->get<Timeline>();
 }
 
 std::string
@@ -232,19 +230,17 @@ from_json(const json &obj, ToDevice &to_device)
 void
 from_json(const json &obj, Sync &response)
 {
-    if (obj.count("rooms") != 0)
-        response.rooms = obj.at("rooms").get<Rooms>();
+    if (auto it = obj.find("rooms"); it != obj.end())
+        response.rooms = it->get<Rooms>();
 
-    if (obj.count("device_lists") != 0)
-        response.device_lists = obj.at("device_lists").get<DeviceLists>();
+    if (auto it = obj.find("device_lists"); it != obj.end())
+        response.device_lists = it->get<DeviceLists>();
 
-    if (obj.count("to_device") != 0) {
-        response.to_device = obj.at("to_device").get<ToDevice>();
-    }
+    if (auto it = obj.find("to_device"); it != obj.end())
+        response.to_device = it->get<ToDevice>();
 
-    if (obj.count("device_one_time_keys_count") != 0)
-        response.device_one_time_keys_count =
-          obj.at("device_one_time_keys_count").get<std::map<std::string, uint16_t>>();
+    if (auto it = obj.find("device_one_time_keys_count"); it != obj.end())
+        response.device_one_time_keys_count = it->get<std::map<std::string, uint16_t>>();
 
     if (auto fallback_keys = obj.find("device_unused_fallback_key_types");
         fallback_keys != obj.end() && fallback_keys->is_array())
@@ -264,10 +260,8 @@ from_json(const json &obj, Sync &response)
         }
     }
 
-    if (obj.count("account_data") != 0) {
-        if (obj.at("account_data").count("events") != 0)
-            response.account_data = obj.at("account_data").get<AccountData>();
-    }
+    if (auto it = obj.find("account_data"); it != obj.end())
+        response.account_data = it->get<AccountData>();
 
     response.next_batch = obj.at("next_batch").get<std::string>();
 }

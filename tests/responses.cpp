@@ -552,6 +552,67 @@ TEST(Responses, Sync)
     EXPECT_EQ(sync3.rooms.invite.count("!696r7675:example.com"), 1);
     EXPECT_EQ(sync3.rooms.knock.count("!223asd457:example.com"), 1);
     EXPECT_EQ(sync3.rooms.join.count("!726s7s6q:example.com"), 1);
+
+    // verify that fields without "events" key parse
+    // see: https://github.com/Nheko-Reborn/nheko/issues/1257
+    json data4 = R"({
+				"device_one_time_keys_count": {},
+				"account_data": null,
+				"next_batch": "s123_42_42_42_42_42_42_42_7",
+				"presence": {
+					"events": [
+						{
+							"content": {
+								"avatar_url": "mxc://localhost/wefuiwegh8742w",
+								"currently_active": false,
+								"last_active_ago": 2478593,
+								"presence": "online",
+								"status_msg": "Making cupcakes"
+							},
+							"sender": "@example:localhost",
+							"type": "m.presence"
+						}
+					]
+				},
+				"rooms": {
+					"invite": {
+						"!696r7674:example.com": {
+							"invite_state": {
+							}
+						},
+						"!696r7675:example.com": {}
+					},
+					"join": {
+						"!726s6s6q:example.com": {
+							"account_data": {
+							},
+							"ephemeral": {
+							},
+							"state": {
+							},
+							"summary": {
+								"m.heroes": [
+									"@alice:example.com",
+									"@bob:example.com"
+								],
+								"m.invited_member_count": 0,
+								"m.joined_member_count": 2
+							},
+							"timeline": {
+								"events": [
+								],
+								"limited": true,
+								"prev_batch": "t34-23535_0_0"
+							}
+						},
+						"!726s7s6q:example.com": {}
+					}
+			}
+	})"_json;
+
+    Sync sync4 = data4.get<Sync>();
+
+    EXPECT_EQ(sync4.next_batch, "s123_42_42_42_42_42_42_42_7");
 }
 
 TEST(Responses, SyncWithEncryption)
