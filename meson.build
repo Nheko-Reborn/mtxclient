@@ -85,6 +85,7 @@ src = [
 	'lib/structs/events/messages/emote.cpp',
 	'lib/structs/events/messages/file.cpp',
 	'lib/structs/events/messages/image.cpp',
+	'lib/structs/events/messages/location.cpp',
 	'lib/structs/events/messages/notice.cpp',
 	'lib/structs/events/messages/text.cpp',
 	'lib/structs/events/messages/video.cpp',

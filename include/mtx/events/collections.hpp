@@ -43,6 +43,7 @@
 #include "mtx/events/messages/emote.hpp"
 #include "mtx/events/messages/file.hpp"
 #include "mtx/events/messages/image.hpp"
+#include "mtx/events/messages/location.hpp"
 #include "mtx/events/messages/notice.hpp"
 #include "mtx/events/messages/text.hpp"
 #include "mtx/events/messages/video.hpp"
@@ -170,7 +171,7 @@ using TimelineEvents =
                mtx::events::RoomEvent<mtx::events::msg::Emote>,
                mtx::events::RoomEvent<mtx::events::msg::File>,
                mtx::events::RoomEvent<mtx::events::msg::Image>,
-               // TODO: events::RoomEvent<mtx::events::msg::Location>,
+               mtx::events::RoomEvent<mtx::events::msg::Location>,
                mtx::events::RoomEvent<mtx::events::msg::Notice>,
                mtx::events::RoomEvent<mtx::events::msg::Text>,
                mtx::events::RoomEvent<mtx::events::msg::Video>,
@@ -226,6 +227,9 @@ template<>
 constexpr inline EventType message_content_to_type<mtx::events::msg::File> = EventType::RoomMessage;
 template<>
 constexpr inline EventType message_content_to_type<mtx::events::msg::Image> =
+  EventType::RoomMessage;
+template<>
+constexpr inline EventType message_content_to_type<mtx::events::msg::Location> =
   EventType::RoomMessage;
 template<>
 constexpr inline EventType message_content_to_type<mtx::events::msg::Notice> =

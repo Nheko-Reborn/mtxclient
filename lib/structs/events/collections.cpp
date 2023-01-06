@@ -45,6 +45,7 @@ MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::RoomEvent, mtx::events::msg::Confet
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::RoomEvent, mtx::events::msg::Emote)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::RoomEvent, mtx::events::msg::File)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::RoomEvent, mtx::events::msg::Image)
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::RoomEvent, mtx::events::msg::Location)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::RoomEvent, mtx::events::msg::Notice)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::RoomEvent, mtx::events::msg::Text)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::RoomEvent, mtx::events::msg::Video)
@@ -309,8 +310,9 @@ from_json(const nlohmann::json &obj, TimelineEvent &e)
                 break;
             }
             case MsgType::Location: {
-                /* events::RoomEvent<events::msg::Location> location = e; */
-                /* container.emplace_back(location); */
+                // events::RoomEvent<events::msg::Location> location = e;
+                // container.emplace_back(location);
+                e.data = events::RoomEvent<events::msg::Location>(obj);
                 break;
             }
             case MsgType::Notice: {
