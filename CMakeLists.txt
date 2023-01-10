@@ -180,7 +180,7 @@ if(USE_BUNDLED_COEURL)
 	FetchContent_Declare(
 		coeurl
 		GIT_REPOSITORY https://nheko.im/Nheko-Reborn/coeurl.git
-		GIT_TAG        f989f3c54c1ca15e29c5bd6b1ce4efbcb3fd8078
+		GIT_TAG        v0.3.0
 		)
 	FetchContent_MakeAvailable(coeurl)
 	target_link_libraries(matrix_client PUBLIC coeurl::coeurl)
@@ -189,7 +189,7 @@ elseif(coeurl_DIR)
 	target_link_libraries(matrix_client PUBLIC coeurl::coeurl)
 else()
 	find_package(PkgConfig REQUIRED)
-	pkg_check_modules(coeurl REQUIRED IMPORTED_TARGET coeurl>=0.1.1)
+	pkg_check_modules(coeurl REQUIRED IMPORTED_TARGET coeurl>=0.3.0)
 	target_link_libraries(matrix_client PUBLIC PkgConfig::coeurl)
 endif()
 

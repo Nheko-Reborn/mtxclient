@@ -14,7 +14,7 @@ if compiler.get_id() == 'msvc'
 	add_project_arguments('/bigobj', language: 'cpp')
 endif
 
-coeurl_dep = dependency('coeurl', version: '>=0.1.1', required: true)
+coeurl_dep = dependency('coeurl', version: '>=0.3.0', required: true)
 thread_dep = dependency('threads', required: true)
 openssl_dep = dependency('openssl', version: '>=1.1', required: true)
 spdlog_dep = dependency('spdlog', fallback: ['spdlog', 'spdlog_dep'])
