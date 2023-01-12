@@ -30,7 +30,7 @@ struct ClientError
 } // namespace mtx
 
 template<>
-struct spdlog::fmt_lib::formatter<mtx::http::ClientError>
+struct fmt::formatter<mtx::http::ClientError>
 {
     // Presentation format: 'f' - fixed, 'e' - exponential.
     bool print_network_error = false;
@@ -39,7 +39,7 @@ struct spdlog::fmt_lib::formatter<mtx::http::ClientError>
     bool print_matrix_error  = false;
 
     // Parses format specifications of the form ['f' | 'e'].
-    constexpr auto parse(spdlog::fmt_lib::format_parse_context &ctx) -> decltype(ctx.begin())
+    constexpr auto parse(fmt::format_parse_context &ctx) -> decltype(ctx.begin())
     {
         // [ctx.begin(), ctx.end()) is a character range that contains a part of
         // the format string starting from the format specifications to be parsed,
@@ -78,7 +78,7 @@ struct spdlog::fmt_lib::formatter<mtx::http::ClientError>
 
         // Check if reached the end of the range:
         if (it != end && *it != '}')
-            throw spdlog::fmt_lib::format_error("invalid format");
+            throw fmt::format_error("invalid format");
 
         // Return an iterator past the end of the parsed range:
         return it;
@@ -91,24 +91,24 @@ struct spdlog::fmt_lib::formatter<mtx::http::ClientError>
     {
         // ctx.out() is an output iterator to write to.
         bool prepend_comma = false;
-        spdlog::fmt_lib::format_to(ctx.out(), "(");
+        fmt::format_to(ctx.out(), "(");
         if (print_network_error || e.error_code) {
-            spdlog::fmt_lib::format_to(ctx.out(), "connection: {}", e.error_code_string());
+            fmt::format_to(ctx.out(), "connection: {}", e.error_code_string());
             prepend_comma = true;
         }
 
         if (print_http_error ||
             (e.status_code != 0 && (e.status_code < 200 || e.status_code >= 300))) {
             if (prepend_comma)
-                spdlog::fmt_lib::format_to(ctx.out(), ", ");
-            spdlog::fmt_lib::format_to(ctx.out(), "http: {}", e.status_code);
+                fmt::format_to(ctx.out(), ", ");
+            fmt::format_to(ctx.out(), "http: {}", e.status_code);
             prepend_comma = true;
         }
 
         if (print_parser_error || !e.parse_error.empty()) {
             if (prepend_comma)
-                spdlog::fmt_lib::format_to(ctx.out(), ", ");
-            spdlog::fmt_lib::format_to(ctx.out(), "parser: {}", e.parse_error);
+                fmt::format_to(ctx.out(), ", ");
+            fmt::format_to(ctx.out(), "parser: {}", e.parse_error);
             prepend_comma = true;
         }
 
@@ -116,27 +116,26 @@ struct spdlog::fmt_lib::formatter<mtx::http::ClientError>
             (e.matrix_error.errcode != mtx::errors::ErrorCode::M_UNRECOGNIZED &&
              !e.matrix_error.error.empty())) {
             if (prepend_comma)
-                spdlog::fmt_lib::format_to(ctx.out(), ", ");
-            spdlog::fmt_lib::format_to(ctx.out(),
-                                       "matrix: {}:'{}'",
-                                       to_string(e.matrix_error.errcode),
-                                       e.matrix_error.error);
+                fmt::format_to(ctx.out(), ", ");
+            fmt::format_to(ctx.out(),
+                           "matrix: {}:'{}'",
+                           to_string(e.matrix_error.errcode),
+                           e.matrix_error.error);
         }
 
-        return spdlog::fmt_lib::format_to(ctx.out(), ")");
+        return fmt::format_to(ctx.out(), ")");
     }
 };
 
 template<>
-struct spdlog::fmt_lib::formatter<std::optional<mtx::http::ClientError>>
-  : formatter<mtx::http::ClientError>
+struct fmt::formatter<std::optional<mtx::http::ClientError>> : formatter<mtx::http::ClientError>
 {
     // parse is inherited from formatter<string_view>.
     template<typename FormatContext>
     auto format(std::optional<mtx::http::ClientError> c, FormatContext &ctx)
     {
         if (!c)
-            return spdlog::fmt_lib::format_to(ctx.out(), "(no error)");
+            return fmt::format_to(ctx.out(), "(no error)");
         else
             return formatter<mtx::http::ClientError>::format(*c, ctx);
     }
