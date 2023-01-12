@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.9.0] -- UNRELEASED
+## [0.9.0] -- 2023-01-12
 
 - Support error formatting using {fmt}/spdlog.
 - Don't require the events key in `state` and other keys in sync.
