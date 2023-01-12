@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.9.0] -- UNRELEASED
+
+- Support error formatting using {fmt}/spdlog.
+- Don't require the events key in `state` and other keys in sync.
+- Fix parsing members with `null` reason.
+- Implement searching user directory. (Malte E)
+- Add support for confetti events. (LorenDB)
+- Support MSC3664, pushrules for relations.
+- Support altsvc for http/3 switching.
+- Allow evaluating pushrules locally.
+- Use stable endpoints for cross-signing.
+- Improve documentation in several places.
+- Support voip v1. (r0hit05)
+- Support threading.
+- Switch to C++20.
+- Fix /sync with invites without state.
+
 ## [0.8.2] -- 2022-09-09
 
 - fix crash when fetching room summaries
