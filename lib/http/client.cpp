@@ -1001,7 +1001,7 @@ Client::registration(const std::string &user,
           request,
           [this, cb, h](auto &r, RequestErr e) {
               if (e && e->status_code == 401) {
-                  mtx::utils::log::log()->debug("{}", e->matrix_error.error);
+                  mtx::utils::log::log()->debug("{}", e);
                   h.prompt(h, e->matrix_error.unauthorized);
               } else {
                   if (!e && !r.access_token.empty()) {
