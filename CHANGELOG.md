@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.9.1] -- 2023-01-13
+
+- Fix building with user specified toolchain files.
+
+We still specified C++17 as the C++ standard, which was overwritten by our
+toolchain file, but some distros use their own, so this fixes the build for
+them. (This probably only affects building the tests and examples.)
+
 ## [0.9.0] -- 2023-01-12
 
 - Support error formatting using {fmt}/spdlog.

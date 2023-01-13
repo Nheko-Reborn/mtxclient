@@ -8,7 +8,7 @@ set(
 	FILEPATH
 	"Default toolchain"
 	)
-set(CMAKE_CXX_STANDARD 17 CACHE STRING "C++ standard")
+set(CMAKE_CXX_STANDARD 20 CACHE STRING "C++ standard")
 set(CMAKE_CXX_STANDARD_REQUIRED ON CACHE BOOL "Require C++ standard to be supported")
 set(CMAKE_POSITION_INDEPENDENT_CODE ON CACHE BOOL "compile as PIC by default")
 
@@ -38,12 +38,12 @@ option(USE_BUNDLED_RE2 "Use the bundled version of re2." ${HUNTER_ENABLED})
 
 if (CMAKE_VERSION VERSION_GREATER_EQUAL 3.12)
 project(matrix_client
-	VERSION 0.9.0
+	VERSION 0.9.1
 	DESCRIPTION "Client API library for Matrix."
 	HOMEPAGE_URL https://github.com/Nheko-Reborn/mtxclient)
 else()
 project(matrix_client
-	VERSION 0.9.0
+	VERSION 0.9.1
 	DESCRIPTION "Client API library for Matrix.")
 endif()
 
