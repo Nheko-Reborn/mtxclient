@@ -5,6 +5,7 @@
 ///
 /// The wrappers implement RAII semantics, so you don't need to free stuff manually.
 
+#include <cstdint>
 #include <memory>
 #include <olm/olm.h>
 #include <olm/pk.h>

@@ -5,6 +5,7 @@
 #include "spdlog/spdlog.h"
 
 #include <atomic>
+#include <cstdint>
 #include <fstream>
 #include <iostream>
 #include <nlohmann/json.hpp>

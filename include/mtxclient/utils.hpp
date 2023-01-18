@@ -3,6 +3,7 @@
 /// @file
 /// @brief Various utility functions for http requests.
 
+#include <cstdint>
 #include <iosfwd>
 #include <map>
 #include <string>
