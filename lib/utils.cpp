@@ -1,6 +1,7 @@
 #include "mtxclient/utils.hpp"
 
 #include <algorithm>
+#include <cstdint>
 #include <iomanip>
 #include <random>
 #include <sstream>

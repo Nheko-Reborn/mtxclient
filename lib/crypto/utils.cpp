@@ -12,6 +12,7 @@
 #include <olm/pk.h>
 
 #include <algorithm>
+#include <cstdint>
 
 #include "mtx/log.hpp"
 #include "mtxclient/crypto/client.hpp"

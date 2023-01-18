@@ -3,6 +3,7 @@
 /// @file
 /// @brief Various crypto functions.
 
+#include <cstdint>
 #include <string>
 #include <vector>
 

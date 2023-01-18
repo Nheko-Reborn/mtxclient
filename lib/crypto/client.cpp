@@ -1,3 +1,4 @@
+#include <cstdint>
 #include <nlohmann/json.hpp>
 #include <utility>
 

@@ -4,6 +4,7 @@
 /// @brief Image packs from [MSC2545](https://github.com/matrix-org/matrix-doc/pull/2545)
 
 #include <bitset>
+#include <cstdint>
 #include <map>
 #include <string>
 
