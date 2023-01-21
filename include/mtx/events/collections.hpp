@@ -5,7 +5,6 @@
 
 #include <variant>
 
-#include "messages/unknown.hpp"
 #include "mtx/events.hpp"
 #include "mtx/events/account_data/direct.hpp"
 #include "mtx/events/account_data/fully_read.hpp"
