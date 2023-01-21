@@ -491,6 +491,12 @@ PushRuleEvaluator::PushRuleEvaluator(const Ruleset &rules_)
         if (!rule_.enabled)
             continue;
 
+        // Work around construct sending invalid content rules.
+        // Also this seems like just a sane thing to do, an empty pattern will always match and that
+        // is usually not what you want.
+        if (rule_.pattern.empty())
+            continue;
+
         OptimizedRules::OptimizedRule rule;
         rule.actions = rule_.actions;
 
