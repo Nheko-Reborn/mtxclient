@@ -27,6 +27,8 @@ struct Unknown
     std::string msgtype;
     //! Relates to for rich replies
     mtx::common::Relations relations;
+    //! The original content of the message.
+    std::string content;
 
     friend void from_json(const nlohmann::json &obj, Unknown &content);
     friend void to_json(nlohmann::json &obj, const Unknown &content);
