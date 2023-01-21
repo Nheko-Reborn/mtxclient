@@ -324,6 +324,9 @@ struct PushRuleEvaluator::OptimizedRules
             }
 
             if (check_displayname) {
+                if (ctx.user_display_name.empty())
+                    return false;
+
                 if (auto it = ev.find("content.body"); it != ev.end()) {
                     re2::RE2::Options opts;
                     opts.set_case_sensitive(false);

@@ -558,6 +558,10 @@ TEST(Pushrules, DisplaynameMatches)
         auto textEvWordBoundaries2         = textEv;
         textEvWordBoundaries2.content.body = "ähonkü";
         EXPECT_EQ(evaluator.evaluate({textEvWordBoundaries2}, ctx, {}), actions);
+
+        // assert empty displayname does not match
+        mtx::pushrules::PushRuleEvaluator::RoomContext ctxEmpty{};
+        EXPECT_TRUE(evaluator.evaluate({textEvWordBoundaries}, ctxEmpty, {}).empty());
     };
 
     mtx::pushrules::Ruleset override_ruleset;
@@ -2705,7 +2709,8 @@ TEST(Pushrules, EmptyOrInvalidContentRulesDontMatch)
 })"_json;
     auto text      = raw_event.get<mtx::events::RoomEvent<mtx::events::msg::Text>>();
     mtx::pushrules::PushRuleEvaluator evaluator{ruleset.global};
-    mtx::pushrules::PushRuleEvaluator::RoomContext ctx{.user_display_name = "Jason"};
+    mtx::pushrules::PushRuleEvaluator::RoomContext ctx{};
+    ctx.user_display_name = "Jason";
 
     auto actions = evaluator.evaluate({text}, ctx, {});
 
