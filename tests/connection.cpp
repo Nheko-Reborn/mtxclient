@@ -23,7 +23,7 @@ TEST(Basic, Connection)
 TEST(Basic, ServerWithPort)
 {
     std::string server = server_name();
-    auto alice         = std::make_shared<Client>("matrix.org");
+    auto alice         = std::make_shared<Client>("example.org");
     alice->verify_certificates(false);
     alice->set_server(server + ":8008");
 
@@ -75,4 +75,17 @@ TEST(Basic, Shutdown)
 
     auto diff = std::chrono::duration_cast<std::chrono::seconds>(end - begin).count();
     ASSERT_TRUE(diff < 5);
+}
+
+TEST(Basic, ExceptionInHandler)
+{
+    auto client = make_test_client();
+
+    int counter = 0;
+    client->versions([&counter](const mtx::responses::Versions &, RequestErr) {
+        counter++;
+        throw std::logic_error("This is just a drill.");
+    });
+    client->close();
+    EXPECT_EQ(counter, 1);
 }

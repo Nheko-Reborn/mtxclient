@@ -7,6 +7,7 @@
 /// just adds compile time without any benefits.
 
 #include "client.hpp"
+#include "mtx/log.hpp"
 #include "mtxclient/utils.hpp" // for random_token, url_encode, des...
 
 #include <nlohmann/json.hpp>
@@ -124,9 +125,20 @@ mtx::http::Client::prepare_callback(HeadersCallback<Response> callback)
         Response response_data;
         mtx::http::ClientError client_error{};
 
+        // return after this, swallows all errors
+        auto invoke_callback = [&callback, &response_data, &headers](
+                                 std::optional<mtx::http::ClientError> &&err) {
+            try {
+                callback(std::move(response_data), headers, std::move(err));
+            } catch (std::exception &e) {
+                mtx::utils::log::log()->critical("Application bug, exception escaped callback: {}",
+                                                 e.what());
+            }
+        };
+
         if (err_code) {
             client_error.error_code = err_code;
-            return callback(response_data, headers, client_error);
+            return invoke_callback(std::move(client_error));
         }
 
         // We only count 2xx status codes as success.
@@ -138,29 +150,31 @@ mtx::http::Client::prepare_callback(HeadersCallback<Response> callback)
             try {
                 response_data = client::utils::deserialize<Response>(body);
             } catch (const std::exception &) {
+                // fall through, if this is not a regular matrix response with a http error.
             }
 
             // The homeserver should return an error struct.
             try {
                 nlohmann::json json_error = nlohmann::json::parse(body);
                 client_error.matrix_error = json_error.get<mtx::errors::Error>();
-                return callback(response_data, headers, client_error);
             } catch (const std::exception &e) {
-                client_error.parse_error = std::string(e.what()) + ": " + std::string(body);
-
-                return callback(response_data, headers, client_error);
+                client_error.parse_error =
+                  std::string(e.what()) + " [while parsing error]: " + std::string(body);
+                client_error.error_code =
+                  42; // CURLE_ABORTED_BY_CALLBACK, since this happens a lot when we cancel requests
             }
+            return invoke_callback(std::move(client_error));
         }
 
         // If we reach that point we most likely have a valid output from the
         // homeserver.
         try {
-            auto res = client::utils::deserialize<Response>(body);
-            callback(std::move(res), headers, {});
+            response_data = client::utils::deserialize<Response>(body);
+            return invoke_callback({});
         } catch (const std::exception &e) {
             client_error.parse_error = std::string(e.what()) + ": " + std::string(body);
-            callback(response_data, headers, client_error);
         }
+        return invoke_callback(std::move(client_error));
     };
 
     return type_erased_cb;
