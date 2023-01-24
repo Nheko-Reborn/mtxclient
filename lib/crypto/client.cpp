@@ -320,7 +320,11 @@ OlmClient::create_ssss_key(const std::string &password)
     } else {
         mtx::secret_storage::PBKDF2 pbkdf2{};
         pbkdf2.algorithm  = "m.pbkdf2";
-        pbkdf2.iterations = 500'000;
+        // OWASP recommends 210'000 in 2023
+        // https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html#pbkdf2
+        // We started out with 500'000 iterations, so we should still have a long time until we need
+        // to prompt users to upgrade and then we might want to go argon2 directly.
+        pbkdf2.iterations = 630'000;
         pbkdf2.bits       = 256; // 32 * 8
         pbkdf2.salt       = bin2base64(to_string(create_buffer(32)));
 
