@@ -319,7 +319,7 @@ OlmClient::create_ssss_key(const std::string &password)
         setup.privateKey = create_buffer(32);
     } else {
         mtx::secret_storage::PBKDF2 pbkdf2{};
-        pbkdf2.algorithm  = "m.pbkdf2";
+        pbkdf2.algorithm = "m.pbkdf2";
         // OWASP recommends 210'000 in 2023
         // https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html#pbkdf2
         // We started out with 500'000 iterations, so we should still have a long time until we need
