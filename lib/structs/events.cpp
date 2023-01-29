@@ -303,15 +303,15 @@ MessageType
 getMessageType(const json &obj)
 {
     if (obj.is_null())
-        return MessageType::Unknown;
+        return MessageType::Invalid;
 
     if (obj.find("msgtype") == obj.end())
-        return MessageType::Unknown;
+        return MessageType::Invalid;
 
     try {
         return getMessageType(obj.at("msgtype").get<std::string>());
     } catch (...) {
-        return MessageType::Unknown;
+        return MessageType::Invalid;
     }
 }
 }

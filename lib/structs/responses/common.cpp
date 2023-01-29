@@ -439,6 +439,10 @@ parse_timeline_events(const json &events,
                     container.emplace_back(events::RoomEvent<events::msg::Unknown>(e));
                     break;
                 }
+                case MsgType::Invalid: {
+                    container.emplace_back(events::RoomEvent<events::Unknown>(e));
+                    break;
+                }
                 }
                 break;
             }

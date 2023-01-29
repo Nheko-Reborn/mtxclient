@@ -167,6 +167,9 @@ enum class MessageType
     Confetti,
     // Unrecognized message type
     Unknown,
+
+    // Malformed content
+    Invalid,
 };
 
 MessageType
