@@ -922,7 +922,7 @@ TEST(RoomEvents, InvalidMessage)
           "room_id": "!lfoDRlNFWlvOnvkBwQ:matrix.org"
     })"_json;
 
-    auto messageType = getMessageType(data["content"]);
+    auto messageType         = getMessageType(data["content"]);
     RoomEvent<Unknown> event = data.get<RoomEvent<Unknown>>();
 
     EXPECT_EQ(event.type, EventType::RoomMessage);
