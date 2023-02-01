@@ -899,3 +899,32 @@ TEST(RoomEvents, ThreadedMessage)
 
     EXPECT_EQ(data.dump(), json(event).dump());
 }
+
+TEST(RoomEvents, InvalidMessage)
+{
+    json data = R"({
+          "origin_server_ts": 1510489356530,
+          "sender": "@nheko_test:matrix.org",
+          "event_id": "$15104893562785758wEgEU:matrix.org",
+          "unsigned": {
+            "age": 2225,
+            "transaction_id": "m1510489356267.2"
+          },
+          "content": {
+            "body": "I don't have a msgtype :(",
+            "m.relates_to": {
+              "m.in_reply_to": {
+                "event_id": "$6GKhAfJOcwNd69lgSizdcTob8z2pWQgBOZPrnsWMA1E"
+              }
+            }
+          },
+          "type": "m.room.message",
+          "room_id": "!lfoDRlNFWlvOnvkBwQ:matrix.org"
+    })"_json;
+
+    auto messageType = getMessageType(data["content"]);
+    RoomEvent<Unknown> event = data.get<RoomEvent<Unknown>>();
+
+    EXPECT_EQ(event.type, EventType::RoomMessage);
+    EXPECT_EQ(messageType, MessageType::Invalid);
+}
