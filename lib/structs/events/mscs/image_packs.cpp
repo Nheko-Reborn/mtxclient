@@ -58,7 +58,8 @@ from_json(const nlohmann::json &obj, ImagePack &content)
         content.pack = ImagePack::PackDescription{};
         from_json(obj.at("pack"), *content.pack);
     }
-    content.images = obj.at("images").get<std::map<std::string, PackImage>>();
+    if (obj.contains("images"))
+        content.images = obj.at("images").get<std::map<std::string, PackImage>>();
 }
 
 void

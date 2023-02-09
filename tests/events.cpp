@@ -1283,7 +1283,8 @@ TEST(StateEvents, ImagePack)
     EXPECT_EQ(event.origin_server_ts, 1510476064445);
     EXPECT_EQ(event.unsigned_data.age, 37);
     EXPECT_EQ(event.state_key, "my-pack");
-    EXPECT_EQ(event.content.pack.has_value(), true);
+    ASSERT_EQ(event.content.pack.has_value(), true);
+    assert(event.content.pack);
     EXPECT_EQ(event.content.pack->display_name, "Awesome Pack");
     EXPECT_EQ(event.content.pack->attribution, "huh");
     EXPECT_EQ(event.content.pack->avatar_url, "mxc://example.org/asdjfasd");
@@ -1298,6 +1299,22 @@ TEST(StateEvents, ImagePack)
     EXPECT_EQ(event.content.images["sticker"].is_emoji(), false);
     EXPECT_EQ(event.content.images["sticker"].overrides_usage(), true);
     EXPECT_EQ(json(event)["content"]["images"].size(), 2);
+
+    json data2 = R"({
+          "origin_server_ts": 1510476064445,
+          "sender": "@nheko_test:matrix.org",
+          "event_id": "$15104760642668662QICBu:matrix.org",
+          "unsigned": {
+            "age": 37
+          },
+          "state_key": "my-pack",
+          "content": {
+},
+          "type": "im.ponies.room_emotes",
+          "room_id": "!lfoDRlNFWlvOnvkBwQ:matrix.org"
+        })"_json;
+
+    EXPECT_NO_THROW(data2.get<ns::StateEvent<ns::msc2545::ImagePack>>());
 }
 
 TEST(StateEvents, Widget)
