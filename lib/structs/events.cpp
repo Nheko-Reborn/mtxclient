@@ -303,7 +303,7 @@ MessageType
 getMessageType(const json &obj)
 {
     if (obj.is_null())
-        return MessageType::Invalid;
+        return MessageType::Redacted;
 
     if (obj.find("msgtype") == obj.end())
         return MessageType::Invalid;

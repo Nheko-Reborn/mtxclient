@@ -334,6 +334,10 @@ from_json(const nlohmann::json &obj, TimelineEvent &e)
                 e.data = events::RoomEvent<events::msg::Unknown>(obj);
                 break;
             }
+            case MsgType::Redacted: {
+                e.data = events::RoomEvent<events::Unknown>(obj);
+                break;
+            }
             case MsgType::Invalid:
                 break;
             }
