@@ -1582,8 +1582,8 @@ TEST(ToDevice, KeyVerificationRequest)
     "type": "m.key.verification.request"
 })"_json;
 
-    ns::Event<ns::msg::KeyVerificationRequest> event =
-      request_data.get<ns::Event<ns::msg::KeyVerificationRequest>>();
+    ns::DeviceEvent<ns::msg::KeyVerificationRequest> event =
+      request_data.get<ns::DeviceEvent<ns::msg::KeyVerificationRequest>>();
     auto keyEvent = event.content;
     EXPECT_EQ(keyEvent.from_device, "AliceDevice2");
     EXPECT_EQ(event.type, mtx::events::EventType::KeyVerificationRequest);
@@ -1619,8 +1619,8 @@ TEST(ToDevice, KeyVerificationStart)
     "type": "m.key.verification.start"
 })"_json;
 
-    ns::Event<ns::msg::KeyVerificationStart> event =
-      request_data.get<ns::Event<ns::msg::KeyVerificationStart>>();
+    ns::DeviceEvent<ns::msg::KeyVerificationStart> event =
+      request_data.get<ns::DeviceEvent<ns::msg::KeyVerificationStart>>();
     auto keyEvent = event.content;
     EXPECT_EQ(keyEvent.from_device, "BobDevice1");
     EXPECT_EQ(keyEvent.hashes[0], "sha256");
@@ -1655,8 +1655,8 @@ TEST(ToDevice, KeyVerificationAccept)
     "type": "m.key.verification.accept"
 })"_json;
 
-    ns::Event<ns::msg::KeyVerificationAccept> event =
-      request_data.get<ns::Event<ns::msg::KeyVerificationAccept>>();
+    ns::DeviceEvent<ns::msg::KeyVerificationAccept> event =
+      request_data.get<ns::DeviceEvent<ns::msg::KeyVerificationAccept>>();
     auto keyEvent = event.content;
     EXPECT_EQ(event.type, mtx::events::EventType::KeyVerificationAccept);
     EXPECT_EQ(
@@ -1683,8 +1683,8 @@ TEST(ToDevice, KeyVerificationReady)
     "type": "m.key.verification.ready"
 })"_json;
 
-    ns::Event<ns::msg::KeyVerificationReady> event =
-      request_data.get<ns::Event<ns::msg::KeyVerificationReady>>();
+    ns::DeviceEvent<ns::msg::KeyVerificationReady> event =
+      request_data.get<ns::DeviceEvent<ns::msg::KeyVerificationReady>>();
     auto keyEvent = event.content;
     EXPECT_EQ(event.sender, "test_user");
     EXPECT_EQ(event.type, mtx::events::EventType::KeyVerificationReady);
@@ -1703,8 +1703,8 @@ TEST(ToDevice, KeyVerificationDone)
     "type": "m.key.verification.done"
 })"_json;
 
-    ns::Event<ns::msg::KeyVerificationDone> event =
-      request_data.get<ns::Event<ns::msg::KeyVerificationDone>>();
+    ns::DeviceEvent<ns::msg::KeyVerificationDone> event =
+      request_data.get<ns::DeviceEvent<ns::msg::KeyVerificationDone>>();
     auto keyEvent = event.content;
     EXPECT_EQ(event.sender, "test_user");
     EXPECT_EQ(event.type, mtx::events::EventType::KeyVerificationDone);
@@ -1723,8 +1723,8 @@ TEST(ToDevice, KeyVerificationCancel)
     "type": "m.key.verification.cancel"
 })"_json;
 
-    ns::Event<ns::msg::KeyVerificationCancel> event =
-      request_data.get<ns::Event<ns::msg::KeyVerificationCancel>>();
+    ns::DeviceEvent<ns::msg::KeyVerificationCancel> event =
+      request_data.get<ns::DeviceEvent<ns::msg::KeyVerificationCancel>>();
     auto keyEvent = event.content;
     EXPECT_EQ(event.type, mtx::events::EventType::KeyVerificationCancel);
     EXPECT_EQ(keyEvent.code, "m.user");
@@ -1744,8 +1744,8 @@ TEST(ToDevice, KeyVerificationKey)
     "type": "m.key.verification.key"
 })"_json;
 
-    ns::Event<ns::msg::KeyVerificationKey> event =
-      request_data.get<ns::Event<ns::msg::KeyVerificationKey>>();
+    ns::DeviceEvent<ns::msg::KeyVerificationKey> event =
+      request_data.get<ns::DeviceEvent<ns::msg::KeyVerificationKey>>();
     auto keyEvent = event.content;
     EXPECT_EQ(event.type, mtx::events::EventType::KeyVerificationKey);
     EXPECT_EQ(
@@ -1769,8 +1769,8 @@ TEST(ToDevice, KeyVerificationMac)
     "type": "m.key.verification.mac"
 })"_json;
 
-    ns::Event<ns::msg::KeyVerificationMac> event =
-      request_data.get<ns::Event<ns::msg::KeyVerificationMac>>();
+    ns::DeviceEvent<ns::msg::KeyVerificationMac> event =
+      request_data.get<ns::DeviceEvent<ns::msg::KeyVerificationMac>>();
     auto keyEvent = event.content;
     EXPECT_EQ(event.type, mtx::events::EventType::KeyVerificationMac);
     EXPECT_EQ(

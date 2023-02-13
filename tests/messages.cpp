@@ -785,7 +785,7 @@ TEST(RoomEvents, Encrypted)
 	    }
 	})"_json;
 
-    RoomEvent<msg::Encrypted> event = data.get<RoomEvent<msg::Encrypted>>();
+    EncryptedEvent<msg::Encrypted> event = data.get<EncryptedEvent<msg::Encrypted>>();
 
     std::cout << "*****" << std::endl;
     std::cout << data.dump(2) << std::endl;
