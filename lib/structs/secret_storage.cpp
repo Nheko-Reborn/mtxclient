@@ -48,7 +48,7 @@ from_json(const nlohmann::json &obj, PBKDF2 &desc)
     desc.algorithm  = obj.at("algorithm").get<std::string>();
     desc.salt       = obj.at("salt").get<std::string>();
     desc.iterations = obj.at("iterations").get<uint32_t>();
-    desc.bits       = obj.value("bits", 256);
+    desc.bits       = obj.value("bits", std::uint32_t{256});
 }
 
 void

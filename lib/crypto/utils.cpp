@@ -497,7 +497,7 @@ encrypt_file(const std::string &plaintext)
     iv[15 - 63 % 8] &= mask;
 
     // Counter should be 0 in v1.1 of the spec...
-    for (int i = 8; i < 16; i++)
+    for (std::size_t i = 8; i < 16; i++)
         iv[i] = 0;
 
     BinaryBuf cyphertext = AES_CTR_256_Encrypt(plaintext, key, iv);
@@ -556,7 +556,8 @@ HMAC_SHA256(const BinaryBuf &hmacKey, const BinaryBuf &data)
 void
 uint8_to_uint32(uint8_t b[4], uint32_t &u32)
 {
-    u32 = b[0] << 24 | b[1] << 16 | b[2] << 8 | b[3];
+    u32 = std::uint32_t{b[0]} << 24 | std::uint32_t{b[1]} << 16 | std::uint32_t{b[2]} << 8 |
+          std::uint32_t{b[3]};
 }
 
 void

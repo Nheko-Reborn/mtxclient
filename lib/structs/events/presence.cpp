@@ -39,7 +39,7 @@ from_json(const nlohmann::json &obj, Presence &presence)
 {
     presence.avatar_url       = obj.value("avatar_url", "");
     presence.displayname      = obj.value("displayname", "");
-    presence.last_active_ago  = obj.value("last_active_ago", 0);
+    presence.last_active_ago  = obj.value("last_active_ago", std::uint64_t{0});
     presence.presence         = mtx::presence::from_string(obj.value("presence", "online"));
     presence.currently_active = obj.value("currently_active", false);
     try {
