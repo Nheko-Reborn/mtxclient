@@ -1,7 +1,5 @@
 #include "mtx/responses/version.hpp"
 
-#include <regex>
-
 #include <nlohmann/json.hpp>
 
 namespace mtx {

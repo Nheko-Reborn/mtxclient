@@ -19,23 +19,23 @@ namespace state {
 using power_level_t = int64_t;
 
 //! The default level required for events
-constexpr power_level_t EventsDefault = 0;
+inline constexpr power_level_t EventsDefault = 0;
 //! The default level for users.
-constexpr power_level_t UsersDefault = 0;
+inline constexpr power_level_t UsersDefault = 0;
 //! The default level required for state events.
-constexpr power_level_t StatesDefault = 50;
+inline constexpr power_level_t StatesDefault = 50;
 
 //! The power level usually associated with normal users.
-constexpr power_level_t User = 0;
+inline constexpr power_level_t User = 0;
 //! The power level usually associated with moderators.
-constexpr power_level_t Moderator = 50;
+inline constexpr power_level_t Moderator = 50;
 //! The power level usually associated with admins.
-constexpr power_level_t Admin = 100;
+inline constexpr power_level_t Admin = 100;
 
 //! different predefined keys for notification levels
 namespace notification_keys {
 //! The level required to trigger an @room notification. Defaults to 50 if unspecified.
-constexpr std::string_view room = "room";
+inline constexpr std::string_view room = "room";
 }
 
 /// @brief Content for the `m.room.power_levels` state event.

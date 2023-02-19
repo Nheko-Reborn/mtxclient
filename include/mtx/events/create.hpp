@@ -26,9 +26,9 @@ struct PreviousRoom
 //! Definitions of different room types.
 namespace room_type {
 //! The room type for a space.
-constexpr std::string_view space = "m.space";
+inline constexpr std::string_view space = "m.space";
 //! MSC for policy list rooms, see https://github.com/matrix-org/matrix-spec-proposals/pull/3784
-constexpr std::string_view exp_policy = "support.feline.policy.lists.msc.v1";
+inline constexpr std::string_view exp_policy = "support.feline.policy.lists.msc.v1";
 }
 
 //! Content of the `m.room.create` event.

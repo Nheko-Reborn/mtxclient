@@ -33,8 +33,8 @@ private:
 //! Data representation used to interact with libolm. It's a contiguous buffer of bytes.
 using BinaryBuf = std::vector<uint8_t>;
 
-const std::string HEADER_LINE("-----BEGIN MEGOLM SESSION DATA-----");
-const std::string TRAILER_LINE("-----END MEGOLM SESSION DATA-----");
+inline const std::string HEADER_LINE("-----BEGIN MEGOLM SESSION DATA-----");
+inline const std::string TRAILER_LINE("-----END MEGOLM SESSION DATA-----");
 
 //! Create a uint8_t buffer which is initialized with random bytes.
 BinaryBuf

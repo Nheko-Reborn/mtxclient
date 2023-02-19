@@ -335,7 +335,7 @@ struct UploadKeys
 };
 
 //! The default timeout for a download.
-constexpr uint64_t DEFAULT_DOWNLOAD_TIMEOUT = 10UL * 1000; // 10 seconds
+inline constexpr uint64_t DEFAULT_DOWNLOAD_TIMEOUT = 10UL * 1000; // 10 seconds
 
 //! Query the keys of devices of specific users.
 struct QueryKeys

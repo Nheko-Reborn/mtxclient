@@ -47,7 +47,7 @@ namespace recommendation {
 /// When this recommendation is used, the entities affected by the rule should be banned from
 /// participation where possible. The enforcement of this is deliberately left as an implementation
 /// detail to avoid the protocol imposing its opinion on how the policy list is to be interpreted.
-constexpr std::string_view ban = "m.ban";
+inline constexpr std::string_view ban = "m.ban";
 }
 
 //! Content of the `m.policy.rule.*` events.

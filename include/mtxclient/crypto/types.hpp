@@ -12,13 +12,13 @@
 namespace mtx {
 namespace crypto {
 //! Constant for ed25519 keys
-constexpr auto ED25519 = "ed25519";
+inline constexpr auto ED25519 = "ed25519";
 //! Constant for curve25519 keys
-constexpr auto CURVE25519 = "curve25519";
+inline constexpr auto CURVE25519 = "curve25519";
 //! Constant for signed curve25519 keys
-constexpr auto SIGNED_CURVE25519 = "signed_curve25519";
+inline constexpr auto SIGNED_CURVE25519 = "signed_curve25519";
 //! The algorithm used for group messages.
-constexpr auto MEGOLM_ALGO = "m.megolm.v1.aes-sha2";
+inline constexpr auto MEGOLM_ALGO = "m.megolm.v1.aes-sha2";
 
 //! An exported megolm group session
 struct ExportedSession

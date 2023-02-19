@@ -148,7 +148,8 @@ struct KeysBackup
     friend void to_json(nlohmann::json &obj, const KeysBackup &response);
 };
 
-constexpr const char *megolm_backup_v1 = "m.megolm_backup.v1.curve25519-aes-sha2";
+inline constexpr const char *megolm_backup_v1 = "m.megolm_backup.v1.curve25519-aes-sha2";
+
 //! Responses from the `GET /_matrix/client/r0/room_keys/version` endpoint
 struct BackupVersion
 {

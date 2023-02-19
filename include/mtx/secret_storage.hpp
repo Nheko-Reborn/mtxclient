@@ -20,13 +20,13 @@ namespace secret_storage {
 //! Names of secrets used in the spec.
 namespace secrets {
 //! Decryption key for online key backup.
-constexpr const char megolm_backup_v1[] = "m.megolm_backup.v1";
+inline constexpr char megolm_backup_v1[] = "m.megolm_backup.v1";
 //! Key to sign own devices
-constexpr const char cross_signing_self_signing[] = "m.cross_signing.self_signing";
+inline constexpr char cross_signing_self_signing[] = "m.cross_signing.self_signing";
 //! Key to sign other users
-constexpr const char cross_signing_user_signing[] = "m.cross_signing.user_signing";
+inline constexpr char cross_signing_user_signing[] = "m.cross_signing.user_signing";
 //! Key to sign your own keys like user and self signing keys.
-constexpr const char cross_signing_master[] = "m.cross_signing.master";
+inline constexpr char cross_signing_master[] = "m.cross_signing.master";
 }
 
 //! A aes-hmac-sha2 encrypted secret.
