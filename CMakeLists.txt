@@ -106,7 +106,7 @@ if(USE_BUNDLED_OLM)
 	FetchContent_Declare(
 		Olm
 		GIT_REPOSITORY https://gitlab.matrix.org/matrix-org/olm.git
-		GIT_TAG        3.2.7
+		GIT_TAG        3.2.14
 		)
 	FetchContent_MakeAvailable(Olm)
 else()
