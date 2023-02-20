@@ -1,7 +1,7 @@
 project(
   'mtxclient',
   'cpp',
-version : '0.9.1',
+version : '0.9.2',
 meson_version : '>=0.57.0',
 license : 'MIT',
 default_options : 'cpp_std=c++20'

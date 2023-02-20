@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.9.2] -- 2023-02-20
+
+- Fix compilation with gcc13. (vitaly)
+- Handle incorrect pushrules sent by construct better.
+- Don't highlight everything, when an empty display name is set.
+- Document security of the default parameters to PBKDF2.
+- Fix double invokation of callback if callback throws.
+- Fix compiling tests with LTO.
+- Clean up some duplicate symbols in the library.
+
 ## [0.9.1] -- 2023-01-13
 
 - Fix building with user specified toolchain files.
