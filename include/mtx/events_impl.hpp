@@ -74,11 +74,12 @@ template<class Content>
 [[gnu::used, gnu::retain]] void
 from_json(const nlohmann::json &obj, DeviceEvent<Content> &event)
 {
-    Event<Content> base_event = event;
-    from_json(obj, base_event);
-    event.content = base_event.content;
-    event.type    = base_event.type;
-    event.sender  = obj.at("sender").get<std::string>();
+    Event<Content> &base = event;
+    from_json(obj, base);
+
+    if (event.sender.empty()) {
+        throw std::out_of_range("Empty sender in to_device event.");
+    }
 }
 
 template<class Content>
@@ -87,8 +88,6 @@ to_json(nlohmann::json &obj, const DeviceEvent<Content> &event)
 {
     Event<Content> base_event = event;
     to_json(obj, base_event);
-
-    obj["sender"] = event.sender;
 }
 
 void

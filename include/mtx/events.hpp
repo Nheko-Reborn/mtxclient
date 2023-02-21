@@ -21,15 +21,16 @@ namespace events {
 template<class Content>
 struct Event
 {
-    //! The fields in this object will vary depending on the type of event.
-    //! When interacting with the REST API, this is the HTTP body.
-    Content content;
     //! The type of event.
     //! This *should* be namespaced similar to Java package
     //! naming conventions e.g. 'com.example.subdomain.event.type'
     EventType type;
     //! Contains the fully-qualified ID of the user who sent this event.
     std::string sender;
+
+    //! The fields in this object will vary depending on the type of event.
+    //! When interacting with the REST API, this is the HTTP body.
+    Content content;
 
     template<class C>
     friend void to_json(nlohmann::json &obj, const Event<C> &event);
@@ -41,8 +42,6 @@ struct Event
 template<class Content>
 struct DeviceEvent : public Event<Content>
 {
-    std::string sender;
-
     template<class C>
     friend void from_json(const nlohmann::json &obj, DeviceEvent<C> &event);
     template<class C>

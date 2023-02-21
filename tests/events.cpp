@@ -1578,7 +1578,7 @@ TEST(ToDevice, KeyVerificationRequest)
         "timestamp": 1559598944869,
         "transaction_id": "S0meUniqueAndOpaqueString"
     },
-    "sender": "",
+    "sender": "@mujx:matrix.org",
     "type": "m.key.verification.request"
 })"_json;
 
@@ -1615,7 +1615,7 @@ TEST(ToDevice, KeyVerificationStart)
         ],
         "transaction_id": "S0meUniqueAndOpaqueString"
     },
-    "sender": "",
+    "sender": "@mujx:matrix.org",
     "type": "m.key.verification.start"
 })"_json;
 
@@ -1651,7 +1651,7 @@ TEST(ToDevice, KeyVerificationAccept)
         ],
         "transaction_id": "S0meUniqueAndOpaqueString"
     },
-    "sender": "",
+    "sender": "@mujx:matrix.org",
     "type": "m.key.verification.accept"
 })"_json;
 
@@ -1719,7 +1719,7 @@ TEST(ToDevice, KeyVerificationCancel)
         "reason": "User rejected the key verification request",
         "transaction_id": "S0meUniqueAndOpaqueString"
     },
-    "sender": "",
+    "sender": "@mujx:matrix.org",
     "type": "m.key.verification.cancel"
 })"_json;
 
@@ -1740,7 +1740,7 @@ TEST(ToDevice, KeyVerificationKey)
         "key": "fQpGIW1Snz+pwLZu6sTy2aHy/DYWWTspTJRPyNp0PKkymfIsNffysMl6ObMMFdIJhk6g6pwlIqZ54rxo8SLmAg",
         "transaction_id": "S0meUniqueAndOpaqueString"
     },
-    "sender": "",
+    "sender": "@mujx:matrix.org",
     "type": "m.key.verification.key"
 })"_json;
 
@@ -1765,7 +1765,7 @@ TEST(ToDevice, KeyVerificationMac)
         },
         "transaction_id": "S0meUniqueAndOpaqueString"
     },
-    "sender": "",
+    "sender": "@mujx:matrix.org",
     "type": "m.key.verification.mac"
 })"_json;
 
