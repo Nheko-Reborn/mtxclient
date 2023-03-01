@@ -1036,13 +1036,24 @@ TEST(Responses, Messages)
 	  "room_id": "!Xq3620DUiqCaoxq:example.com",
 	  "type": "m.room.name",
 	  "age": 50789
-	 }
+    }, {
+      "origin_server_ts": 1444812198888,
+      "sender": "@bob:example.com",
+      "event_id": "$1444812213350496Cdddd:example.com",
+      "content": {
+        "body": "i like custom things",
+        "msgtype": "im.nheko.test_msgtype"
+      },
+      "room_id": "!Xq3620DUiqCaoxq:example.com",
+      "type": "m.room.message",
+      "age": 69290
+    }
 	]})"_json;
 
     Messages messages = data.get<Messages>();
     EXPECT_EQ(messages.start, "t47429-4392820_219380_26003_2265");
     EXPECT_EQ(messages.end, "t47409-4357353_219380_26003_2265");
-    EXPECT_EQ(messages.chunk.size(), 3);
+    EXPECT_EQ(messages.chunk.size(), 4);
 
     using mtx::events::RoomEvent;
     using mtx::events::StateEvent;
@@ -1066,6 +1077,12 @@ TEST(Responses, Messages)
     EXPECT_EQ(third_event.type, mtx::events::EventType::RoomName);
     EXPECT_EQ(third_event.event_id, "$1444812213350496Ccccc:example.com");
     EXPECT_EQ(third_event.sender, "@bob:example.com");
+
+    auto fourth_event = std::get<RoomEvent<mtx::events::msg::Unknown>>(messages.chunk[3]);
+    EXPECT_EQ(fourth_event.content.body, "i like custom things");
+    EXPECT_EQ(fourth_event.content.msgtype, "im.nheko.test_msgtype");
+    EXPECT_EQ(fourth_event.type, mtx::events::EventType::RoomMessage);
+    EXPECT_EQ(fourth_event.event_id, "$1444812213350496Cdddd:example.com");
 
     // Three of the events are malformed
     // 1. Missing "type" key and should be dropped.
