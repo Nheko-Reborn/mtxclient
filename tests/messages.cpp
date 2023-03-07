@@ -856,3 +856,97 @@ TEST(RoomEvents, ThreadedMessage)
 
     EXPECT_EQ(data.dump(), json(event).dump());
 }
+
+TEST(RoomEvents, UnknownMessage)
+{
+    json data = R"({
+          "origin_server_ts": 1510489356530,
+          "sender": "@nheko_test:matrix.org",
+          "event_id": "$15104893562785758wEgEU:matrix.org",
+          "unsigned": {
+            "age": 2225,
+            "transaction_id": "m1510489356267.2"
+          },
+          "content": {
+            "body": "party!",
+            "msgtype": "like.its.1999",
+          "m.relates_to": {
+          "m.in_reply_to": {
+                       "event_id": "$6GKhAfJOcwNd69lgSizdcTob8z2pWQgBOZPrnsWMA1E"
+                  }
+              }
+          },
+          "type": "m.room.message",
+          "room_id": "!lfoDRlNFWlvOnvkBwQ:matrix.org"
+         })"_json;
+
+    RoomEvent<msg::Unknown> event = data.get<RoomEvent<msg::Unknown>>();
+
+    EXPECT_EQ(event.type, EventType::RoomMessage);
+    EXPECT_EQ(event.event_id, "$15104893562785758wEgEU:matrix.org");
+    EXPECT_EQ(event.room_id, "!lfoDRlNFWlvOnvkBwQ:matrix.org");
+    EXPECT_EQ(event.sender, "@nheko_test:matrix.org");
+    EXPECT_EQ(event.origin_server_ts, 1510489356530L);
+    EXPECT_EQ(event.unsigned_data.age, 2225);
+    EXPECT_EQ(event.unsigned_data.transaction_id, "m1510489356267.2");
+
+    EXPECT_EQ(event.content.body, "party!");
+    EXPECT_EQ(event.content.msgtype, "like.its.1999");
+    EXPECT_EQ(event.content.relations.relations.at(0).event_id,
+              "$6GKhAfJOcwNd69lgSizdcTob8z2pWQgBOZPrnsWMA1E");
+    EXPECT_EQ(event.content.relations.relations.at(0).rel_type,
+              mtx::common::RelationType::InReplyTo);
+
+    EXPECT_EQ(data.dump(), json(event).dump());
+}
+
+TEST(RoomEvents, RedactedMessage)
+{
+    json data = R"({
+          "origin_server_ts": 1510489356530,
+          "sender": "@nheko_test:matrix.org",
+          "event_id": "$15104893562785758wEgEU:matrix.org",
+          "unsigned": {
+            "age": 2225,
+            "transaction_id": "m1510489356267.2"
+          },
+          "content": null,
+          "type": "m.room.message",
+          "room_id": "!lfoDRlNFWlvOnvkBwQ:matrix.org"
+    })"_json;
+
+    auto messageType         = getMessageType(data["content"]);
+    RoomEvent<Unknown> event = data.get<RoomEvent<Unknown>>();
+
+    EXPECT_EQ(event.type, EventType::RoomMessage);
+    EXPECT_EQ(messageType, MessageType::Redacted);
+}
+
+TEST(RoomEvents, InvalidMessage)
+{
+    json data = R"({
+          "origin_server_ts": 1510489356530,
+          "sender": "@nheko_test:matrix.org",
+          "event_id": "$15104893562785758wEgEU:matrix.org",
+          "unsigned": {
+            "age": 2225,
+            "transaction_id": "m1510489356267.2"
+          },
+          "content": {
+            "body": "I don't have a msgtype :(",
+            "m.relates_to": {
+              "m.in_reply_to": {
+                "event_id": "$6GKhAfJOcwNd69lgSizdcTob8z2pWQgBOZPrnsWMA1E"
+              }
+            }
+          },
+          "type": "m.room.message",
+          "room_id": "!lfoDRlNFWlvOnvkBwQ:matrix.org"
+    })"_json;
+
+    auto messageType         = getMessageType(data["content"]);
+    RoomEvent<Unknown> event = data.get<RoomEvent<Unknown>>();
+
+    EXPECT_EQ(event.type, EventType::RoomMessage);
+    EXPECT_EQ(messageType, MessageType::Invalid);
+}

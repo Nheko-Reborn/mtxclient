@@ -1036,13 +1036,24 @@ TEST(Responses, Messages)
 	  "room_id": "!Xq3620DUiqCaoxq:example.com",
 	  "type": "m.room.name",
 	  "age": 50789
-	 }
+    }, {
+      "origin_server_ts": 1444812198888,
+      "sender": "@bob:example.com",
+      "event_id": "$1444812213350496Cdddd:example.com",
+      "content": {
+        "body": "i like custom things",
+        "msgtype": "im.nheko.test_msgtype"
+      },
+      "room_id": "!Xq3620DUiqCaoxq:example.com",
+      "type": "m.room.message",
+      "age": 69290
+    }
 	]})"_json;
 
     Messages messages = data.get<Messages>();
     EXPECT_EQ(messages.start, "t47429-4392820_219380_26003_2265");
     EXPECT_EQ(messages.end, "t47409-4357353_219380_26003_2265");
-    EXPECT_EQ(messages.chunk.size(), 3);
+    EXPECT_EQ(messages.chunk.size(), 4);
 
     using mtx::events::RoomEvent;
     using mtx::events::StateEvent;
@@ -1067,9 +1078,16 @@ TEST(Responses, Messages)
     EXPECT_EQ(third_event.event_id, "$1444812213350496Ccccc:example.com");
     EXPECT_EQ(third_event.sender, "@bob:example.com");
 
-    // Two of the events are malformed
+    auto fourth_event = std::get<RoomEvent<mtx::events::msg::Unknown>>(messages.chunk[3]);
+    EXPECT_EQ(fourth_event.content.body, "i like custom things");
+    EXPECT_EQ(fourth_event.content.msgtype, "im.nheko.test_msgtype");
+    EXPECT_EQ(fourth_event.type, mtx::events::EventType::RoomMessage);
+    EXPECT_EQ(fourth_event.event_id, "$1444812213350496Cdddd:example.com");
+
+    // Three of the events are malformed
     // 1. Missing "type" key and should be dropped.
     // 2. Content is null and should be parsed as redacted.
+    // 3. msgtype is not a string and should be dropped.
     json malformed_data = R"({
 	"start": "t47429-4392820_219380_26003_2265",
 	"end": "t47409-4357353_219380_26003_2265",
@@ -1091,7 +1109,21 @@ TEST(Responses, Messages)
 	  "room_id": "!Xq3620DUiqCaoxq:example.com",
 	  "type": "m.room.message",
 	  "age": 20123
-	}, {
+    }, {
+      "origin_server_ts": 1510489356530,
+      "sender": "@nheko_test:matrix.org",
+      "event_id": "$15104893562785758wEgEU:matrix.org",
+      "unsigned": {
+        "age": 2225,
+        "transaction_id": "m1510489356267.2"
+      },
+      "content": {
+        "body": "DON'T PANIC",
+        "msgtype": 42
+      },
+      "type": "m.room.message",
+      "room_id": "!lfoDRlNFWlvOnvkBwQ:matrix.org"
+    }, {
 	  "origin_server_ts": 1444812163990,
 	  "sender": "@bob:example.com",
 	  "event_id": "$1444812213350496Ccccc:example.com",

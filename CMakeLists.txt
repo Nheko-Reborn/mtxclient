@@ -249,6 +249,7 @@ target_sources(matrix_client
 	lib/structs/events/messages/image.cpp
 	lib/structs/events/messages/notice.cpp
 	lib/structs/events/messages/text.cpp
+	lib/structs/events/messages/unknown.cpp
 	lib/structs/events/messages/video.cpp
 	lib/structs/events/mscs/image_packs.cpp
 	lib/structs/responses/capabilities.cpp

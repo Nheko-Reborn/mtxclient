@@ -47,6 +47,7 @@ MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::RoomEvent, mtx::events::msg::File)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::RoomEvent, mtx::events::msg::Image)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::RoomEvent, mtx::events::msg::Notice)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::RoomEvent, mtx::events::msg::Text)
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::RoomEvent, mtx::events::msg::Unknown)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::RoomEvent, mtx::events::msg::Video)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::RoomEvent, mtx::events::msg::KeyVerificationRequest)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::RoomEvent, mtx::events::msg::KeyVerificationStart)
@@ -330,9 +331,15 @@ from_json(const nlohmann::json &obj, TimelineEvent &e)
                 break;
             }
             case MsgType::Unknown: {
+                e.data = events::RoomEvent<events::msg::Unknown>(obj);
+                break;
+            }
+            case MsgType::Redacted: {
                 e.data = events::RoomEvent<events::Unknown>(obj);
                 break;
             }
+            case MsgType::Invalid:
+                break;
             }
             break;
         }
