@@ -473,7 +473,53 @@ TEST(RoomEvents, ImageMessage)
               mtx::common::RelationType::InReplyTo);
 }
 
-TEST(RoomEvents, LocationMessage) {}
+TEST(RoomEvents, LocationMessage) {
+    json data = R"({
+            "content": {
+              "body": "Big Ben, London, UK",
+              "geo_uri": "geo:51.5008,0.1247",
+              "info": {
+                "thumbnail_info": {
+                  "h": 300,
+                  "mimetype": "image/jpeg",
+                  "size": 46144,
+                  "w": 300
+                },
+                "thumbnail_url": "mxc://example.org/FHyPlCeYUSFFxlgbQYZmoEoe"
+              },
+              "msgtype": "m.location",
+              "m.relates_to": {
+                    "m.in_reply_to": {
+                                    "event_id": "$6GKhAfJOcwNd69lgSizdcTob8z2pWQgBOZPrnsWMA1E"
+                                }
+                            }
+            },
+            "event_id": "$143273582443PhrSn:example.org",
+            "origin_server_ts": 1432735824653,
+            "room_id": "!jEsUZKDJdhlrceRyVU:example.org",
+            "sender": "@example:example.org",
+            "type": "m.room.message",
+            "unsigned": {
+              "age": 69168455
+            }
+          }
+        )"_json;
+    RoomEvent<msg::Location> event = data.get<RoomEvent<msg::Location>>();
+
+    EXPECT_EQ(event.type, EventType::RoomMessage);
+    EXPECT_EQ(event.event_id, "$143273582443PhrSn:example.org");
+    EXPECT_EQ(event.room_id, "!jEsUZKDJdhlrceRyVU:example.org");
+    EXPECT_EQ(event.sender, "@example:example.org");
+    EXPECT_EQ(event.origin_server_ts, 1432735824653);
+    EXPECT_EQ(event.unsigned_data.age, 69168455);
+    EXPECT_EQ(event.content.body,
+              "Big Ben, London, UK");
+    EXPECT_EQ(event.content.msgtype, "m.location");
+    EXPECT_EQ(event.content.relations.relations.at(0).event_id,
+              "$6GKhAfJOcwNd69lgSizdcTob8z2pWQgBOZPrnsWMA1E");
+    EXPECT_EQ(event.content.relations.relations.at(0).rel_type,
+              mtx::common::RelationType::InReplyTo);
+}
 
 TEST(RoomEvents, NoticeMessage)
 {

@@ -170,6 +170,35 @@ to_json(json &obj, const VideoInfo &info)
 }
 
 void
+from_json(const json &obj, LocationInfo &info)
+{
+    if (obj.find("thumbnail_url") != obj.end())
+        info.thumbnail_url = obj.at("thumbnail_url").get<std::string>();
+
+    if (obj.find("thumbnail_info") != obj.end())
+        info.thumbnail_info = obj.at("thumbnail_info").get<ThumbnailInfo>();
+
+    if (obj.find("thumbnail_file") != obj.end())
+        info.thumbnail_file = obj.at("thumbnail_file").get<crypto::EncryptedFile>();
+
+    if (obj.find("xyz.amorgan.blurhash") != obj.end())
+        info.blurhash = obj.at("xyz.amorgan.blurhash").get<std::string>();
+}
+
+void
+to_json(json &obj, const LocationInfo &info)
+{
+    if (!info.thumbnail_url.empty()) {
+        obj["thumbnail_url"]  = info.thumbnail_url;
+        obj["thumbnail_info"] = info.thumbnail_info;
+    }
+    if (info.thumbnail_file)
+        obj["thumbnail_file"] = info.thumbnail_file.value();
+    if (!info.blurhash.empty())
+        obj["xyz.amorgan.blurhash"] = info.blurhash;
+}
+
+void
 to_json(json &obj, const RelationType &type)
 {
     switch (type) {

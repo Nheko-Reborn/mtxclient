@@ -146,10 +146,10 @@ struct LocationInfo
     std::string blurhash;
 
     //! Deserialization method needed by @p nlohmann::json.
-    friend void from_json(const nlohmann::json &obj, ThumbnailInfo &info);
+    friend void from_json(const nlohmann::json &obj, LocationInfo &info);
 
     //! Serialization method needed by @p nlohmann::json.
-    friend void to_json(nlohmann::json &obj, const ThumbnailInfo &info);
+    friend void to_json(nlohmann::json &obj, const LocationInfo &info);
 };
 
 //! Definition of rel_type for relations.

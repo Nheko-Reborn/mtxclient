@@ -28,6 +28,7 @@
 #include "mtx/events/messages/emote.hpp"
 #include "mtx/events/messages/file.hpp"
 #include "mtx/events/messages/image.hpp"
+#include "mtx/events/messages/location.hpp"
 #include "mtx/events/messages/notice.hpp"
 #include "mtx/events/messages/text.hpp"
 #include "mtx/events/messages/unknown.hpp"
