@@ -852,6 +852,7 @@ TEST(StateEvents, ServerAcl)
                 "evil.com",
               }));
     EXPECT_EQ(event.content.allow_ip_literals, false);
+    EXPECT_EQ(data.dump(), nlohmann::json(event).dump());
 }
 
 TEST(StateEvents, Topic)
