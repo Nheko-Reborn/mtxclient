@@ -74,8 +74,11 @@ enum class EventType
     RoomPinnedEvents,
     /// m.room.tombstone
     RoomTombstone,
+    /// m.room.server_acl
+    RoomServerAcl,
     // m.sticker
     Sticker,
+
     // m.tag
     Tag,
     // m.presence

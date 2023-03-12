@@ -177,6 +177,7 @@ parse_room_account_data_events(
             case events::EventType::RoomPowerLevels:
             case events::EventType::RoomRedaction:
             case events::EventType::RoomTombstone:
+            case events::EventType::RoomServerAcl:
             case events::EventType::RoomTopic:
             case events::EventType::Widget:
             case events::EventType::VectorWidget:
@@ -296,6 +297,11 @@ parse_timeline_events(const json &events,
             }
             case events::EventType::RoomTombstone: {
                 container.emplace_back(events::StateEvent<Tombstone>(e));
+
+                break;
+            }
+            case events::EventType::RoomServerAcl: {
+                container.emplace_back(events::StateEvent<ServerAcl>(e));
 
                 break;
             }
@@ -697,6 +703,11 @@ parse_state_events(const json &events,
 
                 break;
             }
+            case events::EventType::RoomServerAcl: {
+                container.emplace_back(events::StateEvent<ServerAcl>(e));
+
+                break;
+            }
             case events::EventType::RoomTopic: {
                 container.emplace_back(events::StateEvent<Topic>(e));
 
@@ -860,6 +871,11 @@ parse_stripped_events(const json &events,
             }
             case events::EventType::RoomTombstone: {
                 container.emplace_back(events::StrippedEvent<Tombstone>(e));
+
+                break;
+            }
+            case events::EventType::RoomServerAcl: {
+                container.emplace_back(events::StrippedEvent<ServerAcl>(e));
 
                 break;
             }

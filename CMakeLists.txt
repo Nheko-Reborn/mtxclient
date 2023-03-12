@@ -230,13 +230,14 @@ target_sources(matrix_client
 	lib/structs/events/presence.cpp
 	lib/structs/events/reaction.cpp
 	lib/structs/events/redaction.cpp
+	lib/structs/events/server_acl.cpp
 	lib/structs/events/spaces.cpp
 	lib/structs/events/tag.cpp
 	lib/structs/events/tombstone.cpp
 	lib/structs/events/topic.cpp
-	lib/structs/events/widget.cpp
 	lib/structs/events/unknown.cpp
 	lib/structs/events/voip.cpp
+	lib/structs/events/widget.cpp
 	lib/structs/events/account_data/direct.cpp
 	lib/structs/events/account_data/fully_read.cpp
 	lib/structs/events/ephemeral/receipt.cpp

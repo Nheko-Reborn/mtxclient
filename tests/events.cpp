@@ -807,6 +807,53 @@ TEST(StateEvents, Tombstone)
     EXPECT_EQ(event.content.replacement_room, "!newroom:example.org");
 }
 
+TEST(StateEvents, ServerAcl)
+{
+    json data = R"(
+{
+  "content": {
+    "allow": [
+      "*"
+    ],
+    "allow_ip_literals": false,
+    "deny": [
+      "*.evil.com",
+      "evil.com"
+    ]
+  },
+  "event_id": "$143273582443PhrSn:example.org",
+  "origin_server_ts": 1432735824653,
+  "room_id": "!jEsUZKDJdhlrceRyVU:example.org",
+  "sender": "@example:example.org",
+  "state_key": "",
+  "type": "m.room.server_acl",
+  "unsigned": {
+    "age": 1234
+  }
+}
+)"_json;
+
+    ns::StateEvent<ns::state::ServerAcl> event = data.get<ns::StateEvent<ns::state::ServerAcl>>();
+
+    EXPECT_EQ(event.type, ns::EventType::RoomServerAcl);
+    EXPECT_EQ(event.event_id, "$143273582443PhrSn:example.org");
+    EXPECT_EQ(event.room_id, "!jEsUZKDJdhlrceRyVU:example.org");
+    EXPECT_EQ(event.sender, "@example:example.org");
+    EXPECT_EQ(event.origin_server_ts, 1432735824653);
+    EXPECT_EQ(event.unsigned_data.age, 1234);
+    EXPECT_EQ(event.state_key, "");
+    EXPECT_EQ(event.content.allow,
+              (std::vector<std::string>{
+                "*",
+              }));
+    EXPECT_EQ(event.content.deny,
+              (std::vector<std::string>{
+                "*.evil.com",
+                "evil.com",
+              }));
+    EXPECT_EQ(event.content.allow_ip_literals, false);
+}
+
 TEST(StateEvents, Topic)
 {
     json data = R"({

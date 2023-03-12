@@ -29,6 +29,7 @@
 #include "mtx/events/presence.hpp"
 #include "mtx/events/reaction.hpp"
 #include "mtx/events/redaction.hpp"
+#include "mtx/events/server_acl.hpp"
 #include "mtx/events/spaces.hpp"
 #include "mtx/events/tag.hpp"
 #include "mtx/events/tombstone.hpp"
@@ -105,6 +106,7 @@ using StateEvents =
                mtx::events::StateEvent<mtx::events::state::space::Child>,
                mtx::events::StateEvent<mtx::events::state::space::Parent>,
                mtx::events::StateEvent<mtx::events::state::Tombstone>,
+               mtx::events::StateEvent<mtx::events::state::ServerAcl>,
                mtx::events::StateEvent<mtx::events::state::Topic>,
                mtx::events::StateEvent<mtx::events::state::Widget>,
                mtx::events::StateEvent<mtx::events::msg::Redacted>,
@@ -131,6 +133,7 @@ using StrippedEvents =
                mtx::events::StrippedEvent<mtx::events::state::space::Child>,
                mtx::events::StrippedEvent<mtx::events::state::space::Parent>,
                mtx::events::StrippedEvent<mtx::events::state::Tombstone>,
+               mtx::events::StrippedEvent<mtx::events::state::ServerAcl>,
                mtx::events::StrippedEvent<mtx::events::state::Topic>,
                mtx::events::StrippedEvent<mtx::events::state::Widget>,
                mtx::events::StrippedEvent<mtx::events::msg::Redacted>,
@@ -157,6 +160,7 @@ using TimelineEvents =
                mtx::events::StateEvent<mtx::events::state::space::Child>,
                mtx::events::StateEvent<mtx::events::state::space::Parent>,
                mtx::events::StateEvent<mtx::events::state::Tombstone>,
+               mtx::events::StateEvent<mtx::events::state::ServerAcl>,
                mtx::events::StateEvent<mtx::events::state::Topic>,
                mtx::events::StateEvent<mtx::events::state::Widget>,
                mtx::events::StateEvent<mtx::events::msc2545::ImagePack>,
@@ -319,6 +323,9 @@ constexpr inline EventType state_content_to_type<mtx::events::state::PowerLevels
 template<>
 constexpr inline EventType state_content_to_type<mtx::events::state::Tombstone> =
   EventType::RoomTombstone;
+template<>
+constexpr inline EventType state_content_to_type<mtx::events::state::ServerAcl> =
+  EventType::RoomServerAcl;
 
 template<>
 constexpr inline EventType state_content_to_type<mtx::events::state::space::Child> =

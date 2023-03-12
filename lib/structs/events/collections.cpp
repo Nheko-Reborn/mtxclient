@@ -24,6 +24,7 @@ MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::StateEvent, mtx::events::state::Nam
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::StateEvent, mtx::events::state::PinnedEvents)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::StateEvent, mtx::events::state::PowerLevels)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::StateEvent, mtx::events::state::Tombstone)
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::StateEvent, mtx::events::state::ServerAcl)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::StateEvent, mtx::events::state::Topic)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::StateEvent, mtx::events::state::Widget)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::StateEvent, mtx::events::state::policy_rule::UserRule)
@@ -79,6 +80,7 @@ MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::StrippedEvent, mtx::events::state::
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::StrippedEvent, mtx::events::state::PinnedEvents)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::StrippedEvent, mtx::events::state::PowerLevels)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::StrippedEvent, mtx::events::state::Tombstone)
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::StrippedEvent, mtx::events::state::ServerAcl)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::StrippedEvent, mtx::events::state::Topic)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::StrippedEvent, mtx::events::state::Widget)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::StrippedEvent,
@@ -210,6 +212,10 @@ from_json(const nlohmann::json &obj, TimelineEvent &e)
         }
         case events::EventType::RoomTombstone: {
             e.data = events::StateEvent<Tombstone>(obj);
+            break;
+        }
+        case events::EventType::RoomServerAcl: {
+            e.data = events::StateEvent<ServerAcl>(obj);
             break;
         }
         case events::EventType::RoomTopic: {
