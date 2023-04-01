@@ -39,6 +39,7 @@ compile_commands.json
 .clangd/
 .*.sw*
 .vscode
+CMakeLists.txt.user*
 
 # Synapse data
 /data/
