@@ -119,7 +119,7 @@ TEST(RoomEvents, AudioMessage)
               mtx::common::RelationType::InReplyTo);
 }
 
-TEST(RoomEvents, ConfettiMessage)
+TEST(RoomEvents, ElementEffectMessage)
 {
     json data = R"({
           "origin_server_ts": 1510489356530,
@@ -142,7 +142,7 @@ TEST(RoomEvents, ConfettiMessage)
           "room_id": "!lfoDRlNFWlvOnvkBwQ:matrix.org"
          })"_json;
 
-    RoomEvent<msg::Confetti> event = data.get<RoomEvent<msg::Confetti>>();
+    RoomEvent<msg::ElementEffect> event = data.get<RoomEvent<msg::ElementEffect>>();
 
     EXPECT_EQ(event.type, EventType::RoomMessage);
     EXPECT_EQ(event.event_id, "$15104893562785758wEgEU:matrix.org");

@@ -2,7 +2,7 @@
 #include <string>
 
 #include "mtx/events/common.hpp"
-#include "mtx/events/messages/confetti.hpp"
+#include "mtx/events/messages/elementeffect.hpp"
 
 using json = nlohmann::json;
 
@@ -11,7 +11,7 @@ namespace events {
 namespace msg {
 
 void
-from_json(const json &obj, Confetti &content)
+from_json(const json &obj, ElementEffect &content)
 {
     content.body    = obj.at("body").get<std::string>();
     content.msgtype = obj.at("msgtype").get<std::string>();
@@ -26,9 +26,9 @@ from_json(const json &obj, Confetti &content)
 }
 
 void
-to_json(json &obj, const Confetti &content)
+to_json(json &obj, const ElementEffect &content)
 {
-    obj["msgtype"] = "nic.custom.confetti";
+    obj["msgtype"] = content.msgtype;
     obj["body"]    = content.body;
 
     if (!content.formatted_body.empty()) {

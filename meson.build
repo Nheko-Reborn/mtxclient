@@ -81,7 +81,7 @@ src = [
 	'lib/structs/events/join_rules.cpp',
 	'lib/structs/events/member.cpp',
 	'lib/structs/events/messages/audio.cpp',
-	'lib/structs/events/messages/confetti.cpp',
+	'lib/structs/events/messages/elementeffect.cpp',
 	'lib/structs/events/messages/emote.cpp',
 	'lib/structs/events/messages/file.cpp',
 	'lib/structs/events/messages/image.cpp',

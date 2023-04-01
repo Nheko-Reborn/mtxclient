@@ -1,7 +1,7 @@
 #pragma once
 
 /// @file
-/// @brief A confetti message.
+/// @brief A message with a fancy effect.
 
 #if __has_include(<nlohmann/json_fwd.hpp>)
 #include <nlohmann/json_fwd.hpp>
@@ -18,12 +18,11 @@ namespace events {
 //! Non-state events sent in the timeline like messages.
 namespace msg {
 
-//! Content of `m.room.message` with msgtype `nic.custom.confetti`.
-struct Confetti
+//! Content of `m.room.message` with a msgtype used by Element to show a fancy effect.
+struct ElementEffect
 {
     //! The body of the message.
     std::string body;
-    //! Must be 'nic.custom.confetti'.
     std::string msgtype;
     //! We only handle org.matrix.custom.html.
     std::string format;
@@ -32,8 +31,8 @@ struct Confetti
     //! Relates to for rich replies
     mtx::common::Relations relations;
 
-    friend void from_json(const nlohmann::json &obj, Confetti &content);
-    friend void to_json(nlohmann::json &obj, const Confetti &content);
+    friend void from_json(const nlohmann::json &obj, ElementEffect &content);
+    friend void to_json(nlohmann::json &obj, const ElementEffect &content);
 };
 
 } // namespace msg

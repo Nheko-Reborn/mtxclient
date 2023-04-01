@@ -395,8 +395,8 @@ parse_timeline_events(const json &events,
 
                     break;
                 }
-                case MsgType::Confetti: {
-                    container.emplace_back(events::RoomEvent<events::msg::Confetti>(e));
+                case MsgType::ElementEffect: {
+                    container.emplace_back(events::RoomEvent<events::msg::ElementEffect>(e));
 
                     break;
                 }
