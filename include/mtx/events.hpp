@@ -162,8 +162,8 @@ enum class MessageType
     Video,
     /// m.key.verification.request
     KeyVerificationRequest,
-    // nic.custom.confetti
-    Confetti,
+    // Any of Element's custom effect msgtypes
+    ElementEffect,
     // Unrecognized message type
     Unknown,
 

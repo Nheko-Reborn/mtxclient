@@ -42,7 +42,7 @@ MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::RoomEvent, mtx::events::msg::Sticke
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::RoomEvent, mtx::events::msg::Reaction)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::RoomEvent, mtx::events::msg::Redacted)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::RoomEvent, mtx::events::msg::Audio)
-MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::RoomEvent, mtx::events::msg::Confetti)
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::RoomEvent, mtx::events::msg::ElementEffect)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::RoomEvent, mtx::events::msg::Emote)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::RoomEvent, mtx::events::msg::File)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::RoomEvent, mtx::events::msg::Image)
@@ -299,8 +299,8 @@ from_json(const nlohmann::json &obj, TimelineEvent &e)
                 e.data = events::RoomEvent<events::msg::Audio>(obj);
                 break;
             }
-            case MsgType::Confetti: {
-                e.data = events::RoomEvent<events::msg::Confetti>(obj);
+            case MsgType::ElementEffect: {
+                e.data = events::RoomEvent<events::msg::ElementEffect>(obj);
                 break;
             }
             case MsgType::Emote: {

@@ -40,7 +40,7 @@
 #include "mtx/pushrules.hpp"
 
 #include "mtx/events/messages/audio.hpp"
-#include "mtx/events/messages/confetti.hpp"
+#include "mtx/events/messages/elementeffect.hpp"
 #include "mtx/events/messages/emote.hpp"
 #include "mtx/events/messages/file.hpp"
 #include "mtx/events/messages/image.hpp"
@@ -171,7 +171,7 @@ using TimelineEvents =
                mtx::events::RoomEvent<mtx::events::msg::Reaction>,
                mtx::events::RoomEvent<mtx::events::msg::Redacted>,
                mtx::events::RoomEvent<mtx::events::msg::Audio>,
-               mtx::events::RoomEvent<mtx::events::msg::Confetti>,
+               mtx::events::RoomEvent<mtx::events::msg::ElementEffect>,
                mtx::events::RoomEvent<mtx::events::msg::Emote>,
                mtx::events::RoomEvent<mtx::events::msg::File>,
                mtx::events::RoomEvent<mtx::events::msg::Image>,
@@ -245,7 +245,7 @@ template<>
 constexpr inline EventType message_content_to_type<mtx::events::msg::Video> =
   EventType::RoomMessage;
 template<>
-constexpr inline EventType message_content_to_type<mtx::events::msg::Confetti> =
+constexpr inline EventType message_content_to_type<mtx::events::msg::ElementEffect> =
   EventType::RoomMessage;
 template<>
 constexpr inline EventType message_content_to_type<mtx::events::msg::StickerImage> =

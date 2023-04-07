@@ -293,8 +293,10 @@ getMessageType(const std::string &type)
         return MessageType::Notice;
     else if (type == "m.text")
         return MessageType::Text;
-    else if (type == "nic.custom.confetti")
-        return MessageType::Confetti;
+    else if (type == "nic.custom.confetti" || type == "nic.custom.fireworks" ||
+             type == "io.element.effect.rainfall" || type == "io.element.effect.hearts" ||
+             type == "io.element.effect.snowfall" || type == "io.element.effects.space_invaders")
+        return MessageType::ElementEffect;
     else if (type == "m.video")
         return MessageType::Video;
     else if (type == "m.key.verification.request")
