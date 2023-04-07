@@ -121,6 +121,7 @@ TEST(RoomEvents, AudioMessage)
 
 TEST(RoomEvents, ElementEffectMessage)
 {
+    // confetti
     json data = R"({
           "origin_server_ts": 1510489356530,
           "sender": "@nheko_test:matrix.org",
@@ -159,6 +160,35 @@ TEST(RoomEvents, ElementEffectMessage)
     EXPECT_EQ(event.content.relations.relations.at(0).rel_type,
               mtx::common::RelationType::InReplyTo);
 
+    EXPECT_EQ(data.dump(), json(event).dump());
+
+    // space invaders
+    data = R"({
+          "origin_server_ts": 1510489356530,
+          "sender": "@nheko_test:matrix.org",
+          "event_id": "$15104893562785758wEgEU:matrix.org",
+          "unsigned": {
+            "age": 2225,
+            "transaction_id": "m1510489356267.2"
+          },
+          "content": {
+            "body": "galaga > space invaders",
+            "msgtype": "io.element.effects.space_invaders",
+          "m.relates_to": {
+          "m.in_reply_to": {
+                       "event_id": "$6GKhAfJOcwNd69lgSizdcTob8z2pWQgBOZPrnsWMA1E"
+                  }
+              }
+          },
+          "type": "m.room.message",
+          "room_id": "!lfoDRlNFWlvOnvkBwQ:matrix.org"
+         })"_json;
+
+    event = data.get<RoomEvent<msg::ElementEffect>>();
+
+    EXPECT_EQ(event.type, EventType::RoomMessage);
+    EXPECT_EQ(event.content.body, "galaga > space invaders");
+    EXPECT_EQ(event.content.msgtype, "io.element.effects.space_invaders");
     EXPECT_EQ(data.dump(), json(event).dump());
 }
 
