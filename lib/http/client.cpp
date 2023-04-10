@@ -866,11 +866,11 @@ Client::get_event(const std::string &room_id,
     const auto api_path =
       "/client/v3/rooms/" + url_encode(room_id) + "/event/" + url_encode(event_id);
 
-    get<mtx::events::collections::TimelineEvent>(
+    get<mtx::events::collections::TimelineEvents>(
       api_path,
-      [callback = std::move(callback)](const mtx::events::collections::TimelineEvent &res,
+      [callback = std::move(callback)](const mtx::events::collections::TimelineEvents &res,
                                        HeaderFields,
-                                       RequestErr err) { callback(res.data, err); });
+                                       RequestErr err) { callback(res, err); });
 }
 
 void

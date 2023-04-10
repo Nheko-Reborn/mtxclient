@@ -20,7 +20,7 @@
 namespace mtx {
 namespace events {
 namespace collections {
-struct TimelineEvent;
+struct TimelineEvents;
 }
 }
 
@@ -211,9 +211,9 @@ public:
     /// by this event here.
     /// \returns the actions to apply.
     [[nodiscard]] std::vector<actions::Action> evaluate(
-      const mtx::events::collections::TimelineEvent &event,
+      const mtx::events::collections::TimelineEvents &event,
       const RoomContext &ctx,
-      const std::vector<std::pair<mtx::common::Relation, mtx::events::collections::TimelineEvent>>
+      const std::vector<std::pair<mtx::common::Relation, mtx::events::collections::TimelineEvents>>
         &relatedEvents) const;
 
 private:

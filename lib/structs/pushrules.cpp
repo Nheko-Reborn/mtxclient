@@ -565,9 +565,9 @@ flatten_event(const nlohmann::json &j)
 
 std::vector<actions::Action>
 PushRuleEvaluator::evaluate(
-  const mtx::events::collections::TimelineEvent &event,
+  const mtx::events::collections::TimelineEvents &event,
   const RoomContext &ctx,
-  const std::vector<std::pair<mtx::common::Relation, mtx::events::collections::TimelineEvent>>
+  const std::vector<std::pair<mtx::common::Relation, mtx::events::collections::TimelineEvents>>
     &relatedEvents) const
 {
     auto event_json = nlohmann::json(event);

@@ -54,10 +54,10 @@ TEST(Events, Redacted)
           "type": "m.room.redaction"
         })"_json;
 
-    mtx::events::collections::TimelineEvent event =
-      data.get<mtx::events::collections::TimelineEvent>();
+    mtx::events::collections::TimelineEvents event =
+      data.get<mtx::events::collections::TimelineEvents>();
 
-    ASSERT_TRUE(std::holds_alternative<ns::RedactionEvent<ns::msg::Redaction>>(event.data));
+    ASSERT_TRUE(std::holds_alternative<ns::RedactionEvent<ns::msg::Redaction>>(event));
 
     json data2 = R"({
 		"content": {
@@ -84,13 +84,13 @@ TEST(Events, Redacted)
 		"event_id": "$redacted_id_2"
 	})"_json;
 
-    event = data2.get<mtx::events::collections::TimelineEvent>();
-    ASSERT_TRUE(std::holds_alternative<ns::StateEvent<ns::msg::Redacted>>(event.data));
-    ASSERT_TRUE(std::get<ns::StateEvent<ns::msg::Redacted>>(event.data)
+    event = data2.get<mtx::events::collections::TimelineEvents>();
+    ASSERT_TRUE(std::holds_alternative<ns::StateEvent<ns::msg::Redacted>>(event));
+    ASSERT_TRUE(std::get<ns::StateEvent<ns::msg::Redacted>>(event)
                   .unsigned_data.redacted_because.has_value());
-    ASSERT_EQ(std::get<ns::StateEvent<ns::msg::Redacted>>(event.data)
-                .unsigned_data.redacted_because->sender,
-              "@redacted_user_2:example.com");
+    ASSERT_EQ(
+      std::get<ns::StateEvent<ns::msg::Redacted>>(event).unsigned_data.redacted_because->sender,
+      "@redacted_user_2:example.com");
 }
 
 TEST(Events, Conversions)
@@ -1905,10 +1905,10 @@ TEST(Collection, Events)
 	  "type": "m.room.aliases"
 	})"_json;
 
-    mtx::events::collections::TimelineEvent event =
-      data.get<mtx::events::collections::TimelineEvent>();
+    mtx::events::collections::TimelineEvents event =
+      data.get<mtx::events::collections::TimelineEvents>();
 
-    ASSERT_TRUE(std::get_if<ns::StateEvent<ns::state::Aliases>>(&event.data) != nullptr);
+    ASSERT_TRUE(std::get_if<ns::StateEvent<ns::state::Aliases>>(&event) != nullptr);
 }
 
 TEST(RoomAccountData, Tags)

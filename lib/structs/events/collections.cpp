@@ -131,13 +131,13 @@ MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::RedactionEvent, msg::Redaction)
 
 namespace mtx::events::collections {
 void
-to_json(nlohmann::json &obj, const TimelineEvent &e)
+to_json(nlohmann::json &obj, const TimelineEvents &e)
 {
-    std::visit([&obj](const auto &ev) { return to_json(obj, ev); }, e.data);
+    std::visit([&obj](const auto &ev) { return to_json(obj, ev); }, e);
 }
 
 void
-from_json(const nlohmann::json &obj, TimelineEvent &e)
+from_json(const nlohmann::json &obj, TimelineEvents &e)
 {
     const auto type = mtx::events::getEventType(obj);
     using namespace mtx::events::state;
@@ -147,147 +147,147 @@ from_json(const nlohmann::json &obj, TimelineEvent &e)
     try {
         if (obj.contains("unsigned") && obj["unsigned"].contains("redacted_by")) {
             if (obj.contains("state_key"))
-                e.data = events::StateEvent<msg::Redacted>(obj);
+                e = events::StateEvent<msg::Redacted>(obj);
             else
-                e.data = events::RoomEvent<msg::Redacted>(obj);
+                e = events::RoomEvent<msg::Redacted>(obj);
             return;
         }
 
         switch (type) {
         case events::EventType::Reaction: {
-            e.data = events::RoomEvent<Reaction>(obj);
+            e = events::RoomEvent<Reaction>(obj);
             break;
         }
         case events::EventType::RoomAliases: {
-            e.data = events::StateEvent<Aliases>(obj);
+            e = events::StateEvent<Aliases>(obj);
             break;
         }
         case events::EventType::RoomAvatar: {
-            e.data = events::StateEvent<Avatar>(obj);
+            e = events::StateEvent<Avatar>(obj);
             break;
         }
         case events::EventType::RoomCanonicalAlias: {
-            e.data = events::StateEvent<CanonicalAlias>(obj);
+            e = events::StateEvent<CanonicalAlias>(obj);
             break;
         }
         case events::EventType::RoomCreate: {
-            e.data = events::StateEvent<Create>(obj);
+            e = events::StateEvent<Create>(obj);
             break;
         }
         case events::EventType::RoomEncrypted: {
-            e.data = events::EncryptedEvent<mtx::events::msg::Encrypted>(obj);
+            e = events::EncryptedEvent<mtx::events::msg::Encrypted>(obj);
             break;
         }
         case events::EventType::RoomEncryption: {
-            e.data = events::StateEvent<Encryption>(obj);
+            e = events::StateEvent<Encryption>(obj);
             break;
         }
         case events::EventType::RoomGuestAccess: {
-            e.data = events::StateEvent<GuestAccess>(obj);
+            e = events::StateEvent<GuestAccess>(obj);
             break;
         }
         case events::EventType::RoomHistoryVisibility: {
-            e.data = events::StateEvent<HistoryVisibility>(obj);
+            e = events::StateEvent<HistoryVisibility>(obj);
             break;
         }
         case events::EventType::RoomJoinRules: {
-            e.data = events::StateEvent<JoinRules>(obj);
+            e = events::StateEvent<JoinRules>(obj);
             break;
         }
         case events::EventType::RoomMember: {
-            e.data = events::StateEvent<Member>(obj);
+            e = events::StateEvent<Member>(obj);
             break;
         }
         case events::EventType::RoomName: {
-            e.data = events::StateEvent<Name>(obj);
+            e = events::StateEvent<Name>(obj);
             break;
         }
         case events::EventType::RoomPowerLevels: {
-            e.data = events::StateEvent<PowerLevels>(obj);
+            e = events::StateEvent<PowerLevels>(obj);
             break;
         }
         case events::EventType::RoomRedaction: {
-            e.data = events::RedactionEvent<mtx::events::msg::Redaction>(obj);
+            e = events::RedactionEvent<mtx::events::msg::Redaction>(obj);
             break;
         }
         case events::EventType::RoomTombstone: {
-            e.data = events::StateEvent<Tombstone>(obj);
+            e = events::StateEvent<Tombstone>(obj);
             break;
         }
         case events::EventType::RoomServerAcl: {
-            e.data = events::StateEvent<ServerAcl>(obj);
+            e = events::StateEvent<ServerAcl>(obj);
             break;
         }
         case events::EventType::RoomTopic: {
-            e.data = events::StateEvent<Topic>(obj);
+            e = events::StateEvent<Topic>(obj);
             break;
         }
         case events::EventType::Widget: {
-            e.data = events::StateEvent<Widget>(obj);
+            e = events::StateEvent<Widget>(obj);
             break;
         }
         case events::EventType::VectorWidget: {
-            e.data = events::StateEvent<Widget>(obj);
+            e = events::StateEvent<Widget>(obj);
             break;
         }
         case events::EventType::RoomPinnedEvents: {
-            e.data = events::StateEvent<PinnedEvents>(obj);
+            e = events::StateEvent<PinnedEvents>(obj);
             break;
         }
         case events::EventType::PolicyRuleUser: {
-            e.data = events::StateEvent<policy_rule::UserRule>(obj);
+            e = events::StateEvent<policy_rule::UserRule>(obj);
             break;
         }
         case events::EventType::PolicyRuleRoom: {
-            e.data = events::StateEvent<policy_rule::RoomRule>(obj);
+            e = events::StateEvent<policy_rule::RoomRule>(obj);
             break;
         }
         case events::EventType::PolicyRuleServer: {
-            e.data = events::StateEvent<policy_rule::ServerRule>(obj);
+            e = events::StateEvent<policy_rule::ServerRule>(obj);
             break;
         }
         case events::EventType::SpaceChild: {
-            e.data = events::StateEvent<space::Child>(obj);
+            e = events::StateEvent<space::Child>(obj);
             break;
         }
         case events::EventType::SpaceParent: {
-            e.data = events::StateEvent<space::Parent>(obj);
+            e = events::StateEvent<space::Parent>(obj);
             break;
         }
         case events::EventType::ImagePackInRoom: {
-            e.data = events::StateEvent<msc2545::ImagePack>(obj);
+            e = events::StateEvent<msc2545::ImagePack>(obj);
             break;
         }
         case events::EventType::KeyVerificationCancel: {
-            e.data = events::RoomEvent<events::msg::KeyVerificationCancel>(obj);
+            e = events::RoomEvent<events::msg::KeyVerificationCancel>(obj);
             break;
         }
         case events::EventType::KeyVerificationRequest: {
-            e.data = events::RoomEvent<events::msg::KeyVerificationRequest>(obj);
+            e = events::RoomEvent<events::msg::KeyVerificationRequest>(obj);
             break;
         }
         case events::EventType::KeyVerificationReady: {
-            e.data = events::RoomEvent<events::msg::KeyVerificationReady>(obj);
+            e = events::RoomEvent<events::msg::KeyVerificationReady>(obj);
             break;
         }
         case events::EventType::KeyVerificationStart: {
-            e.data = events::RoomEvent<events::msg::KeyVerificationStart>(obj);
+            e = events::RoomEvent<events::msg::KeyVerificationStart>(obj);
             break;
         }
         case events::EventType::KeyVerificationDone: {
-            e.data = events::RoomEvent<events::msg::KeyVerificationDone>(obj);
+            e = events::RoomEvent<events::msg::KeyVerificationDone>(obj);
             break;
         }
         case events::EventType::KeyVerificationKey: {
-            e.data = events::RoomEvent<events::msg::KeyVerificationKey>(obj);
+            e = events::RoomEvent<events::msg::KeyVerificationKey>(obj);
             break;
         }
         case events::EventType::KeyVerificationMac: {
-            e.data = events::RoomEvent<events::msg::KeyVerificationMac>(obj);
+            e = events::RoomEvent<events::msg::KeyVerificationMac>(obj);
             break;
         }
         case events::EventType::KeyVerificationAccept: {
-            e.data = events::RoomEvent<events::msg::KeyVerificationAccept>(obj);
+            e = events::RoomEvent<events::msg::KeyVerificationAccept>(obj);
             break;
         }
         case events::EventType::RoomMessage: {
@@ -296,23 +296,23 @@ from_json(const nlohmann::json &obj, TimelineEvent &e)
 
             switch (msg_type) {
             case MsgType::Audio: {
-                e.data = events::RoomEvent<events::msg::Audio>(obj);
+                e = events::RoomEvent<events::msg::Audio>(obj);
                 break;
             }
             case MsgType::ElementEffect: {
-                e.data = events::RoomEvent<events::msg::ElementEffect>(obj);
+                e = events::RoomEvent<events::msg::ElementEffect>(obj);
                 break;
             }
             case MsgType::Emote: {
-                e.data = events::RoomEvent<events::msg::Emote>(obj);
+                e = events::RoomEvent<events::msg::Emote>(obj);
                 break;
             }
             case MsgType::File: {
-                e.data = events::RoomEvent<events::msg::File>(obj);
+                e = events::RoomEvent<events::msg::File>(obj);
                 break;
             }
             case MsgType::Image: {
-                e.data = events::RoomEvent<events::msg::Image>(obj);
+                e = events::RoomEvent<events::msg::Image>(obj);
                 break;
             }
             case MsgType::Location: {
@@ -321,27 +321,27 @@ from_json(const nlohmann::json &obj, TimelineEvent &e)
                 break;
             }
             case MsgType::Notice: {
-                e.data = events::RoomEvent<events::msg::Notice>(obj);
+                e = events::RoomEvent<events::msg::Notice>(obj);
                 break;
             }
             case MsgType::Text: {
-                e.data = events::RoomEvent<events::msg::Text>(obj);
+                e = events::RoomEvent<events::msg::Text>(obj);
                 break;
             }
             case MsgType::Video: {
-                e.data = events::RoomEvent<events::msg::Video>(obj);
+                e = events::RoomEvent<events::msg::Video>(obj);
                 break;
             }
             case MsgType::KeyVerificationRequest: {
-                e.data = events::RoomEvent<events::msg::KeyVerificationRequest>(obj);
+                e = events::RoomEvent<events::msg::KeyVerificationRequest>(obj);
                 break;
             }
             case MsgType::Unknown: {
-                e.data = events::RoomEvent<events::msg::Unknown>(obj);
+                e = events::RoomEvent<events::msg::Unknown>(obj);
                 break;
             }
             case MsgType::Redacted: {
-                e.data = events::RoomEvent<events::Unknown>(obj);
+                e = events::RoomEvent<events::Unknown>(obj);
                 break;
             }
             case MsgType::Invalid:
@@ -350,39 +350,39 @@ from_json(const nlohmann::json &obj, TimelineEvent &e)
             break;
         }
         case events::EventType::Sticker: {
-            e.data = events::Sticker(obj);
+            e = events::Sticker(obj);
             break;
         }
         case events::EventType::CallInvite: {
-            e.data = events::RoomEvent<events::voip::CallInvite>(obj);
+            e = events::RoomEvent<events::voip::CallInvite>(obj);
             break;
         }
         case events::EventType::CallCandidates: {
-            e.data = events::RoomEvent<events::voip::CallCandidates>(obj);
+            e = events::RoomEvent<events::voip::CallCandidates>(obj);
             break;
         }
         case events::EventType::CallAnswer: {
-            e.data = events::RoomEvent<events::voip::CallAnswer>(obj);
+            e = events::RoomEvent<events::voip::CallAnswer>(obj);
             break;
         }
         case events::EventType::CallHangUp: {
-            e.data = events::RoomEvent<events::voip::CallHangUp>(obj);
+            e = events::RoomEvent<events::voip::CallHangUp>(obj);
             break;
         }
         case events::EventType::CallSelectAnswer: {
-            e.data = events::RoomEvent<events::voip::CallSelectAnswer>(obj);
+            e = events::RoomEvent<events::voip::CallSelectAnswer>(obj);
             break;
         }
         case events::EventType::CallReject: {
-            e.data = events::RoomEvent<events::voip::CallReject>(obj);
+            e = events::RoomEvent<events::voip::CallReject>(obj);
             break;
         }
         case events::EventType::CallNegotiate: {
-            e.data = events::RoomEvent<events::voip::CallNegotiate>(obj);
+            e = events::RoomEvent<events::voip::CallNegotiate>(obj);
             break;
         }
         case events::EventType::Unsupported: {
-            e.data = events::RoomEvent<events::Unknown>(obj);
+            e = events::RoomEvent<events::Unknown>(obj);
             break;
         }
         case events::EventType::RoomKey:          // not part of the timeline
@@ -405,7 +405,7 @@ from_json(const nlohmann::json &obj, TimelineEvent &e)
         }
     } catch (std::exception &err) {
         mtx::utils::log::log()->error("Invalid event type: {} {}", err.what(), obj.dump(2));
-        e.data = events::RoomEvent<events::Unknown>(obj);
+        e = events::RoomEvent<events::Unknown>(obj);
     }
 }
 }

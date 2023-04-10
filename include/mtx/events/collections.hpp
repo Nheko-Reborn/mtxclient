@@ -56,158 +56,172 @@ namespace events {
 namespace collections {
 
 //! Collection of key verification events
-using DeviceEvents =
-  std::variant<mtx::events::DeviceEvent<mtx::events::msg::RoomKey>,
-               mtx::events::DeviceEvent<mtx::events::msg::ForwardedRoomKey>,
-               mtx::events::DeviceEvent<mtx::events::msg::KeyRequest>,
-               mtx::events::DeviceEvent<mtx::events::msg::OlmEncrypted>,
-               mtx::events::DeviceEvent<mtx::events::msg::Encrypted>,
-               mtx::events::DeviceEvent<mtx::events::msg::Dummy>,
-               mtx::events::DeviceEvent<mtx::events::msg::KeyVerificationRequest>,
-               mtx::events::DeviceEvent<mtx::events::msg::KeyVerificationStart>,
-               mtx::events::DeviceEvent<mtx::events::msg::KeyVerificationReady>,
-               mtx::events::DeviceEvent<mtx::events::msg::KeyVerificationDone>,
-               mtx::events::DeviceEvent<mtx::events::msg::KeyVerificationAccept>,
-               mtx::events::DeviceEvent<mtx::events::msg::KeyVerificationCancel>,
-               mtx::events::DeviceEvent<mtx::events::msg::KeyVerificationKey>,
-               mtx::events::DeviceEvent<mtx::events::msg::KeyVerificationMac>,
-               mtx::events::DeviceEvent<mtx::events::msg::SecretRequest>,
-               mtx::events::DeviceEvent<mtx::events::msg::SecretSend>,
-               mtx::events::DeviceEvent<mtx::events::Unknown>>;
+struct DeviceEvents
+  : public std::variant<mtx::events::DeviceEvent<mtx::events::msg::RoomKey>,
+                        mtx::events::DeviceEvent<mtx::events::msg::ForwardedRoomKey>,
+                        mtx::events::DeviceEvent<mtx::events::msg::KeyRequest>,
+                        mtx::events::DeviceEvent<mtx::events::msg::OlmEncrypted>,
+                        mtx::events::DeviceEvent<mtx::events::msg::Encrypted>,
+                        mtx::events::DeviceEvent<mtx::events::msg::Dummy>,
+                        mtx::events::DeviceEvent<mtx::events::msg::KeyVerificationRequest>,
+                        mtx::events::DeviceEvent<mtx::events::msg::KeyVerificationStart>,
+                        mtx::events::DeviceEvent<mtx::events::msg::KeyVerificationReady>,
+                        mtx::events::DeviceEvent<mtx::events::msg::KeyVerificationDone>,
+                        mtx::events::DeviceEvent<mtx::events::msg::KeyVerificationAccept>,
+                        mtx::events::DeviceEvent<mtx::events::msg::KeyVerificationCancel>,
+                        mtx::events::DeviceEvent<mtx::events::msg::KeyVerificationKey>,
+                        mtx::events::DeviceEvent<mtx::events::msg::KeyVerificationMac>,
+                        mtx::events::DeviceEvent<mtx::events::msg::SecretRequest>,
+                        mtx::events::DeviceEvent<mtx::events::msg::SecretSend>,
+                        mtx::events::DeviceEvent<mtx::events::Unknown>>
+{
+    using variant::variant;
+};
 
 //! Collection of room specific account data
-using RoomAccountDataEvents = std::variant<
-  mtx::events::AccountDataEvent<mtx::events::account_data::Tags>,
-  mtx::events::AccountDataEvent<mtx::events::account_data::Direct>,
-  mtx::events::AccountDataEvent<mtx::events::account_data::FullyRead>,
-  mtx::events::AccountDataEvent<mtx::pushrules::GlobalRuleset>,
-  mtx::events::AccountDataEvent<mtx::events::account_data::nheko_extensions::HiddenEvents>,
-  mtx::events::AccountDataEvent<mtx::events::msc2545::ImagePack>,
-  mtx::events::AccountDataEvent<mtx::events::msc2545::ImagePackRooms>,
-  mtx::events::AccountDataEvent<mtx::events::Unknown>>;
+struct RoomAccountDataEvents
+  : public std::variant<
+      mtx::events::AccountDataEvent<mtx::events::account_data::Tags>,
+      mtx::events::AccountDataEvent<mtx::events::account_data::Direct>,
+      mtx::events::AccountDataEvent<mtx::events::account_data::FullyRead>,
+      mtx::events::AccountDataEvent<mtx::pushrules::GlobalRuleset>,
+      mtx::events::AccountDataEvent<mtx::events::account_data::nheko_extensions::HiddenEvents>,
+      mtx::events::AccountDataEvent<mtx::events::msc2545::ImagePack>,
+      mtx::events::AccountDataEvent<mtx::events::msc2545::ImagePackRooms>,
+      mtx::events::AccountDataEvent<mtx::events::Unknown>>
+{
+    using variant::variant;
+};
 
 //! Collection of @p StateEvent only.
-using StateEvents =
-  std::variant<mtx::events::StateEvent<mtx::events::state::Aliases>,
-               mtx::events::StateEvent<mtx::events::state::Avatar>,
-               mtx::events::StateEvent<mtx::events::state::CanonicalAlias>,
-               mtx::events::StateEvent<mtx::events::state::Create>,
-               mtx::events::StateEvent<mtx::events::state::Encryption>,
-               mtx::events::StateEvent<mtx::events::state::GuestAccess>,
-               mtx::events::StateEvent<mtx::events::state::HistoryVisibility>,
-               mtx::events::StateEvent<mtx::events::state::JoinRules>,
-               mtx::events::StateEvent<mtx::events::state::Member>,
-               mtx::events::StateEvent<mtx::events::state::Name>,
-               mtx::events::StateEvent<mtx::events::state::PinnedEvents>,
-               mtx::events::StateEvent<mtx::events::state::PowerLevels>,
-               mtx::events::StateEvent<mtx::events::state::policy_rule::UserRule>,
-               mtx::events::StateEvent<mtx::events::state::policy_rule::RoomRule>,
-               mtx::events::StateEvent<mtx::events::state::policy_rule::ServerRule>,
-               mtx::events::StateEvent<mtx::events::state::space::Child>,
-               mtx::events::StateEvent<mtx::events::state::space::Parent>,
-               mtx::events::StateEvent<mtx::events::state::Tombstone>,
-               mtx::events::StateEvent<mtx::events::state::ServerAcl>,
-               mtx::events::StateEvent<mtx::events::state::Topic>,
-               mtx::events::StateEvent<mtx::events::state::Widget>,
-               mtx::events::StateEvent<mtx::events::msg::Redacted>,
-               mtx::events::StateEvent<mtx::events::msc2545::ImagePack>,
-               mtx::events::StateEvent<mtx::events::Unknown>>;
+struct StateEvents
+  : public std::variant<mtx::events::StateEvent<mtx::events::state::Aliases>,
+                        mtx::events::StateEvent<mtx::events::state::Avatar>,
+                        mtx::events::StateEvent<mtx::events::state::CanonicalAlias>,
+                        mtx::events::StateEvent<mtx::events::state::Create>,
+                        mtx::events::StateEvent<mtx::events::state::Encryption>,
+                        mtx::events::StateEvent<mtx::events::state::GuestAccess>,
+                        mtx::events::StateEvent<mtx::events::state::HistoryVisibility>,
+                        mtx::events::StateEvent<mtx::events::state::JoinRules>,
+                        mtx::events::StateEvent<mtx::events::state::Member>,
+                        mtx::events::StateEvent<mtx::events::state::Name>,
+                        mtx::events::StateEvent<mtx::events::state::PinnedEvents>,
+                        mtx::events::StateEvent<mtx::events::state::PowerLevels>,
+                        mtx::events::StateEvent<mtx::events::state::policy_rule::UserRule>,
+                        mtx::events::StateEvent<mtx::events::state::policy_rule::RoomRule>,
+                        mtx::events::StateEvent<mtx::events::state::policy_rule::ServerRule>,
+                        mtx::events::StateEvent<mtx::events::state::space::Child>,
+                        mtx::events::StateEvent<mtx::events::state::space::Parent>,
+                        mtx::events::StateEvent<mtx::events::state::Tombstone>,
+                        mtx::events::StateEvent<mtx::events::state::ServerAcl>,
+                        mtx::events::StateEvent<mtx::events::state::Topic>,
+                        mtx::events::StateEvent<mtx::events::state::Widget>,
+                        mtx::events::StateEvent<mtx::events::msg::Redacted>,
+                        mtx::events::StateEvent<mtx::events::msc2545::ImagePack>,
+                        mtx::events::StateEvent<mtx::events::Unknown>>
+{
+    using variant::variant;
+};
 
 //! Collection of @p StrippedEvent only.
-using StrippedEvents =
-  std::variant<mtx::events::StrippedEvent<mtx::events::state::Aliases>,
-               mtx::events::StrippedEvent<mtx::events::state::Avatar>,
-               mtx::events::StrippedEvent<mtx::events::state::CanonicalAlias>,
-               mtx::events::StrippedEvent<mtx::events::state::Create>,
-               mtx::events::StrippedEvent<mtx::events::state::Encryption>,
-               mtx::events::StrippedEvent<mtx::events::state::GuestAccess>,
-               mtx::events::StrippedEvent<mtx::events::state::HistoryVisibility>,
-               mtx::events::StrippedEvent<mtx::events::state::JoinRules>,
-               mtx::events::StrippedEvent<mtx::events::state::Member>,
-               mtx::events::StrippedEvent<mtx::events::state::Name>,
-               mtx::events::StrippedEvent<mtx::events::state::PinnedEvents>,
-               mtx::events::StrippedEvent<mtx::events::state::PowerLevels>,
-               mtx::events::StrippedEvent<mtx::events::state::policy_rule::UserRule>,
-               mtx::events::StrippedEvent<mtx::events::state::policy_rule::RoomRule>,
-               mtx::events::StrippedEvent<mtx::events::state::policy_rule::ServerRule>,
-               mtx::events::StrippedEvent<mtx::events::state::space::Child>,
-               mtx::events::StrippedEvent<mtx::events::state::space::Parent>,
-               mtx::events::StrippedEvent<mtx::events::state::Tombstone>,
-               mtx::events::StrippedEvent<mtx::events::state::ServerAcl>,
-               mtx::events::StrippedEvent<mtx::events::state::Topic>,
-               mtx::events::StrippedEvent<mtx::events::state::Widget>,
-               mtx::events::StrippedEvent<mtx::events::msg::Redacted>,
-               mtx::events::StrippedEvent<mtx::events::Unknown>>;
+struct StrippedEvents
+  : public std::variant<mtx::events::StrippedEvent<mtx::events::state::Aliases>,
+                        mtx::events::StrippedEvent<mtx::events::state::Avatar>,
+                        mtx::events::StrippedEvent<mtx::events::state::CanonicalAlias>,
+                        mtx::events::StrippedEvent<mtx::events::state::Create>,
+                        mtx::events::StrippedEvent<mtx::events::state::Encryption>,
+                        mtx::events::StrippedEvent<mtx::events::state::GuestAccess>,
+                        mtx::events::StrippedEvent<mtx::events::state::HistoryVisibility>,
+                        mtx::events::StrippedEvent<mtx::events::state::JoinRules>,
+                        mtx::events::StrippedEvent<mtx::events::state::Member>,
+                        mtx::events::StrippedEvent<mtx::events::state::Name>,
+                        mtx::events::StrippedEvent<mtx::events::state::PinnedEvents>,
+                        mtx::events::StrippedEvent<mtx::events::state::PowerLevels>,
+                        mtx::events::StrippedEvent<mtx::events::state::policy_rule::UserRule>,
+                        mtx::events::StrippedEvent<mtx::events::state::policy_rule::RoomRule>,
+                        mtx::events::StrippedEvent<mtx::events::state::policy_rule::ServerRule>,
+                        mtx::events::StrippedEvent<mtx::events::state::space::Child>,
+                        mtx::events::StrippedEvent<mtx::events::state::space::Parent>,
+                        mtx::events::StrippedEvent<mtx::events::state::Tombstone>,
+                        mtx::events::StrippedEvent<mtx::events::state::ServerAcl>,
+                        mtx::events::StrippedEvent<mtx::events::state::Topic>,
+                        mtx::events::StrippedEvent<mtx::events::state::Widget>,
+                        mtx::events::StrippedEvent<mtx::events::msg::Redacted>,
+                        mtx::events::StrippedEvent<mtx::events::Unknown>>
+{
+    using variant::variant;
+};
 
 //! Collection of @p StateEvent and @p RoomEvent. Those events would be
 //! available on the returned timeline.
-using TimelineEvents =
-  std::variant<mtx::events::StateEvent<mtx::events::state::Aliases>,
-               mtx::events::StateEvent<mtx::events::state::Avatar>,
-               mtx::events::StateEvent<mtx::events::state::CanonicalAlias>,
-               mtx::events::StateEvent<mtx::events::state::Create>,
-               mtx::events::StateEvent<mtx::events::state::Encryption>,
-               mtx::events::StateEvent<mtx::events::state::GuestAccess>,
-               mtx::events::StateEvent<mtx::events::state::HistoryVisibility>,
-               mtx::events::StateEvent<mtx::events::state::JoinRules>,
-               mtx::events::StateEvent<mtx::events::state::Member>,
-               mtx::events::StateEvent<mtx::events::state::Name>,
-               mtx::events::StateEvent<mtx::events::state::PinnedEvents>,
-               mtx::events::StateEvent<mtx::events::state::PowerLevels>,
-               mtx::events::StateEvent<mtx::events::state::policy_rule::UserRule>,
-               mtx::events::StateEvent<mtx::events::state::policy_rule::RoomRule>,
-               mtx::events::StateEvent<mtx::events::state::policy_rule::ServerRule>,
-               mtx::events::StateEvent<mtx::events::state::space::Child>,
-               mtx::events::StateEvent<mtx::events::state::space::Parent>,
-               mtx::events::StateEvent<mtx::events::state::Tombstone>,
-               mtx::events::StateEvent<mtx::events::state::ServerAcl>,
-               mtx::events::StateEvent<mtx::events::state::Topic>,
-               mtx::events::StateEvent<mtx::events::state::Widget>,
-               mtx::events::StateEvent<mtx::events::msc2545::ImagePack>,
-               mtx::events::StateEvent<mtx::events::msg::Redacted>,
-               mtx::events::EncryptedEvent<mtx::events::msg::Encrypted>,
-               mtx::events::RedactionEvent<mtx::events::msg::Redaction>,
-               mtx::events::Sticker,
-               mtx::events::RoomEvent<mtx::events::msg::Reaction>,
-               mtx::events::RoomEvent<mtx::events::msg::Redacted>,
-               mtx::events::RoomEvent<mtx::events::msg::Audio>,
-               mtx::events::RoomEvent<mtx::events::msg::ElementEffect>,
-               mtx::events::RoomEvent<mtx::events::msg::Emote>,
-               mtx::events::RoomEvent<mtx::events::msg::File>,
-               mtx::events::RoomEvent<mtx::events::msg::Image>,
-               // TODO: events::RoomEvent<mtx::events::msg::Location>,
-               mtx::events::RoomEvent<mtx::events::msg::Notice>,
-               mtx::events::RoomEvent<mtx::events::msg::Text>,
-               mtx::events::RoomEvent<mtx::events::msg::Unknown>,
-               mtx::events::RoomEvent<mtx::events::msg::Video>,
-               mtx::events::RoomEvent<mtx::events::msg::KeyVerificationRequest>,
-               mtx::events::RoomEvent<mtx::events::msg::KeyVerificationStart>,
-               mtx::events::RoomEvent<mtx::events::msg::KeyVerificationReady>,
-               mtx::events::RoomEvent<mtx::events::msg::KeyVerificationDone>,
-               mtx::events::RoomEvent<mtx::events::msg::KeyVerificationAccept>,
-               mtx::events::RoomEvent<mtx::events::msg::KeyVerificationCancel>,
-               mtx::events::RoomEvent<mtx::events::msg::KeyVerificationKey>,
-               mtx::events::RoomEvent<mtx::events::msg::KeyVerificationMac>,
-               mtx::events::RoomEvent<mtx::events::voip::CallCandidates>,
-               mtx::events::RoomEvent<mtx::events::voip::CallInvite>,
-               mtx::events::RoomEvent<mtx::events::voip::CallAnswer>,
-               mtx::events::RoomEvent<mtx::events::voip::CallHangUp>,
-               mtx::events::RoomEvent<mtx::events::voip::CallSelectAnswer>,
-               mtx::events::RoomEvent<mtx::events::voip::CallReject>,
-               mtx::events::RoomEvent<mtx::events::voip::CallNegotiate>,
-               mtx::events::RoomEvent<mtx::events::Unknown>>;
-
-using EphemeralEvents = std::variant<mtx::events::EphemeralEvent<mtx::events::ephemeral::Typing>,
-                                     mtx::events::EphemeralEvent<mtx::events::ephemeral::Receipt>,
-                                     mtx::events::EphemeralEvent<mtx::events::Unknown>>;
-
-//! A wapper around TimelineEvent, that produces less noisy compiler errors.
-struct TimelineEvent
+struct TimelineEvents
+  : public std::variant<mtx::events::StateEvent<mtx::events::state::Aliases>,
+                        mtx::events::StateEvent<mtx::events::state::Avatar>,
+                        mtx::events::StateEvent<mtx::events::state::CanonicalAlias>,
+                        mtx::events::StateEvent<mtx::events::state::Create>,
+                        mtx::events::StateEvent<mtx::events::state::Encryption>,
+                        mtx::events::StateEvent<mtx::events::state::GuestAccess>,
+                        mtx::events::StateEvent<mtx::events::state::HistoryVisibility>,
+                        mtx::events::StateEvent<mtx::events::state::JoinRules>,
+                        mtx::events::StateEvent<mtx::events::state::Member>,
+                        mtx::events::StateEvent<mtx::events::state::Name>,
+                        mtx::events::StateEvent<mtx::events::state::PinnedEvents>,
+                        mtx::events::StateEvent<mtx::events::state::PowerLevels>,
+                        mtx::events::StateEvent<mtx::events::state::policy_rule::UserRule>,
+                        mtx::events::StateEvent<mtx::events::state::policy_rule::RoomRule>,
+                        mtx::events::StateEvent<mtx::events::state::policy_rule::ServerRule>,
+                        mtx::events::StateEvent<mtx::events::state::space::Child>,
+                        mtx::events::StateEvent<mtx::events::state::space::Parent>,
+                        mtx::events::StateEvent<mtx::events::state::Tombstone>,
+                        mtx::events::StateEvent<mtx::events::state::ServerAcl>,
+                        mtx::events::StateEvent<mtx::events::state::Topic>,
+                        mtx::events::StateEvent<mtx::events::state::Widget>,
+                        mtx::events::StateEvent<mtx::events::msc2545::ImagePack>,
+                        mtx::events::StateEvent<mtx::events::msg::Redacted>,
+                        mtx::events::EncryptedEvent<mtx::events::msg::Encrypted>,
+                        mtx::events::RedactionEvent<mtx::events::msg::Redaction>,
+                        mtx::events::Sticker,
+                        mtx::events::RoomEvent<mtx::events::msg::Reaction>,
+                        mtx::events::RoomEvent<mtx::events::msg::Redacted>,
+                        mtx::events::RoomEvent<mtx::events::msg::Audio>,
+                        mtx::events::RoomEvent<mtx::events::msg::ElementEffect>,
+                        mtx::events::RoomEvent<mtx::events::msg::Emote>,
+                        mtx::events::RoomEvent<mtx::events::msg::File>,
+                        mtx::events::RoomEvent<mtx::events::msg::Image>,
+                        // TODO: events::RoomEvent<mtx::events::msg::Location>,
+                        mtx::events::RoomEvent<mtx::events::msg::Notice>,
+                        mtx::events::RoomEvent<mtx::events::msg::Text>,
+                        mtx::events::RoomEvent<mtx::events::msg::Unknown>,
+                        mtx::events::RoomEvent<mtx::events::msg::Video>,
+                        mtx::events::RoomEvent<mtx::events::msg::KeyVerificationRequest>,
+                        mtx::events::RoomEvent<mtx::events::msg::KeyVerificationStart>,
+                        mtx::events::RoomEvent<mtx::events::msg::KeyVerificationReady>,
+                        mtx::events::RoomEvent<mtx::events::msg::KeyVerificationDone>,
+                        mtx::events::RoomEvent<mtx::events::msg::KeyVerificationAccept>,
+                        mtx::events::RoomEvent<mtx::events::msg::KeyVerificationCancel>,
+                        mtx::events::RoomEvent<mtx::events::msg::KeyVerificationKey>,
+                        mtx::events::RoomEvent<mtx::events::msg::KeyVerificationMac>,
+                        mtx::events::RoomEvent<mtx::events::voip::CallCandidates>,
+                        mtx::events::RoomEvent<mtx::events::voip::CallInvite>,
+                        mtx::events::RoomEvent<mtx::events::voip::CallAnswer>,
+                        mtx::events::RoomEvent<mtx::events::voip::CallHangUp>,
+                        mtx::events::RoomEvent<mtx::events::voip::CallSelectAnswer>,
+                        mtx::events::RoomEvent<mtx::events::voip::CallReject>,
+                        mtx::events::RoomEvent<mtx::events::voip::CallNegotiate>,
+                        mtx::events::RoomEvent<mtx::events::Unknown>>
 {
-    TimelineEvents data;
+    using variant::variant;
 
-    friend void from_json(const nlohmann::json &obj, TimelineEvent &e);
-    friend void to_json(nlohmann::json &obj, const TimelineEvent &e);
+    friend void from_json(const nlohmann::json &obj, TimelineEvents &e);
+    friend void to_json(nlohmann::json &obj, const TimelineEvents &e);
+};
+
+struct EphemeralEvents
+  : public std::variant<mtx::events::EphemeralEvent<mtx::events::ephemeral::Typing>,
+                        mtx::events::EphemeralEvent<mtx::events::ephemeral::Receipt>,
+                        mtx::events::EphemeralEvent<mtx::events::Unknown>>
+{
+    using variant::variant;
 };
 
 } // namespace collections
