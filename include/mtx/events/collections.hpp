@@ -212,6 +212,11 @@ struct TimelineEvents
 {
     using variant::variant;
 
+    // The Qt MOC chokes on this, because the default implementation from the variant gets into some
+    // conflict with the variant types not having an operator==. Being explicit fixes that.
+    bool operator==(const TimelineEvents &) const = delete;
+    bool operator<(const TimelineEvents &) const  = delete;
+
     friend void from_json(const nlohmann::json &obj, TimelineEvents &e);
     friend void to_json(nlohmann::json &obj, const TimelineEvents &e);
 };
