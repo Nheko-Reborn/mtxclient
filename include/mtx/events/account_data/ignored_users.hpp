@@ -13,18 +13,16 @@ namespace mtx {
 namespace events {
 namespace account_data {
 
-namespace data {
 //! An entry in `m.ignored_user_list`. Currently only the key (mxid) is supported, not arbitrary
 //! values.
 struct IgnoredUser
 {
     std::string id;
 };
-} // namespace data
 
 struct IgnoredUsers
 {
-    std::vector<data::IgnoredUser> users;
+    std::vector<IgnoredUser> users;
 
     //! Deserialization method needed by @p nlohmann::json.
     friend void from_json(const nlohmann::json &obj, IgnoredUsers &content);

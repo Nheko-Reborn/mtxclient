@@ -10,9 +10,11 @@ namespace account_data {
 void
 from_json(const nlohmann::json &obj, IgnoredUsers &content)
 {
-    const auto map = obj.at("ignored_users").get<std::unordered_map<std::string, nlohmann::json>>();
-    for (const auto &[key, value] : map) {
-        data::IgnoredUser user;
+    if (!obj.contains("ignored_users"))
+        return;
+
+    for (const auto &[key, value] : obj.at("ignored_users").items()) {
+        IgnoredUser user;
         user.id = key;
         content.users.push_back(user);
     }
@@ -22,7 +24,7 @@ void
 to_json(nlohmann::json &obj, const IgnoredUsers &content)
 {
     std::unordered_map<std::string, nlohmann::json> map;
-    for (const data::IgnoredUser &user : content.users) {
+    for (const IgnoredUser &user : content.users) {
         map[user.id] = {};
     }
     obj["ignored_users"] = map;
