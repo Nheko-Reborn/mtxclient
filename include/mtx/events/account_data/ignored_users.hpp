@@ -13,9 +13,9 @@ namespace mtx {
 namespace events {
 namespace account_data {
 
-/// An entry in `m.ignored_user_list`. Currently only the key (mxid) is supported, not arbitrary
-/// values.
 namespace data {
+//! An entry in `m.ignored_user_list`. Currently only the key (mxid) is supported, not arbitrary
+//! values.
 struct IgnoredUser
 {
     std::string id;
