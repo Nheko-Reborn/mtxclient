@@ -20,7 +20,7 @@ struct IgnoredUser
 {
     std::string id;
 };
-}
+} // namespace data
 
 struct IgnoredUsers
 {
