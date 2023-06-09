@@ -132,6 +132,8 @@ enum class EventType
     //! m.direct
     Direct,
 
+    IgnoredUsers,
+
     // custom events
     // im.nheko.hidden_events
     NhekoHiddenEvents,

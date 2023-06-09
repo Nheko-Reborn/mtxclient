@@ -115,6 +115,10 @@ parse_room_account_data_events(
                 container.emplace_back(events::AccountDataEvent<Direct>(e));
                 break;
             }
+            case events::EventType::IgnoredUsers: {
+                container.emplace_back(events::AccountDataEvent<IgnoredUsers>(e));
+                break;
+            }
             case events::EventType::Tag: {
                 container.emplace_back(events::AccountDataEvent<Tags>(e));
                 break;
@@ -517,6 +521,7 @@ parse_timeline_events(const json &events,
             case events::EventType::Typing:
             case events::EventType::Receipt:
             case events::EventType::FullyRead:
+            case events::EventType::IgnoredUsers:
             case events::EventType::NhekoHiddenEvents:
             case events::EventType::ImagePackRooms:
             case events::EventType::ImagePackInAccountData:
@@ -795,6 +800,7 @@ parse_state_events(const json &events,
             case events::EventType::Typing:
             case events::EventType::Receipt:
             case events::EventType::FullyRead:
+            case events::EventType::IgnoredUsers:
             case events::EventType::NhekoHiddenEvents:
             case events::EventType::ImagePackRooms:
             case events::EventType::ImagePackInAccountData:
@@ -962,6 +968,7 @@ parse_stripped_events(const json &events,
             case events::EventType::Typing:
             case events::EventType::Receipt:
             case events::EventType::FullyRead:
+            case events::EventType::IgnoredUsers:
             case events::EventType::NhekoHiddenEvents:
             case events::EventType::ImagePackInAccountData:
             case events::EventType::ImagePackInRoom:
