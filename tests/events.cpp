@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <gtest/gtest.h>
 
 #include <mtx.hpp>
@@ -1613,6 +1614,38 @@ TEST(AccountData, FullyRead)
     EXPECT_EQ(event.type, ns::EventType::FullyRead);
     EXPECT_EQ(event.content.event_id, "$someplace:example.org");
     EXPECT_EQ(j.dump(), json(event).dump());
+}
+
+TEST(AccountData, IgnoredUsers)
+{
+    json j = R"({
+    "content": {
+        "ignored_users": {
+            "@someone:example.org": {},
+            "@anotherone:example.org": {}
+        }
+    },
+    "type": "m.ignored_user_list"
+})"_json;
+    ns::AccountDataEvent<ns::account_data::IgnoredUsers> event =
+      j.get<ns::AccountDataEvent<ns::account_data::IgnoredUsers>>();
+
+    ASSERT_EQ(event.content.users.size(), 2);
+
+    // JSON does not demand a guaranteed key order
+    ASSERT_TRUE(std::any_of(event.content.users.cbegin(),
+                            event.content.users.cend(),
+                            [](const ns::account_data::IgnoredUser &entry) {
+                                return entry.id == "@someone:example.org";
+                            }));
+    ASSERT_TRUE(std::any_of(event.content.users.cbegin(),
+                            event.content.users.cend(),
+                            [](const ns::account_data::IgnoredUser &entry) {
+                                return entry.id == "@anotherone:example.org";
+                            }));
+
+    ASSERT_EQ(event.type, ns::EventType::IgnoredUsers);
+    ASSERT_EQ(j.dump(), json(event).dump());
 }
 
 TEST(ToDevice, KeyVerificationRequest)

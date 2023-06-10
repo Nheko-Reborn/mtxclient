@@ -25,7 +25,7 @@ to_json(nlohmann::json &obj, const IgnoredUsers &content)
 {
     std::unordered_map<std::string, nlohmann::json> map;
     for (const IgnoredUser &user : content.users) {
-        map[user.id] = {};
+        map[user.id] = nlohmann::json::object(); // {} = null
     }
     obj["ignored_users"] = map;
 }
