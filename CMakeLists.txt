@@ -242,6 +242,7 @@ target_sources(matrix_client
 	lib/structs/events/account_data/fully_read.cpp
 	lib/structs/events/ephemeral/receipt.cpp
 	lib/structs/events/ephemeral/typing.cpp
+	lib/structs/events/nheko_extensions/event_expiry.cpp
 	lib/structs/events/nheko_extensions/hidden_events.cpp
 	lib/structs/events/messages/audio.cpp
 	lib/structs/events/messages/elementeffect.cpp

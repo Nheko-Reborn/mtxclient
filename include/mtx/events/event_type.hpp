@@ -135,6 +135,8 @@ enum class EventType
     // custom events
     // im.nheko.hidden_events
     NhekoHiddenEvents,
+    // im.nheko.event_expiry
+    NhekoEventExpiry,
 
     // MSCs
     //! m.image_pack, currently im.ponies.room_emotes

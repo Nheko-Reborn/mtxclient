@@ -132,6 +132,10 @@ parse_room_account_data_events(
                 container.emplace_back(events::AccountDataEvent<nheko_extensions::HiddenEvents>(e));
                 break;
             }
+            case events::EventType::NhekoEventExpiry: {
+                container.emplace_back(events::AccountDataEvent<nheko_extensions::EventExpiry>(e));
+                break;
+            }
             case events::EventType::ImagePackRooms: {
                 container.emplace_back(
                   events::AccountDataEvent<events::msc2545::ImagePackRooms>(e));
@@ -518,6 +522,7 @@ parse_timeline_events(const json &events,
             case events::EventType::Receipt:
             case events::EventType::FullyRead:
             case events::EventType::NhekoHiddenEvents:
+            case events::EventType::NhekoEventExpiry:
             case events::EventType::ImagePackRooms:
             case events::EventType::ImagePackInAccountData:
             case events::EventType::Dummy:
@@ -796,6 +801,7 @@ parse_state_events(const json &events,
             case events::EventType::Receipt:
             case events::EventType::FullyRead:
             case events::EventType::NhekoHiddenEvents:
+            case events::EventType::NhekoEventExpiry:
             case events::EventType::ImagePackRooms:
             case events::EventType::ImagePackInAccountData:
             case events::EventType::Dummy:
@@ -963,6 +969,7 @@ parse_stripped_events(const json &events,
             case events::EventType::Receipt:
             case events::EventType::FullyRead:
             case events::EventType::NhekoHiddenEvents:
+            case events::EventType::NhekoEventExpiry:
             case events::EventType::ImagePackInAccountData:
             case events::EventType::ImagePackInRoom:
             case events::EventType::ImagePackRooms:

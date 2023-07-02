@@ -36,6 +36,6 @@ struct Direct
     friend void to_json(nlohmann::json &obj, const Direct &content);
 };
 
-} // namespace state
+} // namespace account_data
 } // namespace events
 } // namespace mtx

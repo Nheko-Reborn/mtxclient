@@ -92,6 +92,7 @@ src = [
 	'lib/structs/events/mscs/image_packs.cpp',
 	'lib/structs/events/name.cpp',
 	'lib/structs/events/nheko_extensions/hidden_events.cpp',
+	'lib/structs/events/nheko_extensions/event_expiry.cpp',
 	'lib/structs/events/pinned_events.cpp',
 	'lib/structs/events/policy_rules.cpp',
 	'lib/structs/events/power_levels.cpp',

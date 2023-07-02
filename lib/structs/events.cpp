@@ -125,6 +125,8 @@ getEventType(const std::string &type)
         return EventType::FullyRead;
     else if (type == "im.nheko.hidden_events")
         return EventType::NhekoHiddenEvents;
+    else if (type == "im.nheko.event_expiry")
+        return EventType::NhekoEventExpiry;
     else if (type == "im.ponies.room_emotes")
         return EventType::ImagePackInRoom;
     else if (type == "im.ponies.user_emotes")
@@ -254,6 +256,8 @@ to_string(EventType type)
         return "m.fully_read";
     case EventType::NhekoHiddenEvents:
         return "im.nheko.hidden_events";
+    case EventType::NhekoEventExpiry:
+        return "im.nheko.event_expiry";
     case EventType::ImagePackInRoom:
         return "im.ponies.room_emotes";
     case EventType::ImagePackInAccountData:

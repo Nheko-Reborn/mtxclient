@@ -1963,6 +1963,39 @@ TEST(RoomAccountData, NhekoHiddenEvents)
     EXPECT_EQ(event.content.hidden_event_types.value()[1], ns::EventType::RoomMember);
 }
 
+TEST(RoomAccountData, NhekoEventExpiry)
+{
+    json data = R"({
+          "content": {
+          },
+          "type": "im.nheko.event_expiry"
+        })"_json;
+
+    ns::AccountDataEvent<ns::account_data::nheko_extensions::EventExpiry> event =
+      data.get<ns::AccountDataEvent<ns::account_data::nheko_extensions::EventExpiry>>();
+
+    EXPECT_EQ(event.type, ns::EventType::NhekoEventExpiry);
+    ASSERT_FALSE(event.content.exclude_state_events);
+    ASSERT_EQ(event.content.expire_after_ms, 0);
+    ASSERT_EQ(event.content.protect_latest, 0);
+    ASSERT_EQ(event.content.keep_only_latest, 0);
+
+    data = R"({
+          "content": {
+          "exclude_state_events": true,
+          "expire_after_ms": 100,
+          "protect_latest": 100,
+          "keep_only_latest": 100
+          },
+          "type": "im.nheko.event_expiry"
+        })"_json;
+
+    ASSERT_TRUE(event.content.exclude_state_events);
+    ASSERT_EQ(event.content.expire_after_ms, 100);
+    ASSERT_EQ(event.content.protect_latest, 100);
+    ASSERT_EQ(event.content.keep_only_latest, 100);
+}
+
 TEST(RoomAccountData, ImagePack)
 {
     json data = R"({

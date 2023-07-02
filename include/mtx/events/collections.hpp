@@ -22,6 +22,7 @@
 #include "mtx/events/member.hpp"
 #include "mtx/events/mscs/image_packs.hpp"
 #include "mtx/events/name.hpp"
+#include "mtx/events/nheko_extensions/event_expiry.hpp"
 #include "mtx/events/nheko_extensions/hidden_events.hpp"
 #include "mtx/events/pinned_events.hpp"
 #include "mtx/events/policy_rules.hpp"
@@ -86,6 +87,7 @@ struct RoomAccountDataEvents
       mtx::events::AccountDataEvent<mtx::events::account_data::FullyRead>,
       mtx::events::AccountDataEvent<mtx::pushrules::GlobalRuleset>,
       mtx::events::AccountDataEvent<mtx::events::account_data::nheko_extensions::HiddenEvents>,
+      mtx::events::AccountDataEvent<mtx::events::account_data::nheko_extensions::EventExpiry>,
       mtx::events::AccountDataEvent<mtx::events::msc2545::ImagePack>,
       mtx::events::AccountDataEvent<mtx::events::msc2545::ImagePackRooms>,
       mtx::events::AccountDataEvent<mtx::events::Unknown>>
@@ -435,6 +437,10 @@ template<>
 constexpr inline EventType
   account_data_content_to_type<mtx::events::account_data::nheko_extensions::HiddenEvents> =
     EventType::NhekoHiddenEvents;
+template<>
+constexpr inline EventType
+  account_data_content_to_type<mtx::events::account_data::nheko_extensions::EventExpiry> =
+    EventType::NhekoEventExpiry;
 
 } // namespace events
 } // namespace mtx
