@@ -32,4 +32,3 @@ to_json(nlohmann::json &obj, const EventExpiry &content)
 } // namespace account_data
 } // namespace events
 } // namespace mtx
-
