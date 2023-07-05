@@ -1990,6 +1990,8 @@ TEST(RoomAccountData, NhekoEventExpiry)
           "type": "im.nheko.event_expiry"
         })"_json;
 
+    event = data.get<ns::AccountDataEvent<ns::account_data::nheko_extensions::EventExpiry>>();
+
     ASSERT_TRUE(event.content.exclude_state_events);
     ASSERT_EQ(event.content.expire_after_ms, 100);
     ASSERT_EQ(event.content.protect_latest, 100);
