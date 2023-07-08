@@ -123,6 +123,8 @@ getEventType(const std::string &type)
         return EventType::Receipt;
     else if (type == "m.fully_read")
         return EventType::FullyRead;
+    else if (type == "m.ignored_user_list")
+        return EventType::IgnoredUsers;
     else if (type == "im.nheko.hidden_events")
         return EventType::NhekoHiddenEvents;
     else if (type == "im.nheko.event_expiry")
@@ -254,6 +256,8 @@ to_string(EventType type)
         return "m.receipt";
     case EventType::FullyRead:
         return "m.fully_read";
+    case EventType::IgnoredUsers:
+        return "m.ignored_user_list";
     case EventType::NhekoHiddenEvents:
         return "im.nheko.hidden_events";
     case EventType::NhekoEventExpiry:

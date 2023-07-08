@@ -131,6 +131,8 @@ enum class EventType
     FullyRead,
     //! m.direct
     Direct,
+    //! m.ignored_user_list
+    IgnoredUsers,
 
     // custom events
     // im.nheko.hidden_events

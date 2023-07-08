@@ -8,6 +8,7 @@
 #include "mtx/events.hpp"
 #include "mtx/events/account_data/direct.hpp"
 #include "mtx/events/account_data/fully_read.hpp"
+#include "mtx/events/account_data/ignored_users.hpp"
 #include "mtx/events/aliases.hpp"
 #include "mtx/events/avatar.hpp"
 #include "mtx/events/canonical_alias.hpp"
@@ -85,6 +86,7 @@ struct RoomAccountDataEvents
       mtx::events::AccountDataEvent<mtx::events::account_data::Tags>,
       mtx::events::AccountDataEvent<mtx::events::account_data::Direct>,
       mtx::events::AccountDataEvent<mtx::events::account_data::FullyRead>,
+      mtx::events::AccountDataEvent<mtx::events::account_data::IgnoredUsers>,
       mtx::events::AccountDataEvent<mtx::pushrules::GlobalRuleset>,
       mtx::events::AccountDataEvent<mtx::events::account_data::nheko_extensions::HiddenEvents>,
       mtx::events::AccountDataEvent<mtx::events::account_data::nheko_extensions::EventExpiry>,
@@ -433,6 +435,9 @@ constexpr inline EventType account_data_content_to_type<mtx::events::account_dat
 template<>
 constexpr inline EventType account_data_content_to_type<mtx::events::account_data::Direct> =
   EventType::Direct;
+template<>
+constexpr inline EventType account_data_content_to_type<mtx::events::account_data::IgnoredUsers> =
+  EventType::IgnoredUsers;
 template<>
 constexpr inline EventType
   account_data_content_to_type<mtx::events::account_data::nheko_extensions::HiddenEvents> =

@@ -1805,3 +1805,4 @@ MTXCLIENT_ACCOUNT_DATA(mtx::events::account_data::nheko_extensions::HiddenEvents
 MTXCLIENT_ACCOUNT_DATA(mtx::events::account_data::nheko_extensions::EventExpiry)
 MTXCLIENT_ACCOUNT_DATA(mtx::events::account_data::Tags)
 MTXCLIENT_ACCOUNT_DATA(mtx::events::account_data::Direct)
+MTXCLIENT_ACCOUNT_DATA(mtx::events::account_data::IgnoredUsers)

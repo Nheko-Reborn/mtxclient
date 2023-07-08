@@ -66,6 +66,7 @@ src = [
 	'lib/structs/events.cpp',
 	'lib/structs/events/account_data/direct.cpp',
 	'lib/structs/events/account_data/fully_read.cpp',
+	'lib/structs/events/account_data/ignored_users.cpp',
 	'lib/structs/events/aliases.cpp',
 	'lib/structs/events/avatar.cpp',
 	'lib/structs/events/canonical_alias.cpp',

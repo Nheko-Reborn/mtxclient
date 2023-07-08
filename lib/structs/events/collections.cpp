@@ -119,6 +119,9 @@ MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::EphemeralEvent, Unknown)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::AccountDataEvent, mtx::events::account_data::Direct)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::AccountDataEvent, mtx::events::account_data::Tags)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::AccountDataEvent, mtx::events::account_data::FullyRead)
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::AccountDataEvent,
+                                     mtx::events::account_data::IgnoredUsers)
+
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::AccountDataEvent, pushrules::GlobalRuleset)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::AccountDataEvent,
                                      mtx::events::account_data::nheko_extensions::HiddenEvents)
@@ -399,6 +402,7 @@ from_json(const nlohmann::json &obj, TimelineEvents &e)
         case events::EventType::Typing:
         case events::EventType::Receipt:
         case events::EventType::FullyRead:
+        case events::EventType::IgnoredUsers:
         case events::EventType::NhekoHiddenEvents:
         case events::EventType::NhekoEventExpiry:
         case events::EventType::ImagePackInAccountData:
