@@ -1282,6 +1282,36 @@ TEST(ClientAPI, RedactEvent)
     alice->close();
 }
 
+TEST(ClientAPI, ReportEvent)
+{
+    auto alice = make_test_client();
+    alice->login("alice", "secret", check_login);
+
+    while (alice->access_token().empty())
+        sleep();
+
+    mtx::requests::CreateRoom req;
+    alice->create_room(req, [alice](const mtx::responses::CreateRoom &res, RequestErr err) {
+        check_error(err);
+        auto room_id = res.room_id.to_string();
+
+        mtx::events::msg::Text text;
+        text.body = "hello alice!";
+
+        alice->send_room_message<mtx::events::msg::Text>(
+          room_id, text, [room_id, alice](const mtx::responses::EventId &res, RequestErr err) {
+              check_error(err);
+
+              alice->report_event(room_id,
+                                  res.event_id.to_string(),
+                                  "This is some sort of weird spam?",
+                                  -50);
+          });
+    });
+
+    alice->close();
+}
+
 TEST(ClientAPI, SendStateEvents)
 {
     auto alice = make_test_client();

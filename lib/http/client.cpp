@@ -979,6 +979,23 @@ Client::redact_event(const std::string &room_id,
 }
 
 void
+Client::report_event(const std::string &room_id,
+                     const std::string &event_id,
+                     const std::string &reason,
+                     const int score)
+{
+    const auto api_path = "/client/v3/rooms" + mtx::client::utils::url_encode(room_id) +
+                          "/report/" + mtx::client::utils::url_encode(event_id);
+    nlohmann::json body = nlohmann::json::object();
+    if (!reason.empty())
+        body["reason"] = reason;
+    if (score <= 0 && score <= -100)
+        body["score"] = score;
+
+    put<nlohmann::json, mtx::responses::Empty>(api_path, body, {});
+}
+
+void
 Client::registration(const std::string &user,
                      const std::string &pass,
                      UIAHandler uia_handler,
