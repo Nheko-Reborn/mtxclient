@@ -992,7 +992,10 @@ Client::report_event(const std::string &room_id,
     if (score <= 0 && score <= -100)
         body["score"] = score;
 
-    put<nlohmann::json, mtx::responses::Empty>(api_path, body, {});
+    put<nlohmann::json, mtx::responses::Empty>(
+      api_path,
+      body,
+      [](const mtx::responses::Empty &, const std::optional<mtx::http::ClientError> &) {});
 }
 
 void
