@@ -1302,10 +1302,8 @@ TEST(ClientAPI, ReportEvent)
           room_id, text, [room_id, alice](const mtx::responses::EventId &res, RequestErr err) {
               check_error(err);
 
-              alice->report_event(room_id,
-                                  res.event_id.to_string(),
-                                  "This is some sort of weird spam?",
-                                  -50);
+              alice->report_event(
+                room_id, res.event_id.to_string(), "This is some sort of weird spam?", -50);
           });
     });
 
