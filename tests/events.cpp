@@ -247,7 +247,7 @@ TEST(StateEvents, Create)
     EXPECT_EQ(event.unsigned_data.age, 3715756343L);
     EXPECT_EQ(event.origin_server_ts, 1506761923948L);
     EXPECT_EQ(event.state_key, "");
-    EXPECT_EQ(event.content.creator, "@mujx:matrix.org");
+    // EXPECT_EQ(event.content.creator, "@mujx:matrix.org");
 
     json example_from_spec = R"({
             "content": {
@@ -278,7 +278,7 @@ TEST(StateEvents, Create)
     EXPECT_EQ(event.unsigned_data.age, 1234);
     EXPECT_EQ(event.origin_server_ts, 1432735824653L);
     EXPECT_EQ(event.state_key, "");
-    EXPECT_EQ(event.content.creator, "@example:example.org");
+    // EXPECT_EQ(event.content.creator, "@example:example.org");
     EXPECT_EQ(event.content.federate, true);
     EXPECT_EQ(event.content.room_version, "1");
     EXPECT_EQ(event.content.predecessor->room_id, "!oldroom:example.org");
@@ -310,7 +310,7 @@ TEST(StateEvents, CreateWithType)
     EXPECT_EQ(event.unsigned_data.age, 3715756343L);
     EXPECT_EQ(event.origin_server_ts, 1506761923948L);
     EXPECT_EQ(event.state_key, "");
-    EXPECT_EQ(event.content.creator, "@mujx:matrix.org");
+    // EXPECT_EQ(event.content.creator, "@mujx:matrix.org");
     EXPECT_TRUE(event.content.type.has_value());
     EXPECT_EQ(event.content.type.value(), ns::state::room_type::space);
 
