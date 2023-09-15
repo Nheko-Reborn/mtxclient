@@ -1574,6 +1574,27 @@ TEST(Ephemeral, Receipt)
     EXPECT_EQ(j.dump(), json(event).dump());
 }
 
+TEST(AccountData, Faulty)
+{
+    json j = R"(
+    [
+      {
+        "content": {
+          "@bob:example.com": [
+             "!abcdefgh:example.com",
+             "!hgfedcba:example.com"
+           ]
+         },
+         "type": ""
+      }
+     ])"_json;
+
+    mtx::responses::AccountData events;
+    EXPECT_NO_THROW(mtx::responses::utils::parse_room_account_data_events(j, events.events));
+
+    EXPECT_EQ(events.events.size(), 0);
+}
+
 TEST(AccountData, Direct)
 {
     json j = R"({

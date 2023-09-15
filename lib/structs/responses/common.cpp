@@ -102,14 +102,14 @@ parse_room_account_data_events(
     container.reserve(events.size());
 
     for (const auto &e : events) {
-        const auto type = mtx::events::getEventType(e);
-
-        // if (!e.contains("content") || e["content"].empty()) {
-        //        container.emplace_back(events::AccountDataEvent<events::msg::Redacted>(e));
-        //        break;
-        //}
-
         try {
+            const auto type = mtx::events::getEventType(e);
+
+            // if (!e.contains("content") || e["content"].empty()) {
+            //        container.emplace_back(events::AccountDataEvent<events::msg::Redacted>(e));
+            //        break;
+            //}
+
             switch (type) {
             case events::EventType::Direct: {
                 container.emplace_back(events::AccountDataEvent<Direct>(e));
@@ -229,9 +229,9 @@ parse_timeline_events(const json &events,
     container.reserve(events.size());
 
     for (const auto &e : events) {
-        const auto type = mtx::events::getEventType(e);
-
         try {
+            const auto type = mtx::events::getEventType(e);
+
             if (e.contains("unsigned") && e["unsigned"].contains("redacted_by")) {
                 if (e.contains("state_key"))
                     container.emplace_back(events::StateEvent<events::msg::Redacted>(e));
@@ -546,9 +546,9 @@ parse_device_events(const json &events,
     container.clear();
     container.reserve(events.size());
     for (const auto &e : events) {
-        const auto type = mtx::events::getEventType(e);
-
         try {
+            const auto type = mtx::events::getEventType(e);
+
             switch (type) {
             case events::EventType::RoomEncrypted: {
                 const auto algo = e.at("content").at("algorithm").get<std::string>();
@@ -645,9 +645,9 @@ parse_state_events(const json &events,
     container.reserve(events.size());
 
     for (const auto &e : events) {
-        const auto type = mtx::events::getEventType(e);
-
         try {
+            const auto type = mtx::events::getEventType(e);
+
             if (e.contains("unsigned") && e["unsigned"].contains("redacted_by")) {
                 container.emplace_back(events::StateEvent<events::msg::Redacted>(e));
                 continue;
@@ -827,9 +827,9 @@ parse_stripped_events(const json &events,
     container.reserve(events.size());
 
     for (const auto &e : events) {
-        const auto type = mtx::events::getEventType(e);
-
         try {
+            const auto type = mtx::events::getEventType(e);
+
             switch (type) {
             case events::EventType::RoomAliases: {
                 container.emplace_back(events::StrippedEvent<mtx::events::state::Aliases>(e));
@@ -996,9 +996,9 @@ parse_ephemeral_events(const json &events,
     container.clear();
     container.reserve(events.size());
     for (const auto &e : events) {
-        const auto type = mtx::events::getEventType(e);
-
         try {
+            const auto type = mtx::events::getEventType(e);
+
             switch (type) {
             case events::EventType::Typing: {
                 container.emplace_back(events::EphemeralEvent<events::ephemeral::Typing>(e));
