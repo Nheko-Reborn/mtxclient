@@ -989,7 +989,7 @@ Client::report_event(const std::string &room_id,
     nlohmann::json body = nlohmann::json::object();
     if (!reason.empty())
         body["reason"] = reason;
-    if (score <= 0 && score <= -100)
+    if (score <= 0 && score >= -100)
         body["score"] = score;
 
     put<nlohmann::json, mtx::responses::Empty>(
