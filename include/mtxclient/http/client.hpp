@@ -464,6 +464,13 @@ public:
                       Callback<mtx::responses::EventId> cb,
                       const std::string &reason = "");
 
+    //! Report an event to the server adminstrator.
+    //! @param score Must be between 0 and -100.
+    void report_event(const std::string &room_id,
+                      const std::string &event_id,
+                      const std::string &reason,
+                      const int score);
+
     //! Upload a filter
     void upload_filter(const nlohmann::json &j, Callback<mtx::responses::FilterId> cb);
 
