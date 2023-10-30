@@ -35,7 +35,7 @@ struct QueryKeys
     //! If any remote homeservers could not be reached, they are
     //! recorded here. The names of the properties are the names
     //! of the unreachable servers.
-    std::map<std::string, nlohmann::json> failures;
+    std::map<std::string, std::string> failures;
     //! Information on the queried devices.
     //! A map from user ID, to a map from device ID to device information.
     //! For each device, the information returned will be the same
@@ -67,7 +67,7 @@ struct ClaimKeys
     //! If any remote homeservers could not be reached, they are
     //! recorded here. The names of the properties are the names
     //! of the unreachable servers.
-    std::map<std::string, nlohmann::json> failures;
+    std::map<std::string, std::string> failures;
     //! One-time keys for the queried devices. A map from user ID,
     //! to a map from <algorithm>:<key_id> to the key object.
     std::map<std::string, std::map<std::string, nlohmann::json>> one_time_keys;
