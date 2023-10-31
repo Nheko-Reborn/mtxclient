@@ -236,7 +236,7 @@ from_json(const json &obj, CallNegotiate &content)
     content.call_id     = obj.at("call_id").get<std::string>();
     content.party_id    = obj.at("party_id").get<std::string>();
     content.lifetime    = obj.at("lifetime").get<uint32_t>();
-    content.description = obj.at("description");
+    content.description = obj.at("description").get<RTCSessionDescriptionInit>();
 }
 
 void

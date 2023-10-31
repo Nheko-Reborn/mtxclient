@@ -1,23 +1,13 @@
 hunter_config(
-    OpenSSL
-    VERSION 1.1.1j
-)
-
-hunter_config(
-    Libevent
-    VERSION 2.1.8-p4
-)
-
-hunter_config(
     nlohmann_json
-    VERSION 3.8.0
+    VERSION 3.11.2
     CMAKE_ARGS JSON_MultipleHeaders=ON
 )
 
 if (WIN32)
     hunter_config(
         CURL
-        VERSION 7.74.0-p2
+        VERSION 8.4.0-p0
         CMAKE_ARGS
             CMAKE_USE_SCHANNEL=ON
             BUILD_CURL_TESTS=OFF
@@ -29,7 +19,7 @@ if (WIN32)
 else()
     hunter_config(
         CURL
-        VERSION 7.74.0-p2
+        VERSION 8.4.0-p0
         CMAKE_ARGS
             CMAKE_USE_SCHANNEL=OFF
             BUILD_CURL_TESTS=OFF
