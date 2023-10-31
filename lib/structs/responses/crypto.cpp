@@ -9,7 +9,7 @@ void
 from_json(const nlohmann::json &obj, UploadKeys &response)
 {
     response.one_time_key_counts =
-      obj.at("one_time_key_counts").get<std::map<std::string, uint32_t>>();
+      obj.at("one_time_key_counts").get<std::map<std::string, uint32_t, std::less<>>>();
 }
 
 void

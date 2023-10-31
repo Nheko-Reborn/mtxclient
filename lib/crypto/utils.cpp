@@ -131,7 +131,7 @@ key_to_recoverykey(const BinaryBuf &key)
 std::string
 decrypt(const mtx::secret_storage::AesHmacSha2EncryptedData &data,
         const BinaryBuf &decryptionKey,
-        const std::string &key_name)
+        std::string_view key_name)
 {
     auto keys   = HKDF_SHA256(decryptionKey, BinaryBuf(32, 0), to_binary_buf(key_name));
     auto keyMac = HMAC_SHA256(keys.mac, to_binary_buf(base642bin(data.ciphertext)));
@@ -149,7 +149,7 @@ decrypt(const mtx::secret_storage::AesHmacSha2EncryptedData &data,
 }
 
 mtx::secret_storage::AesHmacSha2EncryptedData
-encrypt(const std::string &data, const BinaryBuf &decryptionKey, const std::string &key_name)
+encrypt(const std::string &data, const BinaryBuf &decryptionKey, std::string_view key_name)
 {
     mtx::secret_storage::AesHmacSha2EncryptedData encrypted{};
     auto iv      = compatible_iv(create_buffer(16));

@@ -22,7 +22,7 @@ struct UploadKeys
 {
     //! For each key algorithm, the number of unclaimed one-time keys
     //! of that type currently held on the server for this device.
-    std::map<std::string, uint32_t> one_time_key_counts;
+    std::map<std::string, uint32_t, std::less<>> one_time_key_counts;
 
     friend void from_json(const nlohmann::json &obj, UploadKeys &response);
 };

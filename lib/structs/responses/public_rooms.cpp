@@ -1,7 +1,6 @@
 #include <nlohmann/json.hpp>
 
 #include "mtx/common.hpp"
-#include "mtx/identifiers.hpp"
 #include "mtx/responses/common.hpp"
 #include "mtx/responses/public_rooms.hpp"
 

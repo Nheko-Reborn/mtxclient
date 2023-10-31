@@ -9,7 +9,6 @@
 #include <nlohmann/json.hpp>
 #endif
 
-#include <optional>
 #include <string>
 #include <string_view>
 

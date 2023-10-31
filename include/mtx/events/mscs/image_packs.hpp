@@ -6,6 +6,7 @@
 #include <bitset>
 #include <cstdint>
 #include <map>
+#include <optional>
 #include <string>
 
 #if __has_include(<nlohmann/json_fwd.hpp>)
@@ -14,7 +15,7 @@
 #include <nlohmann/json.hpp>
 #endif
 
-#include "mtx/events.hpp"
+#include "mtx/events/common.hpp"
 
 namespace mtx {
 namespace events {
@@ -43,12 +44,12 @@ struct PackImage
     std::bitset<2> usage;
 
     //! If this overrides the pack level usage definition.
-    bool overrides_usage() const { return usage.any(); }
+    [[nodiscard]] bool overrides_usage() const { return usage.any(); }
 
     //! If this can be used as an emoji/emojicon.
-    bool is_emoji() const { return usage.test(PackUsage::Emoji); }
+    [[nodiscard]] bool is_emoji() const { return usage.test(PackUsage::Emoji); }
     //! If this can be used as a sticker.
-    bool is_sticker() const { return usage.test(PackUsage::Sticker); }
+    [[nodiscard]] bool is_sticker() const { return usage.test(PackUsage::Sticker); }
 };
 
 //! A pack of stickers and/or emoticons.
@@ -71,9 +72,12 @@ struct ImagePack
         std::bitset<2> usage;
 
         //! If this can be used as an emoji/emojicon.
-        bool is_emoji() const { return usage.none() || usage.test(PackUsage::Emoji); }
+        [[nodiscard]] bool is_emoji() const { return usage.none() || usage.test(PackUsage::Emoji); }
         //! If this can be used as a sticker.
-        bool is_sticker() const { return usage.none() || usage.test(PackUsage::Sticker); }
+        [[nodiscard]] bool is_sticker() const
+        {
+            return usage.none() || usage.test(PackUsage::Sticker);
+        }
     };
 
     //! Information about this pack

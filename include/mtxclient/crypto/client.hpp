@@ -6,7 +6,6 @@
 
 #include <exception>
 #include <memory>
-#include <new>
 
 #if __has_include(<nlohmann/json_fwd.hpp>)
 #include <nlohmann/json_fwd.hpp>

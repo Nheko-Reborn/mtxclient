@@ -10,7 +10,7 @@ namespace {
 std::string
 version(const json &obj)
 {
-    auto v = obj.at("version");
+    const auto &v = obj.at("version");
     return v.is_number() ? "0" : v.get<std::string>();
 }
 

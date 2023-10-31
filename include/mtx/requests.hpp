@@ -8,6 +8,8 @@
 
 #include <mtx/common.hpp>
 #include <mtx/events/collections.hpp>
+#include <mtx/identifiers.hpp>
+
 #if __has_include(<nlohmann/json_fwd.hpp>)
 #include <nlohmann/json_fwd.hpp>
 #else

@@ -1,6 +1,4 @@
 #include "mtx/requests.hpp"
-#include "mtx/events/collections.hpp"
-#include "mtx/events/encrypted.hpp"
 
 #include <nlohmann/json.hpp>
 

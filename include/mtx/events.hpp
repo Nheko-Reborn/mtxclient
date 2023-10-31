@@ -12,7 +12,6 @@
 #include "mtx/events/event_type.hpp"
 #include "mtx/events/messages/image.hpp"
 #include "mtx/events/redaction.hpp"
-#include "mtx/identifiers.hpp"
 
 //! Top level namespace for mtxclient
 namespace mtx {

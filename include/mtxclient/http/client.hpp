@@ -9,11 +9,10 @@
 #include <nlohmann/json.hpp>
 #endif
 
-#include "mtx/errors.hpp"             // for Error
-#include "mtx/events.hpp"             // for EventType, to_string, json
 #include "mtx/events/collections.hpp" // for TimelineEvents
-#include "mtx/identifiers.hpp"        // for User
-#include "mtx/identifiers.hpp"        // for Class user
+#include "mtx/events/presence.hpp"
+#include "mtx/identifiers.hpp" // for User
+#include "mtx/identifiers.hpp" // for Class user
 #include "mtx/pushrules.hpp"
 #include "mtx/requests.hpp"
 #include "mtx/responses/empty.hpp" // for Empty, Logout, RoomInvite
@@ -748,23 +747,23 @@ public:
     //
 
     //! Retrieve a specific secret
-    void secret_storage_secret(const std::string &secret_id,
+    void secret_storage_secret(std::string_view secret_id,
                                Callback<mtx::secret_storage::Secret> cb);
     //! Retrieve information about a key
-    void secret_storage_key(const std::string &key_id,
+    void secret_storage_key(std::string_view key_id,
                             Callback<mtx::secret_storage::AesHmacSha2KeyDescription> cb);
 
     //! Upload a specific secret
-    void upload_secret_storage_secret(const std::string &secret_id,
+    void upload_secret_storage_secret(std::string_view secret_id,
                                       const mtx::secret_storage::Secret &secret,
                                       ErrCallback cb);
     //! Upload information about a key
-    void upload_secret_storage_key(const std::string &key_id,
+    void upload_secret_storage_key(std::string_view key_id,
                                    const mtx::secret_storage::AesHmacSha2KeyDescription &desc,
                                    ErrCallback cb);
 
     //! Set the default key for the secret storage
-    void set_secret_storage_default_key(const std::string &key_id, ErrCallback cb);
+    void set_secret_storage_default_key(std::string_view key_id, ErrCallback cb);
 
     //! Gets any TURN server URIs and authentication credentials
     void get_turn_server(Callback<mtx::responses::TurnServer> cb);

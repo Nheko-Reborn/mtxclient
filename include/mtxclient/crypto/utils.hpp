@@ -5,6 +5,7 @@
 
 #include <cstdint>
 #include <string>
+#include <string_view>
 #include <vector>
 
 #include "mtx/common.hpp"
@@ -18,13 +19,13 @@ namespace crypto {
 class crypto_exception : public std::exception
 {
 public:
-    crypto_exception(std::string func, const char *msg)
+    crypto_exception(const std::string &func, const char *msg)
       : msg_(func + ": " + std::string(msg))
     {
     }
 
     //! Describes the error
-    const char *what() const noexcept override { return msg_.c_str(); }
+    [[nodiscard]] const char *what() const noexcept override { return msg_.c_str(); }
 
 private:
     std::string msg_;
@@ -42,7 +43,7 @@ create_buffer(std::size_t nbytes);
 
 //! Convert a string to a binary buffer.
 inline BinaryBuf
-to_binary_buf(const std::string &str)
+to_binary_buf(std::string_view str)
 {
     return BinaryBuf(reinterpret_cast<const uint8_t *>(str.data()),
                      reinterpret_cast<const uint8_t *>(str.data()) + str.size());
@@ -85,11 +86,11 @@ key_from_recoverykey(const std::string &recoverkey,
 std::string
 decrypt(const mtx::secret_storage::AesHmacSha2EncryptedData &data,
         const BinaryBuf &decryptionKey,
-        const std::string &key_name);
+        std::string_view key_name);
 
 //! Encrypt a secret for SSSS
 mtx::secret_storage::AesHmacSha2EncryptedData
-encrypt(const std::string &data, const BinaryBuf &decryptionKey, const std::string &key_name);
+encrypt(const std::string &data, const BinaryBuf &decryptionKey, std::string_view key_name);
 
 //! HKDF key derivation with SHA256 digest
 struct HkdfKeys

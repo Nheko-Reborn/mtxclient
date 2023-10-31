@@ -9,8 +9,6 @@
 #include <nlohmann/json.hpp>
 #endif
 
-#include <string>
-
 #include "mtx/events/common.hpp"
 
 namespace mtx {

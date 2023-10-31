@@ -2,9 +2,6 @@
 #include "mtx/log.hpp"
 #include "mtxclient/http/client_impl.hpp"
 
-#include <mutex>
-#include <thread>
-
 #include <nlohmann/json.hpp>
 
 #include <coeurl/client.hpp>
@@ -1604,8 +1601,7 @@ Client::put_room_keys(const std::string &version,
 
 //! Retrieve a specific secret
 void
-Client::secret_storage_secret(const std::string &secret_id,
-                              Callback<mtx::secret_storage::Secret> cb)
+Client::secret_storage_secret(std::string_view secret_id, Callback<mtx::secret_storage::Secret> cb)
 {
     get<mtx::secret_storage::Secret>(
       "/client/v3/user/" + mtx::client::utils::url_encode(user_id_.to_string()) + "/account_data/" +
@@ -1616,7 +1612,7 @@ Client::secret_storage_secret(const std::string &secret_id,
 }
 //! Retrieve information about a key
 void
-Client::secret_storage_key(const std::string &key_id,
+Client::secret_storage_key(std::string_view key_id,
                            Callback<mtx::secret_storage::AesHmacSha2KeyDescription> cb)
 {
     get<mtx::secret_storage::AesHmacSha2KeyDescription>(
@@ -1629,7 +1625,7 @@ Client::secret_storage_key(const std::string &key_id,
 
 //! Upload a specific secret
 void
-Client::upload_secret_storage_secret(const std::string &secret_id,
+Client::upload_secret_storage_secret(std::string_view secret_id,
                                      const mtx::secret_storage::Secret &secret,
                                      ErrCallback cb)
 {
@@ -1641,7 +1637,7 @@ Client::upload_secret_storage_secret(const std::string &secret_id,
 
 //! Upload information about a key
 void
-Client::upload_secret_storage_key(const std::string &key_id,
+Client::upload_secret_storage_key(std::string_view key_id,
                                   const mtx::secret_storage::AesHmacSha2KeyDescription &desc,
                                   ErrCallback cb)
 {
@@ -1652,7 +1648,7 @@ Client::upload_secret_storage_key(const std::string &key_id,
 }
 
 void
-Client::set_secret_storage_default_key(const std::string &key_id, ErrCallback cb)
+Client::set_secret_storage_default_key(std::string_view key_id, ErrCallback cb)
 {
     nlohmann::json key = {{"key", key_id}};
     put("/client/v3/user/" + mtx::client::utils::url_encode(user_id_.to_string()) +

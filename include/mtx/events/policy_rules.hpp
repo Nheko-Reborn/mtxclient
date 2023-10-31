@@ -26,7 +26,6 @@
 /// string which describes the recommendation. Currently only one recommendation, m.ban, is
 /// specified.
 
-#include <optional>
 #include <string_view>
 
 #if __has_include(<nlohmann/json_fwd.hpp>)

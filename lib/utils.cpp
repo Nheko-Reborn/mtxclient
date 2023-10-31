@@ -90,7 +90,7 @@ mtx::client::utils::query_params(const std::map<std::string, std::string> &param
 }
 
 std::string
-mtx::client::utils::url_encode(const std::string &value) noexcept
+mtx::client::utils::url_encode(std::string_view value) noexcept
 {
     // https: // stackoverflow.com/questions/154536/encode-decode-urls-in-c
     std::ostringstream escaped;
