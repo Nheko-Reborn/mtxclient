@@ -2000,8 +2000,8 @@ TEST(RoomAccountData, NhekoHiddenEvents)
     json data = R"({
           "content": {
               "hidden_event_types": [
-	          "m.reaction",
-		  "m.room.member"
+              "m.reaction",
+              "m.room.member"
 	      ]
           },
           "type": "im.nheko.hidden_events"
@@ -2015,6 +2015,21 @@ TEST(RoomAccountData, NhekoHiddenEvents)
     ASSERT_EQ(event.content.hidden_event_types->size(), 2);
     EXPECT_EQ(event.content.hidden_event_types.value()[0], ns::EventType::Reaction);
     EXPECT_EQ(event.content.hidden_event_types.value()[1], ns::EventType::RoomMember);
+
+    json data2 = R"({
+          "content": {
+              "hidden_event_types": [
+              ""
+	      ]
+          },
+          "type": "im.nheko.hidden_events"
+        })"_json;
+    ns::AccountDataEvent<ns::account_data::nheko_extensions::HiddenEvents> event2 =
+      data2.get<ns::AccountDataEvent<ns::account_data::nheko_extensions::HiddenEvents>>();
+    ASSERT_TRUE(event2.content.hidden_event_types.has_value());
+    ASSERT_EQ(event2.content.hidden_event_types.value().size(), 1);
+    EXPECT_EQ(event2.content.hidden_event_types.value().front(),
+              mtx::events::EventType::Unsupported);
 }
 
 TEST(RoomAccountData, NhekoEventExpiry)
