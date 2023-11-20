@@ -3,16 +3,8 @@ include_directories(../tests)
 add_executable(room_feed room_feed.cpp)
 target_link_libraries(room_feed MatrixClient::MatrixClient)
 
-include(CheckIncludeFileCXX)
-CHECK_INCLUDE_FILE_CXX("filesystem" HAVE_STD_FILESYSTEM)
-
-if (HAVE_STD_FILESYSTEM)
-  add_executable(media_downloader media_downloader.cpp)
-  target_link_libraries(media_downloader MatrixClient::MatrixClient)
-  if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    target_link_libraries(media_downloader stdc++fs)
-  endif()
-endif()
+add_executable(media_downloader media_downloader.cpp)
+target_link_libraries(media_downloader MatrixClient::MatrixClient)
 
 add_executable(memberstats memberstats.cpp)
 target_link_libraries(memberstats MatrixClient::MatrixClient)
