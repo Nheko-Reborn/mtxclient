@@ -38,6 +38,7 @@ from_json(const json &obj, URLPreview &res)
     res.title = obj.at("og:title").get<std::string>();
     res.url   = obj.at("og:url").get<std::string>();
     extractOptionalAttribute(obj, "og:site_name", res.site_name);
+    extractOptionalAttribute(obj, "og:description", res.description);
 
     extractOptionalAttribute(obj, "og:image:type", res.image.type);
     extractOptionalAttribute(obj, "og:image:width", res.image.width);
@@ -46,10 +47,6 @@ from_json(const json &obj, URLPreview &res)
 
     res.image.size = obj.at("matrix:image:size").get<std::uint64_t>();
     res.image.url  = obj.at("og:image").get<std::string>();
-
-    if (obj.contains("og:description")) {
-        res.description = obj.at("og:description").get<std::string>();
-    }
 }
 }
 }
