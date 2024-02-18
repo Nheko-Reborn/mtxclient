@@ -729,6 +729,27 @@ Client::download(const std::string &mxc_url,
 }
 
 void
+Client::preview_url(const std::optional<std::int64_t> &timestamp,
+                    const std::string &url,
+                    Callback<mtx::responses::URLPreview> callback)
+{
+    std::map<std::string, std::string> params;
+
+    if (timestamp) {
+        params.emplace("ts", std::to_string(*timestamp));
+    }
+
+    params.emplace("url", url);
+
+    const auto api_path = "/media/v3/preview_url?" + client::utils::query_params(params);
+    get<mtx::responses::URLPreview>(
+      api_path,
+      [callback = std::move(callback)](const mtx::responses::URLPreview &res,
+                                       HeaderFields,
+                                       RequestErr err) { callback(res, err); });
+}
+
+void
 Client::get_thumbnail(const ThumbOpts &opts, Callback<std::string> callback, bool try_download)
 {
     std::map<std::string, std::string> params;

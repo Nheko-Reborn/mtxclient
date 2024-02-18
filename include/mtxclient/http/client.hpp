@@ -55,6 +55,7 @@ struct Available;
 struct AvatarUrl;
 struct ClaimKeys;
 struct ContentURI;
+struct URLPreview;
 struct CreateRoom;
 struct Device;
 struct EventId;
@@ -490,6 +491,9 @@ public:
                                      const std::string &content_type,
                                      const std::string &original_filename,
                                      RequestErr err)> cb);
+    void preview_url(const std::optional<std::int64_t> &timestamp,
+                     const std::string &url,
+                     Callback<mtx::responses::URLPreview> cb);
     std::string mxc_to_download_url(const std::string &mxc_url);
 
     //! Retrieve a thumbnail from the given mxc url.
