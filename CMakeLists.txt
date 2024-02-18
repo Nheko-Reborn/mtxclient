@@ -15,8 +15,8 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON CACHE BOOL "compile as PIC by default")
 option(HUNTER_ENABLED "Enable Hunter package manager" OFF)
 include("cmake/HunterGate.cmake")
 HunterGate(
-    URL "https://github.com/cpp-pm/hunter/archive/v0.24.8.tar.gz"
-    SHA1 "ca7838dded9a1811b04ffd56175f629e0af82d3d"
+    URL "https://github.com/cpp-pm/hunter/archive/v0.25.2.tar.gz"
+    SHA1 "560c000d5b6c972d41c2caf44f24189c868cc404"
     LOCAL
 )
 
@@ -121,7 +121,7 @@ endif()
 if(USE_BUNDLED_JSON)
 	hunter_add_package(nlohmann_json)
 endif()
-find_package(nlohmann_json 3.2.0 CONFIG REQUIRED)
+find_package(nlohmann_json 3.11.0 CONFIG REQUIRED)
 set_package_properties(nlohmann_json PROPERTIES
 	DESCRIPTION "JSON for Modern C++, a C++11 header-only JSON class"
 	URL "https://nlohmann.github.io/json/"
@@ -180,7 +180,7 @@ if(USE_BUNDLED_COEURL)
 	FetchContent_Declare(
 		coeurl
 		GIT_REPOSITORY https://nheko.im/Nheko-Reborn/coeurl.git
-		GIT_TAG        v0.3.0
+		GIT_TAG        831e2ee8e9cf08ea1ee9736cde8370f9d0312abc
 		)
 	FetchContent_MakeAvailable(coeurl)
 	target_link_libraries(matrix_client PUBLIC coeurl::coeurl)

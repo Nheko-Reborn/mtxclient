@@ -1,6 +1,5 @@
 [wrap-git]
 directory = Olm
 url = https://git.matrix.org/git/olm.git
-revision = 3.2.7
-buildsystem = cmake
+revision = 3.2.16
 

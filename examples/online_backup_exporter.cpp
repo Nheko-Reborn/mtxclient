@@ -1,10 +1,11 @@
 #include <fstream>
 #include <iostream>
-#include <variant>
+#include <string>
 
 #include <unistd.h>
 
-#include "mtx.hpp"
+#include "mtx/responses/crypto.hpp"
+#include "mtx/responses/login.hpp"
 #include "mtxclient/crypto/client.hpp"
 #include "mtxclient/crypto/types.hpp"
 #include "mtxclient/crypto/utils.hpp"
@@ -48,11 +49,11 @@ void
 login_handler(const mtx::responses::Login &res, RequestErr err)
 {
     if (err) {
-        cerr << "There was an error during login: " << err->matrix_error.error << "\n";
+        std::cerr << "There was an error during login: " << err->matrix_error.error << "\n";
         return;
     }
 
-    cout << "Logged in as: " << res.user_id.to_string() << "\n";
+    std::cout << "Logged in as: " << res.user_id.to_string() << "\n";
 
     SyncOpts opts;
     opts.timeout = 0;
@@ -74,7 +75,8 @@ login_handler(const mtx::responses::Login &res, RequestErr err)
               return;
           }
           client->room_keys(
-            backup_version.version, [](mtx::responses::backup::KeysBackup backup, RequestErr err) {
+            backup_version.version,
+            [](const mtx::responses::backup::KeysBackup &backup, RequestErr err) {
                 if (err) {
                     cerr << "Error fetching the backup: ";
                     print_errors(err);
@@ -102,7 +104,8 @@ login_handler(const mtx::responses::Login &res, RequestErr err)
                       client->secret_storage_key(
                         secret.encrypted.begin()->first,
                         [backup, secretData = secret.encrypted.begin()->second](
-                          mtx::secret_storage::AesHmacSha2KeyDescription keyDesc, RequestErr err) {
+                          const mtx::secret_storage::AesHmacSha2KeyDescription &keyDesc,
+                          RequestErr err) {
                             client->logout([](mtx::responses::Logout, RequestErr) {});
                             if (err) {
                                 cerr << "Error fetching the backup key "

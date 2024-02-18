@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "mtx/events/collections.hpp"
+#include "mtx/events/presence.hpp"
 
 #if __has_include(<nlohmann/json_fwd.hpp>)
 #include <nlohmann/json_fwd.hpp>

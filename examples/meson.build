@@ -4,13 +4,11 @@ room_feed = executable('room_feed',
     include_directories : '../tests'
     )
 
-if meson.get_compiler('cpp').has_header('filesystem')
 media_downloader = executable('media_downloader',
     'media_downloader.cpp',
     dependencies: [matrix_client_dep],
     include_directories : '../tests'
     )
-endif
 
 simple_bot = executable('memberstats',
     'memberstats.cpp',

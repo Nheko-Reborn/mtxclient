@@ -2,9 +2,6 @@
 #include "mtx/log.hpp"
 #include "mtxclient/http/client_impl.hpp"
 
-#include <mutex>
-#include <thread>
-
 #include <nlohmann/json.hpp>
 
 #include <coeurl/client.hpp>
@@ -732,6 +729,27 @@ Client::download(const std::string &mxc_url,
 }
 
 void
+Client::preview_url(const std::optional<std::int64_t> &timestamp,
+                    const std::string &url,
+                    Callback<mtx::responses::URLPreview> callback)
+{
+    std::map<std::string, std::string> params;
+
+    if (timestamp) {
+        params.emplace("ts", std::to_string(*timestamp));
+    }
+
+    params.emplace("url", url);
+
+    const auto api_path = "/media/v3/preview_url?" + client::utils::query_params(params);
+    get<mtx::responses::URLPreview>(
+      api_path,
+      [callback = std::move(callback)](const mtx::responses::URLPreview &res,
+                                       HeaderFields,
+                                       RequestErr err) { callback(res, err); });
+}
+
+void
 Client::get_thumbnail(const ThumbOpts &opts, Callback<std::string> callback, bool try_download)
 {
     std::map<std::string, std::string> params;
@@ -976,6 +994,26 @@ Client::redact_event(const std::string &room_id,
     }
 
     put<nlohmann::json, mtx::responses::EventId>(api_path, body, std::move(callback));
+}
+
+void
+Client::report_event(const std::string &room_id,
+                     const std::string &event_id,
+                     const std::string &reason,
+                     const int score)
+{
+    const auto api_path = "/client/v3/rooms" + mtx::client::utils::url_encode(room_id) +
+                          "/report/" + mtx::client::utils::url_encode(event_id);
+    nlohmann::json body = nlohmann::json::object();
+    if (!reason.empty())
+        body["reason"] = reason;
+    if (score <= 0 && score >= -100)
+        body["score"] = score;
+
+    put<nlohmann::json, mtx::responses::Empty>(
+      api_path,
+      body,
+      [](const mtx::responses::Empty &, const std::optional<mtx::http::ClientError> &) {});
 }
 
 void
@@ -1584,8 +1622,7 @@ Client::put_room_keys(const std::string &version,
 
 //! Retrieve a specific secret
 void
-Client::secret_storage_secret(const std::string &secret_id,
-                              Callback<mtx::secret_storage::Secret> cb)
+Client::secret_storage_secret(std::string_view secret_id, Callback<mtx::secret_storage::Secret> cb)
 {
     get<mtx::secret_storage::Secret>(
       "/client/v3/user/" + mtx::client::utils::url_encode(user_id_.to_string()) + "/account_data/" +
@@ -1596,7 +1633,7 @@ Client::secret_storage_secret(const std::string &secret_id,
 }
 //! Retrieve information about a key
 void
-Client::secret_storage_key(const std::string &key_id,
+Client::secret_storage_key(std::string_view key_id,
                            Callback<mtx::secret_storage::AesHmacSha2KeyDescription> cb)
 {
     get<mtx::secret_storage::AesHmacSha2KeyDescription>(
@@ -1609,7 +1646,7 @@ Client::secret_storage_key(const std::string &key_id,
 
 //! Upload a specific secret
 void
-Client::upload_secret_storage_secret(const std::string &secret_id,
+Client::upload_secret_storage_secret(std::string_view secret_id,
                                      const mtx::secret_storage::Secret &secret,
                                      ErrCallback cb)
 {
@@ -1621,7 +1658,7 @@ Client::upload_secret_storage_secret(const std::string &secret_id,
 
 //! Upload information about a key
 void
-Client::upload_secret_storage_key(const std::string &key_id,
+Client::upload_secret_storage_key(std::string_view key_id,
                                   const mtx::secret_storage::AesHmacSha2KeyDescription &desc,
                                   ErrCallback cb)
 {
@@ -1632,7 +1669,7 @@ Client::upload_secret_storage_key(const std::string &key_id,
 }
 
 void
-Client::set_secret_storage_default_key(const std::string &key_id, ErrCallback cb)
+Client::set_secret_storage_default_key(std::string_view key_id, ErrCallback cb)
 {
     nlohmann::json key = {{"key", key_id}};
     put("/client/v3/user/" + mtx::client::utils::url_encode(user_id_.to_string()) +

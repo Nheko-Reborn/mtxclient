@@ -4,9 +4,9 @@
 /// @brief Various utility functions for http requests.
 
 #include <cstdint>
-#include <iosfwd>
 #include <map>
 #include <string>
+#include <string_view>
 
 namespace mtx {
 namespace client {
@@ -40,7 +40,7 @@ query_params(const std::map<std::string, std::string> &params) noexcept;
 
 //! URL-encode the input string.
 std::string
-url_encode(const std::string &s) noexcept;
+url_encode(std::string_view s) noexcept;
 }
 }
 }

@@ -1,5 +1,4 @@
 #include <nlohmann/json.hpp>
-#include <string>
 
 #include "mtx/events/reaction.hpp"
 

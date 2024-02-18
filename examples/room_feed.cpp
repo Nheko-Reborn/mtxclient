@@ -73,7 +73,7 @@ get_body(const TimelineEvent &e)
 std::string
 get_sender(const TimelineEvent &event)
 {
-    return std::visit([](auto e) { return e.sender; }, event);
+    return std::visit([](const auto &e) { return e.sender; }, event);
 }
 
 // Simple print of the message contents.

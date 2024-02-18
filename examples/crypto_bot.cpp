@@ -540,14 +540,14 @@ get_body(const TimelineEvent &e)
 std::string
 get_sender(const TimelineEvent &event)
 {
-    return std::visit([](auto e) { return e.sender; }, event);
+    return std::visit([](const auto &e) { return e.sender; }, event);
 }
 
 template<class T>
 std::string
 get_json(const T &event)
 {
-    return std::visit([](auto e) { return nlohmann::json(e).dump(2); }, event);
+    return std::visit([](const auto &e) { return nlohmann::json(e).dump(2); }, event);
 }
 
 void

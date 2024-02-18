@@ -135,6 +135,8 @@ getEventType(const std::string &type)
         return EventType::ImagePackInAccountData;
     else if (type == "im.ponies.emote_rooms")
         return EventType::ImagePackRooms;
+    else if (type == "")
+        throw std::invalid_argument("Empty event type");
     else
         return EventType::Unsupported;
 }

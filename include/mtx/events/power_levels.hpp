@@ -46,7 +46,7 @@ inline constexpr std::string_view room = "room";
 struct PowerLevels
 {
     //! Returns the power_level for a given event type.
-    inline power_level_t event_level(const std::string &event_type) const
+    [[nodiscard]] inline power_level_t event_level(const std::string &event_type) const
     {
         if (events.find(event_type) == events.end())
             return events_default;
@@ -55,7 +55,7 @@ struct PowerLevels
     }
 
     //! Returns the power_level for a given event type.
-    inline power_level_t state_level(const std::string &event_type) const
+    [[nodiscard]] inline power_level_t state_level(const std::string &event_type) const
     {
         if (events.find(event_type) == events.end())
             return state_default;
@@ -64,7 +64,7 @@ struct PowerLevels
     }
 
     //! Returns the power_level for a given user id.
-    inline power_level_t user_level(const std::string &user_id) const
+    [[nodiscard]] inline power_level_t user_level(const std::string &user_id) const
     {
         if (users.find(user_id) == users.end())
             return users_default;
@@ -72,7 +72,7 @@ struct PowerLevels
         return users.at(user_id);
     }
 
-    inline power_level_t notification_level(std::string_view notification_key) const
+    [[nodiscard]] inline power_level_t notification_level(std::string_view notification_key) const
     {
         if (auto it = notifications.find(notification_key); it != notifications.end())
             return it->second;

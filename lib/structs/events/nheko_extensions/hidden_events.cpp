@@ -2,6 +2,8 @@
 
 #include <nlohmann/json.hpp>
 
+#include <mtx/log.hpp>
+
 namespace mtx {
 namespace events {
 namespace account_data {
@@ -13,8 +15,17 @@ from_json(const nlohmann::json &obj, HiddenEvents &content)
     if (obj.contains("hidden_event_types")) {
         content.hidden_event_types = std::vector<EventType>{};
         for (const auto &typeStr : obj.at("hidden_event_types")) {
-            auto type = getEventType(typeStr.get<std::string>());
-            content.hidden_event_types->push_back(type);
+            auto type_ = typeStr.get<std::string>();
+            if (type_ == "") {
+                content.hidden_event_types->push_back(mtx::events::EventType::Unsupported);
+            } else {
+                try {
+                    auto type = getEventType(type_);
+                    content.hidden_event_types->push_back(type);
+                } catch (...) {
+                    utils::log::log()->warn("Ignoring unknown event type to ignore: {}", type_);
+                }
+            }
         }
     }
 }

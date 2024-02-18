@@ -37,8 +37,13 @@ inline constexpr std::string_view exp_policy = "support.feline.policy.lists.msc.
 //! It acts as the root of all other events.
 struct Create
 {
-    //! The `user_id` of the room creator. This is set by the homeserver.
-    std::string creator;
+    // The create field is removed in room version 11. We remove the field instead of deprecating
+    // it, since it seems to cause warnings in EVERY generated destructor or copy constructor and
+    // using the sender is easy enough.
+
+    // The `user_id` of the room creator. This is set by the homeserver.
+    //[[deprecated("Removed in future room versions, check the sender instead")]] std::string
+    // creator;
 
     //! The room type, for example `m.space` for spaces.
     std::optional<std::string> type;

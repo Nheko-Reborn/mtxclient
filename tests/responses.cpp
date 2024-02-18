@@ -1721,3 +1721,48 @@ TEST(Response, Users)
     EXPECT_EQ(users.results[0].user_id, "@foo:bar.com");
     EXPECT_EQ(users.limited, false);
 }
+
+TEST(Response, PreviewURL)
+{
+    // Tests with both actual numbers and strings containing them, as both may be returned
+    json fullData = R"({
+          "og:title": "Example",
+          "og:url": "https://example.org",
+          "og:image:type": "image/png",
+          "og:image:width": 12345,
+          "og:image:height": 12345,
+          "og:image:alt": "Alt text",
+          "og:image": "mxc://example.org/abc",
+          "matrix:image:size": 12345,
+          "og:description": "Description",
+          "og:site_name": "example.org"
+        })"_json;
+
+    URLPreview full = fullData.get<URLPreview>();
+    ASSERT_EQ(full.title, "Example");
+    ASSERT_EQ(full.url, "https://example.org");
+    ASSERT_EQ(full.image.type, "image/png");
+    ASSERT_EQ(full.image.width, 12345);
+    ASSERT_EQ(full.image.height, 12345);
+    ASSERT_EQ(full.image.alt, "Alt text");
+    ASSERT_EQ(full.image.url, "mxc://example.org/abc");
+    ASSERT_EQ(full.image.size, 12345);
+    ASSERT_TRUE(full.site_name);
+    ASSERT_TRUE(full.description);
+    ASSERT_EQ(*full.description, "Description");
+    ASSERT_EQ(*full.site_name, "example.org");
+
+    json minData   = R"({
+          "og:title": "Example",
+          "og:url": "https://example.org",
+          "og:image": "mxc://example.org/abc",
+          "matrix:image:size": 12345
+        })"_json;
+    URLPreview min = minData.get<URLPreview>();
+    ASSERT_EQ(min.title, "Example");
+    ASSERT_EQ(min.url, "https://example.org");
+    ASSERT_EQ(min.image.url, "mxc://example.org/abc");
+    ASSERT_EQ(min.image.size, 12345);
+    ASSERT_FALSE(min.site_name);
+    ASSERT_FALSE(min.description);
+}

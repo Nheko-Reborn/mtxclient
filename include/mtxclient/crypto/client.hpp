@@ -6,7 +6,6 @@
 
 #include <exception>
 #include <memory>
-#include <new>
 
 #if __has_include(<nlohmann/json_fwd.hpp>)
 #include <nlohmann/json_fwd.hpp>
@@ -181,10 +180,26 @@ struct SAS
     /// Map these numpers to one of the 64 emoji from the specification and let the user compare
     /// them.
     std::vector<int> generate_bytes_emoji(const std::string &info);
+
     //! Calculate MACs after verification to verify keys.
-    std::string calculate_mac(const std::string &input_data, const std::string &info);
+    //! mac_version is either hkdf-hmac-sha256 or hkdf-hmac-sha256.v2
+    //! keys are the keys to verify.
+    //! Transaction id is the transaction id of the current verification exchange.
+    //! *Device are the device ids of the respective senders.
+    mtx::events::msg::KeyVerificationMac calculate_mac(
+      std::string_view mac_version,
+      const mtx::identifiers::User &sender,
+      const std::string &senderDevice,
+      const mtx::identifiers::User &receiver,
+      const std::string &receiverDevice,
+      const std::string &transactionId,
+      const std::map<std::string, std::string> &keys);
 
 private:
+    std::string calculate_mac_v(const std::string &input_data,
+                                const std::string &info,
+                                std::string_view mac_version);
+
     SASPtr sas;
 };
 

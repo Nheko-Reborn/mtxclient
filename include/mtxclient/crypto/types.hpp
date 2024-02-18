@@ -3,6 +3,8 @@
 /// @file
 /// @brief Various type definitions for the crypto API.
 
+#include <string_view>
+
 #if __has_include(<nlohmann/json_fwd.hpp>)
 #include <nlohmann/json_fwd.hpp>
 #else
@@ -12,13 +14,13 @@
 namespace mtx {
 namespace crypto {
 //! Constant for ed25519 keys
-inline constexpr auto ED25519 = "ed25519";
+inline constexpr std::string_view ED25519 = "ed25519";
 //! Constant for curve25519 keys
-inline constexpr auto CURVE25519 = "curve25519";
+inline constexpr std::string_view CURVE25519 = "curve25519";
 //! Constant for signed curve25519 keys
-inline constexpr auto SIGNED_CURVE25519 = "signed_curve25519";
+inline constexpr std::string_view SIGNED_CURVE25519 = "signed_curve25519";
 //! The algorithm used for group messages.
-inline constexpr auto MEGOLM_ALGO = "m.megolm.v1.aes-sha2";
+inline constexpr std::string_view MEGOLM_ALGO = "m.megolm.v1.aes-sha2";
 
 //! An exported megolm group session
 struct ExportedSession
@@ -30,7 +32,7 @@ struct ExportedSession
     std::vector<std::string> forwarding_curve25519_key_chain; // currently unused.
 
     //! Required. The encryption algorithm that the session uses. Must be m.megolm.v1.aes-sha2.
-    std::string algorithm = MEGOLM_ALGO;
+    std::string algorithm = std::string(MEGOLM_ALGO);
     //! Required. The room where the session is used.
     std::string room_id;
     //! Required. The Curve25519 key of the device which initiated the session originally.

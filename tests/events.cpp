@@ -247,7 +247,7 @@ TEST(StateEvents, Create)
     EXPECT_EQ(event.unsigned_data.age, 3715756343L);
     EXPECT_EQ(event.origin_server_ts, 1506761923948L);
     EXPECT_EQ(event.state_key, "");
-    EXPECT_EQ(event.content.creator, "@mujx:matrix.org");
+    // EXPECT_EQ(event.content.creator, "@mujx:matrix.org");
 
     json example_from_spec = R"({
             "content": {
@@ -278,7 +278,7 @@ TEST(StateEvents, Create)
     EXPECT_EQ(event.unsigned_data.age, 1234);
     EXPECT_EQ(event.origin_server_ts, 1432735824653L);
     EXPECT_EQ(event.state_key, "");
-    EXPECT_EQ(event.content.creator, "@example:example.org");
+    // EXPECT_EQ(event.content.creator, "@example:example.org");
     EXPECT_EQ(event.content.federate, true);
     EXPECT_EQ(event.content.room_version, "1");
     EXPECT_EQ(event.content.predecessor->room_id, "!oldroom:example.org");
@@ -310,7 +310,7 @@ TEST(StateEvents, CreateWithType)
     EXPECT_EQ(event.unsigned_data.age, 3715756343L);
     EXPECT_EQ(event.origin_server_ts, 1506761923948L);
     EXPECT_EQ(event.state_key, "");
-    EXPECT_EQ(event.content.creator, "@mujx:matrix.org");
+    // EXPECT_EQ(event.content.creator, "@mujx:matrix.org");
     EXPECT_TRUE(event.content.type.has_value());
     EXPECT_EQ(event.content.type.value(), ns::state::room_type::space);
 
@@ -1574,6 +1574,27 @@ TEST(Ephemeral, Receipt)
     EXPECT_EQ(j.dump(), json(event).dump());
 }
 
+TEST(AccountData, Faulty)
+{
+    json j = R"(
+    [
+      {
+        "content": {
+          "@bob:example.com": [
+             "!abcdefgh:example.com",
+             "!hgfedcba:example.com"
+           ]
+         },
+         "type": ""
+      }
+     ])"_json;
+
+    mtx::responses::AccountData events;
+    EXPECT_NO_THROW(mtx::responses::utils::parse_room_account_data_events(j, events.events));
+
+    EXPECT_EQ(events.events.size(), 0);
+}
+
 TEST(AccountData, Direct)
 {
     json j = R"({
@@ -1979,8 +2000,8 @@ TEST(RoomAccountData, NhekoHiddenEvents)
     json data = R"({
           "content": {
               "hidden_event_types": [
-	          "m.reaction",
-		  "m.room.member"
+              "m.reaction",
+              "m.room.member"
 	      ]
           },
           "type": "im.nheko.hidden_events"
@@ -1994,6 +2015,21 @@ TEST(RoomAccountData, NhekoHiddenEvents)
     ASSERT_EQ(event.content.hidden_event_types->size(), 2);
     EXPECT_EQ(event.content.hidden_event_types.value()[0], ns::EventType::Reaction);
     EXPECT_EQ(event.content.hidden_event_types.value()[1], ns::EventType::RoomMember);
+
+    json data2 = R"({
+          "content": {
+              "hidden_event_types": [
+              ""
+	      ]
+          },
+          "type": "im.nheko.hidden_events"
+        })"_json;
+    ns::AccountDataEvent<ns::account_data::nheko_extensions::HiddenEvents> event2 =
+      data2.get<ns::AccountDataEvent<ns::account_data::nheko_extensions::HiddenEvents>>();
+    ASSERT_TRUE(event2.content.hidden_event_types.has_value());
+    ASSERT_EQ(event2.content.hidden_event_types.value().size(), 1);
+    EXPECT_EQ(event2.content.hidden_event_types.value().front(),
+              mtx::events::EventType::Unsupported);
 }
 
 TEST(RoomAccountData, NhekoEventExpiry)

@@ -647,25 +647,73 @@ SAS::generate_bytes_emoji(const std::string &info)
 
 //! calculates the mac based on the given input and info using the shared secret produced after
 //! `set_their_key`
+static constexpr std::string_view mac_method_alg_v1 = "hkdf-hmac-sha256";
+static constexpr std::string_view mac_method_alg_v2 = "hkdf-hmac-sha256.v2";
+
 std::string
-SAS::calculate_mac(const std::string &input_data, const std::string &info)
+SAS::calculate_mac_v(const std::string &input_data,
+                     const std::string &info,
+                     std::string_view mac_version)
 {
     auto input_data_buffer = to_binary_buf(input_data);
     auto info_buffer       = to_binary_buf(info);
     auto output_buffer     = BinaryBuf(olm_sas_mac_length(this->sas.get()));
 
-    const auto ret = olm_sas_calculate_mac(this->sas.get(),
-                                           input_data_buffer.data(),
-                                           input_data_buffer.size(),
-                                           info_buffer.data(),
-                                           info_buffer.size(),
-                                           output_buffer.data(),
-                                           output_buffer.size());
+    std::size_t ret = 0;
+    if (mac_version == mac_method_alg_v1) {
+        ret = olm_sas_calculate_mac(this->sas.get(),
+                                    input_data_buffer.data(),
+                                    input_data_buffer.size(),
+                                    info_buffer.data(),
+                                    info_buffer.size(),
+                                    output_buffer.data(),
+                                    output_buffer.size());
+    } else if (mac_version == mac_method_alg_v2) {
+        ret = olm_sas_calculate_mac_fixed_base64(this->sas.get(),
+                                                 input_data_buffer.data(),
+                                                 input_data_buffer.size(),
+                                                 info_buffer.data(),
+                                                 info_buffer.size(),
+                                                 output_buffer.data(),
+                                                 output_buffer.size());
+    } else {
+        throw olm_exception("calculate_mac unsupported mac version", this->sas.get());
+    }
 
     if (ret == olm_error())
         throw olm_exception("calculate_mac", this->sas.get());
 
     return to_string(output_buffer);
+}
+
+mtx::events::msg::KeyVerificationMac
+SAS::calculate_mac(std::string_view mac_version,
+                   const mtx::identifiers::User &sender,
+                   const std::string &senderDevice,
+                   const mtx::identifiers::User &receiver,
+                   const std::string &receiverDevice,
+                   const std::string &transactionId,
+                   const std::map<std::string, std::string> &keys)
+{
+    mtx::events::msg::KeyVerificationMac req{};
+
+    std::string info = "MATRIX_KEY_VERIFICATION_MAC" + sender.to_string() + senderDevice +
+                       receiver.to_string() + receiverDevice + transactionId;
+
+    std::string key_list;
+    bool first = true;
+    for (const auto &[key_id, key] : keys) {
+        req.mac[key_id] = this->calculate_mac_v(key, info + key_id, mac_version);
+
+        if (!first)
+            key_list += ",";
+        key_list += key_id;
+        first = false;
+    }
+
+    req.keys = this->calculate_mac_v(key_list, info + "KEY_IDS", mac_version);
+
+    return req;
 }
 
 PkSigning

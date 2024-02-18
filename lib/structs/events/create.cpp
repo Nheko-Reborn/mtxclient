@@ -26,7 +26,9 @@ to_json(json &obj, const PreviousRoom &predecessor)
 void
 from_json(const json &obj, Create &create)
 {
-    create.creator = obj.at("creator").get<std::string>();
+    // room version 11 gets rid of this field
+    // if (obj.contains("creator"))
+    //    create.creator = obj.at("creator").get<std::string>();
 
     if (obj.contains("type") && obj.at("type").is_string())
         create.type = obj.at("type").get<std::string>();
@@ -34,7 +36,7 @@ from_json(const json &obj, Create &create)
     if (obj.find("m.federate") != obj.end())
         create.federate = obj.at("m.federate").get<bool>();
 
-    // Assume room verison 1 for events where it's not specified
+    // Assume room version 1 for events where it's not specified
     if (obj.find("room_version") != obj.end())
         create.room_version = obj.at("room_version").get<std::string>();
     else
@@ -47,8 +49,8 @@ from_json(const json &obj, Create &create)
 void
 to_json(json &obj, const Create &create)
 {
-    if (!create.creator.empty())
-        obj["creator"] = create.creator;
+    // if (!create.creator.empty())
+    //     obj["creator"] = create.creator;
     obj["m.federate"] = create.federate;
     if (!create.room_version.empty())
         obj["room_version"] = create.room_version;

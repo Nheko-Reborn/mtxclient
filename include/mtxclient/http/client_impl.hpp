@@ -8,6 +8,7 @@
 
 #include "client.hpp"
 #include "mtx/log.hpp"
+#include "mtx/responses/common.hpp"
 #include "mtxclient/utils.hpp" // for random_token, url_encode, des...
 
 #include <nlohmann/json.hpp>

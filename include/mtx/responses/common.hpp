@@ -13,6 +13,7 @@
 #include <vector>
 
 #include "mtx/events/collections.hpp"
+#include "mtx/identifiers.hpp"
 
 namespace mtx {
 //! Namespace for the different types of responses.

@@ -11,7 +11,6 @@
 #include <nlohmann/json.hpp>
 #endif
 
-#include "mtx/common.hpp"
 #include "mtx/events/common.hpp"
 
 namespace mtx {

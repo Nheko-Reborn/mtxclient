@@ -3,8 +3,6 @@
 /// @file
 /// @brief A nheko specific event in account data used to delete events meeting certain criteria
 
-#include <vector>
-
 #if __has_include(<nlohmann/json_fwd.hpp>)
 #include <nlohmann/json_fwd.hpp>
 #else

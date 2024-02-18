@@ -9,11 +9,10 @@
 #include <nlohmann/json.hpp>
 #endif
 
-#include "mtx/errors.hpp"             // for Error
-#include "mtx/events.hpp"             // for EventType, to_string, json
 #include "mtx/events/collections.hpp" // for TimelineEvents
-#include "mtx/identifiers.hpp"        // for User
-#include "mtx/identifiers.hpp"        // for Class user
+#include "mtx/events/presence.hpp"
+#include "mtx/identifiers.hpp" // for User
+#include "mtx/identifiers.hpp" // for Class user
 #include "mtx/pushrules.hpp"
 #include "mtx/requests.hpp"
 #include "mtx/responses/empty.hpp" // for Empty, Logout, RoomInvite
@@ -56,6 +55,7 @@ struct Available;
 struct AvatarUrl;
 struct ClaimKeys;
 struct ContentURI;
+struct URLPreview;
 struct CreateRoom;
 struct Device;
 struct EventId;
@@ -464,6 +464,13 @@ public:
                       Callback<mtx::responses::EventId> cb,
                       const std::string &reason = "");
 
+    //! Report an event to the server adminstrator.
+    //! @param score Must be between 0 and -100.
+    void report_event(const std::string &room_id,
+                      const std::string &event_id,
+                      const std::string &reason,
+                      const int score);
+
     //! Upload a filter
     void upload_filter(const nlohmann::json &j, Callback<mtx::responses::FilterId> cb);
 
@@ -484,6 +491,9 @@ public:
                                      const std::string &content_type,
                                      const std::string &original_filename,
                                      RequestErr err)> cb);
+    void preview_url(const std::optional<std::int64_t> &timestamp,
+                     const std::string &url,
+                     Callback<mtx::responses::URLPreview> cb);
     std::string mxc_to_download_url(const std::string &mxc_url);
 
     //! Retrieve a thumbnail from the given mxc url.
@@ -741,23 +751,23 @@ public:
     //
 
     //! Retrieve a specific secret
-    void secret_storage_secret(const std::string &secret_id,
+    void secret_storage_secret(std::string_view secret_id,
                                Callback<mtx::secret_storage::Secret> cb);
     //! Retrieve information about a key
-    void secret_storage_key(const std::string &key_id,
+    void secret_storage_key(std::string_view key_id,
                             Callback<mtx::secret_storage::AesHmacSha2KeyDescription> cb);
 
     //! Upload a specific secret
-    void upload_secret_storage_secret(const std::string &secret_id,
+    void upload_secret_storage_secret(std::string_view secret_id,
                                       const mtx::secret_storage::Secret &secret,
                                       ErrCallback cb);
     //! Upload information about a key
-    void upload_secret_storage_key(const std::string &key_id,
+    void upload_secret_storage_key(std::string_view key_id,
                                    const mtx::secret_storage::AesHmacSha2KeyDescription &desc,
                                    ErrCallback cb);
 
     //! Set the default key for the secret storage
-    void set_secret_storage_default_key(const std::string &key_id, ErrCallback cb);
+    void set_secret_storage_default_key(std::string_view key_id, ErrCallback cb);
 
     //! Gets any TURN server URIs and authentication credentials
     void get_turn_server(Callback<mtx::responses::TurnServer> cb);

@@ -93,24 +93,25 @@ to_json(nlohmann::json &obj, const DeviceEvent<Content> &event)
 void
 from_json(const nlohmann::json &obj, UnsignedData &data)
 {
-    if (obj.find("age") != obj.end())
-        data.age = obj.at("age").get<uint64_t>();
+    if (auto field = obj.find("age"); field != obj.end())
+        data.age = field->get<uint64_t>();
 
-    if (obj.find("transaction_id") != obj.end())
-        data.transaction_id = obj.at("transaction_id").get<std::string>();
+    if (auto field = obj.find("transaction_id"); field != obj.end())
+        data.transaction_id = field->get<std::string>();
 
-    if (obj.find("prev_sender") != obj.end())
-        data.prev_sender = obj.at("prev_sender").get<std::string>();
+    if (auto field = obj.find("prev_sender"); field != obj.end())
+        data.prev_sender = field->get<std::string>();
 
-    if (obj.find("replaces_state") != obj.end())
-        data.replaces_state = obj.at("replaces_state").get<std::string>();
+    // This field is non-standard, but otherwise we need to be able to nest arbitrary event contents
+    // here, which currently doesn't work with how we type our event variants...
+    if (auto field = obj.find("replaces_state"); field != obj.end())
+        data.replaces_state = field->get<std::string>();
 
-    if (obj.find("redacted_by") != obj.end())
-        data.redacted_by = obj.at("redacted_by").get<std::string>();
+    if (auto field = obj.find("redacted_by"); field != obj.end())
+        data.redacted_by = field->get<std::string>();
 
-    if (obj.find("redacted_because") != obj.end())
-        data.redacted_because =
-          obj.at("redacted_because").get<Event<mtx::events::msg::Redaction>>();
+    if (auto field = obj.find("redacted_because"); field != obj.end())
+        data.redacted_because = field->get<Event<mtx::events::msg::Redaction>>();
 }
 
 void
@@ -174,16 +175,16 @@ from_json(const nlohmann::json &obj, RoomEvent<Content> &event)
 
     event.origin_server_ts = obj.at("origin_server_ts").get<uint64_t>();
 
-    // SPEC_BUG: Not present in the state array returned by /sync.
-    if (obj.find("room_id") != obj.end())
-        event.room_id = obj.at("room_id").get<std::string>();
+    // Not present in the state array returned by /sync.
+    if (auto field = obj.find("room_id"); field != obj.end())
+        event.room_id = field->get<std::string>();
 
     if (event.room_id.size() > 255) {
         throw std::out_of_range("Room id exceeds 255 bytes");
     }
 
-    if (obj.find("unsigned") != obj.end())
-        event.unsigned_data = obj.at("unsigned").get<UnsignedData>();
+    if (auto field = obj.find("unsigned"); field != obj.end())
+        event.unsigned_data = field->get<UnsignedData>();
 }
 
 template<class Content>

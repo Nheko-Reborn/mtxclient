@@ -9,9 +9,6 @@
 #include <nlohmann/json.hpp>
 #endif
 
-#include "mtx/common.hpp"
-#include "mtx/lightweight_error.hpp"
-
 #include <string>
 #include <vector>
 

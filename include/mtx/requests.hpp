@@ -8,6 +8,8 @@
 
 #include <mtx/common.hpp>
 #include <mtx/events/collections.hpp>
+#include <mtx/identifiers.hpp>
+
 #include <nlohmann/json.hpp>
 
 namespace mtx {

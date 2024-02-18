@@ -28,7 +28,6 @@
 #include "mtx/events/pinned_events.hpp"
 #include "mtx/events/policy_rules.hpp"
 #include "mtx/events/power_levels.hpp"
-#include "mtx/events/presence.hpp"
 #include "mtx/events/reaction.hpp"
 #include "mtx/events/redaction.hpp"
 #include "mtx/events/server_acl.hpp"

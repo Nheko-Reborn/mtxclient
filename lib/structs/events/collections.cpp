@@ -1,4 +1,5 @@
 #include "mtx/events/collections.hpp"
+#include "mtx/events/presence.hpp"
 #include "mtx/events_impl.hpp"
 #include "mtx/log.hpp"
 

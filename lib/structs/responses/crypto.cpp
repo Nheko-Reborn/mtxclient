@@ -9,14 +9,17 @@ void
 from_json(const nlohmann::json &obj, UploadKeys &response)
 {
     response.one_time_key_counts =
-      obj.at("one_time_key_counts").get<std::map<std::string, uint32_t>>();
+      obj.at("one_time_key_counts").get<std::map<std::string, uint32_t, std::less<>>>();
 }
 
 void
 from_json(const nlohmann::json &obj, QueryKeys &response)
 {
-    if (obj.contains("failures"))
-        response.failures = obj.at("failures").get<std::map<std::string, nlohmann::json>>();
+    if (obj.contains("failures")) {
+        for (const auto &[key, value] :
+             obj.at("failures").get<std::map<std::string, nlohmann::json>>())
+            response.failures[key] = value.dump();
+    }
     if (obj.contains("device_keys"))
         response.device_keys = obj.at("device_keys").get<std::map<std::string, DeviceToKeysMap>>();
     if (obj.contains("master_keys"))
@@ -33,7 +36,9 @@ from_json(const nlohmann::json &obj, QueryKeys &response)
 void
 to_json(nlohmann::json &obj, const QueryKeys &response)
 {
-    obj["failures"]          = response.failures;
+    for (const auto &[key, value] : response.failures)
+        obj["failures"][key] = nlohmann::json::parse(value);
+
     obj["device_keys"]       = response.device_keys;
     obj["master_keys"]       = response.master_keys;
     obj["user_signing_keys"] = response.user_signing_keys;
@@ -50,8 +55,11 @@ from_json(const nlohmann::json &obj, KeySignaturesUpload &response)
 void
 from_json(const nlohmann::json &obj, ClaimKeys &response)
 {
-    if (obj.contains("failures"))
-        response.failures = obj.at("failures").get<std::map<std::string, nlohmann::json>>();
+    if (obj.contains("failures")) {
+        for (const auto &[key, value] :
+             obj.at("failures").get<std::map<std::string, nlohmann::json>>())
+            response.failures[key] = value.dump();
+    }
     if (obj.contains("one_time_keys"))
         response.one_time_keys =
           obj.at("one_time_keys")

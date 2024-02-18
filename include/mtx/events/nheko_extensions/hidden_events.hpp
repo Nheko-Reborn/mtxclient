@@ -3,6 +3,7 @@
 /// @file
 /// @brief A nheko specific event in account data used to hide events across different clients.
 
+#include <optional>
 #include <vector>
 
 #if __has_include(<nlohmann/json_fwd.hpp>)
@@ -11,7 +12,7 @@
 #include <nlohmann/json.hpp>
 #endif
 
-#include "mtx/events.hpp"
+#include "mtx/events/event_type.hpp"
 
 namespace mtx {
 namespace events {

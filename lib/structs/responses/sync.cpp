@@ -1,11 +1,9 @@
 #include "mtx/responses/sync.hpp"
-#include "mtx/events/collections.hpp"
 #include "mtx/log.hpp"
 #include "mtx/responses/common.hpp"
 
 #include <nlohmann/json.hpp>
 
-#include <algorithm>
 #include <variant>
 
 using json = nlohmann::json;
