@@ -10,11 +10,7 @@
 #include <mtx/events/collections.hpp>
 #include <mtx/identifiers.hpp>
 
-#if __has_include(<nlohmann/json_fwd.hpp>)
-#include <nlohmann/json_fwd.hpp>
-#else
 #include <nlohmann/json.hpp>
-#endif
 
 namespace mtx {
 //! Namespace for request structs
@@ -408,6 +404,8 @@ struct PusherData
     //! defined in the Push Gateway Specification. Currently the only format available is
     //! 'event_id_only'.
     std::string format;
+    //! Push gateway specific data.
+    std::optional<nlohmann::json> default_payload;
 
     friend void to_json(nlohmann::json &obj, const PusherData &data);
 };

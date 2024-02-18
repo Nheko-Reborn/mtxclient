@@ -267,6 +267,9 @@ to_json(json &obj, const PusherData &data)
     if (!data.format.empty()) {
         obj["format"] = data.format;
     }
+    if (data.default_payload) {
+        obj["default_payload"] = data.default_payload.value();
+    }
 }
 
 void
