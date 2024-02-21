@@ -257,8 +257,8 @@ struct PushRuleEvaluator::OptimizedRules
         //! a event_property_is condition to match
         struct IsCondition
         {
-            non_compound_json_value value;     //!< the pattern
-            std::string field;                 //!< the field to match with pattern
+            non_compound_json_value value; //!< the pattern
+            std::string field;             //!< the field to match with pattern
 
             [[nodiscard]] bool matches(
               const std::unordered_map<std::string, push_json_value> &ev) const
@@ -474,13 +474,13 @@ PushRuleEvaluator::PushRuleEvaluator(const Ruleset &rules_)
                     rule.patterns.push_back(std::move(c));
             } else if (cond.kind == "event_property_is" && cond.value) {
                 OptimizedRules::OptimizedRule::IsCondition c;
-                c.field   = cond.key;
-                c.value   = cond.value.value();
+                c.field = cond.key;
+                c.value = cond.value.value();
                 rule.is.push_back(std::move(c));
             } else if (cond.kind == "event_property_contains" && cond.value) {
                 OptimizedRules::OptimizedRule::ContainsCondition c;
-                c.field   = cond.key;
-                c.value   = cond.value.value();
+                c.field = cond.key;
+                c.value = cond.value.value();
                 rule.contains.push_back(std::move(c));
             } else if (cond.kind == "im.nheko.msc3664.related_event_match") {
                 OptimizedRules::OptimizedRule::RelatedEventCondition c;
