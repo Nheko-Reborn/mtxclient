@@ -42,6 +42,9 @@ struct PushCondition
     //! with no special glob characters should be treated as having asterisks prepended and
     //! appended when testing the condition.
     std::string pattern;
+    //! Required for event_property_is and event_property_contains conditions. A non compound json
+    //! value.
+    std::optional<std::variant<std::string, std::int64_t, bool, std::nullptr_t>> value;
     //! Required for room_member_count conditions. A decimal integer optionally prefixed by one
     //! of, ==, <, >, >= or <=. A prefix of < matches rooms where the member count is strictly
     //! less than the given number and so forth. If no prefix is present, this parameter

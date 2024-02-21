@@ -424,6 +424,7 @@ TEST(Pushrules, EventMatches)
       .kind    = "event_match",
       .key     = "content.body",
       .pattern = "honk",
+      .value   = std::nullopt,
       .is      = "",
     });
 
@@ -513,6 +514,7 @@ TEST(Pushrules, DisplaynameMatches)
       .kind    = "contains_display_name",
       .key     = "",
       .pattern = "",
+      .value   = std::nullopt,
       .is      = "",
     });
 
@@ -586,6 +588,7 @@ TEST(Pushrules, PowerLevelMatches)
       .kind    = "sender_notification_permission",
       .key     = "room",
       .pattern = "",
+      .value   = std::nullopt,
       .is      = "",
     });
 
@@ -642,6 +645,7 @@ TEST(Pushrules, MemberCountMatches)
             .kind    = "room_member_count",
             .key     = "",
             .pattern = "",
+            .value   = std::nullopt,
             .is      = is,
           },
         };
@@ -665,6 +669,128 @@ TEST(Pushrules, MemberCountMatches)
     testEval("<=100", true, true, false);
     testEval(">100", false, false, true);
     testEval("<100", true, false, false);
+}
+
+TEST(Pushrules, EventPropertyIsMatches)
+{
+    mtx::pushrules::PushRule event_match_rule;
+    event_match_rule.actions = {
+      mtx::pushrules::actions::notify{},
+      mtx::pushrules::actions::set_tweak_highlight{},
+    };
+    event_match_rule.conditions.push_back(mtx::pushrules::PushCondition{
+      .kind    = "event_property_is",
+      .key     = "content.body",
+      .pattern = "",
+      .value   = "honk",
+      .is      = "",
+    });
+
+    mtx::events::RoomEvent<mtx::events::msg::Text> textEv{};
+    textEv.content.body = "honk";
+    textEv.room_id      = "!abc:def.ghi";
+    textEv.event_id     = "$abc1234567890:def.ghi";
+    textEv.sender       = "@me:def.ghi";
+
+    auto testEval = [actions = event_match_rule.actions,
+                     &textEv](const mtx::pushrules::PushRuleEvaluator &evaluator) {
+        mtx::pushrules::PushRuleEvaluator::RoomContext ctx{};
+        EXPECT_EQ(evaluator.evaluate({textEv}, ctx, {}), actions);
+
+        auto textEvNo         = textEv;
+        textEvNo.content.body = "hon";
+        EXPECT_TRUE(evaluator.evaluate({textEvNo}, ctx, {}).empty());
+        auto textEvNo2         = textEv;
+        textEvNo2.content.body = "honkb";
+        EXPECT_TRUE(evaluator.evaluate({textEvNo2}, ctx, {}).empty());
+        auto textEvWordBoundaries         = textEv;
+        textEvWordBoundaries.content.body = "@honk:";
+        EXPECT_TRUE(evaluator.evaluate({textEvWordBoundaries}, ctx, {}).empty());
+    };
+
+    mtx::pushrules::Ruleset override_ruleset;
+    override_ruleset.override_.push_back(event_match_rule);
+    mtx::pushrules::PushRuleEvaluator over_evaluator{override_ruleset};
+    testEval(over_evaluator);
+
+    mtx::pushrules::Ruleset underride_ruleset;
+    underride_ruleset.underride.push_back(event_match_rule);
+    mtx::pushrules::PushRuleEvaluator under_evaluator{underride_ruleset};
+    testEval(under_evaluator);
+
+    mtx::pushrules::Ruleset room_ruleset;
+    auto room_rule    = event_match_rule;
+    room_rule.rule_id = "!abc:def.ghi";
+    room_ruleset.room.push_back(room_rule);
+    mtx::pushrules::PushRuleEvaluator room_evaluator{room_ruleset};
+    EXPECT_EQ(room_evaluator.evaluate({textEv}, {}, {}), room_rule.actions);
+
+    mtx::pushrules::Ruleset sender_ruleset;
+    auto sender_rule    = event_match_rule;
+    sender_rule.rule_id = "@me:def.ghi";
+    sender_ruleset.sender.push_back(sender_rule);
+    mtx::pushrules::PushRuleEvaluator sender_evaluator{sender_ruleset};
+    EXPECT_EQ(sender_evaluator.evaluate({textEv}, {}, {}), sender_rule.actions);
+
+    mtx::pushrules::PushRule event_match_5_rule;
+    event_match_rule.actions = {
+      mtx::pushrules::actions::notify{},
+      mtx::pushrules::actions::set_tweak_highlight{},
+    };
+    event_match_rule.conditions.push_back(mtx::pushrules::PushCondition{
+      .kind    = "event_property_is",
+      .key     = "content.info.size",
+      .pattern = "",
+      .value   = 5,
+      .is      = "",
+    });
+    mtx::pushrules::Ruleset match5_ruleset;
+    match5_ruleset.override_.push_back(event_match_rule);
+    mtx::pushrules::PushRuleEvaluator over_evaluator5{match5_ruleset};
+    mtx::events::RoomEvent<mtx::events::msg::Image> imageEv{};
+    imageEv.content.info.size = 5;
+    mtx::pushrules::PushRuleEvaluator::RoomContext ctx{};
+    EXPECT_EQ(over_evaluator5.evaluate({imageEv}, ctx, {}), event_match_5_rule.actions);
+    imageEv.content.info.size = 6;
+    EXPECT_TRUE(over_evaluator5.evaluate({imageEv}, ctx, {}).empty());
+}
+
+TEST(Pushrules, EventPropertyContainsMatches)
+{
+    mtx::pushrules::PushRule event_match_rule;
+    event_match_rule.actions = {
+      mtx::pushrules::actions::notify{},
+      mtx::pushrules::actions::set_tweak_highlight{},
+    };
+    event_match_rule.conditions.push_back(mtx::pushrules::PushCondition{
+      .kind    = "event_property_contains",
+      .key     = "content.via",
+      .pattern = "",
+      .value   = "honk",
+      .is      = "",
+    });
+
+    mtx::events::StateEvent<mtx::events::state::space::Child> childEv{};
+    childEv.content.via = {"honk"};
+    childEv.room_id     = "!abc:def.ghi";
+    childEv.event_id    = "$abc1234567890:def.ghi";
+    childEv.sender      = "@me:def.ghi";
+
+    mtx::pushrules::Ruleset override_ruleset;
+    override_ruleset.override_.push_back(event_match_rule);
+    mtx::pushrules::PushRuleEvaluator evaluator{override_ruleset};
+    mtx::pushrules::PushRuleEvaluator::RoomContext ctx{};
+
+    EXPECT_EQ(evaluator.evaluate({childEv}, ctx, {}), event_match_rule.actions);
+
+    childEv.content.via = {"abc", "honk", ""};
+    EXPECT_EQ(evaluator.evaluate({childEv}, ctx, {}), event_match_rule.actions);
+
+    childEv.content.via = {};
+    EXPECT_TRUE(evaluator.evaluate({childEv}, ctx, {}).empty());
+
+    childEv.content.via = {"not honk"};
+    EXPECT_TRUE(evaluator.evaluate({childEv}, ctx, {}).empty());
 }
 
 TEST(Pushrules, ContentOverRoomRulesMatches)

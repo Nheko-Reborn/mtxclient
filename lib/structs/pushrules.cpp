@@ -8,13 +8,39 @@
 #include "mtx/events/collections.hpp"
 #include "mtx/log.hpp"
 
+using non_compound_json_value = std::variant<std::string, std::int64_t, bool, std::nullptr_t>;
+using push_json_value         = std::
+  variant<std::string, std::int64_t, bool, std::nullptr_t, std::vector<non_compound_json_value>>;
+
 namespace {
 struct RelatedEvents
 {
-    std::vector<std::unordered_map<std::string, std::string>>
-      fallbacks;                                                      //!< fallback related events
-    std::vector<std::unordered_map<std::string, std::string>> events; //!< related events
+    std::vector<std::unordered_map<std::string, push_json_value>>
+      fallbacks; //!< fallback related events
+    std::vector<std::unordered_map<std::string, push_json_value>> events; //!< related events
 };
+}
+
+static std::optional<non_compound_json_value>
+to_non_compound_json_value(const nlohmann::json &val)
+{
+    switch (val.type()) {
+    case nlohmann::json::value_t::string: {
+        return val.get<std::string>();
+    }
+    case nlohmann::json::value_t::null: {
+        return nullptr;
+    }
+    case nlohmann::json::value_t::boolean: {
+        return val.get<bool>();
+    }
+    case nlohmann::json::value_t::number_integer:
+    case nlohmann::json::value_t::number_unsigned: {
+        return val.get<std::int64_t>();
+    }
+    default:
+        return std::nullopt;
+    }
 }
 
 namespace mtx {
@@ -32,6 +58,10 @@ to_json(nlohmann::json &obj, const PushCondition &condition)
         obj["is"] = condition.is;
     if (condition.rel_type != mtx::common::RelationType::Unsupported)
         obj["rel_type"] = condition.rel_type;
+
+    if (condition.value) {
+        std::visit([&obj](const auto &e) { obj["value"] = e; }, *condition.value);
+    }
 }
 
 void
@@ -43,6 +73,10 @@ from_json(const nlohmann::json &obj, PushCondition &condition)
     condition.is               = obj.value("is", "");
     condition.rel_type         = obj.value("rel_type", mtx::common::RelationType::Unsupported);
     condition.include_fallback = obj.value("include_fallback", false);
+
+    if (obj.contains("value"))
+        if (auto val = to_non_compound_json_value(obj.at("pattern")))
+            condition.value = *val;
 }
 
 namespace actions {
@@ -196,15 +230,17 @@ struct PushRuleEvaluator::OptimizedRules
             std::unique_ptr<re2::RE2> pattern; //!< the pattern
             std::string field;                 //!< the field to match with pattern
 
-            bool matches(const std::unordered_map<std::string, std::string> &ev) const
+            [[nodiscard]] bool matches(
+              const std::unordered_map<std::string, push_json_value> &ev) const
             {
                 if (auto it = ev.find(field); it != ev.end()) {
-                    if (pattern) {
+                    if (pattern && std::holds_alternative<std::string>(it->second)) {
                         if (field == "content.body") {
-                            if (!re2::RE2::PartialMatch(it->second, *pattern))
+                            if (!re2::RE2::PartialMatch(std::get<std::string>(it->second),
+                                                        *pattern))
                                 return false;
                         } else {
-                            if (!re2::RE2::FullMatch(it->second, *pattern))
+                            if (!re2::RE2::FullMatch(std::get<std::string>(it->second), *pattern))
                                 return false;
                         }
                     }
@@ -217,6 +253,45 @@ struct PushRuleEvaluator::OptimizedRules
         };
         // TODO(Nico): Sort by field for faster matching?
         std::vector<PatternCondition> patterns; //!< conditions that match on a field
+
+        //! a event_property_is condition to match
+        struct IsCondition
+        {
+            non_compound_json_value value;     //!< the pattern
+            std::string field;                 //!< the field to match with pattern
+
+            [[nodiscard]] bool matches(
+              const std::unordered_map<std::string, push_json_value> &ev) const
+            {
+                if (auto it = ev.find(field); it != ev.end()) {
+                    return std::visit(
+                      [it](const auto &e) { return it->second == push_json_value(e); }, value);
+                }
+
+                return false;
+            }
+        };
+        std::vector<IsCondition> is; //!< conditions that match on a field being an exact value
+                                     //!
+        //! a event_property_contains condition to match
+        struct ContainsCondition
+        {
+            non_compound_json_value value; //!< the pattern
+            std::string field;             //!< the field to match with pattern
+
+            [[nodiscard]] bool matches(
+              const std::unordered_map<std::string, push_json_value> &ev) const
+            {
+                if (auto it = ev.find(field); it != ev.end()) {
+                    if (auto arr = std::get_if<std::vector<non_compound_json_value>>(&it->second)) {
+                        return std::find(arr->begin(), arr->end(), value) != arr->end();
+                    }
+                }
+
+                return false;
+            }
+        };
+        std::vector<ContainsCondition> contains; //!< conditions that match on arrays
 
         //! a pattern condition to match on a related event
         struct RelatedEventCondition
@@ -255,7 +330,7 @@ struct PushRuleEvaluator::OptimizedRules
         std::vector<actions::Action> actions; //< the actions to apply on match
 
         [[nodiscard]] bool matches(
-          const std::unordered_map<std::string, std::string> &ev,
+          const std::unordered_map<std::string, push_json_value> &ev,
           const PushRuleEvaluator::RoomContext &ctx,
           const std::map<mtx::common::RelationType, RelatedEvents> &relatedEventsFlat) const
         {
@@ -284,7 +359,8 @@ struct PushRuleEvaluator::OptimizedRules
                 if (sender_ == ev.end())
                     return false;
 
-                auto sender_level = ctx.power_levels.user_level(sender_->second);
+                auto sender_level =
+                  ctx.power_levels.user_level(std::get<std::string>(sender_->second));
 
                 for (const auto &n : notification_levels) {
                     if (sender_level < ctx.power_levels.notification_level(n))
@@ -293,6 +369,14 @@ struct PushRuleEvaluator::OptimizedRules
             }
 
             for (const auto &cond : patterns) {
+                if (!cond.matches(ev))
+                    return false;
+            }
+            for (const auto &cond : is) {
+                if (!cond.matches(ev))
+                    return false;
+            }
+            for (const auto &cond : contains) {
                 if (!cond.matches(ev))
                     return false;
             }
@@ -327,12 +411,13 @@ struct PushRuleEvaluator::OptimizedRules
                 if (ctx.user_display_name.empty())
                     return false;
 
-                if (auto it = ev.find("content.body"); it != ev.end()) {
+                if (auto it = ev.find("content.body");
+                    it != ev.end() && std::holds_alternative<std::string>(it->second)) {
                     re2::RE2::Options opts;
                     opts.set_case_sensitive(false);
 
                     if (!re2::RE2::PartialMatch(
-                          it->second,
+                          std::get<std::string>(it->second),
                           re2::RE2("(\\W|^)" + re2::RE2::QuoteMeta(ctx.user_display_name) +
                                      "(\\W|$)",
                                    opts)))
@@ -387,6 +472,16 @@ PushRuleEvaluator::PushRuleEvaluator(const Ruleset &rules_)
                 c.pattern = construct_re_from_pattern(cond.pattern, cond.key);
                 if (c.pattern)
                     rule.patterns.push_back(std::move(c));
+            } else if (cond.kind == "event_property_is" && cond.value) {
+                OptimizedRules::OptimizedRule::IsCondition c;
+                c.field   = cond.key;
+                c.value   = cond.value.value();
+                rule.is.push_back(std::move(c));
+            } else if (cond.kind == "event_property_contains" && cond.value) {
+                OptimizedRules::OptimizedRule::ContainsCondition c;
+                c.field   = cond.key;
+                c.value   = cond.value.value();
+                rule.contains.push_back(std::move(c));
             } else if (cond.kind == "im.nheko.msc3664.related_event_match") {
                 OptimizedRules::OptimizedRule::RelatedEventCondition c;
 
@@ -516,12 +611,22 @@ PushRuleEvaluator::PushRuleEvaluator(const Ruleset &rules_)
 
 static void
 flatten_impl(const nlohmann::json &value,
-             std::unordered_map<std::string, std::string> &result,
+             std::unordered_map<std::string, push_json_value> &result,
              const std::string &current_path,
              int current_depth)
 {
     if (current_depth > 100)
         return;
+
+    auto escape_key = [](std::string input) {
+        for (size_t i = 0; i < input.size(); i++) {
+            if (input[i] == '.') {
+                input.insert(i, 1, '\\');
+                i++;
+            }
+        }
+        return input;
+    };
 
     switch (value.type()) {
     case nlohmann::json::value_t::object: {
@@ -530,24 +635,61 @@ flatten_impl(const nlohmann::json &value,
         if (!current_path.empty())
             prefix = current_path + ".";
         for (const auto &element : value.items()) {
-            flatten_impl(element.value(), result, prefix + element.key(), current_depth + 1);
+            flatten_impl(
+              element.value(), result, prefix + escape_key(element.key()), current_depth + 1);
         }
         break;
     }
 
-    case nlohmann::json::value_t::string: {
-        // add primitive value with its reference string
-        result[current_path] = value.get<std::string>();
+    case nlohmann::json::value_t::array: {
+        std::vector<non_compound_json_value> arr;
+        for (const auto &val : value) {
+            switch (val.type()) {
+            case nlohmann::json::value_t::string: {
+                arr.emplace_back(val.get<std::string>());
+                break;
+            }
+            case nlohmann::json::value_t::null: {
+                arr.emplace_back(nullptr);
+                break;
+            }
+            case nlohmann::json::value_t::boolean: {
+                arr.emplace_back(val.get<bool>());
+                break;
+            }
+            case nlohmann::json::value_t::number_integer:
+            case nlohmann::json::value_t::number_unsigned: {
+                arr.emplace_back(val.get<std::int64_t>());
+                break;
+            }
+            default:
+                break;
+            }
+        }
+
+        result[current_path] = arr;
         break;
     }
 
-        // currently we only match strings
-    case nlohmann::json::value_t::array:
-    case nlohmann::json::value_t::null:
-    case nlohmann::json::value_t::boolean:
+    case nlohmann::json::value_t::string: {
+        result[current_path] = value.get<std::string>();
+        break;
+    }
+    case nlohmann::json::value_t::null: {
+        result[current_path] = nullptr;
+        break;
+    }
+    case nlohmann::json::value_t::boolean: {
+        result[current_path] = value.get<bool>();
+        break;
+    }
     case nlohmann::json::value_t::number_integer:
-    case nlohmann::json::value_t::number_unsigned:
-    case nlohmann::json::value_t::number_float:
+    case nlohmann::json::value_t::number_unsigned: {
+        result[current_path] = value.get<std::int64_t>();
+        break;
+    }
+
+    case nlohmann::json::value_t::number_float: // matrix events can't have floats
     case nlohmann::json::value_t::binary:
     case nlohmann::json::value_t::discarded:
     default:
@@ -555,10 +697,10 @@ flatten_impl(const nlohmann::json &value,
     }
 }
 
-static std::unordered_map<std::string, std::string>
+static std::unordered_map<std::string, push_json_value>
 flatten_event(const nlohmann::json &j)
 {
-    std::unordered_map<std::string, std::string> flat;
+    std::unordered_map<std::string, push_json_value> flat;
     flatten_impl(j, flat, "", 0);
     return flat;
 }
