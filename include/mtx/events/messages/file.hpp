@@ -41,6 +41,9 @@ struct File
     //! Relates to for rich replies
     mtx::common::Relations relations;
 
+    //! Mentioned users by this event
+    std::optional<mtx::common::Mentions> mentions;
+
     friend void from_json(const nlohmann::json &obj, File &content);
     friend void to_json(nlohmann::json &obj, const File &content);
 };

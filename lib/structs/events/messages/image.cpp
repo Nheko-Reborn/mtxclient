@@ -26,6 +26,7 @@ from_json(const json &obj, Image &content)
         content.file = obj.at("file").get<crypto::EncryptedFile>();
 
     content.relations = common::parse_relations(obj);
+    content.mentions  = common::parse_mentions(obj);
 }
 
 void
@@ -41,6 +42,7 @@ to_json(json &obj, const Image &content)
         obj["url"] = content.url;
 
     common::apply_relations(obj, content.relations);
+    common::add_mentions(obj, content.mentions);
 }
 
 void
@@ -57,6 +59,7 @@ from_json(const json &obj, StickerImage &content)
         content.file = obj.at("file").get<crypto::EncryptedFile>();
 
     content.relations = common::parse_relations(obj);
+    content.mentions  = common::parse_mentions(obj);
 }
 
 void
@@ -71,6 +74,7 @@ to_json(json &obj, const StickerImage &content)
         obj["url"] = content.url;
 
     common::apply_relations(obj, content.relations);
+    common::add_mentions(obj, content.mentions);
 }
 
 } // namespace msg

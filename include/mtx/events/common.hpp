@@ -152,6 +152,33 @@ struct LocationInfo
     friend void to_json(nlohmann::json &obj, const ThumbnailInfo &info);
 };
 
+/// @brief Mentions metadata
+///
+/// @sa https://spec.matrix.org/v1.9/client-server-api/#user-and-room-mentions
+struct Mentions
+{
+    std::vector<std::string> user_ids;
+    bool room = false;
+
+    //! Deserialization method needed by @p nlohmann::json.
+    friend void from_json(const nlohmann::json &obj, Mentions &info);
+
+    //! Serialization method needed by @p nlohmann::json.
+    friend void to_json(nlohmann::json &obj, const Mentions &info);
+};
+
+/// @brief Parses mentions from a content object
+///
+/// @param obj The content object of an event.
+std::optional<Mentions>
+parse_mentions(const nlohmann::json &obj);
+
+/// @brief Serializes mentions to a content object
+///
+/// @param obj The content object of an event.
+void
+add_mentions(nlohmann::json &content, const std::optional<Mentions> &m);
+
 //! Definition of rel_type for relations.
 enum class RelationType
 {
@@ -201,11 +228,11 @@ struct Relations
     //! im.nheko.relactions.v1.relations
     bool synthesized = false;
 
-    std::optional<std::string> reply_to(bool include_fallback = true) const;
-    std::optional<std::string> replaces(bool include_fallback = true) const;
-    std::optional<std::string> references(bool include_fallback = true) const;
-    std::optional<std::string> thread(bool include_fallback = true) const;
-    std::optional<Relation> annotates(bool include_fallback = true) const;
+    [[nodiscard]] std::optional<std::string> reply_to(bool include_fallback = true) const;
+    [[nodiscard]] std::optional<std::string> replaces(bool include_fallback = true) const;
+    [[nodiscard]] std::optional<std::string> references(bool include_fallback = true) const;
+    [[nodiscard]] std::optional<std::string> thread(bool include_fallback = true) const;
+    [[nodiscard]] std::optional<Relation> annotates(bool include_fallback = true) const;
 };
 
 /// @brief Parses relations from a content object

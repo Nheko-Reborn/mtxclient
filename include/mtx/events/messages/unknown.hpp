@@ -30,6 +30,9 @@ struct Unknown
     //! The original content of the message.
     std::string content;
 
+    //! Mentioned users by this event
+    std::optional<mtx::common::Mentions> mentions;
+
     friend void from_json(const nlohmann::json &obj, Unknown &content);
     friend void to_json(nlohmann::json &obj, const Unknown &content);
 };

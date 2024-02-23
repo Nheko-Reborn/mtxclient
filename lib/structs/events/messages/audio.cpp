@@ -27,6 +27,7 @@ from_json(const json &obj, Audio &content)
         content.file = obj.at("file").get<crypto::EncryptedFile>();
 
     content.relations = common::parse_relations(obj);
+    content.mentions  = common::parse_mentions(obj);
 }
 
 void
@@ -42,6 +43,7 @@ to_json(json &obj, const Audio &content)
         obj["url"] = content.url;
 
     common::apply_relations(obj, content.relations);
+    common::add_mentions(obj, content.mentions);
 }
 
 } // namespace msg

@@ -17,6 +17,7 @@ from_json(const json &obj, Unknown &content)
     content.body      = obj.at("body").get<std::string>();
     content.msgtype   = obj.at("msgtype").get<std::string>();
     content.relations = common::parse_relations(obj);
+    content.mentions  = common::parse_mentions(obj);
 }
 
 void
@@ -27,6 +28,7 @@ to_json(json &obj, const Unknown &content)
     obj["msgtype"] = content.msgtype;
     obj["body"]    = content.body;
     common::apply_relations(obj, content.relations);
+    common::add_mentions(obj, content.mentions);
 }
 
 } // namespace msg

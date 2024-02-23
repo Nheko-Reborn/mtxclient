@@ -28,6 +28,7 @@ from_json(const json &obj, Video &content)
         content.file = obj.at("file").get<crypto::EncryptedFile>();
 
     content.relations = common::parse_relations(obj);
+    content.mentions  = common::parse_mentions(obj);
 }
 
 void
@@ -43,6 +44,7 @@ to_json(json &obj, const Video &content)
         obj["url"] = content.url;
 
     common::apply_relations(obj, content.relations);
+    common::add_mentions(obj, content.mentions);
 }
 
 } // namespace msg

@@ -23,6 +23,7 @@ from_json(const json &obj, ElementEffect &content)
         content.formatted_body = obj.at("formatted_body").get<std::string>();
 
     content.relations = common::parse_relations(obj);
+    content.mentions  = common::parse_mentions(obj);
 }
 
 void
@@ -37,6 +38,7 @@ to_json(json &obj, const ElementEffect &content)
     }
 
     common::apply_relations(obj, content.relations);
+    common::add_mentions(obj, content.mentions);
 }
 
 } // namespace msg

@@ -170,6 +170,25 @@ to_json(json &obj, const VideoInfo &info)
 }
 
 void
+from_json(const json &obj, Mentions &info)
+{
+    info.room     = obj.value("room", false);
+    info.user_ids = obj.value("user_ids", std::vector<std::string>{});
+}
+
+void
+to_json(json &obj, const Mentions &info)
+{
+    obj = json::object();
+
+    if (info.room)
+        obj["room"] = true;
+
+    if (!info.user_ids.empty())
+        obj["user_ids"] = info.user_ids;
+}
+
+void
 to_json(json &obj, const RelationType &type)
 {
     switch (type) {
@@ -211,6 +230,22 @@ from_json(const json &obj, RelationType &type)
         type = RelationType::Thread;
     else
         type = RelationType::Unsupported;
+}
+
+std::optional<Mentions>
+parse_mentions(const nlohmann::json &content)
+{
+    if (auto mentions = content.find("m.mentions"); mentions != content.end())
+        return mentions->get<Mentions>();
+
+    return std::nullopt;
+}
+
+void
+add_mentions(nlohmann::json &content, const std::optional<Mentions> &m)
+{
+    if (m)
+        content["m.mentions"] = *m;
 }
 
 Relations
