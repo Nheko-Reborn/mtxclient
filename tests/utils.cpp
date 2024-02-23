@@ -73,6 +73,36 @@ TEST(Utilities, VerifySignedOneTimeKey)
     EXPECT_EQ(res, 0);
 }
 
+TEST(Utilities, VerifySignedOneTimeKey2)
+{
+    auto alice = make_shared<OlmClient>();
+    alice->set_user_id("@alice:example.com");
+    alice->set_device_id("AAAAAA");
+    alice->create_new_account();
+    alice->create_new_utility();
+
+    alice->generate_one_time_keys(1, true);
+    // auto keys = alice->one_time_keys();
+    auto keys = alice->create_upload_keys_request();
+
+    EXPECT_TRUE(mtx::crypto::ed25519_verify_signature(
+      alice->identity_keys().ed25519,
+      json(keys.device_keys),
+      keys.device_keys.signatures["@alice:example.com"]["ed25519:AAAAAA"]));
+
+    auto otk1 = std::get<mtx::requests::SignedOneTimeKey>(keys.one_time_keys.begin()->second);
+    EXPECT_TRUE(mtx::crypto::ed25519_verify_signature(
+      alice->identity_keys().ed25519,
+      json(otk1),
+      otk1.signatures["@alice:example.com"]["ed25519:AAAAAA"]));
+
+    auto otk2 = std::get<mtx::requests::SignedOneTimeKey>(keys.fallback_keys.begin()->second);
+    EXPECT_TRUE(mtx::crypto::ed25519_verify_signature(
+      alice->identity_keys().ed25519,
+      json(otk2),
+      otk2.signatures["@alice:example.com"]["ed25519:AAAAAA"]));
+}
+
 TEST(Utilities, ValidUploadKeysRequest)
 {
     const std::string user_id   = "@alice:matrix.org";
