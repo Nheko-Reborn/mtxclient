@@ -75,7 +75,7 @@ from_json(const nlohmann::json &obj, PushCondition &condition)
     condition.include_fallback = obj.value("include_fallback", false);
 
     if (obj.contains("value"))
-        if (auto val = to_non_compound_json_value(obj.at("pattern")))
+        if (auto val = to_non_compound_json_value(obj.at("value")))
             condition.value = *val;
 }
 

@@ -59,7 +59,27 @@ TEST(Pushrules, GlobalRuleset)
         ],
         "default": true,
         "rule_id": ".m.rule.suppress_notices"
-      }
+      },
+        {
+          "actions": [
+            "notify",
+            {
+              "set_tweak": "highlight"
+            },
+            {
+              "set_tweak": "sound",
+              "value": "default"
+            }
+          ],
+          "conditions": [
+            {
+              "key": "content.m\\.mentions.user_ids",
+              "kind": "event_property_contains"
+            }
+          ],
+          "default": true,
+          "rule_id": ".m.rule.is_user_mention"
+        }
     ],
     "room": [],
     "sender": [],
@@ -213,7 +233,7 @@ TEST(Pushrules, GlobalRuleset)
     EXPECT_TRUE(std::holds_alternative<ns::actions::set_tweak_highlight>(
       rules.global.content.at(0).actions.at(2)));
 
-    // EXPECT_EQ(rules.global.override_.size(), 2);
+    EXPECT_EQ(rules.global.override_.size(), 3);
     EXPECT_EQ(rules.global.room.size(), 0);
     EXPECT_EQ(rules.global.sender.size(), 0);
     EXPECT_EQ(rules.global.underride.size(), 6);
