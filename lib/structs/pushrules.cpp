@@ -248,6 +248,7 @@ struct PushRuleEvaluator::OptimizedRules
                     return false;
                 }
 
+                // We have some internal rules, which just match on a field being present.
                 return true;
             }
         };
@@ -464,7 +465,17 @@ PushRuleEvaluator::PushRuleEvaluator(const Ruleset &rules_)
   : rules(std::make_unique<OptimizedRules>())
 {
     auto add_conditions_to_rule = [](OptimizedRules::OptimizedRule &rule,
-                                     const std::vector<PushCondition> &conditions) {
+                                     const std::vector<PushCondition> &conditions,
+                                     std::string_view rule_id) {
+        // These rules should only be enabled, if there is an m.mentions property, but the spec
+        // doesn't actually add such a condition, so let's do it ourselves...
+        if (rule_id == ".m.rule.contains_display_name" || rule_id == ".m.rule.roomnotif" ||
+            rule_id == ".m.rule.contains_user_name") {
+            OptimizedRules::OptimizedRule::PatternCondition c;
+            c.field = "content.m\\.mentions";
+            rule.patterns.push_back(std::move(c));
+        }
+
         for (const auto &cond : conditions) {
             if (cond.kind == "event_match") {
                 OptimizedRules::OptimizedRule::PatternCondition c;
@@ -542,7 +553,7 @@ PushRuleEvaluator::PushRuleEvaluator(const Ruleset &rules_)
         OptimizedRules::OptimizedRule rule;
         rule.actions = rule_.actions;
 
-        if (!add_conditions_to_rule(rule, rule_.conditions))
+        if (!add_conditions_to_rule(rule, rule_.conditions, rule_.rule_id))
             continue;
 
         rules->override_.push_back(std::move(rule));
@@ -555,7 +566,7 @@ PushRuleEvaluator::PushRuleEvaluator(const Ruleset &rules_)
         OptimizedRules::OptimizedRule rule;
         rule.actions = rule_.actions;
 
-        if (!add_conditions_to_rule(rule, rule_.conditions))
+        if (!add_conditions_to_rule(rule, rule_.conditions, rule_.rule_id))
             continue;
 
         rules->underride.push_back(std::move(rule));
@@ -602,7 +613,7 @@ PushRuleEvaluator::PushRuleEvaluator(const Ruleset &rules_)
           PushCondition{.kind = "event_match", .key = "content.body", .pattern = rule_.pattern},
         };
 
-        if (!add_conditions_to_rule(rule, conditions))
+        if (!add_conditions_to_rule(rule, conditions, rule_.rule_id))
             continue;
 
         rules->content.push_back(std::move(rule));
