@@ -11,8 +11,9 @@ namespace account_data {
 void
 from_json(const json &obj, Tag &content)
 {
-    if (obj.contains("order"))
-        content.order = obj.at("order").get<double>();
+    // Workaround some Element clients sending order as strings...
+    if (auto o = obj.find("order"); o != obj.end() && o->is_number())
+        content.order = o->get<double>();
 }
 
 void
