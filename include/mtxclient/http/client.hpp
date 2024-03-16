@@ -14,7 +14,6 @@
 #include "mtx/identifiers.hpp" // for User
 #include "mtx/identifiers.hpp" // for Class user
 #include "mtx/pushrules.hpp"
-#include "mtx/requests.hpp"
 #include "mtx/responses/empty.hpp" // for Empty, Logout, RoomInvite
 #include "mtx/secret_storage.hpp"
 #include "mtxclient/http/errors.hpp" // for ClientError
@@ -38,16 +37,21 @@ struct ClientPrivate;
 struct Session;
 }
 namespace requests {
+struct ClaimKeys;
 struct CreateRoom;
+struct DeviceSigningUpload;
+struct IdentitySubmitToken;
 struct KeySignaturesUpload;
 struct Login;
-struct QueryKeys;
-struct ClaimKeys;
-struct UploadKeys;
 struct PublicRoomVisibility;
 struct PublicRooms;
 struct PushersData;
+struct QueryKeys;
+struct RequestEmailToken;
+struct RequestMSISDNToken;
+struct SetPusher;
 struct SetPushers;
+struct UploadKeys;
 }
 namespace responses {
 struct Aliases;
