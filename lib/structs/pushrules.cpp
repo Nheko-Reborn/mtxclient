@@ -294,6 +294,8 @@ struct PushRuleEvaluator::OptimizedRules
         };
         std::vector<ContainsCondition> contains; //!< conditions that match on arrays
 
+        bool no_mentions_field = false; //!< rule only matches if no content.m\\.mentions is present
+
         //! a pattern condition to match on a related event
         struct RelatedEventCondition
         {
@@ -335,6 +337,10 @@ struct PushRuleEvaluator::OptimizedRules
           const PushRuleEvaluator::RoomContext &ctx,
           const std::map<mtx::common::RelationType, RelatedEvents> &relatedEventsFlat) const
         {
+            if (no_mentions_field && ev.contains("content.m\\.mentions")) {
+                return false;
+            }
+
             for (const auto &cond : membercounts) {
                 if (![&cond, &ctx] {
                         switch (cond.op) {
@@ -467,13 +473,11 @@ PushRuleEvaluator::PushRuleEvaluator(const Ruleset &rules_)
     auto add_conditions_to_rule = [](OptimizedRules::OptimizedRule &rule,
                                      const std::vector<PushCondition> &conditions,
                                      std::string_view rule_id) {
-        // These rules should only be enabled, if there is an m.mentions property, but the spec
+        // These rules should only be enabled, if there is no m.mentions property, but the spec
         // doesn't actually add such a condition, so let's do it ourselves...
         if (rule_id == ".m.rule.contains_display_name" || rule_id == ".m.rule.roomnotif" ||
             rule_id == ".m.rule.contains_user_name") {
-            OptimizedRules::OptimizedRule::PatternCondition c;
-            c.field = "content.m\\.mentions";
-            rule.patterns.push_back(std::move(c));
+            rule.no_mentions_field = true;
         }
 
         for (const auto &cond : conditions) {
@@ -641,6 +645,11 @@ flatten_impl(const nlohmann::json &value,
 
     switch (value.type()) {
     case nlohmann::json::value_t::object: {
+        // Workaround to be able to check, if the m.mentions object is present
+        if (current_path == "content.m\\.mentions") {
+            result[current_path] = nullptr;
+        }
+
         // iterate object and use keys as reference string
         std::string prefix;
         if (!current_path.empty())
