@@ -30,3 +30,9 @@ online_backup_exporter = executable('online_backup_exporter',
     dependencies: [matrix_client_dep],
     include_directories : '../tests'
     )
+
+restore_secret_storage = executable('restore_secret_storage',
+    'restore_secret_storage.cpp',
+    dependencies: [matrix_client_dep],
+    include_directories : '../tests'
+    )
