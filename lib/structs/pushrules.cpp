@@ -480,87 +480,87 @@ PushRuleEvaluator::PushRuleEvaluator(const Ruleset &rules_)
         }
     }
 
-    auto add_conditions_to_rule = [server_supports_mentions](
-                                    OptimizedRules::OptimizedRule &rule,
-                                    const std::vector<PushCondition> &conditions,
-                                    std::string_view rule_id) {
-        // These rules should only be enabled, if there is no m.mentions property, but the spec
-        // doesn't actually add such a condition, so let's do it ourselves...
-        if (server_supports_mentions &&
-            (rule_id == ".m.rule.contains_display_name" || rule_id == ".m.rule.roomnotif" ||
-             rule_id == ".m.rule.contains_user_name")) {
-            rule.no_mentions_field = true;
-        }
+    auto add_conditions_to_rule =
+      [server_supports_mentions](OptimizedRules::OptimizedRule &rule,
+                                 const std::vector<PushCondition> &conditions,
+                                 std::string_view rule_id) {
+          // These rules should only be enabled, if there is no m.mentions property, but the spec
+          // doesn't actually add such a condition, so let's do it ourselves...
+          if (server_supports_mentions &&
+              (rule_id == ".m.rule.contains_display_name" || rule_id == ".m.rule.roomnotif" ||
+               rule_id == ".m.rule.contains_user_name")) {
+              rule.no_mentions_field = true;
+          }
 
-        for (const auto &cond : conditions) {
-            if (cond.kind == "event_match") {
-                OptimizedRules::OptimizedRule::PatternCondition c;
-                c.field   = cond.key;
-                c.pattern = construct_re_from_pattern(cond.pattern, cond.key);
-                if (c.pattern)
-                    rule.patterns.push_back(std::move(c));
-            } else if (cond.kind == "event_property_is" && cond.value) {
-                OptimizedRules::OptimizedRule::IsCondition c;
-                c.field = cond.key;
-                c.value = cond.value.value();
-                rule.is.push_back(std::move(c));
-            } else if (cond.kind == "event_property_contains" && cond.value) {
-                OptimizedRules::OptimizedRule::ContainsCondition c;
-                c.field = cond.key;
-                c.value = cond.value.value();
-                rule.contains.push_back(std::move(c));
-            } else if (cond.kind == "im.nheko.msc3664.related_event_match") {
-                OptimizedRules::OptimizedRule::RelatedEventCondition c;
+          for (const auto &cond : conditions) {
+              if (cond.kind == "event_match") {
+                  OptimizedRules::OptimizedRule::PatternCondition c;
+                  c.field   = cond.key;
+                  c.pattern = construct_re_from_pattern(cond.pattern, cond.key);
+                  if (c.pattern)
+                      rule.patterns.push_back(std::move(c));
+              } else if (cond.kind == "event_property_is" && cond.value) {
+                  OptimizedRules::OptimizedRule::IsCondition c;
+                  c.field = cond.key;
+                  c.value = cond.value.value();
+                  rule.is.push_back(std::move(c));
+              } else if (cond.kind == "event_property_contains" && cond.value) {
+                  OptimizedRules::OptimizedRule::ContainsCondition c;
+                  c.field = cond.key;
+                  c.value = cond.value.value();
+                  rule.contains.push_back(std::move(c));
+              } else if (cond.kind == "im.nheko.msc3664.related_event_match") {
+                  OptimizedRules::OptimizedRule::RelatedEventCondition c;
 
-                if (cond.rel_type != mtx::common::RelationType::Unsupported) {
-                    c.rel_type          = cond.rel_type;
-                    c.include_fallbacks = cond.include_fallback;
+                  if (cond.rel_type != mtx::common::RelationType::Unsupported) {
+                      c.rel_type          = cond.rel_type;
+                      c.include_fallbacks = cond.include_fallback;
 
-                    if (!cond.key.empty() && !cond.pattern.empty()) {
-                        c.ev_match.field   = cond.key;
-                        c.ev_match.pattern = construct_re_from_pattern(cond.pattern, cond.key);
-                    }
-                    rule.related_event_patterns.push_back(std::move(c));
-                } else {
-                    mtx::utils::log::log()->info(
-                      "Skipping rel_event_match rule with unknown rel_type.");
-                    return false;
-                }
-            } else if (cond.kind == "contains_display_name") {
-                rule.check_displayname = true;
-            } else if (cond.kind == "room_member_count") {
-                OptimizedRules::OptimizedRule::MemberCountCondition c;
-                std::string_view is = cond.is;
-                if (is.starts_with("==")) {
-                    c.op = c.Comp::Eq;
-                    is   = is.substr(2);
-                } else if (is.starts_with(">=")) {
-                    c.op = c.Comp::Ge;
-                    is   = is.substr(2);
-                } else if (is.starts_with("<=")) {
-                    c.op = c.Comp::Le;
-                    is   = is.substr(2);
-                } else if (is.starts_with('<')) {
-                    c.op = c.Comp::Lt;
-                    is   = is.substr(1);
-                } else if (is.starts_with('>')) {
-                    c.op = c.Comp::Gt;
-                    is   = is.substr(1);
-                }
+                      if (!cond.key.empty() && !cond.pattern.empty()) {
+                          c.ev_match.field   = cond.key;
+                          c.ev_match.pattern = construct_re_from_pattern(cond.pattern, cond.key);
+                      }
+                      rule.related_event_patterns.push_back(std::move(c));
+                  } else {
+                      mtx::utils::log::log()->info(
+                        "Skipping rel_event_match rule with unknown rel_type.");
+                      return false;
+                  }
+              } else if (cond.kind == "contains_display_name") {
+                  rule.check_displayname = true;
+              } else if (cond.kind == "room_member_count") {
+                  OptimizedRules::OptimizedRule::MemberCountCondition c;
+                  std::string_view is = cond.is;
+                  if (is.starts_with("==")) {
+                      c.op = c.Comp::Eq;
+                      is   = is.substr(2);
+                  } else if (is.starts_with(">=")) {
+                      c.op = c.Comp::Ge;
+                      is   = is.substr(2);
+                  } else if (is.starts_with("<=")) {
+                      c.op = c.Comp::Le;
+                      is   = is.substr(2);
+                  } else if (is.starts_with('<')) {
+                      c.op = c.Comp::Lt;
+                      is   = is.substr(1);
+                  } else if (is.starts_with('>')) {
+                      c.op = c.Comp::Gt;
+                      is   = is.substr(1);
+                  }
 
-                std::from_chars(is.data(), is.data() + is.size(), c.count);
-                rule.membercounts.push_back(c);
-            } else if (cond.kind == "sender_notification_permission") {
-                rule.notification_levels.push_back(cond.key);
-            } else {
-                mtx::utils::log::log()->info("Skipping rule with unknown condition type: {}",
-                                             cond.kind);
-                return false;
-            }
-        }
+                  std::from_chars(is.data(), is.data() + is.size(), c.count);
+                  rule.membercounts.push_back(c);
+              } else if (cond.kind == "sender_notification_permission") {
+                  rule.notification_levels.push_back(cond.key);
+              } else {
+                  mtx::utils::log::log()->info("Skipping rule with unknown condition type: {}",
+                                               cond.kind);
+                  return false;
+              }
+          }
 
-        return true;
-    };
+          return true;
+      };
 
     for (const auto &rule_ : rules_.override_) {
         if (!rule_.enabled)
