@@ -470,13 +470,25 @@ PushRuleEvaluator::~PushRuleEvaluator() = default;
 PushRuleEvaluator::PushRuleEvaluator(const Ruleset &rules_)
   : rules(std::make_unique<OptimizedRules>())
 {
-    auto add_conditions_to_rule = [](OptimizedRules::OptimizedRule &rule,
-                                     const std::vector<PushCondition> &conditions,
-                                     std::string_view rule_id) {
+    // In theory we should check the server version, but we can't access that here and this should
+    // work on all servers for now.
+    bool server_supports_mentions = false;
+    for (const auto &r : rules_.override_) {
+        if (r.rule_id == " .m.rule.is_user_mention") {
+            server_supports_mentions = true;
+            break;
+        }
+    }
+
+    auto add_conditions_to_rule = [server_supports_mentions](
+                                    OptimizedRules::OptimizedRule &rule,
+                                    const std::vector<PushCondition> &conditions,
+                                    std::string_view rule_id) {
         // These rules should only be enabled, if there is no m.mentions property, but the spec
         // doesn't actually add such a condition, so let's do it ourselves...
-        if (rule_id == ".m.rule.contains_display_name" || rule_id == ".m.rule.roomnotif" ||
-            rule_id == ".m.rule.contains_user_name") {
+        if (server_supports_mentions &&
+            (rule_id == ".m.rule.contains_display_name" || rule_id == ".m.rule.roomnotif" ||
+             rule_id == ".m.rule.contains_user_name")) {
             rule.no_mentions_field = true;
         }
 
