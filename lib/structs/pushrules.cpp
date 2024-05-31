@@ -474,7 +474,7 @@ PushRuleEvaluator::PushRuleEvaluator(const Ruleset &rules_)
     // work on all servers for now.
     bool server_supports_mentions = false;
     for (const auto &r : rules_.override_) {
-        if (r.rule_id == " .m.rule.is_user_mention") {
+        if (r.rule_id == ".m.rule.is_user_mention") {
             server_supports_mentions = true;
             break;
         }
