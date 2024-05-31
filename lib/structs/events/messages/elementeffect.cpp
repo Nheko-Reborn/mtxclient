@@ -37,8 +37,8 @@ to_json(json &obj, const ElementEffect &content)
         obj["formatted_body"] = content.formatted_body;
     }
 
-    common::apply_relations(obj, content.relations);
     common::add_mentions(obj, content.mentions);
+    common::apply_relations(obj, content.relations);
 }
 
 } // namespace msg

@@ -27,8 +27,8 @@ to_json(json &obj, const Unknown &content)
         obj = json::parse(content.content);
     obj["msgtype"] = content.msgtype;
     obj["body"]    = content.body;
-    common::apply_relations(obj, content.relations);
     common::add_mentions(obj, content.mentions);
+    common::apply_relations(obj, content.relations);
 }
 
 } // namespace msg

@@ -41,8 +41,8 @@ to_json(json &obj, const Image &content)
     else
         obj["url"] = content.url;
 
-    common::apply_relations(obj, content.relations);
     common::add_mentions(obj, content.mentions);
+    common::apply_relations(obj, content.relations);
 }
 
 void
@@ -73,8 +73,8 @@ to_json(json &obj, const StickerImage &content)
     else
         obj["url"] = content.url;
 
-    common::apply_relations(obj, content.relations);
     common::add_mentions(obj, content.mentions);
+    common::apply_relations(obj, content.relations);
 }
 
 } // namespace msg

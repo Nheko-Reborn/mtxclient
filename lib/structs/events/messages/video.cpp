@@ -43,8 +43,8 @@ to_json(json &obj, const Video &content)
     else
         obj["url"] = content.url;
 
-    common::apply_relations(obj, content.relations);
     common::add_mentions(obj, content.mentions);
+    common::apply_relations(obj, content.relations);
 }
 
 } // namespace msg
