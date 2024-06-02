@@ -43,7 +43,8 @@ build synapse arm64:
 
 .build-linux:
   stage: build
-  image: ubuntu:22.04
+  image:
+    name: ubuntu:22.04
   services:
     - name: $CI_REGISTRY_IMAGE/synapse-${M_ARCH}:latest
       alias: synapse
@@ -87,6 +88,9 @@ build synapse arm64:
 
 build linux amd64:
   extends: .build-linux
+  image:
+    docker:
+      platform: amd64
   tags: [docker]
   variables:
     M_ARCH: x86_64
@@ -111,7 +115,10 @@ build linux amd64:
 
 build linux arm64:
   extends: .build-linux
-  tags: [docker-arm64]
+  image:
+    docker:
+      platform: arm64
+  tags: [docker]
   variables:
     M_ARCH: aarch64
   needs:
