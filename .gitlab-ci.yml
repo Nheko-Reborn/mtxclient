@@ -173,6 +173,24 @@ build-macos:
       - .hunter/
       - "${CCACHE_DIR}"
 
+build-windows:
+  stage: build
+  image: win10-base
+  tags: [libvirt,powershell]
+  variables:
+    CMAKE_BUILD_PARALLEL_LEVEL: 8
+  before_script:
+    - mkdir -p hunter -f
+    - Move-Item -Path hunter -Destination C:/hunter
+  script:
+    - ./.ci/windows/build.bat
+  after_script:
+    - Move-Item -Path C:/hunter -Destination hunter -Force
+  cache:
+    key: "$CI_JOB_NAME"
+    paths:
+      - hunter/
+
 linting:
   stage: build
   image: alpine:latest
