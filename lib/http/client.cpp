@@ -710,13 +710,6 @@ Client::upload(const std::string &data,
       api_path, data, std::move(cb), true, content_type);
 }
 
-std::string
-mtx::http::Client::mxc_to_download_url(const std::string &mxc_url)
-{
-    auto url = mtx::client::utils::parse_mxc_url(mxc_url);
-    return endpoint_to_url("/media/v3/download/" + url.server + "/" + url.media_id);
-}
-
 void
 Client::download(const std::string &mxc_url,
                  std::function<void(const std::string &res,
@@ -741,12 +734,22 @@ Client::preview_url(const std::optional<std::int64_t> &timestamp,
 
     params.emplace("url", url);
 
-    const auto api_path = "/media/v3/preview_url?" + client::utils::query_params(params);
+    const auto api_path = "/client/v1/media/preview_url?" + client::utils::query_params(params);
     get<mtx::responses::URLPreview>(
       api_path,
-      [callback = std::move(callback)](const mtx::responses::URLPreview &res,
-                                       HeaderFields,
-                                       RequestErr err) { callback(res, err); });
+      [callback = std::move(callback), params = std::move(params), _this = shared_from_this()](
+        const mtx::responses::URLPreview &res, HeaderFields, RequestErr err) {
+          if (!err || !(err->status_code == 404 || err->status_code == 400)) {
+              callback(res, err);
+          } else {
+              const auto api_path = "/media/v3/preview_url?" + client::utils::query_params(params);
+              _this->get<mtx::responses::URLPreview>(
+                api_path,
+                [callback](const mtx::responses::URLPreview &res, HeaderFields, RequestErr err) {
+                    callback(res, err);
+                });
+          }
+      });
 }
 
 void
@@ -758,29 +761,45 @@ Client::get_thumbnail(const ThumbOpts &opts, Callback<std::string> callback, boo
     params.emplace("method", opts.method);
 
     auto mxc            = mtx::client::utils::parse_mxc_url(opts.mxc_url);
-    const auto api_path = "/media/v3/thumbnail/" + mxc.server + "/" + mxc.media_id + "?" +
+    const auto api_path = "/client/v1/media/thumbnail/" + mxc.server + "/" + mxc.media_id + "?" +
                           client::utils::query_params(params);
+    auto fallback_api_path = "/media/v3/thumbnail/" + mxc.server + "/" + mxc.media_id + "?" +
+                             client::utils::query_params(params);
+
     get<std::string>(
       api_path,
       [callback = std::move(callback),
        try_download,
        mxc   = std::move(mxc),
-       _this = shared_from_this()](const std::string &res, HeaderFields, RequestErr err) {
-          if (err && try_download) {
-              const int status_code = static_cast<int>(err->status_code);
-
-              if (status_code == 404) {
-                  _this->download(mxc.server,
-                                  mxc.media_id,
-                                  [callback](const std::string &res,
-                                             const std::string &, // content_type
-                                             const std::string &, // original_filename
-                                             RequestErr err) { callback(res, err); });
-                  return;
-              }
+       _this = shared_from_this(),
+       fallback_api_path =
+         std::move(fallback_api_path)](const std::string &res, HeaderFields, RequestErr err) {
+          if (!err || !(err->status_code == 404 || err->status_code == 400)) {
+              callback(res, err);
+          } else if (err && try_download && err->status_code == 404) {
+              _this->download(mxc.server,
+                              mxc.media_id,
+                              [callback](const std::string &res,
+                                         const std::string &, // content_type
+                                         const std::string &, // original_filename
+                                         RequestErr err) { callback(res, err); });
+          } else {
+              _this->get<std::string>(fallback_api_path,
+                                      [callback = callback, try_download, mxc, _this](
+                                        const std::string &res, HeaderFields, RequestErr err) {
+                                          if (err && try_download && err->status_code == 404) {
+                                              _this->download(
+                                                mxc.server,
+                                                mxc.media_id,
+                                                [callback](const std::string &res,
+                                                           const std::string &, // content_type
+                                                           const std::string &, // original_filename
+                                                           RequestErr err) { callback(res, err); });
+                                          } else {
+                                              callback(res, err);
+                                          }
+                                      });
           }
-
-          callback(res, err);
       });
 }
 
@@ -792,32 +811,44 @@ Client::download(const std::string &server,
                                     const std::string &original_filename,
                                     RequestErr err)> callback)
 {
-    const auto api_path = "/media/v3/download/" + server + "/" + media_id;
-    get<std::string>(
-      api_path,
-      [callback =
-         std::move(callback)](const std::string &res, HeaderFields fields, RequestErr err) {
-          std::string content_type, original_filename;
+    auto cb = [callback =
+                 std::move(callback)](const std::string &res, HeaderFields fields, RequestErr err) {
+        std::string content_type, original_filename;
 
-          if (fields) {
-              if (fields->find("Content-Type") != fields->end())
-                  content_type = fields->at("Content-Type");
-              if (fields->find("Content-Disposition") != fields->end()) {
-                  auto value = fields->at("Content-Disposition");
+        if (fields) {
+            if (fields->find("Content-Type") != fields->end())
+                content_type = fields->at("Content-Type");
+            if (fields->find("Content-Disposition") != fields->end()) {
+                auto value = fields->at("Content-Disposition");
 
-                  if (auto pos = value.find("filename"); pos != std::string::npos) {
-                      if (auto start = value.find('"', pos); start != std::string::npos) {
-                          auto end          = value.find('"', start + 1);
-                          original_filename = value.substr(start + 1, end - start - 2);
-                      } else if (start = value.find('='); start != std::string::npos) {
-                          original_filename = value.substr(start + 1);
-                      }
-                  }
-              }
-          }
+                if (auto pos = value.find("filename"); pos != std::string::npos) {
+                    if (auto start = value.find('"', pos); start != std::string::npos) {
+                        auto end          = value.find('"', start + 1);
+                        original_filename = value.substr(start + 1, end - start - 2);
+                    } else if (start = value.find('='); start != std::string::npos) {
+                        original_filename = value.substr(start + 1);
+                    }
+                }
+            }
+        }
 
-          callback(res, content_type, original_filename, err);
-      });
+        callback(res, content_type, original_filename, err);
+    };
+
+    const auto api_path = "/client/v1/media/download/" + client::utils::url_encode(server) + "/" +
+                          client::utils::url_encode(media_id);
+    get<std::string>(api_path,
+                     [_this = shared_from_this(), cb = std::move(cb), server, media_id](
+                       const std::string &res, HeaderFields fields, RequestErr err) {
+                         if (!err || !(err->status_code == 404 || err->status_code == 400)) {
+                             cb(res, fields, err);
+                         } else {
+                             const auto api_path = "/media/v3/download/" +
+                                                   client::utils::url_encode(server) + "/" +
+                                                   client::utils::url_encode(media_id);
+                             _this->get<std::string>(api_path, std::move(cb));
+                         }
+                     });
 }
 
 void

@@ -498,7 +498,6 @@ public:
     void preview_url(const std::optional<std::int64_t> &timestamp,
                      const std::string &url,
                      Callback<mtx::responses::URLPreview> cb);
-    std::string mxc_to_download_url(const std::string &mxc_url);
 
     //! Retrieve a thumbnail from the given mxc url.
     //! If the thumbnail isn't found and `try_download` is `true` it will try
