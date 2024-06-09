@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.10.0] -- unreleased
+
+- Authentication for media (MSC3916, experimental)
+- Intentional mentions and associated push rules (event_property_is and event_property_contains)
+- Woraround for Element setting "order" in tags as strings
+- Basic support for url previews (NepNep)
+- Support the "fixed" mac method of interactive verification
+- Various speedups for compilation
+- Support reporting content (LorenDB)
+- Remove the creator field from the create event
+- Support the `default_payload` field in pusher data (ramajd)
+- Ignoring users (NepNep)
+- Add Nheko specific account data event to store event expiration settings
+- Inherit variant to shorten symbol names. This requires GCC11.3 or higher.
+- Redo our "effects" event types (LorenDB)
+- Server ACLs
+- Better support for unknown message types
+- Support libolms native error codes
+
 ## [0.9.2] -- 2023-02-20
 
 - Fix compilation with gcc13. (vitaly)
