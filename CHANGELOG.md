@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.10.0] -- unreleased
+## [0.10.0] -- 2024-06-11
 
 - Authentication for media (MSC3916, experimental)
 - Intentional mentions and associated push rules (event_property_is and event_property_contains)
