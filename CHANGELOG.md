@@ -4,7 +4,7 @@
 
 - Authentication for media (MSC3916, experimental)
 - Intentional mentions and associated push rules (event_property_is and event_property_contains)
-- Woraround for Element setting "order" in tags as strings
+- Workaround for Element setting "order" in tags as strings
 - Basic support for url previews (NepNep)
 - Support the "fixed" mac method of interactive verification
 - Various speedups for compilation
