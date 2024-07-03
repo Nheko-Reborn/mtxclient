@@ -23,6 +23,8 @@ from_json(const json &obj, CanonicalAlias &canonical_alias)
 void
 to_json(json &obj, const CanonicalAlias &canonical_alias)
 {
+    obj = nlohmann::json::object();
+
     if (!canonical_alias.alias.empty())
         obj["alias"] = canonical_alias.alias;
     if (!canonical_alias.alt_aliases.empty())
