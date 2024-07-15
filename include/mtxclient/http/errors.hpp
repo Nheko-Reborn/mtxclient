@@ -87,7 +87,7 @@ struct fmt::formatter<mtx::http::ClientError>
     // Formats the point p using the parsed format specification (presentation)
     // stored in this formatter.
     template<typename FormatContext>
-    auto format(const mtx::http::ClientError &e, FormatContext &ctx) -> decltype(ctx.out())
+    auto format(const mtx::http::ClientError &e, FormatContext &ctx) const -> decltype(ctx.out())
     {
         // ctx.out() is an output iterator to write to.
         bool prepend_comma = false;
@@ -132,7 +132,7 @@ struct fmt::formatter<std::optional<mtx::http::ClientError>> : formatter<mtx::ht
 {
     // parse is inherited from formatter<string_view>.
     template<typename FormatContext>
-    auto format(std::optional<mtx::http::ClientError> c, FormatContext &ctx)
+    auto format(std::optional<mtx::http::ClientError> c, FormatContext &ctx) const
     {
         if (!c)
             return fmt::format_to(ctx.out(), "(no error)");
