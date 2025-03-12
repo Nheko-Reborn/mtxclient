@@ -424,8 +424,7 @@ parse_timeline_events(const json &events,
                     break;
                 }
                 case MsgType::Location: {
-                    /* events::RoomEvent<events::msg::Location> location = e; */
-                    /* container.emplace_back(location); */
+                    container.emplace_back(events::RoomEvent<events::msg::Location>(e));
                     break;
                 }
                 case MsgType::Notice: {
