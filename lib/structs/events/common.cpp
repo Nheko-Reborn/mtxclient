@@ -172,13 +172,13 @@ to_json(json &obj, const VideoInfo &info)
 void
 from_json(const json &obj, LocationInfo &info)
 {
-    if (obj.find("thumbnail_url") != obj.end())
+    if (obj.contains("thumbnail_url"))
         info.thumbnail_url = obj.at("thumbnail_url").get<std::string>();
 
-    if (obj.find("thumbnail_info") != obj.end())
+    if (obj.contains("thumbnail_info"))
         info.thumbnail_info = obj.at("thumbnail_info").get<ThumbnailInfo>();
 
-    if (obj.find("thumbnail_file") != obj.end())
+    if (obj.contains("thumbnail_file"))
         info.thumbnail_file = obj.at("thumbnail_file").get<crypto::EncryptedFile>();
 }
 
