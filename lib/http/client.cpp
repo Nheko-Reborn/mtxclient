@@ -848,7 +848,8 @@ Client::download(const std::string &server,
                                                    client::utils::url_encode(media_id);
                              _this->get<std::string>(api_path, std::move(cb));
                          }
-                     });
+                     },
+                     true, "/_matrix", 3);
 }
 
 void
