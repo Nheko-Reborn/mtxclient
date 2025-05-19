@@ -542,6 +542,9 @@ Client::join_room(const std::string &room,
         for (size_t i = 1; i < via.size(); i++) {
             query += "&server_name=" + url_encode(via[i]);
         }
+        for (const auto &v : via) {
+            query += "&via=" + url_encode(v);
+        }
     }
     auto api_path = "/client/v3/join/" + url_encode(room) + query;
 
@@ -564,6 +567,9 @@ Client::knock_room(const std::string &room,
         query = "?server_name=" + url_encode(via[0]);
         for (size_t i = 1; i < via.size(); i++) {
             query += "&server_name=" + url_encode(via[i]);
+        }
+        for (const auto &v : via) {
+            query += "&via=" + url_encode(v);
         }
     }
     auto api_path = "/client/v3/knock/" + url_encode(room) + query;
