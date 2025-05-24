@@ -245,6 +245,7 @@ target_sources(matrix_client
 	lib/structs/events/ephemeral/typing.cpp
 	lib/structs/events/nheko_extensions/event_expiry.cpp
 	lib/structs/events/nheko_extensions/hidden_events.cpp
+	lib/structs/events/nheko_extensions/invite_permissions.cpp
 	lib/structs/events/messages/audio.cpp
 	lib/structs/events/messages/elementeffect.cpp
 	lib/structs/events/messages/emote.cpp

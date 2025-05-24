@@ -129,6 +129,8 @@ MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::AccountDataEvent,
                                      mtx::events::account_data::nheko_extensions::HiddenEvents)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::AccountDataEvent,
                                      mtx::events::account_data::nheko_extensions::EventExpiry)
+MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::AccountDataEvent,
+                                     mtx::events::account_data::nheko_extensions::InvitePermissions)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::AccountDataEvent, msc2545::ImagePackRooms)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::AccountDataEvent, msc2545::ImagePack)
 MTXCLIENT_INSTANTIATE_JSON_FUNCTIONS(events::Event, presence::Presence)
@@ -405,6 +407,7 @@ from_json(const nlohmann::json &obj, TimelineEvents &e)
         case events::EventType::FullyRead:
         case events::EventType::IgnoredUsers:
         case events::EventType::NhekoHiddenEvents:
+        case events::EventType::NhekoInvitePermissions:
         case events::EventType::NhekoEventExpiry:
         case events::EventType::ImagePackInAccountData:
         case events::EventType::ImagePackRooms:
