@@ -2067,6 +2067,59 @@ TEST(RoomAccountData, NhekoEventExpiry)
     ASSERT_EQ(event.content.keep_only_latest, 100);
 }
 
+TEST(RoomAccountData, NhekoInvitePermissions)
+{
+    json data = R"({
+          "content": {
+            "default": "allow",
+            "room": {
+              "allow": {
+                "!abc:example.net": {}
+              },
+              "deny": {
+                "!def:example.net": {}
+              }
+            },
+            "user": {
+              "allow": {
+                "@abc:example.net": {}
+              },
+              "deny": {
+                "@def:example.net": {}
+              }
+            },
+            "server": {
+              "allow": {
+                "example.com": {},
+                "nheko.im": {}
+              },
+              "deny": {
+                "example.org": {}
+              }
+            }
+          },
+          "type": "im.nheko.invite_permissions"
+        })"_json;
+
+    ns::AccountDataEvent<ns::account_data::nheko_extensions::InvitePermissions> event =
+      data.get<ns::AccountDataEvent<ns::account_data::nheko_extensions::InvitePermissions>>();
+
+    EXPECT_EQ(data, json(event));
+
+    EXPECT_EQ(event.content.default_, "allow");
+    EXPECT_TRUE(event.content.server_allow.contains("nheko.im"));
+    EXPECT_TRUE(event.content.server_deny.contains("example.org"));
+    EXPECT_TRUE(event.content.user_allow.contains("@abc:example.net"));
+    EXPECT_TRUE(event.content.user_deny.contains("@def:example.net"));
+    EXPECT_TRUE(event.content.room_allow.contains("!abc:example.net"));
+    EXPECT_TRUE(event.content.room_deny.contains("!def:example.net"));
+
+    EXPECT_TRUE(event.content.invite_allowed("!abc:example.net", "@test:example.org"));
+    EXPECT_TRUE(event.content.invite_allowed("!def:example.net", "@abc:example.net"));
+    EXPECT_FALSE(event.content.invite_allowed("!random:example.net", "@abc:example.org"));
+    EXPECT_FALSE(event.content.invite_allowed("!def:example.net", "@abc:example.com"));
+}
+
 TEST(RoomAccountData, ImagePack)
 {
     json data = R"({
