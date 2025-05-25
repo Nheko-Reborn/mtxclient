@@ -843,19 +843,21 @@ Client::download(const std::string &server,
 
     const auto api_path = "/client/v1/media/download/" + client::utils::url_encode(server) + "/" +
                           client::utils::url_encode(media_id);
-    get<std::string>(api_path,
-                     [_this = shared_from_this(), cb = std::move(cb), server, media_id](
-                       const std::string &res, HeaderFields fields, RequestErr err) {
-                         if (!err || !(err->status_code == 404 || err->status_code == 400)) {
-                             cb(res, fields, err);
-                         } else {
-                             const auto api_path = "/media/v3/download/" +
-                                                   client::utils::url_encode(server) + "/" +
-                                                   client::utils::url_encode(media_id);
-                             _this->get<std::string>(api_path, std::move(cb));
-                         }
-                     },
-                     true, "/_matrix", 3);
+    get<std::string>(
+      api_path,
+      [_this = shared_from_this(), cb = std::move(cb), server, media_id](
+        const std::string &res, HeaderFields fields, RequestErr err) {
+          if (!err || !(err->status_code == 404 || err->status_code == 400)) {
+              cb(res, fields, err);
+          } else {
+              const auto api_path = "/media/v3/download/" + client::utils::url_encode(server) +
+                                    "/" + client::utils::url_encode(media_id);
+              _this->get<std::string>(api_path, std::move(cb));
+          }
+      },
+      true,
+      "/_matrix",
+      3);
 }
 
 void
