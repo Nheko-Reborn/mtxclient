@@ -109,11 +109,12 @@ parse(const std::string &id)
         identifier.hostname_  = id.substr(parts + 1);
         identifier.id_        = id;
         return identifier;
-    } else if (Identifier::sigil == "$") {
+    } else if (Identifier::sigil == "$" || Identifier::sigil == "!") {
         // V3 event ids don't use ':' at all, don't parse them the same way.
+        // V12 rooms don't use a server host in the id.
         Identifier identifier{};
-        identifier.localpart_ = id;
-        identifier.hostname_  = id;
+        identifier.localpart_ = id.substr(1);
+        identifier.hostname_  = "";
         identifier.id_        = id;
         return identifier;
     } else {

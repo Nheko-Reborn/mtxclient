@@ -14,13 +14,14 @@ void
 from_json(const json &obj, PreviousRoom &predecessor)
 {
     predecessor.room_id  = obj.at("room_id").get<std::string>();
-    predecessor.event_id = obj.at("event_id").get<std::string>();
+    predecessor.event_id = obj.value("event_id", "");
 }
 void
 to_json(json &obj, const PreviousRoom &predecessor)
 {
-    obj["room_id"]  = predecessor.room_id;
-    obj["event_id"] = predecessor.event_id;
+    obj["room_id"] = predecessor.room_id;
+    if (!predecessor.event_id.empty())
+        obj["event_id"] = predecessor.event_id;
 }
 
 void

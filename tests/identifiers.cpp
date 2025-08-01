@@ -47,6 +47,11 @@ TEST(MatrixIdentifiers, RoomValid)
     EXPECT_EQ(room2.to_string(), "!39fasdsdfsdf:example.com");
     EXPECT_EQ(room2.localpart(), "39fasdsdfsdf");
     EXPECT_EQ(room2.hostname(), "example.com");
+
+    Room room3 = parse<Room>("!39fasdsdfsdf");
+    EXPECT_EQ(room3.to_string(), "!39fasdsdfsdf");
+    EXPECT_EQ(room3.localpart(), "39fasdsdfsdf");
+    EXPECT_EQ(room3.hostname(), "");
 }
 
 TEST(MatrixIdentifiers, IdentifierInvalid)
