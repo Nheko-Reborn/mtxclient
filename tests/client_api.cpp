@@ -968,7 +968,7 @@ TEST(ClientAPI, Versions)
     mtx_client->versions([](const mtx::responses::Versions &res, RequestErr err) {
         check_error(err);
 
-        EXPECT_EQ(res.versions.size(), 10);
+        EXPECT_EQ(res.versions.size(), 20);
         EXPECT_EQ(res.versions.at(0), "r0.0.1");
         EXPECT_EQ(res.versions.at(1), "r0.1.0");
         EXPECT_EQ(res.versions.at(2), "r0.2.0");
@@ -1070,11 +1070,13 @@ TEST(ClientAPI, Presence)
 {
     auto alice = make_test_client();
 
-    alice->login(
-      "alice", "secret", [](const mtx::responses::Login &, RequestErr err) { check_error(err); });
+    // special user just for presence
+    alice->login("presence", "secret", [](const mtx::responses::Login &, RequestErr err) {
+        check_error(err);
+    });
 
     while (alice->access_token().empty())
-        sleep();
+        std::this_thread::yield();
 
     alice->put_presence_status(
       mtx::presence::unavailable, "Is this thing on?", [alice](RequestErr err) {
@@ -1112,8 +1114,9 @@ TEST(ClientAPI, PresenceOverSync)
     auto alice = make_test_client();
     auto bob   = make_test_client();
 
-    alice->login(
-      "alice", "secret", [](const mtx::responses::Login &, RequestErr err) { check_error(err); });
+    alice->login("presencesync", "secret", [](const mtx::responses::Login &, RequestErr err) {
+        check_error(err);
+    });
     bob->login(
       "bob", "secret", [](const mtx::responses::Login &, RequestErr err) { check_error(err); });
 
@@ -1158,7 +1161,7 @@ TEST(ClientAPI, PresenceOverSync)
 
                                   bool found = false;
                                   for (const auto &p : s.presence) {
-                                      if (p.sender == "@alice:" + server_name()) {
+                                      if (p.sender == "@presencesync:" + server_name()) {
                                           found = true;
                                           EXPECT_EQ(p.content.presence, mtx::presence::online);
                                           EXPECT_EQ(p.content.status_msg,

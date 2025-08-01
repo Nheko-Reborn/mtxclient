@@ -27,17 +27,23 @@ stages:
   script:
     - mkdir -p /kaniko/.docker
     - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
-    - /kaniko/executor --whitelist-var-run=false --context $CI_PROJECT_DIR/.ci/synapse --dockerfile $CI_PROJECT_DIR/.ci/synapse/Dockerfile --destination $CI_REGISTRY_IMAGE/synapse-${M_ARCH}:latest
+    - /kaniko/executor --whitelist-var-run=false --context $CI_PROJECT_DIR/.ci/synapse --dockerfile $CI_PROJECT_DIR/.ci/synapse/Dockerfile --destination $CI_REGISTRY_IMAGE/synapse-${M_ARCH}:latest --force
 
 build synapse amd64:
   extends: .build-synapse-image
   tags: [docker]
+  image:
+    docker:
+      platform: amd64
   variables:
     M_ARCH: x86_64
 
 build synapse arm64:
   extends: .build-synapse-image
-  tags: [docker-arm64]
+  tags: [docker]
+  image:
+    docker:
+      platform: arm64
   variables:
     M_ARCH: aarch64
 
@@ -50,6 +56,7 @@ build synapse arm64:
       alias: synapse
   variables:
     TRAVIS_OS_NAME: linux
+    RUNNER_AFTER_SCRIPT_TIMEOUT: 10m
   before_script:
     - apt-get update
     - apt-get install -y software-properties-common

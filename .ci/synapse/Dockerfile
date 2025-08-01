@@ -1,4 +1,4 @@
-FROM matrixdotorg/synapse:v1.63.1
+FROM matrixdotorg/synapse:v1.135.0
 
 COPY setup-synapse.sh /setup-synapse.sh
 COPY entrypoint.sh /entrypoint.sh
