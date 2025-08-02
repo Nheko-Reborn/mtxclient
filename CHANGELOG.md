@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.10.1] -- 2025-08-02
+
+- Fix room ids without server name
+- Experimental support for invite permissions
+- Support new style join vias (instead of server_name)
+- Redirects for media downloads (Karthik)
+- Location messages (MTRNord)
+- Build against fmt11 (Kefu Chai)
+- Fix incompatibility with null avatars
+
 ## [0.10.0] -- 2024-06-11
 
 - Authentication for media (MSC3916, experimental)
