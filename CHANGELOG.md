@@ -8,7 +8,7 @@
 - Redirects for media downloads (Karthik)
 - Location messages (MTRNord)
 - Build against fmt11 (Kefu Chai)
-- Fix incompatibility with null avatars
+- Fix incompatibility with null aliases
 
 ## [0.10.0] -- 2024-06-11
 
