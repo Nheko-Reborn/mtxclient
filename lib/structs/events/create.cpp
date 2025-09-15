@@ -45,6 +45,8 @@ from_json(const json &obj, Create &create)
 
     if (obj.find("predecessor") != obj.end())
         create.predecessor = obj.at("predecessor").get<PreviousRoom>();
+    if (obj.find("additional_creators") != obj.end())
+        create.additional_creators = obj.at("additional_creators").get<std::vector<std::string>>();
 }
 
 void
@@ -60,6 +62,8 @@ to_json(json &obj, const Create &create)
         obj["type"] = create.type.value();
     if (create.predecessor)
         obj["predecessor"] = *create.predecessor;
+    if (create.additional_creators)
+        obj["additional_creators"] = *create.additional_creators;
 }
 
 } // namespace state

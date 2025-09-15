@@ -234,7 +234,8 @@ TEST(StateEvents, Create)
           },
           "state_key": "",
           "content": {
-            "creator": "@mujx:matrix.org"
+            "creator": "@mujx:matrix.org",
+            "additional_creators": ["@abc:example.com", "@123:example.com"]
           },
           "type": "m.room.create"
         })"_json;
@@ -247,6 +248,9 @@ TEST(StateEvents, Create)
     EXPECT_EQ(event.unsigned_data.age, 3715756343L);
     EXPECT_EQ(event.origin_server_ts, 1506761923948L);
     EXPECT_EQ(event.state_key, "");
+    EXPECT_TRUE(event.content.additional_creators.has_value());
+    EXPECT_EQ(event.content.additional_creators->at(0), "@abc:example.com");
+    EXPECT_EQ(event.content.additional_creators->at(1), "@123:example.com");
     // EXPECT_EQ(event.content.creator, "@mujx:matrix.org");
 
     json example_from_spec = R"({
@@ -297,7 +301,8 @@ TEST(StateEvents, CreateWithType)
           "state_key": "",
           "content": {
             "creator": "@mujx:matrix.org",
-            "type": "m.space"
+            "type": "m.space",
+            "additional_creators": ["@abc:example.com", "@123:example.com"]
           },
           "type": "m.room.create"
         })"_json;
@@ -310,6 +315,9 @@ TEST(StateEvents, CreateWithType)
     EXPECT_EQ(event.unsigned_data.age, 3715756343L);
     EXPECT_EQ(event.origin_server_ts, 1506761923948L);
     EXPECT_EQ(event.state_key, "");
+    EXPECT_TRUE(event.content.additional_creators.has_value());
+    EXPECT_EQ(event.content.additional_creators->at(0), "@abc:example.com");
+    EXPECT_EQ(event.content.additional_creators->at(1), "@123:example.com");
     // EXPECT_EQ(event.content.creator, "@mujx:matrix.org");
     EXPECT_TRUE(event.content.type.has_value());
     EXPECT_EQ(event.content.type.value(), ns::state::room_type::space);
