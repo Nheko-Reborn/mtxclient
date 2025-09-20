@@ -58,7 +58,8 @@ struct Create
     //! A reference to the room this room replaces, if the previous room was upgraded.
     std::optional<PreviousRoom> predecessor;
 
-    //! Additional creators in v12+ rooms, nullopt in earlier versions or if the field is not present.
+    //! Additional creators in v12+ rooms, nullopt in earlier versions or if the field is not
+    //! present.
     std::optional<std::vector<std::string>> additional_creators;
 
     friend void from_json(const nlohmann::json &obj, Create &create);
