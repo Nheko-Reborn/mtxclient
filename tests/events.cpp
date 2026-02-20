@@ -248,9 +248,8 @@ TEST(StateEvents, Create)
     EXPECT_EQ(event.unsigned_data.age, 3715756343L);
     EXPECT_EQ(event.origin_server_ts, 1506761923948L);
     EXPECT_EQ(event.state_key, "");
-    EXPECT_TRUE(event.content.additional_creators.has_value());
-    EXPECT_EQ(event.content.additional_creators->at(0), "@abc:example.com");
-    EXPECT_EQ(event.content.additional_creators->at(1), "@123:example.com");
+    EXPECT_EQ(event.content.additional_creators.at(0), "@abc:example.com");
+    EXPECT_EQ(event.content.additional_creators.at(1), "@123:example.com");
     // EXPECT_EQ(event.content.creator, "@mujx:matrix.org");
 
     json example_from_spec = R"({
@@ -315,9 +314,8 @@ TEST(StateEvents, CreateWithType)
     EXPECT_EQ(event.unsigned_data.age, 3715756343L);
     EXPECT_EQ(event.origin_server_ts, 1506761923948L);
     EXPECT_EQ(event.state_key, "");
-    EXPECT_TRUE(event.content.additional_creators.has_value());
-    EXPECT_EQ(event.content.additional_creators->at(0), "@abc:example.com");
-    EXPECT_EQ(event.content.additional_creators->at(1), "@123:example.com");
+    EXPECT_EQ(event.content.additional_creators.at(0), "@abc:example.com");
+    EXPECT_EQ(event.content.additional_creators.at(1), "@123:example.com");
     // EXPECT_EQ(event.content.creator, "@mujx:matrix.org");
     EXPECT_TRUE(event.content.type.has_value());
     EXPECT_EQ(event.content.type.value(), ns::state::room_type::space);
@@ -781,8 +779,21 @@ TEST(StateEvents, PowerLevels)
     EXPECT_EQ(event.content.event_level("m.room.power_levels"), 109);
     EXPECT_EQ(event.content.event_level("m.custom.event"), event.content.events_default);
 
-    EXPECT_EQ(event.content.user_level("@mujx:matrix.org"), 30);
-    EXPECT_EQ(event.content.user_level("@not:matrix.org"), event.content.users_default);
+    EXPECT_EQ(event.content.user_level("@mujx:matrix.org",
+                                       mtx::events::StateEvent<mtx::events::state::Create>{}),
+              30);
+    EXPECT_EQ(event.content.user_level("@not:matrix.org",
+                                       mtx::events::StateEvent<mtx::events::state::Create>{}),
+              event.content.users_default);
+
+    auto create                 = mtx::events::StateEvent<mtx::events::state::Create>{};
+    create.sender               = "@creator:matrix.org";
+    create.content.room_version = "12";
+    EXPECT_EQ(event.content.user_level("@creator:matrix.org", create), mtx::events::state::Creator);
+
+    EXPECT_TRUE(create.content.room_version_creators_with_infinite_power());
+    create.content.room_version = "";
+    EXPECT_FALSE(create.content.room_version_creators_with_infinite_power());
 }
 
 TEST(StateEvents, Tombstone)

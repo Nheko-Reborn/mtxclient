@@ -205,6 +205,8 @@ public:
         std::size_t member_count = 0;
         //! The powerlevels event in this room
         mtx::events::state::PowerLevels power_levels;
+        //! The create event to fetch the creators of the room
+        mtx::events::StateEvent<mtx::events::state::Create> create;
     };
 
     //! Evaluate the pushrules for @event .

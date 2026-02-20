@@ -9,8 +9,12 @@
 #include <nlohmann/json.hpp>
 #endif
 
+#include <limits>
 #include <string>
 #include <string_view>
+
+#include "create.hpp"
+#include "mtx/events.hpp"
 
 namespace mtx {
 namespace events {
@@ -31,6 +35,9 @@ inline constexpr power_level_t User = 0;
 inline constexpr power_level_t Moderator = 50;
 //! The power level usually associated with admins.
 inline constexpr power_level_t Admin = 100;
+//! Creator powerlevel, which is supposed to be "infinite". int64_t::max should work for that, since
+//! ranges are limited in Matrix for double compatibility.
+inline constexpr power_level_t Creator = std::numeric_limits<power_level_t>::max();
 
 //! different predefined keys for notification levels
 namespace notification_keys {
@@ -64,13 +71,9 @@ struct PowerLevels
     }
 
     //! Returns the power_level for a given user id.
-    [[nodiscard]] inline power_level_t user_level(const std::string &user_id) const
-    {
-        if (users.find(user_id) == users.end())
-            return users_default;
-
-        return users.at(user_id);
-    }
+    [[nodiscard]] power_level_t user_level(
+      const std::string &user_id,
+      const mtx::events::StateEvent<mtx::events::state::Create> &create) const;
 
     [[nodiscard]] inline power_level_t notification_level(std::string_view notification_key) const
     {

@@ -62,8 +62,14 @@ to_json(json &obj, const Create &create)
         obj["type"] = create.type.value();
     if (create.predecessor)
         obj["predecessor"] = *create.predecessor;
-    if (create.additional_creators)
-        obj["additional_creators"] = *create.additional_creators;
+    if (!create.additional_creators.empty())
+        obj["additional_creators"] = create.additional_creators;
+}
+
+[[nodiscard]] bool
+Create::room_version_creators_with_infinite_power() const
+{
+    return room_version.length() > 1 && room_version != "10" && room_version != "11";
 }
 
 } // namespace state

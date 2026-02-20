@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <nlohmann/json.hpp>
 #include <string>
 
@@ -62,6 +63,26 @@ to_json(json &obj, const PowerLevels &power_levels)
 
     if (!power_levels.notifications.empty())
         obj["notifications"] = power_levels.notifications;
+}
+
+[[nodiscard]] power_level_t
+PowerLevels::user_level(const std::string &user_id,
+                        const mtx::events::StateEvent<mtx::events::state::Create> &create) const
+{
+    // Special creator power level in room version 12 and up
+    if (create.content.room_version_creators_with_infinite_power()) {
+        if (create.sender == user_id)
+            return Creator;
+
+        if (std::ranges::find(create.content.additional_creators, user_id) !=
+            std::ranges::end(create.content.additional_creators))
+            return Creator;
+    }
+
+    if (users.find(user_id) == users.end())
+        return users_default;
+
+    return users.at(user_id);
 }
 
 } // namespace state

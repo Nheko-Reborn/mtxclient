@@ -285,7 +285,7 @@ struct PushRuleEvaluator::OptimizedRules
             {
                 if (auto it = ev.find(field); it != ev.end()) {
                     if (auto arr = std::get_if<std::vector<non_compound_json_value>>(&it->second)) {
-                        return std::find(arr->begin(), arr->end(), value) != arr->end();
+                        return std::ranges::find(*arr, value) != arr->end();
                     }
                 }
 
@@ -312,7 +312,7 @@ struct PushRuleEvaluator::OptimizedRules
             //! the count to compare against
             std::size_t count = 0;
             //! the comparison operation
-            enum Comp
+            enum Comp : std::uint8_t
             {
                 Eq, //< ==
                 Lt, //< <
@@ -367,7 +367,7 @@ struct PushRuleEvaluator::OptimizedRules
                     return false;
 
                 auto sender_level =
-                  ctx.power_levels.user_level(std::get<std::string>(sender_->second));
+                  ctx.power_levels.user_level(std::get<std::string>(sender_->second), ctx.create);
 
                 for (const auto &n : notification_levels) {
                     if (sender_level < ctx.power_levels.notification_level(n))

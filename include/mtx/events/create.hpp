@@ -60,7 +60,10 @@ struct Create
 
     //! Additional creators in v12+ rooms, nullopt in earlier versions or if the field is not
     //! present.
-    std::optional<std::vector<std::string>> additional_creators;
+    std::vector<std::string> additional_creators;
+
+    //! If this room version forces creators to have infinite power levels
+    [[nodiscard]] bool room_version_creators_with_infinite_power() const;
 
     friend void from_json(const nlohmann::json &obj, Create &create);
 

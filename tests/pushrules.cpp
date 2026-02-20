@@ -1142,6 +1142,7 @@ TEST(Pushrules, PowerLevelMatches)
             .user_display_name = "me",
             .member_count      = 100,
             .power_levels      = pls,
+            .create            = {},
           };
 
           EXPECT_EQ(evaluator.evaluate({textEv}, ctx, {}), actions);
