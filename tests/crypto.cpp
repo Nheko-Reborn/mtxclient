@@ -416,16 +416,21 @@ TEST(SecretStorage, CreateOnlineKeyBackup)
     auto okb = account.create_online_key_backup(cross->private_master_key);
     ASSERT_TRUE(okb.has_value());
 
+    auto authDataPubkey =
+      json::parse(okb->backupVersion.auth_data)["public_key"].get<std::string>();
+    auto derivedPubkey = mtx::crypto::CURVE25519_public_key_from_private(okb->privateKey);
+    EXPECT_EQ(authDataPubkey, derivedPubkey);
+
     mtx::responses::backup::SessionData s;
     s.algorithm   = mtx::crypto::MEGOLM_ALGO;
     s.sender_key  = "abc";
     s.session_key = "cde";
 
-    auto enc1 = mtx::crypto::encrypt_session(
-      s, json::parse(okb->backupVersion.auth_data)["public_key"].get<std::string>());
-    EXPECT_FALSE(enc1.ciphertext.empty());
+    auto encrypted = mtx::crypto::encrypt_session(s, authDataPubkey);
+    EXPECT_FALSE(encrypted.ciphertext.empty());
 
-    auto enc2 = mtx::crypto::encrypt_session(
-      s, mtx::crypto::CURVE25519_public_key_from_private(okb->privateKey));
-    EXPECT_FALSE(enc2.ciphertext.empty());
+    auto decrypted = mtx::crypto::decrypt_session(encrypted, okb->privateKey);
+    EXPECT_EQ(decrypted.algorithm, s.algorithm);
+    EXPECT_EQ(decrypted.sender_key, s.sender_key);
+    EXPECT_EQ(decrypted.session_key, s.session_key);
 }
