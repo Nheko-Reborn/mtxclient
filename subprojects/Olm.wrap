@@ -3,3 +3,7 @@ directory = Olm
 url = https://git.matrix.org/git/olm.git
 revision = 3.2.16
 
+diff_files = olm/0001-fix-list-const-ptr.patch, olm/0002-fix-cmake-cmp0148.patch 
+
+method = cmake
+
