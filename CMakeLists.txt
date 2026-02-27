@@ -102,20 +102,25 @@ set_package_properties(OpenSSL PROPERTIES
 	)
 
 if(USE_BUNDLED_OLM)
-	include(FetchContent)
-	FetchContent_Declare(
-		Olm
-		GIT_REPOSITORY https://gitlab.matrix.org/matrix-org/olm.git
-		GIT_TAG        3.2.14
-		)
-	FetchContent_MakeAvailable(Olm)
+    include(FetchContent)
+    FetchContent_Declare(
+        Olm
+        GIT_REPOSITORY https://gitlab.matrix.org/matrix-org/olm.git
+        GIT_TAG        3.2.16
+        PATCH_COMMAND  git apply
+            ${CMAKE_CURRENT_SOURCE_DIR}/third_party/olm-patches/0001-fix-list-const-ptr.patch
+            ${CMAKE_CURRENT_SOURCE_DIR}/third_party/olm-patches/0002-fix-cmake-cmp0148.patch
+        UPDATE_DISCONNECTED 1
+    )
+    set(OLM_TESTS OFF CACHE INTERNAL "")
+    FetchContent_MakeAvailable(Olm)
 else()
-	find_package(Olm 3.2.7 REQUIRED)
-	set_package_properties(Olm PROPERTIES
-		DESCRIPTION "An implementation of the Double Ratchet cryptographic ratchet"
-		URL "https://git.matrix.org/git/olm/about/"
-		TYPE REQUIRED
-		)
+    find_package(Olm 3.2.7 REQUIRED)
+    set_package_properties(Olm PROPERTIES
+        DESCRIPTION "An implementation of the Double Ratchet cryptographic ratchet"
+        URL "https://git.matrix.org/git/olm/about/"
+        TYPE REQUIRED
+    )
 endif()
 
 if(USE_BUNDLED_JSON)
