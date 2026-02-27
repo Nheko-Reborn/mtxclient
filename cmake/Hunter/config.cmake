@@ -1,6 +1,6 @@
 hunter_config(
     nlohmann_json
-    VERSION 3.11.2
+    VERSION 3.12.0
     CMAKE_ARGS JSON_MultipleHeaders=ON
 )
 
