@@ -15,8 +15,8 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON CACHE BOOL "compile as PIC by default")
 option(HUNTER_ENABLED "Enable Hunter package manager" OFF)
 include("cmake/HunterGate.cmake")
 HunterGate(
-    URL "https://github.com/cpp-pm/hunter/archive/v0.25.2.tar.gz"
-    SHA1 "560c000d5b6c972d41c2caf44f24189c868cc404"
+    URL "https://github.com/cpp-pm/hunter/archive/v0.26.6.tar.gz"
+    SHA1 "e70c29f878f5d5f5cdf1b9ccd628fb872e8624a8"
     LOCAL
 )
 
