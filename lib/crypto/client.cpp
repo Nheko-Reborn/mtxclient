@@ -264,7 +264,7 @@ OlmClient::create_online_key_backup(const std::string &masterKey)
     setup.privateKey = key;
 
     json auth_data;
-    auth_data["public_key"] = bin2base64_unpadded(CURVE25519_public_key_from_private(key));
+    auth_data["public_key"] = CURVE25519_public_key_from_private(key);
     auto master             = PkSigning::from_seed(masterKey);
 
     auto sig = master.sign(auth_data.dump());
