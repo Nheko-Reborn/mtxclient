@@ -128,6 +128,8 @@ build linux arm64:
   tags: [docker]
   variables:
     M_ARCH: aarch64
+      # Work around epoll not being available in my arm emulation
+    EVENT_NOEPOLL: 1
   needs:
     - job: "build synapse arm64"
       optional: true
