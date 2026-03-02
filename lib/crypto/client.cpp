@@ -301,7 +301,8 @@ OlmClient::create_ssss_key(const std::string &password)
 
     setup.keyDescription.algorithm = "m.secret_storage.v1.aes-hmac-sha2";
     setup.keyDescription.name = bin2base58(to_string(create_buffer(16))); // create a random name
-    setup.keyDescription.iv   = bin2base64(to_string(compatible_iv(create_buffer(32))));
+    setup.keyDescription.iv =
+      bin2base64(to_string(compatible_iv(create_buffer(16)))); // 16 byte IV according to spec
 
     auto testKeys = HKDF_SHA256(setup.privateKey, BinaryBuf(32, 0), BinaryBuf{});
 
