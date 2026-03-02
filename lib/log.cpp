@@ -6,8 +6,7 @@ namespace mtx::utils::log {
 std::shared_ptr<spdlog::logger>
 log()
 {
-    static auto mtx_logger = std::make_shared<spdlog::logger>(
-      "mtx", std::make_shared<spdlog::sinks::stderr_color_sink_mt>());
+    static auto mtx_logger = spdlog::stderr_color_mt("mtx");
 
     return mtx_logger;
 }
