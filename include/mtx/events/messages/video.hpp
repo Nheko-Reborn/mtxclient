@@ -22,9 +22,13 @@ namespace msg {
 //! Content of `m.room.message` with msgtype `m.video`.
 struct Video
 {
-    /// @brief A description of the video or some kind of content description
-    /// for accessibility.
+    //! The video caption or original filename.
+    //!
+    //! If `filename` is unset or identical, this is the original filename of the upload.
+    //! Otherwise, this is a caption for the video.
     std::string body;
+    //! The optional original filename of the uploaded video.
+    std::string filename;
     //! Must be 'm.video'.
     std::string msgtype;
     //! The matrix URL of the video clip.

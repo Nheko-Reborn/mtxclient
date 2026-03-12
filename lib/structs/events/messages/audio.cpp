@@ -20,6 +20,9 @@ from_json(const json &obj, Audio &content)
     if (obj.find("url") != obj.end())
         content.url = obj.at("url").get<std::string>();
 
+    if (obj.find("filename") != obj.end())
+        content.filename = obj.at("filename").get<std::string>();
+
     if (obj.find("info") != obj.end())
         content.info = obj.at("info").get<common::AudioInfo>();
 
@@ -36,6 +39,9 @@ to_json(json &obj, const Audio &content)
     obj["msgtype"] = "m.audio";
     obj["body"]    = content.body;
     obj["info"]    = content.info;
+
+    if (!content.filename.empty())
+        obj["filename"] = content.filename;
 
     if (content.file)
         obj["file"] = content.file.value();

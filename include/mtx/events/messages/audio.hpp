@@ -22,9 +22,13 @@ namespace msg {
 //! Content of `m.room.message` with msgtype `m.audio`.
 struct Audio
 {
-    /// @brief A description of the audio or some kind of content description
-    /// for accessibility.
+    //! The audio caption or original filename.
+    //!
+    //! If `filename` is unset or identical, this is the original filename of the upload.
+    //! Otherwise, this is a caption for the audio.
     std::string body;
+    //! The optional original filename of the uploaded audio clip.
+    std::string filename;
     //! Must be 'm.audio'.
     std::string msgtype;
     //! The matrix URL of the audio clip.

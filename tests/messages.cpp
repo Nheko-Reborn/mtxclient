@@ -78,6 +78,7 @@ TEST(RoomEvents, AudioMessage)
 	  },
           "content": {
               "body": "Bee Gees - Stayin' Alive",
+              "filename": "bee-gees-stayin-alive.mp3",
               "info": {
                   "duration": 2140786,
                   "mimetype": "audio/mpeg",
@@ -108,6 +109,7 @@ TEST(RoomEvents, AudioMessage)
     EXPECT_EQ(event.unsigned_data.age, 146);
 
     EXPECT_EQ(event.content.body, "Bee Gees - Stayin' Alive");
+    EXPECT_EQ(event.content.filename, "bee-gees-stayin-alive.mp3");
     EXPECT_EQ(event.content.msgtype, "m.audio");
     EXPECT_EQ(event.content.url, "mxc://localhost/ffed755USFFxlgbQYZGtryd");
     EXPECT_EQ(event.content.info.mimetype, "audio/mpeg");
@@ -117,6 +119,12 @@ TEST(RoomEvents, AudioMessage)
               "$6GKhAfJOcwNd69lgSizdcTob8z2pWQgBOZPrnsWMA1E");
     EXPECT_EQ(event.content.relations.relations.at(0).rel_type,
               mtx::common::RelationType::InReplyTo);
+
+    EXPECT_EQ(data.dump(), json(event).dump());
+
+    event.content.filename.clear();
+    json withoutFilename = event;
+    EXPECT_EQ(withoutFilename["content"].count("filename"), 0);
 }
 
 TEST(RoomEvents, ElementEffectMessage)
@@ -421,6 +429,7 @@ TEST(RoomEvents, ImageMessage)
     EXPECT_EQ(event.unsigned_data.age, 738977);
 
     EXPECT_EQ(event.content.body, "image.png");
+    EXPECT_TRUE(event.content.filename.empty());
     EXPECT_EQ(event.content.info.mimetype, "image/png");
     EXPECT_EQ(event.content.info.h, 302);
     EXPECT_EQ(event.content.info.w, 474);
@@ -501,6 +510,56 @@ TEST(RoomEvents, ImageMessage)
               "$6GKhAfJOcwNd69lgSizdcTob8z2pWQgBOZPrnsWMA1E");
     EXPECT_EQ(event.content.relations.relations.at(0).rel_type,
               mtx::common::RelationType::InReplyTo);
+}
+
+TEST(RoomEvents, ImageMessageFilename)
+{
+    json data = R"({
+          "origin_server_ts": 1510504294993,
+          "sender": "@max:kamax.io",
+          "event_id": "$15105042942524OGmZm:kamax.io",
+          "unsigned": {
+            "age": 738977
+          },
+          "content": {
+            "body": "Image caption",
+            "filename": "image.png",
+            "info": {
+              "mimetype": "image/png",
+              "h": 302,
+              "w": 474,
+              "size": 32573
+            },
+            "msgtype": "m.image",
+            "url": "mxc://kamax.io/ewDDLHYnysbHYCPViZwAEIjT",
+              "m.relates_to": {
+                  "m.in_reply_to": {
+                       "event_id": "$6GKhAfJOcwNd69lgSizdcTob8z2pWQgBOZPrnsWMA1E"
+                  }
+              }
+          },
+          "type": "m.room.message",
+          "room_id": "!cURbafjkfsMDVwdRDQ:matrix.org"
+        })"_json;
+
+    RoomEvent<msg::Image> event = data.get<RoomEvent<msg::Image>>();
+
+    EXPECT_EQ(event.content.body, "Image caption");
+    EXPECT_EQ(event.content.filename, "image.png");
+    EXPECT_EQ(event.content.msgtype, "m.image");
+    EXPECT_EQ(event.content.url, "mxc://kamax.io/ewDDLHYnysbHYCPViZwAEIjT");
+    EXPECT_EQ(event.content.info.mimetype, "image/png");
+    EXPECT_EQ(event.content.info.h, 302);
+    EXPECT_EQ(event.content.info.w, 474);
+    EXPECT_EQ(event.content.info.size, 32573);
+    EXPECT_EQ(event.content.relations.reply_to().value(),
+              "$6GKhAfJOcwNd69lgSizdcTob8z2pWQgBOZPrnsWMA1E");
+
+    EXPECT_EQ(data.dump(), json(event).dump());
+
+    event.content.filename.clear();
+    json withoutFilename = event;
+    EXPECT_EQ(withoutFilename["content"].count("filename"), 0);
 }
 
 TEST(RoomEvents, LocationMessage)
@@ -692,6 +751,7 @@ TEST(RoomEvents, VideoMessage)
 	  },
           "content": {
               "body": "Gangnam Style",
+              "filename": "gangnam-style.mp4",
               "info": {
                   "duration": 2140786,
                   "mimetype": "video/mp4",
@@ -731,6 +791,7 @@ TEST(RoomEvents, VideoMessage)
     EXPECT_EQ(event.unsigned_data.age, 146);
 
     EXPECT_EQ(event.content.body, "Gangnam Style");
+    EXPECT_EQ(event.content.filename, "gangnam-style.mp4");
     EXPECT_EQ(event.content.msgtype, "m.video");
     EXPECT_EQ(event.content.url, "mxc://localhost/ffed755USFFxlgbQYZGtryd");
     EXPECT_EQ(event.content.info.mimetype, "video/mp4");
@@ -745,6 +806,12 @@ TEST(RoomEvents, VideoMessage)
               "$6GKhAfJOcwNd69lgSizdcTob8z2pWQgBOZPrnsWMA1E");
     EXPECT_EQ(event.content.relations.relations.at(0).rel_type,
               mtx::common::RelationType::InReplyTo);
+
+    EXPECT_EQ(data.dump(), json(event).dump());
+
+    event.content.filename.clear();
+    json withoutFilename = event;
+    EXPECT_EQ(withoutFilename["content"].count("filename"), 0);
 }
 
 TEST(RoomEvents, Sticker)

@@ -22,10 +22,13 @@ namespace msg {
 //! Content of `m.room.message` with msgtype `m.image`.
 struct Image
 {
-    //! A textual representation of the image. This could be
-    //! the alt text of the image, the filename of the image,
-    //! or some kind of content description for accessibility e.g. 'image attachment
+    //! The image caption or original filename.
+    //!
+    //! If `filename` is unset or identical, this is the original filename of the upload.
+    //! Otherwise, this is a caption for the image.
     std::string body;
+    //! The optional original filename of the uploaded image.
+    std::string filename;
     //! Must be 'm.image'.
     std::string msgtype;
     //! The Matrix URL to the image.
