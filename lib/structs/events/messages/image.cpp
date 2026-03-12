@@ -19,6 +19,9 @@ from_json(const json &obj, Image &content)
 
     content.url = obj.value("url", "");
 
+    if (obj.find("filename") != obj.end())
+        content.filename = obj.at("filename").get<std::string>();
+
     if (obj.find("info") != obj.end())
         content.info = obj.at("info").get<common::ImageInfo>();
 
@@ -35,6 +38,9 @@ to_json(json &obj, const Image &content)
     obj["msgtype"] = "m.image";
     obj["body"]    = content.body;
     obj["info"]    = content.info;
+
+    if (!content.filename.empty())
+        obj["filename"] = content.filename;
 
     if (content.file)
         obj["file"] = content.file.value();
